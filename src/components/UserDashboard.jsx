@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Plus, BarChart3, Calendar, User } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import CreateNote from '../Pages/CreateNote';
+import ProductoList from '../components/ProductoList';
+
 import Sidebar from './Sidebar';
 import { UserCircle } from 'lucide-react';
 
@@ -249,8 +251,8 @@ function UserDashboard({ session, initialNotes, onNotesUpdate }) {
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
-        ) : (
-          currentView === 'notes' ? renderNotes() : renderProfile()
+        ) : (          currentView === 'notes' ? renderNotes() :            currentView === 'productos' ? <ProductoList userRole="user" /> :
+          renderProfile()
         )}
       </div>
     </div>

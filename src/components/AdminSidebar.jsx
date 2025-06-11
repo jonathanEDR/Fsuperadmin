@@ -1,9 +1,10 @@
 import React from 'react';
-import { Home, FileText, UserCog, LogOut, Shield, Users } from 'lucide-react';
+import { Home, FileText, UserCog, LogOut, Shield, Users, Package } from 'lucide-react';
 
 function AdminSidebar({ currentView, onViewChange, onLogout, userRole }) {
   const menuItems = [
     { id: 'dashboard', icon: Home, label: 'Gestion de Notas' },
+    { id: 'productos', icon: Package, label: 'Gestión de Productos' },
     { id: 'users', icon: Users, label: 'Colaboradores' },
     { id: 'history', icon: FileText, label: 'Historial' },
     { id: 'profile', icon: UserCog, label: 'Mi Perfil' }

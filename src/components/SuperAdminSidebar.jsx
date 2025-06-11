@@ -1,9 +1,10 @@
 import React from 'react';
-import { Home, FileText, UserCog, LogOut, Shield, History } from 'lucide-react';
+import { Home, FileText, UserCog, LogOut, Shield, History, Package } from 'lucide-react';
 
 function SuperAdminSidebar({ currentView, onViewChange, onLogout }) {
   const menuItems = [
     { id: 'dashboard', icon: Home, label: 'Gestión de Usuarios' },
+    { id: 'productos', icon: Package, label: 'Gestión de Productos' },
     { id: 'notes', icon: FileText, label: 'Gestión de Notas' },
     { id: 'history', icon: History, label: 'Historial' },
     { id: 'profile', icon: UserCog, label: 'Mi Perfil' },

@@ -1,9 +1,9 @@
 import React from 'react';
-import { Home, UserCircle, FileText, Settings, LogOut } from 'lucide-react';
+import { Home, UserCircle, FileText, Settings, LogOut, Package } from 'lucide-react';
 
-function Sidebar({ currentView, onViewChange, onLogout }) {
-  const menuItems = [
+function Sidebar({ currentView, onViewChange, onLogout }) {  const menuItems = [
     { id: 'notes', icon: FileText, label: 'Mis Notas' },
+    { id: 'productos', icon: Package, label: 'Gestión de Productos' },
     { id: 'profile', icon: UserCircle, label: 'Mi Perfil' },
   ];
 

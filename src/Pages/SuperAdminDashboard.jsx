@@ -6,9 +6,11 @@ import {
 } from 'lucide-react';
 import NotesHistory from '../components/NotesHistory';
 import NoteCreationModal from '../components/NoteCreationModal';
+import ProductCreationModal from '../components/ProductCreationModal';
 import SuperAdminSidebar from '../components/SuperAdminSidebar';
 import SuperAdminNotes from '../components/SuperAdminNotes';
 import MyProfile from './MyProfile';
+import ProductoList from '../components/ProductoList';
 
 function SuperAdminDashboard() {
   const { getToken } = useAuth();
@@ -23,6 +25,7 @@ function SuperAdminDashboard() {
   const [totalPages, setTotalPages] = useState(1);
   const [roleFilter, setRoleFilter] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 
   const fetchUsers = async () => {
     try {
@@ -268,6 +271,20 @@ function SuperAdminDashboard() {
     }
   };
 
+  const handleProductCreated = async (product) => {
+    try {
+      setSuccess('Producto creado exitosamente');
+      // Actualizar la lista de productos
+      if (currentView === 'productos') {
+        // Forzar recarga del componente ProductoList
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Error al procesar producto creado:', error);
+      setError('Error al procesar el producto creado');
+    }
+  };
+
   if (loading && users.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -310,8 +327,23 @@ function SuperAdminDashboard() {
           </div>
         )}
 
-        <div className="space-y-6">          {currentView === 'dashboard' && renderUsersTable()}
+        {/* Botón de Nuevo Producto */}
+        {currentView === 'productos' && (
+          <div className="mb-6">
+            <button
+              onClick={() => setIsProductModalOpen(true)}
+              className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              <Plus size={20} />
+              Nuevo Producto
+            </button>
+          </div>
+        )}
+
+        <div className="space-y-6">
+          {currentView === 'dashboard' && renderUsersTable()}
           {currentView === 'users' && renderUsersTable()}
+          {currentView === 'productos' && <ProductoList userRole="super_admin" />}
           {currentView === 'notes' && <SuperAdminNotes ref={notesRef} />}
           {currentView === 'history' && <NotesHistory />}
           {currentView === 'profile' && <MyProfile />}
@@ -323,6 +355,12 @@ function SuperAdminDashboard() {
         onClose={() => setIsModalOpen(false)}
         onNoteCreated={handleNoteCreated}
         userRole="super_admin"
+      />
+
+      <ProductCreationModal
+        isOpen={isProductModalOpen}
+        onClose={() => setIsProductModalOpen(false)}
+        onProductCreated={handleProductCreated}
       />
     </div>
   );

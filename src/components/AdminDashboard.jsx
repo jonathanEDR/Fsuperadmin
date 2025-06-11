@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Shield, FileText, Users, X, User, Trash2 } from 'lucide-react';
+import { Plus, Shield, FileText, Users, X, User, Trash2, Package } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import CreateNote from '../Pages/Createnote';
 import ProfileManagement from '../Pages/ProfileManagement';
 import NotesHistory from './NotesHistory';
 import AdminSidebar from './AdminSidebar';
+import ProductoList from '../components/ProductoList';
+import CreateProduct from '../Pages/CreateProduct';
 
 // Componente Modal para crear notas
 const NoteCreationModal = ({ isOpen, onClose, onNoteCreated, userRole }) => {
@@ -60,15 +62,69 @@ const NoteCreationModal = ({ isOpen, onClose, onNoteCreated, userRole }) => {
   );
 };
 
+// Componente Modal para crear productos
+const ProductCreationModal = ({ isOpen, onClose, onProductCreated }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  if (!isOpen) return null;
+
+  const handleProductCreation = async (product) => {
+    setIsSubmitting(true);
+    try {
+      await onProductCreated(product);
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className={`fixed inset-0 z-50 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'} transition-opacity duration-300`}>
+      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose}>
+        <div className="h-full flex items-center justify-center">
+          <div 
+            className={`bg-white rounded-lg p-6 w-full max-w-2xl mx-4 relative transform transition-all duration-300 ${
+              isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+              disabled={isSubmitting}
+            >
+              <X size={24} />
+            </button>
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+              <Plus className="text-blue-600" size={24} />
+              Crear Nuevo Producto
+            </h2>
+            {isSubmitting && (
+              <div className="absolute inset-0 bg-white bg-opacity-60 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              </div>
+            )}
+            <CreateProduct 
+              onProductCreated={handleProductCreation} 
+              disabled={isSubmitting}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AdminDashboard({ userRole, initialNotes, onNotesUpdate }) {
-  const { getToken, user } = useAuth();
-  const userEmail = user?.primaryEmailAddress?.emailAddress;
+  const { getToken } = useAuth();
   const [notes, setNotes] = useState(initialNotes || []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState('');
-  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard' | 'history'
+  const [currentView, setCurrentView] = useState('dashboard');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [productos, setProductos] = useState([]);
 
   // Efecto para sincronizar notas iniciales
   useEffect(() => {
@@ -109,12 +165,45 @@ function AdminDashboard({ userRole, initialNotes, onNotesUpdate }) {
     }
   };
 
+  const fetchProductos = async () => {
+    try {
+      setLoading(true);
+      const token = await getToken();
+      const response = await fetch('http://localhost:5000/api/productos', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al cargar productos');
+      }
+
+      const data = await response.json();
+      setProductos(data);
+    } catch (error) {
+      console.error('Error:', error);
+      setError('Error al cargar productos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchAdminData();
+    fetchProductos();
   }, []);
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
     if (!isModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+  };
+  const toggleProductModal = () => {
+    setIsProductModalOpen(!isProductModalOpen);
+    if (!isProductModalOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -164,6 +253,31 @@ function AdminDashboard({ userRole, initialNotes, onNotesUpdate }) {
       console.error('Error al crear la nota:', error);
       showMessage('Error al crear la nota. Por favor, inténtalo de nuevo.', 'error');
       setNotes(prevNotes => prevNotes.filter(note => note.id !== newNote.id));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleProductCreated = async (product) => {
+    try {
+      setLoading(true);
+      const token = await getToken();
+      await fetch('http://localhost:5000/api/productos', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(product)
+      });
+
+      setSuccess('Producto creado exitosamente');
+      toggleProductModal();
+      // Actualizar la lista de productos
+      fetchProductos();
+    } catch (error) {
+      console.error('Error al crear producto:', error);
+      setError('Error al crear el producto');
     } finally {
       setLoading(false);
     }
@@ -518,6 +632,43 @@ function AdminDashboard({ userRole, initialNotes, onNotesUpdate }) {
     <NotesHistory />
   );
 
+  const renderProducts = () => (
+    <div className="space-y-8">
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <Package className="text-blue-600" size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-800">Gestión de Productos</h3>
+              <p className="text-sm text-gray-600">
+                Administra los productos de tu organización
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={toggleProductModal}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          >
+            <Plus size={20} />
+            Agregar Producto
+          </button>
+        </div>
+        <div className="mt-6">
+          <ProductoList productos={productos} userRole={userRole} onProductUpdate={fetchProductos} />
+        </div>
+      </div>
+
+      {/* Modal de creación de productos */}
+      <ProductCreationModal
+        isOpen={isProductModalOpen}
+        onClose={toggleProductModal}
+        onProductCreated={handleProductCreated}
+      />
+    </div>
+  );
+
   const handleMarkAsCompleted = async (noteId) => {
     try {
       setLoading(true);
@@ -565,30 +716,11 @@ function AdminDashboard({ userRole, initialNotes, onNotesUpdate }) {
           userRole={userRole}
         />
         <div className="ml-64 flex-1 p-8">
-          <div className="mb-6 flex justify-between items-center">
-            <div className="space-x-2">
-              <button
-                onClick={() => setCurrentView('dashboard')}
-                className={`px-4 py-2 rounded-lg ${
-                  currentView === 'dashboard' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Dashboard
-              </button>
-              <button
-                onClick={() => setCurrentView('history')}
-                className={`px-4 py-2 rounded-lg ${
-                  currentView === 'history' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Historial de Notas
-              </button>
+          {currentView === 'productos' && (userRole === 'admin' || userRole === 'super_admin') && (
+            <div className="mb-6">
+           
             </div>
-          </div>
+          )}
 
           {error && (
             <div className="mb-8 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
@@ -600,22 +732,32 @@ function AdminDashboard({ userRole, initialNotes, onNotesUpdate }) {
             <div className="mb-8 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg">
               {success}
             </div>
-          )}          {loading ? (
+          )}
+
+          {loading ? (
             <div className="flex items-center justify-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            </div>
+            </div>        
           ) : (
             currentView === 'dashboard' ? renderDashboard() : 
             currentView === 'users' ? renderUsers() :
+            currentView === 'productos' ? renderProducts() :
             renderHistory()
           )}
         </div>
       </div>
+
       <NoteCreationModal 
         isOpen={isModalOpen} 
-        onClose={toggleModal} 
+        onClose={() => setIsModalOpen(false)} 
         onNoteCreated={handleNoteCreated} 
         userRole={userRole} 
+      />
+
+      <ProductCreationModal
+        isOpen={isProductModalOpen}
+        onClose={() => setIsProductModalOpen(false)}
+        onProductCreated={handleProductCreated}
       />
     </>
   );
