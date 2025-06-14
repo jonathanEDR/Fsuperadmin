@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Shield, FileText, Users, X, User, Trash2, Package } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Plus, X, Users, Package, DollarSign, Shield, FileText, User, Trash2 } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import CreateNote from '../Pages/Createnote';
 import ProfileManagement from '../Pages/ProfileManagement';
@@ -7,6 +7,10 @@ import NotesHistory from './NotesHistory';
 import AdminSidebar from './AdminSidebar';
 import ProductoList from '../components/ProductoList';
 import CreateProduct from '../Pages/CreateProduct';
+import VentaList from '../components/VentaList';
+import CobroList from '../components/CobroList';
+import VentaCreationModal from '../components/VentaCreationModal';
+import VentasFinalizadas from './VentasFinalizadas';
 
 // Componente Modal para crear notas
 const NoteCreationModal = ({ isOpen, onClose, onNoteCreated, userRole }) => {
@@ -125,6 +129,8 @@ function AdminDashboard({ userRole, initialNotes, onNotesUpdate }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [productos, setProductos] = useState([]);
+  const [isVentaModalOpen, setIsVentaModalOpen] = useState(false);
+  const [ventas, setVentas] = useState([]);
 
   // Efecto para sincronizar notas iniciales
   useEffect(() => {
@@ -189,9 +195,34 @@ function AdminDashboard({ userRole, initialNotes, onNotesUpdate }) {
     }
   };
 
+  const fetchVentas = async () => {
+    try {
+      setLoading(true);
+      const token = await getToken();
+      const response = await fetch('http://localhost:5000/api/ventas', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al cargar ventas');
+      }
+
+      const data = await response.json();
+      setVentas(data);
+    } catch (error) {
+      console.error('Error:', error);
+      setError('Error al cargar ventas');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchAdminData();
     fetchProductos();
+    fetchVentas();
   }, []);
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -204,6 +235,14 @@ function AdminDashboard({ userRole, initialNotes, onNotesUpdate }) {
   const toggleProductModal = () => {
     setIsProductModalOpen(!isProductModalOpen);
     if (!isProductModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+  };
+  const toggleVentaModal = () => {
+    setIsVentaModalOpen(!isVentaModalOpen);
+    if (!isVentaModalOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -278,6 +317,31 @@ function AdminDashboard({ userRole, initialNotes, onNotesUpdate }) {
     } catch (error) {
       console.error('Error al crear producto:', error);
       setError('Error al crear el producto');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVentaCreated = async (venta) => {
+    try {
+      setLoading(true);
+      const token = await getToken();
+      await fetch('http://localhost:5000/api/ventas', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(venta)
+      });
+
+      setSuccess('Venta creada exitosamente');
+      toggleVentaModal();
+      // Actualizar la lista de ventas
+      fetchVentas();
+    } catch (error) {
+      console.error('Error al crear venta:', error);
+      setError('Error al crear la venta');
     } finally {
       setLoading(false);
     }
@@ -667,6 +731,36 @@ function AdminDashboard({ userRole, initialNotes, onNotesUpdate }) {
         onProductCreated={handleProductCreated}
       />
     </div>
+  );  const renderSales = () => (
+    <div className="space-y-8">
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <VentaList userRole={userRole} />
+      </div>
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <VentasFinalizadas userRole={userRole} />
+      </div>
+    </div>
+  );
+
+  const renderCobros = () => (
+    <div className="space-y-8">
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <DollarSign className="text-blue-600" size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-800">Gestión de Cobros</h3>
+              <p className="text-sm text-gray-600">
+                Administra los pagos y cobros del sistema
+              </p>
+            </div>
+          </div>
+        </div>
+        <CobroList />
+      </div>
+    </div>
   );
 
   const handleMarkAsCompleted = async (noteId) => {
@@ -742,6 +836,8 @@ function AdminDashboard({ userRole, initialNotes, onNotesUpdate }) {
             currentView === 'dashboard' ? renderDashboard() : 
             currentView === 'users' ? renderUsers() :
             currentView === 'productos' ? renderProducts() :
+            currentView === 'ventas' ? renderSales() :
+            currentView === 'cobros' ? renderCobros() :
             renderHistory()
           )}
         </div>
@@ -758,6 +854,11 @@ function AdminDashboard({ userRole, initialNotes, onNotesUpdate }) {
         isOpen={isProductModalOpen}
         onClose={() => setIsProductModalOpen(false)}
         onProductCreated={handleProductCreated}
+      />      <VentaCreationModal
+        isOpen={isVentaModalOpen}
+        onClose={() => setIsVentaModalOpen(false)}
+        onVentaCreated={handleVentaCreated}
+        userRole={userRole}
       />
     </>
   );

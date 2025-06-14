@@ -1,10 +1,12 @@
 import React from 'react';
-import { Home, FileText, UserCog, LogOut, Shield, Users, Package } from 'lucide-react';
+import { Home, FileText, UserCog, LogOut, Shield, Users, Package, ShoppingCart, DollarSign } from 'lucide-react';
 
 function AdminSidebar({ currentView, onViewChange, onLogout, userRole }) {
   const menuItems = [
-    { id: 'dashboard', icon: Home, label: 'Gestion de Notas' },
+    { id: 'dashboard', icon: Home, label: 'Gestión de Notas' },
     { id: 'productos', icon: Package, label: 'Gestión de Productos' },
+    { id: 'ventas', icon: ShoppingCart, label: 'Gestión de Ventas' },
+    { id: 'cobros', icon: DollarSign, label: 'Gestión de Cobros' },
     { id: 'users', icon: Users, label: 'Colaboradores' },
     { id: 'history', icon: FileText, label: 'Historial' },
     { id: 'profile', icon: UserCog, label: 'Mi Perfil' }

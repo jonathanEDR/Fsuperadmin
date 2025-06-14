@@ -1,0 +1,159 @@
+import React, { useState, useEffect } from 'react';
+import { useUser, useSession } from '@clerk/clerk-react';
+import { DollarSign } from 'lucide-react';
+import { 
+  getPendingVentas,
+  getPaymentHistory,
+} from '../services/cobroService';
+import CobrosHistorial from './CobrosHistorial';
+import CobroCreationModal from './CobroCreationModal';
+import CobroResumen from './CobroResumen';
+
+const CobroList = () => {
+  const { user } = useUser();
+  const { session } = useSession();
+  const [pendingVentas, setPendingVentas] = useState([]);
+  const [paymentHistory, setPaymentHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [debtInfo, setDebtInfo] = useState(null);
+
+  const loadData = async () => {
+    if (!user || !session) {
+      setLoading(false);
+      setError('Por favor, inicie sesión para acceder a esta función.');
+      return;
+    }
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const token = await session.getToken();
+      if (!token) {
+        throw new Error('No se encontró una sesión activa. Por favor, inicie sesión nuevamente.');
+      }
+
+      const [ventasResponse, historyResponse] = await Promise.all([
+        getPendingVentas(),
+        getPaymentHistory(currentPage)
+      ]);
+
+      setPendingVentas(ventasResponse || []);
+      setPaymentHistory(historyResponse?.cobros || []);
+      setTotalPages(historyResponse?.totalPages || 1);
+
+      // Calcular información de deuda
+      const totalDebt = ventasResponse?.reduce((sum, venta) => 
+        sum + (venta.montoTotal - (venta.cantidadPagada || 0)), 0) || 0;
+      
+      setDebtInfo({
+        totalDebt,
+        pendingVentasCount: ventasResponse?.length || 0
+      });
+
+      setError(null);
+    } catch (err) {
+      console.error('Error loading data:', err);
+      setError(err.message || 'Error al cargar los datos');
+      setPendingVentas([]);
+      setPaymentHistory([]);
+      setTotalPages(1);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [user, session, currentPage]);
+
+  const handleCobroCreated = async (result) => {
+    if (result) {
+      setSuccess('Pago registrado exitosamente');
+      setTimeout(() => setSuccess(''), 3000);
+      await loadData();
+      setShowPaymentModal(false);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {error && (
+        <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+          {error}
+        </div>
+      )}
+      
+      {success && (
+        <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+          {success}
+        </div>
+      )}
+
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+          <DollarSign className="text-blue-600" size={28} />
+          Gestión de Cobros
+        </h2>
+      </div>
+
+      {/* Resumen de Cobros */}
+      <div className="mb-8">
+        <CobroResumen debtInfo={debtInfo} />
+      </div>
+
+      {/* Botón para Nuevo Cobro */}
+      <div className="mb-8">
+        <button
+          onClick={() => setShowPaymentModal(true)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+        >
+          <DollarSign size={20} />
+          Registrar Nuevo Cobro
+        </button>
+      </div>
+
+      {/* Historial de Pagos */}
+      <div className="mb-8">
+        <h3 className="text-xl font-bold text-gray-800 mb-6">Historial de Pagos</h3>
+        <CobrosHistorial
+          payments={paymentHistory}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </div>
+
+      {/* Modal de Pago */}
+      {showPaymentModal && (
+        <CobroCreationModal
+          isOpen={true}
+          onClose={() => setShowPaymentModal(false)}
+          ventasData={pendingVentas}
+          onCobroCreated={handleCobroCreated}
+        />
+      )}
+    </div>
+  );
+};
+
+export default CobroList;

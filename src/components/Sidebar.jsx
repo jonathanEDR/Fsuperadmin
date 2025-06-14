@@ -1,9 +1,12 @@
 import React from 'react';
-import { Home, UserCircle, FileText, Settings, LogOut, Package } from 'lucide-react';
+import { UserCircle, FileText, LogOut, Package, ShoppingBag, RefreshCw } from 'lucide-react';
 
-function Sidebar({ currentView, onViewChange, onLogout }) {  const menuItems = [
+function Sidebar({ currentView, onViewChange, onLogout }) {
+  const menuItems = [
     { id: 'notes', icon: FileText, label: 'Mis Notas' },
     { id: 'productos', icon: Package, label: 'Gestión de Productos' },
+    { id: 'ventas', icon: ShoppingBag, label: 'Mis Ventas' },
+    { id: 'devoluciones', icon: RefreshCw, label: 'Devoluciones' },
     { id: 'profile', icon: UserCircle, label: 'Mi Perfil' },
   ];
 

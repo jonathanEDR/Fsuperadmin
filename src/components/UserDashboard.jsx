@@ -1,18 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, BarChart3, Calendar, User } from 'lucide-react';
+import { Plus, BarChart3, Calendar, User, ShoppingBag, RefreshCw } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
+import { useUser } from '@clerk/clerk-react';
+import api, { getDevoluciones, createDevolucion, deleteDevolucion } from '../services/api';
 import CreateNote from '../Pages/CreateNote';
 import ProductoList from '../components/ProductoList';
+import VentaList from '../components/VentaList';
+import DevolucionList from '../components/DevolucionList';
+import DevolucionModal from '../components/DevolucionModal';
 
 import Sidebar from './Sidebar';
 import { UserCircle } from 'lucide-react';
 
-function UserDashboard({ session, initialNotes, onNotesUpdate }) {
+const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
   const { getToken } = useAuth();
   const [notes, setNotes] = useState(initialNotes || []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [currentView, setCurrentView] = useState('notes'); // 'notes' | 'profile'
+  const [currentView, setCurrentView] = useState('notes'); // 'notes' | 'profile' | 'ventas'
+  const [ventas, setVentas] = useState([]);
+  const [ventasLoading, setVentasLoading] = useState(false);
+  const [devoluciones, setDevoluciones] = useState([]);
+  const [devolucionesLoading, setDevolucionesLoading] = useState(false);
+  const [devolucionesLimit, setDevolucionesLimit] = useState(10);
+  const [showDevolucionModal, setShowDevolucionModal] = useState(false);
+  const [selectedProducto, setSelectedProducto] = useState(null);
+  const [selectedVenta, setSelectedVenta] = useState(null);
+  const [ventasParaDevolucion, setVentasParaDevolucion] = useState([]);
+  const [fechaDevolucion, setFechaDevolucion] = useState('');
+  const [cantidadDevuelta, setCantidadDevuelta] = useState('');
+  const [motivo, setMotivo] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setNotes(initialNotes || []);
@@ -43,9 +61,44 @@ function UserDashboard({ session, initialNotes, onNotesUpdate }) {
     }
   };
 
-  useEffect(() => {
-    fetchUserNotes();
-  }, []);
+  // Función para cargar las ventas del usuario
+  const fetchVentas = async () => {
+    try {
+      setVentasLoading(true);
+      const token = await getToken();
+      const response = await fetch('/api/ventas', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) throw new Error('Error al cargar ventas');
+
+      const data = await response.json();
+      setVentas(data.ventas || []);
+    } catch (error) {
+      console.error('Error:', error);
+      setError('Error al cargar las ventas');
+    } finally {
+      setVentasLoading(false);
+    }
+  };
+
+  // Función para cargar las devoluciones
+  const fetchDevoluciones = async () => {
+    try {
+      setDevolucionesLoading(true);
+      const token = await getToken();
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      const data = await getDevoluciones();
+      setDevoluciones(data.devoluciones || []);
+    } catch (error) {
+      console.error('Error:', error);
+      setError('Error al cargar las devoluciones');
+    } finally {
+      setDevolucionesLoading(false);
+    }
+  };
 
   const handleNoteCreated = async (newNote) => {
     await fetchUserNotes(); // Recargar notas después de crear una nueva
@@ -86,6 +139,124 @@ function UserDashboard({ session, initialNotes, onNotesUpdate }) {
     } finally {
       setLoading(false);
     }
+  };
+  // Función para registrar una devolución
+  const handleSubmitDevolucion = async (productosADevolver) => {
+    try {
+      setIsSubmitting(true);
+      
+      // Validate products
+      if (!productosADevolver || productosADevolver.length === 0) {
+        throw new Error('Debe seleccionar al menos un producto para devolver');
+      }
+
+      // Validate amounts
+      const invalidProducts = productosADevolver.filter(item => 
+        !item.cantidad || item.cantidad <= 0 || item.cantidad > item.producto.cantidad
+      );
+      
+      if (invalidProducts.length > 0) {
+        throw new Error('Las cantidades especificadas no son válidas');
+      }
+
+      // Validate motivo
+      if (!motivo || motivo.length < 10) {
+        throw new Error('El motivo debe tener al menos 10 caracteres');
+      }
+
+      // Create devolution
+      await createDevolucion({
+        ventaId: selectedVenta._id,
+        productos: productosADevolver,
+        motivo,
+        fechaDevolucion
+      });
+
+      // Show success message
+      alert('Devolución registrada exitosamente');
+      
+      // Reset form and refresh list
+      resetDevolucionForm();
+      setShowDevolucionModal(false);
+      fetchDevoluciones();
+    } catch (error) {
+      console.error('Error al crear devolución:', error);
+      alert(error.message || 'Error al crear la devolución');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  const handleDevolucionDeleted = async (devolucionId) => {
+    try {
+      const token = await getToken();
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      await deleteDevolucion(devolucionId);
+      await fetchDevoluciones();
+    } catch (error) {
+      console.error('Error:', error);
+      setError('Error al eliminar la devolución');
+    }
+  };
+
+  const fetchVentasParaDevolucion = async () => {
+    try {
+      const token = await getToken();
+      const response = await fetch('/api/ventas', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) throw new Error('Error al cargar ventas');
+
+      const data = await response.json();
+      // Filtrar solo ventas no finalizadas y con productos
+      const ventasValidas = (data.ventas || []).filter(venta => 
+        !venta.isFinalized && 
+        venta.productos && 
+        venta.productos.length > 0
+      );
+      setVentasParaDevolucion(ventasValidas);
+    } catch (error) {
+      console.error('Error:', error);
+      setError('Error al cargar las ventas para devolución');
+    }
+  };
+
+  useEffect(() => {
+    if (showDevolucionModal) {
+      fetchVentasParaDevolucion();
+    }
+  }, [showDevolucionModal]);
+
+  const resetDevolucionForm = () => {
+    setSelectedVenta(null);
+    setSelectedProducto(null);
+    setFechaDevolucion('');
+    setCantidadDevuelta('');
+    setMotivo('');
+  };
+
+  useEffect(() => {
+    fetchUserNotes();
+  }, []);
+
+  useEffect(() => {
+    if (currentView === 'ventas') {
+      fetchVentas();
+    } else if (currentView === 'devoluciones') {
+      fetchDevoluciones();
+    }
+  }, [currentView]);
+
+  const formatearFechaHora = (fecha) => {
+    return new Date(fecha).toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   const renderNotes = () => (
@@ -233,6 +404,81 @@ function UserDashboard({ session, initialNotes, onNotesUpdate }) {
     </div>
   );
 
+  const renderVentas = () => (
+    <div className="space-y-8">
+      <div className="bg-white shadow-xl rounded-2xl p-8 transform hover:scale-[1.01] transition-all duration-300 border border-gray-100">
+        <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+          <ShoppingBag className="text-blue-600" size={28} />
+          Mis Ventas
+        </h2>
+        <VentaList 
+          userRole="user" 
+          showActions={true} 
+          canComplete={true} 
+          onVentaUpdated={fetchVentas}
+        />
+      </div>
+    </div>
+  );
+
+  const renderDevoluciones = () => (
+    <div className="space-y-8">
+      <div className="bg-white shadow-xl rounded-2xl p-8 transform hover:scale-[1.01] transition-all duration-300 border border-gray-100">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+            <RefreshCw className="text-blue-600" size={28} />
+            Devoluciones
+          </h2>
+          <button
+            onClick={() => {
+              setShowDevolucionModal(true);
+              resetDevolucionForm();
+            }}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+          >
+            <Plus size={20} />
+            Nueva Devolución
+          </button>
+        </div>
+        
+        {devolucionesLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <DevolucionList
+            devoluciones={devoluciones}
+            onDevolucionDeleted={handleDevolucionDeleted}
+            formatearFechaHora={formatearFechaHora}
+            devolucionesLimit={devolucionesLimit}
+            onLoadMore={() => setDevolucionesLimit(prev => prev + 10)}
+          />
+        )}
+      </div>
+
+      <DevolucionModal
+        isVisible={showDevolucionModal}
+        ventas={ventasParaDevolucion}
+        selectedVenta={selectedVenta}
+        selectedProducto={selectedProducto}
+        fechaDevolucion={fechaDevolucion}
+        cantidadDevuelta={cantidadDevuelta}
+        motivo={motivo}
+        onClose={() => {
+          setShowDevolucionModal(false);
+          resetDevolucionForm();
+        }}
+        onVentaSelect={setSelectedVenta}
+        onProductoSelect={setSelectedProducto}
+        onFechaChange={setFechaDevolucion}
+        onCantidadChange={setCantidadDevuelta}
+        onMotivoChange={setMotivo}
+        onSubmit={handleSubmitDevolucion}
+        isSubmitting={isSubmitting}
+      />
+    </div>
+  );
+
   return (
     <div className="flex">
       <Sidebar 
@@ -251,7 +497,11 @@ function UserDashboard({ session, initialNotes, onNotesUpdate }) {
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
-        ) : (          currentView === 'notes' ? renderNotes() :            currentView === 'productos' ? <ProductoList userRole="user" /> :
+        ) : (
+          currentView === 'notes' ? renderNotes() :
+          currentView === 'ventas' ? renderVentas() :
+          currentView === 'productos' ? <ProductoList userRole="user" /> :
+          currentView === 'devoluciones' ? renderDevoluciones() :
           renderProfile()
         )}
       </div>

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { 
-  UserPlus, Trash2, Search, Plus,
-  ChevronLeft, ChevronRight
+  Home, FileText, UserCog, Shield, History, Package, 
+  ShoppingCart, DollarSign, ChevronLeft, ChevronRight,
+  Search, UserPlus, Trash2, Edit, Plus 
 } from 'lucide-react';
 import NotesHistory from '../components/NotesHistory';
 import NoteCreationModal from '../components/NoteCreationModal';
@@ -11,6 +12,9 @@ import SuperAdminSidebar from '../components/SuperAdminSidebar';
 import SuperAdminNotes from '../components/SuperAdminNotes';
 import MyProfile from './MyProfile';
 import ProductoList from '../components/ProductoList';
+import VentaList from '../components/VentaList';
+import CobroList from '../components/CobroList';
+import VentasFinalizadas from '../components/VentasFinalizadas';
 
 function SuperAdminDashboard() {
   const { getToken } = useAuth();
@@ -26,6 +30,20 @@ function SuperAdminDashboard() {
   const [roleFilter, setRoleFilter] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [productos, setProductos] = useState([]); // Añadido estado para productos
+  
+  // Estados para la gestión de ventas
+  const [ventas, setVentas] = useState([]);
+  const [ventasLoading, setVentasLoading] = useState(true);
+  const [ventasError, setVentasError] = useState(null);
+  const [ventasPagina, setVentasPagina] = useState(1);
+  const [totalVentasPaginas, setTotalVentasPaginas] = useState(1);
+  const [ventasFiltro, setVentasFiltro] = useState({
+    fechaInicio: '',
+    fechaFin: '',
+    colaborador: '',
+    producto: ''
+  });
 
   const fetchUsers = async () => {
     try {
@@ -53,7 +71,15 @@ function SuperAdminDashboard() {
   };
   useEffect(() => {
     fetchUsers();
-  }, [currentPage, searchTerm, roleFilter]);const handlePromoteToAdmin = async (userId, currentRole) => {
+  }, [currentPage, searchTerm, roleFilter]);
+
+  useEffect(() => {
+    if (currentView === 'ventas') {
+      fetchVentas();
+    }
+  }, [currentView, ventasPagina, ventasFiltro]);
+
+  const handlePromoteToAdmin = async (userId, currentRole) => {
     try {
       const token = await getToken();
       const newRole = currentRole === 'admin' ? 'user' : 'admin';
@@ -285,74 +311,358 @@ function SuperAdminDashboard() {
     }
   };
 
-  if (loading && users.length === 0) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
+  const fetchProductos = async () => {
+    try {
+      setLoading(true);
+      const token = await getToken();
+      const response = await fetch('/api/productos', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) throw new Error('Error al cargar productos');
+      
+      const data = await response.json();
+      setProductos(data);
+    } catch (error) {
+      console.error('Error fetching productos:', error);
+      setError('Error al cargar productos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (currentView === 'productos') {
+      fetchProductos();
+    }
+  }, [currentView]);
+
+  // Función para cargar ventas
+  const fetchVentas = async () => {
+    setVentasLoading(true);
+    try {
+      const token = await getToken();
+      const response = await fetch(`/api/ventas?page=${ventasPagina}&colaborador=${ventasFiltro.colaborador}&producto=${ventasFiltro.producto}&fechaInicio=${ventasFiltro.fechaInicio}&fechaFin=${ventasFiltro.fechaFin}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) throw new Error('Error al cargar las ventas');
+      const data = await response.json();
+      setVentas(data.ventas || []);
+      setTotalVentasPaginas(data.totalPages || 1);
+      setVentasError(null);
+    } catch (error) {
+      console.error('Error fetching ventas:', error);
+      setVentasError(error.message || 'Error al cargar las ventas');
+    } finally {
+      setVentasLoading(false);
+    }
+  };
+
+  const handleVentasFiltroChange = (e) => {
+    const { name, value } = e.target;
+    setVentasFiltro(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    setVentasPagina(1); // Reset to first page when filter changes
+  };
+
+  const handleDeleteVenta = async (ventaId) => {
+    try {
+      const token = getToken();
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/ventas/${ventaId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) throw new Error('Error al eliminar la venta');
+      setSuccess('Venta eliminada exitosamente');
+      fetchVentas(); // Refresh list
+    } catch (error) {
+      setVentasError(error.message);
+    }
+  };
+
+  const renderVentasTable = () => {
+    if (ventasLoading) return (
+      <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
       </div>
     );
-  }
+    
+    if (ventasError) return (
+      <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+        {ventasError}
+      </div>
+    );
+    
+    return (
+      <div className="bg-white shadow-lg rounded-xl overflow-hidden">
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Fecha Inicio</label>
+              <input
+                type="date"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                name="fechaInicio"
+                value={ventasFiltro.fechaInicio}
+                onChange={handleVentasFiltroChange}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Fecha Fin</label>
+              <input
+                type="date"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                name="fechaFin"
+                value={ventasFiltro.fechaFin}
+                onChange={handleVentasFiltroChange}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Colaborador</label>
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                name="colaborador"
+                value={ventasFiltro.colaborador}
+                onChange={handleVentasFiltroChange}
+                placeholder="Buscar por colaborador"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Producto</label>
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                name="producto"
+                value={ventasFiltro.producto}
+                onChange={handleVentasFiltroChange}
+                placeholder="Buscar por producto"
+              />
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Colaborador</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {ventas.map((venta) => (
+                  <tr key={venta._id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {new Date(venta.fecha).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{venta.colaborador}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{venta.producto}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{venta.cantidad}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${venta.total.toFixed(2)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 text-xs font-semibold rounded-full ${
+                        venta.estado === 'completada' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {venta.estado}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button
+                        onClick={() => handleDeleteVenta(venta._id)}
+                        className="text-red-600 hover:text-red-900 mr-2"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => {/* Implementar edición */}}
+                        className="text-blue-600 hover:text-blue-900"
+                      >
+                        <Edit size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="p-6 border-t flex justify-between items-center">
+            <p className="text-sm text-gray-600">
+              Mostrando página {ventasPagina} de {totalVentasPaginas}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setVentasPagina(p => Math.max(1, p - 1))}
+                disabled={ventasPagina === 1}
+                className="flex items-center gap-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft size={16} />
+                Anterior
+              </button>
+              <button
+                onClick={() => setVentasPagina(p => Math.min(totalVentasPaginas, p + 1))}
+                disabled={ventasPagina === totalVentasPaginas}
+                className="flex items-center gap-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Siguiente
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderCobros = () => (
+    <div className="space-y-8">
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-purple-100 rounded-lg">
+              <DollarSign className="text-purple-600" size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-800">Gestión de Cobros</h3>
+              <p className="text-sm text-gray-600">
+                Administra los pagos y cobros del sistema
+              </p>
+            </div>
+          </div>
+        </div>
+        <CobroList />
+      </div>
+    </div>
+  );
+
+  const renderDashboard = () => (
+    <div className="space-y-8">
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        {renderUsersTable()}
+      </div>
+    </div>
+  );
+
+  const renderProducts = () => (
+    <div className="space-y-8">
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-purple-100 rounded-lg">
+              <Package className="text-purple-600" size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-800">Gestión de Productos</h3>
+              <p className="text-sm text-gray-600">
+                Administra los productos del sistema
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsProductModalOpen(true)}
+            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
+          >
+            <Plus size={20} />
+            Agregar Producto
+          </button>
+        </div>
+        <ProductoList productos={productos} userRole="super_admin" onProductUpdate={fetchProductos} />
+      </div>
+    </div>
+  );  const renderVentas = () => (
+    <div className="space-y-8">
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <VentaList userRole="super_admin" />
+      </div>
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <VentasFinalizadas userRole="super_admin" />
+      </div>
+    </div>
+  );
+
+  const renderNotes = () => (
+    <div className="space-y-8">
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-purple-100 rounded-lg">
+              <FileText className="text-purple-600" size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-800">Gestión de Notas</h3>
+              <p className="text-sm text-gray-600">
+                Administra las notas del sistema
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
+          >
+            <Plus size={20} />
+            Crear Nota
+          </button>
+        </div>
+        <SuperAdminNotes ref={notesRef} />
+      </div>
+    </div>
+  );
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex">
       <SuperAdminSidebar 
         currentView={currentView}
         onViewChange={setCurrentView}
-        onLogout={() => {/* handle logout */}}
+        onLogout={handleLogout}
       />
-      
       <div className="ml-64 flex-1 p-8">
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+          <div className="mb-8 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
             {error}
           </div>
         )}
         
         {success && (
-          <div className="mb-6 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg">
+          <div className="mb-8 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg">
             {success}
           </div>
         )}
 
-        {/* Botón de Nueva Nota */}
-        {(currentView === 'dashboard' || currentView === 'notes') && (
-          <div className="mb-6">
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
-            >
-              <Plus size={20} />
-              Nueva Nota
-            </button>
+        {loading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
           </div>
+        ) : (
+          <>
+            {currentView === 'dashboard' && renderDashboard()}
+            {currentView === 'productos' && renderProducts()}
+            {currentView === 'ventas' && renderVentas()}
+            {currentView === 'cobros' && renderCobros()}
+            {currentView === 'notes' && renderNotes()}
+            {currentView === 'history' && <NotesHistory />}
+            {currentView === 'profile' && <MyProfile />}
+          </>
         )}
-
-        {/* Botón de Nuevo Producto */}
-        {currentView === 'productos' && (
-          <div className="mb-6">
-            <button
-              onClick={() => setIsProductModalOpen(true)}
-              className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
-            >
-              <Plus size={20} />
-              Nuevo Producto
-            </button>
-          </div>
-        )}
-
-        <div className="space-y-6">
-          {currentView === 'dashboard' && renderUsersTable()}
-          {currentView === 'users' && renderUsersTable()}
-          {currentView === 'productos' && <ProductoList userRole="super_admin" />}
-          {currentView === 'notes' && <SuperAdminNotes ref={notesRef} />}
-          {currentView === 'history' && <NotesHistory />}
-          {currentView === 'profile' && <MyProfile />}
-        </div>
       </div>
 
       <NoteCreationModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
         onNoteCreated={handleNoteCreated}
         userRole="super_admin"
       />
