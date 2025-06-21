@@ -2,8 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Check, Calendar, Search, AlertCircle } from 'lucide-react';
-import api from '../services/api';
+import { api } from '../../services';
 
+/**
+ * VentasSelectionList Component
+ * 
+ * A component for selecting ventas (sales) in the context of cobros (payments).
+ * Provides search functionality and displays a list of available ventas for selection.
+ *
+ * @component
+ * @param {Object} props
+ * @param {Function} props.onVentaSelect - Callback function when a venta is selected
+ * @param {Array} props.selectedVentas - Array of currently selected ventas
+ * @param {Function} props.onError - Callback function for error handling
+ *
+ * @example
+ * return (
+ *   <VentasSelectionList
+ *     onVentaSelect={(venta) => handleVentaSelection(venta)}
+ *     selectedVentas={currentlySelectedVentas}
+ *     onError={(error) => handleError(error)}
+ *   />
+ * )
+ */
 const VentasSelectionList = ({ onVentaSelect, selectedVentas = [], onError }) => {
   const [ventas, setVentas] = useState([]);
   const [loading, setLoading] = useState(true);

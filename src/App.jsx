@@ -5,10 +5,9 @@ import { useUser } from '@clerk/clerk-react';
 
 // Importar componentes
 import Home from './Pages/Home';
-import Login from './Pages/Login';
-import Register from './Pages/Signup';
+import { Login, Signup as Register } from './components/auth';
 import Dashboard from './Pages/Dashboard';
-import SuperAdminDashboard from './Pages/SuperAdminDashboard';
+import { SuperAdminDashboard } from './components/layout';
 
 // Componente para proteger rutas que requieren autenticación
 function ProtectedRoute({ children }) {

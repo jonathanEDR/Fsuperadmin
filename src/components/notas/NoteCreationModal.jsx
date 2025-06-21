@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Plus } from 'lucide-react';
-import CreateNote from '../Pages/Createnote';
+import { CreateNote } from './';
 
 const NoteCreationModal = ({ isOpen, onClose, onNoteCreated, userRole }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);

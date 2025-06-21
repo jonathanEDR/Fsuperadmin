@@ -16,19 +16,17 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta }) => {
       ...prev,
       [name]: numberValue
     }));
-  };
-  const handleSubmit = (e) => {
+  };  const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Calcular el total automáticamente
     const total = (parseFloat(formData.yape) || 0) + 
-                 (parseFloat(formData.efectivo) || 0) + 
-                 (parseFloat(formData.gastosImprevistos) || 0);
+                  (parseFloat(formData.efectivo) || 0) + 
+                  (parseFloat(formData.gastosImprevistos) || 0);
 
-    // Redondear a 2 decimales para evitar problemas de precisión
-    const roundedTotal = Math.round(total * 100) / 100;
-    const roundedMontoTotal = Math.round(venta.montoTotal * 100) / 100;
-
-    if (roundedTotal !== roundedMontoTotal) {
-      alert(`El total de los métodos de pago (S/. ${roundedTotal.toFixed(2)}) debe ser igual al monto de la venta (S/. ${roundedMontoTotal.toFixed(2)})`);
+    // Validar que al menos un método de pago tenga valor
+    if (total <= 0) {
+      alert('Debe ingresar al menos un método de pago');
       return;
     }
 
@@ -101,9 +99,7 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta }) => {
               min="0"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
             />
-          </div>
-
-          <div>
+          </div>          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Gastos Imprevistos
             </label>
@@ -116,6 +112,37 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta }) => {
               min="0"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
             />
+          </div>          {/* Resumen del cálculo */}
+          <div className="bg-gray-50 p-3 rounded-md border">
+            <h3 className="text-sm font-medium text-gray-700 mb-2">Resumen del pago:</h3>
+            <div className="space-y-1 text-sm">
+              <div className="flex justify-between">
+                <span>Yape:</span>
+                <span>S/. {(parseFloat(formData.yape) || 0).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Efectivo:</span>
+                <span>S/. {(parseFloat(formData.efectivo) || 0).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Gastos Imprevistos:</span>
+                <span>S/. {(parseFloat(formData.gastosImprevistos) || 0).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between font-bold border-t pt-1 text-lg">
+                <span>Monto a pagar:</span>
+                <span className="text-green-600">S/. {((parseFloat(formData.yape) || 0) + (parseFloat(formData.efectivo) || 0) + (parseFloat(formData.gastosImprevistos) || 0)).toFixed(2)}</span>
+              </div>
+              <div className="text-xs text-gray-500 mt-2 p-2 bg-blue-50 rounded">
+                <div className="flex justify-between">
+                  <span>Monto total de la venta:</span>
+                  <span>S/. {venta.montoTotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Saldo pendiente después del pago:</span>
+                  <span>S/. {Math.max(0, venta.montoTotal - ((parseFloat(formData.yape) || 0) + (parseFloat(formData.efectivo) || 0) + (parseFloat(formData.gastosImprevistos) || 0))).toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div>

@@ -13,6 +13,7 @@ const ProfileManagement = ({ userRole }) => {
     nombre_negocio: '',
     email: '',
   });
+
   // Función para verificar si el usuario puede editar a otro usuario
   const canEditUser = (targetUser) => {
     // Si el usuario actual es super_admin, puede editar cualquier usuario
@@ -76,14 +77,17 @@ const ProfileManagement = ({ userRole }) => {
 
   const handleSaveProfile = async (userId) => {
     try {
-      const token = await getToken();      const response = await fetch(`http://localhost:5000/api/auth/update-profile/${userId}`, {
+      const token = await getToken();
+      const response = await fetch(`http://localhost:5000/api/auth/update-profile/${userId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(editForm)
-      });      if (response.ok) {
+      });
+
+      if (response.ok) {
         const result = await response.json();
         setEditingUser(null);
         fetchUsers(); // Recargar la lista de usuarios
@@ -203,85 +207,69 @@ const ProfileManagement = ({ userRole }) => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {users.map((user) => (
-                <tr key={user._id} className={!canEditUser(user) ? 'bg-gray-50' : ''}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {user.clerk_id}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {editingUser?._id === user._id ? (
-                      <input
-                        type="email"
-                        className="border border-gray-300 rounded px-3 py-1 text-sm w-full"
-                        value={editForm.email}
-                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                      />
-                    ) : (
-                      <div className="text-sm text-gray-900">{user.email}</div>
-                    )}
-                  </td>
+                <tr key={user._id}>
+                  <td className="px-6 py-4 whitespace-nowrap">{user.username}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {editingUser?._id === user._id ? (
                       <input
                         type="text"
-                        className="border border-gray-300 rounded px-3 py-1 text-sm w-full"
+                        className="border border-gray-300 rounded px-2 py-1 w-full"
                         value={editForm.nombre_negocio}
                         onChange={(e) => setEditForm({ ...editForm, nombre_negocio: e.target.value })}
                       />
                     ) : (
-                      <div className="text-sm text-gray-900">{user.nombre_negocio || '-'}</div>
+                      user.nombre_negocio || '-'
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                      user.role === 'super_admin' ? 'bg-purple-100 text-purple-800' :
-                      user.role === 'admin' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
+                    <span className={`px-2 py-1 rounded text-sm ${
+                      user.role === 'super_admin' 
+                        ? 'bg-purple-100 text-purple-800'
+                        : user.role === 'admin'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-green-100 text-green-800'
                     }`}>
                       {user.role}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">                    {editingUser?._id === user._id ? (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleSaveProfile(user._id)}
-                          className="text-green-600 hover:text-green-900"
-                        >
-                          <Save size={18} />
-                        </button>
-                        <button
-                          onClick={handleCancelEdit}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          <X size={18} />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex justify-end gap-2">
-                        {/* Mostrar botón de editar si el usuario actual puede editar al usuario */}
-                        {(userRole === 'super_admin' || (userRole === 'admin' && user.role === 'user')) && (
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex space-x-2">
+                      {editingUser?._id === user._id ? (
+                        <>
+                          <button
+                            onClick={() => handleSaveProfile(user._id)}
+                            className="p-1 text-green-600 hover:text-green-900"
+                          >
+                            <Save size={20} />
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="p-1 text-red-600 hover:text-red-900"
+                          >
+                            <X size={20} />
+                          </button>
+                        </>
+                      ) : (
+                        canEditUser(user) && (
                           <button
                             onClick={() => handleEdit(user)}
-                            className="text-blue-600 hover:text-blue-900"
-                            title="Editar usuario"
+                            className="p-1 text-blue-600 hover:text-blue-900"
                           >
-                            <Edit2 size={18} />
+                            <Edit2 size={20} />
                           </button>
-                        )}
-                        
-                        {/* Mostrar botón de promover solo si el usuario actual es super_admin y el usuario objetivo no es super_admin */}
-                        {userRole === 'super_admin' && user.role !== 'super_admin' && (
-                          <button
-                            onClick={() => handlePromoteToAdmin(user._id)}
-                            className="text-yellow-600 hover:text-yellow-900"
-                            title="Promover a administrador"
-                          >
-                            <UserPlus size={18} />
-                          </button>
-                        )}
-                      </div>
-                    )}
+                        )
+                      )}
+                      {userRole === 'super_admin' && user.role === 'user' && (
+                        <button
+                          onClick={() => handlePromoteToAdmin(user._id)}
+                          className="p-1 text-purple-600 hover:text-purple-900"
+                          title="Promover a administrador"
+                        >
+                          <UserPlus size={20} />
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

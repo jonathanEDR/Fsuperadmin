@@ -5,7 +5,8 @@ import {
   Check,
   X,
   Clock,
-  ShoppingBag
+  ShoppingBag,
+  Undo2
 } from 'lucide-react';
 
 function VentasFinalizadas({ userRole }) {
@@ -13,8 +14,7 @@ function VentasFinalizadas({ userRole }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(null);
-  const { user } = useUser();
-  useEffect(() => {
+  const { user } = useUser();  useEffect(() => {
     loadVentasFinalizadas();
   }, []);
 
@@ -43,9 +43,7 @@ function VentasFinalizadas({ userRole }) {
     }
   };
 
-  useEffect(() => {
-    loadVentasFinalizadas();
-  }, []);  const getStatusColor = (status) => {
+  const getStatusColor = (status) => {
     switch (status) {
       case 'approved':
         return 'bg-green-100 text-green-800';
@@ -122,6 +120,44 @@ function VentasFinalizadas({ userRole }) {
     }
   };
 
+  const handleRevertVenta = async (ventaId) => {
+    try {
+      const confirmRevert = window.confirm(
+        '¿Estás seguro de que quieres quitar esta venta de las finalizadas? Esto la volverá a poner en estado activo.'
+      );
+      
+      if (!confirmRevert) return;
+
+      setActionLoading(ventaId);
+      const token = await getToken();
+      
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/ventas/${ventaId}/revert`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al revertir la venta');
+      }
+
+      // Recargar la lista de ventas
+      await loadVentasFinalizadas();
+      
+      // Mostrar mensaje de éxito
+      setError(null);
+    } catch (error) {
+      console.error('Error:', error);
+      setError(error.message);
+      setTimeout(() => setError(null), 3000);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   if (loading) {
     return <div className="text-center py-4">Cargando ventas finalizadas...</div>;
   }
@@ -146,12 +182,14 @@ function VentasFinalizadas({ userRole }) {
         </div>
       </div>
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
+      <div className="bg-white shadow-md rounded-lg overflow-hidden">        <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Productos
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Colaborador
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Monto Total
@@ -169,8 +207,7 @@ function VentasFinalizadas({ userRole }) {
               )}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {ventas.map((venta) => (
+          <tbody className="bg-white divide-y divide-gray-200">            {ventas.map((venta) => (
               <tr key={venta._id}>
                 <td className="px-6 py-4">
                   {venta.productos.map((prod, idx) => (
@@ -180,6 +217,15 @@ function VentasFinalizadas({ userRole }) {
                   ))}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900">
+                  <div className="flex flex-col">
+                    <span className="font-medium">
+                      {venta.user_info?.nombre_negocio || 'No especificado'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {venta.user_info?.email || ''}
+                    </span>
+                  </div>
+                </td>                <td className="px-6 py-4 text-sm text-gray-900">
                   S/ {venta.montoTotal.toFixed(2)}
                 </td>
                 <td className="px-6 py-4">
@@ -220,6 +266,20 @@ function VentasFinalizadas({ userRole }) {
                           {actionLoading === venta._id ? 'Procesando...' : 'Rechazar'}
                         </button>
                       </div>
+                    )}                    {(venta.completionStatus === 'approved' || venta.completionStatus === 'rejected') && canApproveReject(venta) && (
+                      <button
+                        onClick={() => handleRevertVenta(venta._id)}
+                        disabled={actionLoading === venta._id}
+                        className={`px-3 py-1 text-sm rounded-md flex items-center gap-1 ${
+                          actionLoading === venta._id
+                            ? 'bg-gray-100 text-gray-500'
+                            : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                        }`}
+                        title="Quitar de ventas finalizadas y volver a estado activo"
+                      >
+                        <Undo2 size={14} />
+                        {actionLoading === venta._id ? 'Procesando...' : 'Revertir'}
+                      </button>
                     )}
                   </td>
                 )}

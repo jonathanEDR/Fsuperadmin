@@ -2,13 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useSession, useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Users, BarChart3, Plus, Trash2, User, UserCog, UserCircle2 } from 'lucide-react';
-import LogoutButton from './LogoutButton';
-import CreateNote from './Createnote';
-import SuperAdminDashboard from './SuperAdminDashboard';
-import ProfileManagement from './ProfileManagement';
-import MyProfile from './MyProfile';
-import AdminDashboard from '../components/AdminDashboard';
-import UserDashboard from '../components/UserDashboard';
+import { LogoutButton } from '../components/auth';
+import { CreateNote } from '../components/notas';
+import { SuperAdminDashboard, AdminDashboard, UserDashboard } from '../components/layout';
+import { ProfileManagement } from '../components/auth';
+import { MyProfile } from '../components/auth';
 
 function Dashboard() {
   const { session, isLoaded } = useSession();

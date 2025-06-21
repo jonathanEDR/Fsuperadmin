@@ -17,7 +17,7 @@ const MyProfile = () => {
   const fetchProfile = async () => {
     try {
       const token = await getToken();
-      const response = await fetch('http://localhost:5000/api/auth/my-profile', {
+      const response = await fetch('/api/auth/my-profile', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -57,7 +57,7 @@ const MyProfile = () => {
   const handleSave = async () => {
     try {
       const token = await getToken();
-      const response = await fetch('http://localhost:5000/api/auth/update-my-profile', {
+      const response = await fetch('/api/auth/update-my-profile', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

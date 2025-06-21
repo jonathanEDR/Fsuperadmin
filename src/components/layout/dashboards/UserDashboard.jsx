@@ -1,23 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, BarChart3, Calendar, User, ShoppingBag, RefreshCw } from 'lucide-react';
+import { Plus, BarChart3, Package, ShoppingBag, RefreshCw, Menu, User } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
-import { useUser } from '@clerk/clerk-react';
-import api, { getDevoluciones, createDevolucion, deleteDevolucion } from '../services/api';
-import CreateNote from '../Pages/CreateNote';
-import ProductoList from '../components/ProductoList';
-import VentaList from '../components/VentaList';
-import DevolucionList from '../components/DevolucionList';
-import DevolucionModal from '../components/DevolucionModal';
 
-import Sidebar from './Sidebar';
-import { UserCircle } from 'lucide-react';
+import { CreateNote } from '../../../components/notas';
+import { MyProfile } from '../../../components/auth';
+import { Sidebar } from '../sidebars';
+import { ProductoList } from '../../../components/productos';
+import { VentaList } from '../../../components/ventas';
+import { DevolucionList, DevolucionModal } from '../../../components/devoluciones';
+import api from '../../../services/api';
+import { 
+  getDevoluciones, 
+  createDevolucion, 
+  deleteDevolucion 
+} from '../../../services/devolucionService';
 
 const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
   const { getToken } = useAuth();
   const [notes, setNotes] = useState(initialNotes || []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [currentView, setCurrentView] = useState('notes'); // 'notes' | 'profile' | 'ventas'
+  const [currentView, setCurrentView] = useState('notes');
   const [ventas, setVentas] = useState([]);
   const [ventasLoading, setVentasLoading] = useState(false);
   const [devoluciones, setDevoluciones] = useState([]);
@@ -31,6 +34,8 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
   const [cantidadDevuelta, setCantidadDevuelta] = useState('');
   const [motivo, setMotivo] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(window.innerWidth < 1024);
 
   useEffect(() => {
     setNotes(initialNotes || []);
@@ -83,7 +88,6 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
       setVentasLoading(false);
     }
   };
-
   // Función para cargar las devoluciones
   const fetchDevoluciones = async () => {
     try {
@@ -91,7 +95,7 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
       const token = await getToken();
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       const data = await getDevoluciones();
-      setDevoluciones(data.devoluciones || []);
+      setDevoluciones(Array.isArray(data) ? data : data.devoluciones || []);
     } catch (error) {
       console.error('Error:', error);
       setError('Error al cargar las devoluciones');
@@ -240,12 +244,10 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
   useEffect(() => {
     fetchUserNotes();
   }, []);
-
   useEffect(() => {
     if (currentView === 'ventas') {
       fetchVentas();
-    } else if (currentView === 'devoluciones') {
-      fetchDevoluciones();
+      fetchDevoluciones(); // Cargar devoluciones al mismo tiempo
     }
   }, [currentView]);
 
@@ -261,7 +263,7 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
 
   const renderNotes = () => (
     <div className="space-y-8">
-      {/* Formulario para crear nueva nota */}
+      {/* Sección de Crear Nueva Nota */}
       <div className="bg-white shadow-xl rounded-2xl p-8 transform hover:scale-[1.01] transition-all duration-300 border border-gray-100">
         <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
           <Plus className="text-blue-600" size={24} />
@@ -270,14 +272,22 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
         <CreateNote onNoteCreated={handleNoteCreated} userRole="user" />
       </div>
 
-      {/* Lista de notas */}
+      {/* Sección de Listado de Notas */}
       <div className="bg-white shadow-xl rounded-2xl p-8 transform hover:scale-[1.01] transition-all duration-300 border border-gray-100">
         <h2 className="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-3">
           <BarChart3 className="text-blue-600" size={28} />
           Mis Notas
         </h2>
         
-        {notes.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        ) : error ? (
+          <div className="text-center py-8">
+            <p className="text-red-500">{error}</p>
+          </div>
+        ) : notes.length === 0 ? (
           <div className="text-center py-16">
             <div className="mb-6">
               <Plus size={48} className="text-gray-300 mx-auto mb-4" />
@@ -288,82 +298,85 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
         ) : (
           <div className="grid gap-4">
             {notes
-            .filter(note => !note.isCompleted || note.completionStatus !== 'approved')
-            .map((note) => (
-              <div key={note._id} className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300 bg-white transform hover:scale-[1.02] hover:border-blue-200">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-bold text-gray-800 hover:text-blue-600 transition-colors">
-                        {note.title}
-                      </h3>
-                      {note.isCompleted && (
-                        <span className={`px-3 py-1 text-xs rounded-full ${
-                          note.completionStatus === 'approved' 
-                            ? 'bg-green-100 text-green-800'
-                            : note.completionStatus === 'rejected'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
+              .filter(note => !note.isCompleted || note.completionStatus !== 'approved')
+              .map((note) => (
+                <div 
+                  key={note._id} 
+                  className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300 bg-white transform hover:scale-[1.02] hover:border-blue-200"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-xl font-bold text-gray-800 hover:text-blue-600 transition-colors">
+                          {note.title || 'Sin título'}
+                        </h3>
+                        {note.isCompleted && (
+                          <span className={`px-3 py-1 text-xs rounded-full ${
+                            note.completionStatus === 'approved' 
+                              ? 'bg-green-100 text-green-800'
+                              : note.completionStatus === 'rejected'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}>
                           {note.completionStatus === 'approved' 
                             ? 'Aprobada'
                             : note.completionStatus === 'rejected'
                             ? 'Rechazada'
                             : 'Pendiente de Revisión'}
-                        </span>
-                      )}
-                    </div>
-                  </div>                  {(!note.isCompleted || note.completionStatus === 'rejected') && (
-                    <button
-                      onClick={() => handleMarkAsCompleted(note._id)}
-                      className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      {note.completionStatus === 'rejected' ? 'Volver a Enviar' : 'Marcar como Finalizada'}
-                    </button>
-                  )}
-                </div>
-                <p className="text-gray-600 mb-4 leading-relaxed">{note.content}</p>
-                <div className="text-sm text-gray-500 border-t pt-4 flex gap-4 flex-wrap">
-                  <p className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-                    Creado: {new Date(note.created_at).toLocaleDateString('es-ES', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </p>                  {note.creatorId && (
+                          </span>
+                        )}
+                      </div>
+                    </div>                  {(!note.isCompleted || note.completionStatus === 'rejected') && (
+                      <button
+                        onClick={() => handleMarkAsCompleted(note._id)}
+                        className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        {note.completionStatus === 'rejected' ? 'Volver a Enviar' : 'Marcar como Finalizada'}
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-gray-600 mb-4 leading-relaxed">{note.content}</p>
+                  <div className="text-sm text-gray-500 border-t pt-4 flex gap-4 flex-wrap">
                     <p className="flex items-center gap-2">
-                      <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
-                      <User className="w-4 h-4" />
-                      Creador: {note.creator_info?.nombre_negocio || 'Usuario desconocido'}
-                      {note.creator_info?.role && (
-                        <span className={`ml-2 px-2 py-0.5 text-xs rounded-full ${
-                          note.creator_info.role === 'super_admin' 
-                            ? 'bg-purple-100 text-purple-800' 
-                            : note.creator_info.role === 'admin'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-green-100 text-green-800'
-                        }`}>
-                          {note.creator_info.role}
-                        </span>
-                      )}
-                    </p>
-                  )}
-                  {note.fechadenota && (
-                    <p className="flex items-center gap-2">
-                      <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
-                      Fecha nota: {new Date(note.fechadenota).toLocaleDateString('es-ES', {
+                      <span className="w-2 h-2 bg-green-400 rounded-full"></span>
+                      Creado: {new Date(note.created_at).toLocaleDateString('es-ES', {
                         year: 'numeric',
                         month: 'long',
-                        day: 'numeric'
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
                       })}
-                    </p>
-                  )}
+                    </p>                  {note.creatorId && (
+                      <p className="flex items-center gap-2">
+                        <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
+                        <User className="w-4 h-4" />
+                        Creador: {note.creator_info?.nombre_negocio || 'Usuario desconocido'}
+                        {note.creator_info?.role && (
+                          <span className={`ml-2 px-2 py-0.5 text-xs rounded-full ${
+                            note.creator_info.role === 'super_admin' 
+                              ? 'bg-purple-100 text-purple-800' 
+                              : note.creator_info.role === 'admin'
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-green-100 text-green-800'
+                          }`}>
+                            {note.creator_info.role}
+                          </span>
+                        )}
+                      </p>
+                    )}
+                    {note.fechadenota && (
+                      <p className="flex items-center gap-2">
+                        <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
+                        Fecha nota: {new Date(note.fechadenota).toLocaleDateString('es-ES', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         )}      </div>
     </div>
@@ -375,7 +388,7 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center">
-            <UserCircle className="w-16 h-16 text-blue-600" />
+            <User className="w-16 h-16 text-blue-600" />
           </div>
           <div>
             <h3 className="text-xl font-semibold">{session?.user?.firstName || 'Usuario'}</h3>
@@ -403,49 +416,38 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
       </div>
     </div>
   );
-
-  const renderVentas = () => (
-    <div className="space-y-8">
-      <div className="bg-white shadow-xl rounded-2xl p-8 transform hover:scale-[1.01] transition-all duration-300 border border-gray-100">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-          <ShoppingBag className="text-blue-600" size={28} />
-          Mis Ventas
-        </h2>
-        <VentaList 
-          userRole="user" 
-          showActions={true} 
-          canComplete={true} 
-          onVentaUpdated={fetchVentas}
-        />
-      </div>
-    </div>
-  );
-
-  const renderDevoluciones = () => (
-    <div className="space-y-8">
-      <div className="bg-white shadow-xl rounded-2xl p-8 transform hover:scale-[1.01] transition-all duration-300 border border-gray-100">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-            <RefreshCw className="text-blue-600" size={28} />
-            Devoluciones
+  const renderVentas = () => {
+    return (
+      <div className="space-y-8">
+        {/* Panel de Ventas */}
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
+            <ShoppingBag className="text-blue-600" size={24} />
+            Mis Ventas
           </h2>
-          <button
-            onClick={() => {
-              setShowDevolucionModal(true);
-              resetDevolucionForm();
-            }}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
-          >
-            <Plus size={20} />
-            Nueva Devolución
-          </button>
+          <VentaList 
+            ventas={ventas}
+            loading={ventasLoading}
+            error={error}
+            fetchVentas={fetchVentas}
+          />
         </div>
-        
-        {devolucionesLoading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+
+        {/* Panel de Devoluciones */}
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
+              <RefreshCw className="text-blue-600" size={24} />
+              Historial de Devoluciones
+            </h2>
+            <button
+              onClick={() => setShowDevolucionModal(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+            >
+              <Plus size={20} />
+              Nueva Devolución
+            </button>
           </div>
-        ) : (
           <DevolucionList
             devoluciones={devoluciones}
             onDevolucionDeleted={handleDevolucionDeleted}
@@ -453,60 +455,60 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
             devolucionesLimit={devolucionesLimit}
             onLoadMore={() => setDevolucionesLimit(prev => prev + 10)}
           />
+        </div>
+
+        {/* Modal de Devolución */}
+        {showDevolucionModal && (
+          <DevolucionModal
+            isOpen={showDevolucionModal}
+            onClose={() => {
+              setShowDevolucionModal(false);
+              setSelectedProducto(null);
+              setSelectedVenta(null);
+            }}
+            producto={selectedProducto}
+            venta={selectedVenta}
+            ventas={ventasParaDevolucion}
+            fechaDevolucion={fechaDevolucion}
+            cantidadDevuelta={cantidadDevuelta}
+            motivo={motivo}
+            setFechaDevolucion={setFechaDevolucion}
+            setCantidadDevuelta={setCantidadDevuelta}
+            setMotivo={setMotivo}
+            onSubmit={handleSubmitDevolucion}
+            isSubmitting={isSubmitting}
+          />
         )}
       </div>
+    );
+  };
 
-      <DevolucionModal
-        isVisible={showDevolucionModal}
-        ventas={ventasParaDevolucion}
-        selectedVenta={selectedVenta}
-        selectedProducto={selectedProducto}
-        fechaDevolucion={fechaDevolucion}
-        cantidadDevuelta={cantidadDevuelta}
-        motivo={motivo}
-        onClose={() => {
-          setShowDevolucionModal(false);
-          resetDevolucionForm();
-        }}
-        onVentaSelect={setSelectedVenta}
-        onProductoSelect={setSelectedProducto}
-        onFechaChange={setFechaDevolucion}
-        onCantidadChange={setCantidadDevuelta}
-        onMotivoChange={setMotivo}
-        onSubmit={handleSubmitDevolucion}
-        isSubmitting={isSubmitting}
-      />
-    </div>
-  );
+  const renderContent = () => {
+    switch (currentView) {
+      case 'notes':
+        return renderNotes();
+      case 'ventas':
+        return renderVentas();
+      case 'profile':
+        return <MyProfile />;
+      default:
+        return renderNotes();
+    }
+  };
 
   return (
-    <div className="flex">
+    <div className={`flex ${isSidebarCollapsed ? 'ml-16' : 'ml-64'} transition-all duration-300`}>
       <Sidebar 
+        isCollapsed={isSidebarCollapsed} 
+        onToggle={() => setIsSidebarCollapsed(prev => !prev)} 
         currentView={currentView}
         onViewChange={setCurrentView}
-        onLogout={handleLogout}
-      />
-      <div className="ml-64 flex-1 p-8">
-        {error && (
-          <div className="mb-8 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
-            {error}
-          </div>
-        )}
-        
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
-        ) : (
-          currentView === 'notes' ? renderNotes() :
-          currentView === 'ventas' ? renderVentas() :
-          currentView === 'productos' ? <ProductoList userRole="user" /> :
-          currentView === 'devoluciones' ? renderDevoluciones() :
-          renderProfile()
-        )}
+      />      <div className="flex-1 p-8">
+        {/* Contenido Principal */}
+        {renderContent()}
       </div>
     </div>
   );
-}
+};
 
 export default UserDashboard;

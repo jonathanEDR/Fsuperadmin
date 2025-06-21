@@ -1,20 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { 
-  Home, FileText, UserCog, Shield, History, Package, 
-  ShoppingCart, DollarSign, ChevronLeft, ChevronRight,
-  Search, UserPlus, Trash2, Edit, Plus 
+  Plus, Menu, FileText, History, DollarSign, Package,
+  ShoppingCart, Users, User, Clock, Check, ChevronLeft, ChevronRight,
+  Search, UserPlus, Trash2
 } from 'lucide-react';
-import NotesHistory from '../components/NotesHistory';
-import NoteCreationModal from '../components/NoteCreationModal';
-import ProductCreationModal from '../components/ProductCreationModal';
-import SuperAdminSidebar from '../components/SuperAdminSidebar';
-import SuperAdminNotes from '../components/SuperAdminNotes';
-import MyProfile from './MyProfile';
-import ProductoList from '../components/ProductoList';
-import VentaList from '../components/VentaList';
-import CobroList from '../components/CobroList';
-import VentasFinalizadas from '../components/VentasFinalizadas';
+import VentasManager from '../../ventas/VentasManager';
+import { VentaList, VentasFinalizadas } from '../../ventas';
+import { ProductoList, ProductCreationModal } from '../../productos';
+import { CobroList } from '../../cobros';
+import { SuperAdminNotes, NotesHistory, NoteCreationModal, CreateNote } from '../../notas';
+import { MyProfile } from '../../auth';
+import { SuperAdminSidebar } from '../sidebars';
 
 function SuperAdminDashboard() {
   const { getToken } = useAuth();
@@ -586,17 +583,13 @@ function SuperAdminDashboard() {
     </div>
   );  const renderVentas = () => (
     <div className="space-y-8">
-      <div className="bg-white shadow-lg rounded-xl p-6">
-        <VentaList userRole="super_admin" />
-      </div>
-      <div className="bg-white shadow-lg rounded-xl p-6">
-        <VentasFinalizadas userRole="super_admin" />
-      </div>
+      <VentasManager userRole="super_admin" />
     </div>
   );
 
   const renderNotes = () => (
     <div className="space-y-8">
+      {/* Panel principal de notas */}
       <div className="bg-white shadow-lg rounded-xl p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -620,44 +613,95 @@ function SuperAdminDashboard() {
         </div>
         <SuperAdminNotes ref={notesRef} />
       </div>
+
+      {/* Panel de historial */}
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-purple-100 rounded-lg">
+              <History className="text-purple-600" size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-800">Historial de Notas</h3>
+              <p className="text-sm text-gray-600">
+                Historial completo de notas del sistema
+              </p>
+            </div>
+          </div>
+        </div>
+        <NotesHistory />
+      </div>
     </div>
   );
 
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth < 1024);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
+  };
+
   return (
-    <div className="flex">
+    <div className="min-h-screen bg-gray-50">
+      {/* Botón de menú fijo solo para móviles */}
+      <button
+        onClick={toggleSidebar}
+        className="fixed top-4 left-4 z-50 lg:hidden bg-white p-2 rounded-lg shadow-lg hover:bg-purple-50 text-purple-600"
+        aria-label="Toggle Menu"
+      >
+        <Menu size={24} />
+      </button>
+
       <SuperAdminSidebar 
         currentView={currentView}
         onViewChange={setCurrentView}
         onLogout={handleLogout}
+        isCollapsed={isSidebarCollapsed}
+        toggleSidebar={toggleSidebar}
+        isMobileView={isMobileView}
       />
-      <div className="ml-64 flex-1 p-8">
-        {error && (
-          <div className="mb-8 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
-            {error}
-          </div>
-        )}
-        
-        {success && (
-          <div className="mb-8 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg">
-            {success}
-          </div>
-        )}
+      <div className={`
+        transition-all duration-300 ease-in-out pt-16 lg:pt-0
+        ${isSidebarCollapsed ? 'ml-0 lg:ml-20' : 'ml-0 lg:ml-64'}
+      `}>
+        <div className="p-4 lg:p-8">
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+              {error}
+            </div>
+          )}
+          
+          {success && (
+            <div className="mb-6 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg">
+              {success}
+            </div>
+          )}
 
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-          </div>
-        ) : (
-          <>
-            {currentView === 'dashboard' && renderDashboard()}
-            {currentView === 'productos' && renderProducts()}
-            {currentView === 'ventas' && renderVentas()}
-            {currentView === 'cobros' && renderCobros()}
-            {currentView === 'notes' && renderNotes()}
-            {currentView === 'history' && <NotesHistory />}
-            {currentView === 'profile' && <MyProfile />}
-          </>
-        )}
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {currentView === 'dashboard' && renderDashboard()}
+              {currentView === 'productos' && renderProducts()}
+              {currentView === 'ventas' && renderVentas()}
+              {currentView === 'cobros' && renderCobros()}
+              {currentView === 'notes' && renderNotes()}
+              {currentView === 'history' && <NotesHistory />}
+              {currentView === 'profile' && <MyProfile />}
+            </div>
+          )}
+        </div>
       </div>
 
       <NoteCreationModal 
@@ -665,12 +709,10 @@ function SuperAdminDashboard() {
         onClose={() => setIsModalOpen(false)} 
         onNoteCreated={handleNoteCreated}
         userRole="super_admin"
-      />
-
-      <ProductCreationModal
+      />      <ProductCreationModal
         isOpen={isProductModalOpen}
         onClose={() => setIsProductModalOpen(false)}
-        onProductCreated={handleProductCreated}
+        onSuccess={handleProductCreated}
       />
     </div>
   );

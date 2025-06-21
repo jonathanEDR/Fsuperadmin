@@ -1,13 +1,22 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import api from '../services/api';
-import { updateVentaCompletion } from '../services/ventas';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { Calendar, DollarSign, ShoppingCart, RotateCcw, Plus, Clock, ShoppingBag, Check, X} from 'lucide-react';
-import VentaCreationModal from './VentaCreationModal';
-import PaymentModal from './PaymentModal';
+import { DollarSign, ShoppingCart, RotateCcw, Plus, Clock, Check, X, Search } from 'lucide-react';
+import { api } from '../../services';
+import { procesarPagoVenta } from '../../services/cobroService';
+import { PaymentModal } from '../cobros';
+import { QuickDevolucionModal } from '../devoluciones';
+import { VentaCreationModal } from '.';
+import { format } from 'date-fns';
+import clsx from 'clsx';
 
-
-function VentaList({ userRole = 'user', showActions = true, canComplete = false, onVentaUpdated }) {
+function VentaList({ 
+  userRole = 'user', 
+  showActions = true, 
+  canComplete = false, 
+  onVentaUpdated,
+  showHeader = true, // Nuevo prop para controlar si se muestra el encabezado
+  ventas: ventasProp = null // Ventas pueden venir como prop
+}) {
   const getFechaActualString = () => {
     const hoy = new Date();
     const año = hoy.getFullYear();
@@ -33,6 +42,15 @@ function VentaList({ userRole = 'user', showActions = true, canComplete = false,
   const [success, setSuccess] = useState('');
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [selectedVentaForPayment, setSelectedVentaForPayment] = useState(null);
+  const [isDevolucionModalOpen, setIsDevolucionModalOpen] = useState(false);
+  const [selectedVentaForDevolucion, setSelectedVentaForDevolucion] = useState(null);
+  const [showVentaModal, setShowVentaModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({
+    date: '',
+    estadoPago: ''
+  });
+  const [ventaDetails, setVentaDetails] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -71,14 +89,14 @@ function VentaList({ userRole = 'user', showActions = true, canComplete = false,
       const token = await getToken();
       
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/ventas`, {
-        headers: { 
+        headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Error al cargar las ventas');
       }
 
@@ -324,58 +342,70 @@ function VentaList({ userRole = 'user', showActions = true, canComplete = false,
   const handleClosePayment = () => {
     setIsPaymentModalOpen(false);
     setSelectedVentaForPayment(null);
+  };  const handleProcessPayment = async (paymentData) => {
+    try {
+      setLoading(true);
+        // Usar el servicio para procesar el pago
+      const pagoCompleto = {
+        yape: parseFloat(paymentData.yape) || 0,
+        efectivo: parseFloat(paymentData.efectivo) || 0,
+        gastosImprevistos: parseFloat(paymentData.gastosImprevistos) || 0,
+        descripcion: paymentData.descripcion || ''
+      };
+
+      console.log('Procesando pago con:', pagoCompleto);
+      console.log('Datos recibidos del modal:', paymentData);
+      
+      await procesarPagoVenta(selectedVentaForPayment._id, pagoCompleto);
+      
+      setSuccess(userRole === 'user' ? 'Pago realizado exitosamente' : 'Pago procesado exitosamente');
+      handleClosePayment();
+      await loadVentas();
+    } catch (error) {
+      console.error('Error al procesar el pago:', error);
+      setError(error.message || 'Error al procesar el pago. Por favor, verifica los datos e intenta nuevamente.');
+    } finally {
+      setLoading(false);
+    }
   };
-  const handleProcessPayment = async (paymentData) => {
+
+  const handleOpenDevolucion = (venta) => {
+    setSelectedVentaForDevolucion(venta);
+    setIsDevolucionModalOpen(true);
+  };
+
+  const handleCloseDevolucion = () => {
+    setIsDevolucionModalOpen(false);
+    setSelectedVentaForDevolucion(null);
+  };
+
+  const handleProcessDevolucion = async (devolucionData) => {
     try {
       setLoading(true);
       const token = await getToken();
       
-      // Obtener la información del usuario actual
-      const creatorName = user?.firstName || user?.username || 'Usuario';
-      const creatorEmail = user?.emailAddresses?.[0]?.emailAddress || '';
-      
-      const cobroData = {
-        ventas: [{
-          ventaId: selectedVentaForPayment._id,
-          montoPagado: selectedVentaForPayment.montoTotal
-        }],
-        userId: selectedVentaForPayment.userId,
-        creatorId: user?.id,
-        creatorName,
-        creatorEmail,
-        yape: parseFloat(paymentData.yape) || 0,
-        efectivo: parseFloat(paymentData.efectivo) || 0,
-        gastosImprevistos: userRole === 'user' ? 0 : (parseFloat(paymentData.gastosImprevistos) || 0),
-        descripcion: paymentData.descripcion || '',
-        montoTotal: selectedVentaForPayment.montoTotal,
-        distribucionPagos: [{
-          ventaId: selectedVentaForPayment._id,
-          montoPagado: selectedVentaForPayment.montoTotal,
-          montoOriginal: selectedVentaForPayment.montoTotal,
-          montoPendiente: 0
-        }]
+      // Formatear los datos para que coincidan con lo que espera el backend
+      const formattedData = {
+        ventaId: selectedVentaForDevolucion._id,
+        productos: devolucionData.productos.map(item => ({
+          productoId: item.producto.productoId._id,
+          cantidadDevuelta: parseInt(item.cantidad),
+          montoDevolucion: item.montoDevolucion
+        })),
+        motivo: devolucionData.motivo,
+        fechaDevolucion: new Date().toISOString()
       };
 
-      console.log('Enviando datos de cobro:', cobroData);
+      await api.post('/api/devoluciones', formattedData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-      const response = await api.post('/api/cobros', cobroData);
-      console.log('Respuesta del servidor:', response.data);
-
-      if (response.data.success) {
-        setSuccess(userRole === 'user' ? 'Pago realizado exitosamente' : 'Pago procesado exitosamente');
-        handleClosePayment();
-        await loadVentas();
-      } else {
-        throw new Error(response.data.message || 'Error al procesar el pago');
-      }
+      setSuccess('Devolución procesada exitosamente');
+      handleCloseDevolucion();
+      loadVentas(); // Recargar la lista de ventas
     } catch (error) {
-      console.error('Error al procesar el pago:', error);
-      console.error('Detalles del error:', error.response?.data);
-      setError(
-        error.response?.data?.message || 
-        error.message || 
-        'Error al procesar el pago. Por favor, verifica los datos e intenta nuevamente.'
-      );
+      console.error('Error al procesar la devolución:', error);
+      setError(error.response?.data?.message || 'Error al procesar la devolución');
     } finally {
       setLoading(false);
     }
@@ -492,29 +522,22 @@ function VentaList({ userRole = 'user', showActions = true, canComplete = false,
 
   // Main render
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-purple-100 rounded-lg">
-            <ShoppingCart className="text-purple-600" size={24} />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-gray-800">Gestión de Ventas</h2>
-            <p className="text-sm text-gray-600">
-              Administra las ventas del sistema
-            </p>
+    <div className="space-y-4">
+      {showHeader && (
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-purple-100 rounded-lg">
+              <ShoppingCart className="text-purple-600" size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-800">Lista de Ventas</h3>
+              <p className="text-sm text-gray-600">
+                Visualiza y gestiona las ventas
+              </p>
+            </div>
           </div>
         </div>
-        {(['super_admin', 'admin'].includes(userRole)) && (
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
-          >
-            <Plus size={20} />
-            Nueva Venta
-          </button>
-        )}
-      </div>
+      )}
 
       {/* Mostrar mensajes de éxito/error */}
       {error && (
@@ -546,19 +569,49 @@ function VentaList({ userRole = 'user', showActions = true, canComplete = false,
                   minute: '2-digit'
                 })}
               </p>
-            </div>
-
-            {/* Estados de la venta */}
+            </div>            {/* Estados de la venta */}
             <div className="flex flex-col items-end gap-2">
-              <span className={`px-3 py-1 text-sm rounded-full ${
-                venta.estadoPago === 'Pagado' 
-                  ? 'bg-green-100 text-green-800'
-                  : venta.estadoPago === 'Parcial'
-                  ? 'bg-yellow-100 text-yellow-800'
-                  : 'bg-red-100 text-red-800'
-              }`}>
-                {venta.estadoPago}
-              </span>
+              {/* Estado de pago con detalles */}
+              <div className="text-right">
+                <span className={`px-3 py-1 text-sm rounded-full ${
+                  venta.estadoPago === 'Pagado' 
+                    ? 'bg-green-100 text-green-800'
+                    : venta.estadoPago === 'Parcial'
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : 'bg-red-100 text-red-800'
+                }`}>
+                  {venta.estadoPago}
+                </span>
+                <div className="text-xs text-gray-500 mt-1">
+                  S/ {(venta.cantidadPagada || 0).toFixed(2)} / S/ {venta.montoTotal.toFixed(2)}
+                </div>                {venta.cantidadPagada < venta.montoTotal && (
+                  <div className="text-xs text-red-600 font-medium">
+                    Debe: S/ {(venta.montoTotal - (venta.cantidadPagada || 0)).toFixed(2)}
+                  </div>
+                )}
+                {/* Barra de progreso de pago */}
+                <div className="w-24 mt-2">
+                  <div className="bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full ${
+                        venta.estadoPago === 'Pagado' 
+                          ? 'bg-green-500' 
+                          : venta.estadoPago === 'Parcial'
+                          ? 'bg-yellow-500'
+                          : 'bg-red-500'
+                      }`}
+                      style={{ 
+                        width: `${Math.min(100, ((venta.cantidadPagada || 0) / venta.montoTotal) * 100)}%` 
+                      }}
+                    ></div>
+                  </div>
+                  <div className="text-xs text-gray-500 text-center mt-1">
+                    {Math.round(((venta.cantidadPagada || 0) / venta.montoTotal) * 100)}%
+                  </div>
+                </div>
+              </div>
+              
+              {/* Estado de finalización */}
               {venta.isCompleted && (
                 <span className={`px-3 py-1 text-sm rounded-full ${
                   venta.completionStatus === 'approved'
@@ -596,9 +649,7 @@ function VentaList({ userRole = 'user', showActions = true, canComplete = false,
                 <p className="text-gray-500 text-xs italic">Rol: {venta.userInfo.role}</p>
               </div>
             )}
-          </div>
-
-          {/* Detalles de productos y montos */}
+          </div>          {/* Detalles de productos y montos */}
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <h4 className="text-sm font-semibold text-gray-700 mb-2">Detalles del Cliente</h4>
@@ -608,15 +659,71 @@ function VentaList({ userRole = 'user', showActions = true, canComplete = false,
               <p className="text-gray-600">
                 <span className="font-medium">Email:</span> {venta.user_info?.email || 'N/A'}
               </p>
-            </div>
-            <div>
+            </div>            <div>
               <h4 className="text-sm font-semibold text-gray-700 mb-2">Detalles de la Venta</h4>
               <p className="text-gray-600">
                 <span className="font-medium">Fecha:</span> {formatearFechaHora(venta.fechadeVenta)}
               </p>
-              <p className="text-gray-600">
-                <span className="font-medium">Monto Total:</span> S/ {venta.montoTotal.toFixed(2)}
-              </p>
+              <div className="space-y-1">
+                <p className="text-gray-600">
+                  <span className="font-medium">Monto Total:</span> S/ {venta.montoTotal.toFixed(2)}
+                </p>
+                <p className="text-gray-600">
+                  <span className="font-medium">Monto Pagado:</span> 
+                  <span className={`ml-1 font-semibold ${
+                    venta.cantidadPagada >= venta.montoTotal 
+                      ? 'text-green-600' 
+                      : venta.cantidadPagada > 0 
+                      ? 'text-yellow-600' 
+                      : 'text-red-600'
+                  }`}>
+                    S/ {(venta.cantidadPagada || 0).toFixed(2)}
+                  </span>
+                </p>
+                {venta.cantidadPagada < venta.montoTotal && (
+                  <p className="text-gray-600">
+                    <span className="font-medium">Saldo Pendiente:</span> 
+                    <span className="ml-1 font-semibold text-red-600">
+                      S/ {(venta.montoTotal - (venta.cantidadPagada || 0)).toFixed(2)}
+                    </span>
+                  </p>
+                )}
+                
+                {/* Desglose detallado de pagos */}
+                {venta.cobros_detalle && (venta.cobros_detalle.yape > 0 || venta.cobros_detalle.efectivo > 0 || venta.cobros_detalle.gastosImprevistos > 0) && (
+                  <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <h5 className="text-xs font-semibold text-blue-800 mb-2">Desglose de Pagos:</h5>
+                    <div className="space-y-1 text-xs">
+                      {venta.cobros_detalle.yape > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-blue-700">💳 Yape:</span>
+                          <span className="font-medium text-blue-800">S/ {venta.cobros_detalle.yape.toFixed(2)}</span>
+                        </div>
+                      )}
+                      {venta.cobros_detalle.efectivo > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-blue-700">💵 Efectivo:</span>
+                          <span className="font-medium text-blue-800">S/ {venta.cobros_detalle.efectivo.toFixed(2)}</span>
+                        </div>
+                      )}
+                      {venta.cobros_detalle.gastosImprevistos > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-blue-700">⚠️ Gastos Imprevistos:</span>
+                          <span className="font-medium text-red-600">S/ {venta.cobros_detalle.gastosImprevistos.toFixed(2)}</span>
+                        </div>
+                      )}
+                      <div className="border-t border-blue-300 pt-1 mt-2">
+                        <div className="flex justify-between font-semibold">
+                          <span className="text-blue-700">Total Neto:</span>
+                          <span className="text-blue-800">
+                            S/ {((venta.cobros_detalle.yape || 0) + (venta.cobros_detalle.efectivo || 0) - (venta.cobros_detalle.gastosImprevistos || 0)).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -631,7 +738,8 @@ function VentaList({ userRole = 'user', showActions = true, canComplete = false,
               ))}
             </ul>
           </div>          {/* Botones de acción */}
-          <div className="mt-4 flex gap-2">            {/* Botón de pago */}
+          <div className="mt-4 flex gap-2">
+            {/* Botón de pago */}
             {venta.estadoPago !== 'Pagado' && (
               <button
                 onClick={() => handleOpenPayment(venta)}
@@ -644,6 +752,19 @@ function VentaList({ userRole = 'user', showActions = true, canComplete = false,
               </button>
             )}
             
+            {/* Botón de Devolución - visible si la venta no está completamente devuelta */}
+            {(!venta.estado || venta.estado !== 'devuelta') && (
+              <button
+                onClick={() => handleOpenDevolucion(venta)}
+                className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+                disabled={loading}
+                title="Agregar devolución"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Agregar Devolución
+              </button>
+            )}
+
             {/* Estado de finalización o botón para finalizar */}
             {venta.userId === currentUserId && (userRole === 'user' || userRole === 'admin') && (
               <>
@@ -736,6 +857,17 @@ function VentaList({ userRole = 'user', showActions = true, canComplete = false,
           onClose={handleClosePayment}
           onSubmit={handleProcessPayment}
           venta={selectedVentaForPayment}
+        />
+      )}
+
+      {/* Modal de Devolución Rápida */}
+      {selectedVentaForDevolucion && (
+        <QuickDevolucionModal
+          isOpen={isDevolucionModalOpen}
+          onClose={handleCloseDevolucion}
+          onSubmit={handleProcessDevolucion}
+          venta={selectedVentaForDevolucion}
+          isSubmitting={loading}
         />
       )}
     </div>

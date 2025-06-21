@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Info, Trash2 } from 'lucide-react';
-import { getCobrosHistorial, deleteCobro } from '../services/cobroService';
+import { getCobrosHistorial, deleteCobro } from '../../services/cobroService';
 
 const formatDate = (dateString) => {
   if (!dateString) return '-';
@@ -144,10 +144,9 @@ const CobrosHistorial = () => {
                 <tr key={payment._id} className="hover:bg-gray-50 transition-colors duration-150 ease-in-out">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {formatDate(payment.fechaPago)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  </td>                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <div className="flex flex-col">
-                      <span className="font-medium">{payment.ventasId || '-'}</span>
+                      <span className="font-medium">{payment.creatorName || 'Usuario no especificado'}</span>
                       <span className="text-xs text-gray-500">{payment.creatorEmail || ''}</span>
                     </div>
                   </td>

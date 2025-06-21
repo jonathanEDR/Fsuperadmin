@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { X } from 'lucide-react';
-import VentasSelectionList from './VentasSelectionList';
-import { createCobro } from '../services/cobroService';
 import { useUser } from '@clerk/clerk-react';
+import { VentasSelectionList } from '.';  // Import from local module
+import { createCobro } from '../../services/cobroService';
 
 const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
   const { user, isLoaded, isSignedIn } = useUser();
@@ -180,44 +180,32 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
       // Validar que la suma de los métodos de pago sea igual al total de ventas
       if (Math.abs(totalMetodosPago - ventasTotal) > 0.01) {
         throw new Error(`La suma de los métodos de pago (${totalMetodosPago.toFixed(2)}) debe ser igual al total de ventas (${ventasTotal.toFixed(2)})`);
-      }
-
-      // Procesar la distribución de pagos
-      const distribucionPagos = selectedVentas.map(ventaId => {
+      }      // Preparar los datos en el formato que espera el servicio
+      const ventasParaServicio = selectedVentas.map(ventaId => {
         const venta = ventasDetails[ventaId];
-        const montoTotal = parseFloat(venta.montoTotal);
-        const montoPendiente = parseFloat(venta.montoPendiente);
-        const montoPagado = montoPendiente;
-
-        if (isNaN(montoTotal) || isNaN(montoPendiente) || isNaN(montoPagado)) {
-          throw new Error(`Error en los montos de la venta ${ventaId}`);
-        }
-
         return {
-          ventaId,
-          montoPagado,
-          montoOriginal: montoTotal,
-          montoPendiente: Math.max(0, montoTotal - montoPagado)
+          _id: ventaId,
+          montoTotal: parseFloat(venta.montoTotal),
+          montoPendiente: parseFloat(venta.montoPendiente)
         };
       });
 
       const cobroData = {
-        ventas: distribucionPagos.map(({ ventaId, montoPagado }) => ({
-          ventaId,
-          montoPagado
-        })),
-        distribucionPagos,
-        montoPagado: ventasTotal,
-        montoTotalVentas: ventasTotal,        yape,
+        ventas: ventasParaServicio,
+        yape,
         efectivo,
         gastosImprevistos,
-        descripcion: formData.descripcion || '',
-        observaciones: formData.descripcion || '',
-        gastosImprevistos: parseFloat(formData.gastosImprevistos) || 0,
-        descripcion: formData.descripcion,
         montoTotal: ventasTotal,
-        observaciones: formData.descripcion
+        descripcion: formData.descripcion || ''
       };
+
+      console.log('Datos del cobro a enviar:', {
+        cobroData,
+        ventasTotal,
+        totalMetodosPago,
+        detalleMetodos: { yape, efectivo, gastosImprevistos },
+        ventasSeleccionadas: selectedVentas.length
+      });
 
       await createCobro(cobroData);
       onCobroCreated(true);
@@ -341,9 +329,7 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
                   className="w-full p-2 border border-gray-300 rounded-lg"
                   placeholder="0.00"
                 />
-              </div>
-
-              <div>
+              </div>              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Descripción
                 </label>
@@ -356,6 +342,37 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
                   rows={3}
                 />
               </div>
+
+              {/* Resumen del desglose de pagos */}
+              {(parseFloat(formData.yape) > 0 || parseFloat(formData.efectivo) > 0 || parseFloat(formData.gastosImprevistos) > 0) && (
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                  <h4 className="text-sm font-medium text-blue-800 mb-2">Desglose del pago:</h4>
+                  <div className="space-y-1 text-sm">
+                    {parseFloat(formData.yape) > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-blue-700">Yape:</span>
+                        <span className="text-blue-700">S/. {(parseFloat(formData.yape) || 0).toFixed(2)}</span>
+                      </div>
+                    )}
+                    {parseFloat(formData.efectivo) > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-blue-700">Efectivo:</span>
+                        <span className="text-blue-700">S/. {(parseFloat(formData.efectivo) || 0).toFixed(2)}</span>
+                      </div>
+                    )}
+                    {parseFloat(formData.gastosImprevistos) > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-blue-700">Gastos Imprevistos:</span>
+                        <span className="text-blue-700">S/. {(parseFloat(formData.gastosImprevistos) || 0).toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between font-medium border-t border-blue-300 pt-1">
+                      <span className="text-blue-800">Total ingresado:</span>
+                      <span className="text-blue-800">S/. {montoIngresado.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end gap-4 mt-6">

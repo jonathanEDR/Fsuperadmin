@@ -1,12 +1,43 @@
 import api from './api';
 
+// Función de utilidad para manejar errores
+const handleApiError = (error, defaultMessage) => {
+  console.error('Error en cobroService:', error);
+  const errorMessage = error.response?.data?.message || error.message || defaultMessage;
+  throw new Error(errorMessage);
+};
+
+// Función de utilidad para validar montos
+const validateMontos = (montos) => {
+  const { yape = 0, efectivo = 0, gastosImprevistos = 0 } = montos;
+  
+  // Convertir a números y validar
+  const montosNumericos = {
+    yape: Number(yape),
+    efectivo: Number(efectivo),
+    gastosImprevistos: Number(gastosImprevistos)
+  };
+
+  // Verificar que no haya valores negativos
+  Object.entries(montosNumericos).forEach(([key, value]) => {
+    if (value < 0) throw new Error(`El monto de ${key} no puede ser negativo`);
+  });
+
+  // Calcular el monto total basándose en los métodos de pago
+  const montoTotal = montosNumericos.yape + montosNumericos.efectivo + montosNumericos.gastosImprevistos;
+  
+  return {
+    ...montosNumericos,
+    montoTotal
+  };
+};
+
 export const getResumen = async () => {
   try {
     const response = await api.get('/api/cobros/resumen');
     return response.data;
   } catch (error) {
-    console.error('Error al obtener resumen de cobros:', error);
-    throw new Error(error.response?.data?.message || 'No se pudo obtener el resumen de cobros');
+    handleApiError(error, 'No se pudo obtener el resumen de cobros');
   }
 };
 
@@ -14,38 +45,69 @@ export const getPendingVentas = async () => {
   try {
     console.log('Obteniendo ventas pendientes...');
     const response = await api.get('/api/cobros/ventas-pendientes');
-    return response.data.ventas || response.data;
+    return response.data.ventas || [];
   } catch (error) {
-    console.error('Error al obtener ventas pendientes:', error);
-    throw new Error(error.response?.data?.message || 'Error al obtener las ventas pendientes');
+    handleApiError(error, 'Error al obtener las ventas pendientes');
   }
 };
 
 export const createCobro = async (cobroData) => {
   try {
-    console.log('Creando cobro con datos:', cobroData);
+    console.log('Preparando datos para crear cobro:', cobroData);
     
-    // Validar datos antes de enviar
-    if (!cobroData.ventas || cobroData.ventas.length === 0) {
-      throw new Error('No hay ventas seleccionadas');
+    // Validaciones iniciales
+    if (!cobroData.ventas || !Array.isArray(cobroData.ventas) || cobroData.ventas.length === 0) {
+      throw new Error('Debe seleccionar al menos una venta');
     }
 
-    if (!cobroData.montoTotal || cobroData.montoTotal <= 0) {
-      throw new Error('El monto total no es válido');
-    }
+    // Validar montos primero
+    const montos = validateMontos({
+      yape: cobroData.yape,
+      efectivo: cobroData.efectivo,
+      gastosImprevistos: cobroData.gastosImprevistos
+    });
 
-    // La información del usuario se maneja en el interceptor de api.js,
-    // no necesitamos agregarla aquí
+    console.log('Montos validados:', montos);
 
-    // Asegurar que todos los montos sean números
+    // Calcular cuánto se va a pagar por cada venta
+    // Si hay múltiples ventas, distribuir el monto total proporcionalmente
+    const totalVentasPendientes = cobroData.ventas.reduce((sum, venta) => 
+      sum + (Number(venta.montoPendiente) || 0), 0
+    );
+
+    console.log('Total ventas pendientes:', totalVentasPendientes);
+    console.log('Monto total a pagar:', montos.montoTotal);
+
+    // Preparar la distribución de pagos
+    const distribucionPagos = cobroData.ventas.map(venta => {
+      const montoPendiente = Number(venta.montoPendiente) || 0;
+      
+      // Si el monto total a pagar es igual al total pendiente, se paga completo
+      // Si no, se distribuye proporcionalmente
+      const montoPagado = totalVentasPendientes === montos.montoTotal 
+        ? montoPendiente 
+        : (montoPendiente / totalVentasPendientes) * montos.montoTotal;
+
+      return {
+        ventaId: venta._id,
+        montoPagado: Number(montoPagado.toFixed(2)),
+        montoOriginal: Number(venta.montoTotal) || 0,
+        montoPendiente: Number((montoPendiente - montoPagado).toFixed(2))
+      };
+    });
+
+    // Preparar datos para enviar al backend
     const dataToSend = {
-      ...cobroData,
-      yape: Number(cobroData.yape),
-      efectivo: Number(cobroData.efectivo),
-      gastosImprevistos: Number(cobroData.gastosImprevistos),
-      montoTotal: Number(cobroData.montoTotal)
+      ventas: distribucionPagos.map(d => ({
+        ventaId: d.ventaId,
+        montoPagado: d.montoPagado
+      })),
+      distribucionPagos,
+      ...montos,
+      descripcion: cobroData.descripcion || ''
     };
 
+    console.log('Enviando datos al backend:', dataToSend);
     const response = await api.post('/api/cobros', dataToSend);
     
     if (!response.data.success) {
@@ -54,18 +116,21 @@ export const createCobro = async (cobroData) => {
     
     return response.data;
   } catch (error) {
-    console.error('Error al crear cobro:', error);
-    throw new Error(error.response?.data?.message || error.message || 'Error al crear el cobro');
+    handleApiError(error, 'Error al crear el cobro');
   }
 };
 
 export const getPaymentHistory = async (page = 1, limit = 10) => {
   try {
     const response = await api.get(`/api/cobros/historial?page=${page}&limit=${limit}`);
-    return response.data;
+    return {
+      pagos: response.data.cobros || [],
+      total: response.data.total || 0,
+      currentPage: response.data.currentPage || 1,
+      totalPages: response.data.totalPages || 1
+    };
   } catch (error) {
-    console.error('Error al obtener historial de pagos:', error);
-    throw new Error(error.response?.data?.message || 'Error al obtener el historial de pagos');
+    handleApiError(error, 'Error al obtener el historial de pagos');
   }
 };
 
@@ -76,34 +141,63 @@ export const getCobrosHistorial = async (page = 1, limit = 10) => {
       params: { page, limit }
     });
     
-    if (!response.data || !response.data.cobros) {
-      console.warn('Respuesta vacía o sin cobros:', response.data);
-      return {
-        cobros: [],
-        currentPage: 1,
-        totalPages: 1,
-        total: 0
-      };
-    }
-
     return {
-      cobros: response.data.cobros,
-      currentPage: response.data.currentPage,
-      totalPages: response.data.totalPages,
-      total: response.data.total
+      cobros: response.data.cobros || [],
+      currentPage: response.data.currentPage || 1,
+      totalPages: response.data.totalPages || 1,
+      total: response.data.total || 0
     };
   } catch (error) {
-    console.error('Error al obtener historial de cobros:', error);
-    throw new Error(error.response?.data?.message || 'Error al obtener el historial de cobros');
+    handleApiError(error, 'Error al obtener el historial de cobros');
+  }
+};
+
+export const procesarPagoVenta = async (ventaId, datoPago) => {
+  try {
+    // Validar montos
+    const montos = validateMontos({
+      yape: datoPago.yape,
+      efectivo: datoPago.efectivo,
+      gastosImprevistos: datoPago.gastosImprevistos
+    });
+
+    console.log('Montos validados:', montos);
+
+    // Preparar datos para el cobro
+    const cobroData = {
+      ventas: [{
+        ventaId,
+        montoPagado: montos.montoTotal // Este es el monto que se está pagando
+      }],
+      distribucionPagos: [{
+        ventaId,
+        montoPagado: montos.montoTotal, // Monto que se está pagando
+        montoOriginal: montos.montoTotal, // Para este caso, será el mismo
+        montoPendiente: 0 // Se está pagando completo
+      }],
+      ...montos,
+      descripcion: datoPago.descripcion || ''
+    };
+
+    console.log('Procesando pago de venta:', cobroData);
+    const response = await api.post('/api/cobros', cobroData);
+    
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'Error al procesar el pago');
+    }
+    
+    return response.data;
+  } catch (error) {
+    handleApiError(error, 'Error al procesar el pago de la venta');
   }
 };
 
 export const deleteCobro = async (cobroId) => {
   try {
+    if (!cobroId) throw new Error('ID de cobro no proporcionado');
     const response = await api.delete(`/api/cobros/${cobroId}`);
     return response.data;
   } catch (error) {
-    console.error('Error al eliminar cobro:', error);
-    throw new Error(error.response?.data?.message || 'Error al eliminar el cobro');
+    handleApiError(error, 'Error al eliminar el cobro');
   }
 };

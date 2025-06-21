@@ -157,21 +157,24 @@ function DevolucionModal({
         </div>
 
         {/* Motivo */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+        <div className="mb-6">          <label className="block text-sm font-medium text-gray-700 mb-2">
             Motivo de la devolución:
-            <span className="text-sm text-gray-500 ml-2">(Mínimo 10 caracteres)</span>
+            <span className="text-sm text-gray-500 ml-2">(Se recomienda al menos 10 caracteres)</span>
           </label>
           <textarea
             value={motivo}
             onChange={(e) => onMotivoChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className={`w-full px-3 py-2 border rounded-md ${
+              motivo.length > 0 && motivo.length < 10 
+                ? 'border-yellow-300' 
+                : 'border-gray-300'
+            }`}
             rows="3"
             placeholder="Explique detalladamente el motivo de la devolución..."
           />
           {motivo.length > 0 && motivo.length < 10 && (
-            <p className="text-red-500 text-sm mt-1">
-              El motivo debe tener al menos 10 caracteres ({motivo.length}/10)
+            <p className="text-yellow-600 text-sm mt-1">
+              Recomendamos escribir una descripción más detallada ({motivo.length}/10 caracteres)
             </p>
           )}
         </div>
@@ -205,23 +208,27 @@ function DevolucionModal({
               if (invalidProduct) {
                 alert(`Cantidad inválida para el producto ${invalidProduct.producto.productoId.nombre}`);
                 return;
-              }
-
-              // Validate motivo
-              if (!motivo || motivo.length < 10) {
-                alert('El motivo debe tener al menos 10 caracteres');
+              }              // Validate motivo
+              if (!motivo || motivo.length < 1) {
+                alert('Por favor, ingrese un motivo para la devolución');
                 return;
+              }
+              
+              if (motivo.length < 10) {
+                const continuar = window.confirm('Se recomienda proporcionar una descripción más detallada del motivo. ¿Desea continuar de todos modos?');
+                if (!continuar) {
+                  return;
+                }
               }
 
               // Submit data
               onSubmit(productosADevolver);
             }}
             disabled={
-              isSubmitting || 
-              !selectedVenta || 
+              isSubmitting ||              !selectedVenta || 
               productosADevolver.length === 0 || 
               !motivo || 
-              motivo.length < 10 || 
+              motivo.length < 1 || 
               !fechaDevolucion ||
               productosADevolver.some(item => 
                 !item.cantidad || 

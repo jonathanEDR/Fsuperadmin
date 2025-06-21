@@ -4,7 +4,7 @@ import { DollarSign } from 'lucide-react';
 import { 
   getPendingVentas,
   getPaymentHistory,
-} from '../services/cobroService';
+} from '../../services/cobroService';
 import CobrosHistorial from './CobrosHistorial';
 import CobroCreationModal from './CobroCreationModal';
 import CobroResumen from './CobroResumen';
