@@ -1,8 +1,7 @@
 import React from 'react';
 import { UserCircle, FileText, LogOut, ShoppingBag, ChevronLeft, ChevronRight, X } from 'lucide-react';
 
-function Sidebar({ currentView, onViewChange, onLogout, isCollapsed, toggleSidebar, isMobileView }) {
-  const menuItems = [
+function Sidebar({ currentView, onViewChange, onLogout, isCollapsed, toggleSidebar, isMobileView }) {  const menuItems = [
     { id: 'notes', icon: FileText, label: 'Mis Notas' },
     { id: 'ventas', icon: ShoppingBag, label: 'Mis Ventas' },
     { id: 'profile', icon: UserCircle, label: 'Mi Perfil' },

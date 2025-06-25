@@ -1,12 +1,13 @@
 import React from 'react';
-import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, DollarSign, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, DollarSign, UserCheck, Users, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
-function SuperAdminSidebar({ currentView, onViewChange, onLogout, isCollapsed, toggleSidebar, isMobileView }) {
-  const menuItems = [
+function SuperAdminSidebar({ currentView, onViewChange, onLogout, isCollapsed, toggleSidebar, isMobileView }) {  const menuItems = [
     { id: 'dashboard', icon: Home, label: 'Gestión de Usuarios' },
     { id: 'productos', icon: Package, label: 'Gestión de Productos' },
     { id: 'ventas', icon: ShoppingCart, label: 'Gestión de Ventas' },
     { id: 'cobros', icon: DollarSign, label: 'Gestión de Cobros' },
+    { id: 'personal', icon: UserCheck, label: 'Gestión de Personal' },
+    { id: 'colaboradores', icon: Users, label: 'Colaboradores' },
     { id: 'notes', icon: FileText, label: 'Gestión de Notas' },
     { id: 'profile', icon: UserCog, label: 'Mi Perfil' },
   ];

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { Shield, Mail, Building2, User } from 'lucide-react';
+import { Shield, Mail, Building2, User, DollarSign, TrendingUp, Calendar, Eye } from 'lucide-react';
+import { gestionPersonalService } from '../services';
 
 const MyProfile = () => {
   const { getToken } = useAuth();
@@ -13,7 +14,12 @@ const MyProfile = () => {
     nombre_negocio: '',
     email: ''
   });
-
+  
+  // Estados para gestión personal
+  const [registros, setRegistros] = useState([]);
+  const [loadingRegistros, setLoadingRegistros] = useState(false);
+  const [mostrarTodosRegistros, setMostrarTodosRegistros] = useState(false);
+  const [registrosMostrados, setRegistrosMostrados] = useState(10);
   const fetchProfile = async () => {
     try {
       const token = await getToken();
@@ -42,6 +48,18 @@ const MyProfile = () => {
     }
   };
 
+  const fetchMisRegistros = async () => {
+    try {
+      setLoadingRegistros(true);
+      const data = await gestionPersonalService.obtenerMisRegistros();
+      setRegistros(data);
+    } catch (error) {
+      console.error('Error al obtener mis registros:', error);
+    } finally {
+      setLoadingRegistros(false);
+    }
+  };
+
   const handleEdit = () => {
     setIsEditing(true);
   };
@@ -53,7 +71,6 @@ const MyProfile = () => {
       email: profile.email || ''
     });
   };
-
   const handleSave = async () => {
     try {
       const token = await getToken();
@@ -80,9 +97,56 @@ const MyProfile = () => {
     }
   };
 
+  // Funciones helper para gestión personal
+  const formatearFecha = (fecha) => {
+    return new Date(fecha).toLocaleDateString('es-PE', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatearMoneda = (cantidad) => {
+    return new Intl.NumberFormat('es-PE', {
+      style: 'currency',
+      currency: 'PEN'
+    }).format(cantidad);
+  };
+
+  const calcularTotales = () => {
+    const totales = {
+      gastos: 0,
+      pagosDiarios: 0,
+      faltantes: 0,
+      adelantos: 0
+    };
+
+    registros.forEach(registro => {
+      totales.gastos += registro.monto || 0;
+      totales.pagosDiarios += registro.pagodiario || 0;
+      totales.faltantes += registro.faltante || 0;
+      totales.adelantos += registro.adelanto || 0;
+    });
+
+    return totales;
+  };
+
+  const obtenerRegistrosRecientes = () => {
+    const registrosOrdenados = [...registros].sort((a, b) => new Date(b.fechaDeGestion) - new Date(a.fechaDeGestion));
+    return mostrarTodosRegistros ? registrosOrdenados : registrosOrdenados.slice(0, 5);
+  };
+
+  const cargarMasRegistros = () => {
+    setRegistrosMostrados(prev => prev + 10);
+  };
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    if (user) {
+      fetchProfile();
+      fetchMisRegistros();
+    }
+  }, [user]);
 
   if (loading) {
     return (
@@ -91,9 +155,8 @@ const MyProfile = () => {
       </div>
     );
   }
-
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-4 max-w-6xl">
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
           <User className="text-blue-600" />
@@ -175,7 +238,132 @@ const MyProfile = () => {
                 }`}>
                   {profile.is_active ? 'Activa' : 'Inactiva'}
                 </span>
+              </div>            </div>
+
+            {/* Sección de Gestión Personal */}
+            <div className="border-t pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <DollarSign className="text-green-600" size={20} />
+                <h3 className="text-xl font-semibold text-gray-800">Mi Gestión Personal</h3>
               </div>
+
+              {loadingRegistros ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="mt-2 text-gray-600">Cargando registros...</p>
+                </div>
+              ) : registros.length > 0 ? (
+                <>
+                  {/* Resumen financiero */}
+                  <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-lg mb-4">
+                    <h4 className="text-lg font-medium mb-3 text-gray-800">Resumen Financiero</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-center">
+                      {(() => {
+                        const totales = calcularTotales();
+                        const totalAPagar = totales.pagosDiarios - (totales.faltantes + totales.adelantos);
+                        return (
+                          <>
+                            <div>
+                              <p className="text-xs text-gray-600">Gastos</p>
+                              <p className="text-sm font-bold text-red-600">{formatearMoneda(totales.gastos)}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-600">Pagos Recibidos</p>
+                              <p className="text-sm font-bold text-green-600">{formatearMoneda(totales.pagosDiarios)}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-600">Faltantes</p>
+                              <p className="text-sm font-bold text-orange-600">{formatearMoneda(totales.faltantes)}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-600">Adelantos</p>
+                              <p className="text-sm font-bold text-blue-600">{formatearMoneda(totales.adelantos)}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-600">Total a Pagar</p>
+                              <p className={`text-sm font-bold ${totalAPagar >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {formatearMoneda(totalAPagar)}
+                              </p>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* Registros recientes */}
+                  <div className="bg-white border rounded-lg">
+                    <div className="px-4 py-3 bg-gray-50 border-b">
+                      <div className="flex justify-between items-center">
+                        <h4 className="text-md font-medium text-gray-800">
+                          Registros Recientes ({registros.length} total)
+                        </h4>
+                        <button
+                          onClick={() => setMostrarTodosRegistros(!mostrarTodosRegistros)}
+                          className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                        >
+                          <Eye size={14} />
+                          {mostrarTodosRegistros ? 'Ver menos' : 'Ver todos'}
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+                      {obtenerRegistrosRecientes().map((registro) => (
+                        <div key={registro._id} className="p-3 hover:bg-gray-50">
+                          <div className="flex justify-between items-start mb-2">
+                            <p className="text-gray-800 font-medium text-sm">{registro.descripcion || 'Sin descripción'}</p>
+                            <span className="text-xs text-gray-500 whitespace-nowrap ml-3">
+                              {formatearFecha(registro.fechaDeGestion)}
+                            </span>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                            {registro.monto && registro.monto > 0 && (
+                              <div>
+                                <span className="text-gray-600">Gasto:</span>
+                                <span className="block text-red-600 font-bold">
+                                  {formatearMoneda(registro.monto)}
+                                </span>
+                              </div>
+                            )}
+                            {registro.pagodiario && registro.pagodiario > 0 && (
+                              <div>
+                                <span className="text-gray-600">Pago Diario:</span>
+                                <span className="block text-green-600 font-bold">
+                                  {formatearMoneda(registro.pagodiario)}
+                                </span>
+                              </div>
+                            )}
+                            {registro.faltante && registro.faltante > 0 && (
+                              <div>
+                                <span className="text-gray-600">Faltante:</span>
+                                <span className="block text-orange-600 font-bold">
+                                  {formatearMoneda(registro.faltante)}
+                                </span>
+                              </div>
+                            )}
+                            {registro.adelanto && registro.adelanto > 0 && (
+                              <div>
+                                <span className="text-gray-600">Adelanto:</span>
+                                <span className="block text-blue-600 font-bold">
+                                  {formatearMoneda(registro.adelanto)}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-8 bg-gray-50 rounded-lg">
+                  <TrendingUp className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <p className="text-gray-600">No tienes registros de gestión personal aún</p>
+                  <p className="text-sm text-gray-500 mt-1">Los registros aparecerán aquí cuando se creen</p>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end gap-3">

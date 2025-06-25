@@ -4,12 +4,13 @@ import { es } from 'date-fns/locale';
 import { Trash2 } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 
-const DevolucionList = () => {
+const DevolucionList = ({ userRole = 'user' }) => {
   const [devoluciones, setDevoluciones] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [hasMore, setHasMore] = useState(true);
   const [deleteStatus, setDeleteStatus] = useState({ show: false, message: '', type: '' });
   const { getToken } = useAuth();
 
@@ -23,23 +24,42 @@ const DevolucionList = () => {
       return 'Fecha inválida';
     }
   };
-
   // Función para mostrar mensajes de estado
   const showStatusMessage = (message, type) => {
     setDeleteStatus({ show: true, message, type });
     setTimeout(() => setDeleteStatus({ show: false, message: '', type: '' }), 3000);
-  };
-
-  useEffect(() => {
+  };  // Función para verificar si una devolución puede ser eliminada
+  const canDeleteDevolucion = (devolucion) => {
+    return devolucion.ventaFinalizada !== true;
+  };useEffect(() => {
+    console.log('DevolucionList inicializado con userRole:', userRole);
     fetchDevoluciones();
-  }, [currentPage]);
+  }, []);
 
-  const fetchDevoluciones = async () => {
+  // Efecto para cargar más elementos cuando cambia el limit
+  useEffect(() => {
+    if (limit > 10) {
+      fetchDevoluciones(true);
+    }
+  }, [limit]);  const handleLoadMore = () => {
+    // Solo permitir cargar más si es super admin
+    if (userRole === 'super_admin') {
+      console.log('Cargando más elementos. Límite actual:', limit, 'Nuevo límite:', limit + 10);
+      setLimit(prev => prev + 10);
+    } else {
+      console.log('Usuario no es super admin, no puede cargar más');
+    }
+  };const fetchDevoluciones = async (isLoadingMore = false) => {
     try {
-      setLoading(true);
+      if (!isLoadingMore) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
       setError(null);
+      
       const token = await getToken();
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/devoluciones?page=${currentPage}&limit=10`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/devoluciones?page=1&limit=${limit}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -48,19 +68,45 @@ const DevolucionList = () => {
 
       if (!response.ok) {
         throw new Error('Error al cargar devoluciones');
+      }      const data = await response.json();
+        console.log('Datos recibidos:', {
+        devoluciones: data.devoluciones?.length,
+        totalDevoluciones: data.totalDevoluciones,
+        limit: limit,
+        isLoadingMore,
+        ventasFinalizadas: data.devoluciones?.filter(d => d.ventaFinalizada).length || 0
+      });        // Log de ejemplo de la primera devolución para verificar la estructura
+      if (data.devoluciones && data.devoluciones.length > 0) {
+        console.log('Ejemplo de devolución:', {
+          id: data.devoluciones[0]._id,
+          ventaFinalizada: data.devoluciones[0].ventaFinalizada,
+          producto: data.devoluciones[0].producto
+        });
       }
-
-      const data = await response.json();
-      setDevoluciones(data.devoluciones);
-      setTotalPages(data.totalPages);
+      
+      // Siempre establecer las devoluciones (la API devuelve todos los elementos hasta el límite)
+      setDevoluciones(data.devoluciones || []);
+        // Verificar si hay más elementos disponibles usando el total del backend
+      const totalDevoluciones = data.totalDevoluciones || 0;
+      const hasMoreElements = totalDevoluciones > limit;
+      setHasMore(hasMoreElements);
+      
+      console.log('HasMore calculado:', {
+        totalDevoluciones: data.totalDevoluciones,
+        devolucionesLength: data.devoluciones?.length,
+        limit: limit,
+        hasMoreElements,
+        logica: `${totalDevoluciones} > ${limit} = ${hasMoreElements}`
+      });
+      
     } catch (error) {
       console.error('Error:', error);
       setError('Error al cargar las devoluciones');
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
-
   const handleDeleteDevolucion = async (id, producto, cantidad) => {
     const confirmMessage = `¿Estás seguro de que deseas eliminar la devolución?\n\nDetalles:\nProducto: ${producto}\nCantidad: ${cantidad}`;
     
@@ -77,19 +123,16 @@ const DevolucionList = () => {
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.message || 'Error al eliminar la devolución');
-        }
-
-        // Actualizar la lista de devoluciones
+        }        // Actualizar la lista de devoluciones
         setDevoluciones(prevDevoluciones => 
           prevDevoluciones.filter(dev => dev._id !== id)
         );
         
         showStatusMessage('Devolución eliminada correctamente', 'success');
         
-        // Recargar la página actual si está vacía
-        if (devoluciones.length === 1 && currentPage > 1) {
-          setCurrentPage(prev => prev - 1);
-        }
+        // Recargar la lista completa para mantener sincronización
+        await fetchDevoluciones();
+        
       } catch (error) {
         console.error('Error:', error);
         showStatusMessage(error.message || 'Error al eliminar la devolución', 'error');
@@ -112,11 +155,8 @@ const DevolucionList = () => {
       </div>
     );
   }
-
   return (
     <div className="overflow-x-auto">
-      <h2 className="text-xl font-bold mb-4">Historial de Devoluciones</h2>
-      
       {/* Mensaje de estado */}
       {deleteStatus.show && (
         <div className={`p-4 mb-4 text-sm rounded-lg ${
@@ -152,6 +192,9 @@ const DevolucionList = () => {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Estado
             </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Venta
+            </th>
             <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
               Acciones
             </th>
@@ -159,13 +202,20 @@ const DevolucionList = () => {
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {devoluciones.map((devolucion) => (
-            <tr key={devolucion._id} className="hover:bg-gray-50">
+            <tr
+              key={devolucion._id} 
+              className={`hover:bg-gray-50 transition-colors duration-200 ${
+                !canDeleteDevolucion(devolucion)
+                  ? 'bg-gray-50 border-l-4 border-orange-400' 
+                  : ''
+              }`}
+              title={!canDeleteDevolucion(devolucion) ? 'Esta devolución está asociada a una venta finalizada' : ''}
+            >
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {formatearFecha(devolucion.fechaDevolucion)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-gray-900">
+                <div className="flex flex-col">                  <span className="text-sm font-medium text-gray-900">
                     {devolucion.colaborador?.nombre || 'N/A'}
                   </span>
                   <span className="text-sm text-gray-500">
@@ -192,43 +242,91 @@ const DevolucionList = () => {
                     : devolucion.estado === 'rechazada'
                     ? 'bg-red-100 text-red-800'
                     : 'bg-yellow-100 text-yellow-800'
+                }`}>                  {devolucion.estado?.charAt(0).toUpperCase() + devolucion.estado?.slice(1) || 'Pendiente'}
+                </span>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                  devolucion.ventaFinalizada
+                    ? 'bg-orange-100 text-orange-800'
+                    : 'bg-green-100 text-green-800'
                 }`}>
-                  {devolucion.estado?.charAt(0).toUpperCase() + devolucion.estado?.slice(1) || 'Pendiente'}
+                  {devolucion.ventaFinalizada ? 'Finalizada' : 'Activa'}
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-center">
-                <button
-                  onClick={() => handleDeleteDevolucion(devolucion._id, devolucion.producto, devolucion.cantidad)}
-                  className="inline-flex items-center px-3 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Eliminar
-                </button>
+                {canDeleteDevolucion(devolucion) ? (
+                  <button
+                    onClick={() => handleDeleteDevolucion(devolucion._id, devolucion.producto, devolucion.cantidad)}
+                    className="inline-flex items-center px-3 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Eliminar
+                  </button>
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md">
+                      No disponible
+                    </span>
+                    <span className="text-xs text-gray-400 mt-1">
+                      Venta finalizada
+                    </span>
+                  </div>                )}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {/* Información adicional para usuarios no super admin */}
+      {hasMore && userRole !== 'super_admin' && (
+        <div className="text-center mt-6 p-4 bg-blue-50 rounded-lg">
+          <p className="text-sm text-blue-800">
+            <span className="font-medium">Nota:</span> Solo se muestran las primeras 10 devoluciones. 
+            Contacta a un Super Administrador para ver el historial completo.
+          </p>
+        </div>
+      )}      {/* Botón Ver más - Solo para Super Admin */}
+      {(() => {
+        const shouldShowButton = hasMore && userRole === 'super_admin';
+        console.log('Evaluando mostrar botón "Ver más":', {
+          hasMore,
+          userRole,
+          shouldShowButton
+        });
+        return shouldShowButton;
+      })() && (
+        <div className="flex justify-center mt-6">
+          <button
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
+          >
+            {loadingMore ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Cargando...
+              </>
+            ) : (
+              <>
+                Ver más ({limit + 10} elementos)
+              </>
+            )}
+          </button>
+        </div>
+      )}
       
-      {/* Paginación */}
-      <div className="flex justify-center mt-4 gap-2">
-        <button
-          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-          className="px-4 py-2 border rounded-lg disabled:opacity-50"
-        >
-          Anterior
-        </button>
-        <span className="px-4 py-2">
-          Página {currentPage} de {totalPages}
-        </span>
-        <button
-          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-          className="px-4 py-2 border rounded-lg disabled:opacity-50"
-        >
-          Siguiente
-        </button>
+      {/* Mostrar total de elementos cargados */}
+      <div className="text-center mt-4 text-sm text-gray-600">
+        Mostrando {devoluciones.length} devoluciones
+        {(!hasMore || userRole !== 'super_admin') && devoluciones.length > 0 && (
+          <span className="ml-2 text-blue-600 font-medium">
+            {userRole === 'super_admin' 
+              ? '(Todas las devoluciones cargadas)' 
+              : '(Mostrando primeras 10 devoluciones)'
+            }
+          </span>
+        )}
       </div>
     </div>
   );

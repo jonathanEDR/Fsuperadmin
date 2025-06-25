@@ -43,7 +43,6 @@ export const getResumen = async () => {
 
 export const getPendingVentas = async () => {
   try {
-    console.log('Obteniendo ventas pendientes...');
     const response = await api.get('/api/cobros/ventas-pendientes');
     return response.data.ventas || [];
   } catch (error) {
@@ -145,7 +144,8 @@ export const getCobrosHistorial = async (page = 1, limit = 10) => {
       cobros: response.data.cobros || [],
       currentPage: response.data.currentPage || 1,
       totalPages: response.data.totalPages || 1,
-      total: response.data.total || 0
+      total: response.data.total || 0,
+      totalCobros: response.data.total || 0
     };
   } catch (error) {
     handleApiError(error, 'Error al obtener el historial de cobros');

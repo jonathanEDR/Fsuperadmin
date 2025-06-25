@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, BarChart3, Calendar, User, Users, ShoppingBag, RefreshCw, Menu, History, FileText, DollarSign, Package, X, Trash2 } from 'lucide-react';
+import { Plus, BarChart3, Calendar, User, Users, ShoppingBag, RefreshCw, Menu, History, FileText, DollarSign, Package, X, Trash2, UserCheck } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { CreateNote, NotesHistory } from '../../../components/notas';
-import { MyProfile, ProfileManagement } from '../../../components/auth';
+import MyProfileUnified from '../../../components/auth/MyProfileUnified';
+import ProfileManagement from '../../../Pages/ProfileManagement';
 import { AdminSidebar } from '../sidebars';
 import { ProductoList, CreateProduct } from '../../../components/productos';
 import { VentaList, VentaCreationModal, VentasFinalizadas } from '../../../components/ventas';
 import VentasManager from '../../../components/ventas/VentasManager';
 import { CobroList } from '../../../components/cobros';
 import { DevolucionList, DevolucionModal } from '../../../components/devoluciones';
+import { GestionPersonal } from '../../../components/personal';
 
 // Componente Modal para crear notas
 const NoteCreationModal = ({ isOpen, onClose, onNoteCreated, userRole }) => {
@@ -768,16 +770,13 @@ function AdminDashboard({ initialNotes, onNotesUpdate }) {
       </div>
     );
   };
-
   const renderProfile = () => {
     return (
       <div className="w-full">
-        <MyProfile />
+        <MyProfileUnified />
       </div>
     );
-  };
-
-  const renderUsers = () => {
+  };const renderUsers = () => {
     return (
       <div className="w-full">
         <div className="bg-white rounded-lg shadow-lg p-6">
@@ -857,7 +856,7 @@ function AdminDashboard({ initialNotes, onNotesUpdate }) {
             </div>
           </div>
         </div>
-        <CobroList />
+        <CobroList userRole="admin" />
       </div>
     </div>
   );
@@ -914,6 +913,27 @@ function AdminDashboard({ initialNotes, onNotesUpdate }) {
     }
   };
 
+  const renderPersonal = () => (
+    <div className="space-y-8">
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-green-100 rounded-lg">
+              <UserCheck className="text-green-600" size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-800">Gestión de Personal</h3>
+              <p className="text-sm text-gray-600">
+                Administra los registros y pagos del personal
+              </p>
+            </div>
+          </div>
+        </div>
+        <GestionPersonal />
+      </div>
+    </div>
+  );
+
   return (
     <>
       <div className="min-h-screen bg-gray-50">
@@ -957,13 +977,13 @@ function AdminDashboard({ initialNotes, onNotesUpdate }) {
                 <div className="flex items-center justify-center h-64">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
                 </div>        
-              ) : (
-                <div className="space-y-6">
+              ) : (                <div className="space-y-6">
                   {                  currentView === 'dashboard' ? renderDashboard() : 
                   currentView === 'users' ? renderUsers() :
                   currentView === 'productos' ? renderProducts() :
                   currentView === 'ventas' ? renderSales() :
                   currentView === 'cobros' ? renderCobros() :
+                  currentView === 'personal' ? renderPersonal() :
                   currentView === 'profile' ? renderProfile() :
                   renderDashboard()}
                 </div>

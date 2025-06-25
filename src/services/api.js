@@ -171,10 +171,8 @@ export const createCobro = async (cobro) => {
       gastosImprevistos: Number(cobro.gastosImprevistos || 0),
       montoPagado: Number(cobro.montoPagado),
       estadoPago: cobro.estadoPago.toLowerCase(),
-      fechaPago: cobro.fechaPago
-    };
+      fechaPago: cobro.fechaPago    };
     
-    console.log('Datos formateados:', formattedCobro);
     const response = await api.post('/cobros', formattedCobro);
     return response;
   } catch (error) {

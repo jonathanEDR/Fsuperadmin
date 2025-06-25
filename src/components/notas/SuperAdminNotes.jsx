@@ -21,6 +21,7 @@ const SuperAdminNotes = forwardRef((props, ref) => {
     fechadenota: new Date().toISOString().split('T')[0],
     userId: '',  // Este será el targetUserId en el backend
   });
+  const [approvedNotes, setApprovedNotes] = useState([]);
   const [stats, setStats] = useState({
     total: 0,
     byUser: {},

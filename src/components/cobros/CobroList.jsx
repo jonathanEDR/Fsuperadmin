@@ -9,7 +9,7 @@ import CobrosHistorial from './CobrosHistorial';
 import CobroCreationModal from './CobroCreationModal';
 import CobroResumen from './CobroResumen';
 
-const CobroList = () => {
+const CobroList = ({ userRole }) => {
   const { user } = useUser();
   const { session } = useSession();
   const [pendingVentas, setPendingVentas] = useState([]);
@@ -134,13 +134,7 @@ const CobroList = () => {
 
       {/* Historial de Pagos */}
       <div className="mb-8">
-        <h3 className="text-xl font-bold text-gray-800 mb-6">Historial de Pagos</h3>
-        <CobrosHistorial
-          payments={paymentHistory}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+        <h3 className="text-xl font-bold text-gray-800 mb-6">Historial de Pagos</h3>        <CobrosHistorial userRole={userRole} />
       </div>
 
       {/* Modal de Pago */}

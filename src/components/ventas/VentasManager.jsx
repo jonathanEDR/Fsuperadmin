@@ -20,9 +20,8 @@ const VentasManager = ({ userRole }) => {  const { getToken, user } = useAuth();
       console.log('Role set in VentasManager:', userRole);
     }
   }, [userRole]);
-  
-  // Todos los usuarios pueden crear ventas
-  const canShowAddButton = true; // Los permisos específicos se manejan en VentaCreationModal
+    // Solo admins y super_admins pueden crear ventas
+  const canShowAddButton = ['admin', 'super_admin'].includes(currentUserRole);
 
   const fetchVentas = async () => {
     try {

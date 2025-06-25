@@ -9,28 +9,74 @@ const ProfileManagement = ({ userRole }) => {
   const [error, setError] = useState('');
   const [editingUser, setEditingUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+
   const [editForm, setEditForm] = useState({
     nombre_negocio: '',
     email: '',
+    departamento: 'ventas',
+    sueldo: 0
   });
+
+  // Opciones de departamento
+  const departamentoOptions = [
+    { value: 'ventas', label: 'Ventas' },
+    { value: 'administracion', label: 'Administración' },
+    { value: 'produccion', label: 'Producción' },
+    { value: 'finanzas', label: 'Finanzas' }
+  ];
+
   // Función para verificar si el usuario puede editar a otro usuario
   const canEditUser = (targetUser) => {
-    // Si el usuario actual es super_admin, puede editar cualquier usuario
     if (userRole === 'super_admin') return true;
-    
-    // Si el usuario actual es admin, solo puede editar usuarios normales
     if (userRole === 'admin') {
       return targetUser.role === 'user';
     }
-    
-    // Los usuarios normales no pueden editar a nadie
     return false;
+  };
+
+  // Función para verificar si el usuario puede ver/editar sueldos
+  const canEditSueldo = (targetUser) => {
+    if (userRole === 'super_admin') return true;
+    if (userRole === 'admin' && targetUser.role === 'user') return true;
+    return false;
+  };
+
+  // Función para formatear moneda
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN'
+    }).format(amount || 0);
+  };  // Función para validar el formulario
+  const validateForm = () => {
+    const errors = [];
+    
+    if (!editForm.email || !editForm.email.includes('@')) {
+      errors.push('Email válido es requerido');
+    }
+    
+    if (!editForm.nombre_negocio || editForm.nombre_negocio.trim().length < 2) {
+      errors.push('Nombre del negocio debe tener al menos 2 caracteres');
+    }
+    
+    // Validar sueldo
+    if (editForm.sueldo && editForm.sueldo.trim() !== '') {
+      const sueldoNumerico = parseFloat(editForm.sueldo);
+      if (isNaN(sueldoNumerico) || sueldoNumerico < 0) {
+        errors.push('El sueldo debe ser un número válido y no puede ser negativo');
+      }
+    }
+    
+    return errors;
   };
 
   const fetchUsers = async () => {
     try {
       const token = await getToken();
-      const response = await fetch(`/api/admin/users-profiles${searchTerm ? `?search=${searchTerm}` : ''}`, {
+      
+      const url = `/api/admin/users-profiles${searchTerm ? `?search=${searchTerm}` : ''}`;
+      
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -53,41 +99,63 @@ const ProfileManagement = ({ userRole }) => {
   };
 
   const handleEdit = (user) => {
-    // Verificar permisos antes de permitir la edición
     if (!canEditUser(user)) {
       setError('No tienes permisos para editar este usuario');
       return;
     }
 
-    setEditingUser(user);
-    setEditForm({
+    setEditingUser(user);    setEditForm({
       nombre_negocio: user.nombre_negocio || '',
-      email: user.email
+      email: user.email,
+      departamento: user.departamento || 'ventas',
+      sueldo: user.sueldo ? user.sueldo.toString() : ''
     });
   };
 
   const handleCancelEdit = () => {
-    setEditingUser(null);
-    setEditForm({
+    setEditingUser(null);    setEditForm({
       nombre_negocio: '',
-      email: ''
+      email: '',
+      departamento: 'ventas',
+      sueldo: ''
     });
   };
 
   const handleSaveProfile = async (userId) => {
     try {
-      const token = await getToken();      const response = await fetch(`http://localhost:5000/api/auth/update-profile/${userId}`, {
+      const validationErrors = validateForm();
+      if (validationErrors.length > 0) {
+        setError(validationErrors.join(', '));
+        return;
+      }
+
+      const token = await getToken();
+      
+      const dataToSend = {
+        nombre_negocio: editForm.nombre_negocio.trim(),
+        email: editForm.email.trim(),
+        departamento: editForm.departamento
+      };      const targetUser = users.find(u => u._id === userId);
+      if (canEditSueldo(targetUser)) {
+        const sueldoValue = editForm.sueldo === '' || editForm.sueldo === null || editForm.sueldo === undefined 
+          ? 0 
+          : parseFloat(editForm.sueldo) || 0;
+        dataToSend.sueldo = sueldoValue;
+      }
+
+      const response = await fetch(`http://localhost:5000/api/auth/update-profile/${userId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(editForm)
-      });      if (response.ok) {
+        body: JSON.stringify(dataToSend)
+      });
+
+      if (response.ok) {
         const result = await response.json();
         setEditingUser(null);
-        fetchUsers(); // Recargar la lista de usuarios
-        // Mostrar mensaje de éxito
+        fetchUsers();
         setError('success:' + result.message);
       } else {
         const errorData = await response.json();
@@ -96,11 +164,6 @@ const ProfileManagement = ({ userRole }) => {
     } catch (error) {
       setError('Error al actualizar el perfil: ' + error.message);
     }
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    fetchUsers();
   };
 
   const handlePromoteToAdmin = async (userId) => {
@@ -127,13 +190,18 @@ const ProfileManagement = ({ userRole }) => {
     }
   };
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    fetchUsers();
+  };
+
   useEffect(() => {
     fetchUsers();
   }, []);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
@@ -185,13 +253,16 @@ const ProfileManagement = ({ userRole }) => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Usuario
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Email
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Nombre del Negocio
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Departamento
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Sueldo
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Rol
@@ -204,13 +275,7 @@ const ProfileManagement = ({ userRole }) => {
             <tbody className="bg-white divide-y divide-gray-200">
               {users.map((user) => (
                 <tr key={user._id} className={!canEditUser(user) ? 'bg-gray-50' : ''}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {user.clerk_id}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {editingUser?._id === user._id ? (
+                  <td className="px-6 py-4 whitespace-nowrap">{editingUser?._id === user._id ? (
                       <input
                         type="email"
                         className="border border-gray-300 rounded px-3 py-1 text-sm w-full"
@@ -221,8 +286,7 @@ const ProfileManagement = ({ userRole }) => {
                       <div className="text-sm text-gray-900">{user.email}</div>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {editingUser?._id === user._id ? (
+                  <td className="px-6 py-4 whitespace-nowrap">{editingUser?._id === user._id ? (
                       <input
                         type="text"
                         className="border border-gray-300 rounded px-3 py-1 text-sm w-full"
@@ -231,6 +295,72 @@ const ProfileManagement = ({ userRole }) => {
                       />
                     ) : (
                       <div className="text-sm text-gray-900">{user.nombre_negocio || '-'}</div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">{editingUser?._id === user._id ? (
+                      <select
+                        className="border border-gray-300 rounded px-3 py-1 text-sm w-full"
+                        value={editForm.departamento}
+                        onChange={(e) => setEditForm({ ...editForm, departamento: e.target.value })}
+                      >
+                        {departamentoOptions.map(option => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div className="text-sm text-gray-900">
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          user.departamento === 'ventas' ? 'bg-green-100 text-green-800' :
+                          user.departamento === 'administracion' ? 'bg-blue-100 text-blue-800' :
+                          user.departamento === 'produccion' ? 'bg-orange-100 text-orange-800' :
+                          user.departamento === 'finanzas' ? 'bg-purple-100 text-purple-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {user.departamento ? 
+                            (departamentoOptions.find(d => d.value === user.departamento)?.label || user.departamento) : 
+                            'No asignado'
+                          }
+                        </span>
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">{editingUser?._id === user._id ? (
+                      <div className="flex flex-col">
+                        <div className="flex items-center">
+                          <span className="text-sm text-gray-500 mr-2">$</span>
+                          <input
+                            type="text"
+                            className="border border-gray-300 rounded px-3 py-2 text-sm w-32 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={editForm.sueldo}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              // Solo permitir números, punto decimal y valores vacíos
+                              if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                setEditForm({ 
+                                  ...editForm, 
+                                  sueldo: value
+                                });
+                              }
+                            }}
+                            placeholder="0.00"
+                            autoComplete="off"
+                          />
+                        </div>
+                        {editForm.sueldo && editForm.sueldo.trim() !== '' && !isNaN(parseFloat(editForm.sueldo)) && (
+                          <div className="text-xs text-gray-400 mt-1 ml-6">
+                            {formatCurrency(parseFloat(editForm.sueldo))}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-sm text-gray-900 font-medium">
+                        {canEditSueldo(user) ? 
+                          formatCurrency(user.sueldo) :
+                          '****'
+                        }
+                      </div>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -242,7 +372,8 @@ const ProfileManagement = ({ userRole }) => {
                       {user.role}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">                    {editingUser?._id === user._id ? (
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    {editingUser?._id === user._id ? (
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleSaveProfile(user._id)}
@@ -259,7 +390,6 @@ const ProfileManagement = ({ userRole }) => {
                       </div>
                     ) : (
                       <div className="flex justify-end gap-2">
-                        {/* Mostrar botón de editar si el usuario actual puede editar al usuario */}
                         {(userRole === 'super_admin' || (userRole === 'admin' && user.role === 'user')) && (
                           <button
                             onClick={() => handleEdit(user)}
@@ -270,7 +400,6 @@ const ProfileManagement = ({ userRole }) => {
                           </button>
                         )}
                         
-                        {/* Mostrar botón de promover solo si el usuario actual es super_admin y el usuario objetivo no es super_admin */}
                         {userRole === 'super_admin' && user.role !== 'super_admin' && (
                           <button
                             onClick={() => handlePromoteToAdmin(user._id)}
@@ -288,6 +417,12 @@ const ProfileManagement = ({ userRole }) => {
             </tbody>
           </table>
         </div>
+
+        {users.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            No se encontraron usuarios
+          </div>
+        )}
       </div>
     </div>
   );

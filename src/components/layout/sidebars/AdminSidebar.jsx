@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, UserCog, LogOut, Shield, Users, Package, ShoppingCart, DollarSign, Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Home, UserCog, LogOut, Shield, Users, Package, ShoppingCart, DollarSign, Menu, X, ChevronLeft, ChevronRight, UserCheck } from 'lucide-react';
 
 function AdminSidebar({ currentView, onViewChange, onLogout, userRole, isCollapsed, toggleSidebar, isMobileView }) {
   const menuItems = [
@@ -7,6 +7,7 @@ function AdminSidebar({ currentView, onViewChange, onLogout, userRole, isCollaps
     { id: 'productos', icon: Package, label: 'Gestión de Productos' },
     { id: 'ventas', icon: ShoppingCart, label: 'Gestión de Ventas' },
     { id: 'cobros', icon: DollarSign, label: 'Gestión de Cobros' },
+    { id: 'personal', icon: UserCheck, label: 'Gestión de Personal' },
     { id: 'users', icon: Users, label: 'Colaboradores' },
     { id: 'profile', icon: UserCog, label: 'Mi Perfil' }
   ];

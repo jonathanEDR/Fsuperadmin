@@ -2,24 +2,6 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { X, Plus, Trash2, ShoppingCart, AlertCircle } from 'lucide-react';
 import { useAuth, useUser } from '@clerk/clerk-react';
 
-// Función auxiliar para filtrar usuarios
-const filterUsers = (users, currentRole, currentUserId) => {
-  if (!users || !currentRole) return [];
-
-  return users.filter(user => {
-    const isSelf = user.id === currentUserId;
-
-    switch (currentRole) {
-      case 'super_admin':
-        return user.role !== 'super_admin' || isSelf;
-      case 'admin':
-        return user.role === 'user' || user.role === 'admin' || isSelf;
-      default:
-        return isSelf;
-    }
-  });
-};
-
 // Función auxiliar para filtrar usuarios según el rol
 const filterUsersByRole = (users, currentRole, currentUserId) => {
   if (!users || !currentRole) {
@@ -115,10 +97,15 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole: initial
 
     loadProductos();
   }, [getToken]);
-
   // Efecto para cargar usuarios
   useEffect(() => {
     const loadUsers = async () => {
+      // Solo cargar usuarios si el rol permite crear ventas
+      if (!['admin', 'super_admin'].includes(currentUserRole)) {
+        console.log('Usuario con rol', currentUserRole, 'no puede cargar lista de usuarios');
+        return;
+      }
+
       try {
         const token = await getToken();
         const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/users`, {
@@ -318,6 +305,31 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole: initial
   };
 
   if (!isOpen) return null;
+
+  // Verificación de permisos: solo admin y super_admin pueden crear ventas
+  if (!['admin', 'super_admin'].includes(currentUserRole)) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div className="bg-white rounded-lg w-full max-w-md p-6">
+          <div className="text-center">
+            <div className="p-3 bg-red-100 rounded-full w-16 h-16 mx-auto mb-4">
+              <X className="text-red-600 w-10 h-10" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Acceso Denegado</h3>
+            <p className="text-gray-600 mb-4">
+              No tienes permisos para crear ventas. Solo los administradores pueden realizar esta acción.
+            </p>
+            <button
+              onClick={onClose}
+              className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">

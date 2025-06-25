@@ -3,14 +3,17 @@ import { useAuth } from '@clerk/clerk-react';
 import { 
   Plus, Menu, FileText, History, DollarSign, Package,
   ShoppingCart, Users, User, Clock, Check, ChevronLeft, ChevronRight,
-  Search, UserPlus, Trash2
+  Search, UserPlus, Trash2, RotateCcw, UserCheck
 } from 'lucide-react';
 import VentasManager from '../../ventas/VentasManager';
 import { VentaList, VentasFinalizadas } from '../../ventas';
 import { ProductoList, ProductCreationModal } from '../../productos';
 import { CobroList } from '../../cobros';
+import { DevolucionList } from '../../devoluciones';
 import { SuperAdminNotes, NotesHistory, NoteCreationModal, CreateNote } from '../../notas';
-import { MyProfile } from '../../auth';
+import { GestionPersonal } from '../../personal';
+import MyProfileUnified from '../../auth/MyProfileUnified';
+import ProfileManagement from '../../../Pages/ProfileManagement';
 import { SuperAdminSidebar } from '../sidebars';
 
 function SuperAdminDashboard() {
@@ -27,20 +30,7 @@ function SuperAdminDashboard() {
   const [roleFilter, setRoleFilter] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
-  const [productos, setProductos] = useState([]); // Añadido estado para productos
-  
-  // Estados para la gestión de ventas
-  const [ventas, setVentas] = useState([]);
-  const [ventasLoading, setVentasLoading] = useState(true);
-  const [ventasError, setVentasError] = useState(null);
-  const [ventasPagina, setVentasPagina] = useState(1);
-  const [totalVentasPaginas, setTotalVentasPaginas] = useState(1);
-  const [ventasFiltro, setVentasFiltro] = useState({
-    fechaInicio: '',
-    fechaFin: '',
-    colaborador: '',
-    producto: ''
-  });
+  const [productos, setProductos] = useState([]);
 
   const fetchUsers = async () => {
     try {
@@ -65,16 +55,9 @@ function SuperAdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
-  useEffect(() => {
+  };  useEffect(() => {
     fetchUsers();
   }, [currentPage, searchTerm, roleFilter]);
-
-  useEffect(() => {
-    if (currentView === 'ventas') {
-      fetchVentas();
-    }
-  }, [currentView, ventasPagina, ventasFiltro]);
 
   const handlePromoteToAdmin = async (userId, currentRole) => {
     try {
@@ -525,7 +508,6 @@ function SuperAdminDashboard() {
       </div>
     );
   };
-
   const renderCobros = () => (
     <div className="space-y-8">
       <div className="bg-white shadow-lg rounded-xl p-6">
@@ -542,10 +524,45 @@ function SuperAdminDashboard() {
             </div>
           </div>
         </div>
-        <CobroList />
+        <CobroList userRole="super_admin" />
       </div>
     </div>
   );
+
+  const renderPersonal = () => (
+    <div className="space-y-8">
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-purple-100 rounded-lg">
+              <UserCheck className="text-purple-600" size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-800">Gestión de Personal</h3>
+              <p className="text-sm text-gray-600">
+                Administra los registros y pagos del personal
+              </p>
+            </div>
+          </div>
+        </div>
+        <GestionPersonal />
+      </div>
+    </div>
+  );
+
+  const renderColaboradores = () => {
+    return (
+      <div className="w-full">
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <Users className="text-purple-600" />
+            Gestión de Colaboradores
+          </h2>
+          <ProfileManagement userRole="super_admin" />
+        </div>
+      </div>
+    );
+  };
 
   const renderDashboard = () => (
     <div className="space-y-8">
@@ -584,6 +601,26 @@ function SuperAdminDashboard() {
   );  const renderVentas = () => (
     <div className="space-y-8">
       <VentasManager userRole="super_admin" />
+      
+  
+      
+      {/* Historial de Devoluciones */}
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-orange-100 rounded-lg">
+              <RotateCcw className="text-orange-600" size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-800">Historial de Devoluciones</h3>
+              <p className="text-sm text-gray-600">
+                Administra las devoluciones del sistema
+              </p>
+            </div>
+          </div>
+        </div>
+        <DevolucionList userRole="super_admin" />
+      </div>
     </div>
   );
 
@@ -690,15 +727,16 @@ function SuperAdminDashboard() {
             <div className="flex items-center justify-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
             </div>
-          ) : (
-            <div className="space-y-6">
+          ) : (            <div className="space-y-6">
               {currentView === 'dashboard' && renderDashboard()}
               {currentView === 'productos' && renderProducts()}
               {currentView === 'ventas' && renderVentas()}
               {currentView === 'cobros' && renderCobros()}
+              {currentView === 'personal' && renderPersonal()}
+              {currentView === 'colaboradores' && renderColaboradores()}
               {currentView === 'notes' && renderNotes()}
               {currentView === 'history' && <NotesHistory />}
-              {currentView === 'profile' && <MyProfile />}
+              {currentView === 'profile' && <MyProfileUnified />}
             </div>
           )}
         </div>

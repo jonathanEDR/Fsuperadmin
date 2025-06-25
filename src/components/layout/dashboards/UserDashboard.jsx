@@ -3,7 +3,8 @@ import { Plus, BarChart3, Package, ShoppingBag, RefreshCw, Menu, User } from 'lu
 import { useAuth } from '@clerk/clerk-react';
 
 import { CreateNote } from '../../../components/notas';
-import { MyProfile } from '../../../components/auth';
+import MyProfile from '../../../Pages/MyProfile';
+import { UserGestionPersonal } from '../../../components/personal';
 import { Sidebar } from '../sidebars';
 import { ProductoList } from '../../../components/productos';
 import { VentaList } from '../../../components/ventas';
@@ -381,40 +382,8 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
         )}      </div>
     </div>
   );
-
   const renderProfile = () => (
-    <div className="bg-white shadow-xl rounded-2xl p-8">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6">Mi Perfil</h2>
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center">
-            <User className="w-16 h-16 text-blue-600" />
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold">{session?.user?.firstName || 'Usuario'}</h3>
-            <p className="text-gray-600">{session?.user?.primaryEmailAddress?.emailAddress}</p>
-          </div>
-        </div>
-        
-        <div className="border-t pt-6">
-          <h4 className="text-lg font-semibold mb-4">Información de la cuenta</h4>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-600">Nombre del Negocio</label>
-              <p className="mt-1 text-gray-900">{session?.user?.firstName || 'No especificado'}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600">Email</label>
-              <p className="mt-1 text-gray-900">{session?.user?.primaryEmailAddress?.emailAddress}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600">Tipo de Usuario</label>
-              <p className="mt-1 text-gray-900">Usuario Regular</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <MyProfile />
   );
   const renderVentas = () => {
     return (
@@ -482,13 +451,14 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
       </div>
     );
   };
-
   const renderContent = () => {
     switch (currentView) {
       case 'notes':
         return renderNotes();
       case 'ventas':
         return renderVentas();
+      case 'personal':
+        return <UserGestionPersonal />;
       case 'profile':
         return <MyProfile />;
       default:
