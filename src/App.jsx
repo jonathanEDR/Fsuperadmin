@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { SignedIn, SignedOut } from '@clerk/clerk-react';
 import { useUser } from '@clerk/clerk-react';
 
@@ -7,7 +7,21 @@ import { useUser } from '@clerk/clerk-react';
 import Home from './Pages/Home';
 import { Login, Signup as Register } from './components/auth';
 import Dashboard from './Pages/Dashboard';
-import { SuperAdminDashboard } from './components/layout';
+import { SuperAdminDashboard, AdminDashboardLayout } from './components/layout';
+import AdminDashboard from './components/layout/dashboards/AdminDashboard';
+import PagosRealizadosPage from './Pages/PagosRealizadosPage';
+import BienvenidaPage from './Pages/BienvenidaPage';
+import UsuariosPage from './Pages/UsuariosPage';
+import ProductosPage from './Pages/ProductosPage';
+import VentasPage from './Pages/VentasPage';
+import CobrosPage from './Pages/CobrosPage';
+import PersonalPage from './Pages/PersonalPage';
+import ColaboradoresPage from './Pages/ColaboradoresPage';
+import NotasPage from './Pages/NotasPage';
+import PerfilPage from './Pages/PerfilPage';
+import UserDashboardLayout from './components/layout/dashboards/UserDashboardLayout';
+import GastosPage from './Pages/GastosPage';
+import CajaPage from './Pages/CajaPage';
 
 // Componente para proteger rutas que requieren autenticación
 function ProtectedRoute({ children }) {
@@ -85,14 +99,63 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            {/* AdminDashboard como layout persistente */}
             <Route 
-              path="/super-admin" 
+              path="/admin" 
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<BienvenidaPage />} />
+              <Route path="notas" element={<NotasPage />} />
+              <Route path="productos" element={<ProductosPage />} />
+              <Route path="ventas" element={<VentasPage />} />
+              <Route path="cobros" element={<CobrosPage />} />
+              <Route path="pagos-realizados" element={<PagosRealizadosPage />} />
+              <Route path="personal" element={<PersonalPage />} />
+              <Route path="colaboradores" element={<ColaboradoresPage />} />
+              <Route path="perfil" element={<PerfilPage />} />
+            </Route>
+            
+            {/* SuperAdminDashboard como layout persistente */}
+            <Route 
+              path="/super-admin"
               element={
                 <ProtectedRoute>
                   <SuperAdminDashboard />
                 </ProtectedRoute>
-              } 
-            />
+              }
+            >
+              <Route index element={<BienvenidaPage />} />
+              <Route path="usuarios" element={<UsuariosPage />} />
+              <Route path="productos" element={<ProductosPage />} />
+              <Route path="ventas" element={<VentasPage />} />
+              <Route path="cobros" element={<CobrosPage />} />
+              <Route path="pagos-realizados" element={<PagosRealizadosPage />} />
+              <Route path="personal" element={<PersonalPage />} />
+              <Route path="colaboradores" element={<ColaboradoresPage />} />
+              <Route path="notas" element={<NotasPage />} />
+              <Route path="perfil" element={<PerfilPage />} />
+              <Route path="gastos" element={<GastosPage />} />
+              <Route path="caja" element={<CajaPage />} />
+            </Route>
+            
+            {/* UserDashboard como layout persistente */}
+            <Route 
+              path="/usuario" 
+              element={
+                <ProtectedRoute>
+                  <UserDashboardLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<NotasPage />} />
+              <Route path="notas" element={<NotasPage />} />
+              <Route path="ventas" element={<VentasPage />} />
+              <Route path="perfil" element={<PerfilPage />} />
+            </Route>
             
             {/* Ruta por defecto - redirige a home */}
             <Route path="*" element={<Navigate to="/" replace />} />

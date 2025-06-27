@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import AdminSidebar from '../sidebars/AdminSidebar';
+import Sidebar from '../sidebars/Sidebar';
 
-function AdminDashboard() {
+function UserDashboardLayout() {
   const [isMobileView, setIsMobileView] = useState(window.innerWidth < 1024);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
@@ -16,7 +16,7 @@ function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <AdminSidebar
+      <Sidebar
         isCollapsed={isSidebarCollapsed}
         toggleSidebar={toggleSidebar}
         isMobileView={isMobileView}
@@ -32,4 +32,4 @@ function AdminDashboard() {
   );
 }
 
-export default AdminDashboard;
+export default UserDashboardLayout;

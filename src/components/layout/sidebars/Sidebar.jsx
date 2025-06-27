@@ -1,10 +1,13 @@
 import React from 'react';
 import { UserCircle, FileText, LogOut, ShoppingBag, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-function Sidebar({ currentView, onViewChange, onLogout, isCollapsed, toggleSidebar, isMobileView }) {  const menuItems = [
-    { id: 'notes', icon: FileText, label: 'Mis Notas' },
-    { id: 'ventas', icon: ShoppingBag, label: 'Mis Ventas' },
-    { id: 'profile', icon: UserCircle, label: 'Mi Perfil' },
+function Sidebar({ isCollapsed, toggleSidebar, isMobileView }) {
+  const navigate = useNavigate();
+  const menuItems = [
+    { id: 'notes', icon: FileText, label: 'Mis Notas', route: '/usuario/notas' },
+    { id: 'ventas', icon: ShoppingBag, label: 'Mis Ventas', route: '/usuario/ventas' },
+    { id: 'profile', icon: UserCircle, label: 'Mi Perfil', route: '/usuario/perfil' },
   ];
 
   return (
@@ -55,16 +58,12 @@ function Sidebar({ currentView, onViewChange, onLogout, isCollapsed, toggleSideb
                 <button
                   key={item.id}
                   onClick={() => {
-                    onViewChange(item.id);
+                    navigate(item.route);
                     if (isMobileView) toggleSidebar();
                   }}
                   className={`
                     w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all
                     hover:bg-blue-50 hover:text-blue-600
-                    ${currentView === item.id
-                      ? 'bg-blue-100 text-blue-600 font-medium'
-                      : 'text-gray-600'
-                    }
                     ${isCollapsed ? 'justify-center' : ''}
                   `}
                   title={isCollapsed ? item.label : ""}
@@ -83,7 +82,7 @@ function Sidebar({ currentView, onViewChange, onLogout, isCollapsed, toggleSideb
         
         <div className="absolute bottom-0 left-0 right-0 p-4">
           <button
-            onClick={onLogout}
+            // onClick={onLogout} // Si tienes lógica de logout, pásala como prop y descomenta
             className={`
               w-full flex items-center gap-3 px-4 py-3 rounded-lg
               text-red-600 hover:bg-red-50 transition-colors

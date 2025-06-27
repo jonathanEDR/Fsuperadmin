@@ -264,3 +264,34 @@ export const createPayment = async (paymentData) => {
     throw error;
   }
 };
+
+// PAGOS REALIZADOS
+export const getPagosRealizados = async () => {
+  try {
+    const response = await api.get('/api/pagos-realizados');
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener pagos realizados:', error);
+    throw error;
+  }
+};
+
+export const createPagoRealizado = async (pago) => {
+  try {
+    const response = await api.post('/api/pagos-realizados', pago);
+    return response.data;
+  } catch (error) {
+    console.error('Error al crear pago realizado:', error);
+    throw error;
+  }
+};
+
+export const deletePagoRealizado = async (id) => {
+  try {
+    const response = await api.delete(`/api/pagos-realizados/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error al eliminar pago realizado:', error);
+    throw error;
+  }
+};

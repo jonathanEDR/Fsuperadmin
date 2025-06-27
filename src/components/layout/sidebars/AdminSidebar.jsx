@@ -1,15 +1,17 @@
 import React from 'react';
 import { Home, UserCog, LogOut, Shield, Users, Package, ShoppingCart, DollarSign, Menu, X, ChevronLeft, ChevronRight, UserCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 function AdminSidebar({ currentView, onViewChange, onLogout, userRole, isCollapsed, toggleSidebar, isMobileView }) {
+  const navigate = useNavigate();
   const menuItems = [
-    { id: 'dashboard', icon: Home, label: 'Gestión de Notas' },
-    { id: 'productos', icon: Package, label: 'Gestión de Productos' },
-    { id: 'ventas', icon: ShoppingCart, label: 'Gestión de Ventas' },
-    { id: 'cobros', icon: DollarSign, label: 'Gestión de Cobros' },
-    { id: 'personal', icon: UserCheck, label: 'Gestión de Personal' },
-    { id: 'users', icon: Users, label: 'Colaboradores' },
-    { id: 'profile', icon: UserCog, label: 'Mi Perfil' }
+    { id: 'notas', icon: Home, label: 'Gestión de Notas', route: '/admin/notas' },
+    { id: 'productos', icon: Package, label: 'Gestión de Productos', route: '/admin/productos' },
+    { id: 'ventas', icon: ShoppingCart, label: 'Gestión de Ventas', route: '/admin/ventas' },
+    { id: 'cobros', icon: DollarSign, label: 'Gestión de Cobros', route: '/admin/cobros' },
+    { id: 'personal', icon: UserCheck, label: 'Gestión de Personal', route: '/admin/personal' },
+    { id: 'colaboradores', icon: Users, label: 'Colaboradores', route: '/admin/colaboradores' },
+    { id: 'perfil', icon: UserCog, label: 'Mi Perfil', route: '/admin/perfil' }
   ];
 
   return (
@@ -63,16 +65,12 @@ function AdminSidebar({ currentView, onViewChange, onLogout, userRole, isCollaps
                 <button
                   key={item.id}
                   onClick={() => {
-                    onViewChange(item.id);
+                    navigate(item.route);
                     if (isMobileView) toggleSidebar();
                   }}
                   className={`
                     w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all
                     hover:bg-blue-50 hover:text-blue-600
-                    ${currentView === item.id
-                      ? 'bg-blue-100 text-blue-600 font-medium'
-                      : 'text-gray-600'
-                    }
                     ${isCollapsed ? 'justify-center' : ''}
                   `}
                   title={isCollapsed ? item.label : ""}

@@ -282,7 +282,7 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-6xl mx-auto p-6">
-      {/* Renderizar el dashboard según el rol */}
+        {/* Renderizar el dashboard según el rol */}
         {userRole === 'super_admin' ? (
           <SuperAdminDashboard />
         ) : userRole === 'admin' ? (

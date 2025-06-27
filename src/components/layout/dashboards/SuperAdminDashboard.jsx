@@ -15,6 +15,8 @@ import { GestionPersonal } from '../../personal';
 import MyProfileUnified from '../../auth/MyProfileUnified';
 import ProfileManagement from '../../../Pages/ProfileManagement';
 import { SuperAdminSidebar } from '../sidebars';
+import PagosRealizadosPage from '../../../Pages/PagosRealizadosPage';
+import { Outlet, useLocation, matchPath } from 'react-router-dom';
 
 function SuperAdminDashboard() {
   const { getToken } = useAuth();
@@ -23,7 +25,6 @@ function SuperAdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState('');
-  const [currentView, setCurrentView] = useState('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -31,6 +32,10 @@ function SuperAdminDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [productos, setProductos] = useState([]);
+  const location = useLocation();
+
+  // Detectar si hay ruta hija activa (por ejemplo, /super-admin/pagos-realizados)
+  const isChildRoute = matchPath('/super-admin/:child', location.pathname);
 
   const fetchUsers = async () => {
     try {
@@ -267,7 +272,7 @@ function SuperAdminDashboard() {
       setTimeout(() => setSuccess(''), 3000);
       
       // Si estamos en la vista de notas, forzar una actualización
-      if (currentView === 'notes' && notesRef.current?.fetchNotes) {
+      if (notesRef.current?.fetchNotes) {
         await notesRef.current.fetchNotes();
       }
     } catch (error) {
@@ -314,10 +319,8 @@ function SuperAdminDashboard() {
   };
 
   useEffect(() => {
-    if (currentView === 'productos') {
-      fetchProductos();
-    }
-  }, [currentView]);
+    fetchProductos();
+  }, []);
 
   // Función para cargar ventas
   const fetchVentas = async () => {
@@ -699,55 +702,44 @@ function SuperAdminDashboard() {
       </button>
 
       <SuperAdminSidebar 
-        currentView={currentView}
-        onViewChange={setCurrentView}
         onLogout={handleLogout}
         isCollapsed={isSidebarCollapsed}
         toggleSidebar={toggleSidebar}
         isMobileView={isMobileView}
       />
-      <div className={`
-        transition-all duration-300 ease-in-out pt-16 lg:pt-0
-        ${isSidebarCollapsed ? 'ml-0 lg:ml-20' : 'ml-0 lg:ml-64'}
-      `}>
-        <div className="p-4 lg:p-8">
+      <div
+        className={`transition-all duration-300 ease-in-out pt-16 lg:pt-0
+          ${isMobileView ? '' : isSidebarCollapsed ? 'ml-20' : 'ml-[280px]'}
+          flex justify-center min-h-screen
+        `}
+      >
+        <div className="w-full max-w-4xl p-4 lg:p-8">
           {error && (
             <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
               {error}
             </div>
           )}
-          
           {success && (
             <div className="mb-6 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg">
               {success}
             </div>
           )}
-
           {loading ? (
             <div className="flex items-center justify-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
             </div>
-          ) : (            <div className="space-y-6">
-              {currentView === 'dashboard' && renderDashboard()}
-              {currentView === 'productos' && renderProducts()}
-              {currentView === 'ventas' && renderVentas()}
-              {currentView === 'cobros' && renderCobros()}
-              {currentView === 'personal' && renderPersonal()}
-              {currentView === 'colaboradores' && renderColaboradores()}
-              {currentView === 'notes' && renderNotes()}
-              {currentView === 'history' && <NotesHistory />}
-              {currentView === 'profile' && <MyProfileUnified />}
-            </div>
+          ) : (
+            <Outlet />
           )}
         </div>
       </div>
-
       <NoteCreationModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onNoteCreated={handleNoteCreated}
         userRole="super_admin"
-      />      <ProductCreationModal
+      />
+      <ProductCreationModal
         isOpen={isProductModalOpen}
         onClose={() => setIsProductModalOpen(false)}
         onSuccess={handleProductCreated}

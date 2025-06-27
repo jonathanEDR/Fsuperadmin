@@ -1,15 +1,21 @@
 import React from 'react';
-import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, DollarSign, UserCheck, Users, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, DollarSign, UserCheck, Users, X, ChevronLeft, ChevronRight, CreditCard } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-function SuperAdminSidebar({ currentView, onViewChange, onLogout, isCollapsed, toggleSidebar, isMobileView }) {  const menuItems = [
-    { id: 'dashboard', icon: Home, label: 'Gestión de Usuarios' },
-    { id: 'productos', icon: Package, label: 'Gestión de Productos' },
-    { id: 'ventas', icon: ShoppingCart, label: 'Gestión de Ventas' },
-    { id: 'cobros', icon: DollarSign, label: 'Gestión de Cobros' },
-    { id: 'personal', icon: UserCheck, label: 'Gestión de Personal' },
-    { id: 'colaboradores', icon: Users, label: 'Colaboradores' },
-    { id: 'notes', icon: FileText, label: 'Gestión de Notas' },
-    { id: 'profile', icon: UserCog, label: 'Mi Perfil' },
+function SuperAdminSidebar({ onLogout, isCollapsed, toggleSidebar, isMobileView }) {
+  const navigate = useNavigate();
+  const menuItems = [
+    { id: 'dashboard', icon: Home, label: 'Gestión de Usuarios', route: '/super-admin/usuarios' },
+    { id: 'productos', icon: Package, label: 'Gestión de Productos', route: '/super-admin/productos' },
+    { id: 'ventas', icon: ShoppingCart, label: 'Gestión de Ventas', route: '/super-admin/ventas' },
+    { id: 'cobros', icon: DollarSign, label: 'Gestión de Cobros', route: '/super-admin/cobros' },
+    { id: 'caja', icon: CreditCard, label: 'Gestión de Caja', route: '/super-admin/caja' },
+    { id: 'pagosrealizados', icon: CreditCard, label: 'Pagos Realizados', route: '/super-admin/pagos-realizados' },
+    { id: 'gastos', icon: DollarSign, label: 'Gestión de Gastos', route: '/super-admin/gastos' },
+    { id: 'personal', icon: UserCheck, label: 'Gestión de Personal', route: '/super-admin/personal' },
+    { id: 'colaboradores', icon: Users, label: 'Colaboradores', route: '/super-admin/colaboradores' },
+    { id: 'notes', icon: FileText, label: 'Gestión de Notas', route: '/super-admin/notas' },
+    { id: 'profile', icon: UserCog, label: 'Mi Perfil', route: '/super-admin/perfil' },
   ];
 
   return (
@@ -63,16 +69,12 @@ function SuperAdminSidebar({ currentView, onViewChange, onLogout, isCollapsed, t
                 <button
                   key={item.id}
                   onClick={() => {
-                    onViewChange(item.id);
+                    navigate(item.route);
                     if (isMobileView) toggleSidebar();
                   }}
                   className={`
                     w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all
                     hover:bg-purple-50 hover:text-purple-600
-                    ${currentView === item.id
-                      ? 'bg-purple-100 text-purple-600 font-medium'
-                      : 'text-gray-600'
-                    }
                     ${isCollapsed ? 'justify-center' : ''}
                   `}
                   title={isCollapsed ? item.label : ""}
