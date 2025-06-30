@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { gestionPersonalService } from '../../services';
+import { getPagosRealizados } from '../../services/api';
 import GestionPersonalModal from './GestionPersonalModal';
 import GestionPersonalList from './GestionPersonalList';
 
@@ -22,9 +23,21 @@ function GestionPersonal() {
   
   // Estados para paginación VISUAL en vista de detalle (solo frontend)
   const [registrosMostrados, setRegistrosMostrados] = useState(10); // Inicialmente mostrar 10
+  const [pagosRealizados, setPagosRealizados] = useState([]);
+
+  // Definir la función antes del useEffect
+  const fetchPagosRealizados = async () => {
+    try {
+      const pagos = await getPagosRealizados();
+      setPagosRealizados(pagos || []);
+    } catch (error) {
+      console.error('Error al obtener pagos realizados:', error);
+    }
+  };
 
   useEffect(() => {
     cargarDatos();
+    fetchPagosRealizados();
   }, []);  
 
   const cargarDatos = async () => {
@@ -173,6 +186,13 @@ function GestionPersonal() {
     }), { gastos: 0, faltantes: 0, adelantos: 0, pagosDiarios: 0 });
   };
 
+  // Calcular pagos realizados por colaborador para el resumen (usando historial de pagos)
+  const calcularPagosRealizados = (colaboradorId) => {
+    return pagosRealizados
+      .filter(p => p.colaboradorUserId === colaboradorId)
+      .reduce((total, p) => total + (p.montoTotal || p.monto || 0), 0);
+  };
+
   // Función para manejar "Ver más registros" (paginación visual)
   const verMasRegistros = () => {
     setRegistrosMostrados(prev => prev + 10);
@@ -237,7 +257,9 @@ function GestionPersonal() {
               <div className="divide-y divide-gray-200">
                 {colaboradores.map((colaborador) => {
                   const totales = calcularTotales(colaborador.clerk_id);
-                  const totalAPagar = totales.pagosDiarios - (totales.faltantes + totales.adelantos);
+                  const pagosRealizadosColab = calcularPagosRealizados(colaborador.clerk_id);
+                  // Nuevo cálculo: restar pagos realizados
+                  const totalAPagar = totales.pagosDiarios - (totales.faltantes + totales.adelantos) - pagosRealizadosColab;
                   
                   return (
                     <div key={colaborador._id} className="p-6 hover:bg-gray-50">
@@ -249,7 +271,7 @@ function GestionPersonal() {
                           <p className="text-sm text-gray-600">{colaborador.email}</p>
                           <p className="text-sm text-gray-600 capitalize">{colaborador.role}</p>
                           
-                          <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+                          <div className="mt-4 grid grid-cols-2 md:grid-cols-6 gap-4 text-sm">
                             <div>
                               <span className="font-medium text-gray-600">Total Gastos:</span>
                               <span className="block text-red-600 font-bold">
@@ -272,6 +294,12 @@ function GestionPersonal() {
                               <span className="font-medium text-gray-600">Pagos Diarios:</span>
                               <span className="block text-green-600 font-bold">
                                 {formatearMoneda(totales.pagosDiarios)}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-600">Pagos Realizados:</span>
+                              <span className="block text-green-700 font-bold">
+                                {formatearMoneda(calcularPagosRealizados(colaborador.clerk_id))}
                               </span>
                             </div>
                             <div>

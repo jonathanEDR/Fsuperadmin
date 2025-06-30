@@ -3,11 +3,13 @@ import { X } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { VentasSelectionList } from '.';  // Import from local module
 import { createCobro } from '../../services/cobroService';
+import PaymentModal from './PaymentModal';
 
 const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
   const { user, isLoaded, isSignedIn } = useUser();
   const [selectedVentas, setSelectedVentas] = useState([]);
   const [ventasDetails, setVentasDetails] = useState({});
+  const [ventaParaPagar, setVentaParaPagar] = useState(null);
   
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -217,6 +219,23 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
     }
   };
 
+  // Nuevo: función para abrir el modal de pago para una venta
+  const handleAbrirPago = (ventaId) => {
+    const venta = ventasDetails[ventaId];
+    if (venta) setVentaParaPagar(venta);
+  };
+
+  // Nuevo: función para cerrar el modal de pago
+  const handleCerrarPago = () => setVentaParaPagar(null);
+
+  // Nuevo: función para procesar el pago (puedes personalizarla)
+  const handleProcesarPago = (pagoData) => {
+    // Aquí puedes manejar el pago individual, por ahora solo cerrar el modal
+    console.log('Pago procesado para venta:', ventaParaPagar, pagoData);
+    setVentaParaPagar(null);
+    // Opcional: refrescar ventas, actualizar estado, etc.
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -249,6 +268,23 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
                   onError={setError}
                 />
               </div>
+              {/* Nuevo: Botón de pago individual para cada venta seleccionada */}
+              {selectedVentas.length > 0 && (
+                <div className="space-y-2">
+                  {selectedVentas.map(ventaId => (
+                    <div key={ventaId} className="flex items-center gap-2">
+                      <span className="text-sm">Venta: {ventaId}</span>
+                      <button
+                        type="button"
+                        className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                        onClick={() => handleAbrirPago(ventaId)}
+                      >
+                        Pagar
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6">
@@ -394,6 +430,14 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
           </form>
         </div>
       </div>
+
+      {/* Nuevo: Modal de pago individual */}
+      <PaymentModal
+        isOpen={!!ventaParaPagar}
+        onClose={handleCerrarPago}
+        onSubmit={handleProcesarPago}
+        venta={ventaParaPagar || { montoTotal: 0 }}
+      />
     </div>
   );
 };

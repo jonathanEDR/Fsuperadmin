@@ -5,16 +5,8 @@ import { useAuth, useUser } from '@clerk/clerk-react';
 // Función auxiliar para filtrar usuarios según el rol
 const filterUsersByRole = (users, currentRole, currentUserId) => {
   if (!users || !currentRole) {
-    console.warn('Missing data for filtering:', { hasUsers: !!users, currentRole });
     return [];
   }
-
-  console.log('Filtering users:', {
-    totalUsers: users.length,
-    currentRole,
-    currentUserId,
-    userRoles: users.map(u => ({ id: u.id, role: u.role }))
-  });
 
   const filteredUsers = users.filter(user => {
     const isSelf = user.id === currentUserId;
@@ -28,11 +20,6 @@ const filterUsersByRole = (users, currentRole, currentUserId) => {
       default:
         return false;
     }
-  });
-
-  console.log('Filtered users:', {
-    totalFiltered: filteredUsers.length,
-    filteredRoles: filteredUsers.map(u => u.role)
   });
 
   return filteredUsers;
@@ -61,16 +48,8 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole: initial
   // Efecto para establecer el rol del usuario
   useEffect(() => {
     const role = initialUserRole || user?.publicMetadata?.role || 'user';
-    console.log('Setting user role:', {
-      providedRole: initialUserRole,
-      metadataRole: user?.publicMetadata?.role,
-      finalRole: role
-    });
     setCurrentUserRole(role);
-  }, [initialUserRole, user]);  // Log role changes
-  useEffect(() => {
-    console.log('Current user role updated to:', currentUserRole);
-  }, [currentUserRole]);
+  }, [initialUserRole, user]);
 
   // Efecto para cargar productos
   useEffect(() => {
@@ -90,7 +69,6 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole: initial
         const data = await response.json();
         setProductos(data);
       } catch (error) {
-        console.error('Error al cargar productos:', error);
         setError('Error al cargar la lista de productos');
       }
     };
@@ -102,7 +80,6 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole: initial
     const loadUsers = async () => {
       // Solo cargar usuarios si el rol permite crear ventas
       if (!['admin', 'super_admin'].includes(currentUserRole)) {
-        console.log('Usuario con rol', currentUserRole, 'no puede cargar lista de usuarios');
         return;
       }
 
@@ -210,12 +187,7 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole: initial
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Debug log to track if this is called multiple times
-    const submissionId = Date.now();
-    console.log(`[DEBUG ${submissionId}] handleSubmit called`);
-    
     if (isSubmitting) {
-      console.log(`[DEBUG ${submissionId}] Already submitting, ignoring duplicate call`);
       return;
     }
     
@@ -227,7 +199,6 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole: initial
         throw new Error('Agrega al menos un producto');
       }
 
-      console.log('Creando venta (única petición POST)...');
       const token = await getToken();
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/ventas`, {
         method: 'POST',
@@ -256,7 +227,6 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole: initial
       }
 
       const data = await response.json();
-      console.log('Venta creada exitosamente:', data.venta);
 
       // Actualizar el estado local de productos
       setProductos(prevProductos => 
@@ -297,7 +267,6 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole: initial
 
       onClose();
     } catch (error) {
-      console.error('Error:', error);
       setError(error.message || 'Error al crear la venta');
     } finally {
       setIsSubmitting(false);

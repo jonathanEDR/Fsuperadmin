@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import useGastos from './useGastos';
 import GastoForm from './GastoForm';
 import GastoTable from './GastoTable';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 export default function GastoList() {
   const {
@@ -135,125 +136,77 @@ export default function GastoList() {
       <div className="container mx-auto p-4">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Control de Secciones</h2>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Tarjeta de Finanzas */}
           <div 
             onClick={() => handleSectionChange('finanzas', 'Finanzas')}
-            className="bg-white shadow-xl rounded-xl overflow-hidden transform hover:scale-105 transition-transform duration-300 cursor-pointer"
+            className="bg-white rounded-2xl border border-blue-100 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group relative overflow-hidden"
+            style={{ boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.10)' }}
           >
-            <div className="aspect-square p-6 flex flex-col">
-              <div className="flex-1 flex flex-col items-center justify-center space-y-4">
-                <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
-                  <i className="fa fa-dollar-sign text-4xl text-blue-500"></i>
-                </div>
-                <h3 className="text-2xl font-bold text-gray-800">Finanzas</h3>
-                <p className="text-gray-600 text-center text-sm">
-                  Gestión de ingresos y egresos, control de presupuesto y más.
-                </p>
+            <div className="flex flex-col items-center justify-center py-10 px-6">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 bg-gradient-to-br from-blue-200/80 to-blue-100/60 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <i className="fas fa-coins text-5xl text-blue-500 drop-shadow-lg"></i>
               </div>
-              <div className="mt-6">
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddGastoByCategory('Financiero');
-                  }}
-                  className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-colors font-semibold flex items-center justify-center space-x-2"
-                >
-                  <i className="fa fa-plus"></i>
-                  <span>Agregar Gasto</span>
-                </button>
-              </div>
+              <h3 className="text-xl font-extrabold text-blue-700 mb-2 tracking-wide group-hover:text-blue-900 transition-colors">Finanzas</h3>
+              <p className="text-gray-500 text-center text-base font-medium leading-relaxed">
+                Gestión de ingresos y egresos, control de presupuesto y más.
+              </p>
             </div>
+            <div className="absolute inset-0 rounded-2xl pointer-events-none group-hover:bg-blue-50/40 transition-colors duration-300"></div>
           </div>
 
           {/* Tarjeta de Producción */}
           <div 
             onClick={() => handleSectionChange('produccion', 'Producción')}
-            className="bg-white shadow-xl rounded-xl overflow-hidden transform hover:scale-105 transition-transform duration-300 cursor-pointer"
+            className="bg-white rounded-2xl border border-green-100 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group relative overflow-hidden"
+            style={{ boxShadow: '0 8px 32px 0 rgba(16, 185, 129, 0.10)' }}
           >
-            <div className="aspect-square p-6 flex flex-col">
-              <div className="flex-1 flex flex-col items-center justify-center space-y-4">
-                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-                  <i className="fa fa-cogs text-4xl text-green-500"></i>
-                </div>
-                <h3 className="text-2xl font-bold text-gray-800">Producción</h3>
-                <p className="text-gray-600 text-center text-sm">
-                  Control de inventarios, planificación de producción y más.
-                </p>
+            <div className="flex flex-col items-center justify-center py-10 px-6">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 bg-gradient-to-br from-green-200/80 to-green-100/60 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <i className="fas fa-industry text-5xl text-green-500 drop-shadow-lg"></i>
               </div>
-              <div className="mt-6">
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddGastoByCategory('Producción');
-                  }}
-                  className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors font-semibold flex items-center justify-center space-x-2"
-                >
-                  <i className="fa fa-plus"></i>
-                  <span>Agregar Gasto</span>
-                </button>
-              </div>
+              <h3 className="text-xl font-extrabold text-green-700 mb-2 tracking-wide group-hover:text-green-900 transition-colors">Producción</h3>
+              <p className="text-gray-500 text-center text-base font-medium leading-relaxed">
+                Control de inventarios, planificación de producción y más.
+              </p>
             </div>
+            <div className="absolute inset-0 rounded-2xl pointer-events-none group-hover:bg-green-50/40 transition-colors duration-300"></div>
           </div>
 
           {/* Tarjeta de Ventas */}
           <div 
             onClick={() => handleSectionChange('ventas', 'Ventas')}
-            className="bg-white shadow-xl rounded-xl overflow-hidden transform hover:scale-105 transition-transform duration-300 cursor-pointer"
+            className="bg-white rounded-2xl border border-yellow-100 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group relative overflow-hidden"
+            style={{ boxShadow: '0 8px 32px 0 rgba(253, 224, 71, 0.10)' }}
           >
-            <div className="aspect-square p-6 flex flex-col">
-              <div className="flex-1 flex flex-col items-center justify-center space-y-4">
-                <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center">
-                  <i className="fa fa-chart-line text-4xl text-yellow-500"></i>
-                </div>
-                <h3 className="text-2xl font-bold text-gray-800">Ventas</h3>
-                <p className="text-gray-600 text-center text-sm">
-                  Gestión de ventas, estrategias y análisis de mercado.
-                </p>
+            <div className="flex flex-col items-center justify-center py-10 px-6">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 bg-gradient-to-br from-yellow-200/80 to-yellow-100/60 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <i className="fas fa-cash-register text-5xl text-yellow-500 drop-shadow-lg"></i>
               </div>
-              <div className="mt-6">
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddGastoByCategory('Ventas');
-                  }}
-                  className="w-full bg-yellow-500 text-white py-3 rounded-lg hover:bg-yellow-600 transition-colors font-semibold flex items-center justify-center space-x-2"
-                >
-                  <i className="fa fa-plus"></i>
-                  <span>Agregar Gasto</span>
-                </button>
-              </div>
+              <h3 className="text-xl font-extrabold text-yellow-700 mb-2 tracking-wide group-hover:text-yellow-900 transition-colors">Ventas</h3>
+              <p className="text-gray-500 text-center text-base font-medium leading-relaxed">
+                Gestión de ventas, estrategias y análisis de mercado.
+              </p>
             </div>
+            <div className="absolute inset-0 rounded-2xl pointer-events-none group-hover:bg-yellow-50/40 transition-colors duration-300"></div>
           </div>
 
           {/* Tarjeta Administrativa */}
           <div 
             onClick={() => handleSectionChange('administrativo', 'Administración')}
-            className="bg-white shadow-xl rounded-xl overflow-hidden transform hover:scale-105 transition-transform duration-300 cursor-pointer"
+            className="bg-white rounded-2xl border border-purple-100 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group relative overflow-hidden"
+            style={{ boxShadow: '0 8px 32px 0 rgba(168, 85, 247, 0.10)' }}
           >
-            <div className="aspect-square p-6 flex flex-col">
-              <div className="flex-1 flex flex-col items-center justify-center space-y-4">
-                <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center">
-                  <i className="fa fa-building text-4xl text-purple-500"></i>
-                </div>
-                <h3 className="text-2xl font-bold text-gray-800">Administrativo</h3>
-                <p className="text-gray-600 text-center text-sm">
-                  Gestión administrativa, organización de recursos y más.
-                </p>
+            <div className="flex flex-col items-center justify-center py-10 px-6">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 bg-gradient-to-br from-purple-200/80 to-purple-100/60 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <i className="fas fa-user-tie text-5xl text-purple-500 drop-shadow-lg"></i>
               </div>
-              <div className="mt-6">
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddGastoByCategory('Administración');
-                  }}
-                  className="w-full bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition-colors font-semibold flex items-center justify-center space-x-2"
-                >
-                  <i className="fa fa-plus"></i>
-                  <span>Agregar Gasto</span>
-                </button>
-              </div>
+              <h3 className="text-xl font-extrabold text-purple-700 mb-2 tracking-wide group-hover:text-purple-900 transition-colors">Administrativo</h3>
+              <p className="text-gray-500 text-center text-base font-medium leading-relaxed">
+                Gestión administrativa, organización de recursos y más.
+              </p>
             </div>
+            <div className="absolute inset-0 rounded-2xl pointer-events-none group-hover:bg-purple-50/40 transition-colors duration-300"></div>
           </div>
         </div>
       </div>
@@ -361,15 +314,6 @@ export default function GastoList() {
                   <div className="text-center py-12">
                     <div className="text-6xl mb-4">📝</div>
                     <p className="text-gray-500 text-xl mb-6">No hay gastos registrados en esta categoría</p>
-                    <button
-                      onClick={() => {
-                        handleCloseGastosList();
-                        handleAddGastoByCategory(selectedCategory);
-                      }}
-                      className="bg-blue-500 text-white px-8 py-3 rounded-lg hover:bg-blue-600 transition-colors font-semibold text-lg"
-                    >
-                      + Agregar Primer Gasto
-                    </button>
                   </div>
                 );
               }
@@ -535,31 +479,13 @@ export default function GastoList() {
                       </table>
                     </div>
                   </div>
-                  {/* Botón para agregar nuevo gasto */}
-                  <div className="text-center pt-6 border-t border-gray-200">
-                    <button
-                      onClick={() => {
-                        handleCloseGastosList();
-                        handleAddGastoByCategory(selectedCategory);
-                      }}
-                      className="bg-green-500 text-white px-8 py-4 rounded-lg hover:bg-green-600 transition-colors font-bold text-lg shadow-lg"
-                    >
-                      ➕ Agregar Nuevo Gasto en {selectedCategory}
-                    </button>
-                  </div>
                 </div>
               );
             })()}
           </div>
         </div>
       )}
-      {/* Botón para agregar nuevo gasto (fuera del bloque de gastos por categoría) */}
-      <button 
-        onClick={() => setShowForm(true)}
-        className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg mb-6 transition-colors"
-      >
-        Agregar Nuevo Gasto
-      </button>
+      {/* Botón para agregar nuevo gasto (fuera del bloque de gastos por categoría) eliminado */}
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-screen overflow-y-auto">

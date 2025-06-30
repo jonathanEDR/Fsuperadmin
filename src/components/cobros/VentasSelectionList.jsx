@@ -52,19 +52,23 @@ const VentasSelectionList = ({ onVentaSelect, selectedVentas = [], onError }) =>
 
         // Validar y procesar cada venta
         const ventasProcesadas = ventasData.map(venta => {
-          if (!venta._id || !venta.montoTotal) {
+          if (!venta._id || (!venta.montoTotal && !venta.montoTotalNeto && !venta.monto_total_neto)) {
             console.warn('Venta con datos incompletos:', venta);
             return null;
           }
 
+          // Usar montoTotalNeto si está disponible, si no, fallback a montoTotal
+          const montoTotalNeto =
+            venta.montoTotalNeto !== undefined ? parseFloat(venta.montoTotalNeto) :
+            venta.monto_total_neto !== undefined ? parseFloat(venta.monto_total_neto) :
+            venta.montoTotal !== undefined ? parseFloat(venta.montoTotal) : 0;
           const cantidadPagada = parseFloat(venta.cantidadPagada || 0);
-          const montoTotal = parseFloat(venta.montoTotal);
-          const montoPendiente = montoTotal - cantidadPagada;
+          const montoPendiente = montoTotalNeto - cantidadPagada;
 
           return {
             ...venta,
             cantidadPagada,
-            montoTotal,
+            montoTotal: montoTotalNeto, // Para mantener compatibilidad visual
             montoPendiente,
             estadoPago: venta.estadoPago || 'Pendiente',
             productos: Array.isArray(venta.productos) ? venta.productos : []

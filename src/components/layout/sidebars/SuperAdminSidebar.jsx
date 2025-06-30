@@ -10,7 +10,6 @@ function SuperAdminSidebar({ onLogout, isCollapsed, toggleSidebar, isMobileView 
     { id: 'ventas', icon: ShoppingCart, label: 'Gestión de Ventas', route: '/super-admin/ventas' },
     { id: 'cobros', icon: DollarSign, label: 'Gestión de Cobros', route: '/super-admin/cobros' },
     { id: 'caja', icon: CreditCard, label: 'Gestión de Caja', route: '/super-admin/caja' },
-    { id: 'pagosrealizados', icon: CreditCard, label: 'Pagos Realizados', route: '/super-admin/pagos-realizados' },
     { id: 'gastos', icon: DollarSign, label: 'Gestión de Gastos', route: '/super-admin/gastos' },
     { id: 'personal', icon: UserCheck, label: 'Gestión de Personal', route: '/super-admin/personal' },
     { id: 'colaboradores', icon: Users, label: 'Colaboradores', route: '/super-admin/colaboradores' },

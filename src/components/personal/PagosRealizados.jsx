@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth, useUser } from '@clerk/clerk-react';
 import { getPagosRealizados, createPagoRealizado, deletePagoRealizado } from '../../services/api';
 import api from '../../services/api';
 import useGestionPersonalData from './useGestionPersonalData';
@@ -32,6 +32,8 @@ function PagosRealizados() {
     observaciones: '',
     estado: 'pagado'
   });
+  const [pagosMostrados, setPagosMostrados] = useState(10);
+  const [userRole, setUserRole] = useState(null);
 
   const metodosPago = ['efectivo', 'transferencia', 'deposito', 'cheque'];
   const estadosPago = ['pagado', 'parcial', 'pendiente'];
@@ -140,6 +142,19 @@ function PagosRealizados() {
     });
   };
 
+  // Obtener el rol del usuario autenticado desde el backend (igual que en el dashboard)
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const res = await api.get('/api/admin/me'); // Cambiado a la ruta correcta del backend
+        setUserRole(res.data.role?.trim().toLowerCase() || null);
+      } catch (err) {
+        setUserRole(null);
+      }
+    };
+    fetchUserRole();
+  }, []);
+
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
@@ -201,17 +216,6 @@ function PagosRealizados() {
                     </div>
                   )}
                 </div>
-
-                {/* Botón de acción */}
-                <div className="mt-4">
-                  <button
-                    onClick={() => abrirModalPago(colaborador)}
-                    disabled={loading}
-                    className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-600 hover:to-indigo-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50"
-                  >
-                    + Registrar Pago
-                  </button>
-                </div>
               </div>
             </div>
           );
@@ -223,83 +227,83 @@ function PagosRealizados() {
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-800">Historial de Pagos</h3>
         </div>
-        
         {pagos.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             <p className="text-lg mb-2">No hay pagos registrados</p>
             <p className="text-sm">Los pagos aparecerán aquí una vez que los registres</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Colaborador
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Fecha Pago
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Monto
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Método
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Estado
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Observaciones
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>              
-              
-              <tbody className="bg-white divide-y divide-gray-200">
-                {pagos
-                  .sort((a, b) => new Date(b.fechaPago) - new Date(a.fechaPago))
-                  .map((pago, index) => {
-                    let colaboradorNombre = 'Colaborador no encontrado';
-                    const colaborador = colaboradores.find(c => c.colaboradorUserId === pago.colaboradorUserId);
-                    colaboradorNombre = colaborador?.nombre || 'Colaborador no encontrado';
-                    return (
-                      <tr key={pago._id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {colaboradorNombre}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {formatearFecha(pago.fechaPago)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">
-                          S/. {pago.montoTotal.toFixed(2)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                            {pago.metodoPago}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          <span className={`px-2 py-1 rounded-full text-xs ${
-                            pago.estado === 'pagado' ? 'bg-green-100 text-green-800' :
-                            pago.estado === 'parcial' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                            {pago.estado}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">
-                          <div className="truncate" title={pago.observaciones}>
-                            {pago.observaciones || '-'}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button
-                            onClick={() => {
-                              setPagoAEliminar(pago._id);
-                              setIsConfirmModalOpen(true);
+          <>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Colaborador
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Fecha Pago
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Monto
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Método
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Estado
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Observaciones
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {pagos
+                    .sort((a, b) => new Date(b.fechaPago) - new Date(a.fechaPago))
+                    .slice(0, pagosMostrados)
+                    .map((pago, index) => {
+                      let colaboradorNombre = 'Colaborador no encontrado';
+                      const colaborador = colaboradores.find(c => c.colaboradorUserId === pago.colaboradorUserId);
+                      colaboradorNombre = colaborador?.nombre || 'Colaborador no encontrado';
+                      return (
+                        <tr key={pago._id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {colaboradorNombre}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {formatearFecha(pago.fechaPago)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">
+                            S/. {pago.montoTotal.toFixed(2)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                              {pago.metodoPago}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <span className={`px-2 py-1 rounded-full text-xs ${
+                              pago.estado === 'pagado' ? 'bg-green-100 text-green-800' :
+                              pago.estado === 'parcial' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {pago.estado}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">
+                            <div className="truncate" title={pago.observaciones}>
+                              {pago.observaciones || '-'}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button
+                              onClick={() => {
+                                setPagoAEliminar(pago._id);
+                                setIsConfirmModalOpen(true);
                             }}
                             className="text-red-600 hover:text-red-900 hover:bg-red-50 px-3 py-1 rounded transition-colors"
                           >
@@ -309,9 +313,34 @@ function PagosRealizados() {
                       </tr>
                     );
                   })}
-              </tbody>
-            </table>
-          </div>
+                </tbody>
+              </table>
+            </div>
+            {/* Botón Ver Más y mensaje informativo, igual que en VentasFinalizadas */}
+            {pagosMostrados < pagos.length && (
+              userRole === 'super_admin' ? (
+                <div className="flex justify-center py-4">
+                  <button
+                    onClick={() => setPagosMostrados(pagosMostrados + 10)}
+                    className="px-6 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
+                  >
+                    Ver más
+                  </button>
+                </div>
+              ) : (
+                <div className="flex justify-center py-4">
+                  <p className="text-sm text-gray-500 text-center">
+                    Mostrando los {pagosMostrados} pagos más recientes
+                    {pagos.length > pagosMostrados && (
+                      <span className="block mt-1 text-xs">
+                        ({pagos.length - pagosMostrados} pagos adicionales disponibles)
+                      </span>
+                    )}
+                  </p>
+                </div>
+              )
+            )}
+          </>
         )}
       </div>
 

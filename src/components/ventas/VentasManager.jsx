@@ -1,28 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth, useUser } from '@clerk/clerk-react';
 import { ShoppingCart, Plus } from 'lucide-react';
 import VentaList from './VentaList';
 import VentasFinalizadas from './VentasFinalizadas';
 import VentaCreationModal from './VentaCreationModal';
+import { useRole } from '../../context/RoleContext';
+import DevolucionList from '../devoluciones/DevolucionList';
 
-const VentasManager = ({ userRole }) => {  const { getToken, user } = useAuth();
+const VentasManager = () => {
+  const { getToken } = useAuth();
+  const { user } = useUser();
+  const userRole = useRole();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ventas, setVentas] = useState([]);
+  const [ventasFinalizadas, setVentasFinalizadas] = useState([]);
+  const [devoluciones, setDevoluciones] = useState([]); // <-- Nuevo estado para devoluciones
   const [loading, setLoading] = useState(false);
+  const [loadingFinalizadas, setLoadingFinalizadas] = useState(false);
   const [error, setError] = useState(null);
-  
-  // Asegurarse de que el userRole esté definido
-  const [currentUserRole, setCurrentUserRole] = useState(userRole || 'user');
-  
-  useEffect(() => {
-    if (userRole) {
-      setCurrentUserRole(userRole);
-      console.log('Role set in VentasManager:', userRole);
-    }
-  }, [userRole]);
-    // Solo admins y super_admins pueden crear ventas
-  const canShowAddButton = ['admin', 'super_admin'].includes(currentUserRole);
 
+  // Solo admins y super_admins pueden crear ventas
+  const canShowAddButton = ['admin', 'super_admin'].includes(userRole);
+
+  // Fetch solo ventas activas (no finalizadas)
   const fetchVentas = async () => {
     try {
       setLoading(true);
@@ -32,13 +32,13 @@ const VentasManager = ({ userRole }) => {  const { getToken, user } = useAuth();
           'Authorization': `Bearer ${token}`
         }
       });
-
       if (!response.ok) {
         throw new Error('Error al cargar ventas');
       }
-
       const data = await response.json();
-      setVentas(data.ventas || []);
+      // Filtrar ventas activas (no finalizadas)
+      const ventasActivas = (data.ventas || []).filter(v => v.completionStatus !== 'approved');
+      setVentas(ventasActivas);
     } catch (error) {
       console.error('Error:', error);
       setError('Error al cargar ventas');
@@ -47,20 +47,57 @@ const VentasManager = ({ userRole }) => {  const { getToken, user } = useAuth();
     }
   };
 
+  // Fetch ventas finalizadas
+  const fetchVentasFinalizadas = async () => {
+    try {
+      setLoadingFinalizadas(true);
+      const token = await getToken();
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/ventas/finalizadas?limit=1000&offset=0`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Error al cargar ventas finalizadas');
+      }
+      const data = await response.json();
+      setVentasFinalizadas(data.ventas || []);
+    } catch (error) {
+      setError('Error al cargar ventas finalizadas');
+    } finally {
+      setLoadingFinalizadas(false);
+    }
+  };
+
+  // Fetch devoluciones
+  const fetchDevoluciones = async () => {
+    try {
+      const token = await getToken();
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/devoluciones`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error('Error al cargar devoluciones');
+      const data = await response.json();
+      setDevoluciones(data.devoluciones || []);
+    } catch (error) {
+      console.error('Error al cargar devoluciones:', error);
+      setDevoluciones([]);
+    }
+  };
+
   useEffect(() => {
     fetchVentas();
-  }, []);  const handleVentaCreated = async (venta) => {
-    // La venta ya fue creada en el modal, solo necesitamos:
-    // 1. Actualizar la lista de ventas
-    // 2. Cerrar el modal
-    console.log('Venta recibida del modal (ya creada):', venta);
+    fetchVentasFinalizadas();
+    fetchDevoluciones(); // <-- Cargar devoluciones al montar
+  }, []);
+
+  const handleVentaCreated = async (venta) => {
     try {
       setLoading(true);
-      await fetchVentas(); // Refrescar la lista de ventas
-      setIsModalOpen(false); // Cerrar el modal
-      console.log('Lista de ventas actualizada correctamente');
+      await fetchVentas();
+      setIsModalOpen(false);
     } catch (error) {
-      console.error('Error al refrescar ventas:', error);
       setError('Error al refrescar la lista de ventas');
     } finally {
       setLoading(false);
@@ -95,7 +132,9 @@ const VentasManager = ({ userRole }) => {  const { getToken, user } = useAuth();
 
         <VentaList 
           ventas={ventas}
+          devoluciones={devoluciones}
           userRole={userRole}
+          currentUserId={user?.id}
           showHeader={false}
           onVentaUpdated={fetchVentas}
           loading={loading}
@@ -104,14 +143,25 @@ const VentasManager = ({ userRole }) => {  const { getToken, user } = useAuth();
         {isModalOpen && (
           <VentaCreationModal
             isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}            onVentaCreated={handleVentaCreated}
-            userRole={currentUserRole}
+            onClose={() => setIsModalOpen(false)}
+            onVentaCreated={handleVentaCreated}
+            userRole={userRole}
           />
         )}
       </div>
 
       <div className="bg-white shadow-lg rounded-xl p-6">
-        <VentasFinalizadas userRole={userRole} />
+        <VentasFinalizadas 
+          userRole={userRole} 
+          ventasFinalizadas={ventasFinalizadas} 
+          loading={loadingFinalizadas}
+        />
+      </div>
+
+      {/* Nueva sección para Devoluciones */}
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <h3 className="text-xl font-bold text-gray-800 mb-4">Devoluciones</h3>
+        <DevolucionList userRole={userRole} />
       </div>
     </div>
   );

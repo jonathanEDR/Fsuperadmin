@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, BarChart3, Package, ShoppingBag, RefreshCw, Menu, User } from 'lucide-react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth, useUser } from '@clerk/clerk-react';
 
 import { CreateNote } from '../../../components/notas';
 import MyProfile from '../../../Pages/MyProfile';
@@ -15,9 +15,11 @@ import {
   createDevolucion, 
   deleteDevolucion 
 } from '../../../services/devolucionService';
+import { RoleContext } from '../../../context/RoleContext';
 
 const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
   const { getToken } = useAuth();
+  const { user } = useUser();
   const [notes, setNotes] = useState(initialNotes || []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -399,6 +401,8 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
             loading={ventasLoading}
             error={error}
             fetchVentas={fetchVentas}
+            userRole="user" // <-- Fallback explícito
+            currentUserId={user?.id} // <-- Nuevo prop
           />
         </div>
 
@@ -466,18 +470,27 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
     }
   };
 
+  // DEBUG: Verifica el contexto justo antes del render
+  React.useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('UserDashboard: RoleContext.Provider value = user');
+  }, []);
+
   return (
-    <div className={`flex ${isSidebarCollapsed ? 'ml-16' : 'ml-64'} transition-all duration-300`}>
-      <Sidebar 
-        isCollapsed={isSidebarCollapsed} 
-        onToggle={() => setIsSidebarCollapsed(prev => !prev)} 
-        currentView={currentView}
-        onViewChange={setCurrentView}
-      />      <div className="flex-1 p-8">
-        {/* Contenido Principal */}
-        {renderContent()}
+    <RoleContext.Provider value="user">
+      <div className={`flex ${isSidebarCollapsed ? 'ml-16' : 'ml-64'} transition-all duration-300`}>
+        <Sidebar 
+          isCollapsed={isSidebarCollapsed} 
+          onToggle={() => setIsSidebarCollapsed(prev => !prev)} 
+          currentView={currentView}
+          onViewChange={setCurrentView}
+        />
+        <div className="flex-1 p-8">
+          {/* Contenido Principal */}
+          {renderContent()}
+        </div>
       </div>
-    </div>
+    </RoleContext.Provider>
   );
 };
 

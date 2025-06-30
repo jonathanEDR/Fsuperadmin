@@ -31,8 +31,9 @@ const DevolucionList = ({ userRole = 'user' }) => {
   };  // Función para verificar si una devolución puede ser eliminada
   const canDeleteDevolucion = (devolucion) => {
     return devolucion.ventaFinalizada !== true;
-  };useEffect(() => {
-    console.log('DevolucionList inicializado con userRole:', userRole);
+  };
+
+  useEffect(() => {
     fetchDevoluciones();
   }, []);
 
@@ -41,15 +42,16 @@ const DevolucionList = ({ userRole = 'user' }) => {
     if (limit > 10) {
       fetchDevoluciones(true);
     }
-  }, [limit]);  const handleLoadMore = () => {
+  }, [limit]);
+
+  const handleLoadMore = () => {
     // Solo permitir cargar más si es super admin
     if (userRole === 'super_admin') {
-      console.log('Cargando más elementos. Límite actual:', limit, 'Nuevo límite:', limit + 10);
       setLimit(prev => prev + 10);
-    } else {
-      console.log('Usuario no es super admin, no puede cargar más');
     }
-  };const fetchDevoluciones = async (isLoadingMore = false) => {
+  };
+
+  const fetchDevoluciones = async (isLoadingMore = false) => {
     try {
       if (!isLoadingMore) {
         setLoading(true);
@@ -68,36 +70,15 @@ const DevolucionList = ({ userRole = 'user' }) => {
 
       if (!response.ok) {
         throw new Error('Error al cargar devoluciones');
-      }      const data = await response.json();
-        console.log('Datos recibidos:', {
-        devoluciones: data.devoluciones?.length,
-        totalDevoluciones: data.totalDevoluciones,
-        limit: limit,
-        isLoadingMore,
-        ventasFinalizadas: data.devoluciones?.filter(d => d.ventaFinalizada).length || 0
-      });        // Log de ejemplo de la primera devolución para verificar la estructura
-      if (data.devoluciones && data.devoluciones.length > 0) {
-        console.log('Ejemplo de devolución:', {
-          id: data.devoluciones[0]._id,
-          ventaFinalizada: data.devoluciones[0].ventaFinalizada,
-          producto: data.devoluciones[0].producto
-        });
       }
+      const data = await response.json();
       
       // Siempre establecer las devoluciones (la API devuelve todos los elementos hasta el límite)
       setDevoluciones(data.devoluciones || []);
-        // Verificar si hay más elementos disponibles usando el total del backend
+      // Verificar si hay más elementos disponibles usando el total del backend
       const totalDevoluciones = data.totalDevoluciones || 0;
       const hasMoreElements = totalDevoluciones > limit;
       setHasMore(hasMoreElements);
-      
-      console.log('HasMore calculado:', {
-        totalDevoluciones: data.totalDevoluciones,
-        devolucionesLength: data.devoluciones?.length,
-        limit: limit,
-        hasMoreElements,
-        logica: `${totalDevoluciones} > ${limit} = ${hasMoreElements}`
-      });
       
     } catch (error) {
       console.error('Error:', error);
@@ -289,11 +270,6 @@ const DevolucionList = ({ userRole = 'user' }) => {
       )}      {/* Botón Ver más - Solo para Super Admin */}
       {(() => {
         const shouldShowButton = hasMore && userRole === 'super_admin';
-        console.log('Evaluando mostrar botón "Ver más":', {
-          hasMore,
-          userRole,
-          shouldShowButton
-        });
         return shouldShowButton;
       })() && (
         <div className="flex justify-center mt-6">

@@ -8,14 +8,16 @@ import { QuickDevolucionModal } from '../devoluciones';
 import { VentaCreationModal } from '.';
 import { format } from 'date-fns';
 import clsx from 'clsx';
+import { useRole } from '../../context/RoleContext';
 
 function VentaList({ 
-  userRole = 'user', 
   showActions = true, 
   canComplete = false, 
   onVentaUpdated,
   showHeader = true, // Nuevo prop para controlar si se muestra el encabezado
-  ventas: ventasProp = null // Ventas pueden venir como prop
+  ventas: ventasProp = null, // Ventas pueden venir como prop
+  currentUserId: currentUserIdProp,
+  devoluciones = [] // <-- Asegura que devoluciones siempre esté definida
 }) {
   const getFechaActualString = () => {
     const hoy = new Date();
@@ -30,7 +32,9 @@ function VentaList({
   // Auth hooks
   const { getToken } = useAuth();
   const { user } = useUser();
-  const [currentUserId, setCurrentUserId] = useState(null);
+  // Fallback temporal para el rol
+  const userRole = useRole() || 'user';
+  const currentUserId = currentUserIdProp || user?.id;
   const [ventas, setVentas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -54,7 +58,6 @@ function VentaList({
 
   useEffect(() => {
     if (user) {
-      setCurrentUserId(user.id);
       loadVentas();
       loadProductos();
       loadUsuarios();
@@ -122,7 +125,6 @@ function VentaList({
           }
         });
 
-        console.log('Ventas filtradas:', ventasActivas);
         setVentas(ventasActivas);
       } else {
         console.warn('Estructura de respuesta inesperada:', data);
@@ -523,6 +525,7 @@ function VentaList({
   // Main render
   return (
     <div className="space-y-4">
+      {/* LOG: ventas mapeadas */}
       {showHeader && (
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -552,281 +555,327 @@ function VentaList({
       )}
 
       {/* Lista de ventas */}
-      {ventas.map(venta => (
-        <div key={venta._id} className="bg-white rounded-lg shadow p-6 mb-4">
-          {/* Cabecera de la venta */}
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Venta #{venta._id}
-              </h3>
-              <p className="text-sm text-gray-500">
-                {new Date(venta.fechadeVenta).toLocaleDateString('es-ES', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </p>
-            </div>            {/* Estados de la venta */}
-            <div className="flex flex-col items-end gap-2">
-              {/* Estado de pago con detalles */}
-              <div className="text-right">
-                <span className={`px-3 py-1 text-sm rounded-full ${
-                  venta.estadoPago === 'Pagado' 
-                    ? 'bg-green-100 text-green-800'
-                    : venta.estadoPago === 'Parcial'
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : 'bg-red-100 text-red-800'
-                }`}>
-                  {venta.estadoPago}
-                </span>
-                <div className="text-xs text-gray-500 mt-1">
-                  S/ {(venta.cantidadPagada || 0).toFixed(2)} / S/ {venta.montoTotal.toFixed(2)}
-                </div>                {venta.cantidadPagada < venta.montoTotal && (
-                  <div className="text-xs text-red-600 font-medium">
-                    Debe: S/ {(venta.montoTotal - (venta.cantidadPagada || 0)).toFixed(2)}
-                  </div>
-                )}
-                {/* Barra de progreso de pago */}
-                <div className="w-24 mt-2">
-                  <div className="bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full ${
-                        venta.estadoPago === 'Pagado' 
-                          ? 'bg-green-500' 
-                          : venta.estadoPago === 'Parcial'
-                          ? 'bg-yellow-500'
-                          : 'bg-red-500'
-                      }`}
-                      style={{ 
-                        width: `${Math.min(100, ((venta.cantidadPagada || 0) / venta.montoTotal) * 100)}%` 
-                      }}
-                    ></div>
-                  </div>
-                  <div className="text-xs text-gray-500 text-center mt-1">
-                    {Math.round(((venta.cantidadPagada || 0) / venta.montoTotal) * 100)}%
+      {ventas.map(venta => {
+        // LOG: venta y condición de botón finalizar
+        const puedeFinalizar = (venta.userId === currentUserId || venta.user_info?.id === currentUserId || venta.userInfo?.id === currentUserId) && (userRole === 'user' || userRole === 'admin');
+        // Calcular monto devuelto para esta venta
+        const devolucionesVenta = devoluciones.filter(dev => {
+          return String(dev.ventaId) === String(venta._id);
+        });
+        const montoDevuelto = devolucionesVenta.reduce((acc, dev) => acc + (dev.monto || dev.montoDevolucion || 0), 0);
+        // Calcular el monto neto real para pasar al modal de pago
+        const montoTotalNeto = (venta.montoTotal || 0) - montoDevuelto;
+        // Crear un objeto venta enriquecido para el modal
+        const ventaParaPago = {
+          ...venta,
+          montoTotal: montoTotalNeto, // El modal PaymentModal usará este campo
+          montoTotalOriginal: venta.montoTotal, // Por si se quiere mostrar el original
+          montoDevuelto: montoDevuelto,
+          montoPendiente: montoTotalNeto - (venta.cantidadPagada || 0)
+        };
+        // Log para depuración de cálculo
+        return (
+          <div key={venta._id} className="bg-white rounded-lg shadow p-6 mb-4">
+            {/* Cabecera de la venta */}
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Venta #{venta._id}
+                </h3>
+                <p className="text-sm text-gray-500">
+                  {new Date(venta.fechadeVenta).toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </p>
+              </div>            {/* Estados de la venta */}
+              <div className="flex flex-col items-end gap-2">
+                {/* Estado de pago con detalles */}
+                <div className="text-right">
+                  <span className={`px-3 py-1 text-sm rounded-full ${
+                    venta.estadoPago === 'Pagado' 
+                      ? 'bg-green-100 text-green-800'
+                      : venta.estadoPago === 'Parcial'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {venta.estadoPago}
+                  </span>
+                  <div className="text-xs text-gray-500 mt-1">
+                    S/ {(venta.cantidadPagada || 0).toFixed(2)} / S/ {montoTotalNeto.toFixed(2)}
+                  </div>                {venta.cantidadPagada < montoTotalNeto && (
+                    <div className="text-xs text-red-600 font-medium">
+                      Debe: S/ {(montoTotalNeto - (venta.cantidadPagada || 0)).toFixed(2)}
+                    </div>
+                  )}
+                  {/* Barra de progreso de pago */}
+                  <div className="w-24 mt-2">
+                    <div className="bg-gray-200 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${
+                          venta.estadoPago === 'Pagado' 
+                            ? 'bg-green-500' 
+                            : venta.estadoPago === 'Parcial'
+                            ? 'bg-yellow-500'
+                            : 'bg-red-500'
+                        }`}
+                        style={{ 
+                          width: `${Math.min(100, ((venta.cantidadPagada || 0) / montoTotalNeto) * 100)}%` 
+                        }}
+                      ></div>
+                    </div>
+                    <div className="text-xs text-gray-500 text-center mt-1">
+                      {Math.round(((venta.cantidadPagada || 0) / montoTotalNeto) * 100)}%
+                    </div>
                   </div>
                 </div>
-              </div>
-              
-              {/* Estado de finalización */}
-              {venta.isCompleted && (
-                <span className={`px-3 py-1 text-sm rounded-full ${
-                  venta.completionStatus === 'approved'
-                    ? 'bg-green-100 text-green-800'
-                    : venta.completionStatus === 'rejected'
-                    ? 'bg-red-100 text-red-800'
-                    : 'bg-yellow-100 text-yellow-800'
-                }`}>
-                  {venta.completionStatus === 'approved'
-                    ? 'Aprobada'
-                    : venta.completionStatus === 'rejected'
-                    ? 'Rechazada'
-                    : 'Pendiente de revisión'}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Información del creador y propietario */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 mb-4 text-sm">
-            {venta.creatorInfo && (
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <p className="font-medium text-gray-700">Creado por:</p>
-                <p className="text-gray-900">{venta.creatorInfo.nombre_negocio || 'No especificado'}</p>
-                <p className="text-gray-500 text-xs">{venta.creatorInfo.email}</p>
-                <p className="text-gray-500 text-xs italic">Rol: {venta.creatorInfo.role}</p>
-              </div>
-            )}
-            
-            {venta.userInfo && venta.userInfo.id !== venta.creatorInfo?.id && (
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <p className="font-medium text-gray-700">Asignado a:</p>
-                <p className="text-gray-900">{venta.userInfo.nombre_negocio || 'No especificado'}</p>
-                <p className="text-gray-500 text-xs">{venta.userInfo.email}</p>
-                <p className="text-gray-500 text-xs italic">Rol: {venta.userInfo.role}</p>
-              </div>
-            )}
-          </div>          {/* Detalles de productos y montos */}
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div>
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">Detalles del Cliente</h4>
-              <p className="text-gray-600">
-                <span className="font-medium">Nombre:</span> {venta.user_info?.nombre_negocio || 'N/A'}
-              </p>
-              <p className="text-gray-600">
-                <span className="font-medium">Email:</span> {venta.user_info?.email || 'N/A'}
-              </p>
-            </div>            <div>
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">Detalles de la Venta</h4>
-              <p className="text-gray-600">
-                <span className="font-medium">Fecha:</span> {formatearFechaHora(venta.fechadeVenta)}
-              </p>
-              <div className="space-y-1">
-                <p className="text-gray-600">
-                  <span className="font-medium">Monto Total:</span> S/ {venta.montoTotal.toFixed(2)}
-                </p>
-                <p className="text-gray-600">
-                  <span className="font-medium">Monto Pagado:</span> 
-                  <span className={`ml-1 font-semibold ${
-                    venta.cantidadPagada >= venta.montoTotal 
-                      ? 'text-green-600' 
-                      : venta.cantidadPagada > 0 
-                      ? 'text-yellow-600' 
-                      : 'text-red-600'
+                
+                {/* Estado de finalización */}
+                {venta.isCompleted && (
+                  <span className={`px-3 py-1 text-sm rounded-full ${
+                    venta.completionStatus === 'approved'
+                      ? 'bg-green-100 text-green-800'
+                      : venta.completionStatus === 'rejected'
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-yellow-100 text-yellow-800'
                   }`}>
-                    S/ {(venta.cantidadPagada || 0).toFixed(2)}
+                    {venta.completionStatus === 'approved'
+                      ? 'Aprobada'
+                      : venta.completionStatus === 'rejected'
+                      ? 'Rechazada'
+                      : 'Pendiente de revisión'}
                   </span>
+                )}
+              </div>
+            </div>
+
+            {/* Información del creador y propietario */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 mb-4 text-sm">
+              {venta.creatorInfo && (
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="font-medium text-gray-700">Creado por:</p>
+                  <p className="text-gray-900">{venta.creatorInfo.nombre_negocio || 'No especificado'}</p>
+                  <p className="text-gray-500 text-xs">{venta.creatorInfo.email}</p>
+                  <p className="text-gray-500 text-xs italic">Rol: {venta.creatorInfo.role}</p>
+                </div>
+              )}
+              
+              {venta.userInfo && venta.userInfo.id !== venta.creatorInfo?.id && (
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="font-medium text-gray-700">Asignado a:</p>
+                  <p className="text-gray-900">{venta.userInfo.nombre_negocio || 'No especificado'}</p>
+                  <p className="text-gray-500 text-xs">{venta.userInfo.email}</p>
+                  <p className="text-gray-500 text-xs italic">Rol: {venta.userInfo.role}</p>
+                </div>
+              )}
+            </div>        
+            
+
+              {/* Detalles de productos y montos */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <h4 className="text-sm font-semibold text-gray-700 mb-2">Detalles del Cliente</h4>
+                <p className="text-gray-600">
+                  <span className="font-medium">Nombre:</span> {venta.user_info?.nombre_negocio || 'N/A'}
                 </p>
-                {venta.cantidadPagada < venta.montoTotal && (
+                <p className="text-gray-600">
+                  <span className="font-medium">Email:</span> {venta.user_info?.email || 'N/A'}
+                </p>
+              </div>            <div>
+                <h4 className="text-sm font-semibold text-gray-700 mb-2">Detalles de la Venta</h4>
+                <p className="text-gray-600">
+                  <span className="font-medium">Fecha:</span> {formatearFechaHora(venta.fechadeVenta)}
+                </p>
+                <div className="space-y-1">
                   <p className="text-gray-600">
-                    <span className="font-medium">Saldo Pendiente:</span> 
-                    <span className="ml-1 font-semibold text-red-600">
-                      S/ {(venta.montoTotal - (venta.cantidadPagada || 0)).toFixed(2)}
+                    <span className="font-medium">Monto Total:</span> S/ {venta.montoTotalOriginal !== undefined ? venta.montoTotalOriginal.toFixed(2) : (venta.montoTotal + (venta.montoDevuelto || 0)).toFixed(2)}
+                  </p>
+
+                  {/* Mostrar monto total neto si hay devoluciones */}
+                  {montoDevuelto > 0 && (
+                    <p className="text-gray-600">
+                      <span className="font-medium">Monto Total Neto:</span>
+                      <span className="ml-1 font-semibold text-blue-700">S/ {montoTotalNeto.toFixed(2)}</span>
+                      <span className="ml-2 text-xs text-gray-400">(descontando devoluciones)</span>
+                    </p>
+                  )}
+                  <p className="text-gray-600">
+                    <span className="font-medium">Monto Pagado:</span> 
+                    <span className={`ml-1 font-semibold ${
+                      venta.cantidadPagada >= montoTotalNeto 
+                        ? 'text-green-600' 
+                        : venta.cantidadPagada > 0 
+                        ? 'text-yellow-600' 
+                        : 'text-red-600'
+                    }`}>
+                      S/ {(venta.cantidadPagada || 0).toFixed(2)}
                     </span>
                   </p>
-                )}
-                
-                {/* Desglose detallado de pagos */}
-                {venta.cobros_detalle && (venta.cobros_detalle.yape > 0 || venta.cobros_detalle.efectivo > 0 || venta.cobros_detalle.gastosImprevistos > 0) && (
-                  <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <h5 className="text-xs font-semibold text-blue-800 mb-2">Desglose de Pagos:</h5>
-                    <div className="space-y-1 text-xs">
-                      {venta.cobros_detalle.yape > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-blue-700">💳 Yape:</span>
-                          <span className="font-medium text-blue-800">S/ {venta.cobros_detalle.yape.toFixed(2)}</span>
-                        </div>
-                      )}
-                      {venta.cobros_detalle.efectivo > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-blue-700">💵 Efectivo:</span>
-                          <span className="font-medium text-blue-800">S/ {venta.cobros_detalle.efectivo.toFixed(2)}</span>
-                        </div>
-                      )}
-                      {venta.cobros_detalle.gastosImprevistos > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-blue-700">⚠️ Gastos Imprevistos:</span>
-                          <span className="font-medium text-red-600">S/ {venta.cobros_detalle.gastosImprevistos.toFixed(2)}</span>
-                        </div>
-                      )}
-                      <div className="border-t border-blue-300 pt-1 mt-2">
-                        <div className="flex justify-between font-semibold">
-                          <span className="text-blue-700">Total Neto:</span>
-                          <span className="text-blue-800">
-                            S/ {((venta.cobros_detalle.yape || 0) + (venta.cobros_detalle.efectivo || 0) - (venta.cobros_detalle.gastosImprevistos || 0)).toFixed(2)}
-                          </span>
+                  {venta.cantidadPagada < montoTotalNeto && (
+                    <p className="text-gray-600">
+                      <span className="font-medium">Saldo Pendiente:</span> 
+                      <span className="ml-1 font-semibold text-red-600">
+                        S/ {(montoTotalNeto - (venta.cantidadPagada || 0)).toFixed(2)}
+                      </span>
+                    </p>
+                  )}
+                  
+                  {/* Desglose detallado de pagos */}
+                  {venta.cobros_detalle && (venta.cobros_detalle.yape > 0 || venta.cobros_detalle.efectivo > 0 || venta.cobros_detalle.gastosImprevistos > 0) && (
+                    <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <h5 className="text-xs font-semibold text-blue-800 mb-2">Desglose de Pagos:</h5>
+                      <div className="space-y-1 text-xs">
+                        {venta.cobros_detalle.yape > 0 && (
+                          <div className="flex justify-between">
+                            <span className="text-blue-700">💳 Yape:</span>
+                            <span className="font-medium text-blue-800">S/ {venta.cobros_detalle.yape.toFixed(2)}</span>
+                          </div>
+                        )}
+                        {venta.cobros_detalle.efectivo > 0 && (
+                          <div className="flex justify-between">
+                            <span className="text-blue-700">💵 Efectivo:</span>
+                            <span className="font-medium text-blue-800">S/ {venta.cobros_detalle.efectivo.toFixed(2)}</span>
+                          </div>
+                        )}
+                        {venta.cobros_detalle.gastosImprevistos > 0 && (
+                          <div className="flex justify-between">
+                            <span className="text-blue-700">⚠️ Gastos Imprevistos:</span>
+                            <span className="font-medium text-red-600">S/ {venta.cobros_detalle.gastosImprevistos.toFixed(2)}</span>
+                          </div>
+                        )}
+                        <div className="border-t border-blue-300 pt-1 mt-2">
+                          <div className="flex justify-between font-semibold">
+                            <span className="text-blue-700">Total Neto:</span>
+                            <span className="text-blue-800">
+                              S/ {((venta.cobros_detalle.yape || 0) + (venta.cobros_detalle.efectivo || 0) - (venta.cobros_detalle.gastosImprevistos || 0)).toFixed(2)}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Productos de la venta */}
-          <div className="mb-4">
-            <h4 className="text-sm font-semibold text-gray-700 mb-2">Productos</h4>
-            <ul className="list-disc list-inside">
-              {venta.productos?.map((prod, idx) => (
-                <li key={idx} className="text-gray-600">
-                  {prod.productoId?.nombre} - {prod.cantidad} unidad(es)
-                </li>
-              ))}
-            </ul>
-          </div>          {/* Botones de acción */}
-          <div className="mt-4 flex gap-2">
-            {/* Botón de pago */}
-            {venta.estadoPago !== 'Pagado' && (
-              <button
-                onClick={() => handleOpenPayment(venta)}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                disabled={loading}
-                title={userRole === 'user' ? 'Realizar pago de venta' : 'Procesar pago'}
-              >
-                <DollarSign className="w-4 h-4" />
-                {userRole === 'user' ? 'Pagar Venta' : 'Procesar Pago'}
-              </button>
-            )}
-            
-            {/* Botón de Devolución - visible si la venta no está completamente devuelta */}
-            {(!venta.estado || venta.estado !== 'devuelta') && (
-              <button
-                onClick={() => handleOpenDevolucion(venta)}
-                className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
-                disabled={loading}
-                title="Agregar devolución"
-              >
-                <RotateCcw className="w-4 h-4" />
-                Agregar Devolución
-              </button>
-            )}
 
-            {/* Estado de finalización o botón para finalizar */}
-            {venta.userId === currentUserId && (userRole === 'user' || userRole === 'admin') && (
-              <>
-                {(!venta.completionStatus || venta.completionStatus === 'rejected') && (
-                  <button
-                    onClick={() => handleFinalizarVenta(venta._id)}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    disabled={loading}
-                  >
-                    <Clock className="w-4 h-4" />
-                    {venta.completionStatus === 'rejected' ? 'Reenviar Venta' : 'Marcar como Finalizada'}
-                  </button>
-                )}
-                {venta.completionStatus === 'pending' && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg">
-                    <Clock className="w-4 h-4" />
-                    Pendiente de aprobación
+            {/* Productos de la venta */}
+            <div className="mb-4">
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">Productos</h4>
+              <ul className="list-disc list-inside">
+                {venta.productos?.map((prod, idx) => (
+                  <li key={idx} className="text-gray-600">
+                    {prod.productoId?.nombre} - {prod.cantidad} unidad(es)
+                  </li>
+                ))}
+              </ul>
+            </div>          {/* Botones de acción */}
+            <div className="mt-4 flex gap-2">
+              {/* Botón de pago */}
+              {venta.estadoPago !== 'Pagado' && (
+                <button
+                  onClick={() => handleOpenPayment(ventaParaPago)}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  disabled={loading}
+                  title={userRole === 'user' ? 'Realizar pago de venta' : 'Procesar pago'}
+                >
+                  <DollarSign className="w-4 h-4" />
+                  {userRole === 'user' ? 'Pagar Venta' : 'Procesar Pago'}
+                </button>
+              )}
+              
+              {/* Botón de Devolución - visible si la venta no está completamente devuelta */}
+              {(!venta.estado || venta.estado !== 'devuelta') && (
+                <button
+                  onClick={() => handleOpenDevolucion(venta)}
+                  className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+                  disabled={loading}
+                  title="Agregar devolución"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Agregar Devolución
+                </button>
+              )}
+
+              {/* Estado de finalización o botón para finalizar */}
+              {(venta.userId === currentUserId && (userRole === 'user' || userRole === 'admin')) && (
+                <>
+                  {/* Solo mostrar botón si la venta no está finalizada ni pendiente de revisión */}
+                  {(!venta.completionStatus) && (
+                    <button
+                      onClick={() => handleFinalizarVenta(venta._id)}
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      disabled={loading}
+                    >
+                      <Clock className="w-4 h-4" />
+                      Marcar como Finalizada
+                    </button>
+                  )}
+                  {/* Permitir reenviar solo si fue rechazada */}
+                  {(venta.completionStatus === 'rejected') && (
+                    <button
+                      onClick={() => handleFinalizarVenta(venta._id)}
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      disabled={loading}
+                    >
+                      <Clock className="w-4 h-4" />
+                      Reenviar Venta
+                    </button>
+                  )}
+                  {/* Si está pendiente, solo mostrar mensaje de espera */}
+                  {venta.completionStatus === 'pending' && (
+                    <div className="flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg">
+                      <Clock className="w-4 h-4" />
+                      Pendiente de aprobación
+                    </div>
+                  )}
+                  {venta.completionStatus === 'approved' && (
+                    <div className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-lg">
+                      <Check className="w-4 h-4" />
+                      Finalizada
+                    </div>
+                  )}
+                </>
+              )}            
+              {/* Botones de aprobar/rechazar (solo para admin/super_admin) */}
+              {venta.completionStatus === 'pending' && 
+                ['admin', 'super_admin'].includes(userRole) && (
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => handleApproveReject(venta._id, 'approved')}
+                      className="flex-1 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      disabled={loading}
+                    >
+                      Aprobar
+                    </button>
+                    <button
+                      onClick={() => handleApproveReject(venta._id, 'rejected')}
+                      className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                      disabled={loading}
+                    >
+                      Rechazar
+                    </button>
                   </div>
-                )}
-                {venta.completionStatus === 'approved' && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-lg">
-                    <Check className="w-4 h-4" />
-                    Finalizada
-                  </div>
-                )}
-              </>
-            )}            
-            {/* Botones de aprobar/rechazar (solo para admin/super_admin) */}
-            {venta.completionStatus === 'pending' && 
-              ['admin', 'super_admin'].includes(userRole) && (
-                <div className="flex gap-2">
-                  <button 
-                    onClick={() => handleApproveReject(venta._id, 'approved')}
-                    className="flex-1 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                    disabled={loading}
-                  >
-                    Aprobar
-                  </button>
-                  <button
-                    onClick={() => handleApproveReject(venta._id, 'rejected')}
-                    className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                    disabled={loading}
-                  >
-                    Rechazar
-                  </button>
-                </div>
-            )}          {/* Botón de eliminar (solo para admin y super_admin con permisos) */}
-            {canEditDelete(venta) && userRole !== 'user' && (
-              <button
-                onClick={() => handleDeleteVenta(venta._id)}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                disabled={loading}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                Eliminar
-              </button>
-            )}
+              )}          {/* Botón de eliminar (solo para admin y super_admin con permisos) */}
+              {canEditDelete(venta) && userRole !== 'user' && (
+                <button
+                  onClick={() => handleDeleteVenta(venta._id)}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  disabled={loading}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Eliminar
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {ventasLimit < ventas.length && (
         <div className="flex justify-center mt-4">

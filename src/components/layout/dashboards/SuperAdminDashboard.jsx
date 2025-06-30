@@ -17,6 +17,7 @@ import ProfileManagement from '../../../Pages/ProfileManagement';
 import { SuperAdminSidebar } from '../sidebars';
 import PagosRealizadosPage from '../../../Pages/PagosRealizadosPage';
 import { Outlet, useLocation, matchPath } from 'react-router-dom';
+import { RoleContext } from '../../../context/RoleContext';
 
 function SuperAdminDashboard() {
   const { getToken } = useAuth();
@@ -601,7 +602,9 @@ function SuperAdminDashboard() {
         <ProductoList productos={productos} userRole="super_admin" onProductUpdate={fetchProductos} />
       </div>
     </div>
-  );  const renderVentas = () => (
+  );  
+  
+  const renderVentas = () => (
     <div className="space-y-8">
       <VentasManager userRole="super_admin" />
       
@@ -691,60 +694,62 @@ function SuperAdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Botón de menú fijo solo para móviles */}
-      <button
-        onClick={toggleSidebar}
-        className="fixed top-4 left-4 z-50 lg:hidden bg-white p-2 rounded-lg shadow-lg hover:bg-purple-50 text-purple-600"
-        aria-label="Toggle Menu"
-      >
-        <Menu size={24} />
-      </button>
+    <RoleContext.Provider value="super_admin">
+      <div className="min-h-screen bg-gray-50">
+        {/* Botón de menú fijo solo para móviles */}
+        <button
+          onClick={toggleSidebar}
+          className="fixed top-4 left-4 z-50 lg:hidden bg-white p-2 rounded-lg shadow-lg hover:bg-purple-50 text-purple-600"
+          aria-label="Toggle Menu"
+        >
+          <Menu size={24} />
+        </button>
 
-      <SuperAdminSidebar 
-        onLogout={handleLogout}
-        isCollapsed={isSidebarCollapsed}
-        toggleSidebar={toggleSidebar}
-        isMobileView={isMobileView}
-      />
-      <div
-        className={`transition-all duration-300 ease-in-out pt-16 lg:pt-0
-          ${isMobileView ? '' : isSidebarCollapsed ? 'ml-20' : 'ml-[280px]'}
-          flex justify-center min-h-screen
-        `}
-      >
-        <div className="w-full max-w-4xl p-4 lg:p-8">
-          {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
-              {error}
-            </div>
-          )}
-          {success && (
-            <div className="mb-6 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg">
-              {success}
-            </div>
-          )}
-          {loading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-            </div>
-          ) : (
-            <Outlet />
-          )}
+        <SuperAdminSidebar 
+          onLogout={handleLogout}
+          isCollapsed={isSidebarCollapsed}
+          toggleSidebar={toggleSidebar}
+          isMobileView={isMobileView}
+        />
+        <div
+          className={`transition-all duration-300 ease-in-out pt-16 lg:pt-0
+            ${isMobileView ? '' : isSidebarCollapsed ? 'ml-20' : 'ml-[280px]'}
+            flex justify-center min-h-screen
+          `}
+        >
+          <div className="w-full max-w-4xl p-4 lg:p-8">
+            {error && (
+              <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="mb-6 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg">
+                {success}
+              </div>
+            )}
+            {loading ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+              </div>
+            ) : (
+              <Outlet />
+            )}
+          </div>
         </div>
+        <NoteCreationModal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+          onNoteCreated={handleNoteCreated}
+          userRole="super_admin"
+        />
+        <ProductCreationModal
+          isOpen={isProductModalOpen}
+          onClose={() => setIsProductModalOpen(false)}
+          onSuccess={handleProductCreated}
+        />
       </div>
-      <NoteCreationModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onNoteCreated={handleNoteCreated}
-        userRole="super_admin"
-      />
-      <ProductCreationModal
-        isOpen={isProductModalOpen}
-        onClose={() => setIsProductModalOpen(false)}
-        onSuccess={handleProductCreated}
-      />
-    </div>
+    </RoleContext.Provider>
   );
 }
 

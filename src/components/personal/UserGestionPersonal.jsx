@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { gestionPersonalService } from '../../services';
+import { getPagosRealizados } from '../../services/api';
 
 function UserGestionPersonal() {
   const { user } = useUser();
   const [registros, setRegistros] = useState([]);
+  const [pagosRealizados, setPagosRealizados] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [registrosMostrados, setRegistrosMostrados] = useState(10); // Estado para paginación
@@ -12,6 +14,7 @@ function UserGestionPersonal() {
   useEffect(() => {
     if (user) {
       fetchMisRegistros();
+      fetchPagosRealizados();
     }
   }, [user]);
 
@@ -26,6 +29,23 @@ function UserGestionPersonal() {
       setError(error.message || 'Error al cargar mis registros');    } finally {
       setLoading(false);
     }
+  };
+
+  const fetchPagosRealizados = async () => {
+    try {
+      const pagos = await getPagosRealizados();
+      setPagosRealizados(pagos || []);
+    } catch (error) {
+      console.error('Error al obtener pagos realizados:', error);
+    }
+  };
+
+  // Calcular pagos realizados para el usuario actual
+  const calcularPagosRealizados = () => {
+    if (!user) return 0;
+    return pagosRealizados
+      .filter(p => p.colaboradorUserId === user.id)
+      .reduce((total, p) => total + (p.montoTotal || p.monto || 0), 0);
   };
 
   const cargarMasRegistros = () => {
@@ -67,7 +87,8 @@ function UserGestionPersonal() {
   };  const registrosOrdenados = ordenarRegistros();
   const registrosPaginados = registrosOrdenados.slice(0, registrosMostrados);
   const totales = calcularTotales();
-  const totalAPagar = totales.pagosDiarios - (totales.faltantes + totales.adelantos);
+  const pagosRealizadosTotal = calcularPagosRealizados();
+  const totalAPagar = totales.pagosDiarios - (totales.faltantes + totales.adelantos) - pagosRealizadosTotal;
   const hayMasRegistros = registrosOrdenados.length > registrosMostrados;
   return (
     <div className="max-w-6xl mx-auto p-4">
@@ -82,10 +103,11 @@ function UserGestionPersonal() {
         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
           {error}
         </div>
-      )}      {/* Resumen de totales */}
+      )}     
+       {/* Resumen de totales */}
       <div className="bg-white p-4 rounded-lg shadow mb-4">
         <h3 className="text-lg font-medium mb-3">Resumen Total</h3>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-center">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 text-center">
           <div>
             <p className="text-sm text-gray-600">Gastos</p>
             <p className="text-lg font-bold text-red-600">{formatearMoneda(totales.gastos)}</p>
@@ -101,6 +123,10 @@ function UserGestionPersonal() {
           <div>
             <p className="text-sm text-gray-600">Adelantos</p>
             <p className="text-lg font-bold text-blue-600">{formatearMoneda(totales.adelantos)}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Pagos Realizados</p>
+            <p className="text-lg font-bold text-green-700">{formatearMoneda(pagosRealizadosTotal)}</p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Total a Pagar</p>

@@ -49,7 +49,7 @@ const CobroList = ({ userRole }) => {
 
       // Calcular información de deuda
       const totalDebt = ventasResponse?.reduce((sum, venta) => 
-        sum + (venta.montoTotal - (venta.cantidadPagada || 0)), 0) || 0;
+        sum + (venta.montoTotalNeto - (venta.cantidadPagada || 0)), 0) || 0;
       
       setDebtInfo({
         totalDebt,
@@ -144,6 +144,7 @@ const CobroList = ({ userRole }) => {
           onClose={() => setShowPaymentModal(false)}
           ventasData={pendingVentas}
           onCobroCreated={handleCobroCreated}
+
         />
       )}
     </div>
