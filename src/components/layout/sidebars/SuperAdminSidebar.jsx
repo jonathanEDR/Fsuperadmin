@@ -1,9 +1,16 @@
 import React from 'react';
 import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, DollarSign, UserCheck, Users, X, ChevronLeft, ChevronRight, CreditCard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useClerk } from '@clerk/clerk-react';
 
-function SuperAdminSidebar({ onLogout, isCollapsed, toggleSidebar, isMobileView }) {
+function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView }) {
   const navigate = useNavigate();
+  const { signOut } = useClerk();
+  
+  const handleLogout = () => {
+    signOut();
+    navigate('/login');
+  };
   const menuItems = [
     { id: 'dashboard', icon: Home, label: 'Gestión de Usuarios', route: '/super-admin/usuarios' },
     { id: 'notes', icon: FileText, label: 'Gestión de Notas', route: '/super-admin/notas' },
@@ -93,7 +100,7 @@ function SuperAdminSidebar({ onLogout, isCollapsed, toggleSidebar, isMobileView 
         
         <div className="absolute bottom-0 left-0 right-0 p-4">
           <button
-            onClick={onLogout}
+            onClick={handleLogout}
             className={`
               w-full flex items-center gap-3 px-4 py-3 rounded-lg
               text-red-600 hover:bg-red-50 transition-colors

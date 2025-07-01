@@ -1,9 +1,16 @@
 import React from 'react';
 import { Home, UserCog, LogOut, Shield, Users, Package, ShoppingCart, DollarSign, Menu, X, ChevronLeft, ChevronRight, UserCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useClerk } from '@clerk/clerk-react';
 
-function AdminSidebar({ currentView, onViewChange, onLogout, userRole, isCollapsed, toggleSidebar, isMobileView }) {
+function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggleSidebar, isMobileView }) {
   const navigate = useNavigate();
+  const { signOut } = useClerk();
+  
+  const handleLogout = () => {
+    signOut();
+    navigate('/login');
+  };
   const menuItems = [
     { id: 'notas', icon: Home, label: 'Gestión de Notas', route: '/admin/notas' },
     { id: 'productos', icon: Package, label: 'Gestión de Productos', route: '/admin/productos' },
@@ -89,7 +96,7 @@ function AdminSidebar({ currentView, onViewChange, onLogout, userRole, isCollaps
         
         <div className="absolute bottom-0 left-0 right-0 p-4">
           <button
-            onClick={onLogout}
+            onClick={handleLogout}
             className={`
               w-full flex items-center gap-3 px-4 py-3 rounded-lg
               text-red-600 hover:bg-red-50 transition-colors

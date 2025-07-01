@@ -1,9 +1,17 @@
 import React from 'react';
 import { UserCircle, FileText, LogOut, ShoppingBag, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useClerk } from '@clerk/clerk-react';
 
 function Sidebar({ isCollapsed, toggleSidebar, isMobileView }) {
   const navigate = useNavigate();
+  const { signOut } = useClerk();
+  
+  const handleLogout = () => {
+    signOut();
+    navigate('/login');
+  };
+  
   const menuItems = [
     { id: 'notes', icon: FileText, label: 'Mis Notas', route: '/user/notas' },
     { id: 'ventas', icon: ShoppingBag, label: 'Mis Ventas', route: '/user/ventas' },
@@ -82,7 +90,7 @@ function Sidebar({ isCollapsed, toggleSidebar, isMobileView }) {
         
         <div className="absolute bottom-0 left-0 right-0 p-4">
           <button
-            // onClick={onLogout} // Si tienes lógica de logout, pásala como prop y descomenta
+            onClick={handleLogout}
             className={`
               w-full flex items-center gap-3 px-4 py-3 rounded-lg
               text-red-600 hover:bg-red-50 transition-colors
