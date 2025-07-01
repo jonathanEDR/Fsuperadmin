@@ -7,7 +7,11 @@
   "regions": ["iad1"],
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/api/(.*)",
+      "destination": "https://admincomercial.onrender.com/api/$1"
+    },
+    {
+      "source": "/((?!api|assets|_vercel).*)",
       "destination": "/index.html"
     }
   ],
@@ -21,10 +25,5 @@
         }
       ]
     }
-  ],
-  "functions": {
-    "app/api/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  }
+  ]
 }
