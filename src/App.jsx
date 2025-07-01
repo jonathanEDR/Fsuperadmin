@@ -7,6 +7,7 @@ import { useUser } from '@clerk/clerk-react';
 import Home from './Pages/Home';
 import { Login, Signup as Register } from './components/auth';
 import Dashboard from './Pages/Dashboard';
+import RoleBasedRedirect from './components/auth/RoleBasedRedirect';
 import { SuperAdminDashboard, AdminDashboardLayout } from './components/layout';
 import AdminDashboard from './components/layout/dashboards/AdminDashboard';
 import PagosRealizadosPage from './Pages/PagosRealizadosPage';
@@ -95,7 +96,7 @@ function App() {
               path="/dashboard" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <RoleBasedRedirect />
                 </ProtectedRoute>
               } 
             />
@@ -108,7 +109,8 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route index element={<BienvenidaPage />} />
+              <Route path="dashboard" element={<BienvenidaPage />} />
+              <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="notas" element={<NotasPage />} />
               <Route path="productos" element={<ProductosPage />} />
               <Route path="ventas" element={<VentasPage />} />
@@ -128,7 +130,8 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route index element={<BienvenidaPage />} />
+              <Route path="dashboard" element={<BienvenidaPage />} />
+              <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="usuarios" element={<UsuariosPage />} />
               <Route path="productos" element={<ProductosPage />} />
               <Route path="ventas" element={<VentasPage />} />
@@ -144,14 +147,15 @@ function App() {
             
             {/* UserDashboard como layout persistente */}
             <Route 
-              path="/usuario" 
+              path="/user" 
               element={
                 <ProtectedRoute>
                   <UserDashboardLayout />
                 </ProtectedRoute>
               }
             >
-              <Route index element={<NotasPage />} />
+              <Route path="dashboard" element={<NotasPage />} />
+              <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="notas" element={<NotasPage />} />
               <Route path="ventas" element={<VentasPage />} />
               <Route path="perfil" element={<PerfilPage />} />
