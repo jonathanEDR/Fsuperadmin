@@ -19,8 +19,12 @@ const RoleBasedRedirect = () => {
           return;
         }
 
+        console.log('🔑 Token obtained successfully');
+
         // Obtener perfil del usuario
         const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+        console.log('🌐 Backend URL:', backendUrl);
+        
         const response = await fetch(`${backendUrl}/api/auth/user-profile`, {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -28,16 +32,23 @@ const RoleBasedRedirect = () => {
           }
         });
 
+        console.log('📡 API Response status:', response.status);
+
         if (!response.ok) {
           console.log('❌ Error fetching profile, redirecting to login');
+          console.log('Response status text:', response.statusText);
           navigate('/login');
           return;
         }
 
         const profileData = await response.json();
+        console.log('👤 Profile data received:', profileData);
+        
         const userRole = profileData.user.role;
+        const userEmail = profileData.user.email;
         
         console.log('✅ User role detected:', userRole);
+        console.log('📧 User email:', userEmail);
 
         // Redirigir según el rol
         switch (userRole) {

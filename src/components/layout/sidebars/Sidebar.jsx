@@ -5,9 +5,9 @@ import { useNavigate } from 'react-router-dom';
 function Sidebar({ isCollapsed, toggleSidebar, isMobileView }) {
   const navigate = useNavigate();
   const menuItems = [
-    { id: 'notes', icon: FileText, label: 'Mis Notas', route: '/usuario/notas' },
-    { id: 'ventas', icon: ShoppingBag, label: 'Mis Ventas', route: '/usuario/ventas' },
-    { id: 'profile', icon: UserCircle, label: 'Mi Perfil', route: '/usuario/perfil' },
+    { id: 'notes', icon: FileText, label: 'Mis Notas', route: '/user/notas' },
+    { id: 'ventas', icon: ShoppingBag, label: 'Mis Ventas', route: '/user/ventas' },
+    { id: 'profile', icon: UserCircle, label: 'Mi Perfil', route: '/user/perfil' },
   ];
 
   return (
