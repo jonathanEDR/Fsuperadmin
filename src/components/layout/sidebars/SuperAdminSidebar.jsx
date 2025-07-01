@@ -6,6 +6,8 @@ function SuperAdminSidebar({ onLogout, isCollapsed, toggleSidebar, isMobileView 
   const navigate = useNavigate();
   const menuItems = [
     { id: 'dashboard', icon: Home, label: 'Gestión de Usuarios', route: '/super-admin/usuarios' },
+    { id: 'notes', icon: FileText, label: 'Gestión de Notas', route: '/super-admin/notas' },
+
     { id: 'productos', icon: Package, label: 'Gestión de Productos', route: '/super-admin/productos' },
     { id: 'ventas', icon: ShoppingCart, label: 'Gestión de Ventas', route: '/super-admin/ventas' },
     { id: 'cobros', icon: DollarSign, label: 'Gestión de Cobros', route: '/super-admin/cobros' },
@@ -13,7 +15,6 @@ function SuperAdminSidebar({ onLogout, isCollapsed, toggleSidebar, isMobileView 
     { id: 'gastos', icon: DollarSign, label: 'Gestión de Gastos', route: '/super-admin/gastos' },
     { id: 'personal', icon: UserCheck, label: 'Gestión de Personal', route: '/super-admin/personal' },
     { id: 'colaboradores', icon: Users, label: 'Colaboradores', route: '/super-admin/colaboradores' },
-    { id: 'notes', icon: FileText, label: 'Gestión de Notas', route: '/super-admin/notas' },
     { id: 'profile', icon: UserCog, label: 'Mi Perfil', route: '/super-admin/perfil' },
   ];
 

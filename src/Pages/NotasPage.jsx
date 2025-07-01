@@ -1,10 +1,10 @@
 import React from 'react';
-import SuperAdminNotes from '../components/notas/SuperAdminNotes';
+import Notas from '../components/notas/notas';
 
 function NotasPage() {
   return (
     <div>
-      <SuperAdminNotes />
+      <Notas />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { Plus, Loader, Calendar, Users, User } from 'lucide-react';
 import { api } from '../../services';
+import { useRole } from '../../context/RoleContext';
 
 // Helper function for date formatting
 const formatDate = (date) => {
@@ -18,10 +19,9 @@ const formatDate = (date) => {
  *
  * @param {Object} props
  * @param {Function} props.onNoteCreated - Callback function when a note is created
- * @param {string} props.userRole - Role of the current user ('user', 'admin', 'super_admin')
  * @param {boolean} props.disabled - Whether the form is disabled
  */
-const CreateNote = ({ onNoteCreated, userRole, disabled = false }) => {
+const CreateNote = ({ onNoteCreated, disabled = false }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [fechadenota, setFechadenota] = useState('');
@@ -31,24 +31,39 @@ const CreateNote = ({ onNoteCreated, userRole, disabled = false }) => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState('');
   const { getToken } = useAuth();
+  const userRole = useRole();
 
-  // Load users list if admin
+  // Load users list if admin or super_admin
   useEffect(() => {
     const fetchUsers = async () => {
-      if (!['admin', 'super_admin'].includes(userRole)) return;
-      
-      setLoadingUsers(true);
-      try {
-        const token = await getToken();
-        const response = await api.get('/api/users', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setUsers(response.data);
-      } catch (err) {
-        console.error('Error fetching users:', err);
-        setError('Error loading users');
-      } finally {
-        setLoadingUsers(false);
+      if (userRole === 'super_admin') {
+        setLoadingUsers(true);
+        try {
+          const token = await getToken();
+          const response = await api.get('/api/admin/users', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setUsers(response.data.users || []);
+        } catch (err) {
+          console.error('Error fetching users:', err);
+          setError('Error loading users');
+        } finally {
+          setLoadingUsers(false);
+        }
+      } else if (userRole === 'admin') {
+        setLoadingUsers(true);
+        try {
+          const token = await getToken();
+          const response = await api.get('/api/notes/my-users', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setUsers(response.data.users || []);
+        } catch (err) {
+          console.error('Error fetching users:', err);
+          setError('Error loading users');
+        } finally {
+          setLoadingUsers(false);
+        }
       }
     };
 
@@ -68,10 +83,10 @@ const CreateNote = ({ onNoteCreated, userRole, disabled = false }) => {
         title,
         content,
         fechadenota: formatDate(fechadenota),
-        ...(selectedUser && { userId: selectedUser })
+        ...(selectedUser && { targetUserId: selectedUser })
       };
 
-      await api.post('/api/notes', noteData, {
+      await api.post('/api/notes/create', noteData, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -149,7 +164,7 @@ const CreateNote = ({ onNoteCreated, userRole, disabled = false }) => {
             >
               <option value="">Select User</option>
               {users.map(user => (
-                <option key={user.id} value={user.id}>{user.username || user.email}</option>
+                <option key={user.clerk_id} value={user.clerk_id}>{user.username || user.email}</option>
               ))}
             </select>
           </div>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Plus } from 'lucide-react';
 import { CreateNote } from './';
 
-const NoteCreationModal = ({ isOpen, onClose, onNoteCreated, userRole }) => {
+const NoteCreationModal = ({ isOpen, onClose, onNoteCreated }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
@@ -45,7 +45,6 @@ const NoteCreationModal = ({ isOpen, onClose, onNoteCreated, userRole }) => {
             )}
             <CreateNote
               onNoteCreated={handleNoteCreation}
-              userRole={userRole}
               disabled={isSubmitting}
             />
           </div>

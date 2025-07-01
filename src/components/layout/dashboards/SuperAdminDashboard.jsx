@@ -10,7 +10,7 @@ import { VentaList, VentasFinalizadas } from '../../ventas';
 import { ProductoList, ProductCreationModal } from '../../productos';
 import { CobroList } from '../../cobros';
 import { DevolucionList } from '../../devoluciones';
-import { SuperAdminNotes, NotesHistory, NoteCreationModal, CreateNote } from '../../notas';
+import { notas as Notas, NotesHistory, NoteCreationModal, CreateNote } from '../../notas';
 import { GestionPersonal } from '../../personal';
 import MyProfileUnified from '../../auth/MyProfileUnified';
 import ProfileManagement from '../../../Pages/ProfileManagement';
@@ -741,7 +741,6 @@ function SuperAdminDashboard() {
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
           onNoteCreated={handleNoteCreated}
-          userRole="super_admin"
         />
         <ProductCreationModal
           isOpen={isProductModalOpen}

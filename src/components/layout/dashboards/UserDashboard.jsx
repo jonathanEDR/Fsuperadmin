@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Plus, BarChart3, Package, ShoppingBag, RefreshCw, Menu, User } from 'lucide-react';
 import { useAuth, useUser } from '@clerk/clerk-react';
 
-import { CreateNote } from '../../../components/notas';
 import MyProfile from '../../../Pages/MyProfile';
 import { UserGestionPersonal } from '../../../components/personal';
 import { Sidebar } from '../sidebars';
@@ -16,6 +15,7 @@ import {
   deleteDevolucion 
 } from '../../../services/devolucionService';
 import { RoleContext } from '../../../context/RoleContext';
+import Notas from '../../../components/notas/notas';
 
 const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
   const { getToken } = useAuth();
@@ -265,124 +265,7 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
   };
 
   const renderNotes = () => (
-    <div className="space-y-8">
-      {/* Sección de Crear Nueva Nota */}
-      <div className="bg-white shadow-xl rounded-2xl p-8 transform hover:scale-[1.01] transition-all duration-300 border border-gray-100">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-          <Plus className="text-blue-600" size={24} />
-          Crear Nueva Nota
-        </h2>
-        <CreateNote onNoteCreated={handleNoteCreated} userRole="user" />
-      </div>
-
-      {/* Sección de Listado de Notas */}
-      <div className="bg-white shadow-xl rounded-2xl p-8 transform hover:scale-[1.01] transition-all duration-300 border border-gray-100">
-        <h2 className="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-3">
-          <BarChart3 className="text-blue-600" size={28} />
-          Mis Notas
-        </h2>
-        
-        {loading ? (
-          <div className="flex justify-center items-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
-        ) : error ? (
-          <div className="text-center py-8">
-            <p className="text-red-500">{error}</p>
-          </div>
-        ) : notes.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="mb-6">
-              <Plus size={48} className="text-gray-300 mx-auto mb-4" />
-            </div>
-            <p className="text-gray-500 text-xl font-medium mb-2">No hay notas disponibles</p>
-            <p className="text-gray-400">¡Empieza creando tu primera nota!</p>
-          </div>
-        ) : (
-          <div className="grid gap-4">
-            {notes
-              .filter(note => !note.isCompleted || note.completionStatus !== 'approved')
-              .map((note) => (
-                <div 
-                  key={note._id} 
-                  className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300 bg-white transform hover:scale-[1.02] hover:border-blue-200"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-bold text-gray-800 hover:text-blue-600 transition-colors">
-                          {note.title || 'Sin título'}
-                        </h3>
-                        {note.isCompleted && (
-                          <span className={`px-3 py-1 text-xs rounded-full ${
-                            note.completionStatus === 'approved' 
-                              ? 'bg-green-100 text-green-800'
-                              : note.completionStatus === 'rejected'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                          {note.completionStatus === 'approved' 
-                            ? 'Aprobada'
-                            : note.completionStatus === 'rejected'
-                            ? 'Rechazada'
-                            : 'Pendiente de Revisión'}
-                          </span>
-                        )}
-                      </div>
-                    </div>                  {(!note.isCompleted || note.completionStatus === 'rejected') && (
-                      <button
-                        onClick={() => handleMarkAsCompleted(note._id)}
-                        className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                      >
-                        {note.completionStatus === 'rejected' ? 'Volver a Enviar' : 'Marcar como Finalizada'}
-                      </button>
-                    )}
-                  </div>
-                  <p className="text-gray-600 mb-4 leading-relaxed">{note.content}</p>
-                  <div className="text-sm text-gray-500 border-t pt-4 flex gap-4 flex-wrap">
-                    <p className="flex items-center gap-2">
-                      <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-                      Creado: {new Date(note.created_at).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </p>                  {note.creatorId && (
-                      <p className="flex items-center gap-2">
-                        <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
-                        <User className="w-4 h-4" />
-                        Creador: {note.creator_info?.nombre_negocio || 'Usuario desconocido'}
-                        {note.creator_info?.role && (
-                          <span className={`ml-2 px-2 py-0.5 text-xs rounded-full ${
-                            note.creator_info.role === 'super_admin' 
-                              ? 'bg-purple-100 text-purple-800' 
-                              : note.creator_info.role === 'admin'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-green-100 text-green-800'
-                          }`}>
-                            {note.creator_info.role}
-                          </span>
-                        )}
-                      </p>
-                    )}
-                    {note.fechadenota && (
-                      <p className="flex items-center gap-2">
-                        <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
-                        Fecha nota: {new Date(note.fechadenota).toLocaleDateString('es-ES', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-          </div>
-        )}      </div>
-    </div>
+    <Notas />
   );
   const renderProfile = () => (
     <MyProfile />
