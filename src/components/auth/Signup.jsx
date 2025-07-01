@@ -30,7 +30,8 @@ function Register() {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+      const response = await fetch(`${backendUrl}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -74,7 +74,8 @@ const ProfileManagement = ({ userRole }) => {
     try {
       const token = await getToken();
       
-      const url = `/api/admin/users-profiles${searchTerm ? `?search=${searchTerm}` : ''}`;
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+      const url = `${backendUrl}/api/admin/users-profiles${searchTerm ? `?search=${searchTerm}` : ''}`;
       
       const response = await fetch(url, {
         headers: {
@@ -143,7 +144,8 @@ const ProfileManagement = ({ userRole }) => {
         dataToSend.sueldo = sueldoValue;
       }
 
-      const response = await fetch(`http://localhost:5000/api/auth/update-profile/${userId}`, {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+      const response = await fetch(`${backendUrl}/api/auth/update-profile/${userId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -171,7 +173,8 @@ const ProfileManagement = ({ userRole }) => {
     
     try {
       const token = await getToken();
-      const response = await fetch(`http://localhost:5000/api/admin/promote/${userId}`, {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+      const response = await fetch(`${backendUrl}/api/admin/promote/${userId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

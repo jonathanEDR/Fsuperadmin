@@ -13,7 +13,8 @@ const MyProfile = () => {
     const fetchProfile = async () => {
       try {
         const token = await getToken();
-        const response = await fetch('http://localhost:5000/api/auth/user-profile', {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+        const response = await fetch(`${backendUrl}/api/auth/user-profile`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',

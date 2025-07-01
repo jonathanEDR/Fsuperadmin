@@ -56,7 +56,8 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole: initial
     const loadProductos = async () => {
       try {
         const token = await getToken();
-        const response = await fetch('http://localhost:5000/api/productos', {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+        const response = await fetch(`${backendUrl}/api/productos`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

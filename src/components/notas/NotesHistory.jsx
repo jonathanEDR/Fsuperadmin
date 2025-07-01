@@ -20,7 +20,8 @@ function NotesHistory() {
         throw new Error('No se pudo obtener el token de autenticación');
       }
 
-      const response = await fetch('http://localhost:5000/api/notes/approved', {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+      const response = await fetch(`${backendUrl}/api/notes/approved`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

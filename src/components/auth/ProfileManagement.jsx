@@ -78,7 +78,8 @@ const ProfileManagement = ({ userRole }) => {
   const handleSaveProfile = async (userId) => {
     try {
       const token = await getToken();
-      const response = await fetch(`http://localhost:5000/api/auth/update-profile/${userId}`, {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+      const response = await fetch(`${backendUrl}/api/auth/update-profile/${userId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -112,7 +113,8 @@ const ProfileManagement = ({ userRole }) => {
     
     try {
       const token = await getToken();
-      const response = await fetch(`http://localhost:5000/api/admin/promote/${userId}`, {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+      const response = await fetch(`${backendUrl}/api/admin/promote/${userId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
