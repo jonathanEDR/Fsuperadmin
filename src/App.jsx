@@ -2,10 +2,12 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { SignedIn, SignedOut } from '@clerk/clerk-react';
 import { useUser } from '@clerk/clerk-react';
+import { useAuthCleanup } from './hooks/useAuthCleanup';
 
 // Importar componentes
 import Home from './Pages/Home';
 import { Login, Signup as Register } from './components/auth';
+import SinAcceso from './components/auth/SinAcceso';
 import Dashboard from './Pages/Dashboard';
 import RoleBasedRedirect from './components/auth/RoleBasedRedirect';
 import { SuperAdminDashboard, AdminDashboardLayout } from './components/layout';
@@ -88,6 +90,16 @@ function App() {
                 <PublicRoute>
                   <Register />
                 </PublicRoute>
+              } 
+            />
+            
+            {/* Ruta para usuarios dados de baja */}
+            <Route 
+              path="/sin-acceso" 
+              element={
+                <ProtectedRoute>
+                  <SinAcceso />
+                </ProtectedRoute>
               } 
             />
             

@@ -18,6 +18,7 @@ import { SuperAdminSidebar } from '../sidebars';
 import PagosRealizadosPage from '../../../Pages/PagosRealizadosPage';
 import { Outlet, useLocation, matchPath } from 'react-router-dom';
 import { RoleContext } from '../../../context/RoleContext';
+import { RoleProtection } from '../../auth';
 
 function SuperAdminDashboard() {
   const { getToken } = useAuth();
@@ -33,6 +34,22 @@ function SuperAdminDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [productos, setProductos] = useState([]);
+  // Estados para el modal de eliminación
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  // Estados para ventas
+  const [ventas, setVentas] = useState([]);
+  const [ventasLoading, setVentasLoading] = useState(false);
+  const [ventasError, setVentasError] = useState(null);
+  const [ventasPagina, setVentasPagina] = useState(1);
+  const [totalVentasPaginas, setTotalVentasPaginas] = useState(1);
+  const [ventasFiltro, setVentasFiltro] = useState({
+    colaborador: '',
+    producto: '',
+    fechaInicio: '',
+    fechaFin: ''
+  });
   const location = useLocation();
 
   // Detectar si hay ruta hija activa (por ejemplo, /super-admin/pagos-realizados)
@@ -42,8 +59,9 @@ function SuperAdminDashboard() {
     try {
       setLoading(true);
       const token = await getToken();
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
       const response = await fetch(
-        `/api/admin/users?page=${currentPage}&search=${searchTerm}&role=${roleFilter}`, {
+        `${backendUrl}/api/admin/users?page=${currentPage}&search=${searchTerm}&role=${roleFilter}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -69,8 +87,9 @@ function SuperAdminDashboard() {
     try {
       const token = await getToken();
       const newRole = currentRole === 'admin' ? 'user' : 'admin';
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
       
-      const response = await fetch(`/api/admin/users/${userId}/role`, {
+      const response = await fetch(`${backendUrl}/api/admin/users/${userId}/role`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -99,26 +118,39 @@ function SuperAdminDashboard() {
     }
   };
 
-  const handleDeleteUser = async (userId) => {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) return;
+  const handleDeleteUser = (user) => {
+    setUserToDelete(user);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return;
     
+    setDeleteLoading(true);
     try {
       const token = await getToken();
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+      const response = await fetch(`${backendUrl}/api/admin/users/${userToDelete._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-        if (!response.ok) throw new Error('Error al eliminar usuario');
+      
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Error al eliminar usuario');
       
       await fetchUsers();
-      setSuccess('Usuario eliminado exitosamente');
-      setTimeout(() => setSuccess(''), 3000);
+      setSuccess(data.message || 'Usuario eliminado exitosamente');
+      setShowDeleteModal(false);
+      setUserToDelete(null);
+      setTimeout(() => setSuccess(''), 5000);
     } catch (error) {
       console.error('Error deleting user:', error);
-      setError('Error al eliminar usuario');
+      setError(error.message || 'Error al eliminar usuario');
       setTimeout(() => setError(null), 3000);
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -224,7 +256,7 @@ function SuperAdminDashboard() {
                   )}
                   {user.role !== 'super_admin' && (
                     <button
-                      onClick={() => handleDeleteUser(user._id)}
+                      onClick={() => handleDeleteUser(user)}
                       className="text-red-600 hover:text-red-900"
                     >
                       <div className="flex items-center gap-1">
@@ -301,7 +333,8 @@ function SuperAdminDashboard() {
     try {
       setLoading(true);
       const token = await getToken();
-      const response = await fetch('/api/productos', {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+      const response = await fetch(`${backendUrl}/api/productos`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -328,7 +361,8 @@ function SuperAdminDashboard() {
     setVentasLoading(true);
     try {
       const token = await getToken();
-      const response = await fetch(`/api/ventas?page=${ventasPagina}&colaborador=${ventasFiltro.colaborador}&producto=${ventasFiltro.producto}&fechaInicio=${ventasFiltro.fechaInicio}&fechaFin=${ventasFiltro.fechaFin}`, {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+      const response = await fetch(`${backendUrl}/api/ventas?page=${ventasPagina}&colaborador=${ventasFiltro.colaborador}&producto=${ventasFiltro.producto}&fechaInicio=${ventasFiltro.fechaInicio}&fechaFin=${ventasFiltro.fechaFin}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -357,8 +391,9 @@ function SuperAdminDashboard() {
 
   const handleDeleteVenta = async (ventaId) => {
     try {
-      const token = getToken();
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/ventas/${ventaId}`, {
+      const token = await getToken();
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+      const response = await fetch(`${backendUrl}/api/ventas/${ventaId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -694,16 +729,17 @@ function SuperAdminDashboard() {
   };
 
   return (
-    <RoleContext.Provider value="super_admin">
-      <div className="min-h-screen bg-gray-50">
-        {/* Botón de menú fijo solo para móviles */}
-        <button
-          onClick={toggleSidebar}
-          className="fixed top-4 left-4 z-50 lg:hidden bg-white p-2 rounded-lg shadow-lg hover:bg-purple-50 text-purple-600"
-          aria-label="Toggle Menu"
-        >
-          <Menu size={24} />
-        </button>
+    <RoleProtection allowedRoles={['super_admin']}>
+      <RoleContext.Provider value="super_admin">
+        <div className="min-h-screen bg-gray-50">
+          {/* Botón de menú fijo solo para móviles */}
+          <button
+            onClick={toggleSidebar}
+            className="fixed top-4 left-4 z-50 lg:hidden bg-white p-2 rounded-lg shadow-lg hover:bg-purple-50 text-purple-600"
+            aria-label="Toggle Menu"
+          >
+            <Menu size={24} />
+          </button>
 
         <SuperAdminSidebar 
           onLogout={handleLogout}
@@ -747,8 +783,121 @@ function SuperAdminDashboard() {
           onClose={() => setIsProductModalOpen(false)}
           onSuccess={handleProductCreated}
         />
+        
+        {/* Modal de confirmación para eliminar usuario */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
+              {/* Header del modal */}
+              <div className="flex items-center gap-3 bg-red-50 p-6 border-b border-red-200">
+                <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                  <Trash2 className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-red-900">
+                    Eliminar Usuario
+                  </h3>
+                  <p className="text-sm text-red-700">
+                    Esta acción eliminará permanentemente la cuenta
+                  </p>
+                </div>
+              </div>
+
+              {/* Contenido del modal */}
+              <div className="p-6">
+                <div className="mb-4">
+                  <p className="text-gray-700 mb-3">
+                    ¿Estás seguro de que quieres eliminar al usuario{' '}
+                    <span className="font-semibold text-gray-900">
+                      {userToDelete?.email}
+                    </span>
+                    ?
+                  </p>
+                  
+                  {/* Información sobre qué se conserva */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-start gap-2">
+                      <div className="flex-shrink-0 w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
+                        <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium text-blue-900 mb-1">
+                          Datos que se conservarán intactos:
+                        </h4>
+                        <ul className="text-xs text-blue-800 space-y-1">
+                          <li>• Todas las ventas y transacciones realizadas</li>
+                          <li>• Notas y registros creados</li>
+                          <li>• Movimientos de caja e ingresos/egresos</li>
+                          <li>• Cobros y pagos realizados</li>
+                          <li>• Gastos registrados</li>
+                          <li>• Productos creados o modificados</li>
+                          <li>• Gestión de personal y sueldos</li>
+                          <li>• Devoluciones procesadas</li>
+                          <li>• Todo el historial de actividades</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Advertencia */}
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-start gap-2">
+                      <div className="flex-shrink-0 w-5 h-5 bg-red-100 rounded-full flex items-center justify-center mt-0.5">
+                        <svg className="w-3 h-3 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium text-red-900 mb-1">
+                          Esta acción es irreversible
+                        </h4>
+                        <p className="text-xs text-red-800">
+                          Solo se elimina el acceso del usuario. Todos sus datos y registros permanecen intactos para mantener la integridad del historial del sistema.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Botones */}
+              <div className="flex gap-3 p-6 bg-gray-50 border-t">
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setUserToDelete(null);
+                  }}
+                  disabled={deleteLoading}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={confirmDeleteUser}
+                  disabled={deleteLoading}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {deleteLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Eliminando...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      Eliminar Usuario
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </RoleContext.Provider>
+    </RoleProtection>
   );
 }
 
