@@ -25,6 +25,7 @@ import PerfilPage from './Pages/PerfilPage';
 import UserDashboardLayout from './components/layout/dashboards/UserDashboardLayout';
 import GastosPage from './Pages/GastosPage';
 import CajaPage from './Pages/CajaPage';
+import ProduccionPage from './Pages/ProduccionPage';
 
 // Componente para proteger rutas que requieren autenticación
 function ProtectedRoute({ children }) {
@@ -131,6 +132,7 @@ function App() {
               <Route path="personal" element={<PersonalPage />} />
               <Route path="colaboradores" element={<ColaboradoresPage />} />
               <Route path="perfil" element={<PerfilPage />} />
+              <Route path="produccion/*" element={<ProduccionPage />} />
             </Route>
             
             {/* SuperAdminDashboard como layout persistente */}
@@ -155,6 +157,7 @@ function App() {
               <Route path="perfil" element={<PerfilPage />} />
               <Route path="gastos" element={<GastosPage />} />
               <Route path="caja" element={<CajaPage />} />
+              <Route path="produccion/*" element={<ProduccionPage />} />
             </Route>
             
             {/* UserDashboard como layout persistente */}
