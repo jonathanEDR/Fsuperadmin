@@ -29,7 +29,6 @@ const RoleProtection = ({
 
         const token = await getToken();
         if (!token) {
-          console.log('❌ No token found, redirecting to login');
           navigate('/login');
           return;
         }
@@ -45,20 +44,15 @@ const RoleProtection = ({
         });
 
         if (!response.ok) {
-          console.log('❌ Error fetching profile, redirecting to login');
           navigate('/login');
           return;
         }
 
         const profileData = await response.json();
         const userRole = profileData.user.role;
-        
-        console.log('🔍 RoleProtection - User role detected:', userRole);
-        console.log('🔍 RoleProtection - Allowed roles:', allowedRoles);
 
         // Si el usuario está dado de baja, redirigir a sin acceso
         if (userRole === 'de_baja') {
-          console.log('❌ User is "de_baja", redirecting to sin-acceso');
           navigate('/sin-acceso', { replace: true });
           return;
         }
@@ -66,10 +60,8 @@ const RoleProtection = ({
         // Si hay roles específicos permitidos, verificar si el usuario tiene uno de ellos
         if (allowedRoles.length > 0) {
           if (allowedRoles.includes(userRole)) {
-            console.log('✅ User role is authorized');
             setIsAuthorized(true);
           } else {
-            console.log('❌ User role not authorized, redirecting to:', redirectTo);
             navigate(redirectTo, { replace: true });
             return;
           }
@@ -79,7 +71,6 @@ const RoleProtection = ({
         }
 
       } catch (error) {
-        console.error('❌ Error during role verification:', error);
         navigate('/login');
       } finally {
         setIsVerifying(false);

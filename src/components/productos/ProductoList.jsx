@@ -1,13 +1,22 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { Package, Plus } from 'lucide-react';
+import { Package, Plus, Edit2, Trash2, Users } from 'lucide-react';
 import ProductCreationModal from './ProductCreationModal';
+import ReservaModal from './ReservaModal';
+import ReservasList from './ReservasList';
 import api from '../../services/api';
 
-function ProductoList({ userRole = 'user', hideHeader = false }) {
+function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
   const { getToken } = useAuth();
   const { user } = useUser();
   const [currentUserId, setCurrentUserId] = useState(null);
+  
+  // Usar directamente el rol pasado como prop, con fallback solo si es necesario
+  const userRole = propUserRole || 'user';
+  
+  // Verificar si es admin o super_admin
+  const isAdminUser = userRole === 'admin' || userRole === 'super_admin';
+  
   const [productoData, setProductoData] = useState({
     nombre: '',
     precio: 0,
@@ -22,6 +31,8 @@ function ProductoList({ userRole = 'user', hideHeader = false }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [productosTerminados, setProductosTerminados] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isReservaModalOpen, setIsReservaModalOpen] = useState(false);
+  const [isSubmittingReserva, setIsSubmittingReserva] = useState(false);
   const productosPorPagina = 24;
   const productosAmostrar = productos.slice(0, productosPorPagina);
   const [paginaTerminados, setPaginaTerminados] = useState(1);
@@ -37,6 +48,8 @@ function ProductoList({ userRole = 'user', hideHeader = false }) {
       setCurrentUserId(user.id.replace('user_', ''));
     }
   }, [user]);
+
+  // ...existing code...
 
   // Función para verificar permisos
   const canEditDelete = (product) => {
@@ -151,7 +164,9 @@ function ProductoList({ userRole = 'user', hideHeader = false }) {
         creatorName: user?.fullName || user?.firstName || user?.username || currentUserId,
         creatorEmail: user?.primaryEmailAddress?.emailAddress,
         creatorRole: userRole
-      }, token);
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
       // Actualizar el producto en la lista
       setProductos(prev => prev.map(p => 
@@ -186,25 +201,27 @@ function ProductoList({ userRole = 'user', hideHeader = false }) {
     try {
       setError(null);
       const token = await getToken();
-      await api.delete(`/api/productos/${productoId}`, token);
+      
+      await api.delete(`/api/productos/${productoId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       
       // Actualizar la lista después de eliminar
       setProductos(prevProductos => prevProductos.filter(p => p._id !== productoId));
       
       // Mostrar mensaje de éxito
-      // Nota: Aquí puedes agregar un toast o notificación si lo deseas
+      console.log('Producto eliminado exitosamente');
     } catch (error) {
       console.error('Error al eliminar producto:', error);
       const errorMsg = error.response?.data?.message || error.message || 'Error al eliminar el producto';
       setError(errorMsg);
-      // También podrías mostrar un toast o notificación de error aquí
     }
   };
 
   // Función para agregar o editar productos
   const handleAddOrEditProducto = async () => {
     try {
-      if (!['admin', 'super_admin'].includes(userRole)) {
+      if (!isAdminUser) {
         throw new Error('No tienes permisos para realizar esta acción');
       }
 
@@ -300,22 +317,7 @@ function ProductoList({ userRole = 'user', hideHeader = false }) {
     }
   }, [productos]);
 
-  useEffect(() => {
-    if (productos.length > 0) {
-      console.log('Estado actual de productos:', productos.map(p => ({
-        id: p._id,
-        nombre: p.nombre,
-        creatorId: p.creatorId,
-        userId: p.userId,
-        currentUserId: user?.id,
-        canEdit: canEditDelete(p),
-        idsMatch: {
-          creatorMatch: String(p.creatorId) === String(user?.id),
-          userMatch: String(p.userId) === String(user?.id)
-        }
-      })));
-    }
-  }, [productos, user]);
+  // ...existing code...
 
   // Función para manejar la creación exitosa de un producto
   const handleProductSuccess = useCallback(async () => {
@@ -329,6 +331,41 @@ function ProductoList({ userRole = 'user', hideHeader = false }) {
       setError('Error al actualizar la lista de productos');
     }
   }, [getToken]);
+
+  // Función para manejar la creación de reservas
+  const handleCreateReserva = async (reservaData) => {
+    try {
+      setIsSubmittingReserva(true);
+      setError(null);
+
+      const token = await getToken();
+      if (!token) {
+        throw new Error('No estás autorizado');
+      }
+
+      const response = await api.post('/api/reservas', reservaData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      console.log('Reserva creada exitosamente:', response.data);
+      
+      // Recargar productos para actualizar el stock
+      await fetchProductos();
+      
+      // Cerrar modal
+      setIsReservaModalOpen(false);
+      
+      // Mostrar mensaje de éxito (opcional)
+      alert('Reserva creada exitosamente');
+      
+    } catch (error) {
+      console.error('Error al crear reserva:', error);
+      const errorMsg = error.response?.data?.message || error.message || 'Error al crear la reserva';
+      setError(errorMsg);
+    } finally {
+      setIsSubmittingReserva(false);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -345,13 +382,24 @@ function ProductoList({ userRole = 'user', hideHeader = false }) {
             </p>
           </div>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-        >
-          <Plus size={20} />
-          Agregar Producto
-        </button>
+        <div className="flex items-center gap-3">
+          {isAdminUser && (
+            <button
+              onClick={() => setIsReservaModalOpen(true)}
+              className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
+            >
+              <Users size={20} />
+              Reservar para Colaborador
+            </button>
+          )}
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          >
+            <Plus size={20} />
+            Agregar Producto
+          </button>
+        </div>
       </div>
 
       {/* Modal de creación/edición de producto */}
@@ -395,6 +443,15 @@ function ProductoList({ userRole = 'user', hideHeader = false }) {
         isEditing={productoData.editing}
       />
 
+      {/* Modal de reservas */}
+      <ReservaModal
+        isOpen={isReservaModalOpen}
+        onClose={() => setIsReservaModalOpen(false)}
+        onSubmit={handleCreateReserva}
+        productos={productos.filter(p => (p.cantidad - p.cantidadVendida) > 0)}
+        isLoading={isSubmittingReserva}
+      />
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
           {error}
@@ -424,7 +481,7 @@ function ProductoList({ userRole = 'user', hideHeader = false }) {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Precio
                   </th>
-                  {(userRole === 'admin' || userRole === 'super_admin') && (
+                  {isAdminUser && (
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Acciones
                     </th>
@@ -451,18 +508,24 @@ function ProductoList({ userRole = 'user', hideHeader = false }) {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       S/ {parseFloat(producto.precio).toFixed(2)}
                     </td>
-                    {(userRole === 'admin' || userRole === 'super_admin') && (
+                    {isAdminUser && (
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         {canEditDelete(producto) && (
                           <div className="flex justify-end gap-2">
-                            <button                              onClick={() => handleEditProducto(producto)}
-                              className="text-blue-600 hover:text-blue-900"
+                            <button
+                              onClick={() => handleEditProducto(producto)}
+                              className="inline-flex items-center px-3 py-1 rounded-md text-sm bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200"
+                              title="Editar producto"
                             >
+                              <Edit2 className="w-4 h-4 mr-1" />
                               Editar
                             </button>
-                            <button                              onClick={() => handleDeleteProducto(producto._id)}
-                              className="text-red-600 hover:text-red-900"
+                            <button
+                              onClick={() => handleDeleteProducto(producto._id)}
+                              className="inline-flex items-center px-3 py-1 rounded-md text-sm bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200"
+                              title="Eliminar producto"
                             >
+                              <Trash2 className="w-4 h-4 mr-1" />
                               Eliminar
                             </button>
                           </div>
@@ -475,8 +538,16 @@ function ProductoList({ userRole = 'user', hideHeader = false }) {
             </table>
           </div>
 
+
+          {/* Sección de Reservas de Colaboradores */}
+          {isAdminUser && (
+            <div className="mt-8">
+              <ReservasList userRole={userRole} />
+            </div>
+          )}
+
           {/* Productos Terminados (solo para admin y super_admin) */}
-          {(userRole === 'admin' || userRole === 'super_admin') && (
+          {isAdminUser && (
             <div className="mt-8">
               <div className="mb-6">
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">Productos Terminados</h2>
@@ -558,6 +629,7 @@ function ProductoList({ userRole = 'user', hideHeader = false }) {
               </div>
             </div>
           )}
+
         </div>
       )}
     </div>
