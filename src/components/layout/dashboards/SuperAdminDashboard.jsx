@@ -547,26 +547,6 @@ function SuperAdminDashboard() {
       </div>
     );
   };
-  const renderCobros = () => (
-    <div className="space-y-8">
-      <div className="bg-white shadow-lg rounded-xl p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-purple-100 rounded-lg">
-              <DollarSign className="text-purple-600" size={24} />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-gray-800">Gestión de Cobros</h3>
-              <p className="text-sm text-gray-600">
-                Administra los pagos y cobros del sistema
-              </p>
-            </div>
-          </div>
-        </div>
-        <CobroList userRole="super_admin" />
-      </div>
-    </div>
-  );
 
   const renderPersonal = () => (
     <div className="space-y-8">
@@ -643,8 +623,24 @@ function SuperAdminDashboard() {
     <div className="space-y-8">
       <VentasManager userRole="super_admin" />
       
-  
-      
+      {/* Gestión de Cobros */}
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <DollarSign className="text-blue-600" size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-800">Gestión de Cobros</h3>
+              <p className="text-sm text-gray-600">
+                Administra los pagos y cobros del sistema
+              </p>
+            </div>
+          </div>
+        </div>
+        <CobroList userRole="super_admin" />
+      </div>
+
       {/* Historial de Devoluciones */}
       <div className="bg-white shadow-lg rounded-xl p-6">
         <div className="flex items-center justify-between mb-6">

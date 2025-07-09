@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, DollarSign, UserCheck, Users, X, ChevronLeft, ChevronRight, CreditCard, Factory } from 'lucide-react';
+import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, UserCheck, X, ChevronLeft, ChevronRight, CreditCard, Factory } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 
@@ -17,11 +17,8 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView }) {
     { id: 'productos', icon: Package, label: 'Gestión de Productos', route: '/super-admin/productos' },
     { id: 'produccion', icon: Factory, label: 'Gestión de Producción', route: '/super-admin/produccion' },
     { id: 'ventas', icon: ShoppingCart, label: 'Gestión de Ventas', route: '/super-admin/ventas' },
-    { id: 'cobros', icon: DollarSign, label: 'Gestión de Cobros', route: '/super-admin/cobros' },
     { id: 'caja', icon: CreditCard, label: 'Gestión de Caja', route: '/super-admin/caja' },
-    { id: 'gastos', icon: DollarSign, label: 'Gestión de Gastos', route: '/super-admin/gastos' },
     { id: 'personal', icon: UserCheck, label: 'Gestión de Personal', route: '/super-admin/personal' },
-    { id: 'colaboradores', icon: Users, label: 'Colaboradores', route: '/super-admin/colaboradores' },
     { id: 'profile', icon: UserCog, label: 'Mi Perfil', route: '/super-admin/perfil' },
   ];
 

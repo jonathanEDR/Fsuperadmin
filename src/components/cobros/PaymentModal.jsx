@@ -30,6 +30,21 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta }) => {
       return;
     }
 
+    // Validar que el monto no exceda el monto total de la venta
+    const montoTotalVenta = parseFloat(venta.montoTotal) || 0;
+    const tolerance = 0.01; // Tolerancia para diferencias de centavos
+    
+    if (total > montoTotalVenta + tolerance) {
+      alert(`El monto total ingresado (S/. ${total.toFixed(2)}) no puede ser mayor al monto total de la venta (S/. ${montoTotalVenta.toFixed(2)})`);
+      return;
+    }
+
+    // Validar que el monto no sea negativo
+    if (total < 0) {
+      alert('El monto total no puede ser negativo');
+      return;
+    }
+
     // Asegurarse de que todos los valores numéricos sean números válidos
     const validatedData = {
       ...formData,
@@ -128,20 +143,53 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta }) => {
                 <span>Gastos Imprevistos:</span>
                 <span>S/. {(parseFloat(formData.gastosImprevistos) || 0).toFixed(2)}</span>
               </div>
-              <div className="flex justify-between font-bold border-t pt-1 text-lg">
-                <span>Monto a pagar:</span>
-                <span className="text-green-600">S/. {((parseFloat(formData.yape) || 0) + (parseFloat(formData.efectivo) || 0) + (parseFloat(formData.gastosImprevistos) || 0)).toFixed(2)}</span>
-              </div>
-              <div className="text-xs text-gray-500 mt-2 p-2 bg-blue-50 rounded">
-                <div className="flex justify-between">
-                  <span>Monto total de la venta:</span>
-                  <span>S/. {venta.montoTotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Saldo pendiente después del pago:</span>
-                  <span>S/. {Math.max(0, venta.montoTotal - ((parseFloat(formData.yape) || 0) + (parseFloat(formData.efectivo) || 0) + (parseFloat(formData.gastosImprevistos) || 0))).toFixed(2)}</span>
-                </div>
-              </div>
+              {(() => {
+                const totalPago = ((parseFloat(formData.yape) || 0) + (parseFloat(formData.efectivo) || 0) + (parseFloat(formData.gastosImprevistos) || 0));
+                const montoTotalVenta = parseFloat(venta.montoTotal) || 0;
+                const excedeLimite = totalPago > montoTotalVenta;
+                
+                return (
+                  <div className={`flex justify-between font-bold border-t pt-1 text-lg ${excedeLimite ? 'text-red-600' : 'text-green-600'}`}>
+                    <span>Monto a pagar:</span>
+                    <span>S/. {totalPago.toFixed(2)}</span>
+                  </div>
+                );
+              })()}
+              
+              {(() => {
+                const totalPago = ((parseFloat(formData.yape) || 0) + (parseFloat(formData.efectivo) || 0) + (parseFloat(formData.gastosImprevistos) || 0));
+                const montoTotalVenta = parseFloat(venta.montoTotal) || 0;
+                const excedeLimite = totalPago > montoTotalVenta;
+                
+                if (excedeLimite) {
+                  return (
+                    <div className="text-xs text-red-600 mt-2 p-2 bg-red-50 rounded border border-red-200">
+                      <div className="font-medium">⚠️ El monto excede el límite permitido</div>
+                      <div className="flex justify-between mt-1">
+                        <span>Monto máximo permitido:</span>
+                        <span>S/. {montoTotalVenta.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Excede por:</span>
+                        <span>S/. {(totalPago - montoTotalVenta).toFixed(2)}</span>
+                      </div>
+                    </div>
+                  );
+                }
+                
+                return (
+                  <div className="text-xs text-gray-500 mt-2 p-2 bg-blue-50 rounded">
+                    <div className="flex justify-between">
+                      <span>Monto total de la venta:</span>
+                      <span>S/. {montoTotalVenta.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Saldo pendiente después del pago:</span>
+                      <span>S/. {Math.max(0, montoTotalVenta - totalPago).toFixed(2)}</span>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
 
@@ -166,12 +214,33 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta }) => {
             >
               Cancelar
             </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-            >
-              Procesar Pago
-            </button>
+            {(() => {
+              const totalPago = ((parseFloat(formData.yape) || 0) + (parseFloat(formData.efectivo) || 0) + (parseFloat(formData.gastosImprevistos) || 0));
+              const montoTotalVenta = parseFloat(venta.montoTotal) || 0;
+              const excedeLimite = totalPago > montoTotalVenta;
+              const sinMonto = totalPago <= 0;
+              
+              return (
+                <button
+                  type="submit"
+                  disabled={excedeLimite || sinMonto}
+                  className={`px-4 py-2 rounded-md transition-colors ${
+                    excedeLimite || sinMonto
+                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                      : 'bg-green-600 text-white hover:bg-green-700'
+                  }`}
+                  title={
+                    excedeLimite 
+                      ? 'El monto excede el límite permitido' 
+                      : sinMonto 
+                        ? 'Debe ingresar al menos un método de pago'
+                        : 'Procesar Pago'
+                  }
+                >
+                  {excedeLimite ? 'Monto Excedido' : 'Procesar Pago'}
+                </button>
+              );
+            })()}
           </div>
         </form>
       </div>

@@ -6,6 +6,7 @@ import { procesarPagoVenta } from '../../services/cobroService';
 import { PaymentModal } from '../cobros';
 import { QuickDevolucionModal } from '../devoluciones';
 import { VentaCreationModal } from '.';
+import VentasLineChart from '../graphics/VentasLineChart';
 import { format } from 'date-fns';
 import clsx from 'clsx';
 import { useRole } from '../../context/RoleContext';
@@ -542,6 +543,13 @@ function VentaList({
         </div>
       )}
 
+      {/* Gráfico de Análisis de Ventas - Solo para Super Admin */}
+      {userRole === 'super_admin' && (
+        <div className="mb-8">
+          <VentasLineChart userRole={userRole} />
+        </div>
+      )}
+
       {/* Mostrar mensajes de éxito/error */}
       {error && (
         <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
@@ -801,7 +809,7 @@ function VentaList({
               )}
 
               {/* Estado de finalización o botón para finalizar */}
-              {(venta.userId === currentUserId && (userRole === 'user' || userRole === 'admin')) && (
+              {((venta.userId === currentUserId && (userRole === 'user' || userRole === 'admin')) || userRole === 'super_admin') && (
                 <>
                   {/* Solo mostrar botón si la venta no está finalizada ni pendiente de revisión */}
                   {(!venta.completionStatus) && (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, UserCog, LogOut, Shield, Users, Package, ShoppingCart, DollarSign, Menu, X, ChevronLeft, ChevronRight, UserCheck, Factory } from 'lucide-react';
+import { Home, UserCog, LogOut, Shield, Users, Package, ShoppingCart, Menu, X, ChevronLeft, ChevronRight, UserCheck, Factory } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 
@@ -14,11 +14,9 @@ function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggle
   const menuItems = [
     { id: 'notas', icon: Home, label: 'Gestión de Notas', route: '/admin/notas' },
     { id: 'productos', icon: Package, label: 'Gestión de Productos', route: '/admin/productos' },
-    { id: 'produccion', icon: Factory, label: 'Gestión de Producción', route: '/admin/produccion' },
+    // { id: 'produccion', icon: Factory, label: 'Gestión de Producción', route: '/admin/produccion' }, // Eliminado
     { id: 'ventas', icon: ShoppingCart, label: 'Gestión de Ventas', route: '/admin/ventas' },
-    { id: 'cobros', icon: DollarSign, label: 'Gestión de Cobros', route: '/admin/cobros' },
     { id: 'personal', icon: UserCheck, label: 'Gestión de Personal', route: '/admin/personal' },
-    { id: 'colaboradores', icon: Users, label: 'Colaboradores', route: '/admin/colaboradores' },
     { id: 'perfil', icon: UserCog, label: 'Mi Perfil', route: '/admin/perfil' }
   ];
 

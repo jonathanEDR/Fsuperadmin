@@ -17,13 +17,10 @@ import BienvenidaPage from './Pages/BienvenidaPage';
 import UsuariosPage from './Pages/UsuariosPage';
 import ProductosPage from './Pages/ProductosPage';
 import VentasPage from './Pages/VentasPage';
-import CobrosPage from './Pages/CobrosPage';
 import PersonalPage from './Pages/PersonalPage';
-import ColaboradoresPage from './Pages/ColaboradoresPage';
 import NotasPage from './Pages/NotasPage';
 import PerfilPage from './Pages/PerfilPage';
 import UserDashboardLayout from './components/layout/dashboards/UserDashboardLayout';
-import GastosPage from './Pages/GastosPage';
 import CajaPage from './Pages/CajaPage';
 import ProduccionPage from './Pages/ProduccionPage';
 
@@ -127,10 +124,8 @@ function App() {
               <Route path="notas" element={<NotasPage />} />
               <Route path="productos" element={<ProductosPage />} />
               <Route path="ventas" element={<VentasPage />} />
-              <Route path="cobros" element={<CobrosPage />} />
               <Route path="pagos-realizados" element={<PagosRealizadosPage />} />
               <Route path="personal" element={<PersonalPage />} />
-              <Route path="colaboradores" element={<ColaboradoresPage />} />
               <Route path="perfil" element={<PerfilPage />} />
               <Route path="produccion/*" element={<ProduccionPage />} />
             </Route>
@@ -149,13 +144,10 @@ function App() {
               <Route path="usuarios" element={<UsuariosPage />} />
               <Route path="productos" element={<ProductosPage />} />
               <Route path="ventas" element={<VentasPage />} />
-              <Route path="cobros" element={<CobrosPage />} />
               <Route path="pagos-realizados" element={<PagosRealizadosPage />} />
               <Route path="personal" element={<PersonalPage />} />
-              <Route path="colaboradores" element={<ColaboradoresPage />} />
               <Route path="notas" element={<NotasPage />} />
               <Route path="perfil" element={<PerfilPage />} />
-              <Route path="gastos" element={<GastosPage />} />
               <Route path="caja" element={<CajaPage />} />
               <Route path="produccion/*" element={<ProduccionPage />} />
             </Route>

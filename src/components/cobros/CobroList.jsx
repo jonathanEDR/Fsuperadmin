@@ -8,6 +8,7 @@ import {
 import CobrosHistorial from './CobrosHistorial';
 import CobroCreationModal from './CobroCreationModal';
 import CobroResumen from './CobroResumen';
+import CobrosLineChart from '../graphics/CobrosLineChart';
 
 const CobroList = ({ userRole }) => {
   const { user } = useUser();
@@ -120,6 +121,13 @@ const CobroList = ({ userRole }) => {
       <div className="mb-8">
         <CobroResumen debtInfo={debtInfo} />
       </div>
+
+      {/* Gráfico de Cobros - Solo para Super Admin */}
+      {userRole === 'super_admin' && (
+        <div className="mb-8">
+          <CobrosLineChart userRole={userRole} />
+        </div>
+      )}
 
       {/* Botón para Nuevo Cobro */}
       <div className="mb-8">

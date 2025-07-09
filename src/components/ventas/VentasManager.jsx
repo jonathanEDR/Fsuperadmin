@@ -7,10 +7,12 @@ import VentaCreationModal from './VentaCreationModal';
 import { useRole } from '../../context/RoleContext';
 import DevolucionList from '../devoluciones/DevolucionList';
 
-const VentasManager = () => {
+const VentasManager = ({ userRole: userRoleProp }) => {
   const { getToken } = useAuth();
   const { user } = useUser();
-  const userRole = useRole();
+  const contextUserRole = useRole();
+  // Usar el prop si está disponible, sino usar el contexto como fallback
+  const userRole = userRoleProp || contextUserRole;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ventas, setVentas] = useState([]);
   const [ventasFinalizadas, setVentasFinalizadas] = useState([]);
