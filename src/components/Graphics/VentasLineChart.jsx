@@ -255,19 +255,19 @@ const VentasLineChart = ({ userRole }) => {
   };
 
   if (loading) return (
-    <div className="bg-white rounded-lg shadow p-6 mb-8">
+    <div className="bg-white rounded-lg shadow p-2 sm:p-6 mb-4 sm:mb-8">
       <div className="py-8 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Cargando gráfico de ventas...</p>
+        <p className="mt-4 text-gray-600 text-sm">Cargando gráfico de ventas...</p>
       </div>
     </div>
   );
-  
+
   if (error) return (
-    <div className="bg-white rounded-lg shadow p-6 mb-8">
+    <div className="bg-white rounded-lg shadow p-2 sm:p-6 mb-4 sm:mb-8">
       <div className="py-8 text-center text-red-600">
         <p className="font-semibold">Error al cargar el gráfico</p>
-        <p className="text-sm mt-2">{error}</p>
+        <p className="text-xs sm:text-sm mt-2">{error}</p>
         <button 
           onClick={fetchVentasData}
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -277,9 +277,9 @@ const VentasLineChart = ({ userRole }) => {
       </div>
     </div>
   );
-  
+
   if (!chartData) return (
-    <div className="bg-white rounded-lg shadow p-6 mb-8">
+    <div className="bg-white rounded-lg shadow p-2 sm:p-6 mb-4 sm:mb-8">
       <div className="py-8 text-center text-gray-600">
         <p>No hay datos disponibles para mostrar</p>
       </div>
@@ -287,18 +287,18 @@ const VentasLineChart = ({ userRole }) => {
   );
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 mb-8">
+    <div className="bg-white rounded-lg shadow p-2 sm:p-6 mb-4 sm:mb-8 overflow-x-auto">
       {/* Header con filtros */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-        <h3 className="text-xl font-bold text-gray-800 mb-4 sm:mb-0">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-2">
+        <h3 className="text-base sm:text-xl font-bold text-gray-800 mb-2 sm:mb-0">
           Evolución de Ventas - {getTimeFilterLabel()}
         </h3>
-        <div className="flex gap-2">
+        <div className="flex flex-col xs:flex-row gap-2 w-full sm:w-auto">
           {['hoy', 'semana', 'mes', 'anual'].map((filter) => (
             <button
               key={filter}
               onClick={() => setTimeFilter(filter)}
-              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+              className={`w-full sm:w-auto px-3 py-1 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                 timeFilter === filter
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -311,7 +311,7 @@ const VentasLineChart = ({ userRole }) => {
       </div>
 
       {/* Gráfico */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6 min-w-[350px] sm:min-w-0" style={{height: '18rem', minHeight: '16rem'}}>
         {chartData ? (
           <Line 
             data={chartData} 
@@ -358,32 +358,32 @@ const VentasLineChart = ({ userRole }) => {
                 intersect: false
               }
             }} 
-            height={400}
+            height={window.innerWidth < 640 ? 250 : 400}
           />
         ) : (
-          <div className="h-96 flex items-center justify-center text-gray-500">
+          <div className="h-64 sm:h-96 flex items-center justify-center text-gray-500">
             <p>No se pudo renderizar el gráfico</p>
           </div>
         )}
       </div>
 
       {/* Resumen de totales */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
         <div className="text-center">
-          <div className="text-2xl font-bold text-green-600">S/ {totals.ventasBrutas.toFixed(2)}</div>
-          <div className="text-sm text-gray-600">Ventas Brutas - {getTimeFilterLabel()}</div>
+          <div className="text-lg sm:text-2xl font-bold text-green-600">S/ {totals.ventasBrutas.toFixed(2)}</div>
+          <div className="text-xs sm:text-sm text-gray-600">Ventas Brutas - {getTimeFilterLabel()}</div>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-blue-600">S/ {totals.ventasNetas.toFixed(2)}</div>
-          <div className="text-sm text-gray-600">Ventas Netas - {getTimeFilterLabel()}</div>
+          <div className="text-lg sm:text-2xl font-bold text-blue-600">S/ {totals.ventasNetas.toFixed(2)}</div>
+          <div className="text-xs sm:text-sm text-gray-600">Ventas Netas - {getTimeFilterLabel()}</div>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-red-600">S/ {totals.devoluciones.toFixed(2)}</div>
-          <div className="text-sm text-gray-600">Devoluciones - {getTimeFilterLabel()}</div>
+          <div className="text-lg sm:text-2xl font-bold text-red-600">S/ {totals.devoluciones.toFixed(2)}</div>
+          <div className="text-xs sm:text-sm text-gray-600">Devoluciones - {getTimeFilterLabel()}</div>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-purple-600">{totals.cantidadVendida} unidades</div>
-          <div className="text-sm text-gray-600">Cantidad Vendida - {getTimeFilterLabel()}</div>
+          <div className="text-lg sm:text-2xl font-bold text-purple-600">{totals.cantidadVendida} unidades</div>
+          <div className="text-xs sm:text-sm text-gray-600">Cantidad Vendida - {getTimeFilterLabel()}</div>
         </div>
       </div>
     </div>

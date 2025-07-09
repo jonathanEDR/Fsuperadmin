@@ -8,6 +8,7 @@ const ReservaModal = ({ isOpen, onClose, onSubmit, productos, isLoading }) => {
   });
   const [productosSeleccionados, setProductosSeleccionados] = useState([]);
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Función para agregar producto
   const agregarProducto = () => {
@@ -29,6 +30,7 @@ const ReservaModal = ({ isOpen, onClose, onSubmit, productos, isLoading }) => {
       });
       setProductosSeleccionados([]);
       setErrors({});
+      setIsSubmitting(false);
     }
   }, [isOpen]);
 
@@ -134,9 +136,16 @@ const ReservaModal = ({ isOpen, onClose, onSubmit, productos, isLoading }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Prevenir múltiples envíos
+    if (isSubmitting || isLoading) {
+      return;
+    }
+    
     if (!validateForm()) {
       return;
     }
+
+    setIsSubmitting(true);
 
     try {
       // Crear una sola reserva con múltiples productos
@@ -160,6 +169,8 @@ const ReservaModal = ({ isOpen, onClose, onSubmit, productos, isLoading }) => {
       
     } catch (error) {
       console.error('Error al crear reserva:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -355,10 +366,10 @@ const ReservaModal = ({ isOpen, onClose, onSubmit, productos, isLoading }) => {
             </button>
             <button
               type="submit"
-              disabled={isLoading || productosSeleccionados.length === 0}
+              disabled={isLoading || isSubmitting || productosSeleccionados.length === 0}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isLoading ? 'Creando...' : 'Crear Reservas'}
+              {isLoading || isSubmitting ? 'Creando...' : 'Crear Reservas'}
             </button>
           </div>
         </form>

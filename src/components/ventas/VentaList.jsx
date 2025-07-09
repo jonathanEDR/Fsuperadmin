@@ -583,14 +583,14 @@ function VentaList({
         };
         // Log para depuración de cálculo
         return (
-          <div key={venta._id} className="bg-white rounded-lg shadow p-6 mb-4">
+          <div key={venta._id} className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4">
             {/* Cabecera de la venta */}
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2 sm:gap-0">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                   Venta #{venta._id}
                 </h3>
-                <p className="text-sm text-gray-500">
+                <p className="text-xs sm:text-sm text-gray-500">
                   {new Date(venta.fechadeVenta).toLocaleDateString('es-ES', {
                     year: 'numeric',
                     month: 'long',
@@ -599,11 +599,12 @@ function VentaList({
                     minute: '2-digit'
                   })}
                 </p>
-              </div>            {/* Estados de la venta */}
-              <div className="flex flex-col items-end gap-2">
+              </div>
+              {/* Estados de la venta */}
+              <div className="flex flex-col items-end gap-2 w-full sm:w-auto">
                 {/* Estado de pago con detalles */}
-                <div className="text-right">
-                  <span className={`px-3 py-1 text-sm rounded-full ${
+                <div className="text-right w-full sm:w-auto">
+                  <span className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full ${
                     venta.estadoPago === 'Pagado' 
                       ? 'bg-green-100 text-green-800'
                       : venta.estadoPago === 'Parcial'
@@ -614,13 +615,14 @@ function VentaList({
                   </span>
                   <div className="text-xs text-gray-500 mt-1">
                     S/ {(venta.cantidadPagada || 0).toFixed(2)} / S/ {montoTotalNeto.toFixed(2)}
-                  </div>                {venta.cantidadPagada < montoTotalNeto && (
+                  </div>
+                  {venta.cantidadPagada < montoTotalNeto && (
                     <div className="text-xs text-red-600 font-medium">
                       Debe: S/ {(montoTotalNeto - (venta.cantidadPagada || 0)).toFixed(2)}
                     </div>
                   )}
                   {/* Barra de progreso de pago */}
-                  <div className="w-24 mt-2">
+                  <div className="w-full sm:w-24 mt-2">
                     <div className="bg-gray-200 rounded-full h-2">
                       <div 
                         className={`h-2 rounded-full ${
@@ -640,10 +642,9 @@ function VentaList({
                     </div>
                   </div>
                 </div>
-                
                 {/* Estado de finalización */}
                 {venta.isCompleted && (
-                  <span className={`px-3 py-1 text-sm rounded-full ${
+                  <span className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full ${
                     venta.completionStatus === 'approved'
                       ? 'bg-green-100 text-green-800'
                       : venta.completionStatus === 'rejected'
@@ -661,39 +662,38 @@ function VentaList({
             </div>
 
             {/* Información del creador y propietario */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 mb-4 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4 mt-2 mb-4 text-xs sm:text-sm">
               {venta.creatorInfo && (
-                <div className="bg-gray-50 p-3 rounded-lg">
+                <div className="bg-gray-50 p-2 sm:p-3 rounded-lg">
                   <p className="font-medium text-gray-700">Creado por:</p>
                   <p className="text-gray-900">{venta.creatorInfo.nombre_negocio || 'No especificado'}</p>
                   <p className="text-gray-500 text-xs">{venta.creatorInfo.email}</p>
                   <p className="text-gray-500 text-xs italic">Rol: {venta.creatorInfo.role}</p>
                 </div>
               )}
-              
               {venta.userInfo && venta.userInfo.id !== venta.creatorInfo?.id && (
-                <div className="bg-gray-50 p-3 rounded-lg">
+                <div className="bg-gray-50 p-2 sm:p-3 rounded-lg">
                   <p className="font-medium text-gray-700">Asignado a:</p>
                   <p className="text-gray-900">{venta.userInfo.nombre_negocio || 'No especificado'}</p>
                   <p className="text-gray-500 text-xs">{venta.userInfo.email}</p>
                   <p className="text-gray-500 text-xs italic">Rol: {venta.userInfo.role}</p>
                 </div>
               )}
-            </div>        
-            
+            </div>
 
-              {/* Detalles de productos y montos */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            {/* Detalles de productos y montos */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 mb-4">
               <div>
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">Detalles del Cliente</h4>
+                <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2">Detalles del Cliente</h4>
                 <p className="text-gray-600">
                   <span className="font-medium">Nombre:</span> {venta.user_info?.nombre_negocio || 'N/A'}
                 </p>
                 <p className="text-gray-600">
                   <span className="font-medium">Email:</span> {venta.user_info?.email || 'N/A'}
                 </p>
-              </div>            <div>
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">Detalles de la Venta</h4>
+              </div>
+              <div>
+                <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2">Detalles de la Venta</h4>
                 <p className="text-gray-600">
                   <span className="font-medium">Fecha:</span> {formatearFechaHora(venta.fechadeVenta)}
                 </p>
@@ -701,7 +701,6 @@ function VentaList({
                   <p className="text-gray-600">
                     <span className="font-medium">Monto Total:</span> S/ {venta.montoTotalOriginal !== undefined ? venta.montoTotalOriginal.toFixed(2) : (venta.montoTotal + (venta.montoDevuelto || 0)).toFixed(2)}
                   </p>
-
                   {/* Mostrar monto total neto si hay devoluciones */}
                   {montoDevuelto > 0 && (
                     <p className="text-gray-600">
@@ -730,10 +729,9 @@ function VentaList({
                       </span>
                     </p>
                   )}
-                  
                   {/* Desglose detallado de pagos */}
                   {venta.cobros_detalle && (venta.cobros_detalle.yape > 0 || venta.cobros_detalle.efectivo > 0 || venta.cobros_detalle.gastosImprevistos > 0) && (
-                    <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="mt-3 p-2 sm:p-3 bg-blue-50 rounded-lg border border-blue-200">
                       <h5 className="text-xs font-semibold text-blue-800 mb-2">Desglose de Pagos:</h5>
                       <div className="space-y-1 text-xs">
                         {venta.cobros_detalle.yape > 0 && (
@@ -769,24 +767,24 @@ function VentaList({
               </div>
             </div>
 
-
             {/* Productos de la venta */}
-            <div className="mb-4">
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">Productos</h4>
-              <ul className="list-disc list-inside">
+            <div className="mb-4 overflow-x-auto">
+              <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2">Productos</h4>
+              <ul className="list-disc list-inside min-w-[200px]">
                 {venta.productos?.map((prod, idx) => (
                   <li key={idx} className="text-gray-600">
                     {prod.productoId?.nombre} - {prod.cantidad} unidad(es)
                   </li>
                 ))}
               </ul>
-            </div>          {/* Botones de acción */}
-            <div className="mt-4 flex gap-2">
+            </div>
+            {/* Botones de acción */}
+            <div className="mt-4 flex flex-col sm:flex-row gap-2">
               {/* Botón de pago */}
               {venta.estadoPago !== 'Pagado' && (
                 <button
                   onClick={() => handleOpenPayment(ventaParaPago)}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                   disabled={loading}
                   title={userRole === 'user' ? 'Realizar pago de venta' : 'Procesar pago'}
                 >
@@ -794,12 +792,11 @@ function VentaList({
                   {userRole === 'user' ? 'Pagar Venta' : 'Procesar Pago'}
                 </button>
               )}
-              
               {/* Botón de Devolución - visible si la venta no está completamente devuelta */}
               {(!venta.estado || venta.estado !== 'devuelta') && (
                 <button
                   onClick={() => handleOpenDevolucion(venta)}
-                  className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
                   disabled={loading}
                   title="Agregar devolución"
                 >
@@ -807,7 +804,6 @@ function VentaList({
                   Agregar Devolución
                 </button>
               )}
-
               {/* Estado de finalización o botón para finalizar */}
               {((venta.userId === currentUserId && (userRole === 'user' || userRole === 'admin')) || userRole === 'super_admin') && (
                 <>
@@ -815,7 +811,7 @@ function VentaList({
                   {(!venta.completionStatus) && (
                     <button
                       onClick={() => handleFinalizarVenta(venta._id)}
-                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                       disabled={loading}
                     >
                       <Clock className="w-4 h-4" />
@@ -826,7 +822,7 @@ function VentaList({
                   {(venta.completionStatus === 'rejected') && (
                     <button
                       onClick={() => handleFinalizarVenta(venta._id)}
-                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                       disabled={loading}
                     >
                       <Clock className="w-4 h-4" />
@@ -835,23 +831,23 @@ function VentaList({
                   )}
                   {/* Si está pendiente, solo mostrar mensaje de espera */}
                   {venta.completionStatus === 'pending' && (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg">
+                    <div className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg">
                       <Clock className="w-4 h-4" />
                       Pendiente de aprobación
                     </div>
                   )}
                   {venta.completionStatus === 'approved' && (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-lg">
+                    <div className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-lg">
                       <Check className="w-4 h-4" />
                       Finalizada
                     </div>
                   )}
                 </>
-              )}            
+              )}
               {/* Botones de aprobar/rechazar (solo para admin/super_admin) */}
               {venta.completionStatus === 'pending' && 
                 ['admin', 'super_admin'].includes(userRole) && (
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2 w-full">
                     <button 
                       onClick={() => handleApproveReject(venta._id, 'approved')}
                       className="flex-1 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
@@ -867,11 +863,12 @@ function VentaList({
                       Rechazar
                     </button>
                   </div>
-              )}          {/* Botón de eliminar (solo para admin y super_admin con permisos) */}
+              )}
+              {/* Botón de eliminar (solo para admin y super_admin con permisos) */}
               {canEditDelete(venta) && userRole !== 'user' && (
                 <button
                   onClick={() => handleDeleteVenta(venta._id)}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                   disabled={loading}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

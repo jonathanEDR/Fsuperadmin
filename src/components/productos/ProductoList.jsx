@@ -465,51 +465,35 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
       ) : (
         <div className="space-y-8">
           {/* Tabla de Productos Activos */}
+          {/* Responsive: tabla en desktop, cards en móvil */}
           <div className="overflow-x-auto bg-white rounded-lg shadow">
-            <table className="min-w-full divide-y divide-gray-200">
+            {/* Desktop Table */}
+            <table className="hidden sm:table min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Nombre
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Cantidad
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Cantidad Disponible
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Precio
-                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Disponible</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
                   {isAdminUser && (
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Acciones
-                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                   )}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {productosAmostrar.map((producto) => (
                   <tr key={producto._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">{producto.nombre}</div>
                       {producto.creatorInfo?.role === 'super_admin' && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                          Super Admin
-                        </span>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Super Admin</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {producto.cantidad || 0}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {producto.cantidadRestante || 0}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      S/ {parseFloat(producto.precio).toFixed(2)}
-                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{producto.cantidad || 0}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{producto.cantidadRestante || 0}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">S/ {parseFloat(producto.precio).toFixed(2)}</td>
                     {isAdminUser && (
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                         {canEditDelete(producto) && (
                           <div className="flex justify-end gap-2">
                             <button
@@ -517,16 +501,14 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
                               className="inline-flex items-center px-3 py-1 rounded-md text-sm bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200"
                               title="Editar producto"
                             >
-                              <Edit2 className="w-4 h-4 mr-1" />
-                              Editar
+                              <Edit2 className="w-4 h-4 mr-1" />Editar
                             </button>
                             <button
                               onClick={() => handleDeleteProducto(producto._id)}
                               className="inline-flex items-center px-3 py-1 rounded-md text-sm bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200"
                               title="Eliminar producto"
                             >
-                              <Trash2 className="w-4 h-4 mr-1" />
-                              Eliminar
+                              <Trash2 className="w-4 h-4 mr-1" />Eliminar
                             </button>
                           </div>
                         )}
@@ -536,6 +518,42 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
                 ))}
               </tbody>
             </table>
+            {/* Mobile Cards */}
+            <div className="sm:hidden flex flex-col gap-4 p-2">
+              {productosAmostrar.map((producto) => (
+                <div key={producto._id} className="bg-white rounded-lg shadow p-4 flex flex-col gap-2 border border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <div className="font-semibold text-gray-900 text-base">{producto.nombre}</div>
+                    {producto.creatorInfo?.role === 'super_admin' && (
+                      <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Super Admin</span>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-sm text-gray-600">
+                    <span>Cantidad: <span className="font-medium text-gray-800">{producto.cantidad || 0}</span></span>
+                    <span>Disponible: <span className="font-medium text-gray-800">{producto.cantidadRestante || 0}</span></span>
+                    <span>Precio: <span className="font-medium text-gray-800">S/ {parseFloat(producto.precio).toFixed(2)}</span></span>
+                  </div>
+                  {isAdminUser && canEditDelete(producto) && (
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        onClick={() => handleEditProducto(producto)}
+                        className="flex-1 inline-flex items-center justify-center px-3 py-2 rounded-md text-sm bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200"
+                        title="Editar producto"
+                      >
+                        <Edit2 className="w-4 h-4 mr-1" />Editar
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProducto(producto._id)}
+                        className="flex-1 inline-flex items-center justify-center px-3 py-2 rounded-md text-sm bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200"
+                        title="Eliminar producto"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />Eliminar
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
 

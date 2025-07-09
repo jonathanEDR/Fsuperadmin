@@ -97,52 +97,55 @@ const CobroList = ({ userRole }) => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
       {error && (
-        <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+        <div className="mb-4 sm:mb-6 p-2 sm:p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-xs sm:text-base">
           {error}
         </div>
       )}
-      
+
       {success && (
-        <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+        <div className="mb-4 sm:mb-6 p-2 sm:p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg text-xs sm:text-base">
           {success}
         </div>
       )}
 
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-          <DollarSign className="text-blue-600" size={28} />
+      <div className="mb-4 sm:mb-8">
+        <h2 className="text-lg sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+          <DollarSign className="text-blue-600" size={22} />
           Gestión de Cobros
         </h2>
       </div>
 
       {/* Resumen de Cobros */}
-      <div className="mb-8">
-        <CobroResumen debtInfo={debtInfo} />
+      <div className="mb-4 sm:mb-8">
+        <div className="overflow-x-auto">
+          <CobroResumen debtInfo={debtInfo} />
+        </div>
       </div>
 
       {/* Gráfico de Cobros - Solo para Super Admin */}
       {userRole === 'super_admin' && (
-        <div className="mb-8">
+        <div className="mb-4 sm:mb-8 overflow-x-auto">
           <CobrosLineChart userRole={userRole} />
         </div>
       )}
 
       {/* Botón para Nuevo Cobro */}
-      <div className="mb-8">
+      <div className="mb-4 sm:mb-8">
         <button
           onClick={() => setShowPaymentModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
         >
-          <DollarSign size={20} />
+          <DollarSign size={18} />
           Registrar Nuevo Cobro
         </button>
       </div>
 
       {/* Historial de Pagos */}
-      <div className="mb-8">
-        <h3 className="text-xl font-bold text-gray-800 mb-6">Historial de Pagos</h3>        <CobrosHistorial userRole={userRole} />
+      <div className="mb-4 sm:mb-8 overflow-x-auto">
+        <h3 className="text-base sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">Historial de Pagos</h3>
+        <CobrosHistorial userRole={userRole} />
       </div>
 
       {/* Modal de Pago */}
@@ -152,7 +155,6 @@ const CobroList = ({ userRole }) => {
           onClose={() => setShowPaymentModal(false)}
           ventasData={pendingVentas}
           onCobroCreated={handleCobroCreated}
-
         />
       )}
     </div>
