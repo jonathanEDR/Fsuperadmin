@@ -23,7 +23,8 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
     yape: '0',
     efectivo: '0',
     gastosImprevistos: '0',
-    descripcion: ''
+    descripcion: '',
+    fechaCobro: new Date().toISOString().split('T')[0] // Fecha actual por defecto
   });
 
   // Reset form cuando se abre el modal
@@ -35,7 +36,8 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
         yape: '0',
         efectivo: '0',
         gastosImprevistos: '0',
-        descripcion: ''
+        descripcion: '',
+        fechaCobro: new Date().toISOString().split('T')[0]
       });
       setError(null);
     }
@@ -157,6 +159,19 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
     if (yape === 0 && efectivo === 0 && gastosImprevistos === 0) {
       throw new Error('Debe ingresar al menos un monto de pago');
     }
+
+    // Validar fecha de cobro
+    if (!formData.fechaCobro) {
+      throw new Error('Debe seleccionar una fecha de cobro');
+    }
+
+    const fechaSeleccionada = new Date(formData.fechaCobro);
+    const hoy = new Date();
+    hoy.setHours(23, 59, 59, 999); // Permitir hasta el final del día actual
+    
+    if (fechaSeleccionada > hoy) {
+      throw new Error('La fecha de cobro no puede ser en el futuro');
+    }
   };
 
   // Manejar envío del formulario
@@ -198,7 +213,8 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
         efectivo,
         gastosImprevistos,
         montoTotal: ventasTotal,
-        descripcion: formData.descripcion || ''
+        descripcion: formData.descripcion || '',
+        fechaCobro: formData.fechaCobro
       };
 
       console.log('Datos del cobro a enviar:', {
@@ -228,12 +244,61 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
   // Nuevo: función para cerrar el modal de pago
   const handleCerrarPago = () => setVentaParaPagar(null);
 
-  // Nuevo: función para procesar el pago (puedes personalizarla)
-  const handleProcesarPago = (pagoData) => {
-    // Aquí puedes manejar el pago individual, por ahora solo cerrar el modal
-    console.log('Pago procesado para venta:', ventaParaPagar, pagoData);
-    setVentaParaPagar(null);
-    // Opcional: refrescar ventas, actualizar estado, etc.
+  // Nuevo: función para procesar el pago (crear cobro individual)
+  const handleProcesarPago = async (pagoData) => {
+    try {
+      console.log('Procesando pago individual para venta:', ventaParaPagar, pagoData);
+      
+      if (!ventaParaPagar) {
+        throw new Error('No se encontró la venta para procesar el pago');
+      }
+
+      // Preparar los datos para crear un cobro individual
+      const montoTotalPago = (pagoData.yape || 0) + (pagoData.efectivo || 0) + (pagoData.gastosImprevistos || 0);
+      
+      const cobroIndividual = {
+        ventas: [{
+          _id: ventaParaPagar._id,
+          ventaId: ventaParaPagar._id,
+          montoTotal: parseFloat(ventaParaPagar.montoTotal),
+          montoPendiente: parseFloat(ventaParaPagar.montoPendiente),
+          montoPagado: montoTotalPago
+        }],
+        distribucionPagos: [{
+          ventaId: ventaParaPagar._id,
+          montoPagado: montoTotalPago,
+          montoOriginal: parseFloat(ventaParaPagar.montoTotal),
+          montoPendiente: Math.max(0, parseFloat(ventaParaPagar.montoPendiente) - montoTotalPago)
+        }],
+        yape: pagoData.yape || 0,
+        efectivo: pagoData.efectivo || 0,
+        gastosImprevistos: pagoData.gastosImprevistos || 0,
+        montoTotal: montoTotalPago,
+        montoPagado: montoTotalPago,
+        montoTotalVentas: parseFloat(ventaParaPagar.montoTotal),
+        descripcion: pagoData.descripcion || '',
+        fechaCobro: pagoData.fechaCobro
+      };
+
+      console.log('Datos del cobro individual a crear:', cobroIndividual);
+
+      // Usar el mismo servicio para crear el cobro
+      await createCobro(cobroIndividual);
+      
+      // Cerrar el modal y notificar éxito
+      setVentaParaPagar(null);
+      
+      // Opcional: recargar datos o mostrar mensaje de éxito
+      if (onCobroCreated) {
+        onCobroCreated(true);
+      }
+      
+      console.log('Cobro individual creado exitosamente');
+      
+    } catch (error) {
+      console.error('Error al procesar pago individual:', error);
+      setError(error.message || 'Error al procesar el pago individual');
+    }
   };
 
   if (!isOpen) return null;
@@ -364,6 +429,21 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
                   onChange={handleChange}
                   className="w-full p-2 border border-gray-300 rounded-lg"
                   placeholder="0.00"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Fecha de Cobro <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  name="fechaCobro"
+                  value={formData.fechaCobro}
+                  onChange={handleChange}
+                  max={new Date().toISOString().split('T')[0]}
+                  required
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

@@ -6,7 +6,7 @@ import { procesarPagoVenta } from '../../services/cobroService';
 import { PaymentModal } from '../cobros';
 import { QuickDevolucionModal } from '../devoluciones';
 import { VentaCreationModal } from '.';
-import VentasLineChart from '../Graphics/VentasLineChart.jsx';
+import VentasLineChart from '../graphics/VentasLineChart.jsx';
 import { format } from 'date-fns';
 import clsx from 'clsx';
 import { useRole } from '../../context/RoleContext';
@@ -353,7 +353,8 @@ function VentaList({
         yape: parseFloat(paymentData.yape) || 0,
         efectivo: parseFloat(paymentData.efectivo) || 0,
         gastosImprevistos: parseFloat(paymentData.gastosImprevistos) || 0,
-        descripcion: paymentData.descripcion || ''
+        descripcion: paymentData.descripcion || '',
+        fechaCobro: paymentData.fechaCobro || new Date().toISOString().split('T')[0] // Incluir fecha de cobro
       };
 
       console.log('Procesando pago con:', pagoCompleto);
@@ -396,7 +397,7 @@ function VentaList({
           montoDevolucion: item.montoDevolucion
         })),
         motivo: devolucionData.motivo,
-        fechaDevolucion: new Date().toISOString()
+        fechaDevolucion: devolucionData.fechaDevolucion
       };
 
       await api.post('/api/devoluciones', formattedData, {

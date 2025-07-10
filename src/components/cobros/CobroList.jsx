@@ -8,7 +8,7 @@ import {
 import CobrosHistorial from './CobrosHistorial';
 import CobroCreationModal from './CobroCreationModal';
 import CobroResumen from './CobroResumen';
-import CobrosLineChart from '../Graphics/CobrosLineChart.jsx';
+import CobrosLineChart from '../graphics/CobrosLineChart.jsx';
 
 const CobroList = ({ userRole }) => {
   const { user } = useUser();

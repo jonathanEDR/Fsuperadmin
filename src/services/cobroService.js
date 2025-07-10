@@ -59,6 +59,23 @@ export const createCobro = async (cobroData) => {
       throw new Error('Debe seleccionar al menos una venta');
     }
 
+    // Validar fecha de cobro
+    if (!cobroData.fechaCobro) {
+      throw new Error('La fecha de cobro es requerida');
+    }
+
+    const fechaSeleccionada = new Date(cobroData.fechaCobro);
+    const hoy = new Date();
+    hoy.setHours(23, 59, 59, 999);
+
+    if (isNaN(fechaSeleccionada.getTime())) {
+      throw new Error('La fecha de cobro no es válida');
+    }
+
+    if (fechaSeleccionada > hoy) {
+      throw new Error('La fecha de cobro no puede ser en el futuro');
+    }
+
     // Validar montos primero
     const montos = validateMontos({
       yape: cobroData.yape,
@@ -103,7 +120,8 @@ export const createCobro = async (cobroData) => {
       })),
       distribucionPagos,
       ...montos,
-      descripcion: cobroData.descripcion || ''
+      descripcion: cobroData.descripcion || '',
+      fechaCobro: cobroData.fechaCobro
     };
 
     console.log('Enviando datos al backend:', dataToSend);
@@ -154,6 +172,11 @@ export const getCobrosHistorial = async (page = 1, limit = 10) => {
 
 export const procesarPagoVenta = async (ventaId, datoPago) => {
   try {
+    // Validar que se incluya la fecha de cobro
+    if (!datoPago.fechaCobro) {
+      throw new Error('La fecha de cobro es requerida');
+    }
+
     // Validar montos
     const montos = validateMontos({
       yape: datoPago.yape,
@@ -176,7 +199,8 @@ export const procesarPagoVenta = async (ventaId, datoPago) => {
         montoPendiente: 0 // Se está pagando completo
       }],
       ...montos,
-      descripcion: datoPago.descripcion || ''
+      descripcion: datoPago.descripcion || '',
+      fechaCobro: datoPago.fechaCobro // Incluir la fecha de cobro
     };
 
     console.log('Procesando pago de venta:', cobroData);

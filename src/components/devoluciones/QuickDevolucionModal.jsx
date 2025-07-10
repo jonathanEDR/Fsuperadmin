@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { X, MinusCircle } from 'lucide-react';
@@ -12,7 +12,16 @@ function QuickDevolucionModal({
 }) {
   const [productosADevolver, setProductosADevolver] = useState([]);
   const [motivo, setMotivo] = useState('');
+  const [fechaDevolucion, setFechaDevolucion] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Inicializar fecha con la fecha actual cuando se abre el modal
+  useEffect(() => {
+    if (isOpen && !fechaDevolucion) {
+      const hoy = new Date().toISOString().split('T')[0];
+      setFechaDevolucion(hoy);
+    }
+  }, [isOpen]);
 
   const agregarProducto = (producto) => {
     if (productosADevolver.some(p => p.producto.productoId._id === producto.productoId._id)) {
@@ -47,6 +56,7 @@ function QuickDevolucionModal({
   const limpiarForm = () => {
     setProductosADevolver([]);
     setMotivo('');
+    setFechaDevolucion('');
     setErrorMessage('');
   };
 
@@ -58,6 +68,21 @@ function QuickDevolucionModal({
 
     if (!motivo.trim() || motivo.length < 10) {
       setErrorMessage('El motivo debe tener al menos 10 caracteres');
+      return false;
+    }
+
+    if (!fechaDevolucion) {
+      setErrorMessage('Debe seleccionar una fecha para la devolución');
+      return false;
+    }
+
+    // Validar que la fecha no sea futura
+    const fechaSeleccionada = new Date(fechaDevolucion);
+    const hoy = new Date();
+    hoy.setHours(23, 59, 59, 999); // Permitir hasta el final del día actual
+    
+    if (fechaSeleccionada > hoy) {
+      setErrorMessage('La fecha de devolución no puede ser futura');
       return false;
     }
 
@@ -78,14 +103,24 @@ function QuickDevolucionModal({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
+    
     if (!validarDevolucion()) return;
+
+    // Confirmar si el motivo es corto
+    if (motivo.length < 10) {
+      const continuar = window.confirm('Se recomienda proporcionar una descripción más detallada del motivo. ¿Desea continuar de todos modos?');
+      if (!continuar) {
+        return;
+      }
+    }
 
     try {
       await onSubmit({
         ventaId: venta._id,
         productos: productosADevolver,
         motivo,
-        fechaDevolucion: new Date().toISOString()
+        fechaDevolucion: fechaDevolucion
       });
       
       limpiarForm();
@@ -198,6 +233,25 @@ function QuickDevolucionModal({
                     </div>
                   )}
 
+                  {/* Fecha de devolución */}
+                  <div className="mt-4">
+                    <label htmlFor="fechaDevolucion" className="block text-sm font-medium text-gray-700">
+                      Fecha de devolución *
+                    </label>
+                    <input
+                      type="date"
+                      id="fechaDevolucion"
+                      value={fechaDevolucion}
+                      onChange={(e) => setFechaDevolucion(e.target.value)}
+                      max={new Date().toISOString().split('T')[0]} // No permitir fechas futuras
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      required
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Seleccione la fecha en que se realizó la devolución
+                    </p>
+                  </div>
+
                   {/* Motivo de la devolución */}                  <div className="mt-4">
                     <label htmlFor="motivo" className="block text-sm font-medium text-gray-700">
                       Motivo de la devolución
@@ -239,35 +293,7 @@ function QuickDevolucionModal({
                     </button>
                     <button
                       type="button"
-                      onClick={() => {
-                        if (productosADevolver.length === 0) {
-                          setErrorMessage('Debe seleccionar al menos un producto para devolver');
-                          return;
-                        }                        if (!motivo || motivo.length < 1) {
-                          setErrorMessage('Debe ingresar un motivo para la devolución');
-                          return;
-                        }
-                        
-                        if (motivo.length < 10) {
-                          const continuar = window.confirm('Se recomienda proporcionar una descripción más detallada del motivo. ¿Desea continuar de todos modos?');
-                          if (!continuar) {
-                            return;
-                          }
-                        }
-                        if (productosADevolver.some(p => !p.cantidad || p.cantidad <= 0)) {
-                          setErrorMessage('Debe ingresar una cantidad válida para todos los productos');
-                          return;
-                        }
-                        if (productosADevolver.some(p => p.cantidad > p.producto.cantidad)) {
-                          setErrorMessage('La cantidad a devolver no puede ser mayor a la cantidad original');
-                          return;
-                        }
-                        
-                        onSubmit({
-                          productos: productosADevolver,
-                          motivo,
-                        });
-                      }}
+                      onClick={handleSubmit}
                       disabled={isSubmitting}
                       className={`inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                         isSubmitting

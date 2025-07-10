@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, DollarSign } from 'lucide-react';
 
 const PaymentModal = ({ isOpen, onClose, onSubmit, venta }) => {
@@ -6,18 +6,52 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta }) => {
     yape: 0,
     efectivo: 0,
     gastosImprevistos: 0,
-    descripcion: ''
+    descripcion: '',
+    fechaCobro: new Date().toISOString().split('T')[0] // Fecha actual por defecto
   });
+
+  // Reset form cuando se abre el modal
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        yape: 0,
+        efectivo: 0,
+        gastosImprevistos: 0,
+        descripcion: '',
+        fechaCobro: new Date().toISOString().split('T')[0]
+      });
+    }
+  }, [isOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    let numberValue = name !== 'descripcion' ? parseFloat(value) || 0 : value;
+    let processedValue = value;
+    
+    if (name !== 'descripcion' && name !== 'fechaCobro') {
+      processedValue = parseFloat(value) || 0;
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [name]: numberValue
+      [name]: processedValue
     }));
   };  const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Validar fecha
+    const fechaSeleccionada = new Date(formData.fechaCobro);
+    const hoy = new Date();
+    hoy.setHours(23, 59, 59, 999); // Permitir hasta el final del día actual
+    
+    if (fechaSeleccionada > hoy) {
+      alert('La fecha de cobro no puede ser en el futuro');
+      return;
+    }
+    
+    if (!formData.fechaCobro) {
+      alert('Debe seleccionar una fecha de cobro');
+      return;
+    }
     
     // Calcular el total automáticamente
     const total = (parseFloat(formData.yape) || 0) + 
@@ -51,7 +85,8 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta }) => {
       yape: parseFloat(formData.yape) || 0,
       efectivo: parseFloat(formData.efectivo) || 0,
       gastosImprevistos: parseFloat(formData.gastosImprevistos) || 0,
-      descripcion: formData.descripcion.trim()
+      descripcion: formData.descripcion.trim(),
+      fechaCobro: formData.fechaCobro
     };
 
     console.log('Datos del formulario validados:', validatedData);
@@ -83,6 +118,21 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta }) => {
               value={`S/. ${venta.montoTotal.toFixed(2)}`}
               disabled
               className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Fecha de Cobro <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              name="fechaCobro"
+              value={formData.fechaCobro}
+              onChange={handleChange}
+              max={new Date().toISOString().split('T')[0]}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
             />
           </div>
 

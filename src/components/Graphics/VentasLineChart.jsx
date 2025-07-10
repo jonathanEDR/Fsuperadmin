@@ -92,12 +92,7 @@ const VentasLineChart = ({ userRole }) => {
     // Procesar ventas
     ventas.forEach((venta) => {
       const fechaCampos = [
-        venta.createdAt,
-        venta.fecha,
-        venta.fechaCreacion,
-        venta.fechaVenta,
-        venta.updatedAt,
-        venta.timestamp
+        venta.fechadeVenta,
       ];
       let fechaValida = null;
       for (let fecha of fechaCampos) {
@@ -136,11 +131,7 @@ const VentasLineChart = ({ userRole }) => {
     // Procesar devoluciones
     devoluciones.forEach((devolucion) => {
       const fechaCampos = [
-        devolucion.createdAt,
-        devolucion.fecha,
-        devolucion.fechaCreacion,
         devolucion.fechaDevolucion,
-        devolucion.updatedAt
       ];
       let fechaValida = null;
       for (let fecha of fechaCampos) {
