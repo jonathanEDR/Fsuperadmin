@@ -3,6 +3,8 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Trash2 } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
+import DevolucionModal from './DevolucionModal';
+import { formatLocalDate } from '../../utils/dateUtils';
 
 const DevolucionList = ({ userRole = 'user' }) => {
   const [devoluciones, setDevoluciones] = useState([]);
@@ -14,15 +16,16 @@ const DevolucionList = ({ userRole = 'user' }) => {
   const [deleteStatus, setDeleteStatus] = useState({ show: false, message: '', type: '' });
   const { getToken } = useAuth();
 
-  // Función de utilidad para formatear fechas de manera segura
+  // Función de utilidad para formatear fechas de manera segura en zona horaria local
   const formatearFecha = (fecha) => {
-    if (!fecha) return 'N/A';
-    try {
-      return format(new Date(fecha), 'dd/MM/yyyy HH:mm', { locale: es });
-    } catch (error) {
-      console.error('Error al formatear fecha:', error);
-      return 'Fecha inválida';
-    }
+    return formatLocalDate(fecha, { 
+      hour12: false,
+      year: 'numeric',
+      month: '2-digit', 
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
   // Función para mostrar mensajes de estado
   const showStatusMessage = (message, type) => {

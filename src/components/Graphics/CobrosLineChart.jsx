@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { getCobrosHistorial } from '../../services/cobroService';
+import { getLocalDate } from '../../utils/dateUtils';
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -98,9 +99,10 @@ const CobrosLineChart = ({ userRole }) => {
       let fechaValida = null;
       for (let fecha of fechaCampos) {
         if (fecha) {
-          const testDate = new Date(fecha);
-          if (!isNaN(testDate.getTime())) {
-            fechaValida = testDate;
+          // Usar la función getLocalDate para convertir a zona horaria local
+          const localDate = getLocalDate(fecha);
+          if (localDate) {
+            fechaValida = localDate;
             break;
           }
         }

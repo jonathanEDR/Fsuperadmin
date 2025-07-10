@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { X, MinusCircle } from 'lucide-react';
+import { getLocalDateTimeString, formatLocalDate, convertLocalDateTimeToISO } from '../../utils/dateUtils';
 
 function QuickDevolucionModal({
   isOpen,
@@ -15,11 +16,11 @@ function QuickDevolucionModal({
   const [fechaDevolucion, setFechaDevolucion] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Inicializar fecha con la fecha actual cuando se abre el modal
+  // Inicializar fecha y hora con la fecha/hora actual de Perú cuando se abre el modal
   useEffect(() => {
-    if (isOpen && !fechaDevolucion) {
-      const hoy = new Date().toISOString().split('T')[0];
-      setFechaDevolucion(hoy);
+    if (isOpen) {
+      limpiarForm();
+      setFechaDevolucion(getLocalDateTimeString());
     }
   }, [isOpen]);
 
@@ -76,13 +77,11 @@ function QuickDevolucionModal({
       return false;
     }
 
-    // Validar que la fecha no sea futura
+    // Validar que la fecha y hora no sea futura
     const fechaSeleccionada = new Date(fechaDevolucion);
-    const hoy = new Date();
-    hoy.setHours(23, 59, 59, 999); // Permitir hasta el final del día actual
-    
-    if (fechaSeleccionada > hoy) {
-      setErrorMessage('La fecha de devolución no puede ser futura');
+    const ahora = new Date();
+    if (fechaSeleccionada > ahora) {
+      setErrorMessage('La fecha y hora de devolución no puede ser futura');
       return false;
     }
 
@@ -120,7 +119,7 @@ function QuickDevolucionModal({
         ventaId: venta._id,
         productos: productosADevolver,
         motivo,
-        fechaDevolucion: fechaDevolucion
+        fechaDevolucion: convertLocalDateTimeToISO(fechaDevolucion)
       });
       
       limpiarForm();
@@ -233,22 +232,22 @@ function QuickDevolucionModal({
                     </div>
                   )}
 
-                  {/* Fecha de devolución */}
+                  {/* Fecha y hora de devolución */}
                   <div className="mt-4">
                     <label htmlFor="fechaDevolucion" className="block text-sm font-medium text-gray-700">
-                      Fecha de devolución *
+                      Fecha y hora de devolución *
                     </label>
                     <input
-                      type="date"
+                      type="datetime-local"
                       id="fechaDevolucion"
                       value={fechaDevolucion}
                       onChange={(e) => setFechaDevolucion(e.target.value)}
-                      max={new Date().toISOString().split('T')[0]} // No permitir fechas futuras
+                      max={getLocalDateTimeString()} // No permitir fechas futuras
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                       required
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Seleccione la fecha en que se realizó la devolución
+                      Fecha y hora en horario de Perú. Se inicializa automáticamente con la hora actual (no puede ser en el futuro)
                     </p>
                   </div>
 

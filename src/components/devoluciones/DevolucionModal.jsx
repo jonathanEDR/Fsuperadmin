@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getLocalDateTimeString, formatLocalDate, convertLocalDateTimeToISO } from '../../utils/dateUtils';
 
 function DevolucionModal({
   isVisible,
@@ -71,7 +72,7 @@ function DevolucionModal({
             <option value="">Seleccione una venta</option>
             {ventas.map(venta => (
               <option key={venta._id} value={venta._id}>
-                {`Venta #${venta._id.slice(-6)} - ${new Date(venta.fechadeVenta).toLocaleDateString()}`}
+                {`Venta #${venta._id.slice(-6)} - ${formatLocalDate(venta.fechadeVenta, { hour12: false })}`}
               </option>
             ))}
           </select>
@@ -146,14 +147,19 @@ function DevolucionModal({
         {/* Fecha de devolución */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Fecha de devolución:
+            Fecha y hora de devolución:
           </label>
           <input
             type="datetime-local"
             value={fechaDevolucion}
             onChange={(e) => onFechaChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            max={getLocalDateTimeString()} // No permitir fechas futuras
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
           />
+          <p className="text-xs text-gray-500 mt-1">
+            Fecha y hora en horario de Perú. Editable según cuando se realizó la devolución (no puede ser en el futuro)
+          </p>
         </div>
 
         {/* Motivo */}
@@ -208,7 +214,23 @@ function DevolucionModal({
               if (invalidProduct) {
                 alert(`Cantidad inválida para el producto ${invalidProduct.producto.productoId.nombre}`);
                 return;
-              }              // Validate motivo
+              }
+
+              // Validate fecha de devolución
+              if (!fechaDevolucion) {
+                alert('Por favor, seleccione la fecha y hora de la devolución');
+                return;
+              }
+
+              // Validar que la fecha no sea futura
+              const fechaSeleccionada = new Date(fechaDevolucion);
+              const ahora = new Date();
+              if (fechaSeleccionada > ahora) {
+                alert('La fecha y hora de devolución no puede ser en el futuro');
+                return;
+              }
+
+              // Validate motivo
               if (!motivo || motivo.length < 1) {
                 alert('Por favor, ingrese un motivo para la devolución');
                 return;

@@ -14,6 +14,7 @@ import {
   createDevolucion, 
   deleteDevolucion 
 } from '../../../services/devolucionService';
+import { convertLocalDateTimeToISO, getLocalDateTimeString } from '../../../utils/dateUtils';
 import { RoleContext } from '../../../context/RoleContext';
 import Notas from '../../../components/notas/notas';
 
@@ -33,7 +34,7 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
   const [selectedProducto, setSelectedProducto] = useState(null);
   const [selectedVenta, setSelectedVenta] = useState(null);
   const [ventasParaDevolucion, setVentasParaDevolucion] = useState([]);
-  const [fechaDevolucion, setFechaDevolucion] = useState('');
+  const [fechaDevolucion, setFechaDevolucion] = useState(getLocalDateTimeString());
   const [cantidadDevuelta, setCantidadDevuelta] = useState('');
   const [motivo, setMotivo] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -176,7 +177,7 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
         ventaId: selectedVenta._id,
         productos: productosADevolver,
         motivo,
-        fechaDevolucion
+        fechaDevolucion: convertLocalDateTimeToISO(fechaDevolucion)
       });
 
       // Show success message
@@ -239,7 +240,7 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
   const resetDevolucionForm = () => {
     setSelectedVenta(null);
     setSelectedProducto(null);
-    setFechaDevolucion('');
+    setFechaDevolucion(getLocalDateTimeString());
     setCantidadDevuelta('');
     setMotivo('');
   };
@@ -316,7 +317,7 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
         {/* Modal de Devolución */}
         {showDevolucionModal && (
           <DevolucionModal
-            isOpen={showDevolucionModal}
+            isVisible={showDevolucionModal}
             onClose={() => {
               setShowDevolucionModal(false);
               setSelectedProducto(null);
@@ -328,9 +329,8 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
             fechaDevolucion={fechaDevolucion}
             cantidadDevuelta={cantidadDevuelta}
             motivo={motivo}
-            setFechaDevolucion={setFechaDevolucion}
-            setCantidadDevuelta={setCantidadDevuelta}
-            setMotivo={setMotivo}
+            onFechaChange={setFechaDevolucion}
+            onMotivoChange={setMotivo}
             onSubmit={handleSubmitDevolucion}
             isSubmitting={isSubmitting}
           />

@@ -4,6 +4,7 @@ import { useUser } from '@clerk/clerk-react';
 import { VentasSelectionList } from '.';  // Import from local module
 import { createCobro } from '../../services/cobroService';
 import PaymentModal from './PaymentModal';
+import { getLocalDateString, getLocalDateTimeString, isValidDateNotFuture, convertLocalDateTimeToISO } from '../../utils/dateUtils';
 
 const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
   const { user, isLoaded, isSignedIn } = useUser();
@@ -24,7 +25,7 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
     efectivo: '0',
     gastosImprevistos: '0',
     descripcion: '',
-    fechaCobro: new Date().toISOString().split('T')[0] // Fecha actual por defecto
+    fechaCobro: getLocalDateTimeString() // Fecha y hora actual de Perú por defecto
   });
 
   // Reset form cuando se abre el modal
@@ -37,7 +38,7 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
         efectivo: '0',
         gastosImprevistos: '0',
         descripcion: '',
-        fechaCobro: new Date().toISOString().split('T')[0]
+        fechaCobro: getLocalDateTimeString() // Usar fecha y hora actual de Perú
       });
       setError(null);
     }
@@ -162,15 +163,14 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
 
     // Validar fecha de cobro
     if (!formData.fechaCobro) {
-      throw new Error('Debe seleccionar una fecha de cobro');
+      throw new Error('Debe seleccionar una fecha y hora de cobro');
     }
 
+    // Validar fecha/hora usando zona horaria local
     const fechaSeleccionada = new Date(formData.fechaCobro);
-    const hoy = new Date();
-    hoy.setHours(23, 59, 59, 999); // Permitir hasta el final del día actual
-    
-    if (fechaSeleccionada > hoy) {
-      throw new Error('La fecha de cobro no puede ser en el futuro');
+    const ahora = new Date();
+    if (fechaSeleccionada > ahora) {
+      throw new Error('La fecha y hora de cobro no puede ser en el futuro');
     }
   };
 
@@ -197,9 +197,18 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
       // Validar que la suma de los métodos de pago sea igual al total de ventas
       if (Math.abs(totalMetodosPago - ventasTotal) > 0.01) {
         throw new Error(`La suma de los métodos de pago (${totalMetodosPago.toFixed(2)}) debe ser igual al total de ventas (${ventasTotal.toFixed(2)})`);
-      }      // Preparar los datos en el formato que espera el servicio
+      }
+
+      console.log('🔍 Debug - Datos antes de enviar:');
+      console.log('Selected ventas:', selectedVentas);
+      console.log('Ventas details:', ventasDetails);
+      console.log('Form data:', formData);
+      console.log('Montos calculados:', { yape, efectivo, gastosImprevistos, totalMetodosPago, ventasTotal });
+
+      // Preparar los datos en el formato que espera el servicio
       const ventasParaServicio = selectedVentas.map(ventaId => {
         const venta = ventasDetails[ventaId];
+        console.log(`Procesando venta ${ventaId}:`, venta);
         return {
           _id: ventaId,
           montoTotal: parseFloat(venta.montoTotal),
@@ -214,16 +223,19 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
         gastosImprevistos,
         montoTotal: ventasTotal,
         descripcion: formData.descripcion || '',
-        fechaCobro: formData.fechaCobro
+        fechaCobro: convertLocalDateTimeToISO(formData.fechaCobro)
       };
 
-      console.log('Datos del cobro a enviar:', {
+      console.log('📤 Datos del cobro a enviar:', {
         cobroData,
         ventasTotal,
         totalMetodosPago,
         detalleMetodos: { yape, efectivo, gastosImprevistos },
         ventasSeleccionadas: selectedVentas.length
       });
+
+      console.log('🕐 Fecha original:', formData.fechaCobro);
+      console.log('🕐 Fecha convertida:', convertLocalDateTimeToISO(formData.fechaCobro));
 
       await createCobro(cobroData);
       onCobroCreated(true);
@@ -277,7 +289,7 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
         montoPagado: montoTotalPago,
         montoTotalVentas: parseFloat(ventaParaPagar.montoTotal),
         descripcion: pagoData.descripcion || '',
-        fechaCobro: pagoData.fechaCobro
+        fechaCobro: convertLocalDateTimeToISO(pagoData.fechaCobro)
       };
 
       console.log('Datos del cobro individual a crear:', cobroIndividual);
@@ -434,17 +446,20 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Fecha de Cobro <span className="text-red-500">*</span>
+                  Fecha y Hora de Cobro <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="date"
+                  type="datetime-local"
                   name="fechaCobro"
                   value={formData.fechaCobro}
                   onChange={handleChange}
-                  max={new Date().toISOString().split('T')[0]}
+                  max={getLocalDateTimeString()} // Usar fecha y hora local como máximo
                   required
                   className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Fecha y hora en horario de Perú. Se inicializa automáticamente con la hora actual (no puede ser en el futuro)
+                </p>
               </div>              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Descripción

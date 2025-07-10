@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, DollarSign } from 'lucide-react';
+import { getLocalDateTimeString, isValidDateNotFuture, convertLocalDateTimeToISO } from '../../utils/dateUtils';
 
 const PaymentModal = ({ isOpen, onClose, onSubmit, venta }) => {
   const [formData, setFormData] = useState({
@@ -7,7 +8,7 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta }) => {
     efectivo: 0,
     gastosImprevistos: 0,
     descripcion: '',
-    fechaCobro: new Date().toISOString().split('T')[0] // Fecha actual por defecto
+    fechaCobro: getLocalDateTimeString() // Fecha y hora actual de Perú por defecto
   });
 
   // Reset form cuando se abre el modal
@@ -18,7 +19,7 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta }) => {
         efectivo: 0,
         gastosImprevistos: 0,
         descripcion: '',
-        fechaCobro: new Date().toISOString().split('T')[0]
+        fechaCobro: getLocalDateTimeString() // Usar fecha y hora actual de Perú
       });
     }
   }, [isOpen]);
@@ -38,18 +39,17 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta }) => {
   };  const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Validar fecha
-    const fechaSeleccionada = new Date(formData.fechaCobro);
-    const hoy = new Date();
-    hoy.setHours(23, 59, 59, 999); // Permitir hasta el final del día actual
-    
-    if (fechaSeleccionada > hoy) {
-      alert('La fecha de cobro no puede ser en el futuro');
+    // Validar fecha usando la función utilitaria
+    if (!formData.fechaCobro) {
+      alert('Debe seleccionar una fecha y hora de cobro');
       return;
     }
     
-    if (!formData.fechaCobro) {
-      alert('Debe seleccionar una fecha de cobro');
+    // Validar que la fecha/hora no sea futura
+    const fechaSeleccionada = new Date(formData.fechaCobro);
+    const ahora = new Date();
+    if (fechaSeleccionada > ahora) {
+      alert('La fecha y hora de cobro no puede ser en el futuro');
       return;
     }
     
@@ -86,7 +86,7 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta }) => {
       efectivo: parseFloat(formData.efectivo) || 0,
       gastosImprevistos: parseFloat(formData.gastosImprevistos) || 0,
       descripcion: formData.descripcion.trim(),
-      fechaCobro: formData.fechaCobro
+      fechaCobro: convertLocalDateTimeToISO(formData.fechaCobro)
     };
 
     console.log('Datos del formulario validados:', validatedData);
@@ -123,17 +123,20 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Fecha de Cobro <span className="text-red-500">*</span>
+              Fecha y Hora de Cobro <span className="text-red-500">*</span>
             </label>
             <input
-              type="date"
+              type="datetime-local"
               name="fechaCobro"
               value={formData.fechaCobro}
               onChange={handleChange}
-              max={new Date().toISOString().split('T')[0]}
+              max={getLocalDateTimeString()}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Fecha y hora en horario de Perú. Se inicializa automáticamente con la hora actual (no puede ser en el futuro)
+            </p>
           </div>
 
           <div>
