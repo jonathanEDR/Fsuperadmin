@@ -6,7 +6,7 @@ import { procesarPagoVenta } from '../../services/cobroService';
 import { PaymentModal } from '../cobros';
 import { QuickDevolucionModal } from '../devoluciones';
 import { VentaCreationModal } from '.';
-import VentasLineChart from '../graphics/VentasLineChart.jsx';
+import VentasLineChart from '../graphics/VentasLineChart';
 import { format } from 'date-fns';
 import clsx from 'clsx';
 import { useRole } from '../../context/RoleContext';
