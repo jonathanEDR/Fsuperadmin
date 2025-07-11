@@ -86,7 +86,7 @@ const GestionPersonalModal = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-3 sm:p-6 w-full max-w-md max-h-[98vh] min-h-[210vh] mx-2 overflow-y-auto">
+      <div className="bg-white rounded-lg p-3 sm:p-6 w-full max-w-md max-h-[90vh] mx-2 overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">
             Nuevo Registro - {colaboradorSeleccionado?.nombre_negocio || 'Colaborador'}
@@ -135,61 +135,64 @@ const GestionPersonalModal = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Monto
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.monto}
-                onChange={(e) => handleInputChange('monto', e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="0.00"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-2">Monto</label>
+              <div className="relative">
+                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">S/</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.monto}
+                  onChange={(e) => handleInputChange('monto', e.target.value)}
+                  className="w-full pl-8 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="0.00"
+                />
+              </div>
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Faltante
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.faltante}
-                onChange={(e) => handleInputChange('faltante', e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="0.00"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-2">Faltante</label>
+              <div className="relative">
+                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">S/</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.faltante}
+                  onChange={(e) => handleInputChange('faltante', e.target.value)}
+                  className="w-full pl-8 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="0.00"
+                />
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Adelanto
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.adelanto}
-                onChange={(e) => handleInputChange('adelanto', e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="0.00"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-2">Adelanto</label>
+              <div className="relative">
+                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">S/</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.adelanto}
+                  onChange={(e) => handleInputChange('adelanto', e.target.value)}
+                  className="w-full pl-8 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="0.00"
+                />
+              </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Pago Diario <span className="text-sm text-gray-500">(Calculado)</span>
-              </label>
-              <input
-                type="text"
-                value={`$${pagoDiarioCalculado}`}
-                readOnly
-                className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600"
-                placeholder="0.00"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-2">Pago Diario <span className="text-sm text-gray-500">(Calculado)</span></label>
+              <div className="relative">
+                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">S/</span>
+                <input
+                  type="text"
+                  value={`$${pagoDiarioCalculado}`.replace('$', '')}
+                  readOnly
+                  className="w-full pl-8 p-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600"
+                  placeholder="0.00"
+                />
+              </div>
             </div>
           </div>
 

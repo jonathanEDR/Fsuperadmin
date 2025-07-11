@@ -58,10 +58,10 @@ const VistaReceta = ({ receta, onCerrar, onEditar }) => {
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-      <div className="relative mx-auto border box-border w-full max-w-lg sm:w-4/5 lg:w-3/4 shadow-lg rounded-md bg-white p-3 sm:p-5 h-[380vh] max-h-[400vh] flex flex-col">
-        <div className="mt-2 sm:mt-3 flex-1 overflow-y-auto">
+      <div className="relative mx-auto border box-border w-full max-w-3xl sm:w-11/12 shadow-2xl rounded-2xl bg-white p-0 max-h-[92vh] flex flex-col">
+        <div className="flex-1 overflow-y-auto p-0 sm:p-6">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4 sm:mb-8 border-b pb-4 sm:pb-6">
             <div>
               <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
                 {receta.nombre}
@@ -93,9 +93,9 @@ const VistaReceta = ({ receta, onCerrar, onEditar }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Información Principal */}
-            <div className="lg:col-span-2 space-y-4 sm:space-y-6 min-w-0">
+            <div className="space-y-4 sm:space-y-6 min-w-0">
               {/* Descripción */}
               {receta.descripcion && (
                 <div className="bg-gray-50 p-4 rounded-lg">
@@ -110,27 +110,15 @@ const VistaReceta = ({ receta, onCerrar, onEditar }) => {
                   <h4 className="font-medium text-gray-700">Ingredientes</h4>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="min-w-full text-xs sm:text-sm">
+                  <table className="min-w-[600px] text-xs sm:text-sm">
                     <thead className="bg-gray-100">
                       <tr>
-                        <th className="px-2 sm:px-4 py-2 text-left font-medium text-gray-500 uppercase">
-                          Ingrediente
-                        </th>
-                        <th className="px-2 sm:px-4 py-2 text-left font-medium text-gray-500 uppercase">
-                          Cantidad
-                        </th>
-                        <th className="px-2 sm:px-4 py-2 text-left font-medium text-gray-500 uppercase">
-                          Unidad
-                        </th>
-                        <th className="px-2 sm:px-4 py-2 text-left font-medium text-gray-500 uppercase">
-                          Disponible
-                        </th>
-                        <th className="px-2 sm:px-4 py-2 text-left font-medium text-gray-500 uppercase">
-                          Precio Unit. (S/)
-                        </th>
-                        <th className="px-2 sm:px-4 py-2 text-left font-medium text-gray-500 uppercase">
-                          Subtotal (S/)
-                        </th>
+                        <th className="px-3 py-2 text-left font-semibold text-gray-600 uppercase sticky top-0 bg-gray-100 z-10">Ingrediente</th>
+                        <th className="px-3 py-2 text-left font-semibold text-gray-600 uppercase sticky top-0 bg-gray-100 z-10">Cantidad</th>
+                        <th className="px-3 py-2 text-left font-semibold text-gray-600 uppercase sticky top-0 bg-gray-100 z-10">Unidad</th>
+                        <th className="px-3 py-2 text-left font-semibold text-gray-600 uppercase sticky top-0 bg-gray-100 z-10">Disponible</th>
+                        <th className="px-3 py-2 text-left font-semibold text-gray-600 uppercase sticky top-0 bg-gray-100 z-10">Precio Unit. (S/)</th>
+                        <th className="px-3 py-2 text-left font-semibold text-gray-600 uppercase sticky top-0 bg-gray-100 z-10">Subtotal (S/)</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -142,29 +130,19 @@ const VistaReceta = ({ receta, onCerrar, onEditar }) => {
 
                         return (
                           <tr key={index} className={!suficiente ? 'bg-red-50' : ''}>
-                            <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-900">
+                            <td className="px-3 py-2 text-xs sm:text-sm text-gray-900 whitespace-nowrap max-w-[180px] truncate">
                               {item.ingrediente.nombre}
                             </td>
-                            <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-900">
+                            <td className="px-3 py-2 text-xs sm:text-sm text-gray-900">
                               {item.cantidad}
                               {cantidadConsulta > 1 && (
-                                <span className="text-gray-500 ml-1">
-                                  ({cantidadNecesaria} total)
-                                </span>
+                                <span className="text-gray-500 ml-1">({cantidadNecesaria} total)</span>
                               )}
                             </td>
-                            <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-900">
-                              {item.unidadMedida}
-                            </td>
-                            <td className={`px-2 sm:px-4 py-2 text-xs sm:text-sm ${suficiente ? 'text-green-600' : 'text-red-600'}`}> 
-                              {disponible}
-                            </td>
-                            <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-900">
-                              S/.{item.ingrediente.precioUnitario?.toFixed(2) || '0.00'}
-                            </td>
-                            <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-900">
-                              S/.{subtotal.toFixed(2)}
-                            </td>
+                            <td className="px-3 py-2 text-xs sm:text-sm text-gray-900">{item.unidadMedida}</td>
+                            <td className={`px-3 py-2 text-xs sm:text-sm ${suficiente ? 'text-green-600' : 'text-red-600'}`}>{disponible}</td>
+                            <td className="px-3 py-2 text-xs sm:text-sm text-gray-900">S/.{item.ingrediente.precioUnitario?.toFixed(2) || '0.00'}</td>
+                            <td className="px-3 py-2 text-xs sm:text-sm text-gray-900">S/.{subtotal.toFixed(2)}</td>
                           </tr>
                         );
                       })}
@@ -311,10 +289,10 @@ const VistaReceta = ({ receta, onCerrar, onEditar }) => {
           </div>
 
           {/* Botón Cerrar */}
-          <div className="flex justify-center sm:justify-end mt-4 sm:mt-6">
+          <div className="flex justify-center sm:justify-end mt-6 pt-4 border-t">
             <button
               onClick={onCerrar}
-              className="w-full sm:w-auto px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+              className="w-full sm:w-auto px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-semibold shadow"
             >
               Cerrar
             </button>
