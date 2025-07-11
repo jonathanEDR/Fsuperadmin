@@ -279,8 +279,8 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole: initial
   // Verificación de permisos: solo admin y super_admin pueden crear ventas
   if (!['admin', 'super_admin'].includes(currentUserRole)) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-        <div className="bg-white rounded-lg w-full max-w-md p-6">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-60" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
+        <div className="bg-white rounded-lg w-full max-w-md p-6" style={{ maxWidth: '90vw' }}>
           <div className="text-center">
             <div className="p-3 bg-red-100 rounded-full w-16 h-16 mx-auto mb-4">
               <X className="text-red-600 w-10 h-10" />
@@ -301,18 +301,20 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole: initial
     );
   }
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-4xl overflow-hidden relative">
+return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
+      <div
+        className="bg-white w-full max-w-lg sm:max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl h-auto min-h-[60vh] max-h-[298vh] overflow-y-auto rounded-lg shadow-xl relative p-0 sm:p-4"
+      >
         {/* Header */}
-        <div className="flex items-center justify-between bg-purple-600 px-6 py-4">
+        <div className="flex items-center justify-between bg-purple-600 px-4 sm:px-6 py-4 rounded-t-none sm:rounded-t-lg sticky top-0 z-10">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-purple-500 rounded-lg">
               <ShoppingCart className="text-white" size={20} />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">Nueva Venta</h2>
-              <p className="text-sm text-purple-200">Complete los detalles de la venta</p>
+              <h2 className="text-lg sm:text-xl font-bold text-white">Nueva Venta</h2>
+              <p className="text-xs sm:text-sm text-purple-200">Complete los detalles de la venta</p>
             </div>
           </div>
           <button 
@@ -325,7 +327,7 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole: initial
 
         {/* Error message */}
         {error && (
-          <div className="px-6 py-3 bg-red-50 border-b border-red-100">
+          <div className="px-3 sm:px-6 py-3 bg-red-50 border-b border-red-100">
             <div className="flex items-center gap-2 text-red-600">
               <AlertCircle size={16} />
               <p className="text-sm">{error}</p>
@@ -333,7 +335,10 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole: initial
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="p-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+        <form
+          onSubmit={handleSubmit}
+          className="p-6 w-full flex-1 min-h-0 overflow-y-auto"
+        >
           {/* User and Date Selection */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             {usuarios && usuarios.length > 0 && (

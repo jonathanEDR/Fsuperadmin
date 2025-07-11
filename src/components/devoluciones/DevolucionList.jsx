@@ -139,9 +139,9 @@ const DevolucionList = ({ userRole = 'user' }) => {
       </div>
     );
   }
+
   return (
     <div className="overflow-x-auto">
-      {/* Mensaje de estado */}
       {deleteStatus.show && (
         <div className={`p-4 mb-4 text-sm rounded-lg ${
           deleteStatus.type === 'success' 
@@ -151,85 +151,54 @@ const DevolucionList = ({ userRole = 'user' }) => {
           {deleteStatus.message}
         </div>
       )}
-
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Fecha
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Colaborador
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Producto
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Cantidad
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Monto
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Motivo
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Estado
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Venta
-            </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Acciones
-            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Colaborador</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Motivo</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Estado</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Venta</th>
+            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {devoluciones.map((devolucion) => (
             <tr
-              key={devolucion._id} 
+              key={devolucion._id}
               className={`hover:bg-gray-50 transition-colors duration-200 ${
                 !canDeleteDevolucion(devolucion)
-                  ? 'bg-gray-50 border-l-4 border-orange-400' 
+                  ? 'bg-gray-50 border-l-4 border-orange-400'
                   : ''
               }`}
               title={!canDeleteDevolucion(devolucion) ? 'Esta devolución está asociada a una venta finalizada' : ''}
             >
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {formatearFecha(devolucion.fechaDevolucion)}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex flex-col">                  <span className="text-sm font-medium text-gray-900">
-                    {devolucion.colaborador?.nombre || 'N/A'}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {devolucion.colaborador?.email || 'N/A'}
-                  </span>
+              <td className="px-4 py-4 whitespace-nowrap text-xs text-gray-500">{formatearFecha(devolucion.fechaDevolucion)}</td>
+              <td className="px-4 py-4 whitespace-nowrap hidden md:table-cell">
+                <div className="flex flex-col">
+                  <span className="text-xs font-medium text-gray-900">{devolucion.colaborador?.nombre || 'N/A'}</span>
+                  <span className="text-xs text-gray-500">{devolucion.colaborador?.email || 'N/A'}</span>
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {devolucion.producto || 'N/A'}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {devolucion.cantidad || 0}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                S/ {(devolucion.monto || 0).toFixed(2)}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {devolucion.motivo || 'Sin motivo'}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-4 py-4 whitespace-nowrap text-xs text-gray-500">{devolucion.producto || 'N/A'}</td>
+              <td className="px-4 py-4 whitespace-nowrap text-xs text-gray-500">{devolucion.cantidad || 0}</td>
+              <td className="px-4 py-4 whitespace-nowrap text-xs text-gray-500">S/ {(devolucion.monto || 0).toFixed(2)}</td>
+              <td className="px-4 py-4 whitespace-nowrap text-xs text-gray-500">{devolucion.motivo || 'Sin motivo'}</td>
+              <td className="px-4 py-4 whitespace-nowrap hidden md:table-cell">
                 <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                   devolucion.estado === 'aprobada'
                     ? 'bg-green-100 text-green-800'
                     : devolucion.estado === 'rechazada'
                     ? 'bg-red-100 text-red-800'
                     : 'bg-yellow-100 text-yellow-800'
-                }`}>                  {devolucion.estado?.charAt(0).toUpperCase() + devolucion.estado?.slice(1) || 'Pendiente'}
+                }`}>
+                  {devolucion.estado?.charAt(0).toUpperCase() + devolucion.estado?.slice(1) || 'Pendiente'}
                 </span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-4 py-4 whitespace-nowrap hidden md:table-cell">
                 <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                   devolucion.ventaFinalizada
                     ? 'bg-orange-100 text-orange-800'
@@ -238,24 +207,21 @@ const DevolucionList = ({ userRole = 'user' }) => {
                   {devolucion.ventaFinalizada ? 'Finalizada' : 'Activa'}
                 </span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-center">
+              <td className="px-4 py-4 whitespace-nowrap text-center">
                 {canDeleteDevolucion(devolucion) ? (
                   <button
                     onClick={() => handleDeleteDevolucion(devolucion._id, devolucion.producto, devolucion.cantidad)}
-                    className="inline-flex items-center px-3 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+                    className="inline-flex items-center px-3 py-2 bg-red-600 text-white text-xs font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
                     Eliminar
                   </button>
                 ) : (
                   <div className="flex flex-col items-center">
-                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md">
-                      No disponible
-                    </span>
-                    <span className="text-xs text-gray-400 mt-1">
-                      Venta finalizada
-                    </span>
-                  </div>                )}
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md">No disponible</span>
+                    <span className="text-xs text-gray-400 mt-1">Venta finalizada</span>
+                  </div>
+                )}
               </td>
             </tr>
           ))}
@@ -270,7 +236,8 @@ const DevolucionList = ({ userRole = 'user' }) => {
             Contacta a un Super Administrador para ver el historial completo.
           </p>
         </div>
-      )}      {/* Botón Ver más - Solo para Super Admin */}
+      )}
+      {/* Botón Ver más - Solo para Super Admin */}
       {(() => {
         const shouldShowButton = hasMore && userRole === 'super_admin';
         return shouldShowButton;
@@ -294,7 +261,6 @@ const DevolucionList = ({ userRole = 'user' }) => {
           </button>
         </div>
       )}
-      
       {/* Mostrar total de elementos cargados */}
       <div className="text-center mt-4 text-sm text-gray-600">
         Mostrando {devoluciones.length} devoluciones

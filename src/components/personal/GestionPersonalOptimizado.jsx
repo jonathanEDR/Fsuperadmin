@@ -212,18 +212,18 @@ function GestionPersonal() {
     }));
   };
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">        <div className="flex items-center space-x-4">
-          <h2 className="text-2xl font-bold">Gestión de Personal</h2>
+    <div className="max-w-6xl mx-auto p-4 sm:p-6">
+      <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+          <h2 className="text-xl sm:text-2xl font-bold truncate">Gestión de Personal</h2>
           {vistaActual === 'detalle' && colaboradorDetalle && (
-            <span className="text-lg text-gray-600">- {colaboradorDetalle.nombre_negocio}</span>
+            <span className="text-base sm:text-lg text-gray-600 truncate">- {colaboradorDetalle.nombre_negocio}</span>
           )}
         </div>
-        
         {vistaActual === 'detalle' && (
           <button
             onClick={volverAColaboradores}
-            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+            className="px-3 py-2 sm:px-4 sm:py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 text-sm sm:text-base"
           >
             ← Volver a Colaboradores
           </button>
@@ -231,7 +231,7 @@ function GestionPersonal() {
       </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
           {error}
         </div>
       )}
@@ -239,11 +239,10 @@ function GestionPersonal() {
       {vistaActual === 'colaboradores' ? (
         <div className="space-y-6">
           {/* Lista de colaboradores */}
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="px-6 py-4 bg-gray-50 border-b">
-              <h3 className="text-lg font-medium">Colaboradores</h3>
+          <div className="bg-white rounded-lg shadow overflow-x-auto">
+            <div className="px-4 sm:px-6 py-4 bg-gray-50 border-b">
+              <h3 className="text-base sm:text-lg font-medium">Colaboradores</h3>
             </div>
-            
             {loading ? (
               <div className="p-8 text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
@@ -258,20 +257,17 @@ function GestionPersonal() {
                 {colaboradores.map((colaborador) => {
                   const totales = calcularTotales(colaborador.clerk_id);
                   const pagosRealizadosColab = calcularPagosRealizados(colaborador.clerk_id);
-                  // Nuevo cálculo: restar pagos realizados
                   const totalAPagar = totales.pagosDiarios - (totales.faltantes + totales.adelantos) - pagosRealizadosColab;
-                  
                   return (
-                    <div key={colaborador._id} className="p-6 hover:bg-gray-50">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h4 className="text-lg font-medium text-gray-900">
+                    <div key={colaborador._id} className="p-4 sm:p-6 hover:bg-gray-50">
+                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-base sm:text-lg font-medium text-gray-900 truncate">
                             {colaborador.nombre_negocio}
                           </h4>
-                          <p className="text-sm text-gray-600">{colaborador.email}</p>
-                          <p className="text-sm text-gray-600 capitalize">{colaborador.role}</p>
-                          
-                          <div className="mt-4 grid grid-cols-2 md:grid-cols-6 gap-4 text-sm">
+                          <p className="text-xs sm:text-sm text-gray-600 break-all">{colaborador.email}</p>
+                          <p className="text-xs sm:text-sm text-gray-600 capitalize">{colaborador.role}</p>
+                          <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-4 text-xs sm:text-sm">
                             <div>
                               <span className="font-medium text-gray-600">Total Gastos:</span>
                               <span className="block text-red-600 font-bold">
@@ -310,17 +306,16 @@ function GestionPersonal() {
                             </div>
                           </div>
                         </div>
-                        
-                        <div className="flex space-x-2 ml-4">
+                        <div className="flex flex-col sm:flex-row gap-2 ml-0 md:ml-4 w-full sm:w-auto">
                           <button
                             onClick={() => abrirModalParaColaborador(colaborador)}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-xs sm:text-sm"
                           >
                             Nuevo Registro
                           </button>
                           <button
                             onClick={() => mostrarDetalleColaborador(colaborador)}
-                            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-xs sm:text-sm"
                           >
                             Ver Detalle
                           </button>
@@ -328,22 +323,23 @@ function GestionPersonal() {
                       </div>
                     </div>
                   );
-                })}              </div>
+                })}
+              </div>
             )}
           </div>
-        </div>      ) : (
+        </div>
+      ) : (
         /* Vista de detalle del colaborador con paginación visual */
         <div className="space-y-6">
           {(() => {
             const todosLosRegistrosColaborador = obtenerRegistrosDeColaborador(colaboradorDetalle?.clerk_id);
             const registrosMostrar = todosLosRegistrosColaborador.slice(0, registrosMostrados);
             const hayMasRegistros = registrosMostrados < todosLosRegistrosColaborador.length;
-            
             return (
               <>
                 <GestionPersonalList
                   registros={registrosMostrar}
-                  todosLosRegistros={todosLosRegistrosColaborador} // Pasar TODOS los registros para cálculos
+                  todosLosRegistros={todosLosRegistrosColaborador}
                   onEliminar={confirmarEliminarRegistro}
                   loading={loading}
                   filtroFecha={filtroFecha}
@@ -351,18 +347,15 @@ function GestionPersonal() {
                   customDateRange={customDateRange}
                   onCustomDateRangeChange={handleCustomDateRangeChange}
                 />
-                
-                {/* Botón "Ver más" cuando hay más registros para mostrar */}
                 {hayMasRegistros && (
                   <div className="bg-white rounded-lg shadow p-4">
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                      <div className="text-sm text-gray-600">
+                      <div className="text-xs sm:text-sm text-gray-600">
                         Mostrando {registrosMostrar.length} de {todosLosRegistrosColaborador.length} registros
                       </div>
-                      
                       <button
                         onClick={verMasRegistros}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
+                        className="px-4 sm:px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2 text-xs sm:text-sm"
                       >
                         Ver más registros
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

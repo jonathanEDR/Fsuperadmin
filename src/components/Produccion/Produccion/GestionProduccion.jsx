@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import AccesosRapidosProduccion from '../AccesosRapidosProduccion';
 import { produccionService } from '../../../services/produccionService';
 import NuevaProduccion from './NuevaProduccion';
 import DetalleProduccion from './DetalleProduccion';
@@ -148,15 +149,16 @@ const GestionProduccion = () => {
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
         <h1 className="text-2xl font-bold text-gray-800">Gestión de Producción</h1>
         <button
           onClick={handleNuevaProduccion}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto"
         >
           Nueva Producción
         </button>
       </div>
+      <AccesosRapidosProduccion />
 
       {error && (
         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">

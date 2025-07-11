@@ -544,12 +544,10 @@ function VentaList({
         </div>
       )}
 
-      {/* Gráfico de Análisis de Ventas - Solo para Super Admin */}
-      {userRole === 'super_admin' && (
-        <div className="mb-8">
-          <VentasLineChart userRole={userRole} />
-        </div>
-      )}
+      {/* Gráfico de Análisis de Ventas - Visible para todos los roles */}
+      <div className="mb-8">
+        <VentasLineChart userRole={userRole} />
+      </div>
 
       {/* Mostrar mensajes de éxito/error */}
       {error && (

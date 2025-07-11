@@ -3,7 +3,7 @@ import { UserCircle, FileText, LogOut, ShoppingBag, ChevronLeft, ChevronRight, X
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 
-function Sidebar({ isCollapsed, toggleSidebar, isMobileView }) {
+function Sidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebarOpen }) {
   const navigate = useNavigate();
   const { signOut } = useClerk();
   
@@ -18,22 +18,27 @@ function Sidebar({ isCollapsed, toggleSidebar, isMobileView }) {
     { id: 'profile', icon: UserCircle, label: 'Mi Perfil', route: '/user/perfil' },
   ];
 
+  // Sidebar visible solo si:
+  // - Desktop: siempre
+  // - Mobile: solo si isSidebarOpen
+  const sidebarVisible = !isMobileView || isSidebarOpen;
+
   return (
     <>
-      {/* Overlay para móviles */}
-      {!isCollapsed && isMobileView && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden" 
-          onClick={toggleSidebar}
-        />
-      )}
-
-      <div className={`
-        fixed top-0 left-0 h-screen bg-white shadow-lg z-30
-        transition-all duration-300 ease-in-out
-        ${isCollapsed ? 'w-20' : 'w-[280px]'}
-        ${isMobileView && isCollapsed ? '-translate-x-full' : 'translate-x-0'}
-      `}>
+      <div
+        className={`
+          fixed top-0 left-0 h-screen bg-white shadow-lg z-30
+          transition-all duration-300 ease-in-out
+          ${isCollapsed ? 'w-20' : 'w-[280px]'}
+          ${isMobileView
+            ? isSidebarOpen
+              ? 'translate-x-0'
+              : '-translate-x-full'
+            : 'translate-x-0'}
+          ${isMobileView ? 'lg:hidden' : ''}
+        `}
+        style={{ pointerEvents: sidebarVisible ? 'auto' : 'none' }}
+      >
         <div className="p-4">
           <div className="flex items-center justify-between mb-6">
             {!isCollapsed && (
@@ -58,7 +63,6 @@ function Sidebar({ isCollapsed, toggleSidebar, isMobileView }) {
               </button>
             )}
           </div>
-          
           <nav className="space-y-2">
             {menuItems.map((item) => {
               const Icon = item.icon;
@@ -87,21 +91,7 @@ function Sidebar({ isCollapsed, toggleSidebar, isMobileView }) {
             })}
           </nav>
         </div>
-        
-        <div className="absolute bottom-0 left-0 right-0 p-4">
-          <button
-            onClick={handleLogout}
-            className={`
-              w-full flex items-center gap-3 px-4 py-3 rounded-lg
-              text-red-600 hover:bg-red-50 transition-colors
-              ${isCollapsed ? 'justify-center' : ''}
-            `}
-            title={isCollapsed ? "Cerrar Sesión" : ""}
-          >
-            <LogOut size={20} className="flex-shrink-0" />
-            {!isCollapsed && <span className="font-medium">Cerrar Sesión</span>}
-          </button>
-        </div>
+        {/* Botón de cerrar sesión eliminado, ahora está en MyProfileUnified */}
       </div>
     </>
   );

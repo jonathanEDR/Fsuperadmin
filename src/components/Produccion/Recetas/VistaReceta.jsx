@@ -57,45 +57,45 @@ const VistaReceta = ({ receta, onCerrar, onEditar }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-10 mx-auto p-5 border w-11/12 md:w-4/5 lg:w-3/4 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
-        <div className="mt-3">
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+      <div className="relative mx-auto border box-border w-full max-w-lg sm:w-4/5 lg:w-3/4 shadow-lg rounded-md bg-white p-3 sm:p-5 h-[380vh] max-h-[400vh] flex flex-col">
+        <div className="mt-2 sm:mt-3 flex-1 overflow-y-auto">
           {/* Header */}
-          <div className="flex justify-between items-start mb-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4 sm:mb-6">
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
                 {receta.nombre}
               </h3>
-              <div className="flex items-center space-x-3">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoriaColor(receta.categoria)}`}>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getCategoriaColor(receta.categoria)}`}>
                   {getCategoriaLabel(receta.categoria)}
                 </span>
-                <span className={`px-2 py-1 rounded text-sm ${
+                <span className={`px-2 py-1 rounded text-xs sm:text-sm ${
                   receta.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                 }`}>
                   {receta.activo ? 'Activa' : 'Inactiva'}
                 </span>
               </div>
             </div>
-            <div className="flex space-x-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <button
                 onClick={onEditar}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto"
               >
                 Editar
               </button>
               <button
                 onClick={onCerrar}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 w-full sm:w-auto"
               >
                 ✕
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6">
             {/* Información Principal */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-4 sm:space-y-6 min-w-0">
               {/* Descripción */}
               {receta.descripcion && (
                 <div className="bg-gray-50 p-4 rounded-lg">
@@ -106,29 +106,29 @@ const VistaReceta = ({ receta, onCerrar, onEditar }) => {
 
               {/* Ingredientes */}
               <div className="bg-white border rounded-lg overflow-hidden">
-                <div className="bg-gray-50 px-4 py-3 border-b">
+                <div className="bg-gray-50 px-2 sm:px-4 py-2 sm:py-3 border-b">
                   <h4 className="font-medium text-gray-700">Ingredientes</h4>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="min-w-full">
+                  <table className="min-w-full text-xs sm:text-sm">
                     <thead className="bg-gray-100">
                       <tr>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-2 sm:px-4 py-2 text-left font-medium text-gray-500 uppercase">
                           Ingrediente
                         </th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-2 sm:px-4 py-2 text-left font-medium text-gray-500 uppercase">
                           Cantidad
                         </th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-2 sm:px-4 py-2 text-left font-medium text-gray-500 uppercase">
                           Unidad
                         </th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-2 sm:px-4 py-2 text-left font-medium text-gray-500 uppercase">
                           Disponible
                         </th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-2 sm:px-4 py-2 text-left font-medium text-gray-500 uppercase">
                           Precio Unit. (S/)
                         </th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-2 sm:px-4 py-2 text-left font-medium text-gray-500 uppercase">
                           Subtotal (S/)
                         </th>
                       </tr>
@@ -142,10 +142,10 @@ const VistaReceta = ({ receta, onCerrar, onEditar }) => {
 
                         return (
                           <tr key={index} className={!suficiente ? 'bg-red-50' : ''}>
-                            <td className="px-4 py-2 text-sm text-gray-900">
+                            <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-900">
                               {item.ingrediente.nombre}
                             </td>
-                            <td className="px-4 py-2 text-sm text-gray-900">
+                            <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-900">
                               {item.cantidad}
                               {cantidadConsulta > 1 && (
                                 <span className="text-gray-500 ml-1">
@@ -153,16 +153,16 @@ const VistaReceta = ({ receta, onCerrar, onEditar }) => {
                                 </span>
                               )}
                             </td>
-                            <td className="px-4 py-2 text-sm text-gray-900">
+                            <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-900">
                               {item.unidadMedida}
                             </td>
-                            <td className={`px-4 py-2 text-sm ${suficiente ? 'text-green-600' : 'text-red-600'}`}>
+                            <td className={`px-2 sm:px-4 py-2 text-xs sm:text-sm ${suficiente ? 'text-green-600' : 'text-red-600'}`}> 
                               {disponible}
                             </td>
-                            <td className="px-4 py-2 text-sm text-gray-900">
+                            <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-900">
                               S/.{item.ingrediente.precioUnitario?.toFixed(2) || '0.00'}
                             </td>
-                            <td className="px-4 py-2 text-sm text-gray-900">
+                            <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-900">
                               S/.{subtotal.toFixed(2)}
                             </td>
                           </tr>
@@ -203,7 +203,7 @@ const VistaReceta = ({ receta, onCerrar, onEditar }) => {
             </div>
 
             {/* Panel Lateral */}
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6 min-w-0">
               {/* Información Básica */}
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h4 className="font-medium text-gray-700 mb-3">Información</h4>
@@ -311,10 +311,10 @@ const VistaReceta = ({ receta, onCerrar, onEditar }) => {
           </div>
 
           {/* Botón Cerrar */}
-          <div className="flex justify-end mt-6">
+          <div className="flex justify-center sm:justify-end mt-4 sm:mt-6">
             <button
               onClick={onCerrar}
-              className="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+              className="w-full sm:w-auto px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
             >
               Cerrar
             </button>

@@ -123,12 +123,12 @@ const GestionPersonalList = ({
   return (
     <div className="space-y-4">
       {/* Filtros */}
-      <div className="bg-white p-4 rounded-lg shadow">
-        <h3 className="text-lg font-medium mb-3">Filtrar por período</h3>
-        <div className="flex flex-wrap gap-3 mb-4">
+      <div className="bg-white p-3 sm:p-4 rounded-lg shadow overflow-x-auto">
+        <h3 className="text-base sm:text-lg font-medium mb-3">Filtrar por período</h3>
+        <div className="flex flex-wrap gap-2 sm:gap-3 mb-4">
           <button
             onClick={() => onFiltroChange('semana')}
-            className={`px-3 py-2 rounded-md text-sm ${
+            className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm ${
               filtroFecha === 'semana' 
                 ? 'bg-blue-600 text-white' 
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -138,7 +138,7 @@ const GestionPersonalList = ({
           </button>
           <button
             onClick={() => onFiltroChange('mes')}
-            className={`px-3 py-2 rounded-md text-sm ${
+            className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm ${
               filtroFecha === 'mes' 
                 ? 'bg-blue-600 text-white' 
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -148,7 +148,7 @@ const GestionPersonalList = ({
           </button>
           <button
             onClick={() => onFiltroChange('año')}
-            className={`px-3 py-2 rounded-md text-sm ${
+            className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm ${
               filtroFecha === 'año' 
                 ? 'bg-blue-600 text-white' 
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -158,7 +158,7 @@ const GestionPersonalList = ({
           </button>
           <button
             onClick={() => onFiltroChange('historico')}
-            className={`px-3 py-2 rounded-md text-sm ${
+            className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm ${
               filtroFecha === 'historico' 
                 ? 'bg-blue-600 text-white' 
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -169,96 +169,94 @@ const GestionPersonalList = ({
         </div>
 
         {/* Rango personalizado */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
               Fecha Inicio
             </label>
             <input
               type="date"
               value={customDateRange.start}
               onChange={(e) => onCustomDateRangeChange('start', e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="w-full p-2 border border-gray-300 rounded-md text-xs sm:text-sm"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
               Fecha Fin
             </label>
             <input
               type="date"
               value={customDateRange.end}
               onChange={(e) => onCustomDateRangeChange('end', e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="w-full p-2 border border-gray-300 rounded-md text-xs sm:text-sm"
             />
           </div>
           <div className="flex items-end">
             <button
               onClick={() => onFiltroChange('personalizado')}
               disabled={!customDateRange.start || !customDateRange.end}
-              className="w-full px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
             >
               Aplicar Rango
             </button>
           </div>
         </div>
-      </div>      {/* Resumen de totales */}
-      <div className="bg-white p-4 rounded-lg shadow">
-        <h3 className="text-lg font-medium mb-3">Resumen Total del Colaborador</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      </div>
+      {/* Resumen de totales */}
+      <div className="bg-white p-3 sm:p-4 rounded-lg shadow overflow-x-auto">
+        <h3 className="text-base sm:text-lg font-medium mb-3">Resumen Total del Colaborador</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
           <div className="text-center">
-            <p className="text-sm text-gray-600">Total Gastos</p>
-            <p className="text-lg font-bold text-red-600">{formatearMoneda(totalesCompletos.monto)}</p>
+            <p className="text-xs sm:text-sm text-gray-600">Total Gastos</p>
+            <p className="text-base sm:text-lg font-bold text-red-600">{formatearMoneda(totalesCompletos.monto)}</p>
           </div>
           <div className="text-center">
-            <p className="text-sm text-gray-600">Total Faltantes</p>
-            <p className="text-lg font-bold text-orange-600">{formatearMoneda(totalesCompletos.faltante)}</p>
+            <p className="text-xs sm:text-sm text-gray-600">Total Faltantes</p>
+            <p className="text-base sm:text-lg font-bold text-orange-600">{formatearMoneda(totalesCompletos.faltante)}</p>
           </div>
           <div className="text-center">
-            <p className="text-sm text-gray-600">Total Adelantos</p>
-            <p className="text-lg font-bold text-blue-600">{formatearMoneda(totalesCompletos.adelanto)}</p>
+            <p className="text-xs sm:text-sm text-gray-600">Total Adelantos</p>
+            <p className="text-base sm:text-lg font-bold text-blue-600">{formatearMoneda(totalesCompletos.adelanto)}</p>
           </div>
           <div className="text-center">
-            <p className="text-sm text-gray-600">Total Pagos Diarios</p>
-            <p className="text-lg font-bold text-green-600">{formatearMoneda(totalesCompletos.pagodiario)}</p>
+            <p className="text-xs sm:text-sm text-gray-600">Total Pagos Diarios</p>
+            <p className="text-base sm:text-lg font-bold text-green-600">{formatearMoneda(totalesCompletos.pagodiario)}</p>
           </div>
         </div>
-        
         {/* Mostrar totales del período si hay filtros activos */}
         {filtroFecha !== 'historico' && registrosFiltrados.length !== todosLosRegistros?.length && (
           <>
             <hr className="my-4" />
-            <h4 className="text-md font-medium mb-2">Totales del Período Seleccionado</h4>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <h4 className="text-xs sm:text-md font-medium mb-2">Totales del Período Seleccionado</h4>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 text-xs sm:text-sm">
               <div className="text-center">
                 <p className="text-xs text-gray-500">Gastos del Período</p>
-                <p className="text-md font-semibold text-red-500">{formatearMoneda(totalesFiltrados.monto)}</p>
+                <p className="font-semibold text-red-500">{formatearMoneda(totalesFiltrados.monto)}</p>
               </div>
               <div className="text-center">
                 <p className="text-xs text-gray-500">Faltantes del Período</p>
-                <p className="text-md font-semibold text-orange-500">{formatearMoneda(totalesFiltrados.faltante)}</p>
+                <p className="font-semibold text-orange-500">{formatearMoneda(totalesFiltrados.faltante)}</p>
               </div>
               <div className="text-center">
                 <p className="text-xs text-gray-500">Adelantos del Período</p>
-                <p className="text-md font-semibold text-blue-500">{formatearMoneda(totalesFiltrados.adelanto)}</p>
+                <p className="font-semibold text-blue-500">{formatearMoneda(totalesFiltrados.adelanto)}</p>
               </div>
               <div className="text-center">
                 <p className="text-xs text-gray-500">Pagos del Período</p>
-                <p className="text-md font-semibold text-green-500">{formatearMoneda(totalesFiltrados.pagodiario)}</p>
+                <p className="font-semibold text-green-500">{formatearMoneda(totalesFiltrados.pagodiario)}</p>
               </div>
             </div>
           </>
         )}
       </div>
-
       {/* Lista de registros */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="px-4 py-3 bg-gray-50 border-b">
-          <h3 className="text-lg font-medium">
+      <div className="bg-white rounded-lg shadow overflow-x-auto">
+        <div className="px-3 sm:px-4 py-3 bg-gray-50 border-b">
+          <h3 className="text-base sm:text-lg font-medium">
             Registros ({registrosFiltrados.length})
           </h3>
         </div>
-
         {loading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
@@ -271,21 +269,19 @@ const GestionPersonalList = ({
         ) : (
           <div className="divide-y divide-gray-200">
             {registrosFiltrados.map((registro) => (
-              <div key={registro._id} className="p-4 hover:bg-gray-50">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
+              <div key={registro._id} className="p-3 sm:p-4 hover:bg-gray-50">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-gray-900">
+                      <h4 className="font-medium text-gray-900 truncate">
                         {registro.colaboradorUserId?.nombre_negocio || 'Colaborador'}
                       </h4>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-xs sm:text-sm text-gray-500">
                         {formatearFecha(registro.fechaDeGestion)}
                       </span>
                     </div>
-                    
-                    <p className="text-gray-700 mb-3">{registro.descripcion}</p>
-                    
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <p className="text-gray-700 mb-3 text-xs sm:text-sm break-words">{registro.descripcion}</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 text-xs sm:text-sm">
                       <div>
                         <span className="font-medium text-gray-600">Monto:</span>
                         <span className="block text-red-600 font-bold">
@@ -309,16 +305,15 @@ const GestionPersonalList = ({
                         <span className="block text-green-600 font-bold">
                           {formatearMoneda(registro.pagodiario)}
                         </span>
-                      </div>                    </div>
-                    
-                    <div className="mt-2 text-sm text-gray-600">
+                      </div>
+                    </div>
+                    <div className="mt-2 text-xs sm:text-sm text-gray-600">
                       <span className="font-medium">Colaborador:</span> {registro.colaboradorInfo?.nombre || 'N/A'}
                     </div>
                   </div>
-                  
                   <button
                     onClick={() => onEliminar(registro._id)}
-                    className="ml-4 px-3 py-1 text-red-600 border border-red-600 rounded hover:bg-red-50 text-sm"
+                    className="ml-0 sm:ml-4 px-3 py-1 text-red-600 border border-red-600 rounded hover:bg-red-50 text-xs sm:text-sm"
                   >
                     Eliminar
                   </button>

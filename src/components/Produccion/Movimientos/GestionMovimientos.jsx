@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { movimientoService } from '../../../services/movimientoService';
 import { ingredienteService } from '../../../services/ingredienteService';
+import AccesosRapidosProduccion from '../AccesosRapidosProduccion';
 
 const GestionMovimientos = () => {
   const [movimientos, setMovimientos] = useState([]);
@@ -143,6 +144,7 @@ const GestionMovimientos = () => {
           <span>Exportar CSV</span>
         </button>
       </div>
+      <AccesosRapidosProduccion />
 
       {/* Filtros */}
       <div className="bg-gray-50 p-4 rounded-lg mb-6">

@@ -50,9 +50,9 @@ function DevolucionModal({
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
+    <div className="fixed inset-0 flex items-center justify-center z-60">
       <div className="modal-overlay absolute inset-0 bg-black opacity-50"></div>
-      <div className="modal-content bg-white p-6 rounded-lg shadow-xl z-50 w-[800px] max-h-[90vh] overflow-y-auto">
+      <div className="modal-content bg-white p-4 sm:p-6 rounded-lg shadow-xl z-50 w-[95vw] max-w-[800px] max-h-[95vh] overflow-y-auto">
         <h3 className="text-xl font-semibold mb-6">Registrar Devolución</h3>
         
         {/* Selección de Venta */}

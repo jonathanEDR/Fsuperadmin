@@ -86,7 +86,7 @@ const GestionPersonalModal = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg p-3 sm:p-6 w-full max-w-md max-h-[98vh] min-h-[210vh] mx-2 overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">
             Nuevo Registro - {colaboradorSeleccionado?.nombre_negocio || 'Colaborador'}
@@ -133,7 +133,7 @@ const GestionPersonalModal = ({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Monto
@@ -163,7 +163,8 @@ const GestionPersonalModal = ({
                 placeholder="0.00"
               />
             </div>
-          </div>          <div className="grid grid-cols-2 gap-4">
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Adelanto
@@ -178,7 +179,6 @@ const GestionPersonalModal = ({
                 placeholder="0.00"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Pago Diario <span className="text-sm text-gray-500">(Calculado)</span>
@@ -193,7 +193,7 @@ const GestionPersonalModal = ({
             </div>
           </div>
 
-          <div className="flex justify-end space-x-3 pt-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-4">
             <button
               type="button"
               onClick={handleClose}

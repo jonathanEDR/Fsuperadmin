@@ -81,56 +81,42 @@ const CobrosLineChart = ({ userRole }) => {
     return labels;
   };
 
+  // Agrupa los cobros usando el campo 'fechaCobro' (el mismo que la tabla)
   const processData = (cobros, filter, startDate, endDate) => {
     const labels = generateLabels(filter, startDate, endDate);
     const dataPoints = labels.map(() => ({ yape: 0, efectivo: 0, gastos: 0, total: 0 }));
 
     cobros.forEach((cobro) => {
-      // Intentar múltiples nombres de campos de fecha
-      const fechaCampos = [
-        cobro.createdAt,
-        cobro.fecha,
-        cobro.fechaCreacion,
-        cobro.fechaCobro,
-        cobro.updatedAt,
-        cobro.timestamp
-      ];
-      // Buscar el primer campo de fecha válido
-      let fechaValida = null;
-      for (let fecha of fechaCampos) {
-        if (fecha) {
-          // Usar la función getLocalDate para convertir a zona horaria local
-          const localDate = getLocalDate(fecha);
-          if (localDate) {
-            fechaValida = localDate;
-            break;
-          }
-        }
+      // Usar fechaCobro como principal, si no existe, usar createdAt
+      let fechaBase = cobro.fechaCobro || cobro.createdAt || cobro.fecha || cobro.fechaCreacion || cobro.updatedAt || cobro.timestamp;
+      if (!fechaBase) return; // Si no hay fecha, ignorar
+      const cobroDate = getLocalDate(fechaBase);
+      if (!cobroDate) return;
+      if (cobroDate < startDate || cobroDate >= endDate) return;
+
+      let indexPos = 0;
+      switch (filter) {
+        case 'hoy':
+          indexPos = Math.floor((cobroDate - startDate) / (60 * 60 * 1000));
+          break;
+        case 'semana':
+          indexPos = Math.floor((cobroDate - startDate) / (24 * 60 * 60 * 1000));
+          break;
+        case 'mes':
+          indexPos = cobroDate.getDate() - 1;
+          break;
+        case 'anual':
+          indexPos = cobroDate.getMonth();
+          break;
+        default:
+          indexPos = 0;
       }
-      // Si no encontramos fecha válida, usar fecha actual (para ver los datos)
-      const cobroDate = fechaValida || new Date();
-      if (cobroDate >= startDate && cobroDate < endDate) {
-        let indexPos = 0;
-        switch (filter) {
-          case 'hoy':
-            indexPos = Math.floor((cobroDate - startDate) / (60 * 60 * 1000));
-            break;
-          case 'semana':
-            indexPos = Math.floor((cobroDate - startDate) / (24 * 60 * 60 * 1000));
-            break;
-          case 'mes':
-            indexPos = cobroDate.getDate() - 1;
-            break;
-          case 'anual':
-            indexPos = cobroDate.getMonth();
-            break;
-        }
-        if (indexPos >= 0 && indexPos < dataPoints.length) {
-          dataPoints[indexPos].yape += Number(cobro.yape || 0);
-          dataPoints[indexPos].efectivo += Number(cobro.efectivo || 0);
-          dataPoints[indexPos].gastos += Number(cobro.gastosImprevistos || 0);
-          dataPoints[indexPos].total += Number(cobro.montoTotal || 0);
-        }
+      if (indexPos >= 0 && indexPos < dataPoints.length) {
+        dataPoints[indexPos].yape += Number(cobro.yape || 0);
+        dataPoints[indexPos].efectivo += Number(cobro.efectivo || 0);
+        dataPoints[indexPos].gastos += Number(cobro.gastosImprevistos || 0);
+        // Usar la suma de yape + efectivo - gastos para el total, igual que la tabla
+        dataPoints[indexPos].total += Number(cobro.yape || 0) + Number(cobro.efectivo || 0) - Number(cobro.gastosImprevistos || 0);
       }
     });
     return { labels, dataPoints };

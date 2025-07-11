@@ -91,7 +91,7 @@ function UserGestionPersonal() {
   const totalAPagar = totales.pagosDiarios - (totales.faltantes + totales.adelantos) - pagosRealizadosTotal;
   const hayMasRegistros = registrosOrdenados.length > registrosMostrados;
   return (
-    <div className="max-w-6xl mx-auto p-4">
+    <div className="max-w-6xl mx-auto p-4 mx-2">
       <div className="flex justify-between items-center mb-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Mi Historial Personal</h2>
@@ -107,7 +107,7 @@ function UserGestionPersonal() {
        {/* Resumen de totales */}
       <div className="bg-white p-4 rounded-lg shadow mb-4">
         <h3 className="text-lg font-medium mb-3">Resumen Total</h3>
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 text-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 gap-y-4 text-center">
           <div>
             <p className="text-sm text-gray-600">Gastos</p>
             <p className="text-lg font-bold text-red-600">{formatearMoneda(totales.gastos)}</p>
@@ -137,7 +137,7 @@ function UserGestionPersonal() {
         </div>
       </div>{/* Lista de registros */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="px-4 py-3 bg-gray-50 border-b">
+        <div className="px-2 sm:px-4 py-3 bg-gray-50 border-b">
           <h3 className="text-lg font-medium">
             Mis Registros ({registrosOrdenados.reduce((total, registro) => {
               let count = 0;
@@ -166,15 +166,14 @@ function UserGestionPersonal() {
         ) : (
           <>            <div className="divide-y divide-gray-200">
               {registrosPaginados.map((registro) => (
-                <div key={registro._id} className="p-3 hover:bg-gray-50">
-                  <div className="flex justify-between items-start mb-2">
-                    <p className="text-gray-800 font-medium text-sm">{registro.descripcion || 'Sin descripción'}</p>
-                    <span className="text-xs text-gray-500 whitespace-nowrap ml-3">
+                <div key={registro._id} className="p-2 sm:p-3 hover:bg-gray-50">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-1">
+                    <p className="text-gray-800 font-medium text-sm break-words max-w-full">{registro.descripcion || 'Sin descripción'}</p>
+                    <span className="text-xs text-gray-500 truncate max-w-[140px] sm:max-w-none ml-0 sm:ml-3">
                       {formatearFecha(registro.fechaDeGestion)}
                     </span>
                   </div>
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 gap-y-1 text-xs">
                     {registro.monto && registro.monto > 0 && (
                       <div>
                         <span className="text-gray-600">Gasto:</span>
@@ -214,10 +213,10 @@ function UserGestionPersonal() {
             
             {/* Botón Ver más */}
             {hayMasRegistros && (
-              <div className="px-4 py-3 bg-gray-50 border-t text-center">
+              <div className="px-2 sm:px-4 py-3 bg-gray-50 border-t text-center">
                 <button
                   onClick={cargarMasRegistros}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                  className="w-full sm:w-auto inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
                 >
                   Ver más registros
                   <svg className="ml-2 -mr-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

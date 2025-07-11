@@ -93,47 +93,46 @@ const ProduccionIndex = () => {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-2 sm:p-4 md:p-6">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex justify-between items-center">
+      <div className="mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
               Módulo de Producción
             </h1>
-            <p className="text-lg text-gray-600">
+            <p className="text-base sm:text-lg text-gray-600">
               Sistema integral de gestión de producción, inventario de ingredientes y control de recetas
             </p>
           </div>
           <button
             onClick={cargarEstadisticas}
             disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 flex items-center space-x-2"
+            className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center space-x-2"
           >
             <span>{loading ? '🔄' : '🔄'}</span>
-            <span>{loading ? 'Cargando...' : 'Actualizar'}</span>
+            <span className="text-sm sm:text-base">{loading ? 'Cargando...' : 'Actualizar'}</span>
           </button>
         </div>
-        
         {error && (
-          <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          <div className="mt-3 p-2 sm:p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm sm:text-base">
             {error}
           </div>
         )}
       </div>
 
       {/* Estadísticas Rápidas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6 sm:mb-8">
         {estadisticasDisplay.map((stat, index) => (
-          <div key={index} className="bg-white p-6 rounded-lg shadow-md border">
-            <div className="flex items-center justify-between">
+          <div key={index} className="bg-white p-3 sm:p-6 rounded-lg shadow-md border">
+            <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="text-sm font-medium text-gray-600">{stat.titulo}</p>
-                <p className={`text-2xl font-bold ${stat.color} ${loading ? 'animate-pulse' : ''}`}>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">{stat.titulo}</p>
+                <p className={`text-xl sm:text-2xl font-bold ${stat.color} ${loading ? 'animate-pulse' : ''}`}>
                   {stat.valor}
                 </p>
               </div>
-              <div className="text-2xl opacity-60">
+              <div className="text-xl sm:text-2xl opacity-60">
                 {index === 0 && '🥬'}
                 {index === 1 && '📝'}
                 {index === 2 && '🏭'}
@@ -145,20 +144,20 @@ const ProduccionIndex = () => {
       </div>
 
       {/* Módulos Principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6 mb-6 sm:mb-8">
         {modulos.map((modulo, index) => (
           <Link
             key={index}
             to={modulo.enlace}
-            className={`block p-6 rounded-lg border-2 transition-all duration-200 transform hover:scale-105 ${modulo.color}`}
+            className={`block p-3 sm:p-6 rounded-lg border-2 transition-all duration-200 transform hover:scale-105 ${modulo.color}`}
           >
-            <div className="flex items-start space-x-4">
-              <div className="text-4xl">{modulo.icono}</div>
+            <div className="flex items-start gap-2 sm:gap-4">
+              <div className="text-2xl sm:text-4xl">{modulo.icono}</div>
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1 sm:mb-2">
                   {modulo.titulo}
                 </h3>
-                <p className="text-gray-700">
+                <p className="text-sm sm:text-base text-gray-700">
                   {modulo.descripcion}
                 </p>
               </div>
@@ -168,46 +167,44 @@ const ProduccionIndex = () => {
       </div>
 
       {/* Accesos Rápidos */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+      <div className="bg-white rounded-lg shadow-md p-3 sm:p-6">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">
           Accesos Rápidos
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-4">
           <Link
             to="ingredientes/nuevo"
-            className="flex items-center space-x-3 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+            className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
           >
-            <span className="text-2xl">➕</span>
-            <span className="font-medium text-green-800">Nuevo Ingrediente</span>
+            <span className="text-xl sm:text-2xl">➕</span>
+            <span className="font-medium text-green-800 text-sm sm:text-base">Nuevo Ingrediente</span>
           </Link>
-          
           <Link
             to="recetas/nueva"
-            className="flex items-center space-x-3 p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+            className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
           >
-            <span className="text-2xl">📋</span>
-            <span className="font-medium text-blue-800">Nueva Receta</span>
+            <span className="text-xl sm:text-2xl">📋</span>
+            <span className="font-medium text-blue-800 text-sm sm:text-base">Nueva Receta</span>
           </Link>
-          
           <Link
             to="produccion/nueva"
-            className="flex items-center space-x-3 p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
+            className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
           >
-            <span className="text-2xl">🚀</span>
-            <span className="font-medium text-purple-800">Nueva Producción</span>
+            <span className="text-xl sm:text-2xl">🚀</span>
+            <span className="font-medium text-purple-800 text-sm sm:text-base">Nueva Producción</span>
           </Link>
         </div>
       </div>
 
       {/* Información del Sistema */}
-      <div className="mt-8 bg-gray-50 rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="mt-6 sm:mt-8 bg-gray-50 rounded-lg p-3 sm:p-6">
+        <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
           Funcionalidades del Módulo
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
           <div>
-            <h3 className="font-medium text-gray-800 mb-2">Gestión de Ingredientes</h3>
-            <ul className="text-sm text-gray-600 space-y-1">
+            <h3 className="font-medium text-gray-800 mb-1 sm:mb-2 text-sm sm:text-base">Gestión de Ingredientes</h3>
+            <ul className="text-xs sm:text-sm text-gray-600 space-y-1">
               <li>• Control de inventario en tiempo real</li>
               <li>• Ajustes manuales de stock</li>
               <li>• Historial de movimientos</li>
@@ -215,8 +212,8 @@ const ProduccionIndex = () => {
             </ul>
           </div>
           <div>
-            <h3 className="font-medium text-gray-800 mb-2">Gestión de Recetas</h3>
-            <ul className="text-sm text-gray-600 space-y-1">
+            <h3 className="font-medium text-gray-800 mb-1 sm:mb-2 text-sm sm:text-base">Gestión de Recetas</h3>
+            <ul className="text-xs sm:text-sm text-gray-600 space-y-1">
               <li>• Creación de recetas detalladas</li>
               <li>• Cálculo automático de costos</li>
               <li>• Control de rendimientos</li>
@@ -224,8 +221,8 @@ const ProduccionIndex = () => {
             </ul>
           </div>
           <div>
-            <h3 className="font-medium text-gray-800 mb-2">Control de Producción</h3>
-            <ul className="text-sm text-gray-600 space-y-1">
+            <h3 className="font-medium text-gray-800 mb-1 sm:mb-2 text-sm sm:text-base">Control de Producción</h3>
+            <ul className="text-xs sm:text-sm text-gray-600 space-y-1">
               <li>• Planificación de órdenes</li>
               <li>• Ejecución automática</li>
               <li>• Control de calidad</li>
@@ -233,8 +230,8 @@ const ProduccionIndex = () => {
             </ul>
           </div>
           <div>
-            <h3 className="font-medium text-gray-800 mb-2">Auditoría y Reportes</h3>
-            <ul className="text-sm text-gray-600 space-y-1">
+            <h3 className="font-medium text-gray-800 mb-1 sm:mb-2 text-sm sm:text-base">Auditoría y Reportes</h3>
+            <ul className="text-xs sm:text-sm text-gray-600 space-y-1">
               <li>• Historial completo de movimientos</li>
               <li>• Reportes de producción</li>
               <li>• Análisis de consumos</li>

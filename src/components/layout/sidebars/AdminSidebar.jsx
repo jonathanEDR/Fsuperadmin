@@ -3,7 +3,7 @@ import { Home, UserCog, LogOut, Shield, Users, Package, ShoppingCart, Menu, X, C
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 
-function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggleSidebar, isMobileView }) {
+function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggleSidebar, isMobileView, isSidebarOpen }) {
   const navigate = useNavigate();
   const { signOut } = useClerk();
   
@@ -22,20 +22,30 @@ function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggle
 
   return (
     <>
-      {/* Overlay para móviles */}
-      {!isCollapsed && isMobileView && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden" 
-          onClick={toggleSidebar}
-        />
+      {/* Overlay y sidebar: overlay con z-30, sidebar con z-40 para asegurar orden correcto */}
+      {isMobileView && isSidebarOpen && (
+        <div className="fixed inset-0 z-30 lg:hidden">
+          <div
+            className="absolute inset-0 bg-black bg-opacity-40"
+            onClick={toggleSidebar}
+          />
+        </div>
       )}
 
-      <div className={`
-        fixed top-0 left-0 h-screen bg-white shadow-lg z-30
-        transition-all duration-300 ease-in-out
-        ${isCollapsed ? 'w-20' : 'w-[280px]'}
-        ${isMobileView && isCollapsed ? '-translate-x-full' : 'translate-x-0'}
-      `}>
+      {(!isMobileView || isSidebarOpen) && (
+        <div
+          className={`
+            fixed top-0 left-0 h-screen bg-white shadow-lg z-40
+            transition-all duration-300 ease-in-out
+            ${isCollapsed ? 'w-20' : 'w-[280px]'}
+            ${isMobileView
+              ? isSidebarOpen
+                ? 'translate-x-0'
+                : '-translate-x-full'
+              : 'translate-x-0'}
+          `}
+          style={{ willChange: 'transform' }}
+        >
         <div className="p-4">
           <div className="flex items-center justify-between mb-6">
             {!isCollapsed && (
@@ -49,6 +59,7 @@ function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggle
               <button
                 onClick={toggleSidebar}
                 className="lg:hidden p-2 rounded-lg hover:bg-blue-50 text-blue-600"
+                aria-label="Cerrar menú"
               >
                 <X size={24} />
               </button>
@@ -63,7 +74,7 @@ function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggle
               </button>
             )}
           </div>
-          
+
           <nav className="space-y-2">
             {menuItems.map((item) => {
               const Icon = item.icon;
@@ -92,22 +103,10 @@ function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggle
             })}
           </nav>
         </div>
-        
-        <div className="absolute bottom-0 left-0 right-0 p-4">
-          <button
-            onClick={handleLogout}
-            className={`
-              w-full flex items-center gap-3 px-4 py-3 rounded-lg
-              text-red-600 hover:bg-red-50 transition-colors
-              ${isCollapsed ? 'justify-center' : ''}
-            `}
-            title={isCollapsed ? "Cerrar Sesión" : ""}
-          >
-            <LogOut size={20} className="flex-shrink-0" />
-            {!isCollapsed && <span className="font-medium">Cerrar Sesión</span>}
-          </button>
+
+        {/* Botón de cerrar sesión eliminado, ahora está en MyProfileUnified */}
         </div>
-      </div>
+      )}
     </>
   );
 }

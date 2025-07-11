@@ -501,9 +501,9 @@ const DetalleProduccion = ({ produccion: produccionProp, onCerrar, onActualizar 
 
       {/* Modal de Confirmación */}
       {showConfirmModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3 text-center">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="relative mx-auto border box-border w-full sm:w-11/12 sm:max-w-xl md:max-w-3xl shadow-lg rounded-md bg-white p-4 sm:p-6 h-[70vh] sm:min-h-[350px] max-h-[ 290vh] flex flex-col">
+            <div className="mt-3 text-center flex-1 flex flex-col overflow-y-auto">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 Confirmar {actionType === 'ejecutar' ? 'Ejecución' : 'Cancelación'}
               </h3>

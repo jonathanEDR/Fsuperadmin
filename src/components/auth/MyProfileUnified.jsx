@@ -1,10 +1,11 @@
 import React from 'react';
-import { useUser } from '@clerk/clerk-react';
+import { useUser, useClerk } from '@clerk/clerk-react';
 import { User, Mail, Shield, CheckCircle } from 'lucide-react';
 import UserGestionPersonal from '../personal/UserGestionPersonal';
 
 function MyProfileUnified() {
   const { user } = useUser();
+  const { signOut } = useClerk();
 
   if (!user) {
     return (
@@ -127,9 +128,20 @@ function MyProfileUnified() {
         </div>
       </div>
 
+
       {/* Gestión Personal Financiera */}
       <div className="bg-white rounded-lg shadow-lg">
         <UserGestionPersonal />
+      </div>
+
+      {/* Botón de cerrar sesión */}
+      <div className="flex justify-end mt-8">
+        <button
+          onClick={() => signOut()}
+          className="px-5 py-2 rounded-lg bg-red-600 text-white font-semibold shadow hover:bg-red-700 transition-colors w-full sm:w-auto"
+        >
+          Cerrar sesión
+        </button>
       </div>
     </div>
   );

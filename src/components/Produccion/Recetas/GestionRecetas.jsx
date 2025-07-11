@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import AccesosRapidosProduccion from '../AccesosRapidosProduccion';
 import { recetaService } from '../../../services/recetaService';
 import FormularioReceta from './FormularioReceta';
 import VistaReceta from './VistaReceta';
@@ -168,27 +169,29 @@ const GestionRecetas = () => {
     );
   }
 
+
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Gestión de Recetas</h1>
+    <div className="px-2 sm:px-6 py-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Gestión de Recetas</h1>
         <button
           onClick={handleNuevaReceta}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto"
         >
           Nueva Receta
         </button>
       </div>
+      <AccesosRapidosProduccion />
 
       {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded text-sm sm:text-base">
           {error}
         </div>
       )}
 
       {/* Filtros */}
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-white p-3 sm:p-4 rounded-lg shadow mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Buscar
@@ -232,15 +235,13 @@ const GestionRecetas = () => {
         </div>
       </div>
 
-      {/* Lista de Recetas */}
-
       {/* Lista de Recetas Disponibles */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {recetas.filter(receta => ((receta.inventario?.cantidadProducida || 0) - (receta.inventario?.cantidadUtilizada || 0)) > 0).map((receta) => (
           <div key={receta._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-3">
-                <h3 className="text-lg font-semibold text-gray-900 truncate">
+            <div className="p-4 sm:p-6">
+              <div className="flex justify-between items-start mb-3 gap-2">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
                   {receta.nombre}
                 </h3>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoriaColor(receta.categoria)}`}>
@@ -254,7 +255,7 @@ const GestionRecetas = () => {
                 </p>
               )}
 
-              <div className="space-y-2 text-sm text-gray-600 mb-4">
+              <div className="space-y-2 text-xs sm:text-sm text-gray-600 mb-4">
                 {/* Información de costos */}
                 {tieneCostos(receta) ? (
                   <>
@@ -295,7 +296,6 @@ const GestionRecetas = () => {
                     <span className="font-medium">{receta.tiempoPreparacion} min</span>
                   </div>
                 )}
-                
                 {/* Información de inventario */}
                 <div className="border-t pt-2 mt-2">
                   <div className="flex justify-between">
@@ -323,23 +323,23 @@ const GestionRecetas = () => {
                 </div>
               </div>
 
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                 <button
                   onClick={() => handleVerReceta(receta)}
-                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium w-full sm:w-auto"
                 >
                   Ver Detalles
                 </button>
-                <div className="space-x-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <button
                     onClick={() => handleEditarReceta(receta)}
-                    className="text-green-600 hover:text-green-800 text-sm"
+                    className="text-green-600 hover:text-green-800 text-sm w-full sm:w-auto"
                   >
                     Editar
                   </button>
                   <button
                     onClick={() => handleDesactivar(receta._id)}
-                    className="text-red-600 hover:text-red-800 text-sm"
+                    className="text-red-600 hover:text-red-800 text-sm w-full sm:w-auto"
                   >
                     Desactivar
                   </button>

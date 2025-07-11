@@ -4,6 +4,7 @@ import FormularioIngrediente from './FormularioIngrediente';
 import AjusteInventario from './AjusteInventario';
 import MovimientosIngrediente from './MovimientosIngrediente';
 import TablaIngredientesFinalizados from './TablaIngredientesFinalizados';
+import AccesosRapidosProduccion from '../AccesosRapidosProduccion';
 
 const GestionIngredientes = () => {
   const [ingredientes, setIngredientes] = useState([]);
@@ -107,15 +108,16 @@ const GestionIngredientes = () => {
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
         <h1 className="text-2xl font-bold text-gray-800">Gestión de Ingredientes</h1>
         <button
           onClick={handleNuevoIngrediente}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto"
         >
           Nuevo Ingrediente
         </button>
       </div>
+      <AccesosRapidosProduccion />
 
       {error && (
         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">

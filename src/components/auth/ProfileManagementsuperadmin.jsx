@@ -301,16 +301,16 @@ const ProfileManagement = ({ userRole }) => {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto p-6 mx-2">
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
           <h2 className="text-2xl font-bold text-gray-800">Gestión de Perfiles</h2>
-          <div className="flex gap-4">
-            <form onSubmit={handleSearch} className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
+            <form onSubmit={handleSearch} className="flex gap-2 w-full sm:w-auto">
               <input
                 type="text"
                 placeholder="Buscar usuarios..."
-                className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -323,10 +323,10 @@ const ProfileManagement = ({ userRole }) => {
             </form>
             <button
               onClick={() => fetchUsers()}
-              className="flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+              className="flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors w-full sm:w-auto"
             >
               <RefreshCw size={20} />
-              Actualizar
+              <span className="hidden sm:inline">Actualizar</span>
             </button>
           </div>
         </div>
@@ -345,19 +345,19 @@ const ProfileManagement = ({ userRole }) => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Usuario
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Email
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                   Nombre del Negocio
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Rol
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
@@ -365,9 +365,9 @@ const ProfileManagement = ({ userRole }) => {
             <tbody className="bg-white divide-y divide-gray-200">
               {users.map((user) => (
                 <tr key={user._id}>
-                  <td className="px-6 py-4 whitespace-nowrap">{user.username}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-2 sm:px-6 py-4 whitespace-nowrap max-w-[120px] truncate">{user.username}</td>
+                  <td className="px-2 sm:px-6 py-4 whitespace-nowrap max-w-[160px] truncate">{user.email}</td>
+                  <td className="px-2 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
                     {editingUser?._id === user._id ? (
                       <input
                         type="text"
@@ -379,7 +379,7 @@ const ProfileManagement = ({ userRole }) => {
                       user.nombre_negocio || '-'
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 py-1 rounded text-sm font-medium ${
                       user.role === 'super_admin' 
                         ? 'bg-purple-100 text-purple-800 border border-purple-200'
@@ -392,8 +392,8 @@ const ProfileManagement = ({ userRole }) => {
                       {user.role === 'de_baja' ? 'DE BAJA' : user.role.toUpperCase()}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex space-x-2">
+                  <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
+                    <div className="flex flex-wrap gap-1 sm:space-x-2">
                       {editingUser?._id === user._id ? (
                         <>
                           <button

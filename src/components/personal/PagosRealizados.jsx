@@ -166,7 +166,7 @@ function PagosRealizados() {
           {error}
         </div>
       )}      {/* Resumen de colaboradores con saldos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8 mx-2">
         {colaboradores.filter(colaborador => colaborador && colaborador.colaboradorUserId).map(colaborador => {
           const montoPendiente = calcularMontoPendiente(colaborador.colaboradorUserId);
           const ultimoPago = pagos
@@ -238,25 +238,25 @@ function PagosRealizados() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Colaborador
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Fecha Pago
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Monto
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                       Método
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Estado
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                       Observaciones
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Acciones
                     </th>
                   </tr>
@@ -271,21 +271,21 @@ function PagosRealizados() {
                       colaboradorNombre = colaborador?.nombre || 'Colaborador no encontrado';
                       return (
                         <tr key={pago._id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                             {colaboradorNombre}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {formatearFecha(pago.fechaPago)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">
+                          <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">
                             S/. {pago.montoTotal.toFixed(2)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
                             <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
                               {pago.metodoPago}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             <span className={`px-2 py-1 rounded-full text-xs ${
                               pago.estado === 'pagado' ? 'bg-green-100 text-green-800' :
                               pago.estado === 'parcial' ? 'bg-yellow-100 text-yellow-800' :
@@ -294,23 +294,23 @@ function PagosRealizados() {
                               {pago.estado}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">
+                          <td className="px-2 sm:px-6 py-4 text-sm text-gray-900 max-w-xs hidden md:table-cell">
                             <div className="truncate" title={pago.observaciones}>
                               {pago.observaciones || '-'}
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <button
                               onClick={() => {
                                 setPagoAEliminar(pago._id);
                                 setIsConfirmModalOpen(true);
-                            }}
-                            className="text-red-600 hover:text-red-900 hover:bg-red-50 px-3 py-1 rounded transition-colors"
-                          >
-                            Eliminar
-                          </button>
-                        </td>
-                      </tr>
+                              }}
+                              className="text-red-600 hover:text-red-900 hover:bg-red-50 px-3 py-1 rounded transition-colors w-full sm:w-auto"
+                            >
+                              Eliminar
+                            </button>
+                          </td>
+                        </tr>
                     );
                   })}
                 </tbody>
@@ -347,7 +347,7 @@ function PagosRealizados() {
       {/* Modal para agregar pago */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md max-h-screen overflow-y-auto">
+          <div className="bg-white p-3 sm:p-6 rounded-lg w-full max-w-md max-h-screen mx-2 overflow-y-auto">
             <h3 className="text-lg font-bold mb-4">
               Registrar Pago - {colaboradorSeleccionado?.nombre}
             </h3>
@@ -411,7 +411,7 @@ function PagosRealizados() {
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label className="block text-sm font-medium mb-1">Período Inicio</label>
                   <input
@@ -443,14 +443,14 @@ function PagosRealizados() {
                 />
               </div>
 
-              <div className="flex justify-end space-x-2 pt-4">
+              <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
                 <button
                   type="button"
                   onClick={() => {
                     setIsModalOpen(false);
                     setColaboradorSeleccionado(null);
                   }}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md"
                 >
                   Cancelar
                 </button>

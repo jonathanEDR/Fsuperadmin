@@ -3,13 +3,14 @@ import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, UserChe
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 
-function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView }) {
+function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebarOpen, onLogout }) {
   const navigate = useNavigate();
   const { signOut } = useClerk();
   
   const handleLogout = () => {
     signOut();
     navigate('/login');
+    if (onLogout) onLogout();
   };
   const menuItems = [
     { id: 'dashboard', icon: Home, label: 'Gestión de Usuarios', route: '/super-admin/usuarios' },
@@ -24,20 +25,30 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView }) {
 
   return (
     <>
-      {/* Overlay solo para móviles */}
-      {!isCollapsed && isMobileView && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden" 
-          onClick={toggleSidebar}
-        />
+      {/* Overlay y sidebar: overlay con z-30, sidebar con z-40 para asegurar orden correcto */}
+      {isMobileView && isSidebarOpen && (
+        <div className="fixed inset-0 z-30 lg:hidden">
+          <div
+            className="absolute inset-0 bg-black bg-opacity-40"
+            onClick={toggleSidebar}
+          />
+        </div>
       )}
 
-      <div className={`
-        fixed top-0 left-0 h-screen bg-white shadow-lg z-30
-        transition-all duration-300 ease-in-out
-        ${isCollapsed ? 'w-20' : 'w-[280px]'}
-        ${isMobileView && isCollapsed ? '-translate-x-full' : 'translate-x-0'}
-      `}>
+      {(!isMobileView || isSidebarOpen) && (
+        <div
+          className={`
+            fixed top-0 left-0 h-screen bg-white shadow-lg z-40
+            transition-all duration-300 ease-in-out
+            ${isCollapsed ? 'w-20' : 'w-[280px]'}
+            ${isMobileView
+              ? isSidebarOpen
+                ? 'translate-x-0'
+                : '-translate-x-full'
+              : 'translate-x-0'}
+          `}
+          style={{ willChange: 'transform' }}
+        >
         <div className="p-4">
           <div className="flex items-center justify-between mb-6">
             {!isCollapsed && (
@@ -51,6 +62,7 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView }) {
               <button
                 onClick={toggleSidebar}
                 className="lg:hidden p-2 rounded-lg hover:bg-purple-50 text-purple-600"
+                aria-label="Cerrar menú"
               >
                 <X size={24} />
               </button>
@@ -95,21 +107,9 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView }) {
           </nav>
         </div>
         
-        <div className="absolute bottom-0 left-0 right-0 p-4">
-          <button
-            onClick={handleLogout}
-            className={`
-              w-full flex items-center gap-3 px-4 py-3 rounded-lg
-              text-red-600 hover:bg-red-50 transition-colors
-              ${isCollapsed ? 'justify-center' : ''}
-            `}
-            title={isCollapsed ? "Cerrar Sesión" : ""}
-          >
-            <LogOut size={20} className="flex-shrink-0" />
-            {!isCollapsed && <span className="font-medium">Cerrar Sesión</span>}
-          </button>
+        {/* Botón de cerrar sesión eliminado, ahora está en MyProfileUnified */}
         </div>
-      </div>
+      )}
     </>
   );
 }

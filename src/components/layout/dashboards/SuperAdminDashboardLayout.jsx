@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import AdminSidebar from '../sidebars/AdminSidebar';
+import SuperAdminSidebar from '../sidebars/SuperAdminSidebar';
 import { Menu, ChevronLeft, ChevronRight } from 'lucide-react';
 
-function AdminDashboardLayout({ children, onLogout }) {
+function SuperAdminDashboardLayout({ children, onLogout }) {
   const [isMobileView, setIsMobileView] = useState(window.innerWidth < 1024);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -48,7 +47,7 @@ function AdminDashboardLayout({ children, onLogout }) {
         />
       )}
 
-      <AdminSidebar
+      <SuperAdminSidebar
         isCollapsed={isMobileView ? false : isSidebarCollapsed}
         toggleSidebar={toggleSidebar}
         isMobileView={isMobileView}
@@ -69,7 +68,7 @@ function AdminDashboardLayout({ children, onLogout }) {
       )}
 
       <main
-        className={`flex-1 p-4 lg:p-8 transition-all duration-300 ${
+        className={`flex-1 p-4 lg:p-8 transition-all duration-300 max-w-[1280px] mx-auto w-full ${
           isMobileView
             ? ''
             : isSidebarCollapsed
@@ -83,4 +82,4 @@ function AdminDashboardLayout({ children, onLogout }) {
   );
 }
 
-export default AdminDashboardLayout;
+export default SuperAdminDashboardLayout;
