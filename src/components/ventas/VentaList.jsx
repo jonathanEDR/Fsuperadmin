@@ -36,6 +36,11 @@ function VentaList({
   // Fallback temporal para el rol
   const userRole = useRole() || 'user';
   const currentUserId = currentUserIdProp || user?.id;
+  
+  // DEBUG: Verificar que el rol se está recibiendo correctamente
+  React.useEffect(() => {
+    console.log('🎯 VentaList - userRole from context:', userRole);
+  }, [userRole]);
   const [ventas, setVentas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -864,7 +869,7 @@ function VentaList({
                   </div>
               )}
               {/* Botón de eliminar (solo para admin y super_admin con permisos) */}
-              {canEditDelete(venta) && userRole !== 'user' && (
+              {canEditDelete(venta) && (
                 <button
                   onClick={() => handleDeleteVenta(venta._id)}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"

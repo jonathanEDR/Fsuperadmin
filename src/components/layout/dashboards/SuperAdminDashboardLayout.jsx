@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import SuperAdminSidebar from '../sidebars/SuperAdminSidebar';
 import { Menu, ChevronLeft, ChevronRight } from 'lucide-react';
+import { RoleContext } from '../../../context/RoleContext';
+import { useUserRole } from '../../../hooks/useUserRole';
 
 function SuperAdminDashboardLayout({ children, onLogout }) {
+  const { userRole, isLoading: roleLoading } = useUserRole();
   const [isMobileView, setIsMobileView] = useState(window.innerWidth < 1024);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -26,8 +29,19 @@ function SuperAdminDashboardLayout({ children, onLogout }) {
     }
   };
 
+  // DEBUG: Verificar el rol en SuperAdmin
+  React.useEffect(() => {
+    console.log('🔧 SuperAdminDashboard - RoleContext.Provider value:', userRole);
+  }, [userRole]);
+
+  // Mostrar loading mientras se obtiene el rol
+  if (roleLoading) {
+    return <div className="flex items-center justify-center h-screen">Cargando...</div>;
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 flex relative">
+    <RoleContext.Provider value={userRole || 'user'}>
+      <div className="min-h-screen bg-gray-50 flex relative">
       {/* Botón de menú hamburguesa solo en móvil */}
       {isMobileView && (
         <button
@@ -79,6 +93,7 @@ function SuperAdminDashboardLayout({ children, onLogout }) {
         {children ? children : <Outlet />}
       </main>
     </div>
+    </RoleContext.Provider>
   );
 }
 

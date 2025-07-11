@@ -16,11 +16,13 @@ import {
 } from '../../../services/devolucionService';
 import { convertLocalDateTimeToISO, getLocalDateTimeString } from '../../../utils/dateUtils';
 import { RoleContext } from '../../../context/RoleContext';
+import { useUserRole } from '../../../hooks/useUserRole';
 import Notas from '../../../components/notas/notas';
 
 const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
   const { getToken } = useAuth();
   const { user } = useUser();
+  const { userRole, isLoading: roleLoading } = useUserRole(); // Usar el hook correcto
   const [notes, setNotes] = useState(initialNotes || []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -356,11 +358,16 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
   // DEBUG: Verifica el contexto justo antes del render
   React.useEffect(() => {
     // eslint-disable-next-line no-console
-    console.log('UserDashboard: RoleContext.Provider value = user');
-  }, []);
+    console.log('UserDashboard: RoleContext.Provider value =', userRole);
+  }, [userRole]);
+
+  // Mostrar loading mientras se obtiene el rol
+  if (roleLoading) {
+    return <div className="flex items-center justify-center h-screen">Cargando...</div>;
+  }
 
   return (
-    <RoleContext.Provider value="user">
+    <RoleContext.Provider value={userRole || 'user'}>
       <div className={`flex ${isSidebarCollapsed ? 'ml-16' : 'ml-64'} transition-all duration-300`}>
         <Sidebar 
           isCollapsed={isSidebarCollapsed} 

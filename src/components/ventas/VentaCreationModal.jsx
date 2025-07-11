@@ -38,12 +38,20 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole: initial
     productoId: '',
     cantidad: 1
   });
-  const [formData, setFormData] = useState({
-    fechadeVenta: new Date().toISOString().slice(0, 16),
-    estadoPago: 'Pendiente',
-    cantidadPagada: 0,
-    targetUserId: ''
-  });
+
+// Función para obtener la fecha/hora local en formato compatible con input datetime-local
+const getLocalDateTimeString = () => {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  return now.toISOString().slice(0, 16);
+};
+
+const [formData, setFormData] = useState({
+  fechadeVenta: getLocalDateTimeString(),
+  estadoPago: 'Pendiente',
+  cantidadPagada: 0,
+  targetUserId: ''
+});
 
   // Efecto para establecer el rol del usuario
   useEffect(() => {
@@ -255,7 +263,7 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole: initial
 
       // Resetear el formulario
       setFormData({
-        fechadeVenta: new Date().toISOString().slice(0, 16),
+        fechadeVenta: getLocalDateTimeString(),
         estadoPago: 'Pendiente',
         cantidadPagada: 0,
         targetUserId: ''
