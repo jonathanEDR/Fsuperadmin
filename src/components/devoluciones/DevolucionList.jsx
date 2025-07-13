@@ -106,17 +106,13 @@ const DevolucionList = ({ userRole = 'user' }) => {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.message || 'Error al eliminar la devolución');
-        }        // Actualizar la lista de devoluciones
-        setDevoluciones(prevDevoluciones => 
-          prevDevoluciones.filter(dev => dev._id !== id)
-        );
-        
+          showStatusMessage(errorData.message || 'Error al eliminar la devolución', 'error');
+          return;
+        }
+
         showStatusMessage('Devolución eliminada correctamente', 'success');
-        
         // Recargar la lista completa para mantener sincronización
         await fetchDevoluciones();
-        
       } catch (error) {
         console.error('Error:', error);
         showStatusMessage(error.message || 'Error al eliminar la devolución', 'error');
