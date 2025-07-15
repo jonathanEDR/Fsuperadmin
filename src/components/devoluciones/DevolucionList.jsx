@@ -33,7 +33,8 @@ const DevolucionList = ({ userRole = 'user' }) => {
     setTimeout(() => setDeleteStatus({ show: false, message: '', type: '' }), 3000);
   };  // Función para verificar si una devolución puede ser eliminada
   const canDeleteDevolucion = (devolucion) => {
-    return devolucion.ventaFinalizada !== true;
+    // No permitir eliminar si la venta está finalizada o pagada
+    return devolucion.ventaFinalizada !== true && devolucion.ventaEstadoPago !== 'Pagado';
   };
 
   useEffect(() => {

@@ -16,6 +16,7 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
     { id: 'dashboard', icon: Home, label: 'Gestión de Usuarios', route: '/super-admin/usuarios' },
     { id: 'notes', icon: FileText, label: 'Gestión de Notas', route: '/super-admin/notas' },
     { id: 'productos', icon: Package, label: 'Gestión de Productos', route: '/super-admin/productos' },
+    { id: 'inventario', icon: Package, label: 'Inventario', route: '/super-admin/inventario' },
     { id: 'produccion', icon: Factory, label: 'Gestión de Producción', route: '/super-admin/produccion' },
     { id: 'ventas', icon: ShoppingCart, label: 'Gestión de Ventas', route: '/super-admin/ventas' },
     { id: 'caja', icon: CreditCard, label: 'Gestión de Caja', route: '/super-admin/caja' },

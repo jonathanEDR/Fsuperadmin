@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
+const InventarioPage = lazy(() => import('./Pages/InventarioPage'));
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { SignedIn, SignedOut } from '@clerk/clerk-react';
 import { useUser } from '@clerk/clerk-react';
@@ -123,6 +124,11 @@ function App() {
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="notas" element={<NotasPage />} />
               <Route path="productos" element={<ProductosPage />} />
+              <Route path="inventario" element={
+                <Suspense fallback={<div>Cargando inventario...</div>}>
+                  <InventarioPage />
+                </Suspense>
+              } />
               <Route path="ventas" element={<VentasPage />} />
               <Route path="pagos-realizados" element={<PagosRealizadosPage />} />
               <Route path="personal" element={<PersonalPage />} />
@@ -143,6 +149,11 @@ function App() {
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="usuarios" element={<UsuariosPage />} />
               <Route path="productos" element={<ProductosPage />} />
+              <Route path="inventario" element={
+                <Suspense fallback={<div>Cargando inventario...</div>}>
+                  <InventarioPage />
+                </Suspense>
+              } />
               <Route path="ventas" element={<VentasPage />} />
               <Route path="pagos-realizados" element={<PagosRealizadosPage />} />
               <Route path="personal" element={<PersonalPage />} />
