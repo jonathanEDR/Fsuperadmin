@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { X, Plus } from 'lucide-react';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import api from '../../services/api';
+import categoryService from '../../services/categoryService';
 
 const ProductCreationModal = ({ 
   isOpen, 
@@ -14,25 +15,41 @@ const ProductCreationModal = ({
   const { user } = useUser();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     nombre: '',
     precio: '',
-    cantidad: ''
+    cantidad: '',
+    categoryId: ''
   });
 
   useEffect(() => {
-    if (isOpen && initialData) {
-      setFormData({
-        nombre: initialData.nombre || '',
-        precio: initialData.precio || '',
-        cantidad: initialData.cantidad || ''
-      });
-    } else if (!isOpen) {
+    const loadCategories = async () => {
+      try {
+        const data = await categoryService.getAllCategories();
+        setCategories(data);
+      } catch (err) {
+        setError('Error al cargar las categorías');
+      }
+    };
+
+    if (isOpen) {
+      loadCategories();
+      if (initialData) {
+        setFormData({
+          nombre: initialData.nombre || '',
+          precio: initialData.precio || '',
+          cantidad: initialData.cantidad || '',
+          categoryId: initialData.categoryId || ''
+        });
+      }
+    } else {
       setError('');
       setFormData({
         nombre: '',
         precio: '',
-        cantidad: ''
+        cantidad: '',
+        categoryId: ''
       });
     }
   }, [isOpen, initialData]);
@@ -42,12 +59,20 @@ const ProductCreationModal = ({
     setIsSubmitting(true);
     setError('');
 
+    // Validación extra: categoría seleccionada
+    if (!formData.categoryId) {
+      setError('Debes seleccionar una categoría');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const token = await getToken();
       const data = {
         nombre: formData.nombre.trim(),
         precio: parseFloat(formData.precio),
         cantidad: parseInt(formData.cantidad),
+        categoryId: formData.categoryId,
         creatorName: user?.fullName || user?.username || user?.primaryEmailAddress?.emailAddress.split('@')[0],
         creatorEmail: user?.primaryEmailAddress?.emailAddress
       };
@@ -101,6 +126,26 @@ const ProductCreationModal = ({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Categoría
+            </label>
+            <select
+              name="categoryId"
+              value={formData.categoryId}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              required
+            >
+              <option value="">Selecciona una categoría</option>
+              {categories.map(category => (
+                <option key={category._id} value={category._id}>
+                  {category.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Nombre del Producto

@@ -4,9 +4,21 @@ import { Package, Plus, Edit2, Trash2, Users } from 'lucide-react';
 import ProductCreationModal from './ProductCreationModal';
 import ReservaModal from './ReservaModal';
 import ReservasList from './ReservasList';
+import CategoryModal from './CategoryModal';
 import api from '../../services/api';
 
 function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
+  // Función para crear una nueva categoría desde el modal
+  const handleCategoryModalSubmit = async (formData) => {
+    try {
+      // Importar el servicio dinámicamente para evitar problemas de dependencias
+      const mod = await import('../../services/categoryService');
+      await mod.default.createCategory(formData);
+    } catch (err) {
+      // Puedes mostrar un error si lo deseas
+      console.error('Error al crear categoría:', err);
+    }
+  };
   const { getToken } = useAuth();
   const { user } = useUser();
   const [currentUserId, setCurrentUserId] = useState(null);
@@ -33,6 +45,7 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReservaModalOpen, setIsReservaModalOpen] = useState(false);
   const [isSubmittingReserva, setIsSubmittingReserva] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const productosPorPagina = 24;
   const productosAmostrar = productos.slice(0, productosPorPagina);
   const [paginaTerminados, setPaginaTerminados] = useState(1);
@@ -383,6 +396,14 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {/* Botón para ver/gestionar categorías */}
+          <button
+            onClick={() => setIsCategoryModalOpen(true)}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+          >
+            <Plus size={20} />
+            Ver / Agregar Categorías
+          </button>
           {isAdminUser && (
             <button
               onClick={() => setIsReservaModalOpen(true)}
@@ -443,6 +464,13 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
         isEditing={productoData.editing}
       />
 
+      {/* Modal de categorías */}
+      <CategoryModal
+        open={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
+        onSubmit={handleCategoryModalSubmit}
+      />
+
       {/* Modal de reservas */}
       <ReservaModal
         isOpen={isReservaModalOpen}
@@ -475,6 +503,7 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Disponible</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
                   {isAdminUser && (
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                   )}
@@ -492,6 +521,7 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{producto.cantidad || 0}</td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{producto.cantidadRestante || 0}</td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">S/ {parseFloat(producto.precio).toFixed(2)}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{producto.categoryId?.nombre || 'Sin categoría'}</td>
                     {isAdminUser && (
                       <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                         {canEditDelete(producto) && (
@@ -501,14 +531,14 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
                               className="inline-flex items-center px-3 py-1 rounded-md text-sm bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200"
                               title="Editar producto"
                             >
-                              <Edit2 className="w-4 h-4 mr-1" />Editar
+                              <Edit2 className="w-4 h-4 mr-1" />
                             </button>
                             <button
                               onClick={() => handleDeleteProducto(producto._id)}
                               className="inline-flex items-center px-3 py-1 rounded-md text-sm bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200"
                               title="Eliminar producto"
                             >
-                              <Trash2 className="w-4 h-4 mr-1" />Eliminar
+                              <Trash2 className="w-4 h-4 mr-1" />
                             </button>
                           </div>
                         )}
@@ -532,6 +562,7 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
                     <span>Cantidad: <span className="font-medium text-gray-800">{producto.cantidad || 0}</span></span>
                     <span>Disponible: <span className="font-medium text-gray-800">{producto.cantidadRestante || 0}</span></span>
                     <span>Precio: <span className="font-medium text-gray-800">S/ {parseFloat(producto.precio).toFixed(2)}</span></span>
+                    <span>Categoría: <span className="font-medium text-gray-800">{producto.categoryId?.nombre || 'Sin categoría'}</span></span>
                   </div>
                   {isAdminUser && canEditDelete(producto) && (
                     <div className="flex gap-2 mt-2">

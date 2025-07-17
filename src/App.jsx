@@ -1,5 +1,4 @@
-import React, { lazy, Suspense } from 'react';
-const InventarioPage = lazy(() => import('./Pages/InventarioPage'));
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { SignedIn, SignedOut } from '@clerk/clerk-react';
 import { useUser } from '@clerk/clerk-react';
@@ -17,6 +16,7 @@ import PagosRealizadosPage from './Pages/PagosRealizadosPage';
 import BienvenidaPage from './Pages/BienvenidaPage';
 import UsuariosPage from './Pages/UsuariosPage';
 import ProductosPage from './Pages/ProductosPage';
+import CategoriasPage from './Pages/CategoriasPage';
 import VentasPage from './Pages/VentasPage';
 import PersonalPage from './Pages/PersonalPage';
 import NotasPage from './Pages/NotasPage';
@@ -124,11 +124,7 @@ function App() {
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="notas" element={<NotasPage />} />
               <Route path="productos" element={<ProductosPage />} />
-              <Route path="inventario" element={
-                <Suspense fallback={<div>Cargando inventario...</div>}>
-                  <InventarioPage />
-                </Suspense>
-              } />
+              <Route path="categorias" element={<CategoriasPage />} />
               <Route path="ventas" element={<VentasPage />} />
               <Route path="pagos-realizados" element={<PagosRealizadosPage />} />
               <Route path="personal" element={<PersonalPage />} />
@@ -149,11 +145,6 @@ function App() {
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="usuarios" element={<UsuariosPage />} />
               <Route path="productos" element={<ProductosPage />} />
-              <Route path="inventario" element={
-                <Suspense fallback={<div>Cargando inventario...</div>}>
-                  <InventarioPage />
-                </Suspense>
-              } />
               <Route path="ventas" element={<VentasPage />} />
               <Route path="pagos-realizados" element={<PagosRealizadosPage />} />
               <Route path="personal" element={<PersonalPage />} />
