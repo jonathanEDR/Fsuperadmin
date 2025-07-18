@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { DollarSign, ShoppingCart, RotateCcw, Plus, Clock, Check, X, Search } from 'lucide-react';
+import { DollarSign, ShoppingCart, RotateCcw, Plus, Clock, Check, X, Search, Package } from 'lucide-react';
 import { api } from '../../services';
 import { procesarPagoVenta } from '../../services/cobroService';
 import { PaymentModal } from '../cobros';
@@ -10,6 +10,11 @@ import VentasLineChart from '../Graphics/VentasLineChart';
 import { format } from 'date-fns';
 import clsx from 'clsx';
 import { useRole } from '../../context/RoleContext';
+import ProductCard from './ProductCard';
+import AddProductModal from './AddProductModal';
+import { useVentaModification } from '../../hooks/useVentaModification';
+import ToastContainer from '../common/ToastContainer';
+import { useToast } from '../../hooks/useToast';
 
 function VentaList({ 
   showActions = true, 
@@ -41,7 +46,12 @@ function VentaList({
   React.useEffect(() => {
     console.log('🎯 VentaList - userRole from context:', userRole);
   }, [userRole]);
+  
   const [ventas, setVentas] = useState([]);
+  
+  // Usar ventas del prop si están disponibles, sino usar el estado local
+  const ventasToRender = ventasProp || ventas;
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [ventasLimit, setVentasLimit] = useState(20);
@@ -61,20 +71,43 @@ function VentaList({
     estadoPago: ''
   });
   const [ventaDetails, setVentaDetails] = useState(null);
+  
+  // Estados para el nuevo modal de agregar productos
+  const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
+  const [selectedVentaForAddProduct, setSelectedVentaForAddProduct] = useState(null);
+  
+  // Hook para modificación de ventas
+  const ventaModificationHook = useVentaModification();
+  
+  // Hook para toasts
+  const { toasts, removeToast, showSuccess, showError, showWarning, showInfo } = useToast();
 
   useEffect(() => {
-    if (user) {
+    if (user && !ventasProp) {
       loadVentas();
       loadProductos();
       loadUsuarios();
+    } else if (ventasProp) {
+      // Si se pasan ventas como prop, solo cargar productos y usuarios
+      loadProductos();
+      loadUsuarios();
+      setLoading(false);
     }
-  }, [user]);
+  }, [user, ventasProp]);
 
   useEffect(() => {
     if (selectedRange) {
       loadVentas();
     }
   }, [selectedRange]);
+
+  // Sincronizar ventas del prop con el estado local
+  useEffect(() => {
+    if (ventasProp) {
+      console.log('📦 VentaList - Sincronizando ventas del prop:', ventasProp.length);
+      setVentas(ventasProp);
+    }
+  }, [ventasProp]);
 
   // Data loading
   const loadProductos = async () => {
@@ -95,6 +128,16 @@ function VentaList({
     try {
       setLoading(true);
       setError(null);
+      
+      // Si se está usando ventas como prop, no cargar desde el backend
+      if (ventasProp) {
+        console.log('📦 VentaList - Usando ventas del prop, no cargando desde backend');
+        if (onVentaUpdated) {
+          onVentaUpdated(); // Llamar al callback del parent
+        }
+        return;
+      }
+      
       const token = await getToken();
       
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/ventas`, {
@@ -420,6 +463,66 @@ function VentaList({
     }
   };
 
+  // Funciones para manejar agregar productos
+  const handleOpenAddProduct = (venta) => {
+    setSelectedVentaForAddProduct(venta);
+    setIsAddProductModalOpen(true);
+  };
+
+  const handleCloseAddProduct = () => {
+    setIsAddProductModalOpen(false);
+    setSelectedVentaForAddProduct(null);
+  };
+
+  const handleProductAdded = (ventaActualizada) => {
+    // Actualizar la venta en el estado local
+    setVentas(prevVentas => 
+      prevVentas.map(venta => 
+        venta._id === ventaActualizada._id ? ventaActualizada : venta
+      )
+    );
+    showSuccess('Producto agregado exitosamente');
+    handleCloseAddProduct();
+  };
+
+  const handleUpdateQuantity = async (ventaActualizada) => {
+    try {
+      if (ventaActualizada) {
+        // Actualizar la venta en el estado local
+        setVentas(prevVentas => 
+          prevVentas.map(venta => 
+            venta._id === ventaActualizada._id ? ventaActualizada : venta
+          )
+        );
+        showSuccess('Cantidad actualizada exitosamente');
+        
+        // Notificar al componente padre si hay callback
+        if (onVentaUpdated) {
+          onVentaUpdated(ventaActualizada);
+        }
+      }
+    } catch (error) {
+      console.error('Error al actualizar cantidad:', error);
+      showError(error.message || 'Error al actualizar cantidad');
+    }
+  };
+
+  const handleRemoveProduct = async (ventaId, productoId) => {
+    try {
+      const ventaActualizada = await ventaModificationHook.removeProductFromVenta(ventaId, productoId);
+      // Actualizar la venta en el estado local
+      setVentas(prevVentas => 
+        prevVentas.map(venta => 
+          venta._id === ventaId ? ventaActualizada : venta
+        )
+      );
+      showSuccess('Producto eliminado exitosamente');
+    } catch (error) {
+      console.error('Error al eliminar producto:', error);
+      showError(error.message || 'Error al eliminar producto');
+    }
+  };
+
   // Utils
   const formatearFechaHora = (fecha) => {
     if (!fecha) return '';
@@ -468,7 +571,7 @@ function VentaList({
   };
 
   const canCreateVenta = () => {
-    return ['super_admin', 'admin'].includes(userRole);
+    return ['super_admin', 'admin', 'user'].includes(userRole);
   };
 
   // Status helpers
@@ -567,7 +670,7 @@ function VentaList({
       )}
 
       {/* Lista de ventas */}
-      {ventas.map(venta => {
+      {ventasToRender.map(venta => {
         // LOG: venta y condición de botón finalizar
         const puedeFinalizar = (venta.userId === currentUserId || venta.user_info?.id === currentUserId || venta.userInfo?.id === currentUserId) && (userRole === 'user' || userRole === 'admin');
         // Calcular monto devuelto para esta venta
@@ -772,15 +875,36 @@ function VentaList({
             </div>
 
             {/* Productos de la venta */}
-            <div className="mb-4 overflow-x-auto">
-              <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2">Productos</h4>
-              <ul className="list-disc list-inside min-w-[200px]">
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-xs sm:text-sm font-semibold text-gray-700">Productos</h4>
+                {/* Botón para agregar más productos */}
+                {canEditDelete(venta) && venta.estadoPago !== 'Pagado' && (
+                  <button
+                    onClick={() => handleOpenAddProduct(venta)}
+                    className="flex items-center gap-1 px-3 py-1 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    title="Agregar producto"
+                  >
+                    <Plus className="w-3 h-3" />
+                    Agregar Producto
+                  </button>
+                )}
+              </div>
+              
+              {/* Tarjetas de productos */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {venta.productos?.map((prod, idx) => (
-                  <li key={idx} className="text-gray-600">
-                    {prod.productoId?.nombre} - {prod.cantidad} unidad(es)
-                  </li>
+                  <ProductCard
+                    key={idx}
+                    producto={prod}
+                    ventaId={venta._id}
+                    onUpdateQuantity={handleUpdateQuantity}
+                    onRemoveProduct={handleRemoveProduct}
+                    canEdit={canEditDelete(venta) && venta.estadoPago !== 'Pagado'}
+                    loading={ventaModificationHook.loading}
+                  />
                 ))}
-              </ul>
+              </div>
             </div>
             {/* Botones de acción */}
             <div className="mt-4 flex flex-col sm:flex-row gap-2">
@@ -886,7 +1010,7 @@ function VentaList({
         );
       })}
 
-      {ventasLimit < ventas.length && (
+      {ventasLimit < ventasToRender.length && (
         <div className="flex justify-center mt-4">
           <button
             onClick={() => setVentasLimit(ventasLimit + 20)}
@@ -928,6 +1052,23 @@ function VentaList({
           isSubmitting={loading}
         />
       )}
+
+      {/* Modal para Agregar Productos */}
+      {selectedVentaForAddProduct && (
+        <AddProductModal
+          isOpen={isAddProductModalOpen}
+          onClose={handleCloseAddProduct}
+          ventaId={selectedVentaForAddProduct._id}
+          onProductAdded={handleProductAdded}
+          currentProducts={selectedVentaForAddProduct.productos || []}
+        />
+      )}
+
+      {/* Container de Toasts */}
+      <ToastContainer 
+        toasts={toasts} 
+        onRemoveToast={removeToast} 
+      />
     </div>
   );
 }

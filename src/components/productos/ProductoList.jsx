@@ -2,12 +2,149 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { Package, Plus, Edit2, Trash2, Users } from 'lucide-react';
 import ProductCreationModal from './ProductCreationModal';
-import ReservaModal from './ReservaModal';
-import ReservasList from './ReservasList';
+import InventarioHistorial from './InventarioHistorial';
+import InventarioModal from './InventarioModal';
+import { Dialog } from '@headlessui/react';
+import CatalogoModal from './CatalogoModal';
 import CategoryModal from './CategoryModal';
 import api from '../../services/api';
+import useInventarioProducto from '../../hooks/useInventarioProducto';
 
 function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
+  const { getToken } = useAuth();
+  const inventarioHook = useInventarioProducto();
+  
+  // Estado para el modal de inventario
+  const [isInventarioModalOpen, setIsInventarioModalOpen] = useState(false);
+  const [inventarioForm, setInventarioForm] = useState({
+    productoId: '',
+    cantidad: '',
+    precio: '',
+    lote: '',
+    observaciones: '',
+    proveedor: '',
+    fechaVencimiento: ''
+  });
+  const [catalogoProductos, setCatalogoProductos] = useState([]);
+
+  // Cargar productos registrados para el selector (no productos del catálogo)
+  useEffect(() => {
+    const fetchProductosRegistrados = async () => {
+      try {
+        const token = await getToken();
+        
+        // Obtener productos ya registrados (que tienen categorías)
+        const productosRes = await api.get('/api/productos', { headers: { Authorization: `Bearer ${token}` } });
+        
+        // Transformar productos registrados al formato esperado por el modal
+        const productosParaModal = productosRes.data.map(producto => {
+          // Verificar si el producto tiene catalogoProductoId válido
+          if (!producto.catalogoProductoId) {
+            console.warn(`[WARNING] Producto ${producto.nombre} (${producto.codigoProducto}) no tiene catalogoProductoId válido`);
+          }
+          
+          return {
+            _id: producto._id,
+            codigoProducto: producto.codigoProducto,
+            nombre: producto.nombre,
+            categoria: producto.categoryId?.nombre || 'Sin categoría',
+            catalogoProductoId: producto.catalogoProductoId, // No usar fallback
+            // Información adicional que puede ser útil
+            precio: producto.precio,
+            cantidadRestante: producto.cantidadRestante
+          };
+        });
+        
+        console.log('[DEBUG] Productos registrados para modal:', productosParaModal);
+        console.log('[DEBUG] Productos originales:', productosRes.data);
+        
+        setCatalogoProductos(productosParaModal);
+      } catch (err) {
+        console.error('Error al cargar productos registrados:', err);
+        setCatalogoProductos([]);
+      }
+    };
+    if (isInventarioModalOpen) fetchProductosRegistrados();
+  }, [isInventarioModalOpen, getToken]);
+
+  // Handler para registrar entrada de inventario
+  const handleInventarioSubmit = async (e) => {
+    e.preventDefault();
+    inventarioHook.clearError();
+    
+    try {
+      // Validar campos requeridos
+      if (!inventarioForm.productoId || !inventarioForm.cantidad || !inventarioForm.precio) {
+        throw new Error('Los campos Producto, Cantidad y Precio son obligatorios');
+      }
+
+      // Encontrar el producto seleccionado
+      const productoSeleccionado = catalogoProductos.find(p => p._id === inventarioForm.productoId);
+      if (!productoSeleccionado) {
+        throw new Error('Producto no encontrado');
+      }
+
+      // Validar que el producto tiene ID válido
+      if (!productoSeleccionado._id) {
+        throw new Error(`El producto ${productoSeleccionado.nombre} no tiene un ID válido. Por favor, verifica la configuración del producto.`);
+      }
+
+      // Preparar datos para el nuevo endpoint
+      const entradaData = {
+        productoId: productoSeleccionado._id,
+        cantidad: Number(inventarioForm.cantidad),
+        precio: Number(inventarioForm.precio),
+        lote: inventarioForm.lote || '',
+        observaciones: inventarioForm.observaciones || '',
+        proveedor: inventarioForm.proveedor || '',
+        fechaVencimiento: inventarioForm.fechaVencimiento || null
+      };
+
+      // Crear entrada usando el hook
+      const response = await inventarioHook.createEntry(entradaData);
+      
+      // Cerrar modal y limpiar formulario
+      setIsInventarioModalOpen(false);
+      setInventarioForm({
+        productoId: '',
+        cantidad: '',
+        precio: '',
+        lote: '',
+        observaciones: '',
+        proveedor: '',
+        fechaVencimiento: ''
+      });
+
+      // Refrescar datos
+      await Promise.all([
+        fetchProductos(),
+        refrescarHistorial()
+      ]);
+
+      // Mostrar mensaje de éxito (opcional)
+      console.log('Entrada registrada exitosamente:', response);
+      
+    } catch (err) {
+      console.error('Error al registrar entrada:', err);
+      // El error ya está manejado en el hook
+    }
+  };
+
+  // Función para cerrar el modal de inventario y limpiar formulario
+  const handleCloseInventarioModal = () => {
+    setIsInventarioModalOpen(false);
+    setInventarioForm({
+      productoId: '',
+      cantidad: '',
+      precio: '',
+      lote: '',
+      observaciones: '',
+      proveedor: '',
+      fechaVencimiento: ''
+    });
+    inventarioHook.clearError();
+  };
+
   // Función para crear una nueva categoría desde el modal
   const handleCategoryModalSubmit = async (formData) => {
     try {
@@ -19,7 +156,6 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
       console.error('Error al crear categoría:', err);
     }
   };
-  const { getToken } = useAuth();
   const { user } = useUser();
   const [currentUserId, setCurrentUserId] = useState(null);
   
@@ -28,6 +164,9 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
   
   // Verificar si es admin o super_admin
   const isAdminUser = userRole === 'admin' || userRole === 'super_admin';
+  
+  // Verificar si es super_admin (solo para mostrar columna de acciones)
+  const isSuperAdmin = userRole === 'super_admin';
   
   const [productoData, setProductoData] = useState({
     nombre: '',
@@ -46,6 +185,7 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
   const [isReservaModalOpen, setIsReservaModalOpen] = useState(false);
   const [isSubmittingReserva, setIsSubmittingReserva] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isCatalogoModalOpen, setIsCatalogoModalOpen] = useState(false);
   const productosPorPagina = 24;
   const productosAmostrar = productos.slice(0, productosPorPagina);
   const [paginaTerminados, setPaginaTerminados] = useState(1);
@@ -54,6 +194,41 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
     (paginaTerminados - 1) * productosPorPaginaTerminados,
     paginaTerminados * productosPorPaginaTerminados
   );
+
+  // Estado para historial de entradas de inventario
+  const [historialEntradas, setHistorialEntradas] = useState([]);
+  const [historialLoading, setHistorialLoading] = useState(false);
+
+  // Consultar historial de entradas al montar el componente
+  useEffect(() => {
+    const fetchHistorial = async () => {
+      try {
+        setHistorialLoading(true);
+        const historial = await inventarioHook.getAllEntries();
+        setHistorialEntradas(Array.isArray(historial) ? historial : []);
+      } catch (err) {
+        console.error('Error al obtener historial:', err);
+        setHistorialEntradas([]);
+      } finally {
+        setHistorialLoading(false);
+      }
+    };
+    fetchHistorial();
+  }, [getToken]);
+
+  // Función para refrescar el historial
+  const refrescarHistorial = async () => {
+    try {
+      setHistorialLoading(true);
+      const historial = await inventarioHook.getAllEntries();
+      setHistorialEntradas(Array.isArray(historial) ? historial : []);
+    } catch (err) {
+      console.error('Error al refrescar historial:', err);
+      setHistorialEntradas([]);
+    } finally {
+      setHistorialLoading(false);
+    }
+  };
 
   // Mantener currentUserId actualizado
   useEffect(() => {
@@ -72,17 +247,6 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
   };
 
   // Función para normalizar nombres
-  const normalizarNombre = (nombre) => nombre.toLowerCase().trim();
-
-  // Función para verificar duplicados
-  const verificarDuplicado = (nombre, idActual = null) => {
-    const nombreNormalizado = normalizarNombre(nombre);
-    return productos.some(p => 
-      normalizarNombre(p.nombre) === nombreNormalizado && 
-      (!idActual || p._id !== idActual)
-    );
-  };
-
   // Función principal para cargar productos
   const fetchProductos = useCallback(async () => {
     try {
@@ -102,33 +266,9 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
       const productosData = Array.isArray(response.data) ? response.data : 
                           Array.isArray(response.data.productos) ? response.data.productos : [];
 
-      // Filtrar productos únicos por nombre
-      const productMap = new Map();
-      productosData.forEach(producto => {
-        const nombreNormalizado = normalizarNombre(producto.nombre);
-        if (!productMap.has(nombreNormalizado) || 
-            (productMap.get(nombreNormalizado).updatedAt || '') < (producto.updatedAt || '')) {
-          productMap.set(nombreNormalizado, producto);
-        }
-      });
-
-      // Separar productos activos y terminados
-      const activos = [];
-      const terminados = [];
-
-      productMap.forEach(producto => {
-        if (producto.cantidadRestante === 0) {
-          terminados.push({
-            ...producto,
-            fechaAgotamiento: new Date().toLocaleString()
-          });
-        } else {
-          activos.push(producto);
-        }
-      });
-
-      setProductos(activos);
-      setProductosTerminados(terminados);
+      // Mostrar todos los productos sin filtrar por stock
+      setProductos(productosData);
+      setProductosTerminados([]); // Limpiar productos terminados ya que ahora mostramos todos juntos
     } catch (error) {
       console.error('Error al cargar productos:', error);
       setError(error.message || 'Error al cargar los productos');
@@ -250,11 +390,6 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
         throw new Error('No estás autorizado');
       }
 
-      const nombreNormalizado = normalizarNombre(productoData.nombre);
-      if (!productoData.editing && verificarDuplicado(nombreNormalizado)) {
-        throw new Error('Ya existe un producto con este nombre');
-      }
-
       const productoPayload = {
         nombre: productoData.nombre,
         precio: Number(productoData.precio),
@@ -319,19 +454,6 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
     }));
   };
 
-  // Efecto para limpiar duplicados en el estado local
-  useEffect(() => {
-    const productosUnicos = Array.from(
-      new Map(productos.map(item => [normalizarNombre(item.nombre), item])).values()
-    );
-    
-    if (productosUnicos.length !== productos.length) {
-      setProductos(productosUnicos);
-    }
-  }, [productos]);
-
-  // ...existing code...
-
   // Función para manejar la creación exitosa de un producto
   const handleProductSuccess = useCallback(async () => {
     try {
@@ -385,6 +507,27 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
       {/* Header con icono y botón */}
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-3">
+          {/* Botón para registrar entrada/lote de inventario */}
+          {isAdminUser && (
+            <button
+              onClick={() => setIsInventarioModalOpen(true)}
+              className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors flex items-center gap-2"
+            >
+              <Plus size={20} />
+              Registrar Entrada/Lote
+            </button>
+          )}
+      {/* Modal para registrar entrada/lote de inventario */}
+      <InventarioModal
+        isOpen={isInventarioModalOpen}
+        onClose={handleCloseInventarioModal}
+        inventarioForm={inventarioForm}
+        setInventarioForm={setInventarioForm}
+        inventarioError={inventarioHook.error}
+        inventarioLoading={inventarioHook.loading}
+        catalogoProductos={catalogoProductos}
+        handleInventarioSubmit={handleInventarioSubmit}
+      />
           <div className="p-3 bg-blue-100 rounded-lg">
             <Package className="text-blue-600" size={24} />
           </div>
@@ -396,6 +539,14 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {/* Botón para ver/gestionar catálogo */}
+          <button
+            onClick={() => setIsCatalogoModalOpen(true)}
+            className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors flex items-center gap-2"
+          >
+            <Plus size={20} />
+            Ver / Agregar Catálogo
+          </button>
           {/* Botón para ver/gestionar categorías */}
           <button
             onClick={() => setIsCategoryModalOpen(true)}
@@ -404,15 +555,7 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
             <Plus size={20} />
             Ver / Agregar Categorías
           </button>
-          {isAdminUser && (
-            <button
-              onClick={() => setIsReservaModalOpen(true)}
-              className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
-            >
-              <Users size={20} />
-              Reservar para Colaborador
-            </button>
-          )}
+        
           <button
             onClick={() => setIsModalOpen(true)}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
@@ -464,6 +607,11 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
         isEditing={productoData.editing}
       />
 
+      {/* Modal de catálogo */}
+      <CatalogoModal
+        open={isCatalogoModalOpen}
+        onClose={() => setIsCatalogoModalOpen(false)}
+      />
       {/* Modal de categorías */}
       <CategoryModal
         open={isCategoryModalOpen}
@@ -471,14 +619,7 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
         onSubmit={handleCategoryModalSubmit}
       />
 
-      {/* Modal de reservas */}
-      <ReservaModal
-        isOpen={isReservaModalOpen}
-        onClose={() => setIsReservaModalOpen(false)}
-        onSubmit={handleCreateReserva}
-        productos={productos.filter(p => (p.cantidad - p.cantidadVendida) > 0)}
-        isLoading={isSubmittingReserva}
-      />
+  
 
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
@@ -504,7 +645,7 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Disponible</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
-                  {isAdminUser && (
+                  {isSuperAdmin && (
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                   )}
                 </tr>
@@ -522,7 +663,7 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{producto.cantidadRestante || 0}</td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">S/ {parseFloat(producto.precio).toFixed(2)}</td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{producto.categoryId?.nombre || 'Sin categoría'}</td>
-                    {isAdminUser && (
+                    {isSuperAdmin && (
                       <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                         {canEditDelete(producto) && (
                           <div className="flex justify-end gap-2">
@@ -564,7 +705,7 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
                     <span>Precio: <span className="font-medium text-gray-800">S/ {parseFloat(producto.precio).toFixed(2)}</span></span>
                     <span>Categoría: <span className="font-medium text-gray-800">{producto.categoryId?.nombre || 'Sin categoría'}</span></span>
                   </div>
-                  {isAdminUser && canEditDelete(producto) && (
+                  {isSuperAdmin && canEditDelete(producto) && (
                     <div className="flex gap-2 mt-2">
                       <button
                         onClick={() => handleEditProducto(producto)}
@@ -588,96 +729,32 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
           </div>
 
 
-          {/* Sección de Reservas de Colaboradores */}
-          {isAdminUser && (
-            <div className="mt-8">
-              <ReservasList userRole={userRole} />
-            </div>
-          )}
 
-          {/* Productos Terminados (solo para admin y super_admin) */}
-          {isAdminUser && (
-            <div className="mt-8">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Productos Terminados</h2>
-                <p className="text-gray-600">Historial de productos completados y finalizados</p>
-              </div>
-
-              <div className="overflow-x-auto bg-white rounded-lg shadow">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Nombre
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Cantidad
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Stock Usado
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Precio
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Fecha Agotamiento
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {productosTerminadosPorPagina.map((producto) => (
-                      <tr key={producto._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {producto.nombre}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {producto.cantidad}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {producto.stock_usado || '0%'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          S/ {parseFloat(producto.precio).toFixed(2)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {producto.fechaAgotamiento
-                            ? new Date(producto.fechaAgotamiento).toLocaleDateString('es-ES', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                              })
-                            : 'No disponible'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                {/* Paginación para productos terminados */}
-                {productosTerminados.length > productosPorPaginaTerminados && (
-                  <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-                    <button
-                      onClick={() => setPaginaTerminados(prev => Math.max(prev - 1, 1))}
-                      disabled={paginaTerminados === 1}
-                      className="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded disabled:opacity-50"
-                    >
-                      Anterior
-                    </button>
-                    <span className="text-sm text-gray-600">
-                      Página {paginaTerminados} de {Math.ceil(productosTerminados.length / productosPorPaginaTerminados)}
-                    </span>
-                    <button
-                      onClick={() => setPaginaTerminados(prev => prev + 1)}
-                      disabled={paginaTerminados >= Math.ceil(productosTerminados.length / productosPorPaginaTerminados)}
-                      className="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded disabled:opacity-50"
-                    >
-                      Siguiente
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          {/* Historial de entradas de inventario */}
+          <InventarioHistorial 
+            historialEntradas={historialEntradas} 
+            loading={historialLoading}
+            userRole={userRole}
+            onRefresh={refrescarHistorial}
+            onEdit={async (id, data) => {
+              try {
+                await inventarioHook.updateEntry(id, data);
+                await refrescarHistorial();
+                await fetchProductos();
+              } catch (err) {
+                console.error('Error al editar entrada:', err);
+              }
+            }}
+            onDelete={async (id) => {
+              try {
+                await inventarioHook.deleteEntry(id);
+                await refrescarHistorial();
+                await fetchProductos();
+              } catch (err) {
+                console.error('Error al eliminar entrada:', err);
+              }
+            }}
+          />
 
         </div>
       )}

@@ -87,7 +87,7 @@ const [formData, setFormData] = useState({
   // Efecto para cargar usuarios
   useEffect(() => {
     const loadUsers = async () => {
-      // Solo cargar usuarios si el rol permite crear ventas
+      // Solo cargar usuarios si el rol permite crear ventas para otros
       if (!['admin', 'super_admin'].includes(currentUserRole)) {
         return;
       }
@@ -284,8 +284,8 @@ const [formData, setFormData] = useState({
 
   if (!isOpen) return null;
 
-  // Verificación de permisos: solo admin y super_admin pueden crear ventas
-  if (!['admin', 'super_admin'].includes(currentUserRole)) {
+  // Verificación de permisos: admins, super_admins y users pueden crear ventas
+  if (!['admin', 'super_admin', 'user'].includes(currentUserRole)) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-60" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
         <div className="bg-white rounded-lg w-full max-w-md p-6" style={{ maxWidth: '90vw' }}>
@@ -295,7 +295,7 @@ const [formData, setFormData] = useState({
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Acceso Denegado</h3>
             <p className="text-gray-600 mb-4">
-              No tienes permisos para crear ventas. Solo los administradores pueden realizar esta acción.
+              No tienes permisos para crear ventas.
             </p>
             <button
               onClick={onClose}
@@ -351,8 +351,8 @@ const [formData, setFormData] = useState({
             {/* Left column: all form inputs */}
             <div className="flex-1 min-w-0">
               {/* User and Date Selection */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                {usuarios && usuarios.length > 0 && (
+              <div className={`grid gap-4 mb-6 ${currentUserRole === 'user' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
+                {usuarios && usuarios.length > 0 && currentUserRole !== 'user' && (
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
                       Asignar a Usuario

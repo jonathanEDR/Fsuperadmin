@@ -13,6 +13,10 @@ const VentasManager = ({ userRole: userRoleProp }) => {
   const contextUserRole = useRole();
   // Usar el prop si está disponible, sino usar el contexto como fallback
   const userRole = userRoleProp || contextUserRole;
+  
+  // DEBUG: Verificar el rol del usuario
+  console.log('🔍 VentasManager - userRole:', userRole, 'canShowAddButton:', ['admin', 'super_admin', 'user'].includes(userRole));
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ventas, setVentas] = useState([]);
   const [ventasFinalizadas, setVentasFinalizadas] = useState([]);
@@ -21,8 +25,8 @@ const VentasManager = ({ userRole: userRoleProp }) => {
   const [loadingFinalizadas, setLoadingFinalizadas] = useState(false);
   const [error, setError] = useState(null);
 
-  // Solo admins y super_admins pueden crear ventas
-  const canShowAddButton = ['admin', 'super_admin'].includes(userRole);
+  // Admins, super_admins y usuarios pueden crear ventas
+  const canShowAddButton = ['admin', 'super_admin', 'user'].includes(userRole);
 
   // Fetch solo ventas activas (no finalizadas)
   const fetchVentas = async () => {
@@ -97,9 +101,16 @@ const VentasManager = ({ userRole: userRoleProp }) => {
   const handleVentaCreated = async (venta) => {
     try {
       setLoading(true);
-      await fetchVentas();
+      // Recargar todas las listas después de crear una venta
+      await Promise.all([
+        fetchVentas(),
+        fetchVentasFinalizadas(),
+        fetchDevoluciones()
+      ]);
       setIsModalOpen(false);
+      console.log('✅ Venta creada y listas actualizadas');
     } catch (error) {
+      console.error('Error al refrescar las listas:', error);
       setError('Error al refrescar la lista de ventas');
     } finally {
       setLoading(false);

@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { X, Plus } from 'lucide-react';
-import { useAuth, useUser } from '@clerk/clerk-react';
+import { useUser } from '@clerk/clerk-react';
 import api from '../../services/api';
 import categoryService from '../../services/categoryService';
+
 
 const ProductCreationModal = ({ 
   isOpen, 
@@ -11,16 +12,16 @@ const ProductCreationModal = ({
   initialData = null, 
   isEditing = false 
 }) => {
-  const { getToken } = useAuth();
   const { user } = useUser();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [categories, setCategories] = useState([]);
+  const [catalogoProductos, setCatalogoProductos] = useState([]);
   const [formData, setFormData] = useState({
-    nombre: '',
     precio: '',
     cantidad: '',
-    categoryId: ''
+    categoryId: '',
+    catalogoProductoId: ''
   });
 
   useEffect(() => {
@@ -33,23 +34,33 @@ const ProductCreationModal = ({
       }
     };
 
+    const loadCatalogo = async () => {
+      try {
+        const productos = await api.get('/api/catalogo');
+        setCatalogoProductos(productos.data);
+      } catch (err) {
+        setError('Error al cargar el catálogo');
+      }
+    };
+
     if (isOpen) {
       loadCategories();
+      loadCatalogo();
       if (initialData) {
         setFormData({
-          nombre: initialData.nombre || '',
           precio: initialData.precio || '',
           cantidad: initialData.cantidad || '',
-          categoryId: initialData.categoryId || ''
+          categoryId: initialData.categoryId || '',
+          catalogoProductoId: initialData.catalogoProductoId || ''
         });
       }
     } else {
       setError('');
       setFormData({
-        nombre: '',
         precio: '',
         cantidad: '',
-        categoryId: ''
+        categoryId: '',
+        catalogoProductoId: ''
       });
     }
   }, [isOpen, initialData]);
@@ -67,30 +78,50 @@ const ProductCreationModal = ({
     }
 
     try {
-      const token = await getToken();
       const data = {
-        nombre: formData.nombre.trim(),
         precio: parseFloat(formData.precio),
         cantidad: parseInt(formData.cantidad),
         categoryId: formData.categoryId,
+        catalogoProductoId: formData.catalogoProductoId,
         creatorName: user?.fullName || user?.username || user?.primaryEmailAddress?.emailAddress.split('@')[0],
         creatorEmail: user?.primaryEmailAddress?.emailAddress
       };
 
+      console.log('[ProductCreationModal] Datos enviados al backend:', data);
+
       let response;
       if (isEditing && initialData?._id) {
-        response = await api.put(`/api/productos/${initialData._id}`, data, token);
+        response = await api.put(`/api/productos/${initialData._id}`, data);
       } else {
-        response = await api.post('/api/productos', data, token);
+        response = await api.post('/api/productos', data);
       }
+
+      console.log('[ProductCreationModal] Respuesta del backend:', response);
 
       if (onSuccess) {
         onSuccess(response.data);
       }
       onClose();
     } catch (error) {
-      console.error('Error:', error);
-      setError(error.response?.data?.message || error.message || 'Error al procesar el producto');
+      console.error('[ProductCreationModal] Error al guardar producto:', error);
+      if (error.response) {
+        console.error('[ProductCreationModal] Error response data:', error.response.data);
+      }
+      
+      // Manejo específico de errores comunes
+      let errorMessage = 'Error al procesar el producto';
+      
+      if (error.response?.status === 409) {
+        errorMessage = error.response.data?.message || 'Ya existe un producto con estos datos';
+      } else if (error.response?.status === 401) {
+        errorMessage = 'No tienes permisos para realizar esta acción';
+      } else if (error.response?.status === 400) {
+        errorMessage = error.response.data?.message || 'Datos inválidos';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -148,17 +179,25 @@ const ProductCreationModal = ({
 
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Nombre del Producto
+              Producto del Catálogo
             </label>
-            <input
-              type="text"
-              name="nombre"
-              value={formData.nombre}
+            <select
+              name="catalogoProductoId"
+              value={formData.catalogoProductoId}
               onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               required
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            />
+            >
+              <option value="">Selecciona un producto</option>
+              {catalogoProductos.map(producto => (
+                <option key={producto._id} value={producto._id}>
+                  {producto.codigoproducto} - {producto.nombre}
+                </option>
+              ))}
+            </select>
           </div>
+
+          {/* El campo de nombre se elimina porque se selecciona desde el catálogo */}
 
           <div>
             <label className="block text-sm font-medium text-gray-700">

@@ -6,7 +6,7 @@ import MyProfile from '../../../Pages/MyProfile';
 import { UserGestionPersonal } from '../../../components/personal';
 import { Sidebar } from '../sidebars';
 import { ProductoList } from '../../../components/productos';
-import { VentaList } from '../../../components/ventas';
+import { VentaList, VentaCreationModal } from '../../../components/ventas';
 import { DevolucionList, DevolucionModal } from '../../../components/devoluciones';
 import api from '../../../services/api';
 import { 
@@ -33,6 +33,7 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
   const [devolucionesLoading, setDevolucionesLoading] = useState(false);
   const [devolucionesLimit, setDevolucionesLimit] = useState(10);
   const [showDevolucionModal, setShowDevolucionModal] = useState(false);
+  const [showVentaModal, setShowVentaModal] = useState(false);
   const [selectedProducto, setSelectedProducto] = useState(null);
   const [selectedVenta, setSelectedVenta] = useState(null);
   const [ventasParaDevolucion, setVentasParaDevolucion] = useState([]);
@@ -278,10 +279,19 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
       <div className="space-y-8">
         {/* Panel de Ventas */}
         <div className="bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
-            <ShoppingBag className="text-blue-600" size={24} />
-            Mis Ventas
-          </h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
+              <ShoppingBag className="text-blue-600" size={24} />
+              Mis Ventas
+            </h2>
+            <button
+              onClick={() => setShowVentaModal(true)}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+            >
+              <Plus size={20} />
+              Nueva Venta
+            </button>
+          </div>
           <VentaList 
             ventas={ventas}
             loading={ventasLoading}
@@ -335,6 +345,19 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
             onMotivoChange={setMotivo}
             onSubmit={handleSubmitDevolucion}
             isSubmitting={isSubmitting}
+          />
+        )}
+
+        {/* Modal de Crear Venta */}
+        {showVentaModal && (
+          <VentaCreationModal
+            isOpen={showVentaModal}
+            onClose={() => setShowVentaModal(false)}
+            userRole={userRole}
+            onVentaCreated={() => {
+              setShowVentaModal(false);
+              fetchVentas(); // Recargar ventas después de crear una nueva
+            }}
           />
         )}
       </div>
