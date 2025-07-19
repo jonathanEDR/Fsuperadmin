@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { getCobrosHistorial } from '../../services/cobroService';
-import { getLocalDate } from '../../utils/dateUtils';
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -81,17 +80,30 @@ const CobrosLineChart = ({ userRole }) => {
     return labels;
   };
 
-  // Agrupa los cobros usando el campo 'fechaCobro' (el mismo que la tabla)
+  // Agrupa los cobros usando el campo 'fechaCobro' (consistente con la tabla)
   const processData = (cobros, filter, startDate, endDate) => {
     const labels = generateLabels(filter, startDate, endDate);
-    const dataPoints = labels.map(() => ({ yape: 0, efectivo: 0, gastos: 0, total: 0 }));
+    const dataPoints = labels.map(() => ({ yape: 0, efectivo: 0, gastos: 0, total: 0, cobroNeto: 0 }));
 
     cobros.forEach((cobro) => {
-      // Usar fechaCobro como principal, si no existe, usar createdAt
+      // Usar fechaCobro como principal, igual que en la tabla
       let fechaBase = cobro.fechaCobro || cobro.createdAt || cobro.fecha || cobro.fechaCreacion || cobro.updatedAt || cobro.timestamp;
       if (!fechaBase) return; // Si no hay fecha, ignorar
-      const cobroDate = getLocalDate(fechaBase);
-      if (!cobroDate) return;
+      
+      // CORREGIDO: Usar directamente new Date() sin compensación de zona horaria
+      // para mantener consistencia con la tabla CobrosHistorial
+      const cobroDate = new Date(fechaBase);
+      if (isNaN(cobroDate.getTime())) return; // Validar fecha
+      
+      // Debug temporal: Comparar fechas
+      console.log('🔍 Debug fechas:', {
+        fechaOriginal: fechaBase,
+        fechaParseada: cobroDate.toLocaleString('es-ES'),
+        dia: cobroDate.getDate(),
+        mes: cobroDate.getMonth() + 1,
+        año: cobroDate.getFullYear()
+      });
+      
       if (cobroDate < startDate || cobroDate >= endDate) return;
 
       let indexPos = 0;
@@ -115,8 +127,10 @@ const CobrosLineChart = ({ userRole }) => {
         dataPoints[indexPos].yape += Number(cobro.yape || 0);
         dataPoints[indexPos].efectivo += Number(cobro.efectivo || 0);
         dataPoints[indexPos].gastos += Number(cobro.gastosImprevistos || 0);
-        // Usar la suma de yape + efectivo - gastos para el total, igual que la tabla
-        dataPoints[indexPos].total += Number(cobro.yape || 0) + Number(cobro.efectivo || 0) - Number(cobro.gastosImprevistos || 0);
+        // Corregido: Total ventas = yape + efectivo + gastos imprevistos
+        dataPoints[indexPos].total += Number(cobro.yape || 0) + Number(cobro.efectivo || 0) + Number(cobro.gastosImprevistos || 0);
+        // Cobro neto = solo yape + efectivo (lo que realmente se cobra)
+        dataPoints[indexPos].cobroNeto += Number(cobro.yape || 0) + Number(cobro.efectivo || 0);
       }
     });
     return { labels, dataPoints };
@@ -131,13 +145,14 @@ const CobrosLineChart = ({ userRole }) => {
       const cobros = response.cobros || [];
       const { startDate, endDate } = getDateRange(timeFilter);
       const { labels, dataPoints } = processData(cobros, timeFilter, startDate, endDate);
-      // Calcular totales
+      // Calcular totales incluyendo cobro neto
       const periodTotals = dataPoints.reduce((acc, point) => ({
         total: acc.total + point.total,
         yape: acc.yape + point.yape,
         efectivo: acc.efectivo + point.efectivo,
-        gastos: acc.gastos + point.gastos
-      }), { total: 0, yape: 0, efectivo: 0, gastos: 0 });
+        gastos: acc.gastos + point.gastos,
+        cobroNeto: acc.cobroNeto + point.cobroNeto
+      }), { total: 0, yape: 0, efectivo: 0, gastos: 0, cobroNeto: 0 });
       setTotals(periodTotals);
       setChartData({
         labels,
@@ -167,13 +182,23 @@ const CobrosLineChart = ({ userRole }) => {
             fill: false,
           },
           {
-            label: 'Total Cobros (S/)',
+            label: 'Total Ventas (S/)',
             data: dataPoints.map(point => point.total),
             borderColor: '#3B82F6',
             backgroundColor: 'rgba(59, 130, 246, 0.1)',
             tension: 0.3,
             fill: false,
             borderWidth: 3,
+          },
+          {
+            label: 'Cobro Neto (S/)',
+            data: dataPoints.map(point => point.cobroNeto),
+            borderColor: '#8B5CF6',
+            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+            tension: 0.3,
+            fill: false,
+            borderWidth: 3,
+            borderDash: [5, 3], // Línea punteada para diferenciarlo
           },
         ],
       });
@@ -278,10 +303,14 @@ const CobrosLineChart = ({ userRole }) => {
       </div>
 
       {/* Resumen de totales */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className="text-center">
           <div className="text-2xl font-bold text-blue-600">S/ {totals.total.toFixed(2)}</div>
-          <div className="text-sm text-gray-600">Total Cobros - {getTimeFilterLabel()}</div>
+          <div className="text-sm text-gray-600">Total Ventas - {getTimeFilterLabel()}</div>
+        </div>
+        <div className="text-center">
+          <div className="text-2xl font-bold text-purple-600">S/ {totals.cobroNeto.toFixed(2)}</div>
+          <div className="text-sm text-gray-600">Cobro Neto - {getTimeFilterLabel()}</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-green-600">S/ {totals.yape.toFixed(2)}</div>

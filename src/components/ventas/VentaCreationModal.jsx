@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { X, Plus, Trash2, ShoppingCart, AlertCircle } from 'lucide-react';
+import { X, Plus, Trash2, ShoppingCart, AlertCircle, Search, Filter } from 'lucide-react';
 import { useAuth, useUser } from '@clerk/clerk-react';
 
 // Función auxiliar para filtrar usuarios según el rol
@@ -31,9 +31,13 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole: initial
   const [currentUserRole, setCurrentUserRole] = useState(initialUserRole || 'user');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [productos, setProductos] = useState([]);
+  const [categorias, setCategorias] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [carrito, setCarrito] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [productoActual, setProductoActual] = useState({
     productoId: '',
     cantidad: 1
@@ -83,6 +87,30 @@ const [formData, setFormData] = useState({
     };
 
     loadProductos();
+  }, [getToken]);
+
+  // Efecto para cargar categorías
+  useEffect(() => {
+    const loadCategorias = async () => {
+      try {
+        const token = await getToken();
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+        const response = await fetch(`${backendUrl}/api/categories`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setCategorias(data);
+        }
+      } catch (error) {
+        console.log('Error al cargar categorías (opcional):', error.message);
+      }
+    };
+
+    loadCategorias();
   }, [getToken]);
   // Efecto para cargar usuarios
   useEffect(() => {
@@ -143,10 +171,49 @@ const [formData, setFormData] = useState({
     // eslint-disable-next-line
   }, [currentUserRole, user?.clerk_id, getToken]);
 
-  // Filtrar productos con stock
+  // Filtrar productos con stock, búsqueda y categoría
   const productosDisponibles = useMemo(() => {
-    return productos.filter(producto => producto.cantidadRestante > 0);
-  }, [productos]);
+    console.log('Filtrando productos:', {
+      totalProductos: productos.length,
+      searchTerm,
+      selectedCategory,
+      categorias: categorias.map(c => ({ id: c._id, nombre: c.nombre }))
+    });
+
+    return productos.filter(producto => {
+      // Filtro de stock
+      if (producto.cantidadRestante <= 0) return false;
+      
+      // Filtro de búsqueda
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        const matchName = producto.nombre?.toLowerCase().includes(searchLower);
+        const matchCode = producto.codigoProducto?.toLowerCase().includes(searchLower);
+        if (!matchName && !matchCode) return false;
+      }
+      
+      // Filtro de categoría (corregido)
+      if (selectedCategory && selectedCategory !== '') {
+        console.log('Filtrando por categoría:', {
+          selectedCategory,
+          productoCategoryId: producto.categoryId,
+          productoCategoryName: producto.categoryName,
+          producto: producto.nombre
+        });
+        
+        // Comparar tanto por categoryId como por categoryName para mayor compatibilidad
+        const matchesCategoryId = producto.categoryId && producto.categoryId.toString() === selectedCategory;
+        const matchesCategoryName = producto.categoryName && 
+          categorias.find(cat => cat._id === selectedCategory && cat.nombre === producto.categoryName);
+        
+        if (!matchesCategoryId && !matchesCategoryName) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+  }, [productos, searchTerm, selectedCategory, categorias]);
 
   // Calcular el total de la venta
   const montoTotal = useMemo(() => {
@@ -154,39 +221,41 @@ const [formData, setFormData] = useState({
   }, [carrito]);
 
   // Agregar producto al carrito
-  const agregarProducto = () => {
-    if (!productoActual.productoId) {
+  const agregarProducto = (producto = null, cantidad = null) => {
+    const productoSeleccionado = producto || productos.find(p => p._id === productoActual.productoId);
+    const cantidadSeleccionada = cantidad || productoActual.cantidad;
+
+    if (!productoSeleccionado) {
       setError('Selecciona un producto');
       return;
     }
 
-    const producto = productos.find(p => p._id === productoActual.productoId);
-    if (!producto) {
-      setError('Producto no encontrado');
+    if (cantidadSeleccionada > productoSeleccionado.cantidadRestante) {
+      setError(`Solo hay ${productoSeleccionado.cantidadRestante} unidades disponibles`);
       return;
     }
 
-    if (productoActual.cantidad > producto.cantidadRestante) {
-      setError(`Solo hay ${producto.cantidadRestante} unidades disponibles`);
-      return;
-    }
-
-    const subtotal = producto.precio * productoActual.cantidad;
+    const subtotal = productoSeleccionado.precio * cantidadSeleccionada;
     
     setCarrito(prevCarrito => [...prevCarrito, {
-      productoId: productoActual.productoId,
-      nombre: producto.nombre,
-      cantidad: productoActual.cantidad,
-      precioUnitario: producto.precio,
+      productoId: productoSeleccionado._id,
+      nombre: productoSeleccionado.nombre,
+      cantidad: cantidadSeleccionada,
+      precioUnitario: productoSeleccionado.precio,
       subtotal
     }]);
 
-    setProductoActual({
-      productoId: '',
-      cantidad: 1
-    });
-    
+    // Limpiar la búsqueda y filtros después de agregar
+    setSearchTerm('');
+    setSelectedCategory('');
     setError('');
+    
+    // Mostrar mensaje de éxito
+    const mensaje = `✓ ${productoSeleccionado.nombre} (${cantidadSeleccionada}) agregado al carrito`;
+    setSuccessMessage(mensaje);
+    setTimeout(() => {
+      setSuccessMessage('');
+    }, 3000);
   };
 
   // Eliminar producto del carrito
@@ -342,6 +411,16 @@ const [formData, setFormData] = useState({
           </div>
         )}
 
+        {/* Success message */}
+        {successMessage && (
+          <div className="px-3 sm:px-6 py-3 bg-green-50 border-b border-green-100">
+            <div className="flex items-center gap-2 text-green-600">
+              <Plus size={16} />
+              <p className="text-sm">{successMessage}</p>
+            </div>
+          </div>
+        )}
+
         <form
           onSubmit={handleSubmit}
           className="p-6 w-full flex-1 min-h-0 overflow-y-auto"
@@ -393,46 +472,106 @@ const [formData, setFormData] = useState({
               <div className="bg-gray-50 rounded-lg p-4 mb-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Agregar Productos</h3>
-                  <button
-                    type="button"
-                    onClick={agregarProducto}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                  >
-                    <Plus size={18} />
-                    Agregar al Carrito
-                  </button>
+                  <div className="text-sm text-gray-500">
+                    {productosDisponibles.length} productos disponibles
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Producto
-                    </label>
-                    <select
-                      value={productoActual.productoId}
-                      onChange={(e) => setProductoActual(prev => ({ ...prev, productoId: e.target.value }))}
-                      className="w-full p-2.5 bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    >
-                      <option value="">Seleccionar producto...</option>
-                      {productosDisponibles.map(producto => (
-                        <option key={producto._id} value={producto._id}>
-                          {producto.nombre} - Stock: {producto.cantidadRestante} - S/ {producto.precio}
-                        </option>
-                      ))}
-                    </select>
+                <div className="space-y-4">
+                  {/* Filtros de búsqueda */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Buscar producto
+                      </label>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                        <input
+                          type="text"
+                          placeholder="Buscar por nombre o código..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Filtrar por categoría
+                      </label>
+                      <div className="relative">
+                        <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                        <select
+                          value={selectedCategory}
+                          onChange={(e) => setSelectedCategory(e.target.value)}
+                          className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        >
+                          <option value="">Todas las categorías</option>
+                          {categorias.map(categoria => (
+                            <option key={categoria._id} value={categoria._id}>
+                              {categoria.nombre}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Cantidad
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={productoActual.cantidad}
-                      onChange={(e) => setProductoActual(prev => ({ ...prev, cantidad: parseInt(e.target.value) || 0 }))}
-                      className="w-full p-2.5 bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    />
+                  {/* Lista de productos */}
+                  <div className="max-h-80 overflow-y-auto border rounded-lg bg-white">
+                    {productosDisponibles.length > 0 ? (
+                      <div className="grid gap-2 p-2">
+                        {productosDisponibles.map(producto => (
+                          <div key={producto._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h4 className="font-medium text-gray-900 truncate">{producto.nombre}</h4>
+                                {producto.categoryName && (
+                                  <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                                    {producto.categoryName}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-4 text-sm text-gray-600">
+                                <span>Código: {producto.codigoProducto}</span>
+                                <span>Stock: {producto.cantidadRestante}</span>
+                                <span className="font-semibold text-green-600">S/ {producto.precio}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 ml-4">
+                              <input
+                                type="number"
+                                min="1"
+                                max={producto.cantidadRestante}
+                                defaultValue="1"
+                                className="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                                id={`cantidad-${producto._id}`}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const cantidadInput = document.getElementById(`cantidad-${producto._id}`);
+                                  const cantidad = parseInt(cantidadInput.value) || 1;
+                                  agregarProducto(producto, cantidad);
+                                }}
+                                className="px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 transition-colors"
+                              >
+                                Agregar
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-8 text-center text-gray-500">
+                        <Search size={48} className="mx-auto mb-2 text-gray-300" />
+                        <p>No se encontraron productos disponibles</p>
+                        {(searchTerm || selectedCategory) && (
+                          <p className="text-sm mt-1">Intenta ajustar los filtros de búsqueda</p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -477,47 +616,7 @@ const [formData, setFormData] = useState({
                 )}
               </div>
 
-              {/* Total Summary */}
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-700 font-medium">Total de la venta:</span>
-                  <span className="text-2xl font-bold text-gray-900">S/ {montoTotal.toFixed(2)}</span>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center gap-2"
-                >
-                  <X size={18} />
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting || carrito.length === 0}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <span className="animate-spin">
-                        <svg className="w-4 h-4" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                      </span>
-                      Creando...
-                    </>
-                  ) : (
-                    <>
-                      <Plus size={18} />
-                      Crear Venta
-                    </>
-                  )}
-                </button>
-              </div>
+              
             </div>
 
             {/* Right column: cart table (sticky on desktop) */}
@@ -559,6 +658,44 @@ const [formData, setFormData] = useState({
                         ))}
                       </tbody>
                     </table>
+                  </div>
+                  {/* Total de la venta debajo de la tabla */}
+                  <div className="flex justify-between items-center px-4 py-4 border-t bg-gray-50">
+                    <span className="text-gray-700 font-medium">Total de la venta:</span>
+                    <span className="text-2xl font-bold text-gray-900">S/ {montoTotal.toFixed(2)}</span>
+                  </div>
+                  {/* Botones de acción debajo del total */}
+                  <div className="flex justify-end gap-3 px-4 pb-4">
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center gap-2"
+                    >
+                      <X size={18} />
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting || carrito.length === 0}
+                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <span className="animate-spin">
+                            <svg className="w-4 h-4" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                            </svg>
+                          </span>
+                          Creando...
+                        </>
+                      ) : (
+                        <>
+                          <Plus size={18} />
+                          Crear Venta
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
               )}

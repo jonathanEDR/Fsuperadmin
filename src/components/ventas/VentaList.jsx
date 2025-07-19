@@ -861,9 +861,15 @@ function VentaList({
                         )}
                         <div className="border-t border-blue-300 pt-1 mt-2">
                           <div className="flex justify-between font-semibold">
-                            <span className="text-blue-700">Total Neto:</span>
+                            <span className="text-blue-700">Total Ventas:</span>
                             <span className="text-blue-800">
-                              S/ {((venta.cobros_detalle.yape || 0) + (venta.cobros_detalle.efectivo || 0) - (venta.cobros_detalle.gastosImprevistos || 0)).toFixed(2)}
+                              S/ {((venta.cobros_detalle.yape || 0) + (venta.cobros_detalle.efectivo || 0) + (venta.cobros_detalle.gastosImprevistos || 0)).toFixed(2)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between font-semibold mt-1">
+                            <span className="text-green-700">Cobro Neto:</span>
+                            <span className="text-green-800">
+                              S/ {((venta.cobros_detalle.yape || 0) + (venta.cobros_detalle.efectivo || 0)).toFixed(2)}
                             </span>
                           </div>
                         </div>
