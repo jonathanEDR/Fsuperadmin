@@ -153,12 +153,16 @@ function DevolucionModal({
             type="datetime-local"
             value={fechaDevolucion}
             onChange={(e) => onFechaChange(e.target.value)}
-            max={getLocalDateTimeString()} // No permitir fechas futuras
+            max={(() => {
+              // Generar el max dinámicamente para la fecha/hora actual
+              const now = new Date();
+              return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            })()}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
           <p className="text-xs text-gray-500 mt-1">
-            Fecha y hora en horario de Perú. Editable según cuando se realizó la devolución (no puede ser en el futuro)
+            Fecha y hora local. Editable según cuando se realizó la devolución (no puede ser en el futuro)
           </p>
         </div>
 
@@ -225,6 +229,9 @@ function DevolucionModal({
               // Validar que la fecha no sea futura
               const fechaSeleccionada = new Date(fechaDevolucion);
               const ahora = new Date();
+              // Agregar margen de 1 minuto para evitar problemas de sincronización
+              ahora.setMinutes(ahora.getMinutes() + 1);
+              
               if (fechaSeleccionada > ahora) {
                 alert('La fecha y hora de devolución no puede ser en el futuro');
                 return;

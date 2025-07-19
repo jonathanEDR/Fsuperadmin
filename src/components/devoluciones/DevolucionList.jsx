@@ -18,14 +18,25 @@ const DevolucionList = ({ userRole = 'user' }) => {
 
   // Función de utilidad para formatear fechas de manera segura en zona horaria local
   const formatearFecha = (fecha) => {
-    return formatLocalDate(fecha, { 
-      hour12: false,
-      year: 'numeric',
-      month: '2-digit', 
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    if (!fecha) return 'N/A';
+    
+    try {
+      const date = new Date(fecha);
+      if (isNaN(date.getTime())) return 'Fecha inválida';
+      
+      // Formatear directamente sin conversión de zona horaria adicional
+      return formatLocalDate(fecha, { 
+        hour12: false,
+        year: 'numeric',
+        month: '2-digit', 
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.error('Error al formatear fecha:', error, fecha);
+      return 'Fecha inválida';
+    }
   };
   // Función para mostrar mensajes de estado
   const showStatusMessage = (message, type) => {
@@ -97,6 +108,7 @@ const DevolucionList = ({ userRole = 'user' }) => {
     
     if (window.confirm(confirmMessage)) {
       try {
+        setLoading(true); // Agregar loading para prevenir múltiples clicks
         const token = await getToken();
         const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/devoluciones/${id}`, {
           method: 'DELETE',
@@ -111,12 +123,18 @@ const DevolucionList = ({ userRole = 'user' }) => {
           return;
         }
 
+        // Actualizar el estado local directamente sin recargar todo
+        setDevoluciones(prevDevoluciones => 
+          prevDevoluciones.filter(dev => dev._id !== id)
+        );
+        
         showStatusMessage('Devolución eliminada correctamente', 'success');
-        // Recargar la lista completa para mantener sincronización
-        await fetchDevoluciones();
+        
       } catch (error) {
         console.error('Error:', error);
         showStatusMessage(error.message || 'Error al eliminar la devolución', 'error');
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -208,10 +226,11 @@ const DevolucionList = ({ userRole = 'user' }) => {
                 {canDeleteDevolucion(devolucion) ? (
                   <button
                     onClick={() => handleDeleteDevolucion(devolucion._id, devolucion.producto, devolucion.cantidad)}
-                    className="inline-flex items-center px-3 py-2 bg-red-600 text-white text-xs font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+                    disabled={loading} // Deshabilitar durante loading
+                    className="inline-flex items-center px-3 py-2 bg-red-600 text-white text-xs font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Eliminar
+                    {loading ? 'Eliminando...' : 'Eliminar'}
                   </button>
                 ) : (
                   <div className="flex flex-col items-center">

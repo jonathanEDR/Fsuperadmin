@@ -7,6 +7,7 @@ import { UserGestionPersonal } from '../../../components/personal';
 import { Sidebar } from '../sidebars';
 import { ProductoList } from '../../../components/productos';
 import { VentaList, VentaCreationModal } from '../../../components/ventas';
+// Solo importar componentes de devolución si es necesario
 import { DevolucionList, DevolucionModal } from '../../../components/devoluciones';
 import api from '../../../services/api';
 import { 
@@ -95,8 +96,13 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
       setVentasLoading(false);
     }
   };
-  // Función para cargar las devoluciones
+  // Función para cargar las devoluciones (solo para admin y super_admin)
   const fetchDevoluciones = async () => {
+    // Solo ejecutar si el usuario tiene permisos
+    if (!['admin', 'super_admin'].includes(userRole)) {
+      return;
+    }
+    
     try {
       setDevolucionesLoading(true);
       const token = await getToken();
@@ -151,7 +157,7 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
       setLoading(false);
     }
   };
-  // Función para registrar una devolución
+  // Función para registrar una devolución (para todos los usuarios)
   const handleSubmitDevolucion = async (productosADevolver) => {
     try {
       setIsSubmitting(true);
@@ -189,7 +195,10 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
       // Reset form and refresh list
       resetDevolucionForm();
       setShowDevolucionModal(false);
-      fetchDevoluciones();
+      // Solo recargar devoluciones si es admin o super_admin
+      if (['admin', 'super_admin'].includes(userRole)) {
+        fetchDevoluciones();
+      }
     } catch (error) {
       console.error('Error al crear devolución:', error);
       alert(error.message || 'Error al crear la devolución');
@@ -198,6 +207,12 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
     }
   };
   const handleDevolucionDeleted = async (devolucionId) => {
+    // Verificar permisos antes de procesar
+    if (!['admin', 'super_admin'].includes(userRole)) {
+      alert('No tienes permisos para eliminar devoluciones');
+      return;
+    }
+    
     try {
       const token = await getToken();
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -254,9 +269,12 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
   useEffect(() => {
     if (currentView === 'ventas') {
       fetchVentas();
-      fetchDevoluciones(); // Cargar devoluciones al mismo tiempo
+      // Solo cargar devoluciones si el usuario es admin o super_admin
+      if (['admin', 'super_admin'].includes(userRole)) {
+        fetchDevoluciones();
+      }
     }
-  }, [currentView]);
+  }, [currentView, userRole]);
 
   const formatearFechaHora = (fecha) => {
     return new Date(fecha).toLocaleDateString('es-ES', {
@@ -297,36 +315,14 @@ const UserDashboard = ({ session, initialNotes, onNotesUpdate }) => {
             loading={ventasLoading}
             error={error}
             fetchVentas={fetchVentas}
-            userRole="user" // <-- Fallback explícito
-            currentUserId={user?.id} // <-- Nuevo prop
+            userRole={userRole || "user"} // Usar el rol real del usuario
+            currentUserId={user?.id}
+            devoluciones={['admin', 'super_admin'].includes(userRole) ? devoluciones : []} // Solo pasar devoluciones si tiene permisos
           />
         </div>
 
-        {/* Panel de Devoluciones */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
-              <RefreshCw className="text-blue-600" size={24} />
-              Historial de Devoluciones
-            </h2>
-            <button
-              onClick={() => setShowDevolucionModal(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-            >
-              <Plus size={20} />
-              Nueva Devolución
-            </button>
-          </div>
-          <DevolucionList
-            devoluciones={devoluciones}
-            onDevolucionDeleted={handleDevolucionDeleted}
-            formatearFechaHora={formatearFechaHora}
-            devolucionesLimit={devolucionesLimit}
-            onLoadMore={() => setDevolucionesLimit(prev => prev + 10)}
-          />
-        </div>
 
-        {/* Modal de Devolución */}
+        {/* Modal de Devolución - Para todos los usuarios */}
         {showDevolucionModal && (
           <DevolucionModal
             isVisible={showDevolucionModal}

@@ -38,6 +38,7 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole: initial
   const [carrito, setCarrito] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [cantidades, setCantidades] = useState({}); // Para manejar las cantidades de cada producto
   const [productoActual, setProductoActual] = useState({
     productoId: '',
     cantidad: 1
@@ -245,9 +246,7 @@ const [formData, setFormData] = useState({
       subtotal
     }]);
 
-    // Limpiar la búsqueda y filtros después de agregar
-    setSearchTerm('');
-    setSelectedCategory('');
+    // Mantener los filtros activos - solo limpiar errores
     setError('');
     
     // Mostrar mensaje de éxito
@@ -261,6 +260,28 @@ const [formData, setFormData] = useState({
   // Eliminar producto del carrito
   const eliminarDelCarrito = (index) => {
     setCarrito(prevCarrito => prevCarrito.filter((_, i) => i !== index));
+  };
+
+  // Función para limpiar el formulario
+  const limpiarFormulario = () => {
+    setCarrito([]);
+    setCantidades({});
+    setSearchTerm('');
+    setSelectedCategory('');
+    setError('');
+    setSuccessMessage('');
+    setFormData({
+      fechadeVenta: getLocalDateTimeString(),
+      estadoPago: 'Pendiente',
+      cantidadPagada: 0,
+      targetUserId: ''
+    });
+  };
+
+  // Función para manejar el cierre del modal
+  const handleClose = () => {
+    limpiarFormulario();
+    onClose();
   };  // Manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -343,7 +364,7 @@ const [formData, setFormData] = useState({
         onVentaCreated(data.venta);
       }
 
-      onClose();
+      handleClose();
     } catch (error) {
       setError(error.message || 'Error al crear la venta');
     } finally {
@@ -367,7 +388,7 @@ const [formData, setFormData] = useState({
               No tienes permisos para crear ventas.
             </p>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
             >
               Cerrar
@@ -394,7 +415,7 @@ const [formData, setFormData] = useState({
             </div>
           </div>
           <button 
-            onClick={onClose}
+            onClick={handleClose}
             className="text-white hover:text-purple-200 transition-colors"
           >
             <X size={24} />
@@ -544,16 +565,48 @@ const [formData, setFormData] = useState({
                                 type="number"
                                 min="1"
                                 max={producto.cantidadRestante}
-                                defaultValue="1"
-                                className="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                                placeholder="Cantidad"
+                                value={cantidades[producto._id] || ''}
+                                onChange={(e) => {
+                                  const valor = e.target.value;
+                                  setCantidades(prev => ({
+                                    ...prev,
+                                    [producto._id]: valor
+                                  }));
+                                }}
+                                onKeyPress={(e) => {
+                                  if (e.key === 'Enter') {
+                                    const cantidad = parseInt(cantidades[producto._id]) || 0;
+                                    if (cantidad > 0 && cantidad <= producto.cantidadRestante) {
+                                      agregarProducto(producto, cantidad);
+                                      setCantidades(prev => ({
+                                        ...prev,
+                                        [producto._id]: ''
+                                      }));
+                                    }
+                                  }
+                                }}
+                                className="w-20 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                                 id={`cantidad-${producto._id}`}
                               />
                               <button
                                 type="button"
                                 onClick={() => {
-                                  const cantidadInput = document.getElementById(`cantidad-${producto._id}`);
-                                  const cantidad = parseInt(cantidadInput.value) || 1;
-                                  agregarProducto(producto, cantidad);
+                                  const cantidad = parseInt(cantidades[producto._id]) || 0;
+                                  if (cantidad > 0 && cantidad <= producto.cantidadRestante) {
+                                    agregarProducto(producto, cantidad);
+                                    // Limpiar solo este input específico después de agregar
+                                    setCantidades(prev => ({
+                                      ...prev,
+                                      [producto._id]: ''
+                                    }));
+                                  } else if (cantidad === 0) {
+                                    setError('La cantidad debe ser mayor a 0');
+                                    setTimeout(() => setError(''), 3000);
+                                  } else {
+                                    setError(`Solo hay ${producto.cantidadRestante} unidades disponibles`);
+                                    setTimeout(() => setError(''), 3000);
+                                  }
                                 }}
                                 className="px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 transition-colors"
                               >
@@ -668,7 +721,7 @@ const [formData, setFormData] = useState({
                   <div className="flex justify-end gap-3 px-4 pb-4">
                     <button
                       type="button"
-                      onClick={onClose}
+                      onClick={handleClose}
                       className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center gap-2"
                     >
                       <X size={18} />

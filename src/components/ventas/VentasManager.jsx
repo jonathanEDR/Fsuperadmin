@@ -171,11 +171,13 @@ const VentasManager = ({ userRole: userRoleProp }) => {
         />
       </div>
 
-      {/* Nueva sección para Devoluciones */}
-      <div className="bg-white shadow-lg rounded-xl p-6">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Devoluciones</h3>
-        <DevolucionList userRole={userRole} />
-      </div>
+      {/* Nueva sección para Devoluciones - Solo para admin y super_admin */}
+      {['admin', 'super_admin'].includes(userRole) && (
+        <div className="bg-white shadow-lg rounded-xl p-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Devoluciones</h3>
+          <DevolucionList userRole={userRole} />
+        </div>
+      )}
     </div>
   );
 };

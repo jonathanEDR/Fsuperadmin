@@ -4,6 +4,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { X, MinusCircle } from 'lucide-react';
 import { getLocalDateTimeString, formatLocalDate, convertLocalDateTimeToISO } from '../../utils/dateUtils';
+import { useCantidadManagement } from '../../hooks/useCantidadManagement';
 
 function QuickDevolucionModal({
   isOpen,
@@ -17,11 +18,22 @@ function QuickDevolucionModal({
   const [fechaDevolucion, setFechaDevolucion] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
+  // Hook unificado para gestión de cantidades
+  const { 
+    procesarDevolucion, 
+    loading: cantidadLoading, 
+    error: cantidadError,
+    clearError 
+  } = useCantidadManagement();
+
   // Inicializar fecha y hora con la fecha/hora actual de Perú cuando se abre el modal
   useEffect(() => {
     if (isOpen) {
       limpiarForm();
-      setFechaDevolucion(getLocalDateTimeString());
+      // Obtener la fecha y hora actual en zona horaria local
+      const now = new Date();
+      const localDateString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      setFechaDevolucion(localDateString);
     }
   }, [isOpen]);
 
@@ -40,11 +52,29 @@ function QuickDevolucionModal({
   const actualizarCantidad = (index, cantidad) => {
     setProductosADevolver(prev => prev.map((item, i) => {
       if (i === index) {
+        // ✅ VALIDACIÓN DE CANTIDAD AL ACTUALIZAR
         const cantidadNum = Number(cantidad) || 0;
+        const cantidadMaxima = item.producto.cantidad;
+        
+        // Limitar la cantidad a la cantidad máxima disponible
+        const cantidadFinal = Math.min(Math.max(0, cantidadNum), cantidadMaxima);
+        
+        // ✅ USAR EL PRECIO CORRECTO: precioUnitario de la venta, no del producto general
+        const precioUnitario = item.producto.precioUnitario || item.producto.precio || 0;
+        
+        console.log('💰 Calculando monto devolución:', {
+          producto: item.producto.productoId.nombre,
+          cantidadIngresada: cantidadNum,
+          cantidadMaxima,
+          cantidadFinal,
+          precioUnitario,
+          montoDevolucion: precioUnitario * cantidadFinal
+        });
+        
         return {
           ...item,
-          cantidad: cantidad,
-          montoDevolucion: item.producto.precioUnitario * cantidadNum
+          cantidad: cantidadFinal.toString(),
+          montoDevolucion: precioUnitario * cantidadFinal
         };
       }
       return item;
@@ -60,6 +90,7 @@ function QuickDevolucionModal({
     setMotivo('');
     setFechaDevolucion('');
     setErrorMessage('');
+    clearError();
   };
 
   const validarDevolucion = () => {
@@ -81,19 +112,31 @@ function QuickDevolucionModal({
     // Validar que la fecha y hora no sea futura
     const fechaSeleccionada = new Date(fechaDevolucion);
     const ahora = new Date();
+    // Agregar margen de 1 minuto para evitar problemas de sincronización
+    ahora.setMinutes(ahora.getMinutes() + 1);
+    
     if (fechaSeleccionada > ahora) {
       setErrorMessage('La fecha y hora de devolución no puede ser futura');
       return false;
     }
 
+    // ✅ VALIDACIÓN MEJORADA DE PRODUCTOS A DEVOLVER
     for (const item of productosADevolver) {
-      if (!item.cantidad || item.cantidad <= 0) {
+      const cantidadNum = parseInt(item.cantidad);
+      
+      if (!item.cantidad || cantidadNum <= 0) {
         setErrorMessage('La cantidad a devolver debe ser mayor a 0');
         return false;
       }
       
-      if (item.cantidad > item.producto.cantidad) {
+      if (cantidadNum > item.producto.cantidad) {
         setErrorMessage(`No puede devolver más de ${item.producto.cantidad} unidades de ${item.producto.productoId.nombre}`);
+        return false;
+      }
+
+      // ✅ VALIDACIÓN ADICIONAL: Verificar que la cantidad sea un número entero válido
+      if (isNaN(cantidadNum) || cantidadNum !== parseFloat(item.cantidad)) {
+        setErrorMessage('La cantidad debe ser un número entero válido');
         return false;
       }
     }
@@ -104,6 +147,7 @@ function QuickDevolucionModal({
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
+    clearError();
     
     if (!validarDevolucion()) return;
 
@@ -116,16 +160,37 @@ function QuickDevolucionModal({
     }
 
     try {
-      await onSubmit({
+      // Preparar datos para envío
+      const devolucionData = {
         ventaId: venta._id,
-        productos: productosADevolver,
+        productos: productosADevolver.map(item => ({
+          productoId: item.producto.productoId._id, // Solo el ID del producto
+          cantidadDevuelta: parseInt(item.cantidad),
+          montoDevolucion: item.montoDevolucion
+        })),
         motivo,
-        fechaDevolucion: convertLocalDateTimeToISO(fechaDevolucion)
-      });
+        fechaDevolucion: new Date(fechaDevolucion).toISOString()
+      };
+
+      console.log('🔍 QuickDevolucionModal - Enviando datos:', devolucionData);
+
+      // Si hay callback, usar el callback (VentaList manejará el envío)
+      // Si no hay callback, usar el servicio unificado directamente
+      if (onSubmit) {
+        await onSubmit(devolucionData);
+      } else {
+        const resultado = await procesarDevolucion(devolucionData);
+        console.log('✅ QuickDevolucionModal - Resultado del servicio:', resultado);
+        
+        // Si el servicio retornó una venta actualizada, podríamos notificar al padre
+        // Pero como no hay callback, no hay forma de comunicar la actualización
+        // Este caso se da cuando el modal se usa independientemente
+      }
       
       limpiarForm();
       onClose();
     } catch (error) {
+      console.error('❌ Error en handleSubmit:', error);
       setErrorMessage(error.message || 'Error al procesar la devolución');
     }
   };
@@ -210,7 +275,7 @@ function QuickDevolucionModal({
                           <div className="flex-1">
                             <div className="font-medium">{item.producto.productoId.nombre}</div>
                             <div className="text-sm text-gray-500">
-                              ${item.producto.precioUnitario} x {item.cantidad || 0} = ${item.montoDevolucion}
+                              S/. {item.producto.precioUnitario || item.producto.precio || 0} x {item.cantidad || 0} = ${item.montoDevolucion}
                             </div>
                           </div>
                           <input
@@ -243,12 +308,16 @@ function QuickDevolucionModal({
                       id="fechaDevolucion"
                       value={fechaDevolucion}
                       onChange={(e) => setFechaDevolucion(e.target.value)}
-                      max={getLocalDateTimeString()} // No permitir fechas futuras
+                      max={(() => {
+                        // Generar el max dinámicamente para la fecha/hora actual
+                        const now = new Date();
+                        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                      })()} 
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                       required
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Fecha y hora en horario de Perú. Se inicializa automáticamente con la hora actual (no puede ser en el futuro)
+                      Fecha y hora local. Se inicializa automáticamente con la hora actual (no puede ser en el futuro)
                     </p>
                   </div>
 
@@ -276,8 +345,8 @@ function QuickDevolucionModal({
                     )}
                   </div>
 
-                  {errorMessage && (
-                    <div className="mt-2 text-red-600 text-sm">{errorMessage}</div>
+                  {(errorMessage || cantidadError) && (
+                    <div className="mt-2 text-red-600 text-sm">{errorMessage || cantidadError}</div>
                   )}
 
                   <div className="mt-6 flex justify-end space-x-3">
@@ -294,14 +363,14 @@ function QuickDevolucionModal({
                     <button
                       type="button"
                       onClick={handleSubmit}
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || cantidadLoading}
                       className={`inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                        isSubmitting
+                        (isSubmitting || cantidadLoading)
                           ? 'bg-indigo-400 cursor-not-allowed'
                           : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500'
                       }`}
                     >
-                      {isSubmitting ? 'Procesando...' : 'Confirmar Devolución'}
+                      {(isSubmitting || cantidadLoading) ? 'Procesando...' : 'Confirmar Devolución'}
                     </button>
                   </div>
                 </div>

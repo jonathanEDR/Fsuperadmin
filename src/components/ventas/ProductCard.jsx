@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Minus, Edit3, Trash2, Calculator } from 'lucide-react';
 import QuantityModal from './QuantityModal';
+import { useCantidadManagement } from '../../hooks/useCantidadManagement';
 
 const ProductCard = ({ 
   producto, 
@@ -8,11 +9,81 @@ const ProductCard = ({
   onUpdateQuantity, 
   onRemoveProduct, 
   canEdit = false,
-  loading = false 
+  loading = false,
+  devoluciones = [] // 📋 Nueva prop para detectar devoluciones
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showQuantityModal, setShowQuantityModal] = useState(false);
   const [newQuantity, setNewQuantity] = useState(producto.cantidad);
+
+  // Hook unificado para gestión de cantidades
+  const { 
+    actualizarCantidadManual, 
+    loading: cantidadLoading, 
+    error: cantidadError 
+  } = useCantidadManagement();
+
+  // Actualizar newQuantity cuando cambie producto.cantidad
+  React.useEffect(() => {
+    setNewQuantity(producto.cantidad);
+  }, [producto.cantidad]);
+
+  // 🔍 DETECTAR SI EL PRODUCTO TIENE DEVOLUCIONES (VERSIÓN SIMPLIFICADA PARA DEBUG)
+  const tieneDevolucion = React.useMemo(() => {
+    console.log('🔍 ===== INICIANDO DETECCIÓN DE DEVOLUCIONES =====');
+    
+    if (!devoluciones || devoluciones.length === 0) {
+      console.log('❌ No hay devoluciones para analizar');
+      return false;
+    }
+    
+    const productoIdActual = producto.productoId?._id || producto.productoId;
+    console.log('� Producto actual:', {
+      id: productoIdActual,
+      nombre: producto.productoId?.nombre,
+      devolucionesTotales: devoluciones.length
+    });
+    
+    // Mostrar todas las devoluciones para debug
+    devoluciones.forEach((dev, index) => {
+      const devProductoId = dev.productoId?._id || dev.productoId;
+      const sonIguales = devProductoId && productoIdActual && (devProductoId.toString() === productoIdActual.toString());
+      
+      console.log(`📋 Devolución ${index + 1}:`, {
+        devolucionId: dev._id,
+        productoIdEnDev: devProductoId,
+        productoIdActual: productoIdActual,
+        sonIguales: sonIguales,
+        nombreProducto: dev.productoId?.nombre,
+        cantidadDevuelta: dev.cantidadDevuelta,
+        estado: dev.estado
+      });
+    });
+    
+    // Buscar coincidencias
+    const hayCoincidencia = devoluciones.some(dev => {
+      const devProductoId = dev.productoId?._id || dev.productoId;
+      return devProductoId && productoIdActual && (devProductoId.toString() === productoIdActual.toString());
+    });
+    
+    console.log('🎯 RESULTADO FINAL:', {
+      productoId: productoIdActual,
+      hayDevoluciones: hayCoincidencia,
+      ocultarBotones: hayCoincidencia
+    });
+    
+    console.log('🔍 ===== FIN DETECCIÓN DE DEVOLUCIONES =====');
+    
+    return hayCoincidencia;
+  }, [devoluciones, producto.productoId]);
+
+  // 📊 LOG FINAL SIMPLIFICADO
+  console.log('🎯 DECISIÓN FINAL - MOSTRAR/OCULTAR BOTONES:', {
+    producto: producto.productoId?.nombre,
+    tieneDevolucion: tieneDevolucion,
+    mostrarBotones: !tieneDevolucion,
+    accion: tieneDevolucion ? '🔒 OCULTAR BOTONES' : '✅ MOSTRAR BOTONES'
+  });
 
   // Función para determinar el color del stock
   const getStockColor = (cantidadRestante) => {
@@ -30,7 +101,7 @@ const ProductCard = ({
   };
 
   const handleQuantityChange = async (action) => {
-    if (isUpdating || loading) return;
+    if (isUpdating || loading || cantidadLoading) return;
     
     // Para operaciones + y -, abrir el modal
     if (action === 'increase' || action === 'decrease') {
@@ -53,38 +124,64 @@ const ProductCard = ({
       
       setIsUpdating(true);
       try {
-        await onUpdateQuantity(ventaId, producto.productoId._id, nuevaCantidad);
+        // Usar el servicio unificado
+        const resultado = await actualizarCantidadManual(
+          ventaId, 
+          producto.productoId._id, 
+          nuevaCantidad,
+          'Cambio manual desde tarjeta de producto'
+        );
+        
         setNewQuantity(nuevaCantidad);
+        
+        // Notificar al componente padre
+        if (onUpdateQuantity && resultado.venta) {
+          onUpdateQuantity(resultado.venta);
+        }
       } catch (error) {
         console.error('Error al actualizar cantidad:', error);
         alert('Error al actualizar la cantidad. Por favor, intente nuevamente.');
+        // Revertir el valor del input
+        setNewQuantity(producto.cantidad);
       } finally {
         setIsUpdating(false);
       }
     }
   };
 
-  const handleQuantityConfirm = async (ventaActualizada) => {
-    if (ventaActualizada && ventaActualizada.venta) {
+  const handleQuantityConfirm = async (responseData) => {
+    console.log('🔍 ProductCard - handleQuantityConfirm recibió:', responseData);
+    
+    // La venta puede venir directamente o dentro de un objeto con la propiedad 'venta'
+    const venta = responseData?.venta || responseData;
+    
+    if (venta && venta.productos) {
       // Buscar el producto actualizado en la venta
-      const productoActualizado = ventaActualizada.venta.productos.find(
+      const productoActualizado = venta.productos.find(
         p => p.productoId._id === producto.productoId._id
       );
       
       if (productoActualizado) {
-        // Actualizar el estado local
+        // Actualizar el estado local inmediatamente
         setNewQuantity(productoActualizado.cantidad);
         
         console.log('✅ Producto actualizado con historial:', {
-          cantidad: productoActualizado.cantidad,
+          productoId: producto.productoId._id,
+          cantidadAnterior: producto.cantidad,
+          cantidadNueva: productoActualizado.cantidad,
           historial: productoActualizado.historial
         });
+      } else {
+        console.warn('⚠️ ProductCard - No se encontró el producto en la venta actualizada');
       }
       
       // Notificar al componente padre que la venta se actualizó
       if (onUpdateQuantity) {
-        onUpdateQuantity(ventaActualizada.venta);
+        console.log('🔄 ProductCard - Notificando al padre sobre la actualización');
+        onUpdateQuantity(venta);
       }
+    } else {
+      console.warn('⚠️ ProductCard - No se encontró la estructura de venta esperada:', responseData);
     }
   };
 
@@ -175,50 +272,70 @@ const ProductCard = ({
 
         {canEdit && (
           <div className="flex flex-col items-end gap-2">
-            {/* Controles de cantidad */}
-            <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-1">
-              <button
-                onClick={() => handleQuantityChange('decrease')}
-                disabled={isUpdating || producto.cantidad <= 1}
-                className="p-1 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Reducir cantidad"
-              >
-                <Minus className="w-4 h-4" />
-              </button>
-              
-              <input
-                type="number"
-                value={newQuantity}
-                onChange={(e) => setNewQuantity(e.target.value)}
-                onBlur={() => handleQuantityChange('set')}
-                onKeyPress={(e) => e.key === 'Enter' && handleQuantityChange('set')}
-                className="w-16 text-center border-0 bg-transparent focus:ring-0 focus:outline-none"
-                min="1"
-                max={producto.cantidad + (producto.productoId?.cantidadRestante || 0)}
-              />
-              
-              <button
-                onClick={() => handleQuantityChange('increase')}
-                disabled={isUpdating || (producto.productoId?.cantidadRestante || 0) <= 0}
-                className={`p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed ${
-                  (producto.productoId?.cantidadRestante || 0) <= 0
-                    ? 'text-red-400 bg-red-100'
-                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-200'
-                }`}
-                title={
-                  (producto.productoId?.cantidadRestante || 0) <= 0
-                    ? 'Sin stock disponible'
-                    : 'Aumentar cantidad'
-                }
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-            
-            {/* Advertencia de stock agotado */}
-            {(producto.productoId?.cantidadRestante || 0) <= 0 && (
-              <div className="text-xs text-red-600 text-center">
-                Sin stock
+            {/* ✅ MOSTRAR CONTROLES SOLO SI NO HAY DEVOLUCIONES */}
+            {!tieneDevolucion ? (
+              <>
+                {/* Controles de cantidad */}
+                <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-1">
+                  <button
+                    onClick={() => handleQuantityChange('decrease')}
+                    disabled={isUpdating || producto.cantidad <= 1}
+                    className="p-1 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Reducir cantidad"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  
+                  <input
+                    type="number"
+                    value={newQuantity}
+                    onChange={(e) => setNewQuantity(e.target.value)}
+                    onBlur={() => handleQuantityChange('set')}
+                    onKeyPress={(e) => e.key === 'Enter' && handleQuantityChange('set')}
+                    className="w-16 text-center border-0 bg-transparent focus:ring-0 focus:outline-none"
+                    min="1"
+                    max={producto.cantidad + (producto.productoId?.cantidadRestante || 0)}
+                  />
+                  
+                  <button
+                    onClick={() => handleQuantityChange('increase')}
+                    disabled={isUpdating || (producto.productoId?.cantidadRestante || 0) <= 0}
+                    className={`p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed ${
+                      (producto.productoId?.cantidadRestante || 0) <= 0
+                        ? 'text-red-400 bg-red-100'
+                        : 'text-gray-600 hover:text-gray-800 hover:bg-gray-200'
+                    }`}
+                    title={
+                      (producto.productoId?.cantidadRestante || 0) <= 0
+                        ? 'Sin stock disponible'
+                        : 'Aumentar cantidad'
+                    }
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+                
+                {/* Advertencia de stock agotado */}
+                {(producto.productoId?.cantidadRestante || 0) <= 0 && (
+                  <div className="text-xs text-red-600 text-center">
+                    Sin stock
+                  </div>
+                )}
+              </>
+            ) : (
+              /* 🔒 MENSAJE CUANDO HAY DEVOLUCIONES */
+              <div className="flex flex-col items-center gap-2 bg-orange-50 border border-orange-200 rounded-lg p-3">
+                <div className="flex items-center gap-2 text-orange-700">
+                  <span className="text-lg">🔒</span>
+                  <span className="text-sm font-medium">Cantidad bloqueada</span>
+                </div>
+                <div className="text-xs text-orange-600 text-center">
+                  Este producto tiene devoluciones.<br/>
+                  No se puede modificar la cantidad.
+                </div>
+                <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded border">
+                  Cantidad fija: {producto.cantidad}
+                </div>
               </div>
             )}
 
