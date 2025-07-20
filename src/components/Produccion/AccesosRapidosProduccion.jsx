@@ -4,6 +4,12 @@ import { Link, useLocation, useResolvedPath } from 'react-router-dom';
 
 const accesos = [
   {
+    label: 'Catálogo de Producción',
+    to: 'catalogo',
+    icon: '📋',
+    color: 'bg-indigo-50 hover:bg-indigo-100 text-indigo-800',
+  },
+  {
     label: 'Gestión de Ingredientes',
     to: 'ingredientes',
     icon: '🥬',
@@ -44,7 +50,7 @@ const AccesosRapidosProduccion = () => {
 
   return (
     <div className="mb-4">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-2 sm:gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-2 sm:gap-4">
         {accesos.map((acceso) => {
           const to = basePath + '/' + acceso.to;
           const isActive = location.pathname.startsWith(to);

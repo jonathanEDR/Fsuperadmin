@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { produccionService } from '../../../services/produccionService';
 import { ingredienteService } from '../../../services/ingredienteService';
 import { recetaService } from '../../../services/recetaService';
+import { catalogoProduccionService } from '../../../services/catalogoProduccionService';
 
 const NuevaProduccion = ({ onGuardar, onCancelar }) => {
   const [formData, setFormData] = useState({
@@ -11,11 +12,16 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
     observaciones: '',
     ingredientesUtilizados: [],
     recetasUtilizadas: [],
-    operador: ''
+    operador: '',
+    // ✨ NUEVO: Campo para producto del catálogo
+    productoDelCatalogo: null
   });
 
   const [ingredientesDisponibles, setIngredientesDisponibles] = useState([]);
   const [recetasDisponibles, setRecetasDisponibles] = useState([]);
+  // ✨ NUEVO: Estado para productos del catálogo de producción
+  const [productosProduccion, setProductosProduccion] = useState([]);
+  const [mostrarSelectorCatalogo, setMostrarSelectorCatalogo] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
@@ -27,13 +33,17 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
   const cargarDatos = async () => {
     try {
       setLoading(true);
-      const [ingredientesResponse, recetasResponse] = await Promise.all([
+      const [ingredientesResponse, recetasResponse, productosResponse] = await Promise.all([
         ingredienteService.obtenerIngredientes({ activo: true }),
-        recetaService.obtenerRecetas({ activo: true })
+        recetaService.obtenerRecetas({ activo: true }),
+        // ✨ NUEVO: Cargar productos del catálogo de producción
+        catalogoProduccionService.obtenerProductosProduccion({ activo: true })
       ]);
 
       setIngredientesDisponibles(ingredientesResponse.data);
       setRecetasDisponibles(recetasResponse.data);
+      // ✨ NUEVO: Establecer productos del catálogo
+      setProductosProduccion(productosResponse.data || []);
     } catch (err) {
       setError('Error al cargar datos: ' + err.message);
     } finally {
@@ -69,6 +79,8 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
     }));
   };
 
+  // ✅ CORRECTO: Solo elimina del formulario temporal, NO afecta el stock
+  // El stock se actualiza cuando se guarda toda la producción
   const eliminarIngrediente = (index) => {
     setFormData(prev => ({
       ...prev,
@@ -76,6 +88,8 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
     }));
   };
 
+  // ✅ CORRECTO: Solo elimina del formulario temporal, NO afecta el stock  
+  // El stock se actualiza cuando se guarda toda la producción
   const eliminarReceta = (index) => {
     setFormData(prev => ({
       ...prev,
@@ -121,9 +135,28 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
     return costoIngredientes + costoRecetas;
   };
 
+  // ✨ NUEVAS FUNCIONES PARA CATÁLOGO
+  const seleccionarProductoDelCatalogo = (producto) => {
+    setFormData(prev => ({
+      ...prev,
+      productoDelCatalogo: producto,
+      nombre: producto.nombre, // Auto-llenar el nombre
+      unidadMedida: producto.unidadMedida || 'unidades' // Auto-llenar unidad de medida si está disponible
+    }));
+    setMostrarSelectorCatalogo(false);
+  };
+
+  const limpiarSeleccionCatalogo = () => {
+    setFormData(prev => ({
+      ...prev,
+      productoDelCatalogo: null,
+      nombre: '' // Limpiar el nombre también
+    }));
+  };
+
   const validarFormulario = () => {
-    if (!formData.nombre.trim()) {
-      setError('El nombre del producto es requerido');
+    if (!formData.productoDelCatalogo) {
+      setError('Debe seleccionar un producto del catálogo de producción');
       return false;
     }
 
@@ -183,6 +216,8 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
     try {
       const datosProduccion = {
         ...formData,
+        // Usar el nombre del producto seleccionado del catálogo
+        nombre: formData.productoDelCatalogo.nombre,
         costoTotal: calcularCostoTotal(),
         tipo: 'manual'
       };
@@ -233,10 +268,48 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
             <div className="md:w-1/2 w-full flex-shrink-0 flex flex-col">
               <div className="bg-white p-4 rounded-lg border mb-4 flex-1">
                 <h4 className="text-lg font-medium text-gray-900 mb-4">Información del Producto</h4>
+
                 <div className="grid grid-cols-1 gap-4">
+                  {/* ✨ SELECTOR DEL CATÁLOGO INTEGRADO */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Producto *</label>
-                    <input type="text" value={formData.nombre} onChange={(e) => setFormData(prev => ({ ...prev, nombre: e.target.value }))} className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: Pizza Margherita Especial" />
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      🏭 Producto del Catálogo (Requerido) *
+                    </label>
+                    {formData.productoDelCatalogo ? (
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-green-800">{formData.productoDelCatalogo.nombre}</p>
+                            <p className="text-sm text-green-600">Código: {formData.productoDelCatalogo.codigo}</p>
+                            {formData.productoDelCatalogo.descripcion && (
+                              <p className="text-xs text-green-500 mt-1">{formData.productoDelCatalogo.descripcion}</p>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={limpiarSeleccionCatalogo}
+                            className="text-red-600 hover:text-red-800 p-1 hover:bg-red-100 rounded"
+                            title="Cambiar producto"
+                          >
+                            🔄
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setMostrarSelectorCatalogo(true)}
+                        className="w-full p-3 border-2 border-dashed border-blue-300 rounded-md text-blue-600 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                      >
+                        <div className="flex items-center justify-center space-x-2">
+                          <span className="text-xl">📋</span>
+                          <span className="font-medium">Seleccionar Producto del Catálogo</span>
+                        </div>
+                        <p className="text-sm text-blue-500 mt-1">
+                          Requerido: Elige un producto del catálogo de producción
+                        </p>
+                      </button>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Cantidad Producida *</label>
@@ -380,6 +453,136 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
             <button type="submit" disabled={enviando} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50">{enviando ? 'Creando...' : 'Crear Producción'}</button>
           </div>
         </form>
+
+        {/* ✨ MODAL OPTIMIZADO: Selector del Catálogo */}
+        {mostrarSelectorCatalogo && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[85vh] flex flex-col">
+              
+              {/* Header del Modal */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                    🏭 Catálogo de Producción
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Selecciona un producto para continuar con la producción
+                  </p>
+                </div>
+                <button
+                  onClick={() => setMostrarSelectorCatalogo(false)}
+                  className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors"
+                  title="Cerrar"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Contenido del Modal */}
+              <div className="flex-1 overflow-y-auto p-6">
+                {productosProduccion.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-gray-300 text-6xl mb-4">📦</div>
+                    <h4 className="text-lg font-medium text-gray-700 mb-2">
+                      No hay productos disponibles
+                    </h4>
+                    <p className="text-gray-500 mb-4">
+                      No se encontraron productos de producción en el catálogo.
+                    </p>
+                    <button
+                      onClick={() => setMostrarSelectorCatalogo(false)}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Continuar sin selección
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    {/* Contador de productos */}
+                    <div className="mb-4 text-center">
+                      <span className="text-sm text-gray-500">
+                        {productosProduccion.length} producto{productosProduccion.length !== 1 ? 's' : ''} disponible{productosProduccion.length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+
+                    {/* Grid de productos */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {productosProduccion.map(producto => (
+                        <div
+                          key={producto._id}
+                          onClick={() => seleccionarProductoDelCatalogo(producto)}
+                          className="group border-2 border-gray-200 rounded-xl p-4 hover:border-blue-400 hover:shadow-lg cursor-pointer transition-all duration-200 bg-gradient-to-br from-white to-blue-50/20"
+                        >
+                          {/* Header del producto */}
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
+                                {producto.nombre}
+                              </h4>
+                              <p className="text-sm text-gray-500 font-mono">
+                                {producto.codigo}
+                              </p>
+                            </div>
+                            <div className="text-blue-500 text-2xl group-hover:scale-110 transition-transform">
+                              🏭
+                            </div>
+                          </div>
+                          
+                          {/* Descripción */}
+                          {producto.descripcion && (
+                            <p className="text-sm text-gray-600 mb-3 overflow-hidden" style={{
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical'
+                            }}>
+                              {producto.descripcion}
+                            </p>
+                          )}
+                          
+                          {/* Footer del producto */}
+                          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                            <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-md text-xs font-medium">
+                              {producto.unidadMedida || 'Unidad'}
+                            </span>
+                            {producto.costoEstimado > 0 && (
+                              <span className="text-green-600 font-semibold text-sm">
+                                S/.{producto.costoEstimado.toFixed(2)}
+                              </span>
+                            )}
+                          </div>
+                          
+                          {/* Indicador de acción */}
+                          <div className="mt-3 text-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span className="text-xs text-blue-600 font-medium bg-blue-50 px-3 py-1 rounded-full">
+                              Clic para seleccionar
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Footer del Modal */}
+              <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 rounded-b-xl">
+                <div className="flex justify-between items-center">
+                  <div className="text-xs text-gray-500">
+                    💡 Tip: Al seleccionar un producto, se auto-completará la información básica
+                  </div>
+                  <button
+                    onClick={() => setMostrarSelectorCatalogo(false)}
+                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

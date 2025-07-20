@@ -1,28 +1,80 @@
 import React, { useState, useEffect } from 'react';
 import { recetaService } from '../../../services/recetaService';
+import HistorialFases from './HistorialFases';
 
-const VistaReceta = ({ receta, onCerrar, onEditar }) => {
+const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
+  const [recetaActual, setRecetaActual] = useState(receta);
   const [costoCalculado, setCostoCalculado] = useState(null);
   const [disponibilidad, setDisponibilidad] = useState(null);
   const [cantidadConsulta, setCantidadConsulta] = useState(1);
   const [loading, setLoading] = useState(false);
 
+  // Efecto para recargar la receta cuando cambie el ID o la key de recarga
   useEffect(() => {
-    consultarInformacion();
-  }, [cantidadConsulta]);
+    if (receta?._id) {
+      recargarReceta();
+    }
+  }, [receta?._id, recargarKey]);
+
+  // Efecto para consultar información cuando cambie la cantidad o la receta
+  useEffect(() => {
+    const recetaParaUsar = recetaActual || receta;
+    if (recetaParaUsar?._id) {
+      consultarInformacion();
+    }
+  }, [cantidadConsulta, recetaActual?._id, receta?._id]);
+
+  const recargarReceta = async () => {
+    try {
+      console.log('🔄 Recargando receta:', receta._id);
+      const response = await recetaService.obtenerRecetaPorId(receta._id);
+      // Manejar respuesta del backend que puede venir en response.data o response.data.data
+      const recetaActualizada = response.data || response;
+      setRecetaActual(recetaActualizada);
+      console.log('✅ Receta recargada:', recetaActualizada);
+    } catch (error) {
+      console.error('Error al recargar receta:', error);
+      // Si falla, usar la receta original
+      setRecetaActual(receta);
+    }
+  };
 
   const consultarInformacion = async () => {
+    const recetaParaUsar = recetaActual || receta;
+    if (!recetaParaUsar?._id) return;
+    
     setLoading(true);
     try {
       const [costoResponse, disponibilidadResponse] = await Promise.all([
-        recetaService.calcularCosto(receta._id, cantidadConsulta),
-        recetaService.verificarDisponibilidad(receta._id, cantidadConsulta)
+        recetaService.calcularCosto(recetaParaUsar._id, cantidadConsulta),
+        recetaService.verificarDisponibilidad(recetaParaUsar._id, cantidadConsulta)
       ]);
 
       setCostoCalculado(costoResponse.data);
       setDisponibilidad(disponibilidadResponse.data);
     } catch (error) {
       console.error('Error al consultar información:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🎯 NUEVO: Función para reiniciar receta
+  const handleReiniciarReceta = async () => {
+    const recetaParaUsar = recetaActual || receta;
+    if (!recetaParaUsar?._id) return;
+
+    try {
+      setLoading(true);
+      const response = await recetaService.reiniciarReceta(recetaParaUsar._id, 'Reinicio desde vista de detalles');
+      
+      // Recargar la receta con los nuevos datos
+      await recargarReceta();
+      
+      alert('✅ Receta reiniciada exitosamente al estado preparado');
+    } catch (error) {
+      console.error('Error al reiniciar receta:', error);
+      alert(`❌ Error al reiniciar receta: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -56,6 +108,9 @@ const VistaReceta = ({ receta, onCerrar, onEditar }) => {
     });
   };
 
+  // Usar recetaActual si está disponible, sino usar receta original
+  const datosReceta = recetaActual || receta;
+
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
       <div className="relative mx-auto border box-border w-full max-w-3xl sm:w-11/12 shadow-2xl rounded-2xl bg-white p-0 max-h-[92vh] flex flex-col">
@@ -64,29 +119,24 @@ const VistaReceta = ({ receta, onCerrar, onEditar }) => {
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4 sm:mb-8 border-b pb-4 sm:pb-6">
             <div>
               <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-                {receta.nombre}
+                {datosReceta.nombre}
               </h3>
               <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getCategoriaColor(receta.categoria)}`}>
-                  {getCategoriaLabel(receta.categoria)}
+                <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getCategoriaColor(datosReceta.categoria)}`}>
+                  {getCategoriaLabel(datosReceta.categoria)}
                 </span>
                 <span className={`px-2 py-1 rounded text-xs sm:text-sm ${
-                  receta.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  datosReceta.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                 }`}>
-                  {receta.activo ? 'Activa' : 'Inactiva'}
+                  {datosReceta.activo ? 'Activa' : 'Inactiva'}
                 </span>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <button
-                onClick={onEditar}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto"
-              >
-                Editar
-              </button>
+            <div className="flex justify-end">
               <button
                 onClick={onCerrar}
-                className="text-gray-400 hover:text-gray-600 w-full sm:w-auto"
+                className="text-gray-400 hover:text-gray-600 p-2"
+                title="Cerrar"
               >
                 ✕
               </button>
@@ -97,10 +147,10 @@ const VistaReceta = ({ receta, onCerrar, onEditar }) => {
             {/* Información Principal */}
             <div className="space-y-4 sm:space-y-6 min-w-0">
               {/* Descripción */}
-              {receta.descripcion && (
+              {datosReceta.descripcion && (
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h4 className="font-medium text-gray-700 mb-2">Descripción</h4>
-                  <p className="text-gray-600">{receta.descripcion}</p>
+                  <p className="text-gray-600">{datosReceta.descripcion}</p>
                 </div>
               )}
 
@@ -122,7 +172,7 @@ const VistaReceta = ({ receta, onCerrar, onEditar }) => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {receta.ingredientes?.map((item, index) => {
+                      {datosReceta.ingredientes?.map((item, index) => {
                         const disponible = item.ingrediente.cantidad - item.ingrediente.procesado;
                         const subtotal = item.cantidad * item.ingrediente.precioUnitario;
                         const cantidadNecesaria = item.cantidad * cantidadConsulta;
@@ -189,30 +239,30 @@ const VistaReceta = ({ receta, onCerrar, onEditar }) => {
                   <div className="flex justify-between">
                     <span className="text-gray-600">Rendimiento:</span>
                     <span className="font-medium">
-                      {receta.rendimiento?.cantidad} {receta.rendimiento?.unidadMedida}
+                      {datosReceta.rendimiento?.cantidad} {datosReceta.rendimiento?.unidadMedida}
                     </span>
                   </div>
-                  {receta.tiempoPreparacion > 0 && (
+                  {datosReceta.tiempoPreparacion > 0 && (
                     <div className="flex justify-between">
                       <span className="text-gray-600">Tiempo:</span>
-                      <span className="font-medium">{receta.tiempoPreparacion} min</span>
+                      <span className="font-medium">{datosReceta.tiempoPreparacion} min</span>
                     </div>
                   )}
                   <div className="flex justify-between">
                     <span className="text-gray-600">Ingredientes:</span>
-                    <span className="font-medium">{receta.ingredientes?.length || 0}</span>
+                    <span className="font-medium">{datosReceta.ingredientes?.length || 0}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Creada:</span>
                     <span className="font-medium text-xs">
-                      {formatearFecha(receta.createdAt)}
+                      {formatearFecha(datosReceta.createdAt)}
                     </span>
                   </div>
-                  {receta.updatedAt !== receta.createdAt && (
+                  {datosReceta.updatedAt !== datosReceta.createdAt && (
                     <div className="flex justify-between">
                       <span className="text-gray-600">Actualizada:</span>
                       <span className="font-medium text-xs">
-                        {formatearFecha(receta.updatedAt)}
+                        {formatearFecha(datosReceta.updatedAt)}
                       </span>
                     </div>
                   )}
@@ -287,6 +337,12 @@ const VistaReceta = ({ receta, onCerrar, onEditar }) => {
               </div>
             </div>
           </div>
+
+          {/* 🎯 NUEVO: Historial de Fases */}
+          <HistorialFases 
+            receta={datosReceta} 
+            onReiniciar={handleReiniciarReceta}
+          />
 
           {/* Botón Cerrar */}
           <div className="flex justify-center sm:justify-end mt-6 pt-4 border-t">

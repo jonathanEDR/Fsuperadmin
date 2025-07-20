@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ingredienteService } from '../../../services/ingredienteService';
-import FormularioIngrediente from './FormularioIngrediente';
+import FormularioIngredienteMejorado from './FormularioIngredienteMejorado';
 import AjusteInventario from './AjusteInventario';
 import MovimientosIngrediente from './MovimientosIngrediente';
-import TablaIngredientesFinalizados from './TablaIngredientesFinalizados';
+// import TablaIngredientesFinalizados from './TablaIngredientesFinalizados';
 import AccesosRapidosProduccion from '../AccesosRapidosProduccion';
 
 const GestionIngredientes = () => {
@@ -185,6 +185,9 @@ const GestionIngredientes = () => {
                   Ingrediente
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Producto del Catálogo
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Cantidad Total
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -202,7 +205,7 @@ const GestionIngredientes = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {ingredientes.filter(ingrediente => (ingrediente.cantidad - ingrediente.procesado) > 0).map((ingrediente) => (
+              {ingredientes.map((ingrediente) => (
                 <tr key={ingrediente._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
@@ -212,6 +215,28 @@ const GestionIngredientes = () => {
                       <div className="text-sm text-gray-500">
                         {ingrediente.unidadMedida}
                       </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div>
+                      {ingrediente.productoReferencia ? (
+                        <>
+                          <div className="flex items-center text-sm text-blue-600">
+                            <span className="mr-1">
+                              {ingrediente.productoReferencia.tipoProduccion?.icono || '📦'}
+                            </span>
+                            Del Catálogo
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {ingrediente.productoReferencia.codigo} - {ingrediente.productoReferencia.nombre}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex items-center text-sm text-red-600">
+                          <span className="mr-1">⚠️</span>
+                          Sin referencia
+                        </div>
+                      )}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -264,19 +289,18 @@ const GestionIngredientes = () => {
           </table>
         </div>
 
-        {ingredientes.filter(ingrediente => (ingrediente.cantidad - ingrediente.procesado) > 0).length === 0 && (
+        {ingredientes.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500">No se encontraron ingredientes</p>
           </div>
         )}
       </div>
 
-      {/* Tabla de Ingredientes Finalizados */}
-      <TablaIngredientesFinalizados ingredientes={ingredientes} />
+      {/* Eliminada la tabla de ingredientes finalizados */}
 
       {/* Modales */}
       {mostrarFormulario && (
-        <FormularioIngrediente
+        <FormularioIngredienteMejorado
           ingrediente={ingredienteEditando}
           onGuardar={handleGuardarIngrediente}
           onCancelar={() => {

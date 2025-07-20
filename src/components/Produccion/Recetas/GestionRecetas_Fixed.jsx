@@ -2,10 +2,8 @@ import React, { useState, useEffect } from 'react';
 import AccesosRapidosProduccion from '../AccesosRapidosProduccion';
 import { recetaService } from '../../../services/recetaService';
 import FormularioReceta from './FormularioReceta';
-import FormularioBasicoReceta from './FormularioBasicoReceta';
 import VistaReceta from './VistaReceta';
 import ModalAvanzarFase from './ModalAvanzarFase';
-import TablaHistorialGeneral from './TablaHistorialGeneral';
 
 const GestionRecetas = () => {
   const [recetas, setRecetas] = useState([]);
@@ -17,10 +15,8 @@ const GestionRecetas = () => {
   });
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [recetaEditando, setRecetaEditando] = useState(null);
-  const [mostrarFormularioBasico, setMostrarFormularioBasico] = useState(false);
   const [mostrarVista, setMostrarVista] = useState(false);
   const [recetaSeleccionada, setRecetaSeleccionada] = useState(null);
-  const [recargarVistaKey, setRecargarVistaKey] = useState(0);
   
   // Estados para el flujo de trabajo
   const [mostrarModalAvanzar, setMostrarModalAvanzar] = useState(false);
@@ -34,14 +30,6 @@ const GestionRecetas = () => {
     try {
       setLoading(true);
       const response = await recetaService.obtenerRecetas(filtros);
-      
-      // 🔍 DEBUG: Ver qué datos llegan del backend
-      console.log('🔍 DEBUG - Datos del backend:', response.data);
-      if (response.data.length > 0) {
-        console.log('🔍 DEBUG - Primera receta ejemplo:', response.data[0]);
-        console.log('🔍 DEBUG - Categoría de primera receta:', response.data[0].categoria);
-      }
-      
       setRecetas(response.data);
       setError('');
     } catch (err) {
@@ -65,7 +53,7 @@ const GestionRecetas = () => {
 
   const handleEditarReceta = (receta) => {
     setRecetaEditando(receta);
-    setMostrarFormularioBasico(true); // 🎯 CAMBIO: Usar formulario básico para editar
+    setMostrarFormulario(true);
   };
 
   const handleVerReceta = (receta) => {
@@ -74,11 +62,9 @@ const GestionRecetas = () => {
   };
 
   const handleGuardarReceta = async (datos) => {
-    console.log('🎯 handleGuardarReceta iniciado');
-    console.log('📋 Datos recibidos:', datos);
-    
     try {
-      console.log('🔍 Iniciando validaciones...');
+      console.log('📋 Datos a enviar:', datos);
+      console.log('🔍 Validando estructura de datos...');
       
       // Validaciones adicionales antes del envío
       if (!datos.categoria) {
@@ -105,21 +91,12 @@ const GestionRecetas = () => {
         await recetaService.actualizarReceta(recetaEditando._id, datos);
       } else {
         console.log('🆕 Creando nueva receta...');
-        console.log('📞 Llamando a recetaService.crearReceta...');
-        const response = await recetaService.crearReceta(datos);
-        console.log('✅ Respuesta del backend:', response);
+        await recetaService.crearReceta(datos);
       }
       
-      console.log('🎉 Operación exitosa, cerrando modal y recargando...');
       setMostrarFormulario(false);
       setRecetaEditando(null);
       cargarRecetas();
-      
-      // Si hay una vista abierta, forzar recarga
-      if (mostrarVista && recetaSeleccionada) {
-        setRecargarVistaKey(prev => prev + 1);
-      }
-      
       setError('');
       
       console.log('✅ Receta guardada exitosamente');
@@ -144,75 +121,6 @@ const GestionRecetas = () => {
       
       // Mostrar alerta al usuario también
       alert(`❌ Error: ${mensajeError}`);
-    }
-  };
-
-  // 🎯 NUEVO: Manejador específico para editar información básica
-  const handleGuardarEdicionBasica = async (datosBasicos) => {
-    console.log('🎯 handleGuardarEdicionBasica iniciado');
-    console.log('📋 Datos básicos recibidos:', datosBasicos);
-    
-    try {
-      if (!recetaEditando?._id) {
-        throw new Error('No hay receta seleccionada para editar');
-      }
-      
-      console.log('🔄 Actualizando información básica de receta...');
-      await recetaService.actualizarReceta(recetaEditando._id, datosBasicos);
-      
-      console.log('🎉 Edición básica exitosa, cerrando modal y recargando...');
-      setMostrarFormularioBasico(false);
-      setRecetaEditando(null);
-      cargarRecetas();
-      
-      // Si hay una vista abierta, forzar recarga
-      if (mostrarVista && recetaSeleccionada) {
-        setRecargarVistaKey(prev => prev + 1);
-      }
-      
-      setError('');
-      console.log('✅ Información básica actualizada exitosamente');
-    } catch (err) {
-      console.error('❌ Error al editar información básica:', err);
-      
-      let mensajeError = 'Error desconocido';
-      if (err.response?.data?.message) {
-        mensajeError = err.response.data.message;
-      } else if (err.response?.data?.error) {
-        mensajeError = err.response.data.error;
-      } else if (err.message) {
-        mensajeError = err.message;
-      }
-      
-      setError(`Error al actualizar información básica: ${mensajeError}`);
-      alert(`❌ Error: ${mensajeError}`);
-    }
-  };
-
-  // 🎯 NUEVO: Función para reiniciar receta desde tarjeta
-  const handleReiniciarRecetaTarjeta = async (receta) => {
-    const confirmacion = window.confirm(
-      `¿Estás seguro de que quieres reiniciar la receta "${receta.nombre}" al estado preparado?\n\nEsta acción no se puede deshacer.`
-    );
-    
-    if (!confirmacion) return;
-
-    try {
-      setLoading(true);
-      await recetaService.reiniciarReceta(receta._id, 'Reinicio desde tarjeta');
-      cargarRecetas(); // Recargar la lista
-      
-      // Si hay una vista abierta de esta receta, forzar recarga
-      if (mostrarVista && recetaSeleccionada?._id === receta._id) {
-        setRecargarVistaKey(prev => prev + 1);
-      }
-      
-      alert(`✅ Receta "${receta.nombre}" reiniciada exitosamente al estado preparado`);
-    } catch (error) {
-      console.error('Error al reiniciar receta:', error);
-      alert(`❌ Error al reiniciar receta: ${error.message}`);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -259,12 +167,6 @@ const GestionRecetas = () => {
       setRecetaParaAvanzar(null);
       setError('');
       cargarRecetas();
-      
-      // Si hay una vista abierta, forzar recarga
-      if (mostrarVista && recetaSeleccionada) {
-        setRecargarVistaKey(prev => prev + 1);
-      }
-      
       alert('✅ Fase avanzada exitosamente');
     } catch (err) {
       const mensajeError = err.response?.data?.message || err.message || 'Error desconocido';
@@ -379,74 +281,24 @@ const GestionRecetas = () => {
     }
   };
 
-  // Obtener color del botón según la fase
-  const obtenerColorBotonFase = (siguienteFase) => {
-    switch (siguienteFase) {
-      case 'producto_intermedio':
-        return 'bg-yellow-600 hover:bg-yellow-700'; // Amarillo para intermedio
-      case 'producto_terminado':
-        return 'bg-green-600 hover:bg-green-700';   // Verde para terminado
-      default:
-        return 'bg-blue-600 hover:bg-blue-700';     // Azul por defecto
-    }
-  };
-
-  // Obtener emoji para la siguiente fase
-  const obtenerEmojiSiguienteFase = (siguienteFase) => {
-    switch (siguienteFase) {
-      case 'producto_intermedio':
-        return '⚗️';
-      case 'producto_terminado':
-        return '🏁';
-      default:
-        return '⏭️';
-    }
-  };
-
-  // Normalizar categoría para comparaciones internas
-  const normalizarCategoria = (categoria) => {
-    const mapeoNormalizacion = {
-      'preparado': 'preparado',
-      'intermedio': 'intermedio',              // ✅ AÑADIDO: Faltaba este mapeo
-      'producto_intermedio': 'intermedio', 
-      'terminado': 'terminado',                // ✅ AÑADIDO: Para completitud
-      'producto_terminado': 'terminado'
-    };
-    return mapeoNormalizacion[categoria] || 'preparado';
-  };
-
   // Verificar si puede avanzar de fase
   const puedeAvanzarFase = (receta) => {
-    const categoriaOriginal = receta.categoria || 'preparado'; // 🎯 CORRECCIÓN: Usar categoria directamente
-    const faseNormalizada = normalizarCategoria(categoriaOriginal);
+    const faseActual = receta.faseActual || receta.categoria || 'preparado';
     const estadoProceso = receta.estadoProceso || 'borrador';
     const fases = ['preparado', 'intermedio', 'terminado'];
-    const indiceActual = fases.indexOf(faseNormalizada);
+    const indiceActual = fases.indexOf(faseActual);
     
     return estadoProceso === 'en_proceso' && 
-           indiceActual >= 0 &&  // Verificar que la fase sea válida
            indiceActual < fases.length - 1 && 
            (receta.puedeAvanzar !== false);
   };
 
   // Obtener siguiente fase
   const obtenerSiguienteFase = (receta) => {
-    const categoriaOriginal = receta.categoria || 'preparado'; // 🎯 CORRECCIÓN: Usar categoria directamente
-    const faseNormalizada = normalizarCategoria(categoriaOriginal);
+    const faseActual = receta.faseActual || receta.categoria || 'preparado';
     const fases = ['preparado', 'intermedio', 'terminado'];
-    const indiceActual = fases.indexOf(faseNormalizada);
-    
-    if (indiceActual >= 0 && indiceActual < fases.length - 1) {
-      const siguienteFaseNormalizada = fases[indiceActual + 1];
-      // Convertir de vuelta a la nomenclatura original
-      const mapeoInverso = {
-        'preparado': 'preparado',
-        'intermedio': 'producto_intermedio',
-        'terminado': 'producto_terminado'
-      };
-      return mapeoInverso[siguienteFaseNormalizada] || siguienteFaseNormalizada;
-    }
-    return null;
+    const indiceActual = fases.indexOf(faseActual);
+    return indiceActual < fases.length - 1 ? fases[indiceActual + 1] : null;
   };
 
   if (loading) {
@@ -510,23 +362,10 @@ const GestionRecetas = () => {
       {/* Lista de Recetas con Flujo de Trabajo */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {recetas.map((receta) => {
-          // 🎯 CORRECCIÓN: Usar categoria como fuente de verdad principal
-          const categoriaOriginal = receta.categoria || 'preparado';
-          const faseNormalizada = normalizarCategoria(categoriaOriginal);
+          const faseActual = receta.faseActual || receta.categoria || 'preparado';
           const estadoProceso = receta.estadoProceso || 'borrador';
           const siguienteFase = obtenerSiguienteFase(receta);
           const puedeAvanzar = puedeAvanzarFase(receta);
-          
-          // 🔍 DEBUG: Ver el mapeo de cada receta
-          console.log(`🔍 DEBUG receta "${receta.nombre}":`, {
-            'DB categoria': receta.categoria,
-            'DB faseActual': receta.faseActual,
-            categoriaOriginal,
-            faseNormalizada,
-            estadoProceso,
-            siguienteFase,
-            puedeAvanzar
-          });
           
           return (
             <div key={receta._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
@@ -538,9 +377,9 @@ const GestionRecetas = () => {
                     {receta.nombre}
                   </h3>
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">{obtenerEmojiFase(faseNormalizada)}</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium border ${obtenerColorPorFase(faseNormalizada)}`}>
-                      {categoriaOriginal.replace('producto_', '').toUpperCase()}
+                    <span className="text-lg">{obtenerEmojiFase(faseActual)}</span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium border ${obtenerColorPorFase(faseActual)}`}>
+                      {faseActual.toUpperCase()}
                     </span>
                   </div>
                 </div>
@@ -570,11 +409,11 @@ const GestionRecetas = () => {
                       <div
                         key={fase}
                         className={`flex-1 h-2 rounded ${
-                          estadoProceso === 'completado' && faseNormalizada === 'terminado'
+                          estadoProceso === 'completado' && faseActual === 'terminado'
                             ? 'bg-green-400'
-                            : faseNormalizada === fase
+                            : faseActual === fase
                             ? 'bg-blue-400'
-                            : index < ['preparado', 'intermedio', 'terminado'].indexOf(faseNormalizada)
+                            : index < ['preparado', 'intermedio', 'terminado'].indexOf(faseActual)
                             ? 'bg-green-300'
                             : 'bg-gray-200'
                         }`}
@@ -637,14 +476,14 @@ const GestionRecetas = () => {
                   {puedeAvanzar && (
                     <button
                       onClick={() => handleAbrirModalAvanzar(receta)}
-                      className={`w-full ${obtenerColorBotonFase(siguienteFase)} text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2`}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
                     >
-                      <span>{obtenerEmojiSiguienteFase(siguienteFase)}</span>
-                      <span>Avanzar a {siguienteFase?.replace('producto_', '').toUpperCase()}</span>
+                      <span>⏭️</span>
+                      <span>Avanzar a {siguienteFase?.toUpperCase()}</span>
                     </button>
                   )}
                   
-                  {estadoProceso === 'en_proceso' && !puedeAvanzar && faseNormalizada !== 'terminado' && (
+                  {estadoProceso === 'en_proceso' && !puedeAvanzar && faseActual !== 'terminado' && (
                     <button
                       onClick={() => handlePausarProceso(receta._id)}
                       className="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
@@ -671,35 +510,21 @@ const GestionRecetas = () => {
                   )}
                 </div>
 
-                {/* 🎯 MODIFICADO: Botones simplificados de gestión */}
+                {/* Botones de gestión tradicional */}
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 pt-2 border-t">
+                  <button
+                    onClick={() => handleVerReceta(receta)}
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  >
+                    Ver Detalles
+                  </button>
                   <div className="flex flex-col sm:flex-row gap-2">
                     <button
-                      onClick={() => handleVerReceta(receta)}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                    >
-                      Ver Detalles
-                    </button>
-                    <button
                       onClick={() => handleEditarReceta(receta)}
-                      className="text-green-600 hover:text-green-800 text-sm font-medium"
+                      className="text-green-600 hover:text-green-800 text-sm"
                     >
                       Editar
                     </button>
-                  </div>
-                  
-                  {/* 🎯 NUEVO: Botón de reiniciar (solo si no está en borrador) */}
-                  <div className="flex gap-2">
-                    {receta.estadoProceso !== 'borrador' && (
-                      <button
-                        onClick={() => handleReiniciarRecetaTarjeta(receta)}
-                        disabled={loading}
-                        className="px-3 py-1 bg-orange-100 text-orange-700 border border-orange-300 rounded-md text-sm font-medium hover:bg-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        title="Reiniciar receta al estado preparado"
-                      >
-                        🔄 Reiniciar
-                      </button>
-                    )}
                     <button
                       onClick={() => handleDesactivar(receta._id)}
                       className="text-red-600 hover:text-red-800 text-sm"
@@ -732,16 +557,6 @@ const GestionRecetas = () => {
         </div>
       )}
 
-      {/* 🎯 NUEVO: Tabla de Historial General - Solo mostrar si hay recetas */}
-      {recetas.length > 0 && (
-        <div className="mt-8">
-          <TablaHistorialGeneral 
-            recetas={recetas} 
-            onActualizar={cargarRecetas}
-          />
-        </div>
-      )}
-
       {/* Modales */}
       {mostrarFormulario && (
         <FormularioReceta
@@ -754,25 +569,16 @@ const GestionRecetas = () => {
         />
       )}
 
-      {/* 🎯 NUEVO: Modal para editar información básica */}
-      {mostrarFormularioBasico && (
-        <FormularioBasicoReceta
-          receta={recetaEditando}
-          onGuardar={handleGuardarEdicionBasica}
-          onCancelar={() => {
-            setMostrarFormularioBasico(false);
-            setRecetaEditando(null);
-          }}
-        />
-      )}
-
       {mostrarVista && recetaSeleccionada && (
         <VistaReceta
           receta={recetaSeleccionada}
-          recargarKey={recargarVistaKey}
           onCerrar={() => {
             setMostrarVista(false);
             setRecetaSeleccionada(null);
+          }}
+          onEditar={() => {
+            setMostrarVista(false);
+            handleEditarReceta(recetaSeleccionada);
           }}
         />
       )}

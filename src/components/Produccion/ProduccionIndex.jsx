@@ -63,11 +63,25 @@ const ProduccionIndex = () => {
 
   const modulos = [
     {
+      titulo: 'Catálogo de Producción',
+      descripcion: 'Gestiona el catálogo maestro de productos que se pueden producir',
+      enlace: 'catalogo',
+      icono: '📋',
+      color: 'bg-indigo-100 hover:bg-indigo-200 border-indigo-300'
+    },
+    {
       titulo: 'Gestión de Ingredientes',
       descripcion: 'Administra el inventario de ingredientes, ajustes de stock y movimientos',
       enlace: 'ingredientes',
       icono: '🥬',
       color: 'bg-green-100 hover:bg-green-200 border-green-300'
+    },
+    {
+      titulo: 'Gestión de Materiales',
+      descripcion: 'Controla el inventario de materiales de producción, proveedores y stock',
+      enlace: 'materiales',
+      icono: '🧱',
+      color: 'bg-yellow-100 hover:bg-yellow-200 border-yellow-300'
     },
     {
       titulo: 'Gestión de Recetas',

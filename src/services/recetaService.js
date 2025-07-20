@@ -90,5 +90,44 @@ export const recetaService = {
   async cambiarCategoria(id, categoria) {
     const response = await api.put(`/recetas/${id}/estado`, { categoria });
     return response.data;
+  },
+
+  // ============= NUEVOS MÉTODOS PARA FLUJO DE TRABAJO =============
+  
+  // Iniciar proceso de producción
+  async iniciarProceso(id) {
+    const response = await api.post(`/recetas/${id}/iniciar-proceso`);
+    return response.data;
+  },
+
+  // Avanzar a la siguiente fase del proceso
+  async avanzarFase(id, datosAdicionales = {}) {
+    const response = await api.post(`/recetas/${id}/avanzar-fase`, datosAdicionales);
+    return response.data;
+  },
+
+  // Agregar ingrediente a la fase actual
+  async agregarIngredienteAFaseActual(id, ingredienteData) {
+    const response = await api.post(`/recetas/${id}/agregar-ingrediente-fase`, ingredienteData);
+    return response.data;
+  },
+
+  // Pausar proceso
+  async pausarProceso(id, motivo = '') {
+    const response = await api.put(`/recetas/${id}/pausar-proceso`, { motivo });
+    return response.data;
+  },
+
+  // Reanudar proceso
+  async reanudarProceso(id) {
+    const response = await api.put(`/recetas/${id}/reanudar-proceso`);
+    return response.data;
+  },
+
+  // 🎯 NUEVO: Reiniciar receta al estado inicial
+  async reiniciarReceta(id, motivo) {
+    if (!motivo) motivo = 'Reinicio manual';
+    const response = await api.put(`/recetas/${id}/reiniciar`, { motivo });
+    return response.data;
   }
 };

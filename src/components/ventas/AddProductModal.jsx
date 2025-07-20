@@ -149,7 +149,7 @@ const AddProductModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center gap-3">
@@ -168,239 +168,237 @@ const AddProductModal = ({
           </button>
         </div>
 
-        {/* Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        {/* Body dividido en dos columnas */}
+        <form onSubmit={handleSubmit} className="p-6">
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
               <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
-
-          {/* Selector de producto */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Producto
-            </label>
-            {loadingProducts ? (
-              <div className="flex items-center justify-center p-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-600 border-t-transparent"></div>
-                <span className="ml-2 text-sm text-gray-600">Cargando productos...</span>
-              </div>
-            ) : (
-              <select
-                value={selectedProductId}
-                onChange={(e) => setSelectedProductId(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              >
-                <option value="">Seleccionar producto...</option>
-                {productos.map(producto => (
-                  <option key={producto._id} value={producto._id}>
-                    {producto.nombre} - {producto.categoryId?.nombre || 'Sin categoría'} - {getStockIcon(producto.cantidadRestante)} Stock: {producto.cantidadRestante} - S/ {producto.precio}
-                  </option>
-                ))}
-              </select>
-            )}
-            {productos.length === 0 && !loadingProducts && (
-              <p className="text-sm text-gray-500 mt-2">
-                No hay productos disponibles para agregar a esta venta
-              </p>
-            )}
-          </div>
-
-          {/* Información del producto seleccionado */}
-          {selectedProduct && (
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-              <h4 className="font-medium text-gray-900 mb-2">Información del Producto</h4>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-600">Nombre:</span>
-                  <p className="font-medium">{selectedProduct.nombre}</p>
-                </div>
-                <div>
-                  <span className="text-gray-600">Precio:</span>
-                  <p className="font-medium">S/ {selectedProduct.precio}</p>
-                </div>
-                <div>
-                  <span className="text-gray-600">Categoría:</span>
-                  <p className="font-medium">{selectedProduct.categoryName}</p>
-                </div>
-                <div>
-                  <span className="text-gray-600">Stock disponible:</span>
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStockColor(selectedProduct.cantidadRestante)}`}>
-                      {getStockIcon(selectedProduct.cantidadRestante)} {selectedProduct.cantidadRestante} unidades
-                    </span>
+          <div className="flex flex-col md:flex-row md:gap-6">
+            {/* Columna izquierda: Información del producto, cantidad y botones */}
+            <div className="md:w-1/2 mb-6 md:mb-0 flex flex-col gap-4">
+              {/* Selector de producto */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Producto
+                </label>
+                {loadingProducts ? (
+                  <div className="flex items-center justify-center p-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-600 border-t-transparent"></div>
+                    <span className="ml-2 text-sm text-gray-600">Cargando productos...</span>
                   </div>
-                </div>
+                ) : (
+                  <select
+                    value={selectedProductId}
+                    onChange={(e) => setSelectedProductId(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  >
+                    <option value="">Seleccionar producto...</option>
+                    {productos.map(producto => (
+                      <option key={producto._id} value={producto._id}>
+                        {producto.nombre} - {producto.categoryId?.nombre || 'Sin categoría'} - {getStockIcon(producto.cantidadRestante)} Stock: {producto.cantidadRestante} - S/ {producto.precio}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {productos.length === 0 && !loadingProducts && (
+                  <p className="text-sm text-gray-500 mt-2">
+                    No hay productos disponibles para agregar a esta venta
+                  </p>
+                )}
               </div>
-              
-              {/* Advertencia de stock bajo */}
-              {selectedProduct.cantidadRestante <= 5 && (
-                <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                  <p className="text-sm text-orange-800">
-                    ⚠️ <strong>Stock bajo:</strong> Solo quedan {selectedProduct.cantidadRestante} unidades disponibles
+              {/* Información del producto seleccionado */}
+              {selectedProduct && (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <h4 className="font-medium text-gray-900 mb-2">Información del Producto</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-600">Nombre:</span>
+                      <p className="font-medium">{selectedProduct.nombre}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Precio:</span>
+                      <p className="font-medium">S/ {selectedProduct.precio}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Categoría:</span>
+                      <p className="font-medium">{selectedProduct.categoryName}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Stock disponible:</span>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStockColor(selectedProduct.cantidadRestante)}`}>
+                          {getStockIcon(selectedProduct.cantidadRestante)} {selectedProduct.cantidadRestante} unidades
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Advertencia de stock bajo */}
+                  {selectedProduct.cantidadRestante <= 5 && (
+                    <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                      <p className="text-sm text-orange-800">
+                        ⚠️ <strong>Stock bajo:</strong> Solo quedan {selectedProduct.cantidadRestante} unidades disponibles
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* Cantidad */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Cantidad
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max={selectedProduct ? selectedProduct.cantidadRestante : undefined}
+                  value={quantity}
+                  onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                  className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    selectedProduct && quantity > selectedProduct.cantidadRestante 
+                      ? 'border-red-300 bg-red-50' 
+                      : 'border-gray-300'
+                  }`}
+                  required
+                />
+                {selectedProduct && quantity > selectedProduct.cantidadRestante && (
+                  <p className="mt-1 text-sm text-red-600">
+                    ⚠️ La cantidad no puede ser mayor al stock disponible ({selectedProduct.cantidadRestante})
+                  </p>
+                )}
+                {selectedProduct && (
+                  <p className="mt-1 text-sm text-gray-600">
+                    Máximo disponible: {selectedProduct.cantidadRestante} unidades
+                  </p>
+                )}
+              </div>
+              {/* Botones */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading || !selectedProductId || quantity <= 0 || productos.length === 0 || !isQuantityValid}
+                  className={`flex-1 px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                    loading || !selectedProductId || quantity <= 0 || productos.length === 0 || !isQuantityValid
+                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
+                >
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      Agregando...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4" />
+                      {isQuantityValid ? 'Agregar Producto' : 'Cantidad no válida'}
+                    </>
+                  )}
+                </button>
+              </div>
+              {/* Ayuda adicional */}
+              {!isQuantityValid && selectedProduct && (
+                <div className="mt-2 text-center">
+                  <p className="text-sm text-gray-600">
+                    💡 <strong>Tip:</strong> Ajusta la cantidad a un valor entre 1 y {selectedProduct.cantidadRestante}
                   </p>
                 </div>
               )}
             </div>
-          )}
-
-          {/* Cantidad */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Cantidad
-            </label>
-            <input
-              type="number"
-              min="1"
-              max={selectedProduct ? selectedProduct.cantidadRestante : undefined}
-              value={quantity}
-              onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-              className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                selectedProduct && quantity > selectedProduct.cantidadRestante 
-                  ? 'border-red-300 bg-red-50' 
-                  : 'border-gray-300'
-              }`}
-              required
-            />
-            {selectedProduct && quantity > selectedProduct.cantidadRestante && (
-              <p className="mt-1 text-sm text-red-600">
-                ⚠️ La cantidad no puede ser mayor al stock disponible ({selectedProduct.cantidadRestante})
-              </p>
-            )}
-            {selectedProduct && (
-              <p className="mt-1 text-sm text-gray-600">
-                Máximo disponible: {selectedProduct.cantidadRestante} unidades
-              </p>
-            )}
-          </div>
-
-          {/* Resumen de la operación */}
-          {selectedProduct && (
-            <div className={`border rounded-lg p-4 ${
-              isQuantityValid ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
-            }`}>
-              <h4 className="font-medium text-gray-900 mb-3">Resumen de la operación</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>Producto:</span>
-                  <span className="font-medium">{selectedProduct.nombre}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Categoría:</span>
-                  <span className="font-medium">{selectedProduct.categoryId?.nombre || 'Sin categoría'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Precio unitario:</span>
-                  <span className="font-medium">S/ {selectedProduct.precio.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Cantidad a agregar:</span>
-                  <span className="font-medium">{quantity}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Stock después de la operación:</span>
-                  <span className={`font-medium ${
-                    selectedProduct.cantidadRestante - quantity >= 0 
-                      ? 'text-green-600' 
-                      : 'text-red-600'
-                  }`}>
-                    {selectedProduct.cantidadRestante - quantity} unidades
-                  </span>
-                </div>
-                <div className="flex justify-between border-t pt-2">
-                  <span className="font-medium">Subtotal:</span>
-                  <span className="font-bold text-blue-600">
-                    S/ {(selectedProduct.precio * quantity).toFixed(2)}
-                  </span>
-                </div>
-              </div>
-              
-              {/* Indicador de validación */}
-              {isQuantityValid ? (
-                <div className="mt-3 flex items-center gap-2 text-green-700">
-                  <span className="text-green-600">✓</span>
-                  <span className="text-sm">Operación válida</span>
-                </div>
-              ) : (
-                <div className="mt-3 flex items-center gap-2 text-red-700">
-                  <span className="text-red-600">✗</span>
-                  <span className="text-sm">Cantidad no válida</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Información del producto seleccionado */}
-          {selectedProductId && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              {(() => {
-                const producto = productos.find(p => p._id === selectedProductId);
-                if (!producto) return null;
-                
-                const subtotal = producto.precio * quantity;
-                return (
+            {/* Columna derecha: Resumen */}
+            <div className="md:w-1/2 flex flex-col gap-4">
+              {/* Resumen de la operación */}
+              {selectedProduct && (
+                <div className={`border rounded-lg p-4 ${
+                  isQuantityValid ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
+                }`}>
+                  <h4 className="font-medium text-gray-900 mb-3">Resumen de la operación</h4>
                   <div className="space-y-2 text-sm">
-                    <h4 className="font-medium text-blue-800">Resumen:</h4>
                     <div className="flex justify-between">
-                      <span>Precio unitario:</span>
-                      <span className="font-medium">S/ {producto.precio.toFixed(2)}</span>
+                      <span>Producto:</span>
+                      <span className="font-medium">{selectedProduct.nombre}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Cantidad:</span>
+                      <span>Categoría:</span>
+                      <span className="font-medium">{selectedProduct.categoryId?.nombre || 'Sin categoría'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Precio unitario:</span>
+                      <span className="font-medium">S/ {selectedProduct.precio.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Cantidad a agregar:</span>
                       <span className="font-medium">{quantity}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Stock después de la operación:</span>
+                      <span className={`font-medium ${
+                        selectedProduct.cantidadRestante - quantity >= 0 
+                          ? 'text-green-600' 
+                          : 'text-red-600'
+                      }`}>
+                        {selectedProduct.cantidadRestante - quantity} unidades
+                      </span>
                     </div>
                     <div className="flex justify-between border-t pt-2">
                       <span className="font-medium">Subtotal:</span>
-                      <span className="font-bold text-blue-600">S/ {subtotal.toFixed(2)}</span>
+                      <span className="font-bold text-blue-600">
+                        S/ {(selectedProduct.precio * quantity).toFixed(2)}
+                      </span>
                     </div>
                   </div>
-                );
-              })()}
-            </div>
-          )}
-
-          {/* Botones */}
-          <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={loading || !selectedProductId || quantity <= 0 || productos.length === 0 || !isQuantityValid}
-              className={`flex-1 px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 ${
-                loading || !selectedProductId || quantity <= 0 || productos.length === 0 || !isQuantityValid
-                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  Agregando...
-                </>
-              ) : (
-                <>
-                  <Plus className="w-4 h-4" />
-                  {isQuantityValid ? 'Agregar Producto' : 'Cantidad no válida'}
-                </>
+                  {/* Indicador de validación */}
+                  {isQuantityValid ? (
+                    <div className="mt-3 flex items-center gap-2 text-green-700">
+                      <span className="text-green-600">✓</span>
+                      <span className="text-sm">Operación válida</span>
+                    </div>
+                  ) : (
+                    <div className="mt-3 flex items-center gap-2 text-red-700">
+                      <span className="text-red-600">✗</span>
+                      <span className="text-sm">Cantidad no válida</span>
+                    </div>
+                  )}
+                </div>
               )}
-            </button>
-          </div>
-          
-          {/* Ayuda adicional */}
-          {!isQuantityValid && selectedProduct && (
-            <div className="mt-2 text-center">
-              <p className="text-sm text-gray-600">
-                💡 <strong>Tip:</strong> Ajusta la cantidad a un valor entre 1 y {selectedProduct.cantidadRestante}
-              </p>
+              {/* Información del producto seleccionado (resumen adicional) */}
+              {selectedProductId && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  {(() => {
+                    const producto = productos.find(p => p._id === selectedProductId);
+                    if (!producto) return null;
+                    const subtotal = producto.precio * quantity;
+                    return (
+                      <div className="space-y-2 text-sm">
+                        <h4 className="font-medium text-blue-800">Resumen:</h4>
+                        <div className="flex justify-between">
+                          <span>Precio unitario:</span>
+                          <span className="font-medium">S/ {producto.precio.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Cantidad:</span>
+                          <span className="font-medium">{quantity}</span>
+                        </div>
+                        <div className="flex justify-between border-t pt-2">
+                          <span className="font-medium">Subtotal:</span>
+                          <span className="font-bold text-blue-600">S/ {subtotal.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </form>
       </div>
     </div>
