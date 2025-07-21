@@ -31,12 +31,43 @@ api.interceptors.request.use(async config => {
     config.headers['X-User-Name'] = `${user.firstName} ${user.lastName}`.trim();
     config.headers['X-User-Id'] = user.id;
     
+    // Agregar rol del usuario si está disponible
+    if (user.publicMetadata?.role) {
+      config.headers['X-User-Role'] = user.publicMetadata.role;
+    }
+    
     return config;
   } catch (error) {
     console.error('Error en interceptor de autenticación:', error);
     return Promise.reject(error);
   }
 });
+
+// Interceptor para manejar respuestas y errores
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    console.error('Error en respuesta de API:', error);
+    
+    // Manejar diferentes tipos de errores
+    if (error.response) {
+      // El servidor respondió con un código de error
+      const errorMessage = error.response.data?.message || error.message;
+      console.error('Error del servidor:', errorMessage);
+      return Promise.reject(new Error(errorMessage));
+    } else if (error.request) {
+      // La solicitud se hizo pero no hubo respuesta
+      console.error('No se recibió respuesta del servidor');
+      return Promise.reject(new Error('No se pudo conectar con el servidor'));
+    } else {
+      // Error en la configuración de la solicitud
+      console.error('Error en la configuración:', error.message);
+      return Promise.reject(error);
+    }
+  }
+);
 
 export const materialService = {
   // Obtener todos los materiales

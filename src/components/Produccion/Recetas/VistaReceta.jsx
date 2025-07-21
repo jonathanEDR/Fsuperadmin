@@ -293,21 +293,49 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mx-auto"></div>
                     </div>
                   ) : costoCalculado && (
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-blue-700">Costo unitario:</span>
-                        <span className="font-bold">S/.{costoCalculado.costoUnitario.toFixed(2)}</span>
+                    <div className="space-y-3 text-sm">
+                      {/* Información de rendimiento */}
+                      <div className="bg-blue-100 p-2 rounded text-xs">
+                        <div className="flex justify-between">
+                          <span>Rendimiento por producción:</span>
+                          <span className="font-medium">{costoCalculado.rendimiento || 1} unidades</span>
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-blue-700">Cantidad:</span>
-                        <span className="font-medium">{costoCalculado.cantidad}</span>
+                      
+                      {/* Costos por unidad */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between">
+                          <span className="text-blue-700">Costo por unidad:</span>
+                          <span className="font-bold">S/.{costoCalculado.costoUnitario.toFixed(4)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-blue-700">Unidades a producir:</span>
+                          <span className="font-medium">{costoCalculado.cantidad}</span>
+                        </div>
                       </div>
+                      
+                      {/* Costos de producción */}
+                      <div className="border-t border-blue-200 pt-2 space-y-1">
+                        <div className="flex justify-between text-xs text-blue-600">
+                          <span>Costo ingredientes por lote:</span>
+                          <span>S/.{costoCalculado.costoIngredientes?.toFixed(2) || '0.00'}</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-blue-600">
+                          <span>Total ingredientes necesarios:</span>
+                          <span>S/.{costoCalculado.costoProduccion?.toFixed(2) || '0.00'}</span>
+                        </div>
+                      </div>
+                      
+                      {/* Total final */}
                       <div className="border-t border-blue-200 pt-2">
                         <div className="flex justify-between text-lg">
-                          <span className="text-blue-800 font-medium">Costo total:</span>
+                          <span className="text-blue-800 font-medium">Costo total final:</span>
                           <span className="font-bold text-blue-800">
                             S/.{costoCalculado.costoTotal.toFixed(2)}
                           </span>
+                        </div>
+                        <div className="text-xs text-blue-600 mt-1">
+                          {costoCalculado.cantidad} unidades × S/.{costoCalculado.costoUnitario.toFixed(4)}
                         </div>
                       </div>
                     </div>

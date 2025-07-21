@@ -4,6 +4,8 @@ import { ingredienteService } from '../../../services/ingredienteService';
 import { recetaService } from '../../../services/recetaService';
 import { catalogoProduccionService } from '../../../services/catalogoProduccionService';
 
+console.log('🔍 Debug - catalogoProduccionService importado:', catalogoProduccionService);
+
 const NuevaProduccion = ({ onGuardar, onCancelar }) => {
   const [formData, setFormData] = useState({
     nombre: '',
@@ -36,14 +38,29 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
       const [ingredientesResponse, recetasResponse, productosResponse] = await Promise.all([
         ingredienteService.obtenerIngredientes({ activo: true }),
         recetaService.obtenerRecetas({ activo: true }),
-        // ✨ NUEVO: Cargar productos del catálogo de producción
-        catalogoProduccionService.obtenerProductosProduccion({ activo: true })
+        // ✨ NUEVO: Cargar productos del catálogo de producción usando filtro por módulo
+        catalogoProduccionService.obtenerProductosPorModulo({ 
+          moduloSistema: 'produccion', 
+          activo: true 
+        })
       ]);
 
       setIngredientesDisponibles(ingredientesResponse.data);
       setRecetasDisponibles(recetasResponse.data);
-      // ✨ NUEVO: Establecer productos del catálogo
-      setProductosProduccion(productosResponse.data || []);
+      // ✨ NUEVO: Debug - ver qué devuelve la API
+      console.log('🔍 Respuesta de productos de producción:', productosResponse);
+      
+      // ✨ NUEVO: Establecer productos del catálogo - manejo defensivo de la respuesta
+      if (Array.isArray(productosResponse)) {
+        setProductosProduccion(productosResponse);
+      } else if (productosResponse && Array.isArray(productosResponse.data)) {
+        setProductosProduccion(productosResponse.data);
+      } else if (productosResponse && Array.isArray(productosResponse.productos)) {
+        setProductosProduccion(productosResponse.productos);
+      } else {
+        setProductosProduccion([]);
+        console.warn('Respuesta de productos no es un array válido:', productosResponse);
+      }
     } catch (err) {
       setError('Error al cargar datos: ' + err.message);
     } finally {

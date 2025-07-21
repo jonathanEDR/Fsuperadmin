@@ -120,6 +120,8 @@ const FormularioMaterialMejorado = ({ material, onGuardar, onCancelar }) => {
     }
 
     setEnviando(true);
+    setErrores({}); // Limpiar errores previos
+    
     try {
       let resultado;
       if (material) {
@@ -128,14 +130,37 @@ const FormularioMaterialMejorado = ({ material, onGuardar, onCancelar }) => {
         resultado = await materialService.crearMaterial(formData);
       }
 
-      if (resultado.success) {
+      // Verificar si la respuesta tiene la estructura esperada
+      if (resultado && resultado.success) {
+        console.log('Material guardado exitosamente:', resultado.data);
+        onGuardar(resultado.data);
+      } else if (resultado && resultado.data) {
+        // A veces la respuesta viene directamente como data
+        console.log('Material guardado exitosamente (formato alternativo):', resultado.data);
         onGuardar(resultado.data);
       } else {
-        throw new Error(resultado.message || 'Error al guardar el material');
+        // Si no tiene la estructura esperada, intentar usar resultado directamente
+        console.log('Material guardado exitosamente (formato directo):', resultado);
+        onGuardar(resultado);
       }
     } catch (error) {
-      console.error('Error al guardar:', error);
-      setErrores({ general: error.message || 'Error al guardar el material' });
+      console.error('Error detallado al guardar:', {
+        error,
+        message: error.message,
+        response: error.response?.data,
+        stack: error.stack
+      });
+      
+      let mensajeError = 'Error al guardar el material';
+      
+      // Manejar diferentes tipos de errores
+      if (error.response?.data?.message) {
+        mensajeError = error.response.data.message;
+      } else if (error.message) {
+        mensajeError = error.message;
+      }
+      
+      setErrores({ general: mensajeError });
     } finally {
       setEnviando(false);
     }
