@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { X, MinusCircle } from 'lucide-react';
-import { getLocalDateTimeString, formatLocalDate, convertLocalDateTimeToISO } from '../../utils/dateUtils';
+import { getLocalDateTimeString, formatLocalDate, convertLocalDateTimeToISO } from '../../utils/fechaHoraUtils';
 import { useCantidadManagement } from '../../hooks/useCantidadManagement';
 
 function QuickDevolucionModal({
@@ -26,14 +26,18 @@ function QuickDevolucionModal({
     clearError 
   } = useCantidadManagement();
 
-  // Inicializar fecha y hora con la fecha/hora actual de Perú cuando se abre el modal
+  // Inicializar fecha y hora con la fecha/hora actual cuando se abre el modal
   useEffect(() => {
     if (isOpen) {
       limpiarForm();
-      // Obtener la fecha y hora actual en zona horaria local
-      const now = new Date();
-      const localDateString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-      setFechaDevolucion(localDateString);
+      // Usar la utilidad unificada para obtener la fecha/hora actual
+      const fechaActual = getLocalDateTimeString();
+      setFechaDevolucion(fechaActual);
+      
+      console.log('📅 Fecha inicializada para devolución:', {
+        fechaLocal: fechaActual,
+        fechaDisplay: formatLocalDate(fechaActual)
+      });
     }
   }, [isOpen]);
 
@@ -109,11 +113,9 @@ function QuickDevolucionModal({
       return false;
     }
 
-    // Validar que la fecha y hora no sea futura
+    // Validar que la fecha y hora no sea futura (simplificado)
     const fechaSeleccionada = new Date(fechaDevolucion);
     const ahora = new Date();
-    // Agregar margen de 1 minuto para evitar problemas de sincronización
-    ahora.setMinutes(ahora.getMinutes() + 1);
     
     if (fechaSeleccionada > ahora) {
       setErrorMessage('La fecha y hora de devolución no puede ser futura');
@@ -160,7 +162,7 @@ function QuickDevolucionModal({
     }
 
     try {
-      // Preparar datos para envío
+      // Preparar datos para envío usando utilidades unificadas
       const devolucionData = {
         ventaId: venta._id,
         productos: productosADevolver.map(item => ({
@@ -169,10 +171,14 @@ function QuickDevolucionModal({
           montoDevolucion: item.montoDevolucion
         })),
         motivo,
-        fechaDevolucion: new Date(fechaDevolucion).toISOString()
+        fechaDevolucion: convertLocalDateTimeToISO(fechaDevolucion) // Convertir a ISO usando utilidad unificada
       };
 
-      console.log('🔍 QuickDevolucionModal - Enviando datos:', devolucionData);
+      console.log('🔍 QuickDevolucionModal - Enviando datos:', {
+        ...devolucionData,
+        fechaOriginal: fechaDevolucion,
+        fechaConvertida: devolucionData.fechaDevolucion
+      });
 
       // Si hay callback, usar el callback (VentaList manejará el envío)
       // Si no hay callback, usar el servicio unificado directamente
@@ -309,15 +315,16 @@ function QuickDevolucionModal({
                       value={fechaDevolucion}
                       onChange={(e) => setFechaDevolucion(e.target.value)}
                       max={(() => {
-                        // Generar el max dinámicamente para la fecha/hora actual
+                        // Fecha/hora actual en formato datetime-local
                         const now = new Date();
-                        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                        const peruTime = new Date(now.getTime() - (5 * 60 * 60 * 1000));
+                        return peruTime.toISOString().slice(0, 16);
                       })()} 
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                       required
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Fecha y hora local. Se inicializa automáticamente con la hora actual (no puede ser en el futuro)
+                      Fecha y hora local (Perú). Se inicializa automáticamente con la hora actual
                     </p>
                   </div>
 

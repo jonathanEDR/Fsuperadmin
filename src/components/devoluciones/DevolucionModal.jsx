@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getLocalDateTimeString, formatLocalDate, convertLocalDateTimeToISO } from '../../utils/dateUtils';
+import { getLocalDateTimeString, formatLocalDate, convertLocalDateTimeToISO } from '../../utils/fechaHoraUtils';
 
 function DevolucionModal({
   isVisible,

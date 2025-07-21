@@ -4,7 +4,7 @@ import { es } from 'date-fns/locale';
 import { Trash2 } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import DevolucionModal from './DevolucionModal';
-import { formatLocalDate } from '../../utils/dateUtils';
+import { formatearFecha } from '../../utils/fechaHoraUtils';
 
 const DevolucionList = ({ userRole = 'user' }) => {
   const [devoluciones, setDevoluciones] = useState([]);
@@ -16,27 +16,9 @@ const DevolucionList = ({ userRole = 'user' }) => {
   const [deleteStatus, setDeleteStatus] = useState({ show: false, message: '', type: '' });
   const { getToken } = useAuth();
 
-  // Función de utilidad para formatear fechas de manera segura en zona horaria local
-  const formatearFecha = (fecha) => {
-    if (!fecha) return 'N/A';
-    
-    try {
-      const date = new Date(fecha);
-      if (isNaN(date.getTime())) return 'Fecha inválida';
-      
-      // Formatear directamente sin conversión de zona horaria adicional
-      return formatLocalDate(fecha, { 
-        hour12: false,
-        year: 'numeric',
-        month: '2-digit', 
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch (error) {
-      console.error('Error al formatear fecha:', error, fecha);
-      return 'Fecha inválida';
-    }
+  // Función de utilidad para formatear fechas - usar utilidad unificada
+  const formatearFechaLocal = (fecha) => {
+    return formatearFecha(fecha);
   };
   // Función para mostrar mensajes de estado
   const showStatusMessage = (message, type) => {
@@ -191,7 +173,7 @@ const DevolucionList = ({ userRole = 'user' }) => {
               }`}
               title={!canDeleteDevolucion(devolucion) ? 'Esta devolución está asociada a una venta finalizada' : ''}
             >
-              <td className="px-4 py-4 whitespace-nowrap text-xs text-gray-500">{formatearFecha(devolucion.fechaDevolucion)}</td>
+              <td className="px-4 py-4 whitespace-nowrap text-xs text-gray-500">{formatearFechaLocal(devolucion.fechaDevolucion)}</td>
               <td className="px-4 py-4 whitespace-nowrap hidden md:table-cell">
                 <div className="flex flex-col">
                   <span className="text-xs font-medium text-gray-900">{devolucion.colaborador?.nombre || 'N/A'}</span>

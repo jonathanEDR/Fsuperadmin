@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import api from '../../services/api';
-import { getLocalDate } from '../../utils/dateUtils';
+import { formatearFecha, getLocalDate } from '../../utils/fechaHoraUtils';
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -92,13 +92,19 @@ const VentasLineChart = ({ userRole }) => {
 
     // Procesar ventas
     ventas.forEach((venta) => {
+      // Usar la fecha de venta principal
+      let fechaValida = null;
+      
+      // Prioridad: fechadeVenta, luego campos alternativos
       const fechaCampos = [
         venta.fechadeVenta,
+        venta.createdAt,
+        venta.updatedAt
       ];
-      let fechaValida = null;
+      
       for (let fecha of fechaCampos) {
         if (fecha) {
-          // Usar la función getLocalDate para convertir a zona horaria local
+          // Usar getLocalDate unificado para convertir a zona horaria local
           const localDate = getLocalDate(fecha);
           if (localDate) {
             fechaValida = localDate;
@@ -106,7 +112,17 @@ const VentasLineChart = ({ userRole }) => {
           }
         }
       }
+      
+      // Si no hay fecha válida, usar fecha actual como fallback
       const ventaDate = fechaValida || new Date();
+      
+      console.log('📅 Procesando venta - Fecha:', {
+        ventaId: venta._id,
+        fechaOriginal: venta.fechadeVenta,
+        fechaValida: fechaValida,
+        fechaProcesada: ventaDate
+      });
+      
       if (ventaDate >= startDate && ventaDate < endDate) {
         let indexPos = 0;
         switch (filter) {
@@ -132,13 +148,19 @@ const VentasLineChart = ({ userRole }) => {
 
     // Procesar devoluciones
     devoluciones.forEach((devolucion) => {
+      // Usar la fecha de devolución
+      let fechaValida = null;
+      
+      // Prioridad: fechaDevolucion, luego campos alternativos
       const fechaCampos = [
         devolucion.fechaDevolucion,
+        devolucion.createdAt,
+        devolucion.updatedAt
       ];
-      let fechaValida = null;
+      
       for (let fecha of fechaCampos) {
         if (fecha) {
-          // Usar la función getLocalDate para convertir a zona horaria local
+          // Usar getLocalDate unificado para convertir a zona horaria local
           const localDate = getLocalDate(fecha);
           if (localDate) {
             fechaValida = localDate;
@@ -146,7 +168,17 @@ const VentasLineChart = ({ userRole }) => {
           }
         }
       }
+      
+      // Si no hay fecha válida, usar fecha actual como fallback
       const devolucionDate = fechaValida || new Date();
+      
+      console.log('📅 Procesando devolución - Fecha:', {
+        devolucionId: devolucion._id,
+        fechaOriginal: devolucion.fechaDevolucion,
+        fechaValida: fechaValida,
+        fechaProcesada: devolucionDate
+      });
+      
       if (devolucionDate >= startDate && devolucionDate < endDate) {
         let indexPos = 0;
         switch (filter) {
