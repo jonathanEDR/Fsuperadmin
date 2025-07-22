@@ -2,7 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 // Importar componentes de Producción
-import ProduccionIndex from '../components/Produccion/ProduccionIndex';
+import ProduccionIndex from '../components/Produccion/AccesosRapidosProduccion';
 import CatalogoProduccion from '../components/Produccion/Catalogo/CatalogoProduccion';
 import GestionIngredientes from '../components/Produccion/Ingredientes/GestionIngredientes';
 import FormularioIngredienteMejorado from '../components/Produccion/Ingredientes/FormularioIngredienteMejorado';
