@@ -96,5 +96,12 @@ export const ingredienteService = {
   async desactivarIngrediente(id) {
     const response = await api.delete(`/ingredientes/${id}`);
     return response.data;
+  },
+
+  // Verificar si un nombre de ingrediente está disponible
+  async verificarNombreDisponible(nombre, excluirId = null) {
+    const params = excluirId ? `?excluirId=${excluirId}` : '';
+    const response = await api.get(`/ingredientes/verificar-nombre/${encodeURIComponent(nombre)}${params}`);
+    return response.data;
   }
 };

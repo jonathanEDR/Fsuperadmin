@@ -18,6 +18,8 @@ const FormularioIngredienteMejorado = ({ ingrediente, onGuardar, onCancelar }) =
   const [cargandoProductos, setCargandoProductos] = useState(false);
   const [errores, setErrores] = useState({});
   const [enviando, setEnviando] = useState(false);
+  const [validandoNombre, setValidandoNombre] = useState(false);
+  const [nombreDisponible, setNombreDisponible] = useState(null);
 
   const unidadesMedida = [
     { value: 'kg', label: 'Kilogramos' },
@@ -46,9 +48,13 @@ const FormularioIngredienteMejorado = ({ ingrediente, onGuardar, onCancelar }) =
           nombre: producto.nombre,
           unidadMedida: producto.unidadMedida || prev.unidadMedida
         }));
+
+        // Validar el nombre autocompletado
+        validarNombreIngrediente(producto.nombre);
       }
     } else {
       setProductoSeleccionado(null);
+      setNombreDisponible(null);
     }
   }, [formData.productoReferencia, productosCatalogo]);
 
@@ -69,11 +75,48 @@ const FormularioIngredienteMejorado = ({ ingrediente, onGuardar, onCancelar }) =
     }
   };
 
+  // Validar nombre de ingrediente en tiempo real
+  const validarNombreIngrediente = async (nombre) => {
+    if (!nombre.trim()) {
+      setNombreDisponible(null);
+      return;
+    }
+
+    setValidandoNombre(true);
+    try {
+      const response = await ingredienteService.verificarNombreDisponible(
+        nombre, 
+        ingrediente?._id
+      );
+      setNombreDisponible(response.disponible);
+      
+      if (!response.disponible) {
+        setErrores(prev => ({
+          ...prev,
+          nombre: 'Este nombre ya está en uso. Por favor, elija un nombre diferente.'
+        }));
+      } else {
+        setErrores(prev => {
+          const nuevosErrores = { ...prev };
+          delete nuevosErrores.nombre;
+          return nuevosErrores;
+        });
+      }
+    } catch (error) {
+      console.error('Error al validar nombre:', error);
+      setNombreDisponible(null);
+    } finally {
+      setValidandoNombre(false);
+    }
+  };
+
   const validarFormulario = () => {
     const nuevosErrores = {};
 
     if (!formData.nombre.trim()) {
       nuevosErrores.nombre = 'El nombre es requerido';
+    } else if (nombreDisponible === false) {
+      nuevosErrores.nombre = 'Este nombre ya está en uso. Por favor, elija un nombre diferente.';
     }
 
     if (!formData.productoReferencia) {
@@ -104,6 +147,15 @@ const FormularioIngredienteMejorado = ({ ingrediente, onGuardar, onCancelar }) =
         ...prev,
         [campo]: ''
       }));
+    }
+
+    // Validar nombre en tiempo real cuando sea manual
+    if (campo === 'nombre' && !formData.productoReferencia) {
+      // Esperar un poco antes de validar para evitar demasiadas peticiones
+      clearTimeout(window.validacionTimeout);
+      window.validacionTimeout = setTimeout(() => {
+        validarNombreIngrediente(valor);
+      }, 500);
     }
   };
 
@@ -193,23 +245,44 @@ const FormularioIngredienteMejorado = ({ ingrediente, onGuardar, onCancelar }) =
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Nombre del Ingrediente *
               </label>
-              <input
-                type="text"
-                value={formData.nombre}
-                onChange={(e) => handleChange('nombre', e.target.value)}
-                className={`w-full p-3 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                  errores.nombre ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Se completará automáticamente al seleccionar el producto"
-                disabled={true} // Siempre deshabilitado ya que se autocompleta
-                readOnly
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={formData.nombre}
+                  onChange={(e) => handleChange('nombre', e.target.value)}
+                  className={`w-full p-3 border rounded-md focus:ring-blue-500 focus:border-blue-500 pr-10 ${
+                    errores.nombre ? 'border-red-500' : 
+                    nombreDisponible === true ? 'border-green-500' :
+                    nombreDisponible === false ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                  placeholder="Se completará automáticamente al seleccionar el producto"
+                  disabled={formData.productoReferencia} // Deshabilitado si hay producto seleccionado
+                  readOnly={formData.productoReferencia}
+                />
+                
+                {/* Indicadores de validación */}
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                  {validandoNombre && (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                  )}
+                  {!validandoNombre && nombreDisponible === true && !formData.productoReferencia && (
+                    <span className="text-green-500 text-xl">✓</span>
+                  )}
+                  {!validandoNombre && nombreDisponible === false && (
+                    <span className="text-red-500 text-xl">✗</span>
+                  )}
+                </div>
+              </div>
+              
               {errores.nombre && (
                 <p className="mt-1 text-sm text-red-600">{errores.nombre}</p>
               )}
-              {!formData.productoReferencia && (
+              {!errores.nombre && nombreDisponible === true && !formData.productoReferencia && (
+                <p className="mt-1 text-sm text-green-600">✓ Este nombre está disponible</p>
+              )}
+              {!formData.productoReferencia && !errores.nombre && !nombreDisponible && (
                 <p className="mt-1 text-sm text-gray-500">
-                  Seleccione un producto del catálogo para autocompletar el nombre
+                  Seleccione un producto del catálogo para autocompletar el nombre o escriba uno manualmente
                 </p>
               )}
             </div>

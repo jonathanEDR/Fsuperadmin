@@ -122,3 +122,14 @@ export const convertLocalDateTimeToISO = (localDateTime) => {
   
   return peruDate.toISOString();
 };
+
+/**
+ * Formatea una fecha para mostrar de forma legible
+ * Alias para formatLocalDate para compatibilidad
+ * @param {string|Date} dateInput - Fecha a formatear
+ * @param {Object} options - Opciones de formato (opcional)
+ * @returns {string} - Fecha formateada
+ */
+export const formatearFecha = (dateInput, options = {}) => {
+  return formatLocalDate(dateInput, options);
+};

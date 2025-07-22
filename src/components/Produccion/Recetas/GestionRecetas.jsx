@@ -216,14 +216,16 @@ const GestionRecetas = () => {
     }
   };
 
-  const handleDesactivar = async (id) => {
+  const handleEliminar = async (id) => {
     try {
-      if (window.confirm('¿Estás seguro de que quieres desactivar esta receta?')) {
-        await recetaService.desactivarReceta(id);
+      if (window.confirm('¿Estás seguro de que quieres eliminar completamente esta receta?\n\nEsta acción no se puede deshacer y liberará todos los ingredientes asociados.')) {
+        await recetaService.eliminarReceta(id);
         cargarRecetas();
+        alert('✅ Receta eliminada completamente de la base de datos');
       }
     } catch (err) {
-      setError('Error al desactivar receta: ' + err.message);
+      setError('Error al eliminar receta: ' + err.message);
+      alert('❌ Error al eliminar receta: ' + err.message);
     }
   };
 
@@ -701,10 +703,10 @@ const GestionRecetas = () => {
                       </button>
                     )}
                     <button
-                      onClick={() => handleDesactivar(receta._id)}
+                      onClick={() => handleEliminar(receta._id)}
                       className="text-red-600 hover:text-red-800 text-sm"
                     >
-                      Desactivar
+                      🗑️ Eliminar
                     </button>
                   </div>
                 </div>

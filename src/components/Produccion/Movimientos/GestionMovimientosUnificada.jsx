@@ -5,6 +5,8 @@ import SelectorTipoProducto from './SelectorTipoProducto';
 import ModalAgregarCantidad from './ModalAgregarCantidad';
 import ModalProducirReceta from './ModalProducirReceta';
 import ModalProducirProducto from './ModalProducirProducto';
+import ModalIncrementarStock from './ModalIncrementarStock';
+import HistorialProduccion from './HistorialProduccion';
 
 const GestionMovimientosUnificada = ({ onVolver }) => {
   // Estados principales
@@ -22,6 +24,8 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalRecetaOpen, setModalRecetaOpen] = useState(false);
   const [modalProduccionOpen, setModalProduccionOpen] = useState(false);
+  const [modalIncrementarOpen, setModalIncrementarOpen] = useState(false);
+  const [historialProduccionOpen, setHistorialProduccionOpen] = useState(false);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   
   // Estados de filtros
@@ -59,21 +63,53 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
    * Cargar productos por tipo
    */
   const cargarProductos = async () => {
-    if (!tipoSeleccionado) return;
+    if (!tipoSeleccionado) {
+      console.log('⚠️ No hay tipo seleccionado, saltando carga de productos');
+      return;
+    }
     
     setCargandoProductos(true);
     setError('');
     
     try {
+      console.log(`🔍 Cargando productos para tipo: ${tipoSeleccionado}`);
+      
       const response = await movimientoUnificadoService.obtenerProductosPorTipo(tipoSeleccionado);
       const productosData = response.data || [];
       
-      setProductos(productosData);
-      setProductosOriginales(productosData);
-      console.log(`✅ ${productosData.length} productos cargados para ${tipoSeleccionado}`);
+      console.log(`📦 Productos recibidos del backend:`, productosData.map(p => ({
+        id: p._id,
+        nombre: p.nombre,
+        cantidad: p.cantidad,
+        stock: p.stock
+      })));
+      
+      // FORZAR NUEVA REFERENCIA - SOLUCION DEL BUG
+      const productosConNuevasReferencias = productosData.map(producto => ({
+        ...producto,
+        // Forzar que React detecte el cambio agregando timestamp
+        _lastUpdated: Date.now()
+      }));
+      
+      setProductos(productosConNuevasReferencias);
+      setProductosOriginales(productosConNuevasReferencias);
+      
+      console.log(`✅ ${productosData.length} productos cargados y establecidos en el estado`);
+      
+      // Log específico para producción
+      if (tipoSeleccionado === 'produccion') {
+        console.log('🏭 Productos de producción actualizados:', productosData.map(p => ({
+          id: p._id,
+          nombre: p.nombre,
+          cantidadActual: p.cantidad,
+          moduloSistema: p.moduloSistema,
+          catalogoId: p.catalogoProductoId,
+          inventarioId: p.inventarioProductoId
+        })));
+      }
       
     } catch (error) {
-      console.error('Error al cargar productos:', error);
+      console.error('❌ Error al cargar productos:', error);
       setError(`Error al cargar productos: ${error.message}`);
       setProductos([]);
     } finally {
@@ -173,9 +209,9 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
     if (tipoSeleccionado === 'recetas') {
       setModalRecetaOpen(true);
     } 
-    // Si es producción, abrir el modal específico para producción
+    // Si es producción, abrir el modal simple para incrementar stock
     else if (tipoSeleccionado === 'produccion') {
-      setModalProduccionOpen(true);
+      setModalIncrementarOpen(true);
     } 
     else {
       setModalOpen(true);
@@ -183,55 +219,202 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
   };
 
   /**
-   * Manejar éxito al agregar cantidad
+   * Abrir historial de producción
    */
-  const handleSuccessAgregar = (resultado) => {
-    console.log('✅ Cantidad agregada exitosamente:', resultado);
-    
-    // Recargar productos y historial
-    cargarProductos();
-    cargarHistorial();
-    cargarEstadisticas();
-    
-    // Mostrar mensaje de éxito (opcional)
-    // setMensajeExito('Cantidad agregada exitosamente');
+  const abrirHistorialProduccion = (producto) => {
+    setProductoSeleccionado(producto);
+    setHistorialProduccionOpen(true);
   };
 
   /**
-   * Manejar eliminación de movimiento
+   * Manejar éxito al agregar cantidad
    */
+  const handleSuccessAgregar = async (resultado) => {
+    console.log('✅ Cantidad agregada exitosamente:', resultado);
+    
+    try {
+      // Forzar recarga completa de todos los datos
+      console.log('🔄 Recargando datos después de agregar cantidad...');
+      
+      // Pequeño delay para asegurar que la DB se actualice
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Esperar a que se complete la recarga de productos
+      await cargarProductos();
+      
+      // Recargar historial y estadísticas en paralelo
+      await Promise.all([
+        cargarHistorial(),
+        cargarEstadisticas()
+      ]);
+      
+      console.log('✅ Datos recargados correctamente');
+      
+      // Mostrar mensaje de éxito
+      alert(`✅ Cantidad agregada exitosamente al producto ${productoSeleccionado?.nombre || 'seleccionado'}`);
+      
+    } catch (error) {
+      console.error('❌ Error al recargar datos:', error);
+      setError('Los datos se agregaron correctamente, pero hubo un problema al actualizar la vista. Recargue la página.');
+    }
+  };
+
+  /**
+   * Eliminar producción completa cuando se elimina un movimiento generado por producción
+   */
+  const eliminarProduccionDesdeMovimiento = async (movimiento) => {
+    try {
+      // Extraer ID de producción del motivo
+      const produccionId = extraerProduccionId(movimiento.motivo);
+      
+      if (!produccionId) {
+        // SOLUCIÓN MEJORADA: Dar más información sobre por qué no se pudo identificar
+        console.error('❌ No se pudo extraer el ID de producción del motivo:', movimiento.motivo);
+        console.error('📋 Información del movimiento:', {
+          id: movimiento._id,
+          tipo: movimiento.tipo,
+          tipoItem: movimiento.tipoItem,
+          motivo: movimiento.motivo,
+          operador: movimiento.operador,
+          fecha: movimiento.fecha
+        });
+        
+        throw new Error(
+          `No se pudo identificar la producción asociada al movimiento.\n\n` +
+          `Motivo del movimiento: "${movimiento.motivo}"\n\n` +
+          `Por favor, elimine este movimiento manualmente usando la opción "Eliminar solo movimiento" ` +
+          `o contacte al administrador del sistema.`
+        );
+      }
+      
+      console.log('🔍 Eliminando producción completa:', produccionId);
+      
+      // Importar el servicio de producción
+      const produccionService = (await import('../../../services/produccionService')).default;
+      
+      // Eliminar la producción completa
+      const resultado = await produccionService.eliminarProduccion(produccionId);
+      
+      console.log('✅ Producción completa eliminada:', resultado);
+      alert(`✅ Producción eliminada exitosamente.\nSe revirtió todo el stock generado por la producción.`);
+      
+    } catch (error) {
+      console.error('❌ Error al eliminar producción desde movimiento:', error);
+      throw error;
+    }
+  };
+
+  /**
+   * Extraer ID de producción del motivo del movimiento
+   */
+  const extraerProduccionId = (motivo) => {
+    if (!motivo) return null;
+    
+    console.log('🔍 Analizando motivo para extraer ID:', motivo);
+    
+    // SOLUCIÓN: Buscar patrones como "ID: XXXXX" al final del motivo
+    // Esto funciona con el nuevo formato: "Producción: observación - ID: 64f1234567890abcdef12345"
+    const idMatches = motivo.match(/ID:\s*([a-fA-F0-9]{24})/);
+    if (idMatches) {
+      console.log('✅ ID encontrado:', idMatches[1]);
+      return idMatches[1];
+    }
+    
+    // Mantener compatibilidad con el formato anterior: "Producción: XXXXX" 
+    const legacyMatches = motivo.match(/[Pp]roducción[:\s]*([a-fA-F0-9]{24})/);
+    if (legacyMatches) {
+      console.log('✅ ID encontrado (formato legacy):', legacyMatches[1]);
+      return legacyMatches[1];
+    }
+    
+    console.log('❌ No se pudo extraer ID del motivo');
+    return null;
+  };
   const handleEliminarMovimiento = async (movimientoId) => {
     // Buscar el movimiento en el historial para mostrar información en la confirmación
     const movimiento = historial.find(m => m._id === movimientoId);
     
-    const confirmacion = window.confirm(
-      `¿Está seguro de eliminar este movimiento?\n\n` +
-      `Producto: ${movimiento?.item?.nombre || 'Producto no identificado'}\n` +
-      `Cantidad: ${movimiento?.cantidad || 0} unidades\n` +
-      `Motivo: ${movimiento?.motivo || 'Sin motivo'}\n\n` +
-      `Esta acción revertirá el stock agregado y no se puede deshacer.`
-    );
+    if (!movimiento) {
+      setError('Movimiento no encontrado');
+      return;
+    }
+
+    // Verificar si el movimiento fue generado por una producción
+    const esMovimientoDeProduccion = movimiento.motivo?.includes('Producción:') || 
+                                      movimiento.motivo?.toLowerCase().includes('producción');
+    
+    let confirmacion;
+    
+    if (esMovimientoDeProduccion) {
+      // Si es un movimiento de producción, preguntar si quiere eliminar la producción completa
+      confirmacion = window.confirm(
+        `⚠️ ATENCIÓN: Este movimiento fue generado por una PRODUCCIÓN.\n\n` +
+        `Producto: ${movimiento?.item?.nombre || 'Producto no identificado'}\n` +
+        `Cantidad: ${movimiento?.cantidad || 0} unidades\n` +
+        `Motivo: ${movimiento?.motivo || 'Sin motivo'}\n\n` +
+        `Para mantener la consistencia de datos, se eliminará la PRODUCCIÓN COMPLETA ` +
+        `(no solo este movimiento), lo cual revertirá correctamente todo el stock.\n\n` +
+        `¿Desea continuar con la eliminación de la PRODUCCIÓN?`
+      );
+    } else {
+      // Si es un movimiento manual, eliminar solo el movimiento
+      confirmacion = window.confirm(
+        `¿Está seguro de eliminar este movimiento manual?\n\n` +
+        `Producto: ${movimiento?.item?.nombre || 'Producto no identificado'}\n` +
+        `Cantidad: ${movimiento?.cantidad || 0} unidades\n` +
+        `Motivo: ${movimiento?.motivo || 'Sin motivo'}\n\n` +
+        `Esta acción revertirá el stock agregado y no se puede deshacer.`
+      );
+    }
     
     if (!confirmacion) return;
-    
+
     try {
       setError('');
-      const resultado = await movimientoUnificadoService.eliminarMovimiento(movimientoId);
       
-      console.log('✅ Movimiento eliminado:', resultado);
+      if (esMovimientoDeProduccion) {
+        // Eliminar producción completa - necesitamos encontrar el ID de la producción
+        try {
+          await eliminarProduccionDesdeMovimiento(movimiento);
+        } catch (error) {
+          // Si no se puede identificar la producción, ofrecer eliminar solo el movimiento
+          console.error('❌ Error al eliminar producción completa:', error);
+          
+          const eliminarSoloMovimiento = window.confirm(
+            `❌ ${error.message}\n\n` +
+            `🔧 OPCIÓN ALTERNATIVA:\n` +
+            `¿Desea eliminar SOLO este movimiento en lugar de la producción completa?\n\n` +
+            `⚠️ ADVERTENCIA: Esto puede causar inconsistencias en el inventario ` +
+            `si la producción tenía múltiples movimientos relacionados.\n\n` +
+            `¿Continuar con la eliminación del movimiento únicamente?`
+          );
+          
+          if (eliminarSoloMovimiento) {
+            // Eliminar solo el movimiento como plan B
+            const resultado = await movimientoUnificadoService.eliminarMovimiento(movimientoId);
+            console.log('✅ Movimiento eliminado (solo movimiento):', resultado);
+            alert(`✅ Movimiento eliminado exitosamente.\n⚠️ NOTA: Se eliminó solo el movimiento, no la producción completa.\nSe revirtió ${resultado.data.cantidadRevertida} unidades del stock.`);
+          } else {
+            // Si no quiere eliminar solo el movimiento, relanzar el error
+            throw error;
+          }
+        }
+      } else {
+        // Eliminar solo el movimiento manual
+        const resultado = await movimientoUnificadoService.eliminarMovimiento(movimientoId);
+        console.log('✅ Movimiento eliminado:', resultado);
+        alert(`✅ Movimiento eliminado exitosamente.\nSe revirtió ${resultado.data.cantidadRevertida} unidades del stock.`);
+      }
       
-      // Recargar datos
+      // Recargar datos en ambos casos
       cargarProductos();
       cargarHistorial();
       cargarEstadisticas();
       
-      // Mensaje de confirmación
-      alert(`✅ Movimiento eliminado exitosamente.\nSe revirtió ${resultado.data.cantidadRevertida} unidades del stock.`);
-      
     } catch (error) {
-      console.error('❌ Error al eliminar movimiento:', error);
-      setError('Error al eliminar movimiento: ' + error.message);
-      alert('❌ Error al eliminar movimiento: ' + error.message);
+      console.error('❌ Error al eliminar:', error);
+      setError('Error al eliminar: ' + error.message);
+      alert('❌ Error al eliminar: ' + error.message);
     }
   };
 
@@ -242,7 +425,7 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
     switch (tipoSeleccionado) {
       case 'ingredientes':
         return {
-          cantidad: producto.cantidad || 0, // Cambié de procesado a cantidad
+          cantidad: producto.cantidad || 0,
           unidad: producto.unidadMedida || 'unidad'
         };
       case 'materiales':
@@ -257,7 +440,10 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
         };
       case 'produccion':
         return {
-          cantidad: producto.cantidad || 0,
+          // CORREGIDO: Usar cantidadProducida como el stock base para productos de producción
+          // cantidadProducida = total histórico producido
+          // stock = disponible actual en inventario
+          cantidad: producto.cantidadProducida || producto.stock || producto.cantidad || 0,
           unidad: producto.unidadMedida || 'unidad'
         };
       default:
@@ -410,7 +596,7 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                 ) : productos.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {productos.map((producto) => (
-                      <div key={producto._id} className={`border rounded-lg p-4 hover:shadow-md transition-shadow ${
+                      <div key={`${producto._id}-${producto.cantidad}-${producto._lastUpdated || Date.now()}`} className={`border rounded-lg p-4 hover:shadow-md transition-shadow ${
                         tipoSeleccionado === 'recetas' 
                           ? 'border-green-200 bg-green-50' 
                           : 'border-gray-200 bg-white'
@@ -436,6 +622,17 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                           >
                             {tipoSeleccionado === 'recetas' ? '🧑‍🍳 Producir' : '+ Agregar'}
                           </button>
+                          
+                          {/* Botón de historial solo para productos de producción */}
+                          {tipoSeleccionado === 'produccion' && (
+                            <button
+                              onClick={() => abrirHistorialProduccion(producto)}
+                              className="ml-1 px-2 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded transition-colors flex-shrink-0"
+                              title="Ver historial de producciones"
+                            >
+                              📊 Historial
+                            </button>
+                          )}
                         </div>
                         
                         <div className="space-y-1 text-xs text-gray-600">
@@ -655,6 +852,24 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
         onClose={() => setModalProduccionOpen(false)}
         producto={productoSeleccionado}
         onSuccess={handleSuccessAgregar}
+      />
+
+      {/* Modal para incrementar stock de productos */}
+      <ModalIncrementarStock
+        isOpen={modalIncrementarOpen}
+        onClose={() => setModalIncrementarOpen(false)}
+        producto={productoSeleccionado}
+        onSuccess={handleSuccessAgregar}
+      />
+
+      {/* Modal para historial de producción */}
+      <HistorialProduccion
+        isOpen={historialProduccionOpen}
+        onClose={() => {
+          setHistorialProduccionOpen(false);
+          setProductoSeleccionado(null);
+        }}
+        producto={productoSeleccionado}
       />
     </div>
   );

@@ -241,9 +241,9 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
         tipoProducto: 'produccion',
         productoId: producto._id,
         cantidad: formData.cantidadProducir,
-        motivo: `Producción: ${formData.observaciones || 'Producción manual'}`,
-        operador: formData.operador,
-        observaciones: formData.observaciones,
+        motivo: `Producción: ${formData.observaciones?.trim() || 'Producción manual'}`,
+        operador: formData.operador?.trim() || 'Usuario',
+        observaciones: formData.observaciones?.trim() || '',
         costoTotal: calcularCostoTotal(),
         // Solo incluir ingredientes y recetas si se van a consumir
         ingredientesUtilizados: formData.consumirRecursos ? formData.ingredientesUtilizados : [],

@@ -54,6 +54,21 @@ export const produccionService = {
     return response.data;
   },
 
+  // Obtener producciones agrupadas por producto (cantidades acumulativas)
+  async obtenerProduccionesAgrupadas(filtros = {}) {
+    const params = new URLSearchParams();
+    if (filtros.buscar) params.append('buscar', filtros.buscar);
+    if (filtros.estado) params.append('estado', filtros.estado);
+    if (filtros.fechaInicio) params.append('fechaInicio', filtros.fechaInicio);
+    if (filtros.fechaFin) params.append('fechaFin', filtros.fechaFin);
+    if (filtros.operador) params.append('operador', filtros.operador);
+    if (filtros.limite) params.append('limite', filtros.limite);
+    if (filtros.pagina) params.append('pagina', filtros.pagina);
+
+    const response = await api.get(`/produccion/agrupadas?${params}`);
+    return response.data;
+  },
+
   // Obtener producción por ID (alias para compatibilidad)
   async obtenerPorId(id) {
     return this.obtenerProduccionPorId(id);
@@ -116,6 +131,13 @@ export const produccionService = {
   // Actualizar producción
   async actualizarProduccion(id, datos) {
     const response = await api.put(`/produccion/${id}`, datos);
+    return response.data;
+  },
+
+  // Verificar si un nombre de producción está disponible
+  async verificarNombreDisponible(nombre, excluirId = null) {
+    const params = excluirId ? `?excluirId=${excluirId}` : '';
+    const response = await api.get(`/produccion/verificar-nombre/${encodeURIComponent(nombre)}${params}`);
     return response.data;
   }
 };

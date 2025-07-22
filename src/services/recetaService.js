@@ -80,8 +80,8 @@ export const recetaService = {
     return response.data;
   },
 
-  // Desactivar receta
-  async desactivarReceta(id) {
+  // Eliminar receta completamente
+  async eliminarReceta(id) {
     const response = await api.delete(`/recetas/${id}`);
     return response.data;
   },
@@ -128,6 +128,12 @@ export const recetaService = {
   async reiniciarReceta(id, motivo) {
     if (!motivo) motivo = 'Reinicio manual';
     const response = await api.put(`/recetas/${id}/reiniciar`, { motivo });
+    return response.data;
+  },
+
+  // 🧹 UTILIDAD: Limpiar recetas inactivas de la base de datos
+  async limpiarRecetasInactivas() {
+    const response = await api.post('/recetas/limpiar-inactivas');
     return response.data;
   }
 };
