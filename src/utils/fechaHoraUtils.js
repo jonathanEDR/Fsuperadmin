@@ -89,25 +89,17 @@ export const convertLocalDateTimeToISO = (localDateTime) => {
   if (!localDateTime) return '';
   
   try {
-    // Interpretamos la fecha como si fuera hora local de Perú
-    // Agregamos el offset de Perú (-05:00) para mantener la hora correcta
-    const fechaConOffset = localDateTime + ':00.000-05:00';
-    const peruDate = new Date(fechaConOffset);
-    
-    // Validar que la fecha sea válida
-    if (isNaN(peruDate.getTime())) {
-      console.error('Fecha inválida:', localDateTime);
-      return '';
-    }
+    // NO agregamos offset aquí, el backend se encargará de interpretarlo correctamente
+    // Solo agregamos segundos para completar el formato
+    const fechaCompleta = localDateTime + ':00';
     
     console.log('🕐 Conversión de fecha (Frontend):', {
       fechaLocal: localDateTime,
-      fechaConOffset: fechaConOffset,
-      fechaISO: peruDate.toISOString(),
-      fechaDisplay: peruDate.toLocaleString('es-PE', { timeZone: 'America/Lima' })
+      fechaCompleta: fechaCompleta,
+      nota: 'Enviando sin offset, backend interpretará como hora de Perú'
     });
     
-    return peruDate.toISOString();
+    return fechaCompleta;
   } catch (error) {
     console.error('Error al convertir fecha local a ISO:', error);
     return '';

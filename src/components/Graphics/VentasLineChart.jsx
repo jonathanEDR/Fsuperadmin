@@ -2,7 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import api from '../../services/api';
-import { formatearFecha, getLocalDate } from '../../utils/fechaHoraUtils';
+import { formatearFecha } from '../../utils/fechaHoraUtils';
+import { 
+  procesarFechaParaGrafico, 
+  calcularIndiceParaFecha, 
+  fechaEnRango, 
+  extraerFechaValida,
+  generarEtiquetasGrafico,
+  calcularRangoFechas
+} from '../../utils/graficosDateUtils';
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -18,71 +26,8 @@ const VentasLineChart = ({ userRole }) => {
     cantidadVendida: 0
   });
 
-  const getDateRange = (filter) => {
-    const now = new Date();
-    let startDate, endDate;
-
-    switch (filter) {
-      case 'hoy':
-        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-        break;
-      case 'semana':
-        const dayOfWeek = now.getDay();
-        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-        startDate = new Date(now.getTime() + mondayOffset * 24 * 60 * 60 * 1000);
-        startDate.setHours(0, 0, 0, 0);
-        endDate = new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000);
-        break;
-      case 'mes':
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-        break;
-      case 'anual':
-        startDate = new Date(now.getFullYear(), 0, 1);
-        endDate = new Date(now.getFullYear() + 1, 0, 1);
-        break;
-      default:
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        endDate = now;
-    }
-
-    return { startDate, endDate };
-  };
-
-  const generateLabels = (filter, startDate, endDate) => {
-    const labels = [];
-    const current = new Date(startDate);
-
-    while (current < endDate) {
-      switch (filter) {
-        case 'hoy':
-          labels.push(current.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
-          current.setHours(current.getHours() + 1);
-          break;
-        case 'semana':
-          labels.push(current.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' }));
-          current.setDate(current.getDate() + 1);
-          break;
-        case 'mes':
-          labels.push(current.getDate().toString());
-          current.setDate(current.getDate() + 1);
-          break;
-        case 'anual':
-          labels.push(current.toLocaleDateString('es-ES', { month: 'short' }));
-          current.setMonth(current.getMonth() + 1);
-          break;
-        default:
-          labels.push(current.toLocaleDateString('es-ES'));
-          current.setDate(current.getDate() + 1);
-      }
-    }
-
-    return labels;
-  };
-
   const processVentasData = (ventas, devoluciones, filter, startDate, endDate) => {
-    const labels = generateLabels(filter, startDate, endDate);
+    const labels = generarEtiquetasGrafico(filter, startDate, endDate);
     const dataPoints = labels.map(() => ({ 
       ventasBrutas: 0, 
       devoluciones: 0, 
@@ -90,55 +35,23 @@ const VentasLineChart = ({ userRole }) => {
       cantidadVendida: 0 
     }));
 
+    console.log('🔄 Procesando datos para gráfico:', {
+      ventas: ventas.length,
+      devoluciones: devoluciones.length,
+      filter: filter,
+      etiquetas: labels.length
+    });
+
     // Procesar ventas
     ventas.forEach((venta) => {
-      // Usar la fecha de venta principal
-      let fechaValida = null;
+      const fechaVenta = extraerFechaValida(venta, [
+        'fechadeVenta',
+        'createdAt', 
+        'updatedAt'
+      ]) || new Date();
       
-      // Prioridad: fechadeVenta, luego campos alternativos
-      const fechaCampos = [
-        venta.fechadeVenta,
-        venta.createdAt,
-        venta.updatedAt
-      ];
-      
-      for (let fecha of fechaCampos) {
-        if (fecha) {
-          // Usar getLocalDate unificado para convertir a zona horaria local
-          const localDate = getLocalDate(fecha);
-          if (localDate) {
-            fechaValida = localDate;
-            break;
-          }
-        }
-      }
-      
-      // Si no hay fecha válida, usar fecha actual como fallback
-      const ventaDate = fechaValida || new Date();
-      
-      console.log('📅 Procesando venta - Fecha:', {
-        ventaId: venta._id,
-        fechaOriginal: venta.fechadeVenta,
-        fechaValida: fechaValida,
-        fechaProcesada: ventaDate
-      });
-      
-      if (ventaDate >= startDate && ventaDate < endDate) {
-        let indexPos = 0;
-        switch (filter) {
-          case 'hoy':
-            indexPos = Math.floor((ventaDate - startDate) / (60 * 60 * 1000));
-            break;
-          case 'semana':
-            indexPos = Math.floor((ventaDate - startDate) / (24 * 60 * 60 * 1000));
-            break;
-          case 'mes':
-            indexPos = ventaDate.getDate() - 1;
-            break;
-          case 'anual':
-            indexPos = ventaDate.getMonth();
-            break;
-        }
+      if (fechaEnRango(fechaVenta, startDate, endDate)) {
+        const indexPos = calcularIndiceParaFecha(fechaVenta, filter, startDate);
         if (indexPos >= 0 && indexPos < dataPoints.length) {
           dataPoints[indexPos].ventasBrutas += Number(venta.montoTotal || 0);
           dataPoints[indexPos].cantidadVendida += Number(venta.cantidadVendida || 0);
@@ -147,56 +60,43 @@ const VentasLineChart = ({ userRole }) => {
     });
 
     // Procesar devoluciones
+    console.log('📋 Devoluciones recibidas:', devoluciones.map(d => ({
+      id: d._id,
+      fecha: d.fechaDevolucion,
+      monto: d.monto || d.montoDevolucion
+    })));
+
     devoluciones.forEach((devolucion) => {
-      // Usar la fecha de devolución
-      let fechaValida = null;
+      const fechaDevolucion = extraerFechaValida(devolucion, [
+        'fechaDevolucion',
+        'createdAt',
+        'updatedAt'
+      ]);
       
-      // Prioridad: fechaDevolucion, luego campos alternativos
-      const fechaCampos = [
-        devolucion.fechaDevolucion,
-        devolucion.createdAt,
-        devolucion.updatedAt
-      ];
-      
-      for (let fecha of fechaCampos) {
-        if (fecha) {
-          // Usar getLocalDate unificado para convertir a zona horaria local
-          const localDate = getLocalDate(fecha);
-          if (localDate) {
-            fechaValida = localDate;
-            break;
-          }
-        }
+      if (!fechaDevolucion) {
+        console.warn('⚠️ Devolución sin fecha válida:', devolucion._id);
+        return;
       }
       
-      // Si no hay fecha válida, usar fecha actual como fallback
-      const devolucionDate = fechaValida || new Date();
-      
-      console.log('📅 Procesando devolución - Fecha:', {
-        devolucionId: devolucion._id,
+      console.log('📅 Procesando devolución:', {
+        id: devolucion._id,
         fechaOriginal: devolucion.fechaDevolucion,
-        fechaValida: fechaValida,
-        fechaProcesada: devolucionDate
+        fechaParsed: fechaDevolucion.toISOString(),
+        monto: devolucion.monto || devolucion.montoDevolucion,
+        enRango: fechaEnRango(fechaDevolucion, startDate, endDate)
       });
       
-      if (devolucionDate >= startDate && devolucionDate < endDate) {
-        let indexPos = 0;
-        switch (filter) {
-          case 'hoy':
-            indexPos = Math.floor((devolucionDate - startDate) / (60 * 60 * 1000));
-            break;
-          case 'semana':
-            indexPos = Math.floor((devolucionDate - startDate) / (24 * 60 * 60 * 1000));
-            break;
-          case 'mes':
-            indexPos = devolucionDate.getDate() - 1;
-            break;
-          case 'anual':
-            indexPos = devolucionDate.getMonth();
-            break;
-        }
+      if (fechaEnRango(fechaDevolucion, startDate, endDate)) {
+        const indexPos = calcularIndiceParaFecha(fechaDevolucion, filter, startDate);
+        
         if (indexPos >= 0 && indexPos < dataPoints.length) {
-          dataPoints[indexPos].devoluciones += Number(devolucion.monto || devolucion.montoDevolucion || 0);
+          const montoDevolucion = Number(devolucion.monto || devolucion.montoDevolucion || 0);
+          dataPoints[indexPos].devoluciones += montoDevolucion;
+          console.log('✅ Devolución agregada:', {
+            indice: indexPos,
+            dia: labels[indexPos],
+            monto: montoDevolucion
+          });
         }
       }
     });
@@ -205,6 +105,16 @@ const VentasLineChart = ({ userRole }) => {
     dataPoints.forEach(point => {
       point.ventasNetas = point.ventasBrutas - point.devoluciones;
     });
+    
+    // Resumen final
+    const totalDevoluciones = dataPoints.reduce((sum, point) => sum + point.devoluciones, 0);
+    const totalVentas = dataPoints.reduce((sum, point) => sum + point.ventasBrutas, 0);
+    console.log('💰 TOTALES:', {
+      ventas: totalVentas.toFixed(2),
+      devoluciones: totalDevoluciones.toFixed(2),
+      netas: (totalVentas - totalDevoluciones).toFixed(2)
+    });
+    
     return { labels, dataPoints };
   };
 
@@ -212,15 +122,26 @@ const VentasLineChart = ({ userRole }) => {
     setLoading(true);
     setError(null);
     try {
+      console.log('🔍 Cargando datos para gráfico...');
+      
       // Obtener ventas y devoluciones
       const [ventasResponse, devolucionesResponse] = await Promise.all([
         api.get('/api/ventas?limit=1000'),
-        api.get('/api/devoluciones?limit=1000').catch(() => ({ data: { devoluciones: [] } })) // Fallback si no hay devoluciones
+        api.get('/api/devoluciones?limit=1000').catch(() => ({ data: { devoluciones: [] } }))
       ]);
+      
       const ventas = ventasResponse.data.ventas || ventasResponse.data || [];
       const devoluciones = devolucionesResponse.data.devoluciones || devolucionesResponse.data || [];
-      const { startDate, endDate } = getDateRange(timeFilter);
+      
+      console.log('📊 Datos obtenidos:', {
+        ventas: ventas.length,
+        devoluciones: devoluciones.length,
+        filtro: timeFilter
+      });
+      
+      const { startDate, endDate } = calcularRangoFechas(timeFilter);
       const { labels, dataPoints } = processVentasData(ventas, devoluciones, timeFilter, startDate, endDate);
+      
       // Calcular totales del período
       const periodTotals = dataPoints.reduce((acc, point) => ({
         ventasBrutas: acc.ventasBrutas + point.ventasBrutas,
@@ -228,6 +149,7 @@ const VentasLineChart = ({ userRole }) => {
         ventasNetas: acc.ventasNetas + point.ventasNetas,
         cantidadVendida: acc.cantidadVendida + point.cantidadVendida
       }), { ventasBrutas: 0, devoluciones: 0, ventasNetas: 0, cantidadVendida: 0 });
+      
       setTotals(periodTotals);
       setChartData({
         labels,
