@@ -6,11 +6,12 @@ import { useCantidadManagement } from '../../hooks/useCantidadManagement';
 const ProductCard = ({ 
   producto, 
   ventaId, 
+  venta, // 📋 Nueva prop para acceder a toda la venta y sus devoluciones
   onUpdateQuantity, 
   onRemoveProduct, 
   canEdit = false,
   loading = false,
-  devoluciones = [] // 📋 Nueva prop para detectar devoluciones
+  devoluciones = [] // 📋 Mantener por compatibilidad, pero usar venta.devoluciones como prioridad
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showQuantityModal, setShowQuantityModal] = useState(false);
@@ -28,62 +29,25 @@ const ProductCard = ({
     setNewQuantity(producto.cantidad);
   }, [producto.cantidad]);
 
-  // 🔍 DETECTAR SI EL PRODUCTO TIENE DEVOLUCIONES (VERSIÓN SIMPLIFICADA PARA DEBUG)
+  // 🔍 DETECTAR SI EL PRODUCTO TIENE DEVOLUCIONES
   const tieneDevolucion = React.useMemo(() => {
-    console.log('🔍 ===== INICIANDO DETECCIÓN DE DEVOLUCIONES =====');
+    // PRIORIDAD: Usar devoluciones de la venta si están disponibles
+    const devolucionesAUsar = venta?.devoluciones || devoluciones || [];
     
-    if (!devoluciones || devoluciones.length === 0) {
-      console.log('❌ No hay devoluciones para analizar');
+    if (!devolucionesAUsar || devolucionesAUsar.length === 0) {
       return false;
     }
     
     const productoIdActual = producto.productoId?._id || producto.productoId;
-    console.log('� Producto actual:', {
-      id: productoIdActual,
-      nombre: producto.productoId?.nombre,
-      devolucionesTotales: devoluciones.length
-    });
-    
-    // Mostrar todas las devoluciones para debug
-    devoluciones.forEach((dev, index) => {
-      const devProductoId = dev.productoId?._id || dev.productoId;
-      const sonIguales = devProductoId && productoIdActual && (devProductoId.toString() === productoIdActual.toString());
-      
-      console.log(`📋 Devolución ${index + 1}:`, {
-        devolucionId: dev._id,
-        productoIdEnDev: devProductoId,
-        productoIdActual: productoIdActual,
-        sonIguales: sonIguales,
-        nombreProducto: dev.productoId?.nombre,
-        cantidadDevuelta: dev.cantidadDevuelta,
-        estado: dev.estado
-      });
-    });
     
     // Buscar coincidencias
-    const hayCoincidencia = devoluciones.some(dev => {
+    const hayCoincidencia = devolucionesAUsar.some(dev => {
       const devProductoId = dev.productoId?._id || dev.productoId;
       return devProductoId && productoIdActual && (devProductoId.toString() === productoIdActual.toString());
     });
     
-    console.log('🎯 RESULTADO FINAL:', {
-      productoId: productoIdActual,
-      hayDevoluciones: hayCoincidencia,
-      ocultarBotones: hayCoincidencia
-    });
-    
-    console.log('🔍 ===== FIN DETECCIÓN DE DEVOLUCIONES =====');
-    
     return hayCoincidencia;
-  }, [devoluciones, producto.productoId]);
-
-  // 📊 LOG FINAL SIMPLIFICADO
-  console.log('🎯 DECISIÓN FINAL - MOSTRAR/OCULTAR BOTONES:', {
-    producto: producto.productoId?.nombre,
-    tieneDevolucion: tieneDevolucion,
-    mostrarBotones: !tieneDevolucion,
-    accion: tieneDevolucion ? '🔒 OCULTAR BOTONES' : '✅ MOSTRAR BOTONES'
-  });
+  }, [venta?.devoluciones, devoluciones, producto.productoId]);
 
   // Función para determinar el color del stock
   const getStockColor = (cantidadRestante) => {
@@ -150,8 +114,6 @@ const ProductCard = ({
   };
 
   const handleQuantityConfirm = async (responseData) => {
-    console.log('🔍 ProductCard - handleQuantityConfirm recibió:', responseData);
-    
     // La venta puede venir directamente o dentro de un objeto con la propiedad 'venta'
     const venta = responseData?.venta || responseData;
     
@@ -164,24 +126,12 @@ const ProductCard = ({
       if (productoActualizado) {
         // Actualizar el estado local inmediatamente
         setNewQuantity(productoActualizado.cantidad);
-        
-        console.log('✅ Producto actualizado con historial:', {
-          productoId: producto.productoId._id,
-          cantidadAnterior: producto.cantidad,
-          cantidadNueva: productoActualizado.cantidad,
-          historial: productoActualizado.historial
-        });
-      } else {
-        console.warn('⚠️ ProductCard - No se encontró el producto en la venta actualizada');
       }
       
       // Notificar al componente padre que la venta se actualizó
       if (onUpdateQuantity) {
-        console.log('🔄 ProductCard - Notificando al padre sobre la actualización');
         onUpdateQuantity(venta);
       }
-    } else {
-      console.warn('⚠️ ProductCard - No se encontró la estructura de venta esperada:', responseData);
     }
   };
 
@@ -339,15 +289,17 @@ const ProductCard = ({
               </div>
             )}
 
-            {/* Botón eliminar */}
-            <button
-              onClick={handleRemove}
-              disabled={isUpdating}
-              className="p-1 text-red-600 hover:text-red-800 hover:bg-red-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Eliminar producto"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+            {/* Botón eliminar - solo si NO hay devoluciones */}
+            {!tieneDevolucion && (
+              <button
+                onClick={handleRemove}
+                disabled={isUpdating}
+                className="p-1 text-red-600 hover:text-red-800 hover:bg-red-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Eliminar producto"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
           </div>
         )}
       </div>

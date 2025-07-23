@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import VentasManager from './VentasManager';
 import CobroList from '../cobros/CobroList';
 import { ReservasCompletadas } from '../productos';
+import DevolucionList from '../devoluciones/DevolucionList';
 
 function GestionVentas({ userRole }) {
   const [tab, setTab] = useState('ventas');
@@ -44,6 +45,16 @@ function GestionVentas({ userRole }) {
           >
             Reservas Completadas
           </button>
+          <button
+            className={`px-4 py-2 rounded-t-lg font-semibold border-b-2 transition-colors ${
+              tab === 'devoluciones' 
+                ? 'border-purple-600 text-purple-700 bg-purple-50' 
+                : 'border-transparent text-gray-600 bg-gray-100 hover:bg-purple-50'
+            }`}
+            onClick={() => setTab('devoluciones')}
+          >
+            Devoluciones
+          </button>
         </div>
       )}
       
@@ -57,6 +68,12 @@ function GestionVentas({ userRole }) {
             {tab === 'ventas' && <VentasManager userRole={userRole} />}
             {tab === 'cobros' && <CobroList userRole={userRole} />}
             {tab === 'reservas' && <ReservasCompletadas />}
+            {tab === 'devoluciones' && (
+              <div className="bg-white shadow-lg rounded-xl p-6">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Gestión de Devoluciones</h3>
+                <DevolucionList userRole={userRole} />
+              </div>
+            )}
           </>
         )}
       </div>

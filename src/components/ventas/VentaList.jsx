@@ -21,10 +21,11 @@ function VentaList({
   showActions = true, 
   canComplete = false, 
   onVentaUpdated,
+  onPagoProcessed, // Callback para pagos
+  onDevolucionProcessed, // Callback para devoluciones
   showHeader = true, // Nuevo prop para controlar si se muestra el encabezado
   ventas: ventasProp = null, // Ventas pueden venir como prop
-  currentUserId: currentUserIdProp,
-  devoluciones = [] // <-- Asegura que devoluciones siempre esté definida
+  currentUserId: currentUserIdProp
 }) {
   const getFechaActualString = () => {
     const hoy = new Date();
@@ -42,11 +43,6 @@ function VentaList({
   // Fallback temporal para el rol
   const userRole = useRole() || 'user';
   const currentUserId = currentUserIdProp || user?.id;
-  
-  // DEBUG: Verificar que el rol se está recibiendo correctamente
-  React.useEffect(() => {
-    console.log('🎯 VentaList - userRole from context:', userRole);
-  }, [userRole]);
   
   const [ventas, setVentas] = useState([]);
   
@@ -106,7 +102,6 @@ function VentaList({
   // Sincronizar ventas del prop con el estado local
   useEffect(() => {
     if (ventasProp) {
-      console.log('📦 VentaList - Sincronizando ventas del prop:', ventasProp.length);
       setVentas(ventasProp);
     }
   }, [ventasProp]);
@@ -136,7 +131,6 @@ function VentaList({
       
       // Si se está usando ventas como prop, no cargar desde el backend
       if (ventasProp) {
-        console.log('📦 VentaList - Usando ventas del prop, no cargando desde backend');
         if (onVentaUpdated) {
           onVentaUpdated(); // Llamar al callback del parent
         }
@@ -179,7 +173,11 @@ function VentaList({
           }
         });
 
+        // NOTA: Las ventas ya NO necesitan ser enriquecidas aquí porque
+        // ahora VentasManager se encarga de eso cuando usa props.
+        // Solo se ejecuta esta función cuando NO hay ventasProp.
         setVentas(ventasActivas);
+        console.log('📦 VentaList - Ventas cargadas (sin enriquecimiento porque se usa standalone):', ventasActivas.length);
       } else {
         console.warn('Estructura de respuesta inesperada:', data);
         setVentas([]);
@@ -252,9 +250,34 @@ function VentaList({
     }
 
     try {
+      // VERIFICACIÓN ADICIONAL: Consultar devoluciones antes de eliminar
+      console.log('🔍 VERIFICANDO DEVOLUCIONES antes de eliminar venta:', ventaId);
       const token = await getToken();
+      
+      const devolucionesResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/devoluciones`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (devolucionesResponse.ok) {
+        const devolucionesData = await devolucionesResponse.json();
+        const devoluciones = devolucionesData.devoluciones || [];
+        
+        const tieneDevolucion = devoluciones.some(dev => 
+          dev.ventaId === ventaId || dev.ventaId?._id === ventaId
+        );
+
+        if (tieneDevolucion) {
+          console.log('❌ ELIMINACIÓN BLOQUEADA: Venta tiene devoluciones asociadas');
+          showError('No se puede eliminar esta venta porque tiene devoluciones asociadas');
+          return;
+        }
+      }
+
       if (!token) {
-        alert('No estás autorizado');
+        showError('No estás autorizado');
         return;
       }
 
@@ -270,11 +293,16 @@ function VentaList({
         throw new Error(errorData.message || 'Error al eliminar la venta');
       }
       
+      showSuccess('Venta eliminada exitosamente');
       await loadVentas();
-      alert('Venta eliminada exitosamente');
+      
+      // Notificar al componente padre si es necesario
+      if (onVentaUpdated) {
+        onVentaUpdated();
+      }
     } catch (error) {
       console.error('Error al eliminar la venta:', error);
-      alert('Error al eliminar la venta: ' + (error.response?.data?.message || error.message));
+      showError(error.message || 'Error al eliminar la venta');
     }
   };
 
@@ -413,9 +441,19 @@ function VentaList({
       
       await procesarPagoVenta(selectedVentaForPayment._id, pagoCompleto);
       
+      console.log('💰 PAYMENT PROCESSED - Reloading ventas to check updated payment status');
+      
       setSuccess(userRole === 'user' ? 'Pago realizado exitosamente' : 'Pago procesado exitosamente');
       handleClosePayment();
-      await loadVentas();
+      
+      // Llamar al callback específico para pagos si está disponible
+      if (onPagoProcessed) {
+        await onPagoProcessed();
+      } else if (onVentaUpdated) {
+        await onVentaUpdated();
+      } else {
+        await loadVentas(); // Esto recargará las ventas con devoluciones actualizadas
+      }
     } catch (error) {
       console.error('Error al procesar el pago:', error);
       setError(error.message || 'Error al procesar el pago. Por favor, verifica los datos e intenta nuevamente.');
@@ -448,18 +486,27 @@ function VentaList({
 
       console.log('✅ VentaList - Respuesta del servidor:', response.data);
 
-      // Si el backend devolvió la venta actualizada, usarla para actualizar el estado
-      if (response.data.venta) {
-        console.log('🔄 VentaList - Actualizando estado con venta del servidor');
-        handleUpdateQuantity(response.data.venta);
-      } else {
-        // Fallback: recargar todas las ventas si no se devolvió la venta actualizada
-        console.log('🔄 VentaList - Fallback: recargando todas las ventas');
-        loadVentas();
-      }
+      console.log('🔄 DEVOLUTION PROCESSED - Reloading ventas to check updated devolution status');
+      
+      // SIEMPRE recargar todas las ventas para asegurar datos actualizados
+      console.log('🔄 VentaList - Recargando todas las ventas después de devolución');
+      await loadVentas();
 
       showSuccess('Devolución procesada exitosamente');
       handleCloseDevolucion();
+      
+      // PRIORIDAD: Usar callback específico de devoluciones (viene de VentasManager)
+      if (onDevolucionProcessed) {
+        console.log('📡 VentaList - Llamando callback específico de devolución procesada');
+        await onDevolucionProcessed();
+      } else if (onVentaUpdated) {
+        console.log('� VentaList - Llamando callback de venta actualizada');
+        await onVentaUpdated();
+      } else {
+        // Fallback: recargar todas las ventas si no se devolvió la venta actualizada
+        console.log('🔄 VentaList - Fallback: recargando todas las ventas');
+        await loadVentas();
+      }
     } catch (error) {
       console.error('Error al procesar la devolución:', error);
       showError(error.response?.data?.message || 'Error al procesar la devolución');
@@ -574,7 +621,23 @@ function VentaList({
       return false;
     }
 
-    // Super Admin puede eliminar cualquier venta
+    // Verificar si la venta tiene pagos (cobros)
+    if (venta.estadoPago === 'Pagado' || venta.estadoPago === 'Parcial' || 
+        (venta.cantidadPagada && venta.cantidadPagada > 0)) {
+      return false;
+    }
+
+    // ✅ NUEVA VERIFICACIÓN: Verificar si la venta tiene devoluciones
+    if (venta.devoluciones && venta.devoluciones.length > 0) {
+      return false;
+    }
+
+    // Verificar si la venta está finalizada/aprobada
+    if (venta.completionStatus === 'approved' || venta.completionStatus === 'pending') {
+      return false;
+    }
+
+    // Super Admin puede eliminar cualquier venta (si pasa las validaciones anteriores)
     if (userRole === 'super_admin') {
       return true;
     }
@@ -711,7 +774,6 @@ function VentaList({
         userRole={userRole}
         currentUserId={currentUserId}
         loading={loading}
-        devoluciones={devoluciones}
         formatearFechaHora={formatearFechaHora}
         canEditDelete={canEditDelete}
         handleOpenPayment={handleOpenPayment}
@@ -767,7 +829,6 @@ function VentaList({
           onClose={handleCloseDevolucion}
           onSubmit={handleProcessDevolucion}
           venta={selectedVentaForDevolucion}
-          isSubmitting={loading}
         />
       )}
 

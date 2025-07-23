@@ -5,7 +5,6 @@ import VentaList from './VentaList';
 import VentasFinalizadas from './VentasFinalizadas';
 import VentaCreationModal from './VentaCreationModal';
 import { useRole } from '../../context/RoleContext';
-import DevolucionList from '../devoluciones/DevolucionList';
 
 const VentasManager = ({ userRole: userRoleProp }) => {
   const { getToken } = useAuth();
@@ -14,19 +13,60 @@ const VentasManager = ({ userRole: userRoleProp }) => {
   // Usar el prop si está disponible, sino usar el contexto como fallback
   const userRole = userRoleProp || contextUserRole;
   
-  // DEBUG: Verificar el rol del usuario
-  console.log('🔍 VentasManager - userRole:', userRole, 'canShowAddButton:', ['admin', 'super_admin', 'user'].includes(userRole));
-  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ventas, setVentas] = useState([]);
   const [ventasFinalizadas, setVentasFinalizadas] = useState([]);
-  const [devoluciones, setDevoluciones] = useState([]); // <-- Nuevo estado para devoluciones
   const [loading, setLoading] = useState(false);
   const [loadingFinalizadas, setLoadingFinalizadas] = useState(false);
   const [error, setError] = useState(null);
 
   // Admins, super_admins y usuarios pueden crear ventas
   const canShowAddButton = ['admin', 'super_admin', 'user'].includes(userRole);
+
+  // Función para enriquecer ventas con información de devoluciones
+  const enrichVentasWithDevoluciones = async (ventas) => {
+    try {
+      const token = await getToken();
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/devoluciones`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        console.warn('VentasManager - No se pudieron cargar las devoluciones');
+        return ventas;
+      }
+
+      const data = await response.json();
+      const devoluciones = data.devoluciones || [];
+
+      // Enriquecer cada venta con sus devoluciones
+      const ventasEnriquecidas = ventas.map(venta => {
+        const devolucionesVenta = devoluciones.filter(dev => 
+          dev.ventaId === venta._id || dev.ventaId?._id === venta._id
+        );
+        
+        // Solo log si hay devoluciones para evitar spam
+        if (devolucionesVenta.length > 0) {
+          console.log(`� VentasManager - Venta ${venta._id.slice(-6)} tiene ${devolucionesVenta.length} devoluciones`);
+        }
+        
+        const ventaEnriquecida = {
+          ...venta,
+          devoluciones: devolucionesVenta
+        };
+
+        return ventaEnriquecida;
+      });
+
+      return ventasEnriquecidas;
+    } catch (error) {
+      console.warn('VentasManager - Error al cargar devoluciones:', error);
+      return ventas;
+    }
+  };
 
   // Fetch solo ventas activas (no finalizadas)
   const fetchVentas = async () => {
@@ -44,7 +84,11 @@ const VentasManager = ({ userRole: userRoleProp }) => {
       const data = await response.json();
       // Filtrar ventas activas (no finalizadas)
       const ventasActivas = (data.ventas || []).filter(v => v.completionStatus !== 'approved');
-      setVentas(ventasActivas);
+      
+      // ENRIQUECER CON DEVOLUCIONES - Igual que los cobros
+      const ventasConDevoluciones = await enrichVentasWithDevoluciones(ventasActivas);
+      setVentas(ventasConDevoluciones);
+      
     } catch (error) {
       console.error('Error:', error);
       setError('Error al cargar ventas');
@@ -68,7 +112,12 @@ const VentasManager = ({ userRole: userRoleProp }) => {
         throw new Error('Error al cargar ventas finalizadas');
       }
       const data = await response.json();
-      setVentasFinalizadas(data.ventas || []);
+      
+      // ENRIQUECER CON DEVOLUCIONES - Igual que las ventas activas
+      const ventasFinalizadasConDevoluciones = await enrichVentasWithDevoluciones(data.ventas || []);
+      setVentasFinalizadas(ventasFinalizadasConDevoluciones);
+      
+      console.log('✅ VentasManager - Ventas finalizadas cargadas y enriquecidas:', ventasFinalizadasConDevoluciones.length);
     } catch (error) {
       setError('Error al cargar ventas finalizadas');
     } finally {
@@ -76,36 +125,21 @@ const VentasManager = ({ userRole: userRoleProp }) => {
     }
   };
 
-  // Fetch devoluciones
-  const fetchDevoluciones = async () => {
-    try {
-      const token = await getToken();
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/devoluciones`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!response.ok) throw new Error('Error al cargar devoluciones');
-      const data = await response.json();
-      setDevoluciones(data.devoluciones || []);
-    } catch (error) {
-      console.error('Error al cargar devoluciones:', error);
-      setDevoluciones([]);
-    }
-  };
+  // Fetch devoluciones - REMOVIDO: ahora se maneja en GestionVentas
 
   useEffect(() => {
     fetchVentas();
     fetchVentasFinalizadas();
-    fetchDevoluciones(); // <-- Cargar devoluciones al montar
+    // Eliminado: fetchDevoluciones() - ya no se necesita aquí
   }, []);
 
   const handleVentaCreated = async (venta) => {
     try {
       setLoading(true);
-      // Recargar todas las listas después de crear una venta
+      // Recargar las listas de ventas después de crear una venta
       await Promise.all([
         fetchVentas(),
-        fetchVentasFinalizadas(),
-        fetchDevoluciones()
+        fetchVentasFinalizadas()
       ]);
       setIsModalOpen(false);
       console.log('✅ Venta creada y listas actualizadas');
@@ -114,6 +148,49 @@ const VentasManager = ({ userRole: userRoleProp }) => {
       setError('Error al refrescar la lista de ventas');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Función para manejar actualizaciones de ventas
+  const handleVentaUpdated = async () => {
+    try {
+      console.log('🔄 VentasManager - Recargando datos después de actualización de venta');
+      await Promise.all([
+        fetchVentas(),
+        fetchVentasFinalizadas()
+      ]);
+      console.log('✅ VentasManager - Datos de ventas actualizados');
+    } catch (error) {
+      console.error('Error al refrescar las listas después de actualización:', error);
+      setError('Error al refrescar los datos');
+    }
+  };
+
+  // Función específica para cuando se procesa un pago
+  const handlePagoProcessed = async () => {
+    try {
+      console.log('🔄 VentasManager - Recargando datos después de procesar pago');
+      await Promise.all([
+        fetchVentas(), // Recargar ventas porque cambia el estado de pago
+        fetchVentasFinalizadas() // Recargar finalizadas por si cambia el estado
+      ]);
+      console.log('✅ VentasManager - Datos actualizados después de pago');
+    } catch (error) {
+      console.error('Error al refrescar datos después de pago:', error);
+    }
+  };
+
+  // Función específica para cuando se procesa una devolución
+  const handleDevolucionProcessed = async () => {
+    try {
+      console.log('🔄 VentasManager - Recargando datos después de procesar devolución');
+      await Promise.all([
+        fetchVentas(), // Recargar ventas para actualizar devoluciones
+        fetchVentasFinalizadas() // Recargar finalizadas por si hay devoluciones
+      ]);
+      console.log('✅ VentasManager - Datos actualizados después de devolución');
+    } catch (error) {
+      console.error('Error al refrescar datos después de devolución:', error);
     }
   };
 
@@ -145,11 +222,12 @@ const VentasManager = ({ userRole: userRoleProp }) => {
 
         <VentaList 
           ventas={ventas}
-          devoluciones={devoluciones}
           userRole={userRole}
           currentUserId={user?.id}
           showHeader={false}
-          onVentaUpdated={fetchVentas}
+          onVentaUpdated={handleVentaUpdated}
+          onPagoProcessed={handlePagoProcessed}
+          onDevolucionProcessed={handleDevolucionProcessed}
           loading={loading}
         />
 
@@ -170,14 +248,6 @@ const VentasManager = ({ userRole: userRoleProp }) => {
           loading={loadingFinalizadas}
         />
       </div>
-
-      {/* Nueva sección para Devoluciones - Solo para admin y super_admin */}
-      {['admin', 'super_admin'].includes(userRole) && (
-        <div className="bg-white shadow-lg rounded-xl p-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Devoluciones</h3>
-          <DevolucionList userRole={userRole} />
-        </div>
-      )}
     </div>
   );
 };

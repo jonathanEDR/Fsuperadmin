@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Plus } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import DevolucionModal from './DevolucionModal';
-import { formatearFecha } from '../../utils/fechaHoraUtils';
+import { formatearFecha, getLocalDateTimeString, convertLocalDateTimeToISO } from '../../utils/fechaHoraUtils';
 
-const DevolucionList = ({ userRole = 'user' }) => {
+const DevolucionList = ({ userRole = 'user', onDevolucionDeleted }) => {
   const [devoluciones, setDevoluciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -14,6 +14,15 @@ const DevolucionList = ({ userRole = 'user' }) => {
   const [limit, setLimit] = useState(10);
   const [hasMore, setHasMore] = useState(true);
   const [deleteStatus, setDeleteStatus] = useState({ show: false, message: '', type: '' });
+  
+  // Estados para el modal de devolución
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [ventas, setVentas] = useState([]);
+  const [selectedVenta, setSelectedVenta] = useState(null);
+  const [fechaDevolucion, setFechaDevolucion] = useState(getLocalDateTimeString());
+  const [motivo, setMotivo] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const { getToken } = useAuth();
 
   // Función de utilidad para formatear fechas - usar utilidad unificada
@@ -32,7 +41,37 @@ const DevolucionList = ({ userRole = 'user' }) => {
 
   useEffect(() => {
     fetchDevoluciones();
+    fetchVentas(); // Cargar ventas disponibles para el modal
   }, []);
+
+  // Función para cargar ventas disponibles
+  const fetchVentas = async () => {
+    try {
+      const token = await getToken();
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/ventas`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al cargar ventas');
+      }
+
+      const data = await response.json();
+      // Filtrar solo ventas que no estén aprobadas/finalizadas
+      const ventasDisponibles = data.ventas?.filter(venta => 
+        venta.completionStatus !== 'approved' && 
+        venta.productos && 
+        venta.productos.length > 0
+      ) || [];
+      
+      setVentas(ventasDisponibles);
+    } catch (error) {
+      console.error('Error al cargar ventas:', error);
+    }
+  };
 
   // Efecto para cargar más elementos cuando cambia el limit
   useEffect(() => {
@@ -112,12 +151,87 @@ const DevolucionList = ({ userRole = 'user' }) => {
         
         showStatusMessage('Devolución eliminada correctamente', 'success');
         
+        // Llamar al callback si está disponible para actualizar otros componentes
+        if (onDevolucionDeleted) {
+          console.log('📡 DevolucionList - Notificando eliminación de devolución');
+          await onDevolucionDeleted();
+        }
+        
       } catch (error) {
         console.error('Error:', error);
         showStatusMessage(error.message || 'Error al eliminar la devolución', 'error');
       } finally {
         setLoading(false);
       }
+    }
+  };
+
+  // Funciones para manejar el modal de devolución
+  const handleOpenModal = () => {
+    setIsModalVisible(true);
+    setSelectedVenta(null);
+    setFechaDevolucion(getLocalDateTimeString());
+    setMotivo('');
+  };
+
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+    setSelectedVenta(null);
+    setFechaDevolucion(getLocalDateTimeString());
+    setMotivo('');
+  };
+
+  const handleSubmitDevolucion = async (productosADevolver) => {
+    if (!selectedVenta || productosADevolver.length === 0) {
+      showStatusMessage('Selecciona una venta y productos para devolver', 'error');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const token = await getToken();
+
+      // Procesar cada producto por separado
+      for (const item of productosADevolver) {
+        const devolucionData = {
+          ventaId: selectedVenta._id,
+          productoId: item.producto.productoId._id,
+          cantidad: parseInt(item.cantidad),
+          motivo: motivo,
+          fechaDevolucion: convertLocalDateTimeToISO(fechaDevolucion)
+        };
+
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/devoluciones`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(devolucionData)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Error al procesar la devolución');
+        }
+      }
+
+      showStatusMessage('Devolución(es) procesada(s) exitosamente', 'success');
+      handleCloseModal();
+      
+      // Recargar las devoluciones para mostrar las nuevas
+      await fetchDevoluciones();
+      
+      // Notificar a otros componentes si es necesario
+      if (onDevolucionDeleted) {
+        await onDevolucionDeleted();
+      }
+      
+    } catch (error) {
+      console.error('Error al procesar devolución:', error);
+      showStatusMessage(error.message || 'Error al procesar la devolución', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -139,6 +253,21 @@ const DevolucionList = ({ userRole = 'user' }) => {
 
   return (
     <div className="overflow-x-auto">
+      {/* Botón para abrir el modal de nueva devolución */}
+      <div className="mb-6 flex justify-between items-center">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">Lista de Devoluciones</h3>
+          <p className="text-sm text-gray-600">Gestiona y registra las devoluciones de productos</p>
+        </div>
+        <button
+          onClick={handleOpenModal}
+          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Nueva Devolución
+        </button>
+      </div>
+
       {deleteStatus.show && (
         <div className={`p-4 mb-4 text-sm rounded-lg ${
           deleteStatus.type === 'success' 
@@ -271,6 +400,21 @@ const DevolucionList = ({ userRole = 'user' }) => {
           </span>
         )}
       </div>
+
+      {/* Modal de Devolución */}
+      <DevolucionModal
+        isVisible={isModalVisible}
+        ventas={ventas}
+        selectedVenta={selectedVenta}
+        fechaDevolucion={fechaDevolucion}
+        motivo={motivo}
+        onClose={handleCloseModal}
+        onVentaSelect={setSelectedVenta}
+        onFechaChange={setFechaDevolucion}
+        onMotivoChange={setMotivo}
+        onSubmit={handleSubmitDevolucion}
+        isSubmitting={isSubmitting}
+      />
     </div>
   );
 };

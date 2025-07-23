@@ -8,7 +8,6 @@ const VentaViews = ({
   userRole,
   currentUserId,
   loading,
-  devoluciones,
   formatearFechaHora,
   canEditDelete,
   handleOpenPayment,
@@ -21,6 +20,41 @@ const VentaViews = ({
   handleRemoveProduct,
   ventaModificationHook
 }) => {
+
+  // Helper para determinar por qué no se puede eliminar una venta
+  const getDeleteRestrictionReason = (venta) => {
+    if (userRole === 'user') {
+      return 'Los usuarios no pueden eliminar ventas';
+    }
+    
+    if (venta.estadoPago === 'Pagado' || venta.estadoPago === 'Parcial' || 
+        (venta.cantidadPagada && venta.cantidadPagada > 0)) {
+      return 'No se puede eliminar: tiene pagos registrados';
+    }
+
+    // Verificar si la venta tiene devoluciones
+    if (venta.devoluciones && venta.devoluciones.length > 0) {
+      return 'No se puede eliminar: tiene devoluciones asociadas';
+    }
+
+    if (venta.completionStatus === 'approved') {
+      console.log('❌ COMPLETION RESTRICTION: venta aprobada');
+      return 'No se puede eliminar: venta aprobada';
+    }
+    
+    if (venta.completionStatus === 'pending') {
+      console.log('❌ PENDING RESTRICTION: venta en proceso de aprobación');
+      return 'No se puede eliminar: venta en proceso de aprobación';
+    }
+
+    if (userRole === 'admin' && venta.creatorInfo?.role === 'super_admin') {
+      console.log('❌ ADMIN RESTRICTION: creada por super admin');
+      return 'No se puede eliminar: creada por super admin';
+    }
+
+    console.log('✅ NO RESTRICTIONS: Venta puede ser eliminada');
+    return null; // Se puede eliminar
+  };
 
   // Vista de Tabla
   const renderTableView = () => {
@@ -230,8 +264,8 @@ const VentaViews = ({
                           </div>
                         )}
                         
-                        {/* Botón de eliminar */}
-                        {canEditDelete(venta) && (
+                        {/* Botón de eliminar o razón por la que no se puede eliminar */}
+                        {canEditDelete(venta) ? (
                           <button
                             onClick={() => handleDeleteVenta(venta._id)}
                             className="inline-flex items-center gap-1 px-2 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition-colors"
@@ -239,6 +273,16 @@ const VentaViews = ({
                           >
                             🗑️
                           </button>
+                        ) : (
+                          // Mostrar tooltip o texto indicativo para admin/super_admin
+                          ['admin', 'super_admin'].includes(userRole) && (
+                            <span 
+                              className="inline-flex items-center gap-1 px-2 py-1 bg-gray-200 text-gray-600 rounded text-xs cursor-help"
+                              title={getDeleteRestrictionReason(venta)}
+                            >
+                              🚫
+                            </span>
+                          )
                         )}
                       </div>
                     </td>
@@ -471,23 +515,16 @@ const VentaViews = ({
                 {/* Tarjetas de productos */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {venta.productos?.map((prod, idx) => {
-                    // FILTRAR DEVOLUCIONES PARA ESTA VENTA - Solo para admin y super_admin
-                    const devolucionesVenta = ['admin', 'super_admin'].includes(userRole) 
-                      ? devoluciones.filter(dev => {
-                          return dev.ventaId === venta._id || dev.ventaId?._id === venta._id;
-                        })
-                      : []; // Para usuarios normales, no pasar devoluciones
-                    
                     return (
                       <ProductCard
                         key={idx}
                         producto={prod}
                         ventaId={venta._id}
+                        venta={venta} // Pasar toda la venta para acceder a devoluciones
                         onUpdateQuantity={handleUpdateQuantity}
                         onRemoveProduct={handleRemoveProduct}
                         canEdit={canEditDelete(venta) && venta.estadoPago !== 'Pagado'}
                         loading={ventaModificationHook.loading}
-                        devoluciones={devolucionesVenta}
                       />
                     );
                   })}
@@ -580,8 +617,8 @@ const VentaViews = ({
                       </button>
                     </div>
                 )}
-                {/* Botón de eliminar (solo para admin y super_admin con permisos) */}
-                {canEditDelete(venta) && (
+                {/* Botón de eliminar o mensaje informativo */}
+                {canEditDelete(venta) ? (
                   <button
                     onClick={() => handleDeleteVenta(venta._id)}
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -592,6 +629,15 @@ const VentaViews = ({
                     </svg>
                     Eliminar
                   </button>
+                ) : (
+                  // Mostrar razón por la que no se puede eliminar (solo para admin y super_admin)
+                  ['admin', 'super_admin'].includes(userRole) && (
+                    <div className="flex-1 px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-center text-sm">
+                      <span className="text-xs">
+                        {getDeleteRestrictionReason(venta)}
+                      </span>
+                    </div>
+                  )
                 )}
               </div>
             </div>
