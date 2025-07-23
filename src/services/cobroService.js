@@ -9,12 +9,14 @@ const handleApiError = (error, defaultMessage) => {
 
 // Función de utilidad para validar montos
 const validateMontos = (montos) => {
-  const { yape = 0, efectivo = 0, gastosImprevistos = 0 } = montos;
+  const { yape = 0, efectivo = 0, billetes = 0, faltantes = 0, gastosImprevistos = 0 } = montos;
   
   // Convertir a números y validar
   const montosNumericos = {
     yape: Number(yape),
     efectivo: Number(efectivo),
+    billetes: Number(billetes),
+    faltantes: Number(faltantes),
     gastosImprevistos: Number(gastosImprevistos)
   };
 
@@ -24,7 +26,8 @@ const validateMontos = (montos) => {
   });
 
   // Calcular el monto total basándose en los métodos de pago
-  const montoTotal = montosNumericos.yape + montosNumericos.efectivo + montosNumericos.gastosImprevistos;
+  const montoTotal = montosNumericos.yape + montosNumericos.efectivo + montosNumericos.billetes + 
+                     montosNumericos.faltantes + montosNumericos.gastosImprevistos;
   
   return {
     ...montosNumericos,
@@ -80,19 +83,16 @@ export const createCobro = async (cobroData) => {
     const montos = validateMontos({
       yape: cobroData.yape,
       efectivo: cobroData.efectivo,
+      billetes: cobroData.billetes,
+      faltantes: cobroData.faltantes,
       gastosImprevistos: cobroData.gastosImprevistos
     });
-
-    console.log('Montos validados:', montos);
 
     // Calcular cuánto se va a pagar por cada venta
     // Si hay múltiples ventas, distribuir el monto total proporcionalmente
     const totalVentasPendientes = cobroData.ventas.reduce((sum, venta) => 
       sum + (Number(venta.montoPendiente) || 0), 0
     );
-
-    console.log('Total ventas pendientes:', totalVentasPendientes);
-    console.log('Monto total a pagar:', montos.montoTotal);
 
     // Preparar la distribución de pagos
     const distribucionPagos = cobroData.ventas.map(venta => {
@@ -124,7 +124,11 @@ export const createCobro = async (cobroData) => {
       fechaCobro: cobroData.fechaCobro
     };
 
-    console.log('Enviando datos al backend:', dataToSend);
+    console.log('Enviando datos al backend:', {
+      ventasCount: dataToSend.ventas?.length,
+      distribucionCount: dataToSend.distribucionPagos?.length,
+      montoTotal: dataToSend.montoTotal
+    });
     const response = await api.post('/api/cobros', dataToSend);
     
     if (!response.data.success) {
@@ -181,6 +185,8 @@ export const procesarPagoVenta = async (ventaId, datoPago) => {
     const montos = validateMontos({
       yape: datoPago.yape,
       efectivo: datoPago.efectivo,
+      billetes: datoPago.billetes,
+      faltantes: datoPago.faltantes,
       gastosImprevistos: datoPago.gastosImprevistos
     });
 

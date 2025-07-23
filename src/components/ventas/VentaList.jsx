@@ -431,6 +431,8 @@ function VentaList({
       const pagoCompleto = {
         yape: parseFloat(paymentData.yape) || 0,
         efectivo: parseFloat(paymentData.efectivo) || 0,
+        billetes: parseFloat(paymentData.billetes) || 0,
+        faltantes: parseFloat(paymentData.faltantes) || 0,
         gastosImprevistos: parseFloat(paymentData.gastosImprevistos) || 0,
         descripcion: paymentData.descripcion || '',
         fechaCobro: paymentData.fechaCobro || new Date().toISOString().split('T')[0] // Incluir fecha de cobro

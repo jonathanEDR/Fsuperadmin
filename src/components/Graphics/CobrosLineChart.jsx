@@ -14,6 +14,8 @@ const CobrosLineChart = ({ userRole }) => {
     total: 0,
     yape: 0,
     efectivo: 0,
+    billetes: 0,
+    faltantes: 0,
     gastos: 0
   });
 
@@ -83,7 +85,7 @@ const CobrosLineChart = ({ userRole }) => {
   // Agrupa los cobros usando el campo 'fechaCobro' (consistente con la tabla)
   const processData = (cobros, filter, startDate, endDate) => {
     const labels = generateLabels(filter, startDate, endDate);
-    const dataPoints = labels.map(() => ({ yape: 0, efectivo: 0, gastos: 0, total: 0, cobroNeto: 0 }));
+    const dataPoints = labels.map(() => ({ yape: 0, efectivo: 0, billetes: 0, faltantes: 0, gastos: 0, total: 0, cobroNeto: 0 }));
 
     cobros.forEach((cobro) => {
       // Usar fechaCobro como principal, igual que en la tabla
@@ -126,11 +128,13 @@ const CobrosLineChart = ({ userRole }) => {
       if (indexPos >= 0 && indexPos < dataPoints.length) {
         dataPoints[indexPos].yape += Number(cobro.yape || 0);
         dataPoints[indexPos].efectivo += Number(cobro.efectivo || 0);
+        dataPoints[indexPos].billetes += Number(cobro.billetes || 0);
+        dataPoints[indexPos].faltantes += Number(cobro.faltantes || 0);
         dataPoints[indexPos].gastos += Number(cobro.gastosImprevistos || 0);
-        // Corregido: Total ventas = yape + efectivo + gastos imprevistos
-        dataPoints[indexPos].total += Number(cobro.yape || 0) + Number(cobro.efectivo || 0) + Number(cobro.gastosImprevistos || 0);
-        // Cobro neto = solo yape + efectivo (lo que realmente se cobra)
-        dataPoints[indexPos].cobroNeto += Number(cobro.yape || 0) + Number(cobro.efectivo || 0);
+        // Corregido: Total ventas = yape + efectivo + billetes + faltantes + gastos imprevistos
+        dataPoints[indexPos].total += Number(cobro.yape || 0) + Number(cobro.efectivo || 0) + Number(cobro.billetes || 0) + Number(cobro.faltantes || 0) + Number(cobro.gastosImprevistos || 0);
+        // Cobro neto = yape + efectivo + billetes + faltantes (lo que realmente se cobra, excluyendo gastos)
+        dataPoints[indexPos].cobroNeto += Number(cobro.yape || 0) + Number(cobro.efectivo || 0) + Number(cobro.billetes || 0) + Number(cobro.faltantes || 0);
       }
     });
     return { labels, dataPoints };
@@ -145,14 +149,16 @@ const CobrosLineChart = ({ userRole }) => {
       const cobros = response.cobros || [];
       const { startDate, endDate } = getDateRange(timeFilter);
       const { labels, dataPoints } = processData(cobros, timeFilter, startDate, endDate);
-      // Calcular totales incluyendo cobro neto
+      // Calcular totales incluyendo billetes y faltantes
       const periodTotals = dataPoints.reduce((acc, point) => ({
         total: acc.total + point.total,
         yape: acc.yape + point.yape,
         efectivo: acc.efectivo + point.efectivo,
+        billetes: acc.billetes + point.billetes,
+        faltantes: acc.faltantes + point.faltantes,
         gastos: acc.gastos + point.gastos,
         cobroNeto: acc.cobroNeto + point.cobroNeto
-      }), { total: 0, yape: 0, efectivo: 0, gastos: 0, cobroNeto: 0 });
+      }), { total: 0, yape: 0, efectivo: 0, billetes: 0, faltantes: 0, gastos: 0, cobroNeto: 0 });
       setTotals(periodTotals);
       setChartData({
         labels,
@@ -170,6 +176,22 @@ const CobrosLineChart = ({ userRole }) => {
             data: dataPoints.map(point => point.efectivo),
             borderColor: '#F59E0B',
             backgroundColor: 'rgba(245, 158, 11, 0.1)',
+            tension: 0.3,
+            fill: false,
+          },
+          {
+            label: 'Billetes (S/)',
+            data: dataPoints.map(point => point.billetes),
+            borderColor: '#06B6D4',
+            backgroundColor: 'rgba(6, 182, 212, 0.1)',
+            tension: 0.3,
+            fill: false,
+          },
+          {
+            label: 'Faltantes (S/)',
+            data: dataPoints.map(point => point.faltantes),
+            borderColor: '#F97316',
+            backgroundColor: 'rgba(249, 115, 22, 0.1)',
             tension: 0.3,
             fill: false,
           },
@@ -303,7 +325,7 @@ const CobrosLineChart = ({ userRole }) => {
       </div>
 
       {/* Resumen de totales */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
         <div className="text-center">
           <div className="text-2xl font-bold text-blue-600">S/ {totals.total.toFixed(2)}</div>
           <div className="text-sm text-gray-600">Total Ventas - {getTimeFilterLabel()}</div>
@@ -319,6 +341,14 @@ const CobrosLineChart = ({ userRole }) => {
         <div className="text-center">
           <div className="text-2xl font-bold text-yellow-600">S/ {totals.efectivo.toFixed(2)}</div>
           <div className="text-sm text-gray-600">Total Efectivo - {getTimeFilterLabel()}</div>
+        </div>
+        <div className="text-center">
+          <div className="text-2xl font-bold text-cyan-600">S/ {totals.billetes.toFixed(2)}</div>
+          <div className="text-sm text-gray-600">Total Billetes - {getTimeFilterLabel()}</div>
+        </div>
+        <div className="text-center">
+          <div className="text-2xl font-bold text-orange-600">S/ {totals.faltantes.toFixed(2)}</div>
+          <div className="text-sm text-gray-600">Total Faltantes - {getTimeFilterLabel()}</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-red-600">S/ {totals.gastos.toFixed(2)}</div>

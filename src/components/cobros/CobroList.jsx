@@ -48,9 +48,13 @@ const CobroList = ({ userRole }) => {
       setPaymentHistory(historyResponse?.cobros || []);
       setTotalPages(historyResponse?.totalPages || 1);
 
-      // Calcular información de deuda
-      const totalDebt = ventasResponse?.reduce((sum, venta) => 
-        sum + (venta.montoTotalNeto - (venta.cantidadPagada || 0)), 0) || 0;
+      // Calcular información de deuda - CORREGIDO
+      const totalDebt = ventasResponse?.reduce((sum, venta) => {
+        const montoTotal = parseFloat(venta.montoTotal || venta.montoTotalNeto || 0);
+        const cantidadPagada = parseFloat(venta.cantidadPagada || 0);
+        const deudaVenta = Math.max(0, montoTotal - cantidadPagada);
+        return sum + deudaVenta;
+      }, 0) || 0;
       
       setDebtInfo({
         totalDebt,

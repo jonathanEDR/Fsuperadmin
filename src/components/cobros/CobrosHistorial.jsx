@@ -22,6 +22,30 @@ const formatCurrency = (amount) => {
   return isNaN(numAmount) ? 'S/. 0.00' : `S/. ${numAmount.toFixed(2)}`;
 };
 
+const formatPaymentTypes = (payment) => {
+  console.log('Datos del payment recibido:', payment); // Debug log
+  const types = [];
+  
+  if (payment.yape && parseFloat(payment.yape) > 0) {
+    types.push(`Yape: ${formatCurrency(payment.yape)}`);
+  }
+  if (payment.efectivo && parseFloat(payment.efectivo) > 0) {
+    types.push(`Efectivo: ${formatCurrency(payment.efectivo)}`);
+  }
+  if (payment.billetes && parseFloat(payment.billetes) > 0) {
+    types.push(`Billetes: ${formatCurrency(payment.billetes)}`);
+  }
+  if (payment.faltantes && parseFloat(payment.faltantes) > 0) {
+    types.push(`Faltantes: ${formatCurrency(payment.faltantes)}`);
+  }
+  if (payment.gastosImprevistos && parseFloat(payment.gastosImprevistos) > 0) {
+    types.push(`Gastos: ${formatCurrency(payment.gastosImprevistos)}`);
+  }
+  
+  console.log('Types generados:', types); // Debug log
+  return types.length > 0 ? types : ['Sin especificar'];
+};
+
 const CobrosHistorial = ({ userRole }) => {
   const [payments, setPayments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,7 +74,8 @@ const CobrosHistorial = ({ userRole }) => {
       console.log('Obteniendo cobros, página:', pageToFetch, 'isLoadMore:', isLoadMore);
       
       const data = await getCobrosHistorial(pageToFetch, ITEMS_PER_PAGE);
-      console.log('Datos recibidos:', data);
+      console.log('Datos recibidos del servicio:', data);
+      console.log('Primer cobro recibido:', data.cobros?.[0]); // Debug específico
       
       if (isLoadMore) {
         setPayments(prevPayments => [...prevPayments, ...(data.cobros || [])]);
@@ -128,50 +153,78 @@ const CobrosHistorial = ({ userRole }) => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Usuario</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto Total</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Yape</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Efectivo</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gastos Imprevistos</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Descripción</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Información</th>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Usuario</th>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipos de Cobro</th>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto Total</th>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Descripción</th>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Información</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {payments.length === 0 ? (
               <tr>
-                <td colSpan="8" className="px-6 py-4 text-center text-gray-500">No hay registros de cobros disponibles</td>
+                <td colSpan="6" className="px-4 py-4 text-center text-gray-500">No hay registros de cobros disponibles</td>
               </tr>
             ) : (
               payments.map((payment) => (
                 <tr key={payment._id} className="hover:bg-gray-50 transition-colors duration-150 ease-in-out">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatDate(payment.fechaCobro || payment.fechaPago || payment.createdAt)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden sm:table-cell">
+                  {/* Fecha */}
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {formatDate(payment.fechaCobro || payment.fechaPago || payment.createdAt)}
+                  </td>
+                  
+                  {/* Usuario */}
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 hidden sm:table-cell">
                     <div className="flex flex-col">
                       <span className="font-medium">{payment.creatorName || 'Usuario no especificado'}</span>
                       <span className="text-xs text-gray-500">{payment.creatorEmail || ''}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{formatCurrency(payment.montoPagado || payment.montoTotal)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(payment.yape)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(payment.efectivo)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(payment.gastosImprevistos)}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500 max-w-xs hidden sm:table-cell">
-                    <div className="truncate cursor-help" title={payment.descripcion || 'Sin descripción'}>{payment.descripcion || '-'}</div>
+                  
+                  {/* Tipos de Cobro */}
+                  <td className="px-4 py-4 text-sm text-gray-900">
+                    <div className="space-y-1">
+                      {formatPaymentTypes(payment).map((type, index) => (
+                        <div key={index} className="flex items-center">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {type}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
+                  
+                  {/* Monto Total */}
+                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {formatCurrency(payment.montoPagado || payment.montoTotal)}
+                  </td>
+                  
+                  {/* Descripción */}
+                  <td className="px-4 py-4 text-sm text-gray-500 max-w-xs hidden md:table-cell">
+                    <div className="truncate cursor-help" title={payment.descripcion || 'Sin descripción'}>
+                      {payment.descripcion || '-'}
+                    </div>
+                  </td>
+                  
+                  {/* Información */}
+                  <td className="px-4 py-4 text-sm text-gray-500">
                     <div className="flex flex-col space-y-2">
                       {payment.ventasId?.length > 0 && (
-                        <div className="inline-flex items-center text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                        <div className="inline-flex items-center text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
                           <Info className="h-4 w-4 mr-1" />
                           <span>{payment.ventasId.length} venta{payment.ventasId.length !== 1 ? 's' : ''}</span>
                         </div>
                       )}
-                      <button onClick={() => handleDeleteClick(payment)} className="inline-flex items-center text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        <span>Eliminar</span>
-                      </button>
+                      {userRole === 'super_admin' && (
+                        <button 
+                          onClick={() => handleDeleteClick(payment)} 
+                          className="inline-flex items-center text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full hover:bg-red-200 transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          <span>Eliminar</span>
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

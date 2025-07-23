@@ -409,10 +409,10 @@ const VentaViews = ({
                 )}
               </div>
 
-              {/* Detalles de productos y montos */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 mb-4">
-                <div>
-                  <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2">Detalles del Cliente</h4>
+              {/* Detalles del Cliente */}
+              <div className="mb-4">
+                <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2">Detalles del Cliente</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <p className="text-gray-600">
                     <span className="font-medium">Nombre:</span> {venta.user_info?.nombre_negocio || 'N/A'}
                   </p>
@@ -420,79 +420,94 @@ const VentaViews = ({
                     <span className="font-medium">Email:</span> {venta.user_info?.email || 'N/A'}
                   </p>
                 </div>
-                <div>
-                  <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2">Detalles de la Venta</h4>
+              </div>
+
+              {/* Detalles de la Venta */}
+              <div className="mb-4">
+                <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2">Detalles de la Venta</h4>
+                <p className="text-gray-600 mb-2">
+                  <span className="font-medium">Fecha:</span> {formatearFechaHora(venta.fechadeVenta)}
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
                   <p className="text-gray-600">
-                    <span className="font-medium">Fecha:</span> {formatearFechaHora(venta.fechadeVenta)}
+                    <span className="font-medium">Monto Total:</span> S/ {venta.montoTotal.toFixed(2)}
                   </p>
-                  <div className="space-y-1">
-                    <p className="text-gray-600">
-                      <span className="font-medium">Monto Total:</span> S/ {venta.montoTotal.toFixed(2)}
-                    </p>
-                    <p className="text-gray-600">
-                      <span className="font-medium">Monto Pagado:</span> 
-                      <span className={`ml-1 font-semibold ${
-                        venta.cantidadPagada >= venta.montoTotal 
-                          ? 'text-green-600' 
-                          : venta.cantidadPagada > 0 
-                          ? 'text-yellow-600' 
-                          : 'text-red-600'
-                      }`}>
-                        S/ {(venta.cantidadPagada || 0).toFixed(2)}
-                      </span>
-                    </p>
-                    <p className="text-gray-600">
-                      <span className="font-medium">Saldo Pendiente:</span> 
-                      <span className={`ml-1 font-semibold ${
-                        (venta.debe || 0) <= 0 
-                          ? 'text-green-600' 
-                          : 'text-red-600'
-                      }`}>
-                        S/ {(venta.debe || 0).toFixed(2)}
-                      </span>
-                    </p>
-                    {/* Desglose detallado de pagos */}
-                    {venta.cobros_detalle && (venta.cobros_detalle.yape > 0 || venta.cobros_detalle.efectivo > 0 || venta.cobros_detalle.gastosImprevistos > 0) && (
-                      <div className="mt-3 p-2 sm:p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <h5 className="text-xs font-semibold text-blue-800 mb-2">Desglose de Pagos:</h5>
-                        <div className="space-y-1 text-xs">
-                          {venta.cobros_detalle.yape > 0 && (
-                            <div className="flex justify-between">
-                              <span className="text-blue-700">💳 Yape:</span>
-                              <span className="font-medium text-blue-800">S/ {venta.cobros_detalle.yape.toFixed(2)}</span>
-                            </div>
-                          )}
-                          {venta.cobros_detalle.efectivo > 0 && (
-                            <div className="flex justify-between">
-                              <span className="text-blue-700">💵 Efectivo:</span>
-                              <span className="font-medium text-blue-800">S/ {venta.cobros_detalle.efectivo.toFixed(2)}</span>
-                            </div>
-                          )}
-                          {venta.cobros_detalle.gastosImprevistos > 0 && (
-                            <div className="flex justify-between">
-                              <span className="text-blue-700">⚠️ Gastos Imprevistos:</span>
-                              <span className="font-medium text-red-600">S/ {venta.cobros_detalle.gastosImprevistos.toFixed(2)}</span>
-                            </div>
-                          )}
-                          <div className="border-t border-blue-300 pt-1 mt-2">
-                            <div className="flex justify-between font-semibold">
-                              <span className="text-blue-700">Total Ventas:</span>
-                              <span className="text-blue-800">
-                                S/ {((venta.cobros_detalle.yape || 0) + (venta.cobros_detalle.efectivo || 0) + (venta.cobros_detalle.gastosImprevistos || 0)).toFixed(2)}
-                              </span>
-                            </div>
-                            <div className="flex justify-between font-semibold mt-1">
-                              <span className="text-green-700">Cobro Neto:</span>
-                              <span className="text-green-800">
-                                S/ {((venta.cobros_detalle.yape || 0) + (venta.cobros_detalle.efectivo || 0)).toFixed(2)}
-                              </span>
-                            </div>
-                          </div>
+                  <p className="text-gray-600">
+                    <span className="font-medium">Monto Pagado:</span> 
+                    <span className={`ml-1 font-semibold ${
+                      venta.cantidadPagada >= venta.montoTotal 
+                        ? 'text-green-600' 
+                        : venta.cantidadPagada > 0 
+                        ? 'text-yellow-600' 
+                        : 'text-red-600'
+                    }`}>
+                      S/ {(venta.cantidadPagada || 0).toFixed(2)}
+                    </span>
+                  </p>
+                  <p className="text-gray-600">
+                    <span className="font-medium">Saldo Pendiente:</span> 
+                    <span className={`ml-1 font-semibold ${
+                      (venta.debe || 0) <= 0 
+                        ? 'text-green-600' 
+                        : 'text-red-600'
+                    }`}>
+                      S/ {(venta.debe || 0).toFixed(2)}
+                    </span>
+                  </p>
+                </div>
+                
+                {/* Desglose detallado de pagos */}
+                {venta.cobros_detalle && (venta.cobros_detalle.yape > 0 || venta.cobros_detalle.efectivo > 0 || venta.cobros_detalle.billetes > 0 || venta.cobros_detalle.faltantes > 0 || venta.cobros_detalle.gastosImprevistos > 0) && (
+                  <div className="mt-3 p-2 sm:p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <h5 className="text-xs font-semibold text-blue-800 mb-2">Desglose de Pagos:</h5>
+                    <div className="space-y-1 text-xs">
+                      {venta.cobros_detalle.yape > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-blue-700">💳 Yape:</span>
+                          <span className="font-medium text-blue-800">S/ {venta.cobros_detalle.yape.toFixed(2)}</span>
+                        </div>
+                      )}
+                      {venta.cobros_detalle.efectivo > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-blue-700">💵 Efectivo:</span>
+                          <span className="font-medium text-blue-800">S/ {venta.cobros_detalle.efectivo.toFixed(2)}</span>
+                        </div>
+                      )}
+                      {venta.cobros_detalle.billetes > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-blue-700">💰 Billetes:</span>
+                          <span className="font-medium text-blue-800">S/ {venta.cobros_detalle.billetes.toFixed(2)}</span>
+                        </div>
+                      )}
+                      {venta.cobros_detalle.faltantes > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-orange-700">⚠️ Faltantes:</span>
+                          <span className="font-medium text-orange-600">S/ {venta.cobros_detalle.faltantes.toFixed(2)}</span>
+                        </div>
+                      )}
+                      {venta.cobros_detalle.gastosImprevistos > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-red-700">🚨 Gastos Imprevistos:</span>
+                          <span className="font-medium text-red-600">S/ {venta.cobros_detalle.gastosImprevistos.toFixed(2)}</span>
+                        </div>
+                      )}
+                      <div className="border-t border-blue-300 pt-1 mt-2">
+                        <div className="flex justify-between font-semibold">
+                          <span className="text-blue-700">Total Ventas:</span>
+                          <span className="text-blue-800">
+                            S/ {((venta.cobros_detalle.yape || 0) + (venta.cobros_detalle.efectivo || 0) + (venta.cobros_detalle.billetes || 0) + (venta.cobros_detalle.faltantes || 0) + (venta.cobros_detalle.gastosImprevistos || 0)).toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between font-semibold mt-1">
+                          <span className="text-green-700">Cobro Neto:</span>
+                          <span className="text-green-800">
+                            S/ {((venta.cobros_detalle.yape || 0) + (venta.cobros_detalle.efectivo || 0) + (venta.cobros_detalle.billetes || 0)).toFixed(2)}
+                          </span>
                         </div>
                       </div>
-                    )}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Productos de la venta */}
