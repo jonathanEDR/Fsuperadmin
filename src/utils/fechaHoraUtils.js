@@ -30,7 +30,7 @@ export const validarFormatoFecha = (fecha) => {
 };
 
 /**
- * Formatea una fecha para mostrar - Compatible con backend
+ * Formatea una fecha para mostrar - Específico para zona horaria de Perú
  * @param {string|Date} fecha - Fecha a formatear
  * @returns {string} - Fecha formateada
  */
@@ -46,14 +46,15 @@ export const formatearFecha = (fecha) => {
     const fechaObj = new Date(fecha);
     if (isNaN(fechaObj.getTime())) return 'Fecha inválida';
     
-    // Usar el mismo formato que el backend
-    return fechaObj.toLocaleString('es-ES', {
+    // Usar zona horaria específica de Perú para mostrar correctamente
+    return fechaObj.toLocaleString('es-PE', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
       minute: '2-digit',
-      second: '2-digit'
+      second: '2-digit',
+      timeZone: 'America/Lima'
     });
   } catch (error) {
     console.error('Error al formatear fecha:', error);
@@ -80,6 +81,7 @@ export const getLocalDateTimeString = () => {
 
 /**
  * Convierte fecha/hora local a ISO para enviar al backend
+ * Específicamente para zona horaria de Perú (UTC-5)
  * @param {string} localDateTime - Fecha en formato YYYY-MM-DDTHH:mm
  * @returns {string} - Fecha en formato ISO
  */
@@ -87,17 +89,25 @@ export const convertLocalDateTimeToISO = (localDateTime) => {
   if (!localDateTime) return '';
   
   try {
-    // Crear fecha como si fuera local del navegador
-    const localDate = new Date(localDateTime);
+    // Interpretamos la fecha como si fuera hora local de Perú
+    // Agregamos el offset de Perú (-05:00) para mantener la hora correcta
+    const fechaConOffset = localDateTime + ':00.000-05:00';
+    const peruDate = new Date(fechaConOffset);
     
     // Validar que la fecha sea válida
-    if (isNaN(localDate.getTime())) {
+    if (isNaN(peruDate.getTime())) {
       console.error('Fecha inválida:', localDateTime);
       return '';
     }
     
-    // Devolver directamente como ISO - el backend se encargará del timezone
-    return localDate.toISOString();
+    console.log('🕐 Conversión de fecha (Frontend):', {
+      fechaLocal: localDateTime,
+      fechaConOffset: fechaConOffset,
+      fechaISO: peruDate.toISOString(),
+      fechaDisplay: peruDate.toLocaleString('es-PE', { timeZone: 'America/Lima' })
+    });
+    
+    return peruDate.toISOString();
   } catch (error) {
     console.error('Error al convertir fecha local a ISO:', error);
     return '';
