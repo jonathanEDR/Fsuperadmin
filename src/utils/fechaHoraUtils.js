@@ -63,21 +63,17 @@ export const formatearFecha = (fecha) => {
 
 /**
  * Obtiene la fecha y hora actual para input datetime-local
- * Ajustado para zona horaria de Perú (UTC-5)
  * @returns {string} - Fecha en formato YYYY-MM-DDTHH:mm
  */
 export const getLocalDateTimeString = () => {
   const now = new Date();
-  // Ajustar para zona horaria de Perú (UTC-5)
-  const peruOffset = -5 * 60; // UTC-5 en minutos
-  const localOffset = now.getTimezoneOffset(); // Offset local en minutos
-  const peruTime = new Date(now.getTime() + (localOffset + peruOffset) * 60000);
   
-  const year = peruTime.getFullYear();
-  const month = String(peruTime.getMonth() + 1).padStart(2, '0');
-  const day = String(peruTime.getDate()).padStart(2, '0');
-  const hours = String(peruTime.getHours()).padStart(2, '0');
-  const minutes = String(peruTime.getMinutes()).padStart(2, '0');
+  // Obtener componentes de fecha local
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
   
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
@@ -91,9 +87,17 @@ export const convertLocalDateTimeToISO = (localDateTime) => {
   if (!localDateTime) return '';
   
   try {
-    // Crear fecha interpretándola como hora local de Perú
-    const peruDate = new Date(localDateTime + ':00.000-05:00');
-    return peruDate.toISOString();
+    // Crear fecha como si fuera local del navegador
+    const localDate = new Date(localDateTime);
+    
+    // Validar que la fecha sea válida
+    if (isNaN(localDate.getTime())) {
+      console.error('Fecha inválida:', localDateTime);
+      return '';
+    }
+    
+    // Devolver directamente como ISO - el backend se encargará del timezone
+    return localDate.toISOString();
   } catch (error) {
     console.error('Error al convertir fecha local a ISO:', error);
     return '';

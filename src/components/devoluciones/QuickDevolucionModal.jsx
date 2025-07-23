@@ -314,17 +314,12 @@ function QuickDevolucionModal({
                       id="fechaDevolucion"
                       value={fechaDevolucion}
                       onChange={(e) => setFechaDevolucion(e.target.value)}
-                      max={(() => {
-                        // Fecha/hora actual en formato datetime-local
-                        const now = new Date();
-                        const peruTime = new Date(now.getTime() - (5 * 60 * 60 * 1000));
-                        return peruTime.toISOString().slice(0, 16);
-                      })()} 
+                      max={getLocalDateTimeString()}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                       required
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Fecha y hora local (Perú). Se inicializa automáticamente con la hora actual
+                      Fecha y hora local. Se inicializa automáticamente con la hora actual
                     </p>
                   </div>
 

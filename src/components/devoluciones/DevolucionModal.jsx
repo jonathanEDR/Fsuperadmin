@@ -153,11 +153,7 @@ function DevolucionModal({
             type="datetime-local"
             value={fechaDevolucion}
             onChange={(e) => onFechaChange(e.target.value)}
-            max={(() => {
-              // Generar el max dinámicamente para la fecha/hora actual
-              const now = new Date();
-              return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-            })()}
+            max={getLocalDateTimeString()}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
