@@ -77,10 +77,18 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
       console.error('No se recibieron los detalles de la venta');
       setError('Error: No se pueden obtener los detalles de la venta');
       return;
-    }    // Procesar los detalles de la venta
+    }    // Procesar los detalles de la venta usando montoTotal original
     const montoTotal = parseFloat(ventaDetails.montoTotal || 0);
     const cantidadPagada = parseFloat(ventaDetails.cantidadPagada || 0);
-    const montoPendiente = montoTotal - cantidadPagada;
+    const montoPendiente = Math.max(0, montoTotal - cantidadPagada);
+    
+    console.log(`CobroCreationModal - Procesando venta ${ventaId}:`, {
+      montoTotalOriginal: ventaDetails.montoTotal,
+      montoTotalNetoOriginal: ventaDetails.montoTotalNeto,
+      montoTotalFinal: montoTotal,
+      cantidadPagada: cantidadPagada,
+      montoPendienteFinal: montoPendiente
+    });
     
     const detallesProcesados = {
       ...ventaDetails,

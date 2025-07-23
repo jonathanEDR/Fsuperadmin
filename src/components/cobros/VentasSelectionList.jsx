@@ -50,26 +50,56 @@ const VentasSelectionList = ({ onVentaSelect, selectedVentas = [], onError }) =>
           throw new Error('No se encontraron ventas pendientes');
         }
 
+        console.log('📊 Datos de ventas recibidos del servidor:', ventasData);
+
         // Validar y procesar cada venta
-        const ventasProcesadas = ventasData.map(venta => {
-          if (!venta._id || (!venta.montoTotal && !venta.montoTotalNeto && !venta.monto_total_neto)) {
+        const ventasProcesadas = ventasData.map((venta, index) => {
+          console.log(`🔍 Venta ${index + 1} - Datos originales:`, {
+            _id: venta._id,
+            montoTotal: venta.montoTotal,
+            montoTotalNeto: venta.montoTotalNeto,
+            cantidadPagada: venta.cantidadPagada,
+            productos: venta.productos?.map(p => ({
+              cantidad: p.cantidad,
+              precioUnitario: p.precioUnitario,
+              subtotal: p.cantidad * p.precioUnitario
+            }))
+          });
+
+          if (!venta._id || (!venta.montoTotal && !venta.montoTotalNeto)) {
             console.warn('Venta con datos incompletos:', venta);
             return null;
           }
 
-          // Usar montoTotalNeto si está disponible, si no, fallback a montoTotal
-          const montoTotalNeto =
-            venta.montoTotalNeto !== undefined ? parseFloat(venta.montoTotalNeto) :
-            venta.monto_total_neto !== undefined ? parseFloat(venta.monto_total_neto) :
-            venta.montoTotal !== undefined ? parseFloat(venta.montoTotal) : 0;
+          // El backend ya envía el montoPendiente calculado correctamente
+          // Solo necesitamos usar esos valores directamente
+          const montoTotal = parseFloat(venta.montoTotal || 0);
+          const montoTotalNeto = parseFloat(venta.montoTotalNeto || venta.montoTotal || 0);
           const cantidadPagada = parseFloat(venta.cantidadPagada || 0);
-          const montoPendiente = montoTotalNeto - cantidadPagada;
+          const montoPendiente = parseFloat(venta.montoPendiente || 0); // Usar el valor del backend
+
+          // Calcular también desde productos para verificar consistencia
+          const totalDesdeProductos = venta.productos?.reduce((sum, producto) => {
+            return sum + (parseFloat(producto.cantidad || 0) * parseFloat(producto.precioUnitario || 0));
+          }, 0) || 0;
+
+          console.log(`Procesando venta ${venta._id}:`, {
+            montoTotalOriginal: venta.montoTotal,
+            montoTotalNetoOriginal: venta.montoTotalNeto,
+            montoPendienteBackend: venta.montoPendiente,
+            montoTotalParseado: montoTotal,
+            montoTotalNeto: montoTotalNeto,
+            cantidadPagada: cantidadPagada,
+            montoPendienteFinal: montoPendiente,
+            totalDesdeProductos: totalDesdeProductos,
+            diferencia: Math.abs(montoTotal - totalDesdeProductos)
+          });
 
           return {
             ...venta,
             cantidadPagada,
-            montoTotal: montoTotalNeto, // Para mantener compatibilidad visual
-            montoPendiente,
+            montoTotal: montoTotal, // Usar montoTotal original para el display
+            montoPendiente: montoPendiente, // Usar montoPendiente del backend
             estadoPago: venta.estadoPago || 'Pendiente',
             productos: Array.isArray(venta.productos) ? venta.productos : []
           };

@@ -48,11 +48,21 @@ const CobroList = ({ userRole }) => {
       setPaymentHistory(historyResponse?.cobros || []);
       setTotalPages(historyResponse?.totalPages || 1);
 
-      // Calcular información de deuda - CORREGIDO
+      // Calcular información de deuda usando montoTotal original
       const totalDebt = ventasResponse?.reduce((sum, venta) => {
-        const montoTotal = parseFloat(venta.montoTotal || venta.montoTotalNeto || 0);
+        // Usar montoTotal original como la deuda real del cliente
+        const montoTotal = parseFloat(venta.montoTotal || 0);
         const cantidadPagada = parseFloat(venta.cantidadPagada || 0);
         const deudaVenta = Math.max(0, montoTotal - cantidadPagada);
+        
+        console.log(`CobroList - Calculando deuda para venta ${venta._id}:`, {
+          montoTotal: venta.montoTotal,
+          montoTotalNeto: venta.montoTotalNeto,
+          montoTotalParseado: montoTotal,
+          cantidadPagada: cantidadPagada,
+          deudaVenta: deudaVenta
+        });
+        
         return sum + deudaVenta;
       }, 0) || 0;
       
