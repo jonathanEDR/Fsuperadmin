@@ -35,14 +35,7 @@ const VentasLineChart = ({ userRole }) => {
       cantidadVendida: 0 
     }));
 
-    console.log('🔄 Procesando datos para gráfico:', {
-      ventas: ventas.length,
-      devoluciones: devoluciones.length,
-      filter: filter,
-      etiquetas: labels.length
-    });
-
-    // Procesar ventas
+    // Procesar ventas - SOLO ventas reales, no montos ajustados por devoluciones
     ventas.forEach((venta) => {
       const fechaVenta = extraerFechaValida(venta, [
         'fechadeVenta',
@@ -53,25 +46,49 @@ const VentasLineChart = ({ userRole }) => {
       if (fechaEnRango(fechaVenta, startDate, endDate)) {
         const indexPos = calcularIndiceParaFecha(fechaVenta, filter, startDate);
         if (indexPos >= 0 && indexPos < dataPoints.length) {
-          dataPoints[indexPos].ventasBrutas += Number(venta.montoTotal || 0);
+          // Usar montoOriginal si existe (monto antes de devoluciones), sino montoTotal
+          const montoVentaBruta = Number(venta.montoOriginal || venta.montoTotal || 0);
+          dataPoints[indexPos].ventasBrutas += montoVentaBruta;
           dataPoints[indexPos].cantidadVendida += Number(venta.cantidadVendida || 0);
-          
-          console.log('✅ Venta agregada:', {
-            fecha: fechaVenta.toISOString(),
-            dia: indexPos + 1,
-            monto: Number(venta.montoTotal || 0)
-          });
         }
       }
     });
 
-    // Procesar devoluciones
-    console.log('📋 Devoluciones recibidas:', devoluciones.map(d => ({
-      id: d._id,
-      fecha: d.fechaDevolucion,
-      monto: d.monto || d.montoDevolucion
-    })));
+    // Procesar devoluciones - Solo restar del total, no afectar ventas brutas
+    // Crear un mapa de devoluciones por venta para ajustar las ventas brutas
+    const devolucionesPorVenta = {};
+    devoluciones.forEach((devolucion) => {
+      const ventaId = devolucion.ventaId || devolucion.venta;
+      if (ventaId) {
+        if (!devolucionesPorVenta[ventaId]) {
+          devolucionesPorVenta[ventaId] = 0;
+        }
+        devolucionesPorVenta[ventaId] += Number(devolucion.monto || devolucion.montoDevolucion || 0);
+      }
+    });
 
+    // Si no hay campo montoOriginal, intentar recalcular las ventas brutas
+    if (Object.keys(devolucionesPorVenta).length > 0) {
+      // Recalcular ventas brutas sumando las devoluciones al montoTotal actual
+      ventas.forEach((venta) => {
+        const devolucionTotal = devolucionesPorVenta[venta._id] || 0;
+        if (devolucionTotal > 0) {
+          const fechaVenta = extraerFechaValida(venta, ['fechadeVenta', 'createdAt', 'updatedAt']);
+          if (fechaVenta && fechaEnRango(fechaVenta, startDate, endDate)) {
+            const indexPos = calcularIndiceParaFecha(fechaVenta, filter, startDate);
+            if (indexPos >= 0 && indexPos < dataPoints.length) {
+              // Ajustar: ventas brutas = monto actual + devoluciones
+              const montoOriginalCalculado = Number(venta.montoTotal || 0) + devolucionTotal;
+              const diferencia = montoOriginalCalculado - Number(venta.montoTotal || 0);
+              
+              dataPoints[indexPos].ventasBrutas += diferencia;
+            }
+          }
+        }
+      });
+    }
+
+    // Procesar devoluciones como eventos separados
     devoluciones.forEach((devolucion) => {
       const fechaDevolucion = extraerFechaValida(devolucion, [
         'fechaDevolucion',
@@ -80,17 +97,8 @@ const VentasLineChart = ({ userRole }) => {
       ]);
       
       if (!fechaDevolucion) {
-        console.warn('⚠️ Devolución sin fecha válida:', devolucion._id);
         return;
       }
-      
-      console.log('📅 Procesando devolución:', {
-        id: devolucion._id,
-        fechaOriginal: devolucion.fechaDevolucion,
-        fechaParsed: fechaDevolucion.toISOString(),
-        monto: devolucion.monto || devolucion.montoDevolucion,
-        enRango: fechaEnRango(fechaDevolucion, startDate, endDate)
-      });
       
       if (fechaEnRango(fechaDevolucion, startDate, endDate)) {
         const indexPos = calcularIndiceParaFecha(fechaDevolucion, filter, startDate);
@@ -98,11 +106,6 @@ const VentasLineChart = ({ userRole }) => {
         if (indexPos >= 0 && indexPos < dataPoints.length) {
           const montoDevolucion = Number(devolucion.monto || devolucion.montoDevolucion || 0);
           dataPoints[indexPos].devoluciones += montoDevolucion;
-          console.log('✅ Devolución agregada:', {
-            indice: indexPos,
-            dia: labels[indexPos],
-            monto: montoDevolucion
-          });
         }
       }
     });
@@ -112,19 +115,6 @@ const VentasLineChart = ({ userRole }) => {
       point.ventasNetas = point.ventasBrutas - point.devoluciones;
     });
     
-    // Resumen final con debug
-    const totalDevoluciones = dataPoints.reduce((sum, point) => sum + point.devoluciones, 0);
-    const totalVentas = dataPoints.reduce((sum, point) => sum + point.ventasBrutas, 0);
-    const totalVentasNetas = totalVentas - totalDevoluciones;
-    
-    console.log('💰 TOTALES FINALES:', {
-      ventas: totalVentas.toFixed(2),
-      devoluciones: totalDevoluciones.toFixed(2),
-      netas: totalVentasNetas.toFixed(2),
-      diasConVentas: dataPoints.filter(p => p.ventasBrutas > 0).length,
-      diasConDevoluciones: dataPoints.filter(p => p.devoluciones > 0).length
-    });
-    
     return { labels, dataPoints };
   };
 
@@ -132,8 +122,6 @@ const VentasLineChart = ({ userRole }) => {
     setLoading(true);
     setError(null);
     try {
-      console.log('🔍 Cargando datos para gráfico...');
-      
       // Obtener ventas y devoluciones
       const [ventasResponse, devolucionesResponse] = await Promise.all([
         api.get('/api/ventas?limit=1000'),
@@ -143,38 +131,32 @@ const VentasLineChart = ({ userRole }) => {
       const ventas = ventasResponse.data.ventas || ventasResponse.data || [];
       const devoluciones = devolucionesResponse.data.devoluciones || devolucionesResponse.data || [];
       
-      console.log('📊 Datos obtenidos:', {
-        ventas: ventas.length,
-        devoluciones: devoluciones.length,
-        filtro: timeFilter
-      });
-      
-      // Debug: Mostrar algunos registros de ventas para verificar datos
-      console.log('📋 Muestra de ventas:', ventas.slice(0, 3).map(v => ({
-        id: v._id,
-        fecha: v.fechadeVenta || v.createdAt,
-        monto: v.montoTotal
-      })));
-      
-      console.log('📋 Muestra de devoluciones:', devoluciones.slice(0, 3).map(d => ({
-        id: d._id,
-        fecha: d.fechaDevolucion || d.createdAt,
-        monto: d.monto || d.montoDevolucion
-      })));
-      
       const { startDate, endDate } = calcularRangoFechas(timeFilter);
       const { labels, dataPoints } = processVentasData(ventas, devoluciones, timeFilter, startDate, endDate);
       
       // Calcular totales del período
-      const periodTotals = dataPoints.reduce((acc, point) => ({
-        ventasBrutas: acc.ventasBrutas + point.ventasBrutas,
-        devoluciones: acc.devoluciones + point.devoluciones,
-        ventasNetas: acc.ventasNetas + point.ventasNetas,
-        cantidadVendida: acc.cantidadVendida + point.cantidadVendida
-      }), { ventasBrutas: 0, devoluciones: 0, ventasNetas: 0, cantidadVendida: 0 });
+      let totalVentasBrutas = 0;
+      let totalDevoluciones = 0; 
+      let totalVentasNetas = 0;
+      let totalCantidadVendida = 0;
+
+      // Calcular totales punto por punto para asegurar consistencia
+      dataPoints.forEach(point => {
+        totalVentasBrutas += point.ventasBrutas;
+        totalDevoluciones += point.devoluciones;
+        totalVentasNetas += point.ventasNetas;
+        totalCantidadVendida += point.cantidadVendida;
+      });
+
+      // Verificación cruzada: las ventas netas también pueden calcularse como diferencia total
+      const ventasNetasCalculadas = totalVentasBrutas - totalDevoluciones;
       
-      // Asegurar que ventasNetas se calcule correctamente
-      periodTotals.ventasNetas = periodTotals.ventasBrutas - periodTotals.devoluciones;
+      const periodTotals = {
+        ventasBrutas: totalVentasBrutas,
+        devoluciones: totalDevoluciones,
+        ventasNetas: ventasNetasCalculadas, // Usar el cálculo directo para mayor precisión
+        cantidadVendida: totalCantidadVendida
+      };
       
       setTotals(periodTotals);
       setChartData({
@@ -198,7 +180,7 @@ const VentasLineChart = ({ userRole }) => {
           },
           {
             label: 'Ventas Netas (S/)',
-            data: dataPoints.map(point => point.ventasBrutas - point.devoluciones),
+            data: dataPoints.map(point => point.ventasNetas),
             borderColor: '#3B82F6',
             backgroundColor: 'rgba(59, 130, 246, 0.1)',
             tension: 0.3,
@@ -348,7 +330,7 @@ const VentasLineChart = ({ userRole }) => {
           <div className="text-xs sm:text-sm text-gray-600">Ventas Brutas - {getTimeFilterLabel()}</div>
         </div>
         <div className="text-center">
-          <div className="text-lg sm:text-2xl font-bold text-blue-600">S/ {(totals.ventasBrutas - totals.devoluciones).toFixed(2)}</div>
+          <div className="text-lg sm:text-2xl font-bold text-blue-600">S/ {totals.ventasNetas.toFixed(2)}</div>
           <div className="text-xs sm:text-sm text-gray-600">Ventas Netas - {getTimeFilterLabel()}</div>
         </div>
         <div className="text-center">
