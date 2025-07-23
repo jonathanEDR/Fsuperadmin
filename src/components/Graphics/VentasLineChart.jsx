@@ -55,6 +55,12 @@ const VentasLineChart = ({ userRole }) => {
         if (indexPos >= 0 && indexPos < dataPoints.length) {
           dataPoints[indexPos].ventasBrutas += Number(venta.montoTotal || 0);
           dataPoints[indexPos].cantidadVendida += Number(venta.cantidadVendida || 0);
+          
+          console.log('✅ Venta agregada:', {
+            fecha: fechaVenta.toISOString(),
+            dia: indexPos + 1,
+            monto: Number(venta.montoTotal || 0)
+          });
         }
       }
     });
@@ -106,13 +112,17 @@ const VentasLineChart = ({ userRole }) => {
       point.ventasNetas = point.ventasBrutas - point.devoluciones;
     });
     
-    // Resumen final
+    // Resumen final con debug
     const totalDevoluciones = dataPoints.reduce((sum, point) => sum + point.devoluciones, 0);
     const totalVentas = dataPoints.reduce((sum, point) => sum + point.ventasBrutas, 0);
-    console.log('💰 TOTALES:', {
+    const totalVentasNetas = totalVentas - totalDevoluciones;
+    
+    console.log('💰 TOTALES FINALES:', {
       ventas: totalVentas.toFixed(2),
       devoluciones: totalDevoluciones.toFixed(2),
-      netas: (totalVentas - totalDevoluciones).toFixed(2)
+      netas: totalVentasNetas.toFixed(2),
+      diasConVentas: dataPoints.filter(p => p.ventasBrutas > 0).length,
+      diasConDevoluciones: dataPoints.filter(p => p.devoluciones > 0).length
     });
     
     return { labels, dataPoints };
@@ -139,6 +149,19 @@ const VentasLineChart = ({ userRole }) => {
         filtro: timeFilter
       });
       
+      // Debug: Mostrar algunos registros de ventas para verificar datos
+      console.log('📋 Muestra de ventas:', ventas.slice(0, 3).map(v => ({
+        id: v._id,
+        fecha: v.fechadeVenta || v.createdAt,
+        monto: v.montoTotal
+      })));
+      
+      console.log('📋 Muestra de devoluciones:', devoluciones.slice(0, 3).map(d => ({
+        id: d._id,
+        fecha: d.fechaDevolucion || d.createdAt,
+        monto: d.monto || d.montoDevolucion
+      })));
+      
       const { startDate, endDate } = calcularRangoFechas(timeFilter);
       const { labels, dataPoints } = processVentasData(ventas, devoluciones, timeFilter, startDate, endDate);
       
@@ -149,6 +172,9 @@ const VentasLineChart = ({ userRole }) => {
         ventasNetas: acc.ventasNetas + point.ventasNetas,
         cantidadVendida: acc.cantidadVendida + point.cantidadVendida
       }), { ventasBrutas: 0, devoluciones: 0, ventasNetas: 0, cantidadVendida: 0 });
+      
+      // Asegurar que ventasNetas se calcule correctamente
+      periodTotals.ventasNetas = periodTotals.ventasBrutas - periodTotals.devoluciones;
       
       setTotals(periodTotals);
       setChartData({
@@ -172,7 +198,7 @@ const VentasLineChart = ({ userRole }) => {
           },
           {
             label: 'Ventas Netas (S/)',
-            data: dataPoints.map(point => point.ventasNetas),
+            data: dataPoints.map(point => point.ventasBrutas - point.devoluciones),
             borderColor: '#3B82F6',
             backgroundColor: 'rgba(59, 130, 246, 0.1)',
             tension: 0.3,
@@ -322,7 +348,7 @@ const VentasLineChart = ({ userRole }) => {
           <div className="text-xs sm:text-sm text-gray-600">Ventas Brutas - {getTimeFilterLabel()}</div>
         </div>
         <div className="text-center">
-          <div className="text-lg sm:text-2xl font-bold text-blue-600">S/ {totals.ventasNetas.toFixed(2)}</div>
+          <div className="text-lg sm:text-2xl font-bold text-blue-600">S/ {(totals.ventasBrutas - totals.devoluciones).toFixed(2)}</div>
           <div className="text-xs sm:text-sm text-gray-600">Ventas Netas - {getTimeFilterLabel()}</div>
         </div>
         <div className="text-center">
