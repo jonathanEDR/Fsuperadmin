@@ -158,6 +158,7 @@ export const movimientoUnificadoService = {
       data.costoTotal = costoTotal;
       data.ingredientesUtilizados = ingredientesUtilizados;
       data.recetasUtilizadas = recetasUtilizadas;
+      data.consumirIngredientes = consumirIngredientes; // 🔧 CRÍTICO: Faltaba esta línea
     }
     
     const response = await api.post('/movimientos-unificados/agregar-cantidad', data);

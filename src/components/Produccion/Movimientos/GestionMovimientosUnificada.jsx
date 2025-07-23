@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { movimientoUnificadoService } from '../../../services/movimientoUnificadoService';
+import { produccionService } from '../../../services/produccionService';
 import AccesosRapidosProduccion from '../AccesosRapidosProduccion';
 import SelectorTipoProducto from './SelectorTipoProducto';
 import ModalAgregarCantidad from './ModalAgregarCantidad';
@@ -289,10 +290,7 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
       
       console.log('🔍 Eliminando producción completa:', produccionId);
       
-      // Importar el servicio de producción
-      const produccionService = (await import('../../../services/produccionService')).default;
-      
-      // Eliminar la producción completa
+      // Eliminar la producción completa usando el servicio importado
       const resultado = await produccionService.eliminarProduccion(produccionId);
       
       console.log('✅ Producción completa eliminada:', resultado);
@@ -339,16 +337,31 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
       return;
     }
 
-    // Verificar si el movimiento fue generado por una producción
+    // 🔧 NUEVA LÓGICA: Distinguir entre producción tradicional y producción de receta
     const esMovimientoDeProduccion = movimiento.motivo?.includes('Producción:') || 
                                       movimiento.motivo?.toLowerCase().includes('producción');
     
+    const esMovimientoDeReceta = movimiento.motivo?.includes('Producción de receta:') ||
+                                 movimiento.tipoItem === 'RecetaProducto';
+    
     let confirmacion;
     
-    if (esMovimientoDeProduccion) {
-      // Si es un movimiento de producción, preguntar si quiere eliminar la producción completa
+    if (esMovimientoDeReceta) {
+      // 🍳 Si es un movimiento de RECETA, eliminar solo el movimiento (el backend maneja la reversión)
       confirmacion = window.confirm(
-        `⚠️ ATENCIÓN: Este movimiento fue generado por una PRODUCCIÓN.\n\n` +
+        `🍳 ELIMINACIÓN DE PRODUCCIÓN DE RECETA\n\n` +
+        `Producto: ${movimiento?.item?.nombre || 'Receta no identificada'}\n` +
+        `Cantidad: ${movimiento?.cantidad || 0} unidades\n` +
+        `Motivo: ${movimiento?.motivo || 'Sin motivo'}\n\n` +
+        `✅ El sistema revertirá automáticamente:\n` +
+        `• Stock de la receta producida\n` +
+        `• Ingredientes utilizados en la producción\n\n` +
+        `¿Desea continuar con la eliminación?`
+      );
+    } else if (esMovimientoDeProduccion && !esMovimientoDeReceta) {
+      // 🏭 Si es un movimiento de PRODUCCIÓN TRADICIONAL, eliminar la producción completa
+      confirmacion = window.confirm(
+        `⚠️ ATENCIÓN: Este movimiento fue generado por una PRODUCCIÓN TRADICIONAL.\n\n` +
         `Producto: ${movimiento?.item?.nombre || 'Producto no identificado'}\n` +
         `Cantidad: ${movimiento?.cantidad || 0} unidades\n` +
         `Motivo: ${movimiento?.motivo || 'Sin motivo'}\n\n` +
@@ -357,7 +370,7 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
         `¿Desea continuar con la eliminación de la PRODUCCIÓN?`
       );
     } else {
-      // Si es un movimiento manual, eliminar solo el movimiento
+      // 📝 Si es un movimiento manual, eliminar solo el movimiento
       confirmacion = window.confirm(
         `¿Está seguro de eliminar este movimiento manual?\n\n` +
         `Producto: ${movimiento?.item?.nombre || 'Producto no identificado'}\n` +
@@ -372,8 +385,16 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
     try {
       setError('');
       
-      if (esMovimientoDeProduccion) {
-        // Eliminar producción completa - necesitamos encontrar el ID de la producción
+      if (esMovimientoDeReceta) {
+        // 🍳 PRODUCCIÓN DE RECETA: Eliminar solo el movimiento
+        // El backend detectará automáticamente que es una receta y usará revertirProduccionReceta
+        console.log('🍳 Eliminando movimiento de producción de receta:', movimientoId);
+        const resultado = await movimientoUnificadoService.eliminarMovimiento(movimientoId);
+        console.log('✅ Movimiento de receta eliminado:', resultado);
+        alert(`✅ Producción de receta eliminada exitosamente.\n🔄 Se revirtió correctamente el stock de la receta y los ingredientes utilizados.`);
+        
+      } else if (esMovimientoDeProduccion && !esMovimientoDeReceta) {
+        // 🏭 PRODUCCIÓN TRADICIONAL: Eliminar producción completa
         try {
           await eliminarProduccionDesdeMovimiento(movimiento);
         } catch (error) {
@@ -400,13 +421,14 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
           }
         }
       } else {
-        // Eliminar solo el movimiento manual
+        // 📝 MOVIMIENTO MANUAL: Eliminar solo el movimiento
+        console.log('📝 Eliminando movimiento manual:', movimientoId);
         const resultado = await movimientoUnificadoService.eliminarMovimiento(movimientoId);
-        console.log('✅ Movimiento eliminado:', resultado);
+        console.log('✅ Movimiento manual eliminado:', resultado);
         alert(`✅ Movimiento eliminado exitosamente.\nSe revirtió ${resultado.data.cantidadRevertida} unidades del stock.`);
       }
       
-      // Recargar datos en ambos casos
+      // Recargar datos en todos los casos
       cargarProductos();
       cargarHistorial();
       cargarEstadisticas();

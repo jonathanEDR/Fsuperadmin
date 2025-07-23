@@ -592,11 +592,17 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                                     const producido = receta.inventario?.cantidadProducida || 0;
                                     const utilizado = receta.inventario?.cantidadUtilizada || 0;
                                     return (producido - utilizado) > 0;
-                                  }).map(receta => (
-                                    <option key={receta._id} value={receta._id}>
-                                      {receta.nombre.substring(0, 15)}{receta.nombre.length > 15 ? '...' : ''}
-                                    </option>
-                                  ))}
+                                  }).map(receta => {
+                                    const producido = receta.inventario?.cantidadProducida || 0;
+                                    const utilizado = receta.inventario?.cantidadUtilizada || 0;
+                                    const disponible = producido - utilizado;
+                                    
+                                    return (
+                                      <option key={receta._id} value={receta._id}>
+                                        {receta.nombre.substring(0, 15)}{receta.nombre.length > 15 ? '...' : ''} (Stock: {disponible})
+                                      </option>
+                                    );
+                                  })}
                                 </select>
                               </div>
                               <div className="col-span-2">

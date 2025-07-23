@@ -198,7 +198,9 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
 
       // Verificar stock disponible
       const recetaInfo = obtenerRecetaInfo(item.receta);
-      const disponible = recetaInfo?.inventario?.cantidadProducida || 0;
+      const producido = recetaInfo?.inventario?.cantidadProducida || 0;
+      const utilizado = recetaInfo?.inventario?.cantidadUtilizada || 0;
+      const disponible = producido - utilizado;
       if (item.cantidadUtilizada > disponible) {
         setError(`Stock insuficiente para receta ${recetaInfo?.nombre}. Disponible: ${disponible}, requerido: ${item.cantidadUtilizada}`);
         return false;
@@ -624,7 +626,9 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                     <div className="space-y-3">
                       {formData.recetasUtilizadas.map((item, index) => {
                         const recetaInfo = obtenerRecetaInfo(item.receta);
-                        const disponible = recetaInfo?.inventario?.cantidadProducida || 0;
+                        const producido = recetaInfo?.inventario?.cantidadProducida || 0;
+                        const utilizado = recetaInfo?.inventario?.cantidadUtilizada || 0;
+                        const disponible = producido - utilizado;
                         const stockInsuficiente = formData.consumirRecursos && item.cantidadUtilizada > disponible;
                         
                         return (
@@ -663,11 +667,21 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                                 required
                               >
                                 <option value="">Seleccionar receta...</option>
-                                {recetasDisponibles.map(rec => (
-                                  <option key={rec._id} value={rec._id}>
-                                    {rec.nombre} (Disp: {rec.inventario?.cantidadProducida || 0})
-                                  </option>
-                                ))}
+                                {recetasDisponibles.filter(rec => {
+                                  const producido = rec.inventario?.cantidadProducida || 0;
+                                  const utilizado = rec.inventario?.cantidadUtilizada || 0;
+                                  return (producido - utilizado) > 0;
+                                }).map(rec => {
+                                  const producido = rec.inventario?.cantidadProducida || 0;
+                                  const utilizado = rec.inventario?.cantidadUtilizada || 0;
+                                  const disponible = producido - utilizado;
+                                  
+                                  return (
+                                    <option key={rec._id} value={rec._id}>
+                                      {rec.nombre} (Disp: {disponible})
+                                    </option>
+                                  );
+                                })}
                               </select>
                               <div className="grid grid-cols-2 gap-2">
                                 <input

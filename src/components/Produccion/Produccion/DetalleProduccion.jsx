@@ -115,11 +115,12 @@ const DetalleProduccion = ({ produccionId, produccion: produccionProp, onClose, 
         let nombreReceta = 'Receta no encontrada';
         if (item.receta) {
           if (typeof item.receta === 'string') {
-            nombreReceta = `Receta ID: ${item.receta.substring(0, 8)}...`;
+            // Si es un string (ID), intentar buscar en los datos poblados o usar un nombre genérico
+            nombreReceta = `Receta ${index + 1}`;
           } else if (item.receta && item.receta.nombre) {
             nombreReceta = item.receta.nombre;
           } else if (item.receta && item.receta._id) {
-            nombreReceta = `Receta: ${item.receta._id.toString().substring(0, 8)}...`;
+            nombreReceta = `Receta ${index + 1}`;
           }
         }
         
@@ -150,11 +151,12 @@ const DetalleProduccion = ({ produccionId, produccion: produccionProp, onClose, 
         let nombreIngrediente = 'Ingrediente no encontrado';
         if (item.ingrediente) {
           if (typeof item.ingrediente === 'string') {
-            nombreIngrediente = `Ingrediente ID: ${item.ingrediente.substring(0, 8)}...`;
+            // Si es un string (ID), usar un nombre genérico más amigable
+            nombreIngrediente = `Ingrediente ${index + 1}`;
           } else if (item.ingrediente && item.ingrediente.nombre) {
             nombreIngrediente = item.ingrediente.nombre;
           } else if (item.ingrediente && item.ingrediente._id) {
-            nombreIngrediente = `Ingrediente: ${item.ingrediente._id.toString().substring(0, 8)}...`;
+            nombreIngrediente = `Ingrediente ${index + 1}`;
           }
         }
 
@@ -185,11 +187,12 @@ const DetalleProduccion = ({ produccionId, produccion: produccionProp, onClose, 
         let nombreItem = 'Item no encontrado';
         if (item.ingrediente) {
           if (typeof item.ingrediente === 'string') {
-            nombreItem = `Item ID: ${item.ingrediente.substring(0, 8)}...`;
+            // Si es un string (ID), usar un nombre genérico más amigable
+            nombreItem = `Item ${index + 1}`;
           } else if (item.ingrediente && item.ingrediente.nombre) {
             nombreItem = item.ingrediente.nombre;
           } else if (item.ingrediente && item.ingrediente._id) {
-            nombreItem = `Item: ${item.ingrediente._id.toString().substring(0, 8)}...`;
+            nombreItem = `Item ${index + 1}`;
           }
         }
 

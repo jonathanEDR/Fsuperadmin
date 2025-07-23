@@ -92,12 +92,14 @@ const GestionProduccion = () => {
       return;
     }
 
-    if (window.confirm(`¿Está seguro de eliminar esta producción?\n\n⚠️ IMPORTANTE: Esto revertirá automáticamente el stock del producto.\n\nEsta acción no se puede deshacer.`)) {
+    if (window.confirm(`¿Está seguro de eliminar esta producción?\n\n⚠️ IMPORTANTE: Esto revertirá automáticamente:\n• Stock del producto final\n• Inventario de ingredientes consumidos\n• Inventario de recetas utilizadas\n\nEsta acción no se puede deshacer.`)) {
       try {
         const resultado = await produccionService.eliminarProduccion(id);
         
-        // Mostrar mensaje de éxito con detalles
-        alert(`✅ Producción eliminada exitosamente\n${resultado.inventarioRevertido ? '📉 Stock revertido correctamente' : 'ℹ️ Sin cambios de stock necesarios'}`);
+        // Mostrar mensaje de éxito con detalles mejorados
+        const mensaje = `✅ Producción eliminada exitosamente\n\n📊 Detalles de la reversión:\n${resultado.inventarioRevertido ? '📉 Stock del producto revertido correctamente\n📦 Ingredientes y recetas repuestos al inventario' : 'ℹ️ Sin cambios de stock necesarios (producción no completada)'}`;
+        
+        alert(mensaje);
         
         cargarProducciones();
         // Cerrar el modal de detalle si está abierto
@@ -105,7 +107,7 @@ const GestionProduccion = () => {
         setProduccionSeleccionada(null);
       } catch (err) {
         setError('Error al eliminar producción: ' + err.message);
-        alert(`❌ Error al eliminar producción:\n\n${err.message}`);
+        alert(`❌ Error al eliminar producción:\n\n${err.message}\n\n⚠️ Nota: Si el error persiste, puede que algunos ingredientes/recetas no hayan sido revertidos correctamente. Revise el inventario manualmente.`);
       }
     }
   };
