@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Plus, Minus, Edit3, Trash2, Calculator } from 'lucide-react';
 import QuantityModal from './QuantityModal';
 import { useCantidadManagement } from '../../hooks/useCantidadManagement';
+import { useProductoSafe } from '../../hooks/useProductoSafe';
 
 const ProductCard = ({ 
   producto, 
@@ -15,7 +16,10 @@ const ProductCard = ({
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showQuantityModal, setShowQuantityModal] = useState(false);
-  const [newQuantity, setNewQuantity] = useState(producto.cantidad);
+  
+  // Hook para manejo seguro del producto
+  const productoSafe = useProductoSafe(producto);
+  const [newQuantity, setNewQuantity] = useState(productoSafe.cantidad);
 
   // Hook unificado para gestión de cantidades
   const { 
@@ -26,11 +30,16 @@ const ProductCard = ({
 
   // Actualizar newQuantity cuando cambie producto.cantidad
   React.useEffect(() => {
-    setNewQuantity(producto.cantidad);
-  }, [producto.cantidad]);
+    setNewQuantity(productoSafe.cantidad);
+  }, [productoSafe.cantidad]);
 
   // 🔍 DETECTAR SI EL PRODUCTO TIENE DEVOLUCIONES
   const tieneDevolucion = React.useMemo(() => {
+    // Verificar si el producto es válido primero
+    if (!productoSafe.isValid || !productoSafe.id) {
+      return false;
+    }
+    
     // PRIORIDAD: Usar devoluciones de la venta si están disponibles
     const devolucionesAUsar = venta?.devoluciones || devoluciones || [];
     
@@ -38,16 +47,14 @@ const ProductCard = ({
       return false;
     }
     
-    const productoIdActual = producto.productoId?._id || producto.productoId;
-    
     // Buscar coincidencias
     const hayCoincidencia = devolucionesAUsar.some(dev => {
       const devProductoId = dev.productoId?._id || dev.productoId;
-      return devProductoId && productoIdActual && (devProductoId.toString() === productoIdActual.toString());
+      return devProductoId && productoSafe.id && (devProductoId.toString() === productoSafe.id.toString());
     });
     
     return hayCoincidencia;
-  }, [venta?.devoluciones, devoluciones, producto.productoId]);
+  }, [venta?.devoluciones, devoluciones, productoSafe.id, productoSafe.isValid]);
 
   // Función para determinar el color del stock
   const getStockColor = (cantidadRestante) => {
@@ -136,30 +143,44 @@ const ProductCard = ({
   };
 
   const handleRemove = async () => {
+    if (!productoSafe.isValid || !productoSafe.id) {
+      alert('Error: No se puede eliminar un producto sin ID válido');
+      return;
+    }
+    
     if (window.confirm('¿Estás seguro de que deseas eliminar este producto de la venta?')) {
-      await onRemoveProduct(ventaId, producto.productoId._id);
+      await onRemoveProduct(ventaId, productoSafe.id);
     }
   };
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+      {/* Mostrar error si el producto no es válido */}
+      {!productoSafe.isValid && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <div className="text-red-600 text-sm font-medium">
+            ⚠️ Error en producto: {productoSafe.error}
+          </div>
+        </div>
+      )}
+      
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <h5 className="font-medium text-gray-900 mb-1">
-            {producto.productoId?.nombre}
+            {productoSafe.nombre}
           </h5>
           {/* Información de la categoría */}
-          {producto.productoId?.categoryId && (
+          {productoSafe.categoria && productoSafe.categoria !== 'Sin categoría' && (
             <div className="mb-2">
               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                📂 {producto.productoId.categoryId.nombre}
+                📂 {productoSafe.categoria}
               </span>
             </div>
           )}
           <div className="text-sm text-gray-600 space-y-1">
-            <p>Cantidad: <span className="font-medium">{producto.cantidad}</span></p>
-            <p>Precio unitario: <span className="font-medium">S/ {producto.precioUnitario?.toFixed(2)}</span></p>
-            <p>Subtotal: <span className="font-medium text-blue-600">S/ {producto.subtotal?.toFixed(2)}</span></p>
+            <p>Cantidad: <span className="font-medium">{productoSafe.cantidad}</span></p>
+            <p>Precio unitario: <span className="font-medium">S/ {productoSafe.precio?.toFixed(2)}</span></p>
+            <p>Subtotal: <span className="font-medium text-blue-600">S/ {productoSafe.subtotal?.toFixed(2)}</span></p>
             
             {/* Mostrar historial de operaciones si existe */}
             {producto.historial && producto.historial.length > 0 && (

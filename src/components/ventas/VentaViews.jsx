@@ -123,23 +123,25 @@ const VentaViews = ({
                     <td className="px-3 md:px-6 py-4">
                       <div className="text-sm max-w-xs">
                         <div className="max-h-24 overflow-y-auto">
-                          {venta.productos?.map((prod, idx) => (
+                          {venta.productos?.filter(prod => prod != null).map((prod, idx) => (
                             <div key={idx} className="flex justify-between items-center py-1 border-b border-gray-100 last:border-b-0">
                               <span className="text-gray-900 text-xs truncate max-w-[120px]" title={prod.productoId?.nombre || prod.nombre || 'Producto sin nombre'}>
                                 {prod.productoId?.nombre || prod.nombre || 'Producto sin nombre'}
                               </span>
                               <div className="flex items-center gap-2">
-                                <span className="text-gray-500 text-xs">x{prod.cantidad}</span>
+                                <span className="text-gray-500 text-xs">x{prod.cantidad || 0}</span>
                                 <span className="text-green-600 text-xs font-medium">
                                   S/ {((prod.precioUnitario || prod.precio || 0) * (prod.cantidad || 0)).toFixed(2)}
                                 </span>
                               </div>
                             </div>
-                          ))}
+                          )) || (
+                            <div className="text-gray-500 text-xs">No hay productos</div>
+                          )}
                         </div>
                         <div className="mt-2 pt-2 border-t border-gray-200">
                           <div className="text-xs text-gray-500">
-                            Total items: {venta.productos?.reduce((sum, prod) => sum + prod.cantidad, 0) || 0}
+                            Total items: {venta.productos?.filter(prod => prod != null).reduce((sum, prod) => sum + (prod.cantidad || 0), 0) || 0}
                           </div>
                         </div>
                       </div>
@@ -529,7 +531,7 @@ const VentaViews = ({
                 
                 {/* Tarjetas de productos */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {venta.productos?.map((prod, idx) => {
+                  {venta.productos?.filter(prod => prod != null).map((prod, idx) => {
                     return (
                       <ProductCard
                         key={idx}
@@ -542,7 +544,11 @@ const VentaViews = ({
                         loading={ventaModificationHook.loading}
                       />
                     );
-                  })}
+                  }) || (
+                    <div className="col-span-2 text-center text-gray-500 py-4">
+                      No hay productos en esta venta
+                    </div>
+                  )}
                 </div>
               </div>
               
