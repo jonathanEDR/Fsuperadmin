@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Shield, Users, BarChart3, Zap, Star, ChevronDown, Menu, X } from 'lucide-react';
+import { ArrowRight, Shield, Users, Clock, Pizza, Lock, User, CheckCircle, TrendingUp, Activity, Timer } from 'lucide-react';
 
 function Home() {
   const { user } = useUser();
   const navigate = useNavigate();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -14,270 +13,324 @@ function Home() {
     }
   }, [user, navigate]);
 
-  const features = [
-    {
-      icon: Shield,
-      title: "Seguridad Avanzada",
-      description: "Protección de datos de nivel empresarial con autenticación multifactor"
-    },
+  const quickAccess = [
     {
       icon: Users,
-      title: "Gestión de Equipos",
-      description: "Colabora eficientemente con tu equipo en tiempo real"
+      title: "Personal de Cocina",
+      description: "Chefs, ayudantes y pizzeros",
+      role: "kitchen",
+      color: "from-blue-500 to-blue-600"
     },
     {
-      icon: BarChart3,
-      title: "Análisis Inteligente",
-      description: "Insights profundos para tomar decisiones informadas"
+      icon: Shield,
+      title: "Administración",
+      description: "Gerentes y supervisores", 
+      role: "admin",
+      color: "from-purple-500 to-purple-600"
     },
     {
-      icon: Zap,
-      title: "Rendimiento Óptimo",
-      description: "Velocidad y eficiencia en cada proceso de tu negocio"
+      icon: Clock,
+      title: "Delivery",
+      description: "Repartidores y coordinadores",
+      role: "delivery",
+      color: "from-green-500 to-green-600"
     }
   ];
 
-  const testimonials = [
-    {
-      name: "María González",
-      role: "CEO, TechInnovate",
-      content: "Esta plataforma transformó completamente nuestra productividad. Increíble.",
-      rating: 5
+  const stats = [
+    { 
+      label: "Pedidos Hoy", 
+      value: "127", 
+      icon: TrendingUp,
+      color: "from-red-500 to-red-600",
+      bgColor: "bg-red-50",
+      textColor: "text-red-600",
+      change: "+12%",
+      changeColor: "text-green-600"
     },
-    {
-      name: "Carlos Rodríguez",
-      role: "Director de Operaciones",
-      content: "La mejor inversión que hemos hecho para nuestro equipo de trabajo.",
-      rating: 5
+    { 
+      label: "Personal Activo", 
+      value: "18", 
+      icon: Activity,
+      color: "from-green-500 to-green-600",
+      bgColor: "bg-green-50",
+      textColor: "text-green-600",
+      change: "+2",
+      changeColor: "text-green-600"
     },
-    {
-      name: "Ana Martínez",
-      role: "Gerente General",
-      content: "Interfaz intuitiva y potente. Exactamente lo que necesitábamos.",
-      rating: 5
+    { 
+      label: "Tiempo Promedio", 
+      value: "12min", 
+      icon: Timer,
+      color: "from-blue-500 to-blue-600",
+      bgColor: "bg-blue-50",
+      textColor: "text-blue-600",
+      change: "-2min",
+      changeColor: "text-green-600"
     }
   ];
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-100 to-purple-100">
-        {/* Efectos de fondo animados */}
+      <div className="min-h-screen bg-gradient-to-br from-red-950 via-red-900 to-orange-900 relative">
+        {/* Efectos de fondo mejorados */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-200/40 to-purple-200/40 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-purple-200/40 to-pink-200/40 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-gradient-to-r from-indigo-200/40 to-cyan-200/40 rounded-full blur-3xl animate-pulse delay-2000"></div>
+          {/* Gradientes animados más sutiles */}
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-red-400/10 to-orange-400/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-orange-400/10 to-yellow-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-to-r from-red-400/5 to-orange-400/5 rounded-full blur-3xl animate-pulse delay-2000"></div>
+          
+          {/* Patrón de pizza más elegante */}
+          <div className="absolute inset-0 opacity-[0.02]">
+            <div className="absolute top-20 left-20">
+              <Pizza className="w-32 h-32 text-white rotate-12" />
+            </div>
+            <div className="absolute bottom-32 right-32">
+              <Pizza className="w-24 h-24 text-white -rotate-12" />
+            </div>
+            <div className="absolute top-1/2 left-10">
+              <Pizza className="w-20 h-20 text-white rotate-45" />
+            </div>
+            <div className="absolute bottom-20 left-1/3">
+              <Pizza className="w-16 h-16 text-white -rotate-45" />
+            </div>
+          </div>
+
+          {/* Líneas decorativas */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-white to-transparent"></div>
+            <div className="absolute top-0 right-1/4 w-px h-full bg-gradient-to-b from-transparent via-white to-transparent"></div>
+          </div>
         </div>
 
-        {/* Header Navigation */}
-        <nav className="relative z-10 px-6 py-4">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold text-gray-800">AdminPro</span>
-            </div>
-            
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-gray-600 hover:text-gray-800 transition-colors">Características</a>
-              <a href="#testimonials" className="text-gray-600 hover:text-gray-800 transition-colors">Testimonios</a>
-              <a href="#pricing" className="text-gray-600 hover:text-gray-800 transition-colors">Precios</a>
-              <button 
-                onClick={() => navigate('/login')}
-                className="text-gray-600 hover:text-gray-800 transition-colors"
-              >
-                Iniciar Sesión
-              </button>
-              <button 
-                onClick={() => navigate('/signup')}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-full hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg"
-              >
-                Comenzar Gratis
-              </button>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button 
-              className="md:hidden text-gray-800"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-
-          {/* Mobile Navigation */}
-          {isMenuOpen && (
-            <div className="md:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-xl border-t border-gray-200 shadow-lg">
-              <div className="px-6 py-4 space-y-4">
-                <a href="#features" className="block text-gray-600 hover:text-gray-800 transition-colors">Características</a>
-                <a href="#testimonials" className="block text-gray-600 hover:text-gray-800 transition-colors">Testimonios</a>
-                <a href="#pricing" className="block text-gray-600 hover:text-gray-800 transition-colors">Precios</a>
-                <button 
-                  onClick={() => navigate('/login')}
-                  className="block w-full text-left text-gray-600 hover:text-gray-800 transition-colors"
-                >
-                  Iniciar Sesión
-                </button>
-                <button 
-                  onClick={() => navigate('/signup')}
-                  className="block w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-full hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium text-center shadow-lg"
-                >
-                  Comenzar Gratis
-                </button>
-              </div>
-            </div>
-          )}
-        </nav>
-
-        {/* Hero Section */}
-        <section className="relative z-10 px-6 py-20 md:py-32">
-          <div className="max-w-7xl mx-auto text-center">
-            <div className="mb-8">
-              <span className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium border border-blue-200">
-                <Star className="w-4 h-4" />
-                Líder en gestión empresarial
-              </span>
-            </div>
-            
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-gray-800 mb-8 leading-tight">
-              Gestiona tu
-              <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Negocio
-              </span>
-              con Elegancia
-            </h1>
-            
-            <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
-              La plataforma más avanzada para administrar tu empresa. Potencia tu productividad 
-              con herramientas inteligentes y una experiencia excepcional.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <button 
-                onClick={() => navigate('/signup')}
-                className="group bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium text-lg shadow-2xl flex items-center gap-2"
-              >
-                Empezar Ahora
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
-              
-              <button 
-                onClick={() => navigate('/login')}
-                className="group border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-full hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 font-medium text-lg backdrop-blur-sm"
-              >
-                Ver Demo
-              </button>
-            </div>
-
-            <div className="mt-16 flex justify-center">
-              <ChevronDown className="w-8 h-8 text-gray-500 animate-bounce" />
-            </div>
-          </div>
-        </section>
-
-        {/* Features Section */}
-        <section id="features" className="relative z-10 px-6 py-20 bg-white/60 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
-                Características Excepcionales
-              </h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Diseñado para empresas que buscan la excelencia en cada detalle
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {features.map((feature, index) => (
-                <div 
-                  key={index}
-                  className="group bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 hover:bg-white/90 hover:shadow-xl transition-all duration-300 hover:transform hover:scale-105"
-                >
-                  <div className="w-14 h-14 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center mb-6 group-hover:shadow-2xl transition-all duration-300">
-                    <feature.icon className="w-7 h-7 text-white" />
+        {/* Container principal mejorado */}
+        <div className="relative z-10 min-h-screen flex flex-col">
+          
+          {/* Header profesional */}
+          <header className="px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+            <div className="max-w-7xl mx-auto">
+              {/* Branding mejorado */}
+              <div className="flex flex-col items-center mb-8 lg:mb-12">
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="relative">
+                    <div className="w-16 h-16 lg:w-20 lg:h-20 bg-gradient-to-r from-red-500 to-orange-500 rounded-2xl lg:rounded-3xl flex items-center justify-center shadow-2xl">
+                      <Pizza className="w-8 h-8 lg:w-10 lg:h-10 text-white" />
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white shadow-lg animate-pulse"></div>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-4">{feature.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                  <div className="text-center">
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
+                      Pizzas Roxi
+                    </h1>
+                    <p className="text-red-200 font-medium text-sm lg:text-base mt-1">
+                      Sistema de Gestión Interno
+                    </p>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
-        {/* Testimonials Section */}
-        <section id="testimonials" className="relative z-10 px-6 py-20">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
-                Lo que Dicen Nuestros Clientes
-              </h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Empresas líderes confían en nuestra plataforma
-              </p>
-            </div>
+                {/* Badge de estado */}
+                <div className="inline-flex items-center gap-2 bg-green-500/20 border border-green-400/30 rounded-full px-4 py-2 backdrop-blur-sm">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-green-200 text-sm font-medium">Sistema Operativo</span>
+                </div>
+              </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
-              {testimonials.map((testimonial, index) => (
-                <div 
-                  key={index}
-                  className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 hover:bg-white/90 hover:shadow-xl transition-all duration-300"
-                >
-                  <div className="flex items-center gap-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+              {/* Estadísticas mejoradas */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6">
+                {stats.map((stat, index) => (
+                  <div 
+                    key={index} 
+                    className="group relative bg-white/95 backdrop-blur-xl border border-white/20 rounded-2xl p-6 lg:p-8 hover:bg-white transition-all duration-300 hover:shadow-2xl hover:scale-105"
+                  >
+                    {/* Icono */}
+                    <div className={`w-12 h-12 lg:w-14 lg:h-14 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center mb-4 group-hover:shadow-xl transition-all duration-300`}>
+                      <stat.icon className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
+                    </div>
+                    
+                    {/* Contenido */}
+                    <div className="space-y-2">
+                      <div className="flex items-end justify-between">
+                        <div className={`text-2xl lg:text-3xl font-bold ${stat.textColor}`}>
+                          {stat.value}
+                        </div>
+                        <div className={`text-xs font-medium ${stat.changeColor} flex items-center gap-1`}>
+                          <TrendingUp className="w-3 h-3" />
+                          {stat.change}
+                        </div>
+                      </div>
+                      <div className="text-gray-600 text-sm lg:text-base font-medium">
+                        {stat.label}
+                      </div>
+                    </div>
+
+                    {/* Efecto hover */}
+                    <div className={`absolute inset-0 bg-gradient-to-r ${stat.color} opacity-0 group-hover:opacity-5 rounded-2xl transition-opacity duration-300`}></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </header>
+
+          {/* Contenido principal mejorado */}
+          <main className="flex-1 px-4 sm:px-6 lg:px-8 pb-8 lg:pb-12">
+            <div className="max-w-7xl mx-auto">
+              <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+                
+                {/* Panel de Acceso rediseñado */}
+                <div className="order-2 lg:order-1">
+                  <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-6 sm:p-8 lg:p-10 border border-white/20 hover:shadow-3xl transition-all duration-500">
+                    
+                    {/* Header del panel */}
+                    <div className="text-center mb-8 lg:mb-10">
+                      <div className="relative inline-block mb-6">
+                        <div className="w-20 h-20 lg:w-24 lg:h-24 bg-gradient-to-r from-red-600 to-orange-600 rounded-3xl flex items-center justify-center shadow-2xl">
+                          <Lock className="w-10 h-10 lg:w-12 lg:h-12 text-white" />
+                        </div>
+                        <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-3 border-white shadow-lg flex items-center justify-center">
+                          <CheckCircle className="w-4 h-4 text-white" />
+                        </div>
+                      </div>
+                      
+                      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-3 tracking-tight">
+                        Acceso al Sistema
+                      </h2>
+                      <p className="text-gray-600 text-base lg:text-lg leading-relaxed max-w-sm mx-auto">
+                        Elige tu método de acceso para comenzar a trabajar
+                      </p>
+                    </div>
+
+                    {/* Botones de acceso mejorados */}
+                    <div className="space-y-4 lg:space-y-5">
+                      <button
+                        onClick={() => navigate('/login')}
+                        className="group relative w-full bg-gradient-to-r from-red-600 to-orange-600 text-white py-4 lg:py-5 rounded-2xl hover:from-red-700 hover:to-orange-700 transition-all duration-300 font-semibold text-lg lg:text-xl shadow-xl hover:shadow-2xl transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 overflow-hidden"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                        <Shield className="w-6 h-6 lg:w-7 lg:h-7 relative z-10" />
+                        <span className="relative z-10">Iniciar Sesión</span>
+                        <ArrowRight className="w-5 h-5 lg:w-6 lg:h-6 group-hover:translate-x-1 transition-transform duration-200 relative z-10" />
+                      </button>
+
+                      <button
+                        onClick={() => navigate('/signup')}
+                        className="group relative w-full bg-white border-2 border-red-600 text-red-600 py-4 lg:py-5 rounded-2xl hover:bg-red-50 hover:border-red-700 hover:text-red-700 transition-all duration-300 font-semibold text-lg lg:text-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 overflow-hidden"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-red-50/0 via-red-50/50 to-red-50/0 -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                        <User className="w-6 h-6 lg:w-7 lg:h-7 relative z-10" />
+                        <span className="relative z-10">Registrarse</span>
+                        <ArrowRight className="w-5 h-5 lg:w-6 lg:h-6 group-hover:translate-x-1 transition-transform duration-200 relative z-10" />
+                      </button>
+                    </div>
+
+                    {/* Footer del panel */}
+                    <div className="mt-8 lg:mt-10 pt-6 lg:pt-8 border-t border-gray-200">
+                      <p className="text-center text-sm lg:text-base text-gray-500 leading-relaxed">
+                        ¿Problemas para acceder?{' '}
+                        <button className="text-red-600 hover:text-red-700 font-medium underline decoration-red-600/30 hover:decoration-red-700 underline-offset-2 transition-colors">
+                          Contacta al administrador
+                        </button>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Panel de Información rediseñado */}
+                <div className="order-1 lg:order-2 space-y-6 lg:space-y-8">
+                  
+                  {/* Título de bienvenida */}
+                  <div className="text-center lg:text-left">
+                    <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 lg:mb-6 tracking-tight leading-tight">
+                      Bienvenido al
+                      <span className="block bg-gradient-to-r from-orange-300 to-yellow-300 bg-clip-text text-transparent">
+                        Sistema
+                      </span>
+                    </h3>
+                    <p className="text-red-100 text-lg lg:text-xl leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                      Accede a todas las herramientas que necesitas para gestionar tu trabajo 
+                      en <span className="font-semibold text-orange-200">Pizzas Roxi</span> de manera eficiente y profesional.
+                    </p>
+                  </div>
+
+                  {/* Cards de acceso rápido mejoradas */}
+                  <div className="grid gap-4 lg:gap-5">
+                    {quickAccess.map((item, index) => (
+                      <div
+                        key={index}
+                        className="group relative bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl lg:rounded-3xl p-6 lg:p-8 hover:bg-white/15 hover:border-white/30 transition-all duration-300 cursor-pointer overflow-hidden"
+                      >
+                        {/* Efecto de brillo */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                        
+                        <div className="relative z-10 flex items-center gap-4 lg:gap-6">
+                          <div className={`w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-r ${item.color} rounded-xl lg:rounded-2xl flex items-center justify-center group-hover:shadow-2xl group-hover:scale-110 transition-all duration-300`}>
+                            <item.icon className="w-7 h-7 lg:w-8 lg:h-8 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-xl lg:text-2xl font-bold text-white mb-1 lg:mb-2 group-hover:text-orange-200 transition-colors">
+                              {item.title}
+                            </h4>
+                            <p className="text-red-100 text-sm lg:text-base leading-relaxed">
+                              {item.description}
+                            </p>
+                          </div>
+                          <ArrowRight className="w-5 h-5 lg:w-6 lg:h-6 text-white/60 group-hover:text-white group-hover:translate-x-2 transition-all duration-300 flex-shrink-0" />
+                        </div>
+                      </div>
                     ))}
                   </div>
-                  <p className="text-gray-600 mb-6 leading-relaxed italic">
-                    "{testimonial.content}"
-                  </p>
-                  <div>
-                    <div className="font-bold text-gray-800">{testimonial.name}</div>
-                    <div className="text-gray-500 text-sm">{testimonial.role}</div>
+
+                  {/* Estado del sistema mejorado */}
+                  <div className="relative bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 rounded-2xl lg:rounded-3xl p-6 lg:p-8 backdrop-blur-md overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-400/5 to-emerald-400/5"></div>
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-3 lg:gap-4 mb-4">
+                        <div className="relative">
+                          <CheckCircle className="w-7 h-7 lg:w-8 lg:h-8 text-green-400" />
+                          <div className="absolute inset-0 bg-green-400 rounded-full animate-ping opacity-20"></div>
+                        </div>
+                        <h4 className="text-lg lg:text-xl font-bold text-white">Sistema Operativo</h4>
+                        <div className="ml-auto bg-green-500/30 text-green-200 px-3 py-1 rounded-full text-sm font-medium">
+                          En línea
+                        </div>
+                      </div>
+                      <p className="text-green-100 text-sm lg:text-base leading-relaxed">
+                        Todos los módulos están funcionando correctamente. 
+                        <br className="hidden sm:block" />
+                        <span className="font-medium text-green-200">Última actualización:</span> Hoy 8:30 AM
+                      </p>
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="relative z-10 px-6 py-20 bg-gradient-to-r from-blue-100/80 to-purple-100/80 backdrop-blur-sm">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
-              ¿Listo para Transformar tu Negocio?
-            </h2>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Únete a miles de empresas que ya están revolucionando su forma de trabajar
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button 
-                onClick={() => navigate('/signup')}
-                className="group bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium text-lg shadow-2xl flex items-center justify-center gap-2"
-              >
-                Comenzar Gratis Hoy
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* Footer */}
-        <footer className="relative z-10 px-6 py-12 bg-white/60 backdrop-blur-sm border-t border-gray-200">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row items-center justify-between">
-              <div className="flex items-center space-x-2 mb-4 md:mb-0">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-xl font-bold text-gray-800">AdminPro</span>
               </div>
-              <p className="text-gray-500 text-sm">
-                © 2025 AdminPro. Todos los derechos reservados.
-              </p>
             </div>
-          </div>
-        </footer>
+          </main>
+
+          {/* Footer mejorado */}
+          <footer className="relative px-4 sm:px-6 lg:px-8 py-6 lg:py-8 border-t border-white/10 backdrop-blur-sm">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-orange-500 rounded-lg flex items-center justify-center">
+                    <Pizza className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-red-200 text-sm lg:text-base font-medium">
+                      © 2025 Pizzas Roxi - Sistema de Gestión Interno
+                    </p>
+                    <p className="text-red-300/70 text-xs lg:text-sm">
+                      Versión 2.1.0 • 
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-4 text-red-200/80 text-xs lg:text-sm">
+                  <span>Soporte técnico disponible 24/7</span>
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </footer>
+        </div>
       </div>
     );
   }
