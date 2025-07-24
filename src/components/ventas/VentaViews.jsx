@@ -1,6 +1,7 @@
 import React from 'react';
 import { DollarSign, RotateCcw, Clock, Plus, Check } from 'lucide-react';
 import ProductCard from './ProductCard';
+import withProductoSafeGuard from '../../hoc/withProductoSafeGuard';
 
 const VentaViews = ({
   ventasToRender,
@@ -676,4 +677,4 @@ const VentaViews = ({
   }
 };
 
-export default VentaViews;
+export default withProductoSafeGuard(VentaViews);

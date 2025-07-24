@@ -6,6 +6,9 @@ import App from './App.jsx';
 import { ClerkProvider } from '@clerk/clerk-react';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
+// Activar interceptor de protección contra nulls
+import './utils/mapInterceptor.js';
+
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const clerkDomain = import.meta.env.VITE_CLERK_DOMAIN;
 

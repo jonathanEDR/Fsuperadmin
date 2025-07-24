@@ -5,6 +5,7 @@ import VentaList from './VentaList';
 import VentasFinalizadas from './VentasFinalizadas';
 import VentaCreationModal from './VentaCreationModal';
 import { useRole } from '../../context/RoleContext';
+import { useVentasLimpias } from '../../hooks/useVentasLimpias';
 
 const VentasManager = ({ userRole: userRoleProp }) => {
   const { getToken } = useAuth();
@@ -19,6 +20,10 @@ const VentasManager = ({ userRole: userRoleProp }) => {
   const [loading, setLoading] = useState(false);
   const [loadingFinalizadas, setLoadingFinalizadas] = useState(false);
   const [error, setError] = useState(null);
+
+  // Limpiar ventas para evitar errores de productos null
+  const ventasLimpias = useVentasLimpias(ventas);
+  const ventasFinalizadasLimpias = useVentasLimpias(ventasFinalizadas);
 
   // Admins, super_admins y usuarios pueden crear ventas
   const canShowAddButton = ['admin', 'super_admin', 'user'].includes(userRole);
@@ -221,7 +226,7 @@ const VentasManager = ({ userRole: userRoleProp }) => {
         </div>
 
         <VentaList 
-          ventas={ventas}
+          ventas={ventasLimpias}
           userRole={userRole}
           currentUserId={user?.id}
           showHeader={false}
@@ -244,7 +249,7 @@ const VentasManager = ({ userRole: userRoleProp }) => {
       <div className="bg-white shadow-lg rounded-xl p-6">
         <VentasFinalizadas 
           userRole={userRole} 
-          ventasFinalizadas={ventasFinalizadas} 
+          ventasFinalizadas={ventasFinalizadasLimpias} 
           loading={loadingFinalizadas}
         />
       </div>

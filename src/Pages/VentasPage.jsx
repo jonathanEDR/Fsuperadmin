@@ -1,6 +1,7 @@
 import React from 'react';
 import { GestionVentas } from '../components/ventas';
 import { useUserRole } from '../hooks/useUserRole';
+import ProductoErrorBoundary from '../components/common/ProductoErrorBoundary';
 
 function VentasPage() {
   const { userRole, isLoading, error } = useUserRole();
@@ -30,9 +31,9 @@ function VentasPage() {
   }
 
   return (
-    <div>
+    <ProductoErrorBoundary>
       <GestionVentas userRole={userRole} />
-    </div>
+    </ProductoErrorBoundary>
   );
 }
 
