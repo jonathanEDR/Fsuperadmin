@@ -8,7 +8,7 @@ import { useAuth } from '@clerk/clerk-react';
 function CatalogoModal({ open, onClose }) {
   const { getToken } = useAuth();
   const [catalogo, setCatalogo] = useState([]);
-  const [form, setForm] = useState({ codigoproducto: '', nombre: '', activo: true });
+  const [form, setForm] = useState({ codigoproducto: '', nombre: '', descripcion: '', activo: true });
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
   const [error, setError] = useState(null);
@@ -40,7 +40,7 @@ function CatalogoModal({ open, onClose }) {
     setError(null);
     try {
       if (!form.codigoproducto || !form.nombre) {
-        setError('Completa todos los campos');
+        setError('Código y nombre son requeridos');
         return;
       }
       const token = await getToken();
@@ -49,7 +49,7 @@ function CatalogoModal({ open, onClose }) {
       } else {
         await catalogoService.addCatalogoProducto(form, token);
       }
-      setForm({ codigoproducto: '', nombre: '', activo: true });
+      setForm({ codigoproducto: '', nombre: '', descripcion: '', activo: true });
       setIsEditing(false);
       setEditId(null);
       fetchCatalogo();
@@ -73,6 +73,7 @@ function CatalogoModal({ open, onClose }) {
     setForm({
       codigoproducto: producto.codigoproducto,
       nombre: producto.nombre,
+      descripcion: producto.descripcion || '',
       activo: producto.activo
     });
     setIsEditing(true);
@@ -114,6 +115,14 @@ function CatalogoModal({ open, onClose }) {
             onChange={handleChange}
             required
           />
+          <TextField
+            label="Descripción"
+            name="descripcion"
+            value={form.descripcion}
+            onChange={handleChange}
+            multiline
+            rows={2}
+          />
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span>Activo</span>
             <Switch
@@ -132,6 +141,7 @@ function CatalogoModal({ open, onClose }) {
             <TableRow>
               <TableCell>Código</TableCell>
               <TableCell>Nombre</TableCell>
+              <TableCell>Descripción</TableCell>
               <TableCell>Activo</TableCell>
               <TableCell>Acciones</TableCell>
             </TableRow>
@@ -141,6 +151,7 @@ function CatalogoModal({ open, onClose }) {
               <TableRow key={producto._id}>
                 <TableCell>{producto.codigoproducto}</TableCell>
                 <TableCell>{producto.nombre}</TableCell>
+                <TableCell>{producto.descripcion || 'Sin descripción'}</TableCell>
                 <TableCell>
                   <Switch
                     checked={producto.activo}
