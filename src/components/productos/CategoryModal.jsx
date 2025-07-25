@@ -8,6 +8,7 @@ import {
   Button,
   Typography
 } from '@mui/material';
+import categoryService from '../../services/categoryService';
 
 const CategoryModal = ({ open, onClose, onSubmit, initialData }) => {
   const [formData, setFormData] = useState({
@@ -20,9 +21,7 @@ const CategoryModal = ({ open, onClose, onSubmit, initialData }) => {
 
   React.useEffect(() => {
     if (open) {
-      import('../../services/categoryService').then(mod => {
-        mod.default.getAllCategories().then(setCategories).catch(() => setCategories([]));
-      });
+      categoryService.getAllCategories().then(setCategories).catch(() => setCategories([]));
     }
   }, [open]);
 
@@ -43,9 +42,7 @@ const CategoryModal = ({ open, onClose, onSubmit, initialData }) => {
     await onSubmit(formData);
     setError('');
     // Recargar categorías
-    import('../../services/categoryService').then(mod => {
-      mod.default.getAllCategories().then(setCategories).catch(() => setCategories([]));
-    });
+    categoryService.getAllCategories().then(setCategories).catch(() => setCategories([]));
   };
 
   return (

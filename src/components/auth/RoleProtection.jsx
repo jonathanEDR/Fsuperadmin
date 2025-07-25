@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
+import { getFullApiUrl, safeFetch } from '../../config/api';
 
 /**
  * Componente de protección de roles que verifica el rol del usuario
@@ -34,12 +35,9 @@ const RoleProtection = ({
         }
 
         // Obtener perfil del usuario
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
-        
-        const response = await fetch(`${backendUrl}/api/auth/user-profile`, {
+        const response = await safeFetch(getFullApiUrl('/auth/user-profile'), {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            'Authorization': `Bearer ${token}`
           }
         });
 

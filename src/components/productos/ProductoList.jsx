@@ -8,6 +8,7 @@ import { Dialog } from '@headlessui/react';
 import CatalogoModal from './CatalogoModal';
 import CategoryModal from './CategoryModal';
 import api from '../../services/api';
+import categoryService from '../../services/categoryService';
 import useInventarioProducto from '../../hooks/useInventarioProducto';
 
 function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
@@ -148,9 +149,7 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
   // Función para crear una nueva categoría desde el modal
   const handleCategoryModalSubmit = async (formData) => {
     try {
-      // Importar el servicio dinámicamente para evitar problemas de dependencias
-      const mod = await import('../../services/categoryService');
-      await mod.default.createCategory(formData);
+      await categoryService.createCategory(formData);
     } catch (err) {
       // Puedes mostrar un error si lo deseas
       console.error('Error al crear categoría:', err);

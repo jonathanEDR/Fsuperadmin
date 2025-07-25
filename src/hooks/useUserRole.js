@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
+import { getFullApiUrl, safeFetch } from '../config/api';
 
 /**
  * Hook personalizado para obtener el rol del usuario desde el backend
@@ -23,12 +24,9 @@ export const useUserRole = () => {
           return;
         }
 
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
-        
-        const response = await fetch(`${backendUrl}/api/auth/user-profile`, {
+        const response = await safeFetch(getFullApiUrl('/auth/user-profile'), {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            'Authorization': `Bearer ${token}`
           }
         });
 

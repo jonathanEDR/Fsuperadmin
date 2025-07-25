@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
+import { getFullApiUrl, safeFetch } from '../config/api';
 
 export const useRoleRedirect = () => {
   const { getToken } = useAuth();
@@ -39,14 +40,26 @@ export const useRoleRedirect = () => {
 
         console.log('🔑 Token obtained successfully');
 
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
-        
-        const response = await fetch(`${backendUrl}/api/auth/user-role-check`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
+        let response;
+        try {
+          const apiUrl = getFullApiUrl('/auth/user-role-check');
+          console.log('🌐 Making request to:', apiUrl);
+          
+          response = await safeFetch(apiUrl, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+        } catch (fetchError) {
+          console.error('❌ Network error during fetch:', fetchError);
+          hasRedirected.current = true;
+          sessionStorage.setItem('roleRedirectCompleted', 'true');
+          
+          // En caso de error de red, redirigir a login
+          navigate('/login', { replace: true });
+          return;
+        }
 
         console.log('📡 API Response status:', response.status);
 
