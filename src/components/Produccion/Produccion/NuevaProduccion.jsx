@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { produccionService } from '../../../services/produccionService';
 import { ingredienteService } from '../../../services/ingredienteService';
 import { recetaService } from '../../../services/recetaService';
-import { catalogoProduccionService } from '../../../services/catalogoProduccionService';
+import catalogoProduccionService from '../../../services/catalogoProduccion';
 
 const NuevaProduccion = ({ onGuardar, onCancelar }) => {
   const [formData, setFormData] = useState({
