@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import catalogoProduccionService from '../../../services/catalogoProduccion';
+import catalogoProduccionService from '../../../services/catalogoProduccion.js';
 
 const FormularioCatalogoProducto = ({ producto, tiposProduccion = [], onGuardar, onCancelar }) => {
   // Validación de props al inicio
