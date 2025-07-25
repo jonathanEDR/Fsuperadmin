@@ -81,8 +81,13 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
       console.log(`📦 Productos recibidos del backend:`, productosData.map(p => ({
         id: p._id,
         nombre: p.nombre,
+        tipo: tipoSeleccionado,
         cantidad: p.cantidad,
-        stock: p.stock
+        stock: p.stock,
+        inventario: p.inventario,
+        cantidadProducida: p.cantidadProducida,
+        unidadMedida: p.unidadMedida,
+        rendimiento: p.rendimiento
       })));
       
       // FORZAR NUEVA REFERENCIA - SOLUCION DEL BUG
@@ -456,15 +461,17 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
           unidad: producto.unidadMedida || 'unidad'
         };
       case 'recetas':
+        // Usar cantidadDisponible que ya viene calculada del backend
+        // o calcular manualmente (cantidadProducida - cantidadUtilizada)
+        const cantidadDisponible = producto.cantidadDisponible || 
+          (producto.inventario?.cantidadProducida || 0) - (producto.inventario?.cantidadUtilizada || 0);
+        
         return {
-          cantidad: producto.inventario?.cantidadProducida || 0,
-          unidad: producto.unidadMedida || 'unidad'
+          cantidad: cantidadDisponible,
+          unidad: producto.unidadMedida || producto.rendimiento?.unidadMedida || 'unidad'
         };
       case 'produccion':
         return {
-          // CORREGIDO: Usar cantidadProducida como el stock base para productos de producción
-          // cantidadProducida = total histórico producido
-          // stock = disponible actual en inventario
           cantidad: producto.cantidadProducida || producto.stock || producto.cantidad || 0,
           unidad: producto.unidadMedida || 'unidad'
         };
@@ -676,14 +683,25 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                             <>
                               <div>
                                 <span className="font-medium">Rendimiento:</span> {' '}
-                                <span className="text-blue-600">{producto.rendimientoTotal || 0} unidades</span>
-                              </div>
-                              <div>
-                                <span className="font-medium">Costo Unit.:</span> {' '}
-                                <span className="text-purple-600">
-                                  ${((producto.costoEstimado || 0) / (producto.rendimientoTotal || 1)).toFixed(2)}
+                                <span className="text-blue-600">
+                                  {producto.rendimiento?.cantidad || 0} {producto.rendimiento?.unidadMedida || 'unidad'}
                                 </span>
                               </div>
+                              <div>
+                                <span className="font-medium">Producido:</span> {' '}
+                                <span className="text-blue-600">{producto.inventario?.cantidadProducida || 0}</span>
+                                {' | '}
+                                <span className="font-medium">Utilizado:</span> {' '}
+                                <span className="text-orange-600">{producto.inventario?.cantidadUtilizada || 0}</span>
+                              </div>
+                              {producto.costoEstimado && (
+                                <div>
+                                  <span className="font-medium">Costo Unit.:</span> {' '}
+                                  <span className="text-purple-600">
+                                    ${((producto.costoEstimado || 0) / (producto.rendimiento?.cantidad || 1)).toFixed(2)}
+                                  </span>
+                                </div>
+                              )}
                             </>
                           )}
                           {producto.precio && (
