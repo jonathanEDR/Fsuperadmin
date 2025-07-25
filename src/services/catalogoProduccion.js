@@ -132,6 +132,52 @@ class CatalogoProduccionService {
     }
   }
 
+  // ==================== MÉTODOS ESPECÍFICOS POR MÓDULO ====================
+
+  // Obtener productos del catálogo específicamente para ingredientes
+  async obtenerProductosParaIngredientes() {
+    try {
+      const response = await api.get('/api/catalogo-produccion/ingredientes');
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error en obtenerProductosParaIngredientes:', error);
+      throw error;
+    }
+  }
+
+  // Obtener productos del catálogo específicamente para materiales
+  async obtenerProductosParaMateriales() {
+    try {
+      const response = await api.get('/api/catalogo-produccion/materiales');
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error en obtenerProductosParaMateriales:', error);
+      throw error;
+    }
+  }
+
+  // Obtener productos del catálogo específicamente para recetas
+  async obtenerProductosParaRecetas() {
+    try {
+      const response = await api.get('/api/catalogo-produccion/recetas');
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error en obtenerProductosParaRecetas:', error);
+      throw error;
+    }
+  }
+
+  // Obtener productos del catálogo específicamente para producción
+  async obtenerProductosParaProduccion() {
+    try {
+      const response = await api.get('/api/catalogo-produccion/produccion');
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error en obtenerProductosParaProduccion:', error);
+      throw error;
+    }
+  }
+
   // ==================== VALIDACIONES ====================
   
   async validarCodigoUnico(codigo, idProductoExcluir = null) {
