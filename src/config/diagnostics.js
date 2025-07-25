@@ -37,7 +37,7 @@ export const verifyAppConfig = () => {
 export const verifyBackendConnectivity = async () => {
   try {
     const { getFullApiUrl, safeFetch } = await import('./api');
-    const testUrl = getFullApiUrl('/health'); // Asumiendo que tienes un endpoint de health
+    const testUrl = getFullApiUrl('/health');
 
     console.log('🔗 Testing backend connectivity to:', testUrl);
 
@@ -46,15 +46,16 @@ export const verifyBackendConnectivity = async () => {
     });
 
     if (response.ok) {
-      console.log('✅ Backend connectivity: OK');
-      return true;
+      const data = await response.json();
+      console.log('✅ Backend connectivity: OK', data);
+      return { success: true, data };
     } else {
       console.warn('⚠️ Backend responded with status:', response.status);
-      return false;
+      return { success: false, status: response.status };
     }
   } catch (error) {
     console.error('❌ Backend connectivity failed:', error.message);
-    return false;
+    return { success: false, error: error.message };
   }
 };
 

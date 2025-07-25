@@ -9,6 +9,8 @@ export const useRoleRedirect = () => {
   const navigate = useNavigate();
   const hasRedirected = useRef(false);
   const isProcessing = useRef(false);
+  const retryCount = useRef(0);
+  const maxRetries = 3; // Máximo 3 intentos
 
   useEffect(() => {
     // Verificar si ya se redirigió en esta sesión
@@ -20,6 +22,16 @@ export const useRoleRedirect = () => {
 
     // Evitar múltiples ejecuciones
     if (hasRedirected.current || isProcessing.current) {
+      console.log('🔄 Already processing or redirected');
+      return;
+    }
+
+    // Verificar si hemos excedido el número de reintentos
+    if (retryCount.current >= maxRetries) {
+      console.error('❌ Max retries exceeded, stopping redirect attempts');
+      hasRedirected.current = true;
+      sessionStorage.setItem('roleRedirectCompleted', 'true');
+      navigate('/network-error', { replace: true });
       return;
     }
 
@@ -27,13 +39,15 @@ export const useRoleRedirect = () => {
       try {
         // Marcar como en proceso
         isProcessing.current = true;
+        retryCount.current += 1;
         
-        console.log('🔄 Starting role-based redirect...');
+        console.log(`🔄 Starting role-based redirect... (attempt ${retryCount.current}/${maxRetries})`);
         
         const token = await getToken();
         if (!token) {
           console.log('❌ No token found, redirecting to login');
           hasRedirected.current = true;
+          sessionStorage.setItem('roleRedirectCompleted', 'true');
           navigate('/login', { replace: true });
           return;
         }
@@ -53,19 +67,44 @@ export const useRoleRedirect = () => {
           });
         } catch (fetchError) {
           console.error('❌ Network error during fetch:', fetchError);
-          hasRedirected.current = true;
-          sessionStorage.setItem('roleRedirectCompleted', 'true');
           
-          // En caso de error de red, redirigir a login
-          navigate('/login', { replace: true });
+          // Si es el último intento, marcar como completado
+          if (retryCount.current >= maxRetries) {
+            hasRedirected.current = true;
+            sessionStorage.setItem('roleRedirectCompleted', 'true');
+            navigate('/network-error', { replace: true });
+          } else {
+            // Intentar de nuevo después de un delay
+            setTimeout(() => {
+              isProcessing.current = false;
+            }, 2000 * retryCount.current); // Delay incremental
+          }
           return;
         }
 
         console.log('📡 API Response status:', response.status);
 
+        // Si es 503 (Service Unavailable), manejar específicamente
+        if (response.status === 503) {
+          console.error('🚫 Backend service unavailable (503)');
+          
+          if (retryCount.current >= maxRetries) {
+            hasRedirected.current = true;
+            sessionStorage.setItem('roleRedirectCompleted', 'true');
+            navigate('/service-unavailable', { replace: true });
+          } else {
+            // Intentar de nuevo después de un delay más largo para 503
+            setTimeout(() => {
+              isProcessing.current = false;
+            }, 5000 * retryCount.current); // 5s, 10s, 15s
+          }
+          return;
+        }
+
         if (!response.ok) {
           console.log('❌ Error fetching profile');
           hasRedirected.current = true;
+          sessionStorage.setItem('roleRedirectCompleted', 'true');
           
           if (response.status === 403) {
             console.log('🚫 Access forbidden, redirecting to sin-acceso');
@@ -107,11 +146,22 @@ export const useRoleRedirect = () => {
         }
       } catch (error) {
         console.error('❌ Error during role-based redirect:', error);
-        hasRedirected.current = true;
-        sessionStorage.setItem('roleRedirectCompleted', 'true');
-        navigate('/login', { replace: true });
+        
+        if (retryCount.current >= maxRetries) {
+          hasRedirected.current = true;
+          sessionStorage.setItem('roleRedirectCompleted', 'true');
+          navigate('/network-error', { replace: true });
+        } else {
+          // Reintentar después de un delay
+          setTimeout(() => {
+            isProcessing.current = false;
+          }, 3000 * retryCount.current);
+        }
       } finally {
-        isProcessing.current = false;
+        // Solo marcar como no procesando si hemos terminado definitivamente
+        if (hasRedirected.current || retryCount.current >= maxRetries) {
+          isProcessing.current = false;
+        }
       }
     };
 
