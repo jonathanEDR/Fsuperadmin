@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserCircle, FileText, LogOut, ShoppingBag, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { UserCircle, FileText, LogOut, ShoppingBag, ChevronLeft, ChevronRight, X, Grid3X3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 
@@ -15,6 +15,7 @@ function Sidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebarOpen }) {
   const menuItems = [
     { id: 'notes', icon: FileText, label: 'Mis Notas', route: '/user/notas' },
     { id: 'ventas', icon: ShoppingBag, label: 'Mis Ventas', route: '/user/ventas' },
+    { id: 'catalogo', icon: Grid3X3, label: 'Catálogo de Productos', route: '/user/catalogo' },
     { id: 'profile', icon: UserCircle, label: 'Mi Perfil', route: '/user/perfil' },
   ];
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, UserCheck, X, ChevronLeft, ChevronRight, CreditCard, Factory } from 'lucide-react';
+import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, UserCheck, X, ChevronLeft, ChevronRight, CreditCard, Factory, Grid3X3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 
@@ -18,6 +18,7 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
     { id: 'productos', icon: Package, label: 'Gestión de Productos', route: '/super-admin/productos' },
     { id: 'produccion', icon: Factory, label: 'Gestión de Producción', route: '/super-admin/produccion' },
     { id: 'ventas', icon: ShoppingCart, label: 'Gestión de Ventas', route: '/super-admin/ventas' },
+    { id: 'catalogo', icon: Grid3X3, label: 'Catálogo de Productos', route: '/super-admin/catalogo' },
     { id: 'caja', icon: CreditCard, label: 'Gestión de Caja', route: '/super-admin/caja' },
     { id: 'personal', icon: UserCheck, label: 'Gestión de Personal', route: '/super-admin/personal' },
     { id: 'profile', icon: UserCog, label: 'Mi Perfil', route: '/super-admin/perfil' },

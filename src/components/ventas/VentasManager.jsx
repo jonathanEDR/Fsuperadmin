@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Plus, Grid3X3 } from 'lucide-react';
 import VentaList from './VentaList';
 import VentasFinalizadas from './VentasFinalizadas';
 import VentaCreationModal from './VentaCreationModal';
-import CatalogoVentas from './catalogo/CatalogoVentas';
 import { useRole } from '../../context/RoleContext';
 import { useVentasLimpias } from '../../hooks/useVentasLimpias';
 
-const VentasManager = ({ userRole: userRoleProp }) => {
+function VentasManager({ userRole: userRoleProp }) {
   const { getToken } = useAuth();
   const { user } = useUser();
+  const navigate = useNavigate();
   const contextUserRole = useRole();
   // Usar el prop si está disponible, sino usar el contexto como fallback
   const userRole = userRoleProp || contextUserRole;
   
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isCatalogoOpen, setIsCatalogoOpen] = useState(false);
   const [ventas, setVentas] = useState([]);
   const [ventasFinalizadas, setVentasFinalizadas] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -29,6 +29,20 @@ const VentasManager = ({ userRole: userRoleProp }) => {
 
   // Admins, super_admins y usuarios pueden crear ventas
   const canShowAddButton = ['admin', 'super_admin', 'user'].includes(userRole);
+
+  // Función para obtener la ruta del catálogo según el rol
+  const getCatalogoRoute = () => {
+    switch (userRole) {
+      case 'super_admin':
+        return '/super-admin/catalogo';
+      case 'admin':
+        return '/admin/catalogo';
+      case 'user':
+        return '/user/catalogo';
+      default:
+        return '/super-admin/catalogo'; // fallback
+    }
+  };
 
   // Función para enriquecer ventas con información de devoluciones
   const enrichVentasWithDevoluciones = async (ventas) => {
@@ -158,63 +172,6 @@ const VentasManager = ({ userRole: userRoleProp }) => {
     }
   };
 
-  // Función para manejar la confirmación del catálogo
-  const handleCatalogoConfirmar = async (productosDelCatalogo) => {
-    try {
-      setLoading(true);
-      
-      // Crear la venta con los productos del catálogo
-      const token = await getToken();
-      
-      // Calcular el total
-      const montoTotal = productosDelCatalogo.reduce((total, item) => total + item.subtotal, 0);
-      
-      // Preparar los datos para la venta
-      const ventaData = {
-        productos: productosDelCatalogo.map(item => ({
-          productoId: item.productoId,
-          cantidad: item.cantidad,
-          precioUnitario: item.precioUnitario,
-          subtotal: item.subtotal
-        })),
-        fechadeVenta: new Date().toISOString(),
-        montoTotal,
-        estadoPago: 'Pendiente',
-        cantidadPagada: 0
-      };
-
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/ventas`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(ventaData)
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al crear la venta');
-      }
-
-      const data = await response.json();
-      
-      // Recargar las listas de ventas
-      await Promise.all([
-        fetchVentas(),
-        fetchVentasFinalizadas()
-      ]);
-      
-      setIsCatalogoOpen(false);
-      console.log('✅ Venta creada desde catálogo y listas actualizadas');
-      
-    } catch (error) {
-      console.error('Error al crear venta desde catálogo:', error);
-      setError('Error al crear la venta desde el catálogo');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Función para manejar actualizaciones de ventas
   const handleVentaUpdated = async () => {
     try {
@@ -276,7 +233,7 @@ const VentasManager = ({ userRole: userRoleProp }) => {
           {canShowAddButton && (
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setIsCatalogoOpen(true)}
+                onClick={() => navigate(getCatalogoRoute())}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center gap-2 shadow-lg"
               >
                 <Grid3X3 size={20} />
@@ -312,14 +269,6 @@ const VentasManager = ({ userRole: userRoleProp }) => {
             userRole={userRole}
           />
         )}
-
-        {/* Catálogo de Ventas */}
-        <CatalogoVentas
-          isOpen={isCatalogoOpen}
-          onClose={() => setIsCatalogoOpen(false)}
-          onConfirmarVenta={handleCatalogoConfirmar}
-          userRole={userRole}
-        />
       </div>
 
       <div className="bg-white shadow-lg rounded-xl p-6">

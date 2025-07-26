@@ -1,13 +1,15 @@
-import React from 'react';
-import { Search, Filter, RotateCcw, Package, SortAsc } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Filter, RotateCcw, Package, SortAsc, ChevronDown, X } from 'lucide-react';
 
 const FiltrosCatalogo = ({ 
   filtros, 
   onFiltrosChange, 
   categorias = [],
   totalProductos = 0,
-  compactMode = false
+  compactMode = false,
+  isMobile = false
 }) => {
+  const [mostrarFiltrosAvanzados, setMostrarFiltrosAvanzados] = useState(false);
   
   const handleFiltroChange = (campo, valor) => {
     onFiltrosChange(prev => ({
@@ -27,9 +29,109 @@ const FiltrosCatalogo = ({
 
   const opcionesOrden = [
     { valor: 'nombre', label: 'Nombre A-Z' },
-    { valor: 'precio', label: 'Precio (menor a mayor)' },
-    { valor: 'stock', label: 'Stock (mayor a menor)' }
+    { valor: 'precio', label: 'Precio' },
+    { valor: 'stock', label: 'Stock' }
   ];
+
+  // Versión ultra-compacta para móvil
+  if (isMobile) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+        {/* Búsqueda principal */}
+        <div className="relative mb-3">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+          <input
+            type="text"
+            placeholder="Buscar productos..."
+            value={filtros.busqueda}
+            onChange={(e) => handleFiltroChange('busqueda', e.target.value)}
+            className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          />
+        </div>
+
+        {/* Fila de filtros compacta */}
+        <div className="flex items-center gap-2 mb-2">
+          {/* Botón para mostrar filtros avanzados */}
+          <button
+            onClick={() => setMostrarFiltrosAvanzados(!mostrarFiltrosAvanzados)}
+            className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-xs font-medium hover:bg-gray-200 transition-colors"
+          >
+            <Filter size={12} />
+            Filtros
+            <ChevronDown 
+              size={12} 
+              className={`transform transition-transform ${mostrarFiltrosAvanzados ? 'rotate-180' : ''}`} 
+            />
+          </button>
+
+          {/* Contador de productos */}
+          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+            {totalProductos} productos
+          </span>
+
+          {/* Checkbox solo con stock */}
+          <label className="flex items-center gap-1 text-xs text-gray-600 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={filtros.soloConStock}
+              onChange={(e) => handleFiltroChange('soloConStock', e.target.checked)}
+              className="w-3 h-3 text-orange-500 rounded focus:ring-orange-500"
+            />
+            Stock
+          </label>
+
+          {/* Botón limpiar */}
+          {(filtros.busqueda || filtros.categoria || !filtros.soloConStock || filtros.ordenarPor !== 'nombre') && (
+            <button
+              onClick={limpiarFiltros}
+              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+              title="Limpiar filtros"
+            >
+              <X size={12} />
+            </button>
+          )}
+        </div>
+
+        {/* Filtros avanzados colapsables */}
+        {mostrarFiltrosAvanzados && (
+          <div className="border-t border-gray-200 pt-3 space-y-2">
+            {/* Categorías */}
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Categoría</label>
+              <select
+                value={filtros.categoria}
+                onChange={(e) => handleFiltroChange('categoria', e.target.value)}
+                className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-orange-500 focus:border-transparent"
+              >
+                <option value="">Todas las categorías</option>
+                {categorias.map(categoria => (
+                  <option key={categoria._id} value={categoria._id}>
+                    {categoria.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Ordenar */}
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Ordenar por</label>
+              <select
+                value={filtros.ordenarPor}
+                onChange={(e) => handleFiltroChange('ordenarPor', e.target.value)}
+                className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-orange-500 focus:border-transparent"
+              >
+                {opcionesOrden.map(opcion => (
+                  <option key={opcion.valor} value={opcion.valor}>
+                    {opcion.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   // Modo compacto para el header
   if (compactMode) {

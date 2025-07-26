@@ -24,6 +24,7 @@ import PerfilPage from './Pages/PerfilPage';
 import UserDashboardLayout from './components/layout/dashboards/UserDashboardLayout';
 import CajaPage from './Pages/CajaPage';
 import ProduccionPage from './Pages/ProduccionPage';
+import CatalogoPage from './Pages/CatalogoPage';
 
 // Componente para proteger rutas que requieren autenticación
 function ProtectedRoute({ children }) {
@@ -126,6 +127,7 @@ function App() {
               <Route path="productos" element={<ProductosPage />} />
               <Route path="categorias" element={<CategoriasPage />} />
               <Route path="ventas" element={<VentasPage />} />
+              <Route path="catalogo" element={<CatalogoPage />} />
               <Route path="pagos-realizados" element={<PagosRealizadosPage />} />
               <Route path="personal" element={<PersonalPage />} />
               <Route path="perfil" element={<PerfilPage />} />
@@ -146,6 +148,7 @@ function App() {
               <Route path="usuarios" element={<UsuariosPage />} />
               <Route path="productos" element={<ProductosPage />} />
               <Route path="ventas" element={<VentasPage />} />
+              <Route path="catalogo" element={<CatalogoPage />} />
               <Route path="pagos-realizados" element={<PagosRealizadosPage />} />
               <Route path="personal" element={<PersonalPage />} />
               <Route path="notas" element={<NotasPage />} />
@@ -167,6 +170,7 @@ function App() {
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="notas" element={<NotasPage />} />
               <Route path="ventas" element={<VentasPage />} />
+              <Route path="catalogo" element={<CatalogoPage />} />
               <Route path="perfil" element={<PerfilPage />} />
             </Route>
             
