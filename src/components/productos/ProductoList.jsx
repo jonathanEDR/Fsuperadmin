@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { Package, Plus, Edit2, Trash2, Users } from 'lucide-react';
+import { Package, Plus, Edit2, Trash2, Users, Search, X } from 'lucide-react';
 import ProductCreationModal from './ProductCreationModal';
 import InventarioHistorial from './InventarioHistorial';
 import InventarioModal from './InventarioModal';
@@ -185,8 +185,37 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
   const [isSubmittingReserva, setIsSubmittingReserva] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isCatalogoModalOpen, setIsCatalogoModalOpen] = useState(false);
+  
+  // Estados para filtros
+  const [filtros, setFiltros] = useState({
+    busqueda: '',
+    categoria: '',
+    stock: 'todos' // 'todos', 'conStock', 'sinStock'
+  });
+  const [categorias, setCategorias] = useState([]);
+  
   const productosPorPagina = 24;
-  const productosAmostrar = productos.slice(0, productosPorPagina);
+  
+  // Función para filtrar productos
+  const productosFiltrados = productos.filter(producto => {
+    // Filtro por búsqueda (nombre del producto)
+    const cumpleBusqueda = producto.nombre.toLowerCase().includes(filtros.busqueda.toLowerCase());
+    
+    // Filtro por categoría
+    const cumpleCategoria = !filtros.categoria || producto.categoryId?._id === filtros.categoria;
+    
+    // Filtro por stock
+    let cumpleStock = true;
+    if (filtros.stock === 'conStock') {
+      cumpleStock = (producto.cantidadRestante || 0) > 0;
+    } else if (filtros.stock === 'sinStock') {
+      cumpleStock = (producto.cantidadRestante || 0) === 0;
+    }
+    
+    return cumpleBusqueda && cumpleCategoria && cumpleStock;
+  });
+  
+  const productosAmostrar = productosFiltrados.slice(0, productosPorPagina);
   const [paginaTerminados, setPaginaTerminados] = useState(1);
   const productosPorPaginaTerminados = 10;
   const productosTerminadosPorPagina = productosTerminados.slice(
@@ -245,6 +274,22 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
     return false;
   };
 
+  // Funciones para manejar filtros
+  const handleFiltroChange = (tipo, valor) => {
+    setFiltros(prev => ({
+      ...prev,
+      [tipo]: valor
+    }));
+  };
+
+  const limpiarFiltros = () => {
+    setFiltros({
+      busqueda: '',
+      categoria: '',
+      stock: 'todos'
+    });
+  };
+
   // Función para normalizar nombres
   // Función principal para cargar productos
   const fetchProductos = useCallback(async () => {
@@ -280,6 +325,20 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
   useEffect(() => {
     fetchProductos();
   }, [fetchProductos]);
+
+  // Cargar categorías para el filtro
+  useEffect(() => {
+    const fetchCategorias = async () => {
+      try {
+        const categoriasData = await categoryService.getAllCategories();
+        setCategorias(Array.isArray(categoriasData) ? categoriasData : []);
+      } catch (error) {
+        console.error('Error al cargar categorías:', error);
+        setCategorias([]);
+      }
+    };
+    fetchCategorias();
+  }, []);
 
   // Función para iniciar la edición de un producto
   const handleEditProducto = (producto) => {
@@ -626,15 +685,115 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
         </div>
       )}
 
+      {/* Sección de filtros */}
+      <div className="bg-orange-100 p-4 rounded-lg mb-6 border border-orange-200">
+        <h3 className="text-center text-lg font-semibold text-orange-800 mb-4">
+          Selecciona tus productos favoritos para crear una venta
+        </h3>
+        
+        <div className="flex flex-col lg:flex-row gap-4 items-center justify-center">
+          {/* Campo de búsqueda */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <input
+              type="text"
+              placeholder="Buscar productos"
+              value={filtros.busqueda}
+              onChange={(e) => handleFiltroChange('busqueda', e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* Filtro por categoría */}
+          <div className="flex-1 max-w-xs">
+            <select
+              value={filtros.categoria}
+              onChange={(e) => handleFiltroChange('categoria', e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+            >
+              <option value="">Todas las categorías</option>
+              {categorias.map(categoria => (
+                <option key={categoria._id} value={categoria._id}>
+                  {categoria.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Filtro por stock */}
+          <div className="flex-1 max-w-xs">
+            <select
+              value={filtros.stock}
+              onChange={(e) => handleFiltroChange('stock', e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+            >
+              <option value="todos">Todos los productos</option>
+              <option value="conStock">Solo con stock</option>
+              <option value="sinStock">Sin stock</option>
+            </select>
+          </div>
+
+          {/* Checkbox para solo con stock */}
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="soloConStock"
+              checked={filtros.stock === 'conStock'}
+              onChange={(e) => handleFiltroChange('stock', e.target.checked ? 'conStock' : 'todos')}
+              className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+            />
+            <label htmlFor="soloConStock" className="text-sm font-medium text-gray-700">
+              Solo con stock
+            </label>
+          </div>
+
+          {/* Botón limpiar */}
+          <button
+            onClick={limpiarFiltros}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            <X size={16} />
+            Limpiar
+          </button>
+        </div>
+
+        {/* Mostrar cantidad de productos filtrados */}
+        <div className="mt-3 text-center text-sm text-gray-600">
+          Mostrando {productosFiltrados.length} de {productos.length} productos
+        </div>
+      </div>
+
       {isLoading ? (
         <div className="flex justify-center items-center py-8">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
       ) : (
         <div className="space-y-8">
-          {/* Tabla de Productos Activos */}
-          {/* Responsive: tabla en desktop, cards en móvil */}
-          <div className="overflow-x-auto bg-white rounded-lg shadow">
+          {/* Mensaje cuando no hay productos filtrados */}
+          {productosFiltrados.length === 0 ? (
+            <div className="bg-white rounded-lg shadow p-8 text-center">
+              <div className="text-gray-500">
+                <Package size={48} className="mx-auto mb-4 text-gray-300" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No se encontraron productos
+                </h3>
+                <p className="text-gray-600">
+                  No hay productos que coincidan con los filtros seleccionados.
+                </p>
+                <button
+                  onClick={limpiarFiltros}
+                  className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <X size={16} className="mr-2" />
+                  Limpiar filtros
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Tabla de Productos Activos */}
+              {/* Responsive: tabla en desktop, cards en móvil */}
+              <div className="overflow-x-auto bg-white rounded-lg shadow">
             {/* Desktop Table */}
             <table className="hidden sm:table min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -727,8 +886,6 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
             </div>
           </div>
 
-
-
           {/* Historial de entradas de inventario */}
           <InventarioHistorial 
             historialEntradas={historialEntradas} 
@@ -754,6 +911,8 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
               }
             }}
           />
+          </>
+          )}
 
         </div>
       )}
