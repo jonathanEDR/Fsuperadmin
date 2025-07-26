@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { ShoppingCart, Plus } from 'lucide-react';
+import { ShoppingCart, Plus, Grid3X3 } from 'lucide-react';
 import VentaList from './VentaList';
 import VentasFinalizadas from './VentasFinalizadas';
 import VentaCreationModal from './VentaCreationModal';
+import CatalogoVentas from './catalogo/CatalogoVentas';
 import { useRole } from '../../context/RoleContext';
 import { useVentasLimpias } from '../../hooks/useVentasLimpias';
 
@@ -15,6 +16,7 @@ const VentasManager = ({ userRole: userRoleProp }) => {
   const userRole = userRoleProp || contextUserRole;
   
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCatalogoOpen, setIsCatalogoOpen] = useState(false);
   const [ventas, setVentas] = useState([]);
   const [ventasFinalizadas, setVentasFinalizadas] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -156,6 +158,63 @@ const VentasManager = ({ userRole: userRoleProp }) => {
     }
   };
 
+  // Función para manejar la confirmación del catálogo
+  const handleCatalogoConfirmar = async (productosDelCatalogo) => {
+    try {
+      setLoading(true);
+      
+      // Crear la venta con los productos del catálogo
+      const token = await getToken();
+      
+      // Calcular el total
+      const montoTotal = productosDelCatalogo.reduce((total, item) => total + item.subtotal, 0);
+      
+      // Preparar los datos para la venta
+      const ventaData = {
+        productos: productosDelCatalogo.map(item => ({
+          productoId: item.productoId,
+          cantidad: item.cantidad,
+          precioUnitario: item.precioUnitario,
+          subtotal: item.subtotal
+        })),
+        fechadeVenta: new Date().toISOString(),
+        montoTotal,
+        estadoPago: 'Pendiente',
+        cantidadPagada: 0
+      };
+
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/ventas`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(ventaData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al crear la venta');
+      }
+
+      const data = await response.json();
+      
+      // Recargar las listas de ventas
+      await Promise.all([
+        fetchVentas(),
+        fetchVentasFinalizadas()
+      ]);
+      
+      setIsCatalogoOpen(false);
+      console.log('✅ Venta creada desde catálogo y listas actualizadas');
+      
+    } catch (error) {
+      console.error('Error al crear venta desde catálogo:', error);
+      setError('Error al crear la venta desde el catálogo');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Función para manejar actualizaciones de ventas
   const handleVentaUpdated = async () => {
     try {
@@ -215,13 +274,22 @@ const VentasManager = ({ userRole: userRoleProp }) => {
             </div>
           </div>
           {canShowAddButton && (
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
-            >
-              <Plus size={20} />
-              Nueva Venta
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsCatalogoOpen(true)}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center gap-2 shadow-lg"
+              >
+                <Grid3X3 size={20} />
+                Ver Catálogo
+              </button>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
+              >
+                <Plus size={20} />
+                Nueva Venta
+              </button>
+            </div>
           )}
         </div>
 
@@ -244,6 +312,14 @@ const VentasManager = ({ userRole: userRoleProp }) => {
             userRole={userRole}
           />
         )}
+
+        {/* Catálogo de Ventas */}
+        <CatalogoVentas
+          isOpen={isCatalogoOpen}
+          onClose={() => setIsCatalogoOpen(false)}
+          onConfirmarVenta={handleCatalogoConfirmar}
+          userRole={userRole}
+        />
       </div>
 
       <div className="bg-white shadow-lg rounded-xl p-6">
