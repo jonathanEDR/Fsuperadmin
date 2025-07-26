@@ -461,13 +461,14 @@ const GestionRecetas = () => {
 
   return (
     <div className="px-2 sm:px-6 py-4">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+      {/* 🎯 OPTIMIZADO: Header responsivo */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Gestión de Recetas</h1>
         <button
           onClick={handleNuevaReceta}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-colors w-full sm:w-auto font-medium text-sm sm:text-base"
         >
-          Nueva Receta
+          ➕ Nueva Receta
         </button>
       </div>
       <AccesosRapidosProduccion />
@@ -478,29 +479,29 @@ const GestionRecetas = () => {
         </div>
       )}
 
-      {/* Filtros */}
+      {/* 🎯 SUPER OPTIMIZADO: Filtros ultra compactos - máximo 2 filas */}
       <div className="bg-white p-3 sm:p-4 rounded-lg shadow mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-4">
-          <div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="col-span-2 sm:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Buscar
+              🔍 Buscar Receta
             </label>
             <input
               type="text"
               value={filtros.buscar}
               onChange={(e) => handleFiltroChange('buscar', e.target.value)}
               placeholder="Nombre de la receta..."
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
-          <div>
+          <div className="col-span-2 sm:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Estado
+              📊 Estado
             </label>
             <select
               value={filtros.activo}
               onChange={(e) => handleFiltroChange('activo', e.target.value === 'true')}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="true">Activas</option>
               <option value="false">Inactivas</option>
@@ -673,42 +674,45 @@ const GestionRecetas = () => {
                   )}
                 </div>
 
-                {/* 🎯 MODIFICADO: Botones simplificados de gestión */}
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 pt-2 border-t">
-                  <div className="flex flex-col sm:flex-row gap-2">
+                {/* 🎯 OPTIMIZADO: Botones compactos para móvil - 2 filas máximo */}
+                <div className="pt-2 border-t space-y-2">
+                  {/* Fila 1: Botones principales */}
+                  <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => handleVerReceta(receta)}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      className="text-blue-600 hover:text-blue-800 text-xs sm:text-sm font-medium py-1 px-2 border border-blue-200 rounded hover:bg-blue-50 transition-colors"
                     >
-                      Ver Detalles
+                      👁️ Ver
                     </button>
                     <button
                       onClick={() => handleEditarReceta(receta)}
-                      className="text-green-600 hover:text-green-800 text-sm font-medium"
+                      className="text-green-600 hover:text-green-800 text-xs sm:text-sm font-medium py-1 px-2 border border-green-200 rounded hover:bg-green-50 transition-colors"
                     >
-                      Editar
+                      ✏️ Editar
                     </button>
                   </div>
                   
-                  {/* 🎯 NUEVO: Botón de reiniciar (solo si no está en borrador) */}
-                  <div className="flex gap-2">
-                    {receta.estadoProceso !== 'borrador' && (
+                  {/* Fila 2: Botones secundarios (solo si es necesario) */}
+                  {(receta.estadoProceso !== 'borrador' || true) && (
+                    <div className="grid grid-cols-2 gap-2">
+                      {receta.estadoProceso !== 'borrador' && (
+                        <button
+                          onClick={() => handleReiniciarRecetaTarjeta(receta)}
+                          disabled={loading}
+                          className="px-2 py-1 bg-orange-100 text-orange-700 border border-orange-300 rounded text-xs sm:text-sm font-medium hover:bg-orange-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          title="Reiniciar receta al estado preparado"
+                        >
+                          🔄 Reiniciar
+                        </button>
+                      )}
                       <button
-                        onClick={() => handleReiniciarRecetaTarjeta(receta)}
-                        disabled={loading}
-                        className="px-3 py-1 bg-orange-100 text-orange-700 border border-orange-300 rounded-md text-sm font-medium hover:bg-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        title="Reiniciar receta al estado preparado"
+                        onClick={() => handleEliminar(receta._id)}
+                        className="text-red-600 hover:text-red-800 text-xs sm:text-sm font-medium py-1 px-2 border border-red-200 rounded hover:bg-red-50 transition-colors"
                       >
-                        🔄 Reiniciar
+                        🗑️ Eliminar
                       </button>
-                    )}
-                    <button
-                      onClick={() => handleEliminar(receta._id)}
-                      className="text-red-600 hover:text-red-800 text-sm"
-                    >
-                      🗑️ Eliminar
-                    </button>
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

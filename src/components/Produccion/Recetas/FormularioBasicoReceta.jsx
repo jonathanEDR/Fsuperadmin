@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import '../../../styles/modal-protection.css';
 
 const FormularioBasicoReceta = ({ 
   receta = null, 
@@ -84,18 +85,30 @@ const FormularioBasicoReceta = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-gray-800">{titulo}</h2>
-            <button
-              onClick={onCancelar}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              ✕
-            </button>
-          </div>
+      {/* 🎯 PROTECCIÓN: Container con centrado perfecto y tamaños responsivos */}
+      <div 
+        className="modal-protection small-modal-protection bg-white rounded-lg shadow-xl overflow-hidden"
+        style={{
+          fontSize: '16px',
+          lineHeight: '1.5',
+          position: 'static',
+          transform: 'none',
+          top: 'auto'
+        }}
+      >
+        <div className="overflow-y-auto max-h-[95vh]">
+          <div className="p-6">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-gray-800 m-0">{titulo}</h2>
+              <button
+                onClick={onCancelar}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded"
+                style={{ fontSize: '20px', lineHeight: '1' }}
+              >
+                ✕
+              </button>
+            </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Información Básica */}
@@ -177,6 +190,7 @@ const FormularioBasicoReceta = ({
               </button>
             </div>
           </form>
+          </div>
         </div>
       </div>
     </div>

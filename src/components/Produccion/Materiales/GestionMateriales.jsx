@@ -19,6 +19,7 @@ const GestionMateriales = () => {
   const [mostrarAjuste, setMostrarAjuste] = useState(false);
   const [mostrarMovimientos, setMostrarMovimientos] = useState(false);
   const [materialSeleccionado, setMaterialSeleccionado] = useState(null);
+  const [accionesExpandidas, setAccionesExpandidas] = useState({});
 
   useEffect(() => {
     cargarMateriales();
@@ -78,6 +79,13 @@ const GestionMateriales = () => {
     }
   };
 
+  const toggleAcciones = (materialId) => {
+    setAccionesExpandidas(prev => ({
+      ...prev,
+      [materialId]: !prev[materialId]
+    }));
+  };
+
   const formatearNumero = (numero) => {
     return new Intl.NumberFormat('es-ES', {
       minimumFractionDigits: 2,
@@ -109,22 +117,51 @@ const GestionMateriales = () => {
           <h1 className="text-3xl font-bold text-gray-900">Gestión de Materiales</h1>
           <p className="text-gray-600 mt-1">Administra el inventario de materiales de producción</p>
         </div>
-        <button
-          onClick={handleNuevoMaterial}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          <span>Nuevo Material</span>
-        </button>
+
       </div>
 
       <AccesosRapidosProduccion />
 
-      {/* Filtros */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    
+
+      {/* Filtros optimizados para móvil */}
+      <div className="bg-white p-2 md:p-4 rounded-lg shadow-sm border border-gray-200 mb-4 md:mb-6">
+        {/* Filtro de búsqueda principal en móvil */}
+        <div className="block md:hidden mb-3">
+          <input
+            type="text"
+            placeholder="Buscar material..."
+            value={filtros.buscar}
+            onChange={(e) => handleFiltroChange('buscar', e.target.value)}
+            className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+        
+        {/* Layout compacto para móvil - selectores en una fila */}
+        <div className="flex md:hidden gap-2 mb-2">
+          <select
+            value={filtros.unidadMedida}
+            onChange={(e) => handleFiltroChange('unidadMedida', e.target.value)}
+            className="flex-1 p-2 text-xs border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="">Todas las unidades</option>
+            {unidadesMedida.slice(1).map(unidad => (
+              <option key={unidad} value={unidad}>{unidad}</option>
+            ))}
+          </select>
+          
+          <select
+            value={filtros.activo}
+            onChange={(e) => handleFiltroChange('activo', e.target.value === 'true')}
+            className="flex-1 p-2 text-xs border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value={true}>Activos</option>
+            <option value={false}>Inactivos</option>
+          </select>
+        </div>
+        
+        {/* Layout original para desktop */}
+        <div className="hidden md:grid md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Buscar material
@@ -186,62 +223,70 @@ const GestionMateriales = () => {
         </div>
       )}
 
-      {/* Estadísticas rápidas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <div className="text-2xl font-bold text-blue-600">
+      {/* Estadísticas rápidas optimizadas para móvil */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
+        <div className="bg-white p-3 md:p-4 rounded-lg shadow-sm border border-gray-200">
+          <div className="text-lg md:text-2xl font-bold text-blue-600">
             {materiales.length}
           </div>
-          <div className="text-gray-600">Total Materiales</div>
+          <div className="text-xs md:text-sm text-gray-600">Total Materiales</div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <div className="text-2xl font-bold text-green-600">
+        <div className="bg-white p-3 md:p-4 rounded-lg shadow-sm border border-gray-200">
+          <div className="text-lg md:text-2xl font-bold text-green-600">
             {materiales.filter(m => (m.cantidad - (m.consumido || 0)) > m.stockMinimo).length}
           </div>
-          <div className="text-gray-600">Con Stock Suficiente</div>
+          <div className="text-xs md:text-sm text-gray-600">Con Stock Suficiente</div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <div className="text-2xl font-bold text-yellow-600">
+        <div className="bg-white p-3 md:p-4 rounded-lg shadow-sm border border-gray-200">
+          <div className="text-lg md:text-2xl font-bold text-yellow-600">
             {materiales.filter(m => {
               const disponible = m.cantidad - (m.consumido || 0);
               return disponible > 0 && disponible <= m.stockMinimo;
             }).length}
           </div>
-          <div className="text-gray-600">Stock Bajo</div>
+          <div className="text-xs md:text-sm text-gray-600">Stock Bajo</div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <div className="text-2xl font-bold text-red-600">
+        <div className="bg-white p-3 md:p-4 rounded-lg shadow-sm border border-gray-200">
+          <div className="text-lg md:text-2xl font-bold text-red-600">
             {materiales.filter(m => (m.cantidad - (m.consumido || 0)) <= 0).length}
           </div>
-          <div className="text-gray-600">Agotados</div>
+          <div className="text-xs md:text-sm text-gray-600">Agotados</div>
         </div>
       </div>
-
-      {/* Tabla de materiales */}
+        <button
+          onClick={handleNuevoMaterial}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          <span>Nuevo Material</span>
+        </button>
+      {/* Tabla de materiales optimizada para móvil */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Material
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Producto Referencia
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Stock Actual
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Stock Mínimo
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Precio Unit.
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
@@ -249,7 +294,7 @@ const GestionMateriales = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {materiales.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan="7" className="px-3 md:px-6 py-4 text-center text-gray-500">
                     No se encontraron materiales
                   </td>
                 </tr>
@@ -257,10 +302,11 @@ const GestionMateriales = () => {
                 materiales.map((material) => {
                   const estadoStock = getEstadoStock(material);
                   const disponible = material.cantidad - (material.consumido || 0);
+                  const accionesVisible = accionesExpandidas[material._id];
 
                   return (
                     <tr key={material._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
+                      <td className="px-3 md:px-6 py-4">
                         <div>
                           <div className="text-sm font-medium text-gray-900">
                             {material.nombre}
@@ -270,7 +316,7 @@ const GestionMateriales = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="hidden md:table-cell px-6 py-4">
                         <div className="text-sm text-gray-900">
                           {material.productoReferencia?.nombre || 'Sin referencia'}
                         </div>
@@ -278,7 +324,7 @@ const GestionMateriales = () => {
                           {material.productoReferencia?.categoria || ''}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3 md:px-6 py-4">
                         <div className="text-sm text-gray-900">
                           {formatearNumero(disponible)}
                         </div>
@@ -289,23 +335,70 @@ const GestionMateriales = () => {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="hidden md:table-cell px-6 py-4">
                         <div className="text-sm text-gray-900">
                           {formatearNumero(material.stockMinimo)}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="hidden md:table-cell px-6 py-4">
                         <div className="text-sm text-gray-900">
                           ${formatearNumero(material.precioUnitario)}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3 md:px-6 py-4">
                         <span className={`text-sm font-medium ${estadoStock.color}`}>
                           {estadoStock.texto}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex space-x-2">
+                      <td className="px-3 md:px-6 py-4">
+                        {/* Botón "Ver" para móvil */}
+                        <div className="md:hidden">
+                          <button
+                            onClick={() => toggleAcciones(material._id)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
+                          >
+                            {accionesVisible ? 'Ocultar' : 'Ver'}
+                          </button>
+                          {accionesVisible && (
+                            <div className="mt-2 space-y-1">
+                              <button
+                                onClick={() => handleEditarMaterial(material)}
+                                className="block w-full text-left text-blue-600 hover:text-blue-900 text-sm py-1"
+                              >
+                                Editar
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setMaterialSeleccionado(material);
+                                  setMostrarAjuste(true);
+                                }}
+                                className="block w-full text-left text-green-600 hover:text-green-900 text-sm py-1"
+                              >
+                                Ajustar
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setMaterialSeleccionado(material);
+                                  setMostrarMovimientos(true);
+                                }}
+                                className="block w-full text-left text-purple-600 hover:text-purple-900 text-sm py-1"
+                              >
+                                Movimientos
+                              </button>
+                              {material.activo && (
+                                <button
+                                  onClick={() => handleDesactivarMaterial(material)}
+                                  className="block w-full text-left text-red-600 hover:text-red-900 text-sm py-1"
+                                >
+                                  Desactivar
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Acciones normales para desktop */}
+                        <div className="hidden md:flex space-x-2">
                           <button
                             onClick={() => handleEditarMaterial(material)}
                             className="text-blue-600 hover:text-blue-900 text-sm"

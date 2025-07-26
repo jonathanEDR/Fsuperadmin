@@ -1,0 +1,167 @@
+/* 🎯 PROTECCIÓN PARA MODALES - Evita interferencia de estilos globales */
+
+/* Protección base para todos los modales */
+.modal-protection {
+  /* Reset básico */
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  
+  /* Protección de tamaño */
+  min-width: 280px !important;
+  max-width: none !important;
+  width: auto !important;
+  
+  /* Protección de tipografía */
+  font-size: 16px !important;
+  line-height: 1.5 !important;
+  
+  /* Protección de espaciado */
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Protección específica para contenido de modales */
+.modal-protection * {
+  box-sizing: border-box;
+}
+
+/* Protección para inputs dentro de modales */
+.modal-protection input,
+.modal-protection textarea,
+.modal-protection select {
+  font-size: 16px !important;
+  line-height: 1.5 !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+}
+
+/* Protección para botones dentro de modales */
+.modal-protection button {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  padding: 8px 16px !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+}
+
+/* Protección para títulos dentro de modales */
+.modal-protection h1,
+.modal-protection h2,
+.modal-protection h3,
+.modal-protection h4,
+.modal-protection h5,
+.modal-protection h6 {
+  margin: 0 0 16px 0 !important;
+  font-weight: 600 !important;
+}
+
+/* Protección para labels dentro de modales */
+.modal-protection label {
+  display: block !important;
+  margin-bottom: 4px !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+}
+
+/* Protección para contenedores flex dentro de modales */
+.modal-protection .flex {
+  display: flex !important;
+}
+
+.modal-protection .grid {
+  display: grid !important;
+}
+
+/* 🎯 NUEVO: Media queries para mejor responsividad */
+/* Móvil */
+@media screen and (max-width: 640px) {
+  .modal-protection input,
+  .modal-protection textarea,
+  .modal-protection select {
+    font-size: 16px !important; /* Evita zoom en iOS */
+  }
+  
+  .small-modal-protection {
+    min-width: 90vw !important;
+    max-width: 95vw !important;
+    width: 95vw !important;
+    min-height: 500px !important;
+  }
+  
+  .recipe-modal-protection {
+    min-width: 95vw !important;
+    max-width: 98vw !important;
+    width: 98vw !important;
+  }
+}
+
+/* Tablet */
+@media screen and (min-width: 641px) and (max-width: 1024px) {
+  .small-modal-protection {
+    min-width: 500px !important;
+    max-width: 650px !important;
+    width: 60vw !important;
+    min-height: 550px !important;
+  }
+  
+  .recipe-modal-protection {
+    min-width: 700px !important;
+    max-width: 950px !important;
+    width: 80vw !important;
+  }
+}
+
+/* Escritorio */
+@media screen and (min-width: 1025px) {
+  .small-modal-protection {
+    min-width: 550px !important;
+    max-width: 700px !important;
+    width: 45vw !important;
+    min-height: 600px !important;
+  }
+  
+  .recipe-modal-protection {
+    min-width: 900px !important;
+    max-width: 1300px !important;
+    width: 75vw !important;
+  }
+}
+
+/* Pantallas muy grandes */
+@media screen and (min-width: 1440px) {
+  .small-modal-protection {
+    min-width: 600px !important;
+    max-width: 750px !important;
+    width: 40vw !important;
+    min-height: 650px !important;
+  }
+  
+  .recipe-modal-protection {
+    min-width: 1000px !important;
+    max-width: 1400px !important;
+    width: 65vw !important;
+  }
+}
+
+/* Protección para modales pequeños */
+.small-modal-protection {
+  min-width: 380px !important;
+  max-width: 550px !important;
+  width: 92vw !important;
+  min-height: 500px !important;
+}
+
+/* Protección para modales de receta */
+.recipe-modal-protection {
+  /* Protección adicional para formularios complejos */
+  min-height: 400px !important;
+  max-height: 95vh !important;
+  overflow-y: auto !important;
+}
+
+/* Override para elementos que puedan causar problemas */
+.modal-protection .text-xs { font-size: 12px !important; }
+.modal-protection .text-sm { font-size: 14px !important; }
+.modal-protection .text-base { font-size: 16px !important; }
+.modal-protection .text-lg { font-size: 18px !important; }
+.modal-protection .text-xl { font-size: 20px !important; }

@@ -110,13 +110,9 @@ const GestionIngredientes = () => {
     <div className="p-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
         <h1 className="text-2xl font-bold text-gray-800">Gestión de Ingredientes</h1>
-        <button
-          onClick={handleNuevoIngrediente}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto"
-        >
-          Nuevo Ingrediente
-        </button>
+       
       </div>
+
       <AccesosRapidosProduccion />
 
       {error && (
@@ -125,9 +121,54 @@ const GestionIngredientes = () => {
         </div>
       )}
 
-      {/* Filtros */}
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Filtros super compactos para móvil */}
+      <div className="bg-white p-2 md:p-4 rounded-lg shadow mb-4 md:mb-6">
+
+         <button
+          onClick={handleNuevoIngrediente}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto"
+        >
+          Nuevo Ingrediente
+        </button>
+        {/* Filtro de búsqueda principal en móvil */}
+        <div className="block md:hidden mb-3">
+          <input
+            type="text"
+            value={filtros.buscar}
+            onChange={(e) => handleFiltroChange('buscar', e.target.value)}
+            placeholder="Buscar ingrediente..."
+            className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+        
+        {/* Layout compacto para móvil - selectores en una fila */}
+        <div className="flex md:hidden gap-2 mb-2">
+          <select
+            value={filtros.unidadMedida}
+            onChange={(e) => handleFiltroChange('unidadMedida', e.target.value)}
+            className="flex-1 p-2 text-xs border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="">Todas las unidades</option>
+            <option value="kg">kg</option>
+            <option value="gr">gr</option>
+            <option value="lt">lt</option>
+            <option value="ml">ml</option>
+            <option value="unidad">unidad</option>
+            <option value="pieza">pieza</option>
+          </select>
+          
+          <select
+            value={filtros.activo}
+            onChange={(e) => handleFiltroChange('activo', e.target.value === 'true')}
+            className="flex-1 p-2 text-xs border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="true">Activos</option>
+            <option value="false">Inactivos</option>
+          </select>
+        </div>
+        
+        {/* Layout original para desktop */}
+        <div className="hidden md:grid md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Buscar
@@ -137,7 +178,7 @@ const GestionIngredientes = () => {
               value={filtros.buscar}
               onChange={(e) => handleFiltroChange('buscar', e.target.value)}
               placeholder="Nombre del ingrediente..."
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           <div>
@@ -147,7 +188,7 @@ const GestionIngredientes = () => {
             <select
               value={filtros.unidadMedida}
               onChange={(e) => handleFiltroChange('unidadMedida', e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Todas</option>
               <option value="kg">Kilogramos</option>
@@ -165,7 +206,7 @@ const GestionIngredientes = () => {
             <select
               value={filtros.activo}
               onChange={(e) => handleFiltroChange('activo', e.target.value === 'true')}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="true">Activos</option>
               <option value="false">Inactivos</option>
@@ -181,25 +222,25 @@ const GestionIngredientes = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Ingrediente
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Producto del Catálogo
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Cantidad Total
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Procesado
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Disponible
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Precio Unitario
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
@@ -207,7 +248,7 @@ const GestionIngredientes = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {ingredientes.map((ingrediente) => (
                 <tr key={ingrediente._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">
                         {ingrediente.nombre}
@@ -217,7 +258,7 @@ const GestionIngredientes = () => {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
                     <div>
                       {ingrediente.productoReferencia ? (
                         <>
@@ -239,19 +280,19 @@ const GestionIngredientes = () => {
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {ingrediente.cantidad}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {ingrediente.procesado}
                   </td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${getStockColor(ingrediente)}`}> 
+                  <td className={`px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium ${getStockColor(ingrediente)}`}> 
                     {ingrediente.cantidad - ingrediente.procesado}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     S/.{ingrediente.precioUnitario?.toFixed(2) || '0.00'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-1">
                       <button
                         onClick={() => handleEditarIngrediente(ingrediente)}

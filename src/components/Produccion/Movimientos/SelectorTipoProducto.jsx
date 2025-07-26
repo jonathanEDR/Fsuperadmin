@@ -52,13 +52,14 @@ const SelectorTipoProducto = ({
         Seleccionar Tipo de Producto
       </h3>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 🎯 OPTIMIZADO: Grid compacto para móvil */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {tiposAUsar.map((tipo) => (
           <div
             key={tipo.id}
             onClick={() => handleTipoClick(tipo)}
             className={`
-              relative p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 transform hover:scale-105
+              relative p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 transform hover:scale-105
               ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
               ${
                 tipoSeleccionado === tipo.id
@@ -69,10 +70,10 @@ const SelectorTipoProducto = ({
           >
             {/* Indicador de selección */}
             {tipoSeleccionado === tipo.id && (
-              <div className="absolute top-2 right-2">
-                <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+              <div className="absolute top-1 right-1 sm:top-2 sm:right-2">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-blue-500 rounded-full flex items-center justify-center">
                   <svg 
-                    className="w-3 h-3 text-white" 
+                    className="w-2 h-2 sm:w-3 sm:h-3 text-white" 
                     fill="currentColor" 
                     viewBox="0 0 20 20"
                   >
@@ -90,15 +91,15 @@ const SelectorTipoProducto = ({
             <div className="flex flex-col items-center text-center">
               {/* Icono */}
               <div className={`
-                w-12 h-12 rounded-full flex items-center justify-center mb-3
+                w-8 h-8 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mb-2 sm:mb-3
                 ${tipoSeleccionado === tipo.id ? 'bg-blue-100' : 'bg-gray-100'}
               `}>
-                <span className="text-2xl">{tipo.icono}</span>
+                <span className="text-lg sm:text-2xl">{tipo.icono}</span>
               </div>
               
               {/* Nombre */}
               <h4 className={`
-                font-semibold mb-1 text-sm
+                font-semibold mb-1 text-xs sm:text-sm
                 ${tipoSeleccionado === tipo.id ? 'text-blue-700' : 'text-gray-800'}
               `}>
                 {tipo.nombre}
@@ -106,7 +107,7 @@ const SelectorTipoProducto = ({
               
               {/* Descripción */}
               <p className={`
-                text-xs leading-tight
+                text-xs leading-tight hidden sm:block
                 ${tipoSeleccionado === tipo.id ? 'text-blue-600' : 'text-gray-500'}
               `}>
                 {tipo.descripcion || tipo.descripción}

@@ -155,15 +155,11 @@ const GestionProduccion = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
-        <h1 className="text-2xl font-bold text-gray-800">Gestión de Producción</h1>
-        <button
-          onClick={handleNuevaProduccion}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto"
-        >
-          Nueva Producción
-        </button>
+    <div className="px-2 sm:px-6 py-4">
+      {/* 🎯 OPTIMIZADO: Header responsivo */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Gestión de Producción</h1>
+      
       </div>
       <AccesosRapidosProduccion />
 
@@ -173,30 +169,31 @@ const GestionProduccion = () => {
         </div>
       )}
 
-      {/* Filtros */}
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+      {/* 🎯 OPTIMIZADO: Filtros súper compactos - máximo 2 filas en todos los dispositivos */}
+      <div className="bg-white p-3 sm:p-4 rounded-lg shadow mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
+          {/* Fila 1: Campos principales */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Buscar
+              🔍 Buscar Producto
             </label>
             <input
               type="text"
               value={filtros.buscar}
               onChange={(e) => handleFiltroChange('buscar', e.target.value)}
               placeholder="Nombre del producto..."
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Estado
+              📊 Estado
             </label>
             <select
               value={filtros.estado}
               onChange={(e) => handleFiltroChange('estado', e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Todos</option>
               <option value="planificada">Planificada</option>
@@ -208,51 +205,52 @@ const GestionProduccion = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Fecha Inicio
-            </label>
-            <input
-              type="date"
-              value={filtros.fechaInicio}
-              onChange={(e) => handleFiltroChange('fechaInicio', e.target.value)}
-              max={obtenerFechaHoy()}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Fecha Fin
-            </label>
-            <input
-              type="date"
-              value={filtros.fechaFin}
-              onChange={(e) => handleFiltroChange('fechaFin', e.target.value)}
-              max={obtenerFechaHoy()}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Operador
+              👤 Operador
             </label>
             <input
               type="text"
               value={filtros.operador}
               onChange={(e) => handleFiltroChange('operador', e.target.value)}
               placeholder="Nombre del operador..."
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          {/* Fila 2: Fechas y configuración */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              📅 Fecha Inicio
+            </label>
+            <input
+              type="date"
+              value={filtros.fechaInicio}
+              onChange={(e) => handleFiltroChange('fechaInicio', e.target.value)}
+              max={obtenerFechaHoy()}
+              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Por página
+              📅 Fecha Fin
+            </label>
+            <input
+              type="date"
+              value={filtros.fechaFin}
+              onChange={(e) => handleFiltroChange('fechaFin', e.target.value)}
+              max={obtenerFechaHoy()}
+              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              📄 Por página
             </label>
             <select
               value={filtros.limite}
               onChange={(e) => handleFiltroChange('limite', parseInt(e.target.value))}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               <option value={10}>10</option>
               <option value={20}>20</option>
@@ -263,31 +261,38 @@ const GestionProduccion = () => {
         </div>
       </div>
 
-      {/* Lista de Producciones */}
+        <button
+          onClick={handleNuevaProduccion}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-colors w-full sm:w-auto font-medium text-sm sm:text-base"
+        >
+          ➕ Nueva Producción
+        </button>
+
+      {/* 🎯 OPTIMIZADO: Lista de Producciones con columnas responsivas */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Producto
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Cantidad Producida
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Cantidad
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Costo
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Operador
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Fecha
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
@@ -295,43 +300,60 @@ const GestionProduccion = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {producciones.map((produccion) => (
                 <tr key={produccion._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">
                         {produccion.nombre}
                       </div>
                       {produccion.receta && (
-                        <div className="text-sm text-gray-500">
+                        <div className="text-xs sm:text-sm text-gray-500">
                           Receta: {produccion.receta.nombre}
                         </div>
                       )}
+                      {/* 🎯 MÓVIL: Mostrar estado como badge en móvil */}
+                      <div className="sm:hidden mt-1">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getEstadoColor(produccion.estado)}`}>
+                          {getEstadoLabel(produccion.estado)}
+                        </span>
+                      </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
                     {produccion.cantidadProducida} {produccion.unidadMedida}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getEstadoColor(produccion.estado)}`}>
                       {getEstadoLabel(produccion.estado)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
                     S/.{produccion.costoTotal?.toFixed(2) || '0.00'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {produccion.operador}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatearFecha(produccion.fechaProduccion)}
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
+                    <div className="sm:hidden">
+                      {/* Fecha corta para móvil */}
+                      {new Date(produccion.fechaProduccion).toLocaleDateString('es-ES')}
+                    </div>
+                    <div className="hidden sm:block">
+                      {/* Fecha completa para desktop */}
+                      {formatearFecha(produccion.fechaProduccion)}
+                    </div>
+                    {/* 🎯 MÓVIL: Mostrar operador debajo de la fecha en móvil */}
+                    <div className="sm:hidden text-xs text-gray-500 mt-1">
+                      👤 {produccion.operador}
+                    </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium">
+                    <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-1 sm:space-y-0">
                       <button
                         onClick={() => handleVerDetalle(produccion)}
                         className="text-blue-600 hover:text-blue-900"
                         title="Ver detalles"
                       >
-                        Ver
+                        👁️ Ver
                       </button>
                       {produccion.estado === 'planificada' && (
                         <>
@@ -340,14 +362,14 @@ const GestionProduccion = () => {
                             className="text-green-600 hover:text-green-900"
                             title="Ejecutar producción"
                           >
-                            Ejecutar
+                            ▶️ Ejecutar
                           </button>
                           <button
                             onClick={() => handleCancelarProduccion(produccion._id)}
                             className="text-orange-600 hover:text-orange-900"
                             title="Cancelar producción"
                           >
-                            Cancelar
+                            ⏸️ Cancelar
                           </button>
                         </>
                       )}
@@ -356,7 +378,7 @@ const GestionProduccion = () => {
                         className="text-red-600 hover:text-red-900"
                         title="Eliminar producción"
                       >
-                        Eliminar
+                        🗑️ Eliminar
                       </button>
                     </div>
                   </td>

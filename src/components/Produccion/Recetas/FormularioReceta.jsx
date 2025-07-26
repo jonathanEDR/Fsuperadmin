@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import '../../../styles/modal-protection.css';
 import { ingredienteService } from '../../../services/ingredienteService';
 import catalogoProduccionService from '../../../services/catalogoProduccion';
 
@@ -561,19 +562,30 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-2 mx-auto p-4 border w-[95%] max-w-6xl shadow-lg rounded-md bg-white max-h-[95vh] overflow-hidden">
-        <div className="flex flex-col h-full">
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center h-full w-full z-50 p-2 sm:p-4">
+      {/* 🎯 PROTECCIÓN: Container con centrado perfecto y tamaños responsivos */}
+      <div 
+        className="modal-protection recipe-modal-protection bg-white shadow-lg rounded-md overflow-hidden border"
+        style={{
+          fontSize: '16px',
+          lineHeight: '1.5',
+          position: 'static',
+          top: 'auto',
+          maxHeight: '95vh'
+        }}
+      >
+        <div className="flex flex-col h-full p-4">
           {/* Header */}
           <div className="flex justify-between items-center mb-4 pb-3 border-b">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-gray-900 m-0">
               {receta ? 'Editar Receta' : 'Nueva Receta'} 
               <span className="text-xs text-blue-500 ml-2 hidden sm:inline">(v2.0 - Con Selector de Catálogo)</span>
             </h3>
             <button
               type="button"
               onClick={onCancelar}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded"
+              style={{ fontSize: '24px', lineHeight: '1' }}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
