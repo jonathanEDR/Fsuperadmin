@@ -621,7 +621,7 @@ const VentaViews = ({
                 </div>
                 
                 {/* Tarjetas de productos */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
                   {venta.productos?.filter(prod => prod != null).map((prod, idx) => {
                     return (
                       <ProductCard
@@ -636,7 +636,7 @@ const VentaViews = ({
                       />
                     );
                   }) || (
-                    <div className="col-span-2 text-center text-gray-500 py-4">
+                    <div className="col-span-2 lg:col-span-3 xl:col-span-4 text-center text-gray-500 py-4">
                       No hay productos en esta venta
                     </div>
                   )}
@@ -822,44 +822,44 @@ const VentaViews = ({
           </div>
         )}
 
-        {/* Dashboard de estadísticas */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+        {/* Dashboard de estadísticas - Optimizado para móvil */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+          <div className="bg-blue-50 p-3 sm:p-4 rounded-lg border border-blue-200">
             <div className="flex items-center gap-2">
-              <User className="text-blue-600" size={20} />
-              <div>
-                <div className="text-2xl font-bold text-blue-900">{totalClientes}</div>
-                <div className="text-sm text-blue-600">Cliente(s)</div>
+              <User className="text-blue-600 flex-shrink-0" size={16} />
+              <div className="min-w-0">
+                <div className="text-lg sm:text-2xl font-bold text-blue-900 truncate">{totalClientes}</div>
+                <div className="text-xs sm:text-sm text-blue-600">Cliente(s)</div>
               </div>
             </div>
           </div>
           
-          <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+          <div className="bg-green-50 p-3 sm:p-4 rounded-lg border border-green-200">
             <div className="flex items-center gap-2">
-              <ShoppingCart className="text-green-600" size={20} />
-              <div>
-                <div className="text-2xl font-bold text-green-900">{totalVentasGlobal}</div>
-                <div className="text-sm text-green-600">Venta(s)</div>
+              <ShoppingCart className="text-green-600 flex-shrink-0" size={16} />
+              <div className="min-w-0">
+                <div className="text-lg sm:text-2xl font-bold text-green-900 truncate">{totalVentasGlobal}</div>
+                <div className="text-xs sm:text-sm text-green-600">Venta(s)</div>
               </div>
             </div>
           </div>
           
-          <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+          <div className="bg-purple-50 p-3 sm:p-4 rounded-lg border border-purple-200">
             <div className="flex items-center gap-2">
-              <DollarSign className="text-purple-600" size={20} />
-              <div>
-                <div className="text-2xl font-bold text-purple-900">S/ {totalMontoGlobal.toFixed(2)}</div>
-                <div className="text-sm text-purple-600">Total Ventas</div>
+              <DollarSign className="text-purple-600 flex-shrink-0" size={16} />
+              <div className="min-w-0">
+                <div className="text-sm sm:text-2xl font-bold text-purple-900 truncate">S/ {totalMontoGlobal.toFixed(2)}</div>
+                <div className="text-xs sm:text-sm text-purple-600">Total Ventas</div>
               </div>
             </div>
           </div>
           
-          <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+          <div className="bg-red-50 p-3 sm:p-4 rounded-lg border border-red-200">
             <div className="flex items-center gap-2">
-              <Clock className="text-red-600" size={20} />
-              <div>
-                <div className="text-2xl font-bold text-red-900">S/ {totalPendienteGlobal.toFixed(2)}</div>
-                <div className="text-sm text-red-600">Pendiente</div>
+              <Clock className="text-red-600 flex-shrink-0" size={16} />
+              <div className="min-w-0">
+                <div className="text-sm sm:text-2xl font-bold text-red-900 truncate">S/ {totalPendienteGlobal.toFixed(2)}</div>
+                <div className="text-xs sm:text-sm text-red-600">Pendiente</div>
               </div>
             </div>
           </div>

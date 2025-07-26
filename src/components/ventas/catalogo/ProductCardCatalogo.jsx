@@ -149,7 +149,8 @@ const ProductCardCatalogo = ({
                 alignItems: 'center',
                 gap: isMobile ? '8px' : '6px',
                 margin: 0,
-                marginBottom: isMobile ? '2px' : '1px'
+                marginBottom: isMobile ? '2px' : '1px',
+                flexWrap: isMobile ? 'nowrap' : 'wrap'
               }}
             >
               <span
@@ -162,6 +163,25 @@ const ProductCardCatalogo = ({
               >
                 Personal
               </span>
+              
+              {isMobile && (
+                <div 
+                  style={{
+                    backgroundColor: '#f97316',
+                    color: 'white',
+                    padding: '4px 8px',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    flexShrink: 0,
+                    minWidth: '55px',
+                    textAlign: 'center'
+                  }}
+                >
+                  S/ {producto.precio?.toFixed(2)}
+                </div>
+              )}
+              
               {producto.categoryName && (
                 <span
                   style={{
@@ -181,7 +201,7 @@ const ProductCardCatalogo = ({
                   fontSize: isMobile ? '11px' : '9px',
                   color: '#9ca3af',
                   fontWeight: '500',
-                  marginLeft: '2px'
+                  marginLeft: isMobile ? 'auto' : '2px'
                 }}
               >
                 #{producto.codigoProducto}
@@ -189,21 +209,23 @@ const ProductCardCatalogo = ({
             </div>
           </div>
           
-          <div 
-            style={{
-              backgroundColor: '#f97316',
-              color: 'white',
-              padding: isMobile ? '6px 10px' : '4px 8px',
-              borderRadius: '12px',
-              fontSize: isMobile ? '14px' : '12px',
-              fontWeight: 'bold',
-              flexShrink: 0,
-              minWidth: isMobile ? '60px' : '50px',
-              textAlign: 'center'
-            }}
-          >
-            S/ {producto.precio?.toFixed(2)}
-          </div>
+          {!isMobile && (
+            <div 
+              style={{
+                backgroundColor: '#f97316',
+                color: 'white',
+                padding: '4px 8px',
+                borderRadius: '12px',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                flexShrink: 0,
+                minWidth: '50px',
+                textAlign: 'center'
+              }}
+            >
+              S/ {producto.precio?.toFixed(2)}
+            </div>
+          )}
         </div>
 
         {/* Info adicional compacta eliminada, ahora va junto a 'Personal' */}

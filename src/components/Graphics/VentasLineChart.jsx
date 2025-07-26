@@ -243,18 +243,19 @@ const VentasLineChart = ({ userRole }) => {
   );
 
   return (
-    <div className="bg-white rounded-lg shadow p-2 sm:p-6 mb-4 sm:mb-8 overflow-x-auto">
+    <div className="bg-white rounded-lg shadow p-2 sm:p-6 mb-4 sm:mb-8 overflow-hidden">
       {/* Header con filtros */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-2">
         <h3 className="text-base sm:text-xl font-bold text-gray-800 mb-2 sm:mb-0">
           Evolución de Ventas - {getTimeFilterLabel()}
         </h3>
-        <div className="flex flex-col xs:flex-row gap-2 w-full sm:w-auto">
+        {/* Contenedor de botones mejorado para móvil */}
+        <div className="grid grid-cols-2 sm:flex gap-2 w-full sm:w-auto">
           {['hoy', 'semana', 'mes', 'anual'].map((filter) => (
             <button
               key={filter}
               onClick={() => setTimeFilter(filter)}
-              className={`w-full sm:w-auto px-3 py-1 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
+              className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                 timeFilter === filter
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -267,79 +268,115 @@ const VentasLineChart = ({ userRole }) => {
       </div>
 
       {/* Gráfico */}
-      <div className="mb-4 sm:mb-6 min-w-[350px] sm:min-w-0" style={{height: '18rem', minHeight: '16rem'}}>
-        {chartData ? (
-          <Line 
-            data={chartData} 
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: { 
-                  display: true, 
-                  position: 'top',
-                  labels: {
-                    usePointStyle: true,
-                    padding: 20
-                  }
-                },
-                title: { display: false },
-                tooltip: {
-                  mode: 'index',
-                  intersect: false,
-                  callbacks: {
-                    label: function(context) {
-                      return `${context.dataset.label}: S/ ${context.parsed.y.toFixed(2)}`;
+      <div className="mb-4 sm:mb-6 w-full overflow-x-auto">
+        <div className="min-w-[350px] sm:min-w-0" style={{height: '16rem', minHeight: '14rem'}}>
+          {chartData ? (
+            <Line 
+              data={chartData} 
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { 
+                    display: true, 
+                    position: 'top',
+                    labels: {
+                      usePointStyle: true,
+                      padding: 15,
+                      boxWidth: 12,
+                      boxHeight: 12,
+                      font: {
+                        size: window.innerWidth < 640 ? 10 : 12
+                      }
+                    }
+                  },
+                  title: { display: false },
+                  tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    titleFont: {
+                      size: 12
+                    },
+                    bodyFont: {
+                      size: 11
+                    },
+                    callbacks: {
+                      label: function(context) {
+                        return `${context.dataset.label}: S/ ${context.parsed.y.toFixed(2)}`;
+                      }
                     }
                   }
+                },
+                scales: {
+                  y: { 
+                    beginAtZero: true, 
+                    title: { 
+                      display: true, 
+                      text: 'Monto (S/)',
+                      font: {
+                        size: window.innerWidth < 640 ? 10 : 12
+                      }
+                    },
+                    ticks: {
+                      font: {
+                        size: window.innerWidth < 640 ? 9 : 11
+                      },
+                      callback: function(value) {
+                        return 'S/ ' + value;
+                      }
+                    }
+                  },
+                  x: { 
+                    title: { 
+                      display: true, 
+                      text: 'Día del Mes',
+                      font: {
+                        size: window.innerWidth < 640 ? 10 : 12
+                      }
+                    },
+                    ticks: {
+                      font: {
+                        size: window.innerWidth < 640 ? 9 : 11
+                      }
+                    }
+                  },
+                },
+                interaction: {
+                  mode: 'nearest',
+                  axis: 'x',
+                  intersect: false
                 }
-              },
-              scales: {
-                y: { 
-                  beginAtZero: true, 
-                  title: { display: true, text: 'Monto (S/)' },
-                  ticks: {
-                    callback: function(value) {
-                      return 'S/ ' + value;
-                    }
-                  }
-                },
-                x: { 
-                  title: { display: true, text: 'Día del Mes' }
-                },
-              },
-              interaction: {
-                mode: 'nearest',
-                axis: 'x',
-                intersect: false
-              }
-            }} 
-            height={window.innerWidth < 640 ? 250 : 400}
-          />
-        ) : (
-          <div className="h-64 sm:h-96 flex items-center justify-center text-gray-500">
-            <p>No se pudo renderizar el gráfico</p>
-          </div>
-        )}
+              }} 
+            />
+          ) : (
+            <div className="h-64 sm:h-96 flex items-center justify-center text-gray-500">
+              <p>No se pudo renderizar el gráfico</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Resumen de totales */}
-      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
-        <div className="text-center">
-          <div className="text-lg sm:text-2xl font-bold text-green-600">S/ {totals.ventasBrutas.toFixed(2)}</div>
-          <div className="text-xs sm:text-sm text-gray-600">Ventas Brutas - {getTimeFilterLabel()}</div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+        <div className="text-center p-2 sm:p-3 bg-green-50 rounded-lg">
+          <div className="text-sm sm:text-2xl font-bold text-green-600">S/ {totals.ventasBrutas.toFixed(2)}</div>
+          <div className="text-xs sm:text-sm text-gray-600">Ventas Brutas</div>
+          <div className="text-xs text-gray-500 hidden sm:block">- {getTimeFilterLabel()}</div>
         </div>
-        <div className="text-center">
-          <div className="text-lg sm:text-2xl font-bold text-blue-600">S/ {totals.ventasNetas.toFixed(2)}</div>
-          <div className="text-xs sm:text-sm text-gray-600">Ventas Netas - {getTimeFilterLabel()}</div>
+        <div className="text-center p-2 sm:p-3 bg-blue-50 rounded-lg">
+          <div className="text-sm sm:text-2xl font-bold text-blue-600">S/ {totals.ventasNetas.toFixed(2)}</div>
+          <div className="text-xs sm:text-sm text-gray-600">Ventas Netas</div>
+          <div className="text-xs text-gray-500 hidden sm:block">- {getTimeFilterLabel()}</div>
         </div>
-        <div className="text-center">
-          <div className="text-lg sm:text-2xl font-bold text-red-600">S/ {totals.devoluciones.toFixed(2)}</div>
-          <div className="text-xs sm:text-sm text-gray-600">Devoluciones - {getTimeFilterLabel()}</div>
+        <div className="text-center p-2 sm:p-3 bg-red-50 rounded-lg">
+          <div className="text-sm sm:text-2xl font-bold text-red-600">S/ {totals.devoluciones.toFixed(2)}</div>
+          <div className="text-xs sm:text-sm text-gray-600">Devoluciones</div>
+          <div className="text-xs text-gray-500 hidden sm:block">- {getTimeFilterLabel()}</div>
         </div>
-        <div className="text-center">
-          <div className="text-lg sm:text-2xl font-bold text-purple-600">{totals.cantidadVendida} unidades</div>
-          <div className="text-xs sm:text-sm text-gray-600">Cantidad Vendida - {getTimeFilterLabel()}</div>
+        <div className="text-center p-2 sm:p-3 bg-purple-50 rounded-lg">
+          <div className="text-sm sm:text-2xl font-bold text-purple-600">{totals.cantidadVendida} unidades</div>
+          <div className="text-xs sm:text-sm text-gray-600">Cantidad Vendida</div>
+          <div className="text-xs text-gray-500 hidden sm:block">- {getTimeFilterLabel()}</div>
         </div>
       </div>
     </div>

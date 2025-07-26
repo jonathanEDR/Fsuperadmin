@@ -154,107 +154,73 @@ const ProductCard = ({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-4 shadow-sm hover:shadow-md transition-shadow">
       {/* Mostrar error si el producto no es válido */}
       {!productoSafe.isValid && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-          <div className="text-red-600 text-sm font-medium">
-            ⚠️ Error en producto: {productoSafe.error}
+        <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+          <div className="text-red-600 text-xs font-medium">
+            ⚠️ Error: {productoSafe.error}
           </div>
         </div>
       )}
       
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <h5 className="font-medium text-gray-900 mb-1">
+      <div className="flex flex-col space-y-2">
+        {/* Header compacto */}
+        <div>
+          <h5 className="font-medium text-gray-900 text-sm leading-tight">
             {productoSafe.nombre}
           </h5>
-          {/* Información de la categoría */}
+          {/* Categoría más compacta */}
           {productoSafe.categoria && productoSafe.categoria !== 'Sin categoría' && (
-            <div className="mb-2">
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                📂 {productoSafe.categoria}
-              </span>
-            </div>
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-1">
+              📂 {productoSafe.categoria}
+            </span>
           )}
-          <div className="text-sm text-gray-600 space-y-1">
-            <p>Cantidad: <span className="font-medium">{productoSafe.cantidad}</span></p>
-            <p>Precio unitario: <span className="font-medium">S/ {productoSafe.precio?.toFixed(2)}</span></p>
-            <p>Subtotal: <span className="font-medium text-blue-600">S/ {productoSafe.subtotal?.toFixed(2)}</span></p>
-            
-            {/* Mostrar historial de operaciones si existe */}
-            {producto.historial && producto.historial.length > 0 && (
-              <div className="mt-2 p-2 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-1 mb-1">
-                  <Calculator className="w-3 h-3 text-gray-500" />
-                  <span className="text-xs text-gray-500">Historial de cambios:</span>
-                </div>
-                <div className="text-xs text-gray-600 font-mono">
-                  {(() => {
-                    const historialOrdenado = [...producto.historial].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-                    
-                    if (historialOrdenado.length === 0) {
-                      return `${producto.cantidad}`;
-                    }
-                    
-                    // Obtener la cantidad inicial (primera entrada del historial)
-                    const cantidadInicial = historialOrdenado[0].cantidadAnterior || producto.cantidad;
-                    let formula = cantidadInicial.toString();
-                    
-                    // Agregar cada operación del historial
-                    historialOrdenado.forEach(entry => {
-                      const operacion = entry.operacion;
-                      if (operacion > 0) {
-                        formula += ` +${operacion}`;
-                      } else if (operacion < 0) {
-                        formula += ` ${operacion}`;
-                      }
-                    });
-                    
-                    // Agregar el resultado final
-                    formula += ` = ${producto.cantidad}`;
-                    
-                    return formula;
-                  })()}
-                </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {producto.historial.length} cambio{producto.historial.length !== 1 ? 's' : ''} realizado{producto.historial.length !== 1 ? 's' : ''}
-                </div>
-              </div>
-            )}
-            
-            {/* Información de stock */}
-            <div className="flex items-center gap-2 mt-2">
-              <span className="text-xs text-gray-500">Stock disponible:</span>
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStockColor(producto.productoId?.cantidadRestante || 0)}`}>
-                {getStockIcon(producto.productoId?.cantidadRestante || 0)} {producto.productoId?.cantidadRestante || 0}
-              </span>
-            </div>
-            
-            {/* Advertencia de stock bajo */}
-            {(producto.productoId?.cantidadRestante || 0) <= 5 && (
-              <div className="flex items-center gap-1 mt-1">
-                <span className="text-xs text-orange-600">⚠️</span>
-                <span className="text-xs text-orange-600">Stock bajo</span>
-              </div>
-            )}
+        </div>
+
+        {/* Información principal en formato compacto */}
+        <div className="text-xs text-gray-600 space-y-1">
+          <div className="flex justify-between">
+            <span>Cantidad:</span>
+            <span className="font-medium">{productoSafe.cantidad}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Precio:</span>
+            <span className="font-medium">S/ {productoSafe.precio?.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between border-t pt-1">
+            <span className="font-medium">Subtotal:</span>
+            <span className="font-medium text-blue-600">S/ {productoSafe.subtotal?.toFixed(2)}</span>
           </div>
         </div>
 
+        {/* Stock compacto */}
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-gray-500">Stock:</span>
+          <span className={`px-1.5 py-0.5 rounded-full text-xs font-medium ${getStockColor(producto.productoId?.cantidadRestante || 0)}`}>
+            {getStockIcon(producto.productoId?.cantidadRestante || 0)} {producto.productoId?.cantidadRestante || 0}
+          </span>
+        </div>
+
+        {/* Advertencia de stock bajo */}
+        {(producto.productoId?.cantidadRestante || 0) <= 5 && (
+          <div className="text-xs text-orange-600">⚠️ Stock bajo</div>
+        )}
+
         {canEdit && (
-          <div className="flex flex-col items-end gap-2">
+          <div className="space-y-2">
             {/* ✅ MOSTRAR CONTROLES SOLO SI NO HAY DEVOLUCIONES */}
             {!tieneDevolucion ? (
               <>
-                {/* Controles de cantidad */}
-                <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-1">
+                {/* Controles de cantidad más compactos */}
+                <div className="flex items-center gap-1 bg-gray-50 rounded-lg p-1">
                   <button
                     onClick={() => handleQuantityChange('decrease')}
                     disabled={isUpdating || producto.cantidad <= 1}
                     className="p-1 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Reducir cantidad"
                   >
-                    <Minus className="w-4 h-4" />
+                    <Minus className="w-3 h-3" />
                   </button>
                   
                   <input
@@ -263,7 +229,7 @@ const ProductCard = ({
                     onChange={(e) => setNewQuantity(e.target.value)}
                     onBlur={() => handleQuantityChange('set')}
                     onKeyPress={(e) => e.key === 'Enter' && handleQuantityChange('set')}
-                    className="w-16 text-center border-0 bg-transparent focus:ring-0 focus:outline-none"
+                    className="w-8 text-center text-xs border-0 bg-transparent focus:ring-0 focus:outline-none"
                     min="1"
                     max={producto.cantidad + (producto.productoId?.cantidadRestante || 0)}
                   />
@@ -282,44 +248,41 @@ const ProductCard = ({
                         : 'Aumentar cantidad'
                     }
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-3 h-3" />
                   </button>
                 </div>
                 
+                {/* Botón eliminar compacto */}
+                <button
+                  onClick={handleRemove}
+                  disabled={isUpdating}
+                  className="w-full text-xs text-red-600 hover:text-red-800 hover:bg-red-50 px-2 py-1 rounded transition-colors disabled:opacity-50"
+                  title="Eliminar producto"
+                >
+                  <Trash2 className="w-3 h-3 inline mr-1" />
+                  Eliminar
+                </button>
+                
                 {/* Advertencia de stock agotado */}
                 {(producto.productoId?.cantidadRestante || 0) <= 0 && (
-                  <div className="text-xs text-red-600 text-center">
+                  <div className="text-xs text-red-600 text-center bg-red-50 py-1 rounded">
                     Sin stock
                   </div>
                 )}
               </>
             ) : (
-              /* 🔒 MENSAJE CUANDO HAY DEVOLUCIONES */
-              <div className="flex flex-col items-center gap-2 bg-orange-50 border border-orange-200 rounded-lg p-3">
-                <div className="flex items-center gap-2 text-orange-700">
-                  <span className="text-lg">🔒</span>
-                  <span className="text-sm font-medium">Cantidad bloqueada</span>
+              /* 🔒 MENSAJE CUANDO HAY DEVOLUCIONES - más compacto */
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-2 text-center">
+                <div className="text-orange-700 text-xs">
+                  🔒 <span className="font-medium">Cantidad bloqueada</span>
                 </div>
-                <div className="text-xs text-orange-600 text-center">
-                  Este producto tiene devoluciones.<br/>
-                  No se puede modificar la cantidad.
+                <div className="text-xs text-orange-600 mt-1">
+                  Producto con devolución
                 </div>
-                <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded border">
-                  Cantidad fija: {producto.cantidad}
+                <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded border mt-1">
+                  Cantidad: {producto.cantidad}
                 </div>
               </div>
-            )}
-
-            {/* Botón eliminar - solo si NO hay devoluciones */}
-            {!tieneDevolucion && (
-              <button
-                onClick={handleRemove}
-                disabled={isUpdating}
-                className="p-1 text-red-600 hover:text-red-800 hover:bg-red-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Eliminar producto"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
             )}
           </div>
         )}
