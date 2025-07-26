@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { DollarSign, ShoppingCart, RotateCcw, Plus, Clock, Check, X, Search, Package, Grid3X3, TableProperties } from 'lucide-react';
+import { DollarSign, ShoppingCart, RotateCcw, Plus, Clock, Check, X, Search, Package, Grid3X3, TableProperties, List } from 'lucide-react';
 import { api } from '../../services';
 import { procesarPagoVenta } from '../../services/cobroService';
 import { PaymentModal } from '../cobros';
@@ -65,10 +65,11 @@ function VentaList({
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     date: '',
-    estadoPago: ''
+    estadoPago: '',
+    cliente: '' // Nuevo filtro para cliente
   });
   const [ventaDetails, setVentaDetails] = useState(null);
-  const [viewMode, setViewMode] = useState('cards'); // 'cards' o 'table'
+  const [viewMode, setViewMode] = useState('cards'); // 'cards', 'table', o 'lista'
   
   // Estados para el nuevo modal de agregar productos
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
@@ -753,8 +754,28 @@ function VentaList({
               <TableProperties size={16} />
               Tabla
             </button>
+            <button
+              onClick={() => setViewMode('lista')}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+                viewMode === 'lista'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              <List size={16} />
+              Por Cliente
+            </button>
           </div>
         </div>
+        
+        {viewMode === 'lista' && (
+          <div className="text-sm text-gray-600 bg-blue-50 px-3 py-2 rounded-lg">
+            <span className="flex items-center gap-1">
+              <Package size={14} />
+              Vista agrupada por cliente
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Mostrar mensajes de éxito/error */}
@@ -787,6 +808,11 @@ function VentaList({
         handleUpdateQuantity={handleUpdateQuantity}
         handleRemoveProduct={handleRemoveProduct}
         ventaModificationHook={ventaModificationHook}
+        searchTerm={searchTerm}
+        filters={filters}
+        setSearchTerm={setSearchTerm}
+        setFilters={setFilters}
+        usuarios={usuarios}
       />
 
       {ventasLimit < ventasToRender.length && (

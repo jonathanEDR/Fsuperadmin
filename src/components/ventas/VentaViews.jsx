@@ -1,6 +1,7 @@
-import React from 'react';
-import { DollarSign, RotateCcw, Clock, Plus, Check } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { DollarSign, RotateCcw, Clock, Plus, Check, ChevronDown, ChevronUp, User, Search, Filter, ShoppingCart } from 'lucide-react';
 import ProductCard from './ProductCard';
+import ClienteCard from './ClienteCard';
 import withProductoSafeGuard from '../../hoc/withProductoSafeGuard';
 
 const VentaViews = ({
@@ -19,8 +20,97 @@ const VentaViews = ({
   handleOpenAddProduct,
   handleUpdateQuantity,
   handleRemoveProduct,
-  ventaModificationHook
+  ventaModificationHook,
+  searchTerm = '',
+  filters = {},
+  setSearchTerm = () => {},
+  setFilters = () => {},
+  usuarios = [] // Lista de usuarios para filtrado
 }) => {
+
+  // Estados para la vista de lista por cliente
+  const [expandedClients, setExpandedClients] = useState({});
+  const [clientSearchTerm, setClientSearchTerm] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState(''); // Filtro por usuario
+
+  // Función para filtrar ventas según rol y usuario seleccionado
+  const ventasFiltradas = useMemo(() => {
+    let ventasFiltradas = ventasToRender;
+
+    // Aplicar filtro por usuario si es necesario
+    if (viewMode === 'lista' && ['super_admin', 'admin'].includes(userRole) && selectedUserId) {
+      ventasFiltradas = ventasFiltradas.filter(venta => 
+        venta.userId === selectedUserId || venta.creatorId === selectedUserId
+      );
+    }
+
+    return ventasFiltradas;
+  }, [ventasToRender, viewMode, userRole, selectedUserId]);
+
+  // Función para agrupar ventas por cliente
+  const ventasPorCliente = useMemo(() => {
+    if (viewMode !== 'lista') return {};
+    
+    const grupos = {};
+    
+    ventasFiltradas.forEach(venta => {
+      // Usar la misma lógica que en la tabla para obtener el cliente
+      let clienteKey = venta.user_info?.nombre_negocio || 'Sin Cliente';
+      let clienteEmail = venta.user_info?.email || '';
+      
+      // Si no hay cliente pero hay información del usuario, usar esa información
+      if (clienteKey === 'Sin Cliente' && venta.userInfo) {
+        clienteKey = venta.userInfo.nombre_negocio || venta.userInfo.email || 'Sin Cliente';
+        clienteEmail = venta.userInfo.email || '';
+      }
+      
+      // Como último recurso, usar información del creador
+      if (clienteKey === 'Sin Cliente' && venta.creatorInfo) {
+        clienteKey = venta.creatorInfo.nombre_negocio || venta.creatorInfo.email || 'Sin Cliente';
+        clienteEmail = venta.creatorInfo.email || '';
+      }
+      
+      if (!grupos[clienteKey]) {
+        grupos[clienteKey] = {
+          cliente: clienteKey,
+          email: clienteEmail,
+          ventas: [],
+          totalVentas: 0,
+          totalPagado: 0,
+          totalPendiente: 0,
+          cantidadVentas: 0
+        };
+      }
+      
+      grupos[clienteKey].ventas.push(venta);
+      grupos[clienteKey].totalVentas += venta.montoTotal || 0;
+      grupos[clienteKey].totalPagado += venta.cantidadPagada || 0;
+      grupos[clienteKey].totalPendiente += (venta.montoTotal || 0) - (venta.cantidadPagada || 0);
+      grupos[clienteKey].cantidadVentas += 1;
+    });
+    
+    // Filtrar por búsqueda de cliente si hay término de búsqueda
+    if (clientSearchTerm.trim()) {
+      const filteredGrupos = {};
+      Object.keys(grupos).forEach(clienteKey => {
+        if (clienteKey.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
+            grupos[clienteKey].email.toLowerCase().includes(clientSearchTerm.toLowerCase())) {
+          filteredGrupos[clienteKey] = grupos[clienteKey];
+        }
+      });
+      return filteredGrupos;
+    }
+    
+    return grupos;
+  }, [ventasFiltradas, viewMode, clientSearchTerm]);
+
+  // Función para alternar expansión de cliente
+  const toggleClientExpansion = (clienteKey) => {
+    setExpandedClients(prev => ({
+      ...prev,
+      [clienteKey]: !prev[clienteKey]
+    }));
+  };
 
   // Helper para determinar por qué no se puede eliminar una venta
   const getDeleteRestrictionReason = (venta) => {
@@ -669,9 +759,191 @@ const VentaViews = ({
     );
   };
 
+  // Función para renderizar la vista de lista por cliente
+  const renderListaView = () => {
+    const clientes = Object.values(ventasPorCliente);
+    
+    if (clientes.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <User className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-2 text-sm font-medium text-gray-900">No hay ventas</h3>
+          <p className="mt-1 text-sm text-gray-500">
+            {clientSearchTerm ? 'No se encontraron clientes con ese término de búsqueda.' : 'No hay ventas registradas para mostrar.'}
+          </p>
+        </div>
+      );
+    }
+
+    // Calcular estadísticas generales
+    const totalClientes = clientes.length;
+    const totalVentasGlobal = clientes.reduce((sum, cliente) => sum + cliente.cantidadVentas, 0);
+    const totalMontoGlobal = clientes.reduce((sum, cliente) => sum + cliente.totalVentas, 0);
+    const totalPendienteGlobal = clientes.reduce((sum, cliente) => sum + cliente.totalPendiente, 0);
+
+    return (
+      <div className="space-y-6">
+        {/* Información del usuario seleccionado */}
+        {['super_admin', 'admin'].includes(userRole) && selectedUserId && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            {(() => {
+              const usuarioSeleccionado = usuarios.find(u => u.id === selectedUserId);
+              return usuarioSeleccionado ? (
+                <div className="flex items-center gap-3">
+                  <User className="text-blue-600" size={20} />
+                  <div>
+                    <h3 className="font-semibold text-blue-900">
+                      Viendo ventas de: {usuarioSeleccionado.name}
+                    </h3>
+                    <p className="text-sm text-blue-700">
+                      {usuarioSeleccionado.email} - {usuarioSeleccionado.role}
+                    </p>
+                  </div>
+                </div>
+              ) : null;
+            })()}
+          </div>
+        )}
+
+        {/* Información cuando no hay filtro aplicado */}
+        {['super_admin', 'admin'].includes(userRole) && !selectedUserId && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="flex items-center gap-3">
+              <Filter className="text-yellow-600" size={20} />
+              <div>
+                <h3 className="font-semibold text-yellow-900">
+                  Mostrando ventas de todos los usuarios
+                </h3>
+                <p className="text-sm text-yellow-700">
+                  Selecciona un usuario específico para filtrar las ventas
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Dashboard de estadísticas */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <div className="flex items-center gap-2">
+              <User className="text-blue-600" size={20} />
+              <div>
+                <div className="text-2xl font-bold text-blue-900">{totalClientes}</div>
+                <div className="text-sm text-blue-600">Cliente(s)</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+            <div className="flex items-center gap-2">
+              <ShoppingCart className="text-green-600" size={20} />
+              <div>
+                <div className="text-2xl font-bold text-green-900">{totalVentasGlobal}</div>
+                <div className="text-sm text-green-600">Venta(s)</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+            <div className="flex items-center gap-2">
+              <DollarSign className="text-purple-600" size={20} />
+              <div>
+                <div className="text-2xl font-bold text-purple-900">S/ {totalMontoGlobal.toFixed(2)}</div>
+                <div className="text-sm text-purple-600">Total Ventas</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+            <div className="flex items-center gap-2">
+              <Clock className="text-red-600" size={20} />
+              <div>
+                <div className="text-2xl font-bold text-red-900">S/ {totalPendienteGlobal.toFixed(2)}</div>
+                <div className="text-sm text-red-600">Pendiente</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filtros para la vista de cliente */}
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+          <div className="flex flex-col gap-4">
+            {/* Primera fila: Selector de usuario (solo para admin y super_admin) */}
+            {['super_admin', 'admin'].includes(userRole) && (
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Filtrar por usuario:
+                  </label>
+                  <select
+                    value={selectedUserId}
+                    onChange={(e) => setSelectedUserId(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Todos los usuarios</option>
+                    {usuarios.map(usuario => (
+                      <option key={usuario.id} value={usuario.id}>
+                        {usuario.name} ({usuario.email}) - {usuario.role}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {selectedUserId && (
+                  <div className="flex items-end">
+                    <button
+                      onClick={() => setSelectedUserId('')}
+                      className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                    >
+                      Limpiar
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Segunda fila: Búsqueda de cliente */}
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
+              <div className="flex-1 w-full">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                  <input
+                    type="text"
+                    placeholder="Buscar cliente por nombre o email..."
+                    value={clientSearchTerm}
+                    onChange={(e) => setClientSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <User size={16} />
+                <span>{clientes.length} cliente(s) mostrado(s)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Lista de clientes */}
+        {clientes
+          .sort((a, b) => b.totalVentas - a.totalVentas) // Ordenar por total de ventas descendente
+          .map((clienteData) => (
+            <ClienteCard
+              key={clienteData.cliente}
+              clienteData={clienteData}
+              isExpanded={expandedClients[clienteData.cliente]}
+              onToggleExpansion={() => toggleClientExpansion(clienteData.cliente)}
+              formatearFechaHora={formatearFechaHora}
+            />
+          ))}
+      </div>
+    );
+  };
+
   // Renderizado condicional basado en viewMode
   if (viewMode === 'table') {
     return renderTableView();
+  } else if (viewMode === 'lista') {
+    return renderListaView();
   } else {
     return renderCardsView();
   }
