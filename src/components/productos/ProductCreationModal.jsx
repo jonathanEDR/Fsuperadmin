@@ -17,6 +17,8 @@ const ProductCreationModal = ({
   const [error, setError] = useState('');
   const [categories, setCategories] = useState([]);
   const [catalogoProductos, setCatalogoProductos] = useState([]);
+  const [selectedCatalogo, setSelectedCatalogo] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [formData, setFormData] = useState({
     precio: '',
     cantidad: '',
@@ -25,69 +27,122 @@ const ProductCreationModal = ({
   });
 
   useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const data = await categoryService.getAllCategories();
-        setCategories(data);
-      } catch (err) {
-        setError('Error al cargar las categorías');
-      }
-    };
-
-    const loadCatalogo = async () => {
-      try {
-        const productos = await api.get('/api/catalogo');
-        setCatalogoProductos(productos.data);
-      } catch (err) {
-        setError('Error al cargar el catálogo');
-      }
-    };
-
-    if (isOpen) {
-      loadCategories();
-      loadCatalogo();
-      if (initialData) {
+    const loadInitialData = async () => {
+      if (!isOpen) {
+        // Limpiar estado al cerrar
+        setError('');
         setFormData({
-          precio: initialData.precio || '',
-          cantidad: initialData.cantidad || '',
-          categoryId: initialData.categoryId || '',
-          catalogoProductoId: initialData.catalogoProductoId || ''
+          precio: '',
+          cantidad: '',
+          categoryId: '',
+          catalogoProductoId: ''
         });
+        setSelectedCatalogo(null);
+        setSelectedCategory(null);
+        return;
       }
-    } else {
-      setError('');
-      setFormData({
-        precio: '',
-        cantidad: '',
-        categoryId: '',
-        catalogoProductoId: ''
-      });
-    }
-  }, [isOpen, initialData]);
+
+      try {
+        // Cargar categorías y catálogo en paralelo
+        const [categoriesData, catalogoData] = await Promise.all([
+          categoryService.getAllCategories(),
+          api.get('/api/catalogo')
+        ]);
+
+        setCategories(categoriesData);
+        setCatalogoProductos(catalogoData.data);
+
+        // Si estamos editando, cargar los datos iniciales
+        if (isEditing && initialData) {
+          console.log('[ProductCreationModal] Cargando datos para edición:', initialData);
+          
+          // Buscar la categoría completa
+          const categoria = categoriesData.find(cat => cat._id === initialData.categoryId);
+          setSelectedCategory(categoria);
+
+          // Buscar el producto del catálogo completo
+          const catalogoProducto = catalogoData.data.find(prod => prod._id === initialData.catalogoProductoId);
+          setSelectedCatalogo(catalogoProducto);
+
+          setFormData({
+            precio: initialData.precio?.toString() || '',
+            cantidad: initialData.cantidad?.toString() || '',
+            categoryId: initialData.categoryId || '',
+            catalogoProductoId: initialData.catalogoProductoId || ''
+          });
+        }
+      } catch (err) {
+        console.error('[ProductCreationModal] Error al cargar datos:', err);
+        setError('Error al cargar los datos necesarios');
+      }
+    };
+
+    loadInitialData();
+  }, [isOpen, initialData, isEditing]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError('');
 
-    // Validación extra: categoría seleccionada
-    if (!formData.categoryId) {
-      setError('Debes seleccionar una categoría');
-      setIsSubmitting(false);
-      return;
+    // Validaciones específicas según el modo
+    if (isEditing) {
+      // En modo edición, solo validar precio
+      if (!formData.precio || parseFloat(formData.precio) <= 0) {
+        setError('El precio debe ser mayor a 0');
+        setIsSubmitting(false);
+        return;
+      }
+    } else {
+      // En modo creación, validar todos los campos
+      if (!formData.categoryId) {
+        setError('Debes seleccionar una categoría');
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!formData.catalogoProductoId) {
+        setError('Debes seleccionar un producto del catálogo');
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!formData.precio || parseFloat(formData.precio) <= 0) {
+        setError('El precio debe ser mayor a 0');
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!formData.cantidad || parseInt(formData.cantidad) < 0) {
+        setError('La cantidad debe ser mayor o igual a 0');
+        setIsSubmitting(false);
+        return;
+      }
     }
 
     try {
-      const data = {
-        precio: parseFloat(formData.precio),
-        cantidad: parseInt(formData.cantidad),
-        categoryId: formData.categoryId,
-        catalogoProductoId: formData.catalogoProductoId,
-        creatorName: user?.fullName || user?.username || user?.primaryEmailAddress?.emailAddress.split('@')[0],
-        creatorEmail: user?.primaryEmailAddress?.emailAddress
-      };
+      let data;
+      
+      if (isEditing) {
+        // En modo edición, solo enviar precio
+        data = {
+          precio: parseFloat(formData.precio)
+        };
+      } else {
+        // En modo creación, enviar todos los datos
+        data = {
+          precio: parseFloat(formData.precio),
+          cantidad: parseInt(formData.cantidad),
+          categoryId: formData.categoryId,
+          catalogoProductoId: formData.catalogoProductoId,
+          creatorName: user?.fullName || user?.username || user?.primaryEmailAddress?.emailAddress.split('@')[0],
+          creatorEmail: user?.primaryEmailAddress?.emailAddress
+        };
+      }
 
       console.log('[ProductCreationModal] Datos enviados al backend:', data);
+      console.log('[ProductCreationModal] Modo edición:', isEditing);
+      console.log('[ProductCreationModal] ID del producto:', initialData?._id);
 
       let response;
       if (isEditing && initialData?._id) {
@@ -133,6 +188,17 @@ const ProductCreationModal = ({
       ...prev,
       [name]: value
     }));
+
+    // Actualizar los objetos seleccionados para mostrar información adicional
+    if (name === 'categoryId') {
+      const categoria = categories.find(cat => cat._id === value);
+      setSelectedCategory(categoria);
+    }
+
+    if (name === 'catalogoProductoId') {
+      const catalogoProducto = catalogoProductos.find(prod => prod._id === value);
+      setSelectedCatalogo(catalogoProducto);
+    }
   };
 
   if (!isOpen) return null;
@@ -157,51 +223,84 @@ const ProductCreationModal = ({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Información del producto en modo edición */}
+          {isEditing && initialData && (
+            <div className="bg-gray-50 p-4 rounded-lg mb-4">
+              <h3 className="font-semibold text-gray-700 mb-2">Información del Producto</h3>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <span className="font-medium">Nombre:</span> {initialData.nombre}
+                </div>
+                <div>
+                  <span className="font-medium">Código:</span> {initialData.codigoProducto}
+                </div>
+                <div>
+                  <span className="font-medium">Categoría:</span> {selectedCategory?.nombre || 'Cargando...'}
+                </div>
+                <div>
+                  <span className="font-medium">Cantidad Actual:</span> {initialData.cantidad}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Categoría - Solo mostrar en modo creación */}
+          {!isEditing && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Categoría *
+              </label>
+              <select
+                name="categoryId"
+                value={formData.categoryId}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                required
+              >
+                <option value="">Selecciona una categoría</option>
+                {categories.map(category => (
+                  <option key={category._id} value={category._id}>
+                    {category.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Producto del Catálogo - Solo mostrar en modo creación */}
+          {!isEditing && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Producto del Catálogo *
+              </label>
+              <select
+                name="catalogoProductoId"
+                value={formData.catalogoProductoId}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                required
+              >
+                <option value="">Selecciona un producto</option>
+                {catalogoProductos.map(producto => (
+                  <option key={producto._id} value={producto._id}>
+                    {producto.codigoproducto || producto.codigoProducto} - {producto.nombre}
+                  </option>
+                ))}
+              </select>
+              {selectedCatalogo && (
+                <div className="mt-2 p-2 bg-blue-50 rounded text-sm text-blue-700">
+                  <strong>Producto seleccionado:</strong> {selectedCatalogo.nombre}
+                  <br />
+                  <strong>Código:</strong> {selectedCatalogo.codigoproducto || selectedCatalogo.codigoProducto}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Precio - Siempre editable */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Categoría
-            </label>
-            <select
-              name="categoryId"
-              value={formData.categoryId}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              required
-            >
-              <option value="">Selecciona una categoría</option>
-              {categories.map(category => (
-                <option key={category._id} value={category._id}>
-                  {category.nombre}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Producto del Catálogo
-            </label>
-            <select
-              name="catalogoProductoId"
-              value={formData.catalogoProductoId}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              required
-            >
-              <option value="">Selecciona un producto</option>
-              {catalogoProductos.map(producto => (
-                <option key={producto._id} value={producto._id}>
-                  {producto.codigoproducto} - {producto.nombre}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* El campo de nombre se elimina porque se selecciona desde el catálogo */}
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Precio
+              Precio * {isEditing && <span className="text-blue-600">(Editable)</span>}
             </label>
             <input
               type="number"
@@ -212,30 +311,35 @@ const ProductCreationModal = ({
               min="0"
               step="0.01"
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Ingresa el precio del producto"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Cantidad
-            </label>
-            <input
-              type="number"
-              name="cantidad"
-              value={formData.cantidad}
-              onChange={handleChange}
-              required
-              min="0"
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
+          {/* Cantidad - Solo en modo creación */}
+          {!isEditing && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Cantidad *
+              </label>
+              <input
+                type="number"
+                name="cantidad"
+                value={formData.cantidad}
+                onChange={handleChange}
+                required
+                min="0"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Ingresa la cantidad inicial"
+              />
+            </div>
+          )}
 
           <button
             type="submit"
             disabled={isSubmitting}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-300"
           >
-            {isSubmitting ? 'Procesando...' : (isEditing ? 'Guardar Cambios' : 'Crear Producto')}
+            {isSubmitting ? 'Procesando...' : (isEditing ? 'Actualizar Precio' : 'Crear Producto')}
           </button>
         </form>
       </div>
@@ -245,5 +349,14 @@ const ProductCreationModal = ({
 
 export default ProductCreationModal;
 
-// Asegúrate de que este archivo esté guardado como ProductCreationModal.jsx
-// y que esté en la misma carpeta que ProductoList.jsx
+/* 
+ * Modal mejorado para creación y edición de productos
+ * 
+ * Características:
+ * - En modo creación: permite seleccionar categoría, producto del catálogo, precio y cantidad
+ * - En modo edición: solo permite editar el precio, muestra información del producto
+ * - Carga automáticamente datos al abrir el modal
+ * - Validaciones específicas según el modo
+ * - Manejo mejorado de errores
+ * - Interfaz más clara y user-friendly
+ */
