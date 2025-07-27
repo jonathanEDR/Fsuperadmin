@@ -562,19 +562,6 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header con icono y botón */}
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex items-center gap-3">
-          {/* Botón para registrar entrada/lote de inventario */}
-          {isAdminUser && (
-            <button
-              onClick={() => setIsInventarioModalOpen(true)}
-              className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors flex items-center gap-2"
-            >
-              <Plus size={20} />
-              Registrar Entrada/Lote
-            </button>
-          )}
       {/* Modal para registrar entrada/lote de inventario */}
       <InventarioModal
         isOpen={isInventarioModalOpen}
@@ -586,41 +573,70 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
         catalogoProductos={catalogoProductos}
         handleInventarioSubmit={handleInventarioSubmit}
       />
-          <div className="p-3 bg-blue-100 rounded-lg">
-            <Package className="text-blue-600" size={24} />
+      
+      {/* 🎯 OPTIMIZADO: Header mejorado con contador integrado y botones reorganizados */}
+      <div className="mb-8">
+        {/* Título principal con contador de productos */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <Package className="text-blue-600" size={24} />
+            </div>
+            <div>
+              <div className="flex items-center gap-3">
+                <h3 className="text-xl font-bold text-gray-800">Gestión de Productos</h3>
+                <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+                  {productosFiltrados.length} de {productos.length} productos
+                </span>
+              </div>
+              <p className="text-sm text-gray-600 mt-1">
+                Administra los productos de tu organización
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-xl font-bold text-gray-800">Gestión de Productos</h3>
-            <p className="text-sm text-gray-600">
-              Administra los productos de tu organización
-            </p>
-          </div>
+          
+      
         </div>
-        <div className="flex items-center gap-3">
-          {/* Botón para ver/gestionar catálogo */}
+
+        {/* Botones de acción reorganizados debajo del título */}
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={() => setIsCatalogoModalOpen(true)}
-            className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors flex items-center gap-2"
+            className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors flex items-center gap-2 shadow-sm"
           >
-            <Plus size={20} />
-            Ver / Agregar Catálogo
+            <Plus size={18} />
+            <span className="hidden sm:inline">Ver / Agregar Catálogo</span>
+            <span className="sm:hidden">Catálogo</span>
           </button>
-          {/* Botón para ver/gestionar categorías */}
+          
           <button
             onClick={() => setIsCategoryModalOpen(true)}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 shadow-sm"
           >
-            <Plus size={20} />
-            Ver / Agregar Categorías
+            <Plus size={18} />
+            <span className="hidden sm:inline">Ver / Agregar Categorías</span>
+            <span className="sm:hidden">Categorías</span>
           </button>
         
           <button
             onClick={() => setIsModalOpen(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
           >
-            <Plus size={20} />
-            Agregar Producto
+            <Plus size={18} />
+            <span className="hidden sm:inline">Agregar Producto</span>
+            <span className="sm:hidden">Producto</span>
           </button>
+              {/* Botón registrar entrada (solo para admin) */}
+          {isAdminUser && (
+            <button
+              onClick={() => setIsInventarioModalOpen(true)}
+              className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors flex items-center gap-2 shadow-sm"
+            >
+              <Plus size={20} />
+              <span className="hidden sm:inline">Registrar Entrada/Lote</span>
+              <span className="sm:hidden">Entrada</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -685,31 +701,32 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
         </div>
       )}
 
-      {/* Sección de filtros */}
-      <div className="bg-orange-100 p-4 rounded-lg mb-6 border border-orange-200">
-        <h3 className="text-center text-lg font-semibold text-orange-800 mb-4">
+      {/* 🎯 OPTIMIZADO: Filtros súper compactos - solo esenciales */}
+      <div className="bg-orange-100 p-3 rounded-lg mb-6 border border-orange-200">
+        <h3 className="text-center text-base font-semibold text-orange-800 mb-3">
           Selecciona tus productos favoritos para crear una venta
         </h3>
         
-        <div className="flex flex-col lg:flex-row gap-4 items-center justify-center">
+        {/* Grid responsivo para filtros - máximo 2 filas, solo elementos esenciales */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-3">
           {/* Campo de búsqueda */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
             <input
               type="text"
               placeholder="Buscar productos"
               value={filtros.busqueda}
               onChange={(e) => handleFiltroChange('busqueda', e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
             />
           </div>
 
           {/* Filtro por categoría */}
-          <div className="flex-1 max-w-xs">
+          <div>
             <select
               value={filtros.categoria}
               onChange={(e) => handleFiltroChange('categoria', e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white text-sm"
             >
               <option value="">Todas las categorías</option>
               {categorias.map(categoria => (
@@ -720,46 +737,18 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
             </select>
           </div>
 
-          {/* Filtro por stock */}
-          <div className="flex-1 max-w-xs">
+          {/* Filtro por stock - sin checkbox ni botón limpiar */}
+          <div>
             <select
               value={filtros.stock}
               onChange={(e) => handleFiltroChange('stock', e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white text-sm"
             >
               <option value="todos">Todos los productos</option>
               <option value="conStock">Solo con stock</option>
               <option value="sinStock">Sin stock</option>
             </select>
           </div>
-
-          {/* Checkbox para solo con stock */}
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="soloConStock"
-              checked={filtros.stock === 'conStock'}
-              onChange={(e) => handleFiltroChange('stock', e.target.checked ? 'conStock' : 'todos')}
-              className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
-            />
-            <label htmlFor="soloConStock" className="text-sm font-medium text-gray-700">
-              Solo con stock
-            </label>
-          </div>
-
-          {/* Botón limpiar */}
-          <button
-            onClick={limpiarFiltros}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-          >
-            <X size={16} />
-            Limpiar
-          </button>
-        </div>
-
-        {/* Mostrar cantidad de productos filtrados */}
-        <div className="mt-3 text-center text-sm text-gray-600">
-          Mostrando {productosFiltrados.length} de {productos.length} productos
         </div>
       </div>
 
@@ -824,20 +813,20 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
                     {isSuperAdmin && (
                       <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                         {canEditDelete(producto) && (
-                          <div className="flex justify-end gap-2">
+                          <div className="flex justify-end gap-1">
                             <button
                               onClick={() => handleEditProducto(producto)}
-                              className="inline-flex items-center px-3 py-1 rounded-md text-sm bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200"
+                              className="inline-flex items-center p-2 rounded-md text-sm bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200"
                               title="Editar producto"
                             >
-                              <Edit2 className="w-4 h-4 mr-1" />
+                              <Edit2 className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleDeleteProducto(producto._id)}
-                              className="inline-flex items-center px-3 py-1 rounded-md text-sm bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200"
+                              className="inline-flex items-center p-2 rounded-md text-sm bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200"
                               title="Eliminar producto"
                             >
-                              <Trash2 className="w-4 h-4 mr-1" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         )}
@@ -847,40 +836,73 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
                 ))}
               </tbody>
             </table>
-            {/* Mobile Cards */}
-            <div className="sm:hidden flex flex-col gap-4 p-2">
+            {/* 🎯 OPTIMIZADO: Cards móviles compactas - 1 fila por producto */}
+            <div className="sm:hidden flex flex-col gap-2 p-2">
               {productosAmostrar.map((producto) => (
-                <div key={producto._id} className="bg-white rounded-lg shadow p-4 flex flex-col gap-2 border border-gray-100">
-                  <div className="flex items-center justify-between">
-                    <div className="font-semibold text-gray-900 text-base">{producto.nombre}</div>
-                    {producto.creatorInfo?.role === 'super_admin' && (
-                      <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Super Admin</span>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap gap-2 text-sm text-gray-600">
-                    <span>Cantidad: <span className="font-medium text-gray-800">{producto.cantidad || 0}</span></span>
-                    <span>Disponible: <span className="font-medium text-gray-800">{producto.cantidadRestante || 0}</span></span>
-                    <span>Precio: <span className="font-medium text-gray-800">S/ {parseFloat(producto.precio).toFixed(2)}</span></span>
-                    <span>Categoría: <span className="font-medium text-gray-800">{producto.categoryId?.nombre || 'Sin categoría'}</span></span>
-                  </div>
-                  {isSuperAdmin && canEditDelete(producto) && (
-                    <div className="flex gap-2 mt-2">
-                      <button
-                        onClick={() => handleEditProducto(producto)}
-                        className="flex-1 inline-flex items-center justify-center px-3 py-2 rounded-md text-sm bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200"
-                        title="Editar producto"
-                      >
-                        <Edit2 className="w-4 h-4 mr-1" />Editar
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProducto(producto._id)}
-                        className="flex-1 inline-flex items-center justify-center px-3 py-2 rounded-md text-sm bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200"
-                        title="Eliminar producto"
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" />Eliminar
-                      </button>
+                <div key={producto._id} className="bg-white rounded-lg shadow-sm p-3 border border-gray-100">
+                  {/* Fila principal con toda la información */}
+                  <div className="flex items-center justify-between gap-2">
+                    {/* Nombre del producto y badge */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-gray-900 text-sm truncate">
+                          {producto.nombre}
+                        </span>
+                        {producto.creatorInfo?.role === 'super_admin' && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 flex-shrink-0">
+                            SA
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  )}
+
+                    {/* Información compacta en línea */}
+                    <div className="flex items-center gap-3 text-xs text-gray-600 flex-shrink-0">
+                      {/* Stock */}
+                      <span className="flex items-center gap-1">
+                        <span className="font-medium">{producto.cantidadRestante || 0}</span>
+                        <span className="text-gray-400">u</span>
+                      </span>
+                      
+                      {/* Precio */}
+                      <span className="flex items-center gap-1">
+                        <span className="font-medium text-green-600">S/ {parseFloat(producto.precio).toFixed(2)}</span>
+                      </span>
+                      
+                      {/* Categoría */}
+                      <span className="hidden xs:flex items-center gap-1 max-w-20 truncate">
+                        <span className="font-medium">{producto.categoryId?.nombre || 'Sin cat.'}</span>
+                      </span>
+
+                      {/* Botones de acción - solo iconos */}
+                      {isSuperAdmin && canEditDelete(producto) && (
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => handleEditProducto(producto)}
+                            className="p-1.5 rounded-md bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+                            title="Editar producto"
+                          >
+                            <Edit2 className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteProducto(producto._id)}
+                            className="p-1.5 rounded-md bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+                            title="Eliminar producto"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Información adicional solo visible en pantallas muy pequeñas */}
+                  <div className="xs:hidden mt-2 pt-2 border-t border-gray-100">
+                    <div className="text-xs text-gray-500">
+                      <span>Cat: {producto.categoryId?.nombre || 'Sin categoría'}</span>
+                      <span className="ml-3">Total: {producto.cantidad || 0}</span>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>

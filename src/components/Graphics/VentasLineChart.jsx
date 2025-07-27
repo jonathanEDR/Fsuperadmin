@@ -357,25 +357,25 @@ const VentasLineChart = ({ userRole }) => {
       </div>
 
       {/* Resumen de totales */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
-        <div className="text-center p-2 sm:p-3 bg-green-50 rounded-lg">
-          <div className="text-sm sm:text-2xl font-bold text-green-600">S/ {totals.ventasBrutas.toFixed(2)}</div>
-          <div className="text-xs sm:text-sm text-gray-600">Ventas Brutas</div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="text-center">
+          <div className="text-2xl font-bold text-green-600">S/ {totals.ventasBrutas.toFixed(2)}</div>
+          <div className="text-sm text-gray-600">Ventas Brutas</div>
           <div className="text-xs text-gray-500 hidden sm:block">- {getTimeFilterLabel()}</div>
         </div>
-        <div className="text-center p-2 sm:p-3 bg-blue-50 rounded-lg">
-          <div className="text-sm sm:text-2xl font-bold text-blue-600">S/ {totals.ventasNetas.toFixed(2)}</div>
-          <div className="text-xs sm:text-sm text-gray-600">Ventas Netas</div>
+        <div className="text-center">
+          <div className="text-2xl font-bold text-blue-600">S/ {totals.ventasNetas.toFixed(2)}</div>
+          <div className="text-sm text-gray-600">Ventas Netas</div>
           <div className="text-xs text-gray-500 hidden sm:block">- {getTimeFilterLabel()}</div>
         </div>
-        <div className="text-center p-2 sm:p-3 bg-red-50 rounded-lg">
-          <div className="text-sm sm:text-2xl font-bold text-red-600">S/ {totals.devoluciones.toFixed(2)}</div>
-          <div className="text-xs sm:text-sm text-gray-600">Devoluciones</div>
+        <div className="text-center">
+          <div className="text-2xl font-bold text-red-600">S/ {totals.devoluciones.toFixed(2)}</div>
+          <div className="text-sm text-gray-600">Devoluciones</div>
           <div className="text-xs text-gray-500 hidden sm:block">- {getTimeFilterLabel()}</div>
         </div>
-        <div className="text-center p-2 sm:p-3 bg-purple-50 rounded-lg">
-          <div className="text-sm sm:text-2xl font-bold text-purple-600">{totals.cantidadVendida} unidades</div>
-          <div className="text-xs sm:text-sm text-gray-600">Cantidad Vendida</div>
+        <div className="text-center">
+          <div className="text-2xl font-bold text-purple-600">{totals.cantidadVendida} unidades</div>
+          <div className="text-sm text-gray-600">Cantidad Vendida</div>
           <div className="text-xs text-gray-500 hidden sm:block">- {getTimeFilterLabel()}</div>
         </div>
       </div>

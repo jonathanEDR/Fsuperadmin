@@ -8,6 +8,9 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        'xs': '375px',
+      },
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },

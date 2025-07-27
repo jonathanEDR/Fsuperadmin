@@ -134,72 +134,102 @@ const InventarioHistorial = ({ historialEntradas, onRefresh, onEdit, onDelete, l
           )}
         </div>
 
-        {/* Filtros */}
-        <div className="bg-white p-4 rounded-lg shadow mb-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+        {/* 🎯 FILTROS OPTIMIZADOS: Compactos para móviles, completos para desktop */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-3 sm:p-4 lg:p-6 rounded-lg sm:rounded-xl shadow-sm sm:shadow-lg mb-4 sm:mb-6">
+          {/* Título - Solo en desktop */}
+          <div className="hidden sm:flex items-center gap-2 mb-4">
+            <Filter className="h-5 w-5 text-blue-600" />
+            <h3 className="text-base sm:text-lg font-semibold text-blue-900">Filtros de Búsqueda</h3>
+          </div>
+          
+          {/* Grid de filtros - Compacto en móviles */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+            {/* Búsqueda */}
+            <div className="col-span-2 sm:col-span-1">
+              <label className="block text-xs sm:text-sm font-medium sm:font-semibold text-gray-700 sm:text-blue-800 mb-1 sm:mb-2">
                 Buscar
               </label>
               <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-gray-400 sm:text-blue-500" />
                 <input
                   type="text"
-                  placeholder="Producto, lote, usuario..."
+                  placeholder="Producto, lote..."
                   value={filtros.busqueda}
                   onChange={(e) => setFiltros(prev => ({ ...prev, busqueda: e.target.value }))}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-7 sm:pl-10 pr-2 sm:pr-3 py-2 sm:py-3 border border-gray-300 sm:border-2 sm:border-blue-200 rounded-md sm:rounded-lg focus:ring-1 sm:focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm bg-white shadow-sm hover:border-blue-300 transition-all"
                 />
               </div>
             </div>
+            
+            {/* Estado */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-xs sm:text-sm font-medium sm:font-semibold text-gray-700 sm:text-blue-800 mb-1 sm:mb-2">
                 Estado
               </label>
               <select
                 value={filtros.estado}
                 onChange={(e) => setFiltros(prev => ({ ...prev, estado: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-2 sm:px-3 py-2 sm:py-3 border border-gray-300 sm:border-2 sm:border-blue-200 rounded-md sm:rounded-lg focus:ring-1 sm:focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm bg-white shadow-sm hover:border-blue-300 transition-all"
               >
                 <option value="">Todos</option>
-                <option value="activo">Activo</option>
-                <option value="agotado">Agotado</option>
-                <option value="inactivo">Inactivo</option>
+                <option value="activo">✅ Activo</option>
+                <option value="agotado">🔴 Agotado</option>
+                <option value="inactivo">⏸️ Inactivo</option>
               </select>
             </div>
+            
+            {/* Fecha Desde */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Desde
+              <label className="block text-xs sm:text-sm font-medium sm:font-semibold text-gray-700 sm:text-blue-800 mb-1 sm:mb-2">
+                <span className="sm:hidden">Desde</span>
+                <span className="hidden sm:inline">📅 Desde</span>
               </label>
               <input
                 type="date"
                 value={filtros.fechaDesde}
                 onChange={(e) => setFiltros(prev => ({ ...prev, fechaDesde: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-2 sm:px-3 py-2 sm:py-3 border border-gray-300 sm:border-2 sm:border-blue-200 rounded-md sm:rounded-lg focus:ring-1 sm:focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm bg-white shadow-sm hover:border-blue-300 transition-all"
               />
             </div>
+            
+            {/* Fecha Hasta */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Hasta
+              <label className="block text-xs sm:text-sm font-medium sm:font-semibold text-gray-700 sm:text-blue-800 mb-1 sm:mb-2">
+                <span className="sm:hidden">Hasta</span>
+                <span className="hidden sm:inline">📅 Hasta</span>
               </label>
               <input
                 type="date"
                 value={filtros.fechaHasta}
                 onChange={(e) => setFiltros(prev => ({ ...prev, fechaHasta: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-2 sm:px-3 py-2 sm:py-3 border border-gray-300 sm:border-2 sm:border-blue-200 rounded-md sm:rounded-lg focus:ring-1 sm:focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm bg-white shadow-sm hover:border-blue-300 transition-all"
               />
             </div>
           </div>
-          <div className="flex justify-between items-center mt-4">
-            <p className="text-sm text-gray-600">
-              Mostrando {entradasFiltradas.length} de {historialEntradas.length} entradas
-            </p>
+          
+          {/* Línea de información y acciones - Solo en desktop */}
+          <div className="hidden sm:flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 pt-4 border-t border-blue-200 gap-3 sm:gap-0">
+            <div className="flex items-center gap-2">
+              <div className="bg-blue-100 px-3 py-2 rounded-lg">
+                <p className="text-sm font-medium text-blue-800">
+                  📊 Mostrando <span className="font-bold text-blue-900">{entradasFiltradas.length}</span> de <span className="font-bold text-blue-900">{historialEntradas.length}</span> entradas
+                </p>
+              </div>
+            </div>
             <button
               onClick={limpiarFiltros}
-              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+              className="bg-white border-2 border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400 font-semibold flex items-center gap-2 px-4 py-2 rounded-lg shadow-sm transition-all hover:shadow-md"
             >
-              Limpiar filtros
+              <X size={16} />
+              🗑️ Limpiar filtros
             </button>
+          </div>
+          
+          {/* Contador compacto para móviles */}
+          <div className="sm:hidden mt-2 pt-2 border-t border-blue-200">
+            <p className="text-xs text-blue-700 text-center">
+              📊 {entradasFiltradas.length} de {historialEntradas.length} entradas
+            </p>
           </div>
         </div>
       </div>
