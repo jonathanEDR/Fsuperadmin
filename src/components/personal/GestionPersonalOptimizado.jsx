@@ -25,6 +25,7 @@ function GestionPersonal() {
   const [registrosMostrados, setRegistrosMostrados] = useState(10); // Inicialmente mostrar 10
   const [pagosRealizados, setPagosRealizados] = useState([]);
   const [estadisticasMejoradas, setEstadisticasMejoradas] = useState({}); // Nuevo estado para estadísticas con cobros
+  const [datosCobrosColaborador, setDatosCobrosColaborador] = useState(null); // Datos de cobros para el colaborador en detalle
 
   // Definir la función antes del useEffect
   const fetchPagosRealizados = async () => {
@@ -214,16 +215,33 @@ function GestionPersonal() {
     setIsModalOpen(true);
   };
 
-  const mostrarDetalleColaborador = (colaborador) => {
+  const mostrarDetalleColaborador = async (colaborador) => {
     setColaboradorDetalle(colaborador);
     setVistaActual('detalle');
     setRegistrosMostrados(10); // Resetear a 10 registros iniciales
+    
+    // Cargar datos de cobros para el colaborador
+    try {
+      console.log('🔍 Cargando datos de cobros para:', colaborador.nombre_negocio);
+      const datosCobros = await gestionPersonalService.obtenerResumenCobros(
+        colaborador.clerk_id, 
+        null, 
+        null, 
+        'corregido'
+      );
+      console.log('📊 Datos de cobros cargados:', datosCobros);
+      setDatosCobrosColaborador(datosCobros);
+    } catch (error) {
+      console.warn('⚠️ Error al cargar datos de cobros:', error.message);
+      setDatosCobrosColaborador(null);
+    }
   };
 
   const volverAColaboradores = () => {
     setColaboradorDetalle(null);
     setVistaActual('colaboradores');
     setRegistrosMostrados(10); // Resetear paginación
+    setDatosCobrosColaborador(null); // Limpiar datos de cobros
   };  
 
   const obtenerRegistrosDeColaborador = (colaboradorId) => {
@@ -337,12 +355,6 @@ function GestionPersonal() {
                         Colaborador
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                        Gastos Totales
-                      </th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                        Faltantes Totales
-                      </th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
                         Pendientes de Cobros
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
@@ -380,34 +392,6 @@ function GestionPersonal() {
                               <div className="text-xs text-gray-400 capitalize">
                                 {colaborador.role}
                               </div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-4 text-right border-r">
-                            <div className="flex flex-col">
-                              <span className="text-sm font-bold text-red-600">
-                                {formatearMoneda(totales.gastos + (totales.gastosPendientes || 0))}
-                              </span>
-                              {totales.gastosPendientes > 0 && (
-                                <div className="text-xs text-gray-600 mt-1">
-                                  <span>Registrados: {formatearMoneda(totales.gastos)}</span>
-                                  <br />
-                                  <span>Pendientes: {formatearMoneda(totales.gastosPendientes)}</span>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-4 py-4 text-right border-r">
-                            <div className="flex flex-col">
-                              <span className="text-sm font-bold text-orange-600">
-                                {formatearMoneda(totales.faltantes + (totales.faltantesPendientes || 0))}
-                              </span>
-                              {totales.faltantesPendientes > 0 && (
-                                <div className="text-xs text-gray-600 mt-1">
-                                  <span>Registrados: {formatearMoneda(totales.faltantes)}</span>
-                                  <br />
-                                  <span>Pendientes: {formatearMoneda(totales.faltantesPendientes)}</span>
-                                </div>
-                              )}
                             </div>
                           </td>
                           <td className="px-4 py-4 text-right border-r">
@@ -505,6 +489,8 @@ function GestionPersonal() {
                   onFiltroChange={setFiltroFecha}
                   customDateRange={customDateRange}
                   onCustomDateRangeChange={handleCustomDateRangeChange}
+                  datosCobros={datosCobrosColaborador}
+                  colaboradorId={colaboradorDetalle?.clerk_id}
                 />
                 {hayMasRegistros && (
                   <div className="bg-white rounded-lg shadow p-4">
