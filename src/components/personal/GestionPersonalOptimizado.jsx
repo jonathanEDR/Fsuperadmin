@@ -24,6 +24,7 @@ function GestionPersonal() {
   // Estados para paginación VISUAL en vista de detalle (solo frontend)
   const [registrosMostrados, setRegistrosMostrados] = useState(10); // Inicialmente mostrar 10
   const [pagosRealizados, setPagosRealizados] = useState([]);
+  const [estadisticasMejoradas, setEstadisticasMejoradas] = useState({}); // Nuevo estado para estadísticas con cobros
 
   // Definir la función antes del useEffect
   const fetchPagosRealizados = async () => {
@@ -42,6 +43,55 @@ function GestionPersonal() {
 
   const cargarDatos = async () => {
     await Promise.all([fetchRegistros(), fetchColaboradores()]);
+    // Cargar estadísticas mejoradas DESPUÉS de tener los colaboradores
+    await cargarEstadisticasMejoradas();
+  };
+
+  // NUEVA FUNCIÓN: Cargar estadísticas mejoradas para todos los colaboradores
+  const cargarEstadisticasMejoradas = async () => {
+    try {
+      console.log('🔍 Cargando estadísticas mejoradas para colaboradores...');
+      
+      // Obtener colaboradores actuales si no están en estado
+      let colaboradoresParaProcesar = colaboradores;
+      if (colaboradoresParaProcesar.length === 0) {
+        try {
+          colaboradoresParaProcesar = await gestionPersonalService.obtenerColaboradores();
+        } catch (error) {
+          console.error('Error al obtener colaboradores para estadísticas:', error);
+          return;
+        }
+      }
+      
+      const estadisticasMap = {};
+      
+      console.log(`📊 Procesando ${colaboradoresParaProcesar.length} colaboradores para estadísticas mejoradas`);
+      
+      // Obtener estadísticas mejoradas para cada colaborador
+      for (const colaborador of colaboradoresParaProcesar) {
+        try {
+          console.log(`🔍 Obteniendo estadísticas mejoradas para: ${colaborador.nombre_negocio}`);
+          const estadisticas = await gestionPersonalService.obtenerEstadisticasMejoradas(colaborador.clerk_id);
+          estadisticasMap[colaborador.clerk_id] = estadisticas.estadisticas;
+          console.log(`✅ Estadísticas obtenidas para ${colaborador.nombre_negocio}:`, estadisticas.estadisticas);
+        } catch (error) {
+          console.warn(`⚠️ No se pudieron obtener estadísticas mejoradas para ${colaborador.nombre_negocio}:`, error.message);
+          // Usar estadísticas básicas como fallback
+          try {
+            const estadisticasBasicas = await gestionPersonalService.obtenerEstadisticasColaborador(colaborador.clerk_id);
+            estadisticasMap[colaborador.clerk_id] = estadisticasBasicas;
+            console.log(`📋 Usando estadísticas básicas para ${colaborador.nombre_negocio}:`, estadisticasBasicas);
+          } catch (basicError) {
+            console.error(`❌ Error al obtener estadísticas básicas para ${colaborador.nombre_negocio}:`, basicError.message);
+          }
+        }
+      }
+      
+      console.log('📊 Estadísticas cargadas:', estadisticasMap);
+      setEstadisticasMejoradas(estadisticasMap);
+    } catch (error) {
+      console.error('❌ Error al cargar estadísticas mejoradas:', error);
+    }
   };
 
   // Obtener todos los registros (sin paginación backend)
@@ -115,12 +165,18 @@ function GestionPersonal() {
       setLoading(true);
       setError(null);
       
+      console.log('Creando registro con datos automáticos:', datosRegistro);
+      
+      // Siempre usar el servicio básico, ya que el backend maneja automáticamente 
+      // la inclusión de datos de cobros según el flag incluirDatosCobros
       const nuevoRegistro = await gestionPersonalService.crearRegistro(datosRegistro);
       
       if (nuevoRegistro) {
         await fetchRegistros(); // Recargar todos los registros
         setIsModalOpen(false);
         setColaboradorSeleccionado(null);
+        
+        console.log('✅ Registro creado exitosamente con datos automáticos incluidos');
       }
     } catch (error) {
       console.error('Error al crear registro:', error);
@@ -177,6 +233,26 @@ function GestionPersonal() {
   };
 
   const calcularTotales = (colaboradorId) => {
+    // Primero intentar usar estadísticas mejoradas
+    const estadisticas = estadisticasMejoradas[colaboradorId];
+    if (estadisticas) {
+      return {
+        gastos: estadisticas.totalGastos || 0,
+        faltantes: estadisticas.totalFaltantes || 0,
+        adelantos: estadisticas.totalAdelantos || 0,
+        pagosDiarios: estadisticas.totalPagosDiarios || 0,
+        // Datos adicionales de cobros automáticos
+        faltantesPendientes: estadisticas.cobrosAutomaticos?.faltantesPendientes || 0,
+        gastosPendientes: estadisticas.cobrosAutomaticos?.gastosPendientes || 0,
+        ventasRelacionadas: estadisticas.cobrosAutomaticos?.totalVentas || 0,
+        cobrosRelacionados: estadisticas.cobrosAutomaticos?.totalCobros || 0,
+        totalFaltantesConCobros: estadisticas.totalFaltantesConCobros || estadisticas.totalFaltantes || 0,
+        totalGastosConCobros: estadisticas.totalGastosConCobros || estadisticas.totalGastos || 0,
+        totalAPagarConCobros: estadisticas.totalAPagarConCobros || estadisticas.totalAPagar || 0
+      };
+    }
+    
+    // Fallback: calcular manualmente desde registros
     const registrosColaborador = obtenerRegistrosDeColaborador(colaboradorId);
     return registrosColaborador.reduce((totales, registro) => ({
       gastos: totales.gastos + (registro.monto || 0),
@@ -253,77 +329,160 @@ function GestionPersonal() {
                 No hay colaboradores disponibles
               </div>
             ) : (
-              <div className="divide-y divide-gray-200">
-                {colaboradores.map((colaborador) => {
-                  const totales = calcularTotales(colaborador.clerk_id);
-                  const pagosRealizadosColab = calcularPagosRealizados(colaborador.clerk_id);
-                  const totalAPagar = totales.pagosDiarios - (totales.faltantes + totales.adelantos) - pagosRealizadosColab;
-                  return (
-                    <div key={colaborador._id} className="p-4 sm:p-6 hover:bg-gray-50">
-                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-base sm:text-lg font-medium text-gray-900 truncate">
-                            {colaborador.nombre_negocio}
-                          </h4>
-                          <p className="text-xs sm:text-sm text-gray-600 break-all">{colaborador.email}</p>
-                          <p className="text-xs sm:text-sm text-gray-600 capitalize">{colaborador.role}</p>
-                          <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-4 text-xs sm:text-sm">
-                            <div>
-                              <span className="font-medium text-gray-600">Total Gastos:</span>
-                              <span className="block text-red-600 font-bold">
-                                {formatearMoneda(totales.gastos)}
-                              </span>
+              <div className="overflow-x-auto">
+                <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                        Colaborador
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                        Gastos Totales
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                        Faltantes Totales
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                        Pendientes de Cobros
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                        Adelantos
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                        Pagos Diarios
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                        Total a Pagar (Con Cobros)
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                        Acciones
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {colaboradores.map((colaborador) => {
+                      const totales = calcularTotales(colaborador.clerk_id);
+                      const pagosRealizadosColab = calcularPagosRealizados(colaborador.clerk_id);
+                      const totalAPagarBasico = totales.pagosDiarios - (totales.faltantes + totales.adelantos) - pagosRealizadosColab;
+                      const totalAPagarConCobros = totales.totalAPagarConCobros !== undefined ? 
+                        totales.totalAPagarConCobros - pagosRealizadosColab : totalAPagarBasico;
+                      
+                      return (
+                        <tr key={colaborador._id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-4 py-4 border-r">
+                            <div className="flex flex-col">
+                              <div className="text-sm font-medium text-gray-900">
+                                {colaborador.nombre_negocio}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {colaborador.email}
+                              </div>
+                              <div className="text-xs text-gray-400 capitalize">
+                                {colaborador.role}
+                              </div>
                             </div>
-                            <div>
-                              <span className="font-medium text-gray-600">Faltantes:</span>
-                              <span className="block text-orange-600 font-bold">
-                                {formatearMoneda(totales.faltantes)}
+                          </td>
+                          <td className="px-4 py-4 text-right border-r">
+                            <div className="flex flex-col">
+                              <span className="text-sm font-bold text-red-600">
+                                {formatearMoneda(totales.gastos + (totales.gastosPendientes || 0))}
                               </span>
+                              {totales.gastosPendientes > 0 && (
+                                <div className="text-xs text-gray-600 mt-1">
+                                  <span>Registrados: {formatearMoneda(totales.gastos)}</span>
+                                  <br />
+                                  <span>Pendientes: {formatearMoneda(totales.gastosPendientes)}</span>
+                                </div>
+                              )}
                             </div>
-                            <div>
-                              <span className="font-medium text-gray-600">Adelantos:</span>
-                              <span className="block text-blue-600 font-bold">
-                                {formatearMoneda(totales.adelantos)}
+                          </td>
+                          <td className="px-4 py-4 text-right border-r">
+                            <div className="flex flex-col">
+                              <span className="text-sm font-bold text-orange-600">
+                                {formatearMoneda(totales.faltantes + (totales.faltantesPendientes || 0))}
                               </span>
+                              {totales.faltantesPendientes > 0 && (
+                                <div className="text-xs text-gray-600 mt-1">
+                                  <span>Registrados: {formatearMoneda(totales.faltantes)}</span>
+                                  <br />
+                                  <span>Pendientes: {formatearMoneda(totales.faltantesPendientes)}</span>
+                                </div>
+                              )}
                             </div>
-                            <div>
-                              <span className="font-medium text-gray-600">Pagos Diarios:</span>
-                              <span className="block text-green-600 font-bold">
-                                {formatearMoneda(totales.pagosDiarios)}
-                              </span>
+                          </td>
+                          <td className="px-4 py-4 text-right border-r">
+                            <div className="flex flex-col">
+                              {(totales.faltantesPendientes > 0 || totales.gastosPendientes > 0) ? (
+                                <>
+                                  {totales.faltantesPendientes > 0 && (
+                                    <span className="text-xs text-orange-700">
+                                      Faltantes: {formatearMoneda(totales.faltantesPendientes)}
+                                    </span>
+                                  )}
+                                  {totales.gastosPendientes > 0 && (
+                                    <span className="text-xs text-red-700">
+                                      Gastos: {formatearMoneda(totales.gastosPendientes)}
+                                    </span>
+                                  )}
+                                  <span className="text-sm font-bold text-purple-600 mt-1 pt-1 border-t border-gray-200">
+                                    Total: {formatearMoneda(totales.faltantesPendientes + totales.gastosPendientes)}
+                                  </span>
+                                  {totales.ventasRelacionadas > 0 && (
+                                    <span className="text-xs text-blue-600 mt-1">
+                                      {totales.ventasRelacionadas} ventas → {totales.cobrosRelacionados} cobros
+                                    </span>
+                                  )}
+                                </>
+                              ) : (
+                                <span className="text-xs text-gray-500">Sin pendientes</span>
+                              )}
                             </div>
-                            <div>
-                              <span className="font-medium text-gray-600">Pagos Realizados:</span>
-                              <span className="block text-green-700 font-bold">
-                                {formatearMoneda(calcularPagosRealizados(colaborador.clerk_id))}
-                              </span>
+                          </td>
+                          <td className="px-4 py-4 text-right border-r">
+                            <span className="text-sm font-bold text-blue-600">
+                              {formatearMoneda(totales.adelantos)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 text-right border-r">
+                            <span className="text-sm font-bold text-green-600">
+                              {formatearMoneda(totales.pagosDiarios)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 text-right border-r">
+                            <div className="flex flex-col">
+                              {totales.totalAPagarConCobros !== undefined && (
+                                <span className={`text-sm font-bold ${totalAPagarConCobros >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  {formatearMoneda(totalAPagarConCobros)}
+                                </span>
+                              )}
+                              {totales.totalAPagarConCobros !== totalAPagarBasico && (
+                                <span className="text-xs text-gray-500">
+                                  (Base: {formatearMoneda(totalAPagarBasico)})
+                                </span>
+                              )}
                             </div>
-                            <div>
-                              <span className="font-medium text-gray-600">Total a Pagar:</span>
-                              <span className={`block font-bold ${totalAPagar >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {formatearMoneda(totalAPagar)}
-                              </span>
+                          </td>
+                          <td className="px-4 py-4 text-center">
+                            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                              <button
+                                onClick={() => abrirModalParaColaborador(colaborador)}
+                                className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors"
+                              >
+                                Nuevo Registro
+                              </button>
+                              <button
+                                onClick={() => mostrarDetalleColaborador(colaborador)}
+                                className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 transition-colors"
+                              >
+                                Ver Detalle
+                              </button>
                             </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-2 ml-0 md:ml-4 w-full sm:w-auto">
-                          <button
-                            onClick={() => abrirModalParaColaborador(colaborador)}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-xs sm:text-sm"
-                          >
-                            Nuevo Registro
-                          </button>
-                          <button
-                            onClick={() => mostrarDetalleColaborador(colaborador)}
-                            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-xs sm:text-sm"
-                          >
-                            Ver Detalle
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>

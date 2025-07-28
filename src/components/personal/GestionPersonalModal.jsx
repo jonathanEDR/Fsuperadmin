@@ -17,13 +17,12 @@ const GestionPersonalModal = ({
     const minutos = String(hoy.getMinutes()).padStart(2, '0');
     return `${año}-${mes}-${dia}T${hora}:${minutos}`;
   };
+
   const [formData, setFormData] = useState({
     colaboradorId: colaboradorSeleccionado?._id || '',
     fechaDeGestion: getFechaActualString(),
     descripcion: '',
-    monto: '',
-    faltante: 0,
-    adelanto: 0
+    adelanto: 0 // Solo adelantos
   });
 
   const pagoDiarioCalculado = colaboradorSeleccionado?.sueldo ? (colaboradorSeleccionado.sueldo / 30).toFixed(2) : 0;
@@ -33,9 +32,7 @@ const GestionPersonalModal = ({
       setFormData({
         colaboradorId: colaboradorSeleccionado._id,
         fechaDeGestion: getFechaActualString(),
-        descripcion: '',
-        monto: '',
-        faltante: 0,
+        descripcion: `Registro de pago diario - ${colaboradorSeleccionado.nombre_negocio}`,
         adelanto: 0
       });
     }
@@ -55,24 +52,25 @@ const GestionPersonalModal = ({
     if (!formData.descripcion.trim()) {
       alert('Por favor ingrese una descripción');
       return;
-    }    const dataToSubmit = {
+    }
+
+    // Solo enviamos adelantos, el sistema automáticamente agregará faltantes y gastos
+    const dataToSubmit = {
       colaboradorUserId: colaboradorSeleccionado?.clerk_id,
       fechaDeGestion: new Date(formData.fechaDeGestion).toISOString(),
       descripcion: formData.descripcion.trim(),
-      monto: parseFloat(formData.monto) || 0,
-      faltante: parseFloat(formData.faltante) || 0,
-      adelanto: parseFloat(formData.adelanto) || 0
+      adelanto: parseFloat(formData.adelanto) || 0,
+      incluirDatosCobros: true // Flag para que el backend agregue automáticamente faltantes y gastos
     };
 
     onSubmit(dataToSubmit);
   };
+
   const resetForm = () => {
     setFormData({
       colaboradorId: '',
       fechaDeGestion: getFechaActualString(),
       descripcion: '',
-      monto: '',
-      faltante: 0,
       adelanto: 0
     });
   };
@@ -135,39 +133,10 @@ const GestionPersonalModal = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Monto</label>
-              <div className="relative">
-                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">S/</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.monto}
-                  onChange={(e) => handleInputChange('monto', e.target.value)}
-                  className="w-full pl-8 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="0.00"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Faltante</label>
-              <div className="relative">
-                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">S/</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.faltante}
-                  onChange={(e) => handleInputChange('faltante', e.target.value)}
-                  className="w-full pl-8 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="0.00"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Adelanto</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Adelanto
+                <span className="text-xs text-green-600 ml-1">(Manual)</span>
+              </label>
               <div className="relative">
                 <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">S/</span>
                 <input
@@ -182,18 +151,28 @@ const GestionPersonalModal = ({
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Pago Diario <span className="text-sm text-gray-500">(Calculado)</span></label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Pago Diario 
+                <span className="text-xs text-blue-600 ml-1">(Calculado)</span>
+              </label>
               <div className="relative">
                 <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">S/</span>
                 <input
                   type="text"
-                  value={`$${pagoDiarioCalculado}`.replace('$', '')}
+                  value={pagoDiarioCalculado}
                   readOnly
                   className="w-full pl-8 p-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600"
                   placeholder="0.00"
                 />
               </div>
             </div>
+          </div>
+
+          {/* Nota informativa */}
+          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-800">
+              <span className="font-medium">ℹ️ Información:</span> Los faltantes y gastos imprevistos se agregarán automáticamente desde los cobros del día.
+            </p>
           </div>
 
           <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-4">
