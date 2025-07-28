@@ -354,7 +354,7 @@ function GestionPersonal() {
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
                         Colaborador
                       </th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                      <th className="hidden sm:table-cell px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
                         Pendientes de Cobros
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
@@ -364,7 +364,7 @@ function GestionPersonal() {
                         Pagos Diarios
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                        Total a Pagar (Con Cobros)
+                        Total a Pagar
                       </th>
                       <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
                         Acciones
@@ -375,9 +375,14 @@ function GestionPersonal() {
                     {colaboradores.map((colaborador) => {
                       const totales = calcularTotales(colaborador.clerk_id);
                       const pagosRealizadosColab = calcularPagosRealizados(colaborador.clerk_id);
-                      const totalAPagarBasico = totales.pagosDiarios - (totales.faltantes + totales.adelantos) - pagosRealizadosColab;
+                      
+                      // FÓRMULA CORRECTA: pagos diarios - faltantes - adelantos (sin gastos)
+                      const totalAPagarBasico = totales.pagosDiarios - (totales.faltantes + totales.adelantos);
                       const totalAPagarConCobros = totales.totalAPagarConCobros !== undefined ? 
-                        totales.totalAPagarConCobros - pagosRealizadosColab : totalAPagarBasico;
+                        totales.totalAPagarConCobros : totalAPagarBasico;
+                      
+                      // El total final debe restar los pagos ya realizados
+                      const totalFinalAPagar = totalAPagarConCobros - pagosRealizadosColab;
                       
                       return (
                         <tr key={colaborador._id} className="hover:bg-gray-50 transition-colors">
@@ -386,15 +391,28 @@ function GestionPersonal() {
                               <div className="text-sm font-medium text-gray-900">
                                 {colaborador.nombre_negocio}
                               </div>
-                              <div className="text-xs text-gray-500">
+                              <div className="hidden sm:block text-xs text-gray-500">
                                 {colaborador.email}
                               </div>
                               <div className="text-xs text-gray-400 capitalize">
                                 {colaborador.role}
                               </div>
+                              {/* Mostrar pendientes en móvil como parte del colaborador */}
+                              <div className="sm:hidden mt-2">
+                                {(totales.faltantesPendientes > 0 || totales.gastosPendientes > 0) ? (
+                                  <div className="text-xs">
+                                    <span className="text-orange-700">Pendientes: </span>
+                                    <span className="font-medium text-purple-600">
+                                      {formatearMoneda(totales.faltantesPendientes + totales.gastosPendientes)}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="text-xs text-gray-500">Sin pendientes</span>
+                                )}
+                              </div>
                             </div>
                           </td>
-                          <td className="px-4 py-4 text-right border-r">
+                          <td className="hidden sm:table-cell px-4 py-4 text-right border-r">
                             <div className="flex flex-col">
                               {(totales.faltantesPendientes > 0 || totales.gastosPendientes > 0) ? (
                                 <>
@@ -434,16 +452,9 @@ function GestionPersonal() {
                           </td>
                           <td className="px-4 py-4 text-right border-r">
                             <div className="flex flex-col">
-                              {totales.totalAPagarConCobros !== undefined && (
-                                <span className={`text-sm font-bold ${totalAPagarConCobros >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                  {formatearMoneda(totalAPagarConCobros)}
-                                </span>
-                              )}
-                              {totales.totalAPagarConCobros !== totalAPagarBasico && (
-                                <span className="text-xs text-gray-500">
-                                  (Base: {formatearMoneda(totalAPagarBasico)})
-                                </span>
-                              )}
+                              <span className={`text-sm font-bold ${totalFinalAPagar >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {formatearMoneda(totalFinalAPagar)}
+                              </span>                          
                             </div>
                           </td>
                           <td className="px-4 py-4 text-center">

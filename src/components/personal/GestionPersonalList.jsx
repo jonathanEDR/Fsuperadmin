@@ -334,7 +334,51 @@ const GestionPersonalList = ({
     }), { monto: 0, faltante: 0, adelanto: 0, pagodiario: 0 });
   };
 
-  const totalesCompletos = calcularTotalesCompletos();
+  // Calcular totales de los últimos 12 meses usando la misma lógica del calendario
+  const calcularTotalesAnuales = () => {
+    const fechaActual = new Date();
+    const hace12Meses = new Date();
+    hace12Meses.setFullYear(fechaActual.getFullYear() - 1);
+
+    // Filtrar registros de los últimos 12 meses
+    const registrosUltimos12Meses = todosLosRegistros.filter(registro => {
+      const fechaRegistro = new Date(registro.fechaDeGestion);
+      return fechaRegistro >= hace12Meses && fechaRegistro <= fechaActual;
+    });
+
+    // Calcular totales de gestión
+    const totalesGestion = registrosUltimos12Meses.reduce((totales, registro) => ({
+      adelantos: totales.adelantos + (registro.adelanto || 0),
+      pagosDiarios: totales.pagosDiarios + (registro.pagodiario || 0)
+    }), { adelantos: 0, pagosDiarios: 0 });
+
+    // Obtener totales de cobros de los últimos 12 meses
+    let totalesCobros = { faltantesCobros: 0, gastosImprevistos: 0 };
+    if (datosCobros && datosCobros.resumen && datosCobros.resumen.cobrosDetalle) {
+      // Filtrar cobros de los últimos 12 meses
+      const cobrosUltimos12Meses = datosCobros.resumen.cobrosDetalle.filter(cobro => {
+        const fechaCobro = new Date(cobro.fechaCobro);
+        return fechaCobro >= hace12Meses && fechaCobro <= fechaActual;
+      });
+
+      totalesCobros = cobrosUltimos12Meses.reduce((totales, cobro) => ({
+        faltantesCobros: totales.faltantesCobros + (cobro.faltantes || 0),
+        gastosImprevistos: totales.gastosImprevistos + (cobro.gastosImprevistos || 0)
+      }), { faltantesCobros: 0, gastosImprevistos: 0 });
+    }
+
+    // Usar la MISMA fórmula que funciona en el calendario
+    const totalAPagar = totalesGestion.pagosDiarios - totalesCobros.faltantesCobros - totalesGestion.adelantos;
+
+    return {
+      ...totalesGestion,
+      ...totalesCobros,
+      totalAPagar,
+      periodo: '12 meses'
+    };
+  };
+
+  const totalesCompletos = calcularTotalesAnuales();
 
   // Calcular totales del mes actual mostrado en el calendario
   const calcularTotalesDelMes = () => {
@@ -617,9 +661,9 @@ const GestionPersonalList = ({
             )}
           </div>
         
-      {/* Resumen de totales */}
+      {/* Resumen de totales simplificado */}
       <div className="bg-white p-3 sm:p-4 rounded-lg shadow overflow-x-auto">
-        <h3 className="text-base sm:text-lg font-medium mb-3">Resumen del Colaborador</h3>
+        <h3 className="text-base sm:text-lg font-medium mb-3">Resumen del Colaborador (Últimos 12 Meses)</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
           <div className="text-center">
             <p className="text-xs sm:text-sm text-gray-600">Faltantes de Ventas</p>
@@ -627,34 +671,31 @@ const GestionPersonalList = ({
           </div>
           <div className="text-center">
             <p className="text-xs sm:text-sm text-gray-600">Gastos Imprevistos</p>
-            <p className="text-base sm:text-lg font-bold text-purple-600">{formatearMoneda(totalesCompletos.gastosImprevistosCobros || 0)}</p>
+            <p className="text-base sm:text-lg font-bold text-purple-600">{formatearMoneda(totalesCompletos.gastosImprevistos || 0)}</p>
           </div>
           <div className="text-center">
             <p className="text-xs sm:text-sm text-gray-600">Total Adelantos</p>
-            <p className="text-base sm:text-lg font-bold text-blue-600">{formatearMoneda(totalesCompletos.adelanto || 0)}</p>
+            <p className="text-base sm:text-lg font-bold text-blue-600">{formatearMoneda(totalesCompletos.adelantos || 0)}</p>
           </div>
           <div className="text-center">
             <p className="text-xs sm:text-sm text-gray-600">Total Pagos Diarios</p>
-            <p className="text-base sm:text-lg font-bold text-green-600">{formatearMoneda(totalesCompletos.pagodiario || 0)}</p>
+            <p className="text-base sm:text-lg font-bold text-green-600">{formatearMoneda(totalesCompletos.pagosDiarios || 0)}</p>
           </div>
         </div>
         
-        {/* Mostrar totales de gestión manual solo si existen */}
-        {(totalesCompletos.monto > 0 || totalesCompletos.faltante > 0) && (
-          <div className="border-t border-gray-200 mt-4 pt-4">
-            <p className="text-sm text-gray-600 mb-2">Registros de Gestión Manual:</p>
-            <div className="grid grid-cols-2 gap-2 sm:gap-4">
-              <div className="text-center">
-                <p className="text-xs text-gray-500">Gastos Manuales</p>
-                <p className="text-sm font-semibold text-red-600">{formatearMoneda(totalesCompletos.monto || 0)}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-gray-500">Faltantes Manuales</p>
-                <p className="text-sm font-semibold text-orange-600">{formatearMoneda(totalesCompletos.faltante || 0)}</p>
-              </div>
-            </div>
+        {/* Total a pagar con la fórmula correcta */}
+        <div className="border-t border-gray-200 mt-4 pt-4">
+          <div className="text-center">
+            <p className="text-sm text-gray-600 mb-2">Total a Pagar (Pagos Diarios - Faltantes - Adelantos):</p>
+            <p className={`text-xl font-bold px-4 py-2 rounded ${
+              totalesCompletos.totalAPagar >= 0 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-red-100 text-red-800'
+            }`}>
+              {formatearMoneda(totalesCompletos.totalAPagar)}
+            </p>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

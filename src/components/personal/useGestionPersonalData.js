@@ -8,6 +8,7 @@ export default function useGestionPersonalData() {
   const [pagos, setPagos] = useState([]);
   const [colaboradores, setColaboradores] = useState([]);
   const [registros, setRegistros] = useState([]);
+  const [datosCobros, setDatosCobros] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -73,11 +74,30 @@ export default function useGestionPersonalData() {
     }
   }, [getToken]);
 
+  // Obtener datos de cobros para calcular faltantes
+  const fetchDatosCobros = useCallback(async () => {
+    try {
+      const token = await getToken();
+      if (!token) throw new Error('No estás autorizado');
+      
+      // Obtener datos de cobros para todos los colaboradores
+      const response = await api.get('/api/gestion-personal/cobros-resumen', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setDatosCobros(response.data || null);
+    } catch (err) {
+      console.log('Error al obtener datos de cobros:', err);
+      setDatosCobros(null);
+    }
+  }, [getToken]);
+
   useEffect(() => {
     fetchPagos();
     fetchColaboradores();
     fetchRegistros();
-  }, [fetchPagos, fetchColaboradores, fetchRegistros]);
+    fetchDatosCobros();
+  }, [fetchPagos, fetchColaboradores, fetchRegistros, fetchDatosCobros]);
 
   // Agregar nuevo pago
   const agregarPago = async (formData) => {
@@ -116,11 +136,13 @@ export default function useGestionPersonalData() {
     pagos,
     colaboradores,
     registros,
+    datosCobros,
     loading,
     error,
     fetchPagos,
     fetchColaboradores,
     fetchRegistros,
+    fetchDatosCobros,
     agregarPago,
     eliminarPago,
     setError
