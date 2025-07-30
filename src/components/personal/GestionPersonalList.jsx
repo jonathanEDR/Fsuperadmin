@@ -17,6 +17,14 @@ const GestionPersonalList = ({
   // Estado para el mes y año actual del calendario
   const [mesActual, setMesActual] = useState(new Date().getMonth());
   const [añoActual, setAñoActual] = useState(new Date().getFullYear());
+  
+  // Estados para el filtro de rango de días
+  const [filtroRangoDias, setFiltroRangoDias] = useState({
+    activo: false,
+    diaInicio: 1,
+    diaFin: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()
+  });
+  const [mostrarFiltroRango, setMostrarFiltroRango] = useState(false);
   const formatearFecha = (fecha) => {
     if (!fecha) return '';
     return new Date(fecha).toLocaleDateString('es-ES', {
@@ -61,6 +69,52 @@ const GestionPersonalList = ({
   const obtenerDiasDelMes = (mes, año) => {
     const diasEnMes = new Date(año, mes + 1, 0).getDate();
     return Array.from({ length: diasEnMes }, (_, i) => i + 1);
+  };
+
+  // Actualizar rango de días cuando cambia el mes
+  useEffect(() => {
+    const diasEnMes = new Date(añoActual, mesActual + 1, 0).getDate();
+    setFiltroRangoDias(prev => ({
+      ...prev,
+      diaFin: Math.min(prev.diaFin, diasEnMes) // Ajustar si el día fin es mayor que los días del mes
+    }));
+  }, [mesActual, añoActual]);
+
+  // Función para verificar si un día está dentro del rango filtrado
+  const esDiaEnRango = (dia) => {
+    if (!filtroRangoDias.activo) return true;
+    return dia >= filtroRangoDias.diaInicio && dia <= filtroRangoDias.diaFin;
+  };
+
+  // Función para activar/desactivar filtro de rango
+  const toggleFiltroRango = () => {
+    setFiltroRangoDias(prev => ({
+      ...prev,
+      activo: !prev.activo
+    }));
+  };
+
+  // Función para actualizar rango de días
+  const actualizarRangoDias = (inicio, fin) => {
+    const diasEnMes = new Date(añoActual, mesActual + 1, 0).getDate();
+    const inicioValido = Math.max(1, Math.min(inicio, diasEnMes));
+    const finValido = Math.max(inicioValido, Math.min(fin, diasEnMes));
+    
+    setFiltroRangoDias(prev => ({
+      ...prev,
+      diaInicio: inicioValido,
+      diaFin: finValido
+    }));
+  };
+
+  // Función para limpiar filtro de rango
+  const limpiarFiltroRango = () => {
+    const diasEnMes = new Date(añoActual, mesActual + 1, 0).getDate();
+    setFiltroRangoDias({
+      activo: false,
+      diaInicio: 1,
+      diaFin: diasEnMes
+    });
   };
 
   // Función para agrupar registros por día (versión original - sin cambios)
@@ -380,7 +434,7 @@ const GestionPersonalList = ({
 
   const totalesCompletos = calcularTotalesAnuales();
 
-  // Calcular totales del mes actual mostrado en el calendario
+  // Calcular totales del mes actual mostrado en el calendario (con filtro de rango)
   const calcularTotalesDelMes = () => {
     const diasDelMes = obtenerDiasDelMes(mesActual, añoActual);
     let totalesMes = {
@@ -393,6 +447,9 @@ const GestionPersonalList = ({
     };
 
     diasDelMes.forEach(dia => {
+      // Solo procesar días que estén en el rango filtrado
+      if (!esDiaEnRango(dia)) return;
+      
       const datosDelDia = agruparRegistrosPorFechaVenta[dia] || { 
         registrosGestion: [], 
         datosCobros: { faltantes: 0, gastosImprevistos: 0, totalVentasDelDia: 0, cobrosDetalle: [] }
@@ -449,6 +506,131 @@ const GestionPersonalList = ({
             Siguiente →
           </button>
         </div>
+
+        {/* Controles de filtro de rango de días */}
+        <div className="border-t pt-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => setMostrarFiltroRango(!mostrarFiltroRango)}
+              className={`px-4 py-2 rounded font-medium transition-colors ${
+                mostrarFiltroRango 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              📅 Filtro por Días
+            </button>
+            
+            {filtroRangoDias.activo && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-green-700">
+                  Filtrando: {filtroRangoDias.diaInicio} al {filtroRangoDias.diaFin}
+                </span>
+                <button
+                  onClick={limpiarFiltroRango}
+                  className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200"
+                >
+                  Limpiar
+                </button>
+              </div>
+            )}
+          </div>
+          
+          {mostrarFiltroRango && (
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-700 mb-3">
+                Filtrar por rango de días en {obtenerNombreMes(mesActual)} {añoActual}
+              </h4>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Día de inicio
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max={new Date(añoActual, mesActual + 1, 0).getDate()}
+                    value={filtroRangoDias.diaInicio}
+                    onChange={(e) => actualizarRangoDias(parseInt(e.target.value) || 1, filtroRangoDias.diaFin)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Día de fin
+                  </label>
+                  <input
+                    type="number"
+                    min={filtroRangoDias.diaInicio}
+                    max={new Date(añoActual, mesActual + 1, 0).getDate()}
+                    value={filtroRangoDias.diaFin}
+                    onChange={(e) => actualizarRangoDias(filtroRangoDias.diaInicio, parseInt(e.target.value) || filtroRangoDias.diaInicio)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                
+                <div className="flex items-end">
+                  <button
+                    onClick={toggleFiltroRango}
+                    className={`w-full px-4 py-2 rounded font-medium transition-colors ${
+                      filtroRangoDias.activo
+                        ? 'bg-red-600 text-white hover:bg-red-700'
+                        : 'bg-green-600 text-white hover:bg-green-700'
+                    }`}
+                  >
+                    {filtroRangoDias.activo ? 'Desactivar' : 'Aplicar'}
+                  </button>
+                </div>
+                
+                <div className="flex items-end">
+                  <button
+                    onClick={limpiarFiltroRango}
+                    className="w-full px-4 py-2 bg-gray-500 text-white rounded font-medium hover:bg-gray-600 transition-colors"
+                  >
+                    Limpiar
+                  </button>
+                </div>
+              </div>
+              
+              {/* Botones rápidos para rangos comunes */}
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <p className="text-xs font-medium text-gray-600 mb-2">Rangos rápidos:</p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => {
+                      actualizarRangoDias(1, 15);
+                      setFiltroRangoDias(prev => ({ ...prev, activo: true }));
+                    }}
+                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200"
+                  >
+                    Primera quincena (1-15)
+                  </button>
+                  <button
+                    onClick={() => {
+                      const diasEnMes = new Date(añoActual, mesActual + 1, 0).getDate();
+                      actualizarRangoDias(16, diasEnMes);
+                      setFiltroRangoDias(prev => ({ ...prev, activo: true }));
+                    }}
+                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200"
+                  >
+                    Segunda quincena (16-{new Date(añoActual, mesActual + 1, 0).getDate()})
+                  </button>
+                  <button
+                    onClick={() => {
+                      actualizarRangoDias(15, 24);
+                      setFiltroRangoDias(prev => ({ ...prev, activo: true }));
+                    }}
+                    className="px-3 py-1 bg-purple-100 text-purple-700 rounded text-xs hover:bg-purple-200"
+                  >
+                    15 al 24
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
           {/* Tabla Calendario Mensual */}
@@ -494,8 +676,17 @@ const GestionPersonalList = ({
                       // Determinar si hay actividad en el día
                       const tieneActividad = registrosDia.length > 0 || datosCobros.totalVentasDelDia > 0;
                       
+                      // Verificar si el día está en el rango filtrado
+                      const estaEnRango = esDiaEnRango(dia);
+                      const filaOculta = filtroRangoDias.activo && !estaEnRango;
+                      
+                      // No renderizar la fila si está filtrada
+                      if (filaOculta) return null;
+                      
                       return (
-                        <tr key={dia} className={`hover:bg-gray-50 ${esHoy ? 'bg-blue-50' : ''}`}>
+                        <tr key={dia} className={`hover:bg-gray-50 ${esHoy ? 'bg-blue-50' : ''} ${
+                          filtroRangoDias.activo && estaEnRango ? 'ring-2 ring-green-200' : ''
+                        }`}>
                           <td className="px-4 py-3">
                             <div className="flex items-center">
                               <span className={`text-sm font-medium ${esHoy ? 'text-blue-600' : 'text-gray-900'}`}>
@@ -512,6 +703,12 @@ const GestionPersonalList = ({
                               {/* Indicador de actividad */}
                               {tieneActividad && (
                                 <span className="ml-2 w-2 h-2 bg-green-500 rounded-full" title="Día con actividad"></span>
+                              )}
+                              {/* Indicador de filtro activo */}
+                              {filtroRangoDias.activo && estaEnRango && (
+                                <span className="ml-2 px-1 py-0.5 bg-green-100 text-green-700 text-xs rounded" title="En rango filtrado">
+                                  📅
+                                </span>
                               )}
                             </div>
                           </td>
@@ -607,8 +804,16 @@ const GestionPersonalList = ({
                     <tr className="font-semibold">
                       <td className="px-4 py-3 text-left">
                         <span className="text-sm font-bold text-gray-800">
-                          TOTAL {obtenerNombreMes(mesActual).toUpperCase()}
+                          {filtroRangoDias.activo 
+                            ? `TOTAL DÍAS ${filtroRangoDias.diaInicio}-${filtroRangoDias.diaFin}` 
+                            : `TOTAL ${obtenerNombreMes(mesActual).toUpperCase()}`
+                          }
                         </span>
+                        {filtroRangoDias.activo && (
+                          <div className="text-xs text-green-600 mt-1">
+                            Filtrado: {filtroRangoDias.diaFin - filtroRangoDias.diaInicio + 1} días
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-center">
                         <div className="space-y-1">

@@ -8,6 +8,7 @@ function GestionPersonal() {
   const [registros, setRegistros] = useState([]); // Todos los registros
   const [colaboradores, setColaboradores] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingEstadisticas, setLoadingEstadisticas] = useState(false); // Nuevo estado
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [colaboradorSeleccionado, setColaboradorSeleccionado] = useState(null);
@@ -43,21 +44,33 @@ function GestionPersonal() {
   }, []);  
 
   const cargarDatos = async () => {
-    await Promise.all([fetchRegistros(), fetchColaboradores()]);
-    // Cargar estadísticas mejoradas DESPUÉS de tener los colaboradores
-    await cargarEstadisticasMejoradas();
+    // Limpiar estadísticas previas al inicio de la carga
+    setEstadisticasMejoradas({});
+    
+    // Ejecutar fetchRegistros y fetchColaboradores en paralelo
+    const [, colaboradoresObtenidos] = await Promise.all([
+      fetchRegistros(), 
+      fetchColaboradores()
+    ]);
+    
+    // Cargar estadísticas mejoradas usando los colaboradores recién obtenidos
+    if (colaboradoresObtenidos && colaboradoresObtenidos.length > 0) {
+      await cargarEstadisticasMejoradas(colaboradoresObtenidos);
+    }
   };
 
   // NUEVA FUNCIÓN: Cargar estadísticas mejoradas para todos los colaboradores
-  const cargarEstadisticasMejoradas = async () => {
+  const cargarEstadisticasMejoradas = async (colaboradoresEspecificos = null) => {
     try {
+      setLoadingEstadisticas(true);
       console.log('🔍 Cargando estadísticas mejoradas para colaboradores...');
       
-      // Obtener colaboradores actuales si no están en estado
-      let colaboradoresParaProcesar = colaboradores;
+      // Usar colaboradores específicos o obtenerlos del estado actual o del servicio
+      let colaboradoresParaProcesar = colaboradoresEspecificos || colaboradores;
       if (colaboradoresParaProcesar.length === 0) {
         try {
           colaboradoresParaProcesar = await gestionPersonalService.obtenerColaboradores();
+          console.log('📋 Colaboradores obtenidos del servicio para estadísticas:', colaboradoresParaProcesar.length);
         } catch (error) {
           console.error('Error al obtener colaboradores para estadísticas:', error);
           return;
@@ -92,6 +105,8 @@ function GestionPersonal() {
       setEstadisticasMejoradas(estadisticasMap);
     } catch (error) {
       console.error('❌ Error al cargar estadísticas mejoradas:', error);
+    } finally {
+      setLoadingEstadisticas(false);
     }
   };
 
@@ -155,9 +170,12 @@ function GestionPersonal() {
     try {      
       const data = await gestionPersonalService.obtenerColaboradores();
       setColaboradores(data);
+      console.log('👥 Colaboradores cargados:', data.length);
+      return data; // Retornar los datos para uso inmediato
     } catch (error) {
       console.error('Error al obtener colaboradores:', error);
       setError(error.message || 'Error al cargar colaboradores');
+      return [];
     }
   };  
 
@@ -251,9 +269,13 @@ function GestionPersonal() {
   };
 
   const calcularTotales = (colaboradorId) => {
+    // Debug: mostrar qué estadísticas tenemos
+    console.log(`🔍 calcularTotales para colaborador ${colaboradorId}:`, estadisticasMejoradas[colaboradorId]);
+    
     // Primero intentar usar estadísticas mejoradas
     const estadisticas = estadisticasMejoradas[colaboradorId];
-    if (estadisticas) {
+    if (estadisticas && typeof estadisticas === 'object') {
+      console.log(`✅ Usando estadísticas mejoradas para ${colaboradorId}`);
       return {
         gastos: estadisticas.totalGastos || 0,
         faltantes: estadisticas.totalFaltantes || 0,
@@ -271,13 +293,30 @@ function GestionPersonal() {
     }
     
     // Fallback: calcular manualmente desde registros
+    console.log(`⚠️ Usando cálculo manual para ${colaboradorId} (estadísticas no disponibles)`);
     const registrosColaborador = obtenerRegistrosDeColaborador(colaboradorId);
-    return registrosColaborador.reduce((totales, registro) => ({
+    const totalesCalculados = registrosColaborador.reduce((totales, registro) => ({
       gastos: totales.gastos + (registro.monto || 0),
       faltantes: totales.faltantes + (registro.faltante || 0),
       adelantos: totales.adelantos + (registro.adelanto || 0),
       pagosDiarios: totales.pagosDiarios + (registro.pagodiario || 0)
-    }), { gastos: 0, faltantes: 0, adelantos: 0, pagosDiarios: 0 });
+    }), { 
+      gastos: 0, 
+      faltantes: 0, 
+      adelantos: 0, 
+      pagosDiarios: 0,
+      // Valores por defecto para datos automáticos
+      faltantesPendientes: 0,
+      gastosPendientes: 0,
+      ventasRelacionadas: 0,
+      cobrosRelacionados: 0,
+      totalFaltantesConCobros: 0,
+      totalGastosConCobros: 0,
+      totalAPagarConCobros: 0
+    });
+    
+    console.log(`📊 Totales calculados manualmente para ${colaboradorId}:`, totalesCalculados);
+    return totalesCalculados;
   };
 
   // Calcular pagos realizados por colaborador para el resumen (usando historial de pagos)
@@ -337,10 +376,12 @@ function GestionPersonal() {
             <div className="px-4 sm:px-6 py-4 bg-gray-50 border-b">
               <h3 className="text-base sm:text-lg font-medium">Colaboradores</h3>
             </div>
-            {loading ? (
+            {loading || loadingEstadisticas ? (
               <div className="p-8 text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="mt-2 text-gray-600">Cargando colaboradores...</p>
+                <p className="mt-2 text-gray-600">
+                  {loading ? 'Cargando colaboradores...' : 'Cargando estadísticas...'}
+                </p>
               </div>
             ) : colaboradores.length === 0 ? (
               <div className="p-8 text-center text-gray-500">
