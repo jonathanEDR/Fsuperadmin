@@ -25,6 +25,12 @@ const GestionPersonalList = ({
     diaFin: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()
   });
   const [mostrarFiltroRango, setMostrarFiltroRango] = useState(false);
+  
+  // Estados para manejar los valores de input como strings (para permitir borrar)
+  const [inputValues, setInputValues] = useState({
+    diaInicio: '1',
+    diaFin: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate().toString()
+  });
   const formatearFecha = (fecha) => {
     if (!fecha) return '';
     return new Date(fecha).toLocaleDateString('es-ES', {
@@ -78,6 +84,11 @@ const GestionPersonalList = ({
       ...prev,
       diaFin: Math.min(prev.diaFin, diasEnMes) // Ajustar si el día fin es mayor que los días del mes
     }));
+    // También actualizar los valores de input
+    setInputValues(prev => ({
+      ...prev,
+      diaFin: Math.min(parseInt(prev.diaFin) || diasEnMes, diasEnMes).toString()
+    }));
   }, [mesActual, añoActual]);
 
   // Función para verificar si un día está dentro del rango filtrado
@@ -97,14 +108,54 @@ const GestionPersonalList = ({
   // Función para actualizar rango de días
   const actualizarRangoDias = (inicio, fin) => {
     const diasEnMes = new Date(añoActual, mesActual + 1, 0).getDate();
-    const inicioValido = Math.max(1, Math.min(inicio, diasEnMes));
-    const finValido = Math.max(inicioValido, Math.min(fin, diasEnMes));
+    const inicioValido = Math.max(1, Math.min(inicio || 1, diasEnMes));
+    const finValido = Math.max(inicioValido, Math.min(fin || diasEnMes, diasEnMes));
     
     setFiltroRangoDias(prev => ({
       ...prev,
       diaInicio: inicioValido,
       diaFin: finValido
     }));
+    
+    // Actualizar también los valores de input
+    setInputValues({
+      diaInicio: inicioValido.toString(),
+      diaFin: finValido.toString()
+    });
+  };
+
+  // Función para manejar cambios en los inputs
+  const handleInputChange = (tipo, valor) => {
+    setInputValues(prev => ({
+      ...prev,
+      [tipo]: valor
+    }));
+
+    // Si hay un valor válido, actualizar el filtro
+    if (valor !== '' && !isNaN(valor)) {
+      const numeroValor = parseInt(valor);
+      if (tipo === 'diaInicio') {
+        actualizarRangoDias(numeroValor, filtroRangoDias.diaFin);
+      } else {
+        actualizarRangoDias(filtroRangoDias.diaInicio, numeroValor);
+      }
+    }
+  };
+
+  // Función para manejar cuando se pierde el focus del input
+  const handleInputBlur = (tipo) => {
+    const valor = inputValues[tipo];
+    if (valor === '' || isNaN(valor)) {
+      // Restaurar valor por defecto
+      if (tipo === 'diaInicio') {
+        setInputValues(prev => ({ ...prev, diaInicio: '1' }));
+        actualizarRangoDias(1, filtroRangoDias.diaFin);
+      } else {
+        const diasEnMes = new Date(añoActual, mesActual + 1, 0).getDate();
+        setInputValues(prev => ({ ...prev, diaFin: diasEnMes.toString() }));
+        actualizarRangoDias(filtroRangoDias.diaInicio, diasEnMes);
+      }
+    }
   };
 
   // Función para limpiar filtro de rango
@@ -114,6 +165,10 @@ const GestionPersonalList = ({
       activo: false,
       diaInicio: 1,
       diaFin: diasEnMes
+    });
+    setInputValues({
+      diaInicio: '1',
+      diaFin: diasEnMes.toString()
     });
   };
 
@@ -537,96 +592,99 @@ const GestionPersonalList = ({
           </div>
           
           {mostrarFiltroRango && (
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
               <h4 className="text-sm font-medium text-gray-700 mb-3">
                 Filtrar por rango de días en {obtenerNombreMes(mesActual)} {añoActual}
               </h4>
               
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
-                    Día de inicio
+              {/* Fila única: Inputs + Botones principales */}
+              <div className="flex flex-wrap items-center gap-3 mb-3">
+                {/* Inputs compactos */}
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-600">
+                    Día inicio:
                   </label>
                   <input
                     type="number"
                     min="1"
                     max={new Date(añoActual, mesActual + 1, 0).getDate()}
-                    value={filtroRangoDias.diaInicio}
-                    onChange={(e) => actualizarRangoDias(parseInt(e.target.value) || 1, filtroRangoDias.diaFin)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={inputValues.diaInicio}
+                    onChange={(e) => handleInputChange('diaInicio', e.target.value)}
+                    onFocus={(e) => e.target.select()}
+                    onBlur={() => handleInputBlur('diaInicio')}
+                    placeholder="1"
+                    className="w-14 px-2 py-1 border border-gray-300 rounded text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
-                    Día de fin
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-600">
+                    Día fin:
                   </label>
                   <input
                     type="number"
                     min={filtroRangoDias.diaInicio}
                     max={new Date(añoActual, mesActual + 1, 0).getDate()}
-                    value={filtroRangoDias.diaFin}
-                    onChange={(e) => actualizarRangoDias(filtroRangoDias.diaInicio, parseInt(e.target.value) || filtroRangoDias.diaInicio)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={inputValues.diaFin}
+                    onChange={(e) => handleInputChange('diaFin', e.target.value)}
+                    onFocus={(e) => e.target.select()}
+                    onBlur={() => handleInputBlur('diaFin')}
+                    placeholder={new Date(añoActual, mesActual + 1, 0).getDate().toString()}
+                    className="w-14 px-2 py-1 border border-gray-300 rounded text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
+
+                {/* Botones principales */}
+                <button
+                  onClick={toggleFiltroRango}
+                  className={`px-4 py-1 rounded text-sm font-medium transition-colors ${
+                    filtroRangoDias.activo
+                      ? 'bg-red-600 text-white hover:bg-red-700'
+                      : 'bg-green-600 text-white hover:bg-green-700'
+                  }`}
+                >
+                  {filtroRangoDias.activo ? 'Desactivar' : 'Aplicar'}
+                </button>
                 
-                <div className="flex items-end">
-                  <button
-                    onClick={toggleFiltroRango}
-                    className={`w-full px-4 py-2 rounded font-medium transition-colors ${
-                      filtroRangoDias.activo
-                        ? 'bg-red-600 text-white hover:bg-red-700'
-                        : 'bg-green-600 text-white hover:bg-green-700'
-                    }`}
-                  >
-                    {filtroRangoDias.activo ? 'Desactivar' : 'Aplicar'}
-                  </button>
-                </div>
-                
-                <div className="flex items-end">
-                  <button
-                    onClick={limpiarFiltroRango}
-                    className="w-full px-4 py-2 bg-gray-500 text-white rounded font-medium hover:bg-gray-600 transition-colors"
-                  >
-                    Limpiar
-                  </button>
-                </div>
+                <button
+                  onClick={limpiarFiltroRango}
+                  className="px-4 py-1 bg-gray-500 text-white rounded text-sm font-medium hover:bg-gray-600 transition-colors"
+                >
+                  Limpiar
+                </button>
               </div>
               
-              {/* Botones rápidos para rangos comunes */}
-              <div className="mt-3 pt-3 border-t border-gray-200">
-                <p className="text-xs font-medium text-gray-600 mb-2">Rangos rápidos:</p>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => {
-                      actualizarRangoDias(1, 15);
-                      setFiltroRangoDias(prev => ({ ...prev, activo: true }));
-                    }}
-                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200"
-                  >
-                    Primera quincena (1-15)
-                  </button>
-                  <button
-                    onClick={() => {
-                      const diasEnMes = new Date(añoActual, mesActual + 1, 0).getDate();
-                      actualizarRangoDias(16, diasEnMes);
-                      setFiltroRangoDias(prev => ({ ...prev, activo: true }));
-                    }}
-                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200"
-                  >
-                    Segunda quincena (16-{new Date(añoActual, mesActual + 1, 0).getDate()})
-                  </button>
-                  <button
-                    onClick={() => {
-                      actualizarRangoDias(15, 24);
-                      setFiltroRangoDias(prev => ({ ...prev, activo: true }));
-                    }}
-                    className="px-3 py-1 bg-purple-100 text-purple-700 rounded text-xs hover:bg-purple-200"
-                  >
-                    15 al 24
-                  </button>
-                </div>
+              {/* Fila única: Rangos rápidos */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-medium text-gray-600">Rangos rápidos:</span>
+                <button
+                  onClick={() => {
+                    actualizarRangoDias(1, 15);
+                    setFiltroRangoDias(prev => ({ ...prev, activo: true }));
+                  }}
+                  className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium hover:bg-blue-200 transition-colors"
+                >
+                  1ª Quincena (1-15)
+                </button>
+                <button
+                  onClick={() => {
+                    const diasEnMes = new Date(añoActual, mesActual + 1, 0).getDate();
+                    actualizarRangoDias(16, diasEnMes);
+                    setFiltroRangoDias(prev => ({ ...prev, activo: true }));
+                  }}
+                  className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium hover:bg-blue-200 transition-colors"
+                >
+                  2ª Quincena (16-{new Date(añoActual, mesActual + 1, 0).getDate()})
+                </button>
+                <button
+                  onClick={() => {
+                    actualizarRangoDias(15, 24);
+                    setFiltroRangoDias(prev => ({ ...prev, activo: true }));
+                  }}
+                  className="px-3 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium hover:bg-purple-200 transition-colors"
+                >
+                  15 al 24
+                </button>
               </div>
             </div>
           )}
