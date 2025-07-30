@@ -3,6 +3,7 @@ import api from '../../services/api';
 import { useAuth } from '@clerk/clerk-react';
 import ModalIngreso from './ModalIngreso';
 import ModalEgreso from './ModalEgreso';
+import EstadisticasRapidas from './EstadisticasRapidas';
 
 function Caja() {
   const { getToken } = useAuth();  const [resumen, setResumen] = useState(null);
@@ -11,13 +12,48 @@ function Caja() {
   const [error, setError] = useState(null);
   const [isModalIngresoOpen, setIsModalIngresoOpen] = useState(false);
   const [isModalEgresoOpen, setIsModalEgresoOpen] = useState(false);
-  const [periodo, setPeriodo] = useState('day');
+  const [periodo, setPeriodo] = useState('month');
 
   const periodos = [
     { value: 'day', label: 'Hoy' },
     { value: 'week', label: 'Esta Semana' },
     { value: 'month', label: 'Este Mes' }
   ];
+
+  // Función para obtener el rango de fechas del período seleccionado
+  const obtenerRangoFechas = () => {
+    const ahora = new Date();
+    let inicio, fin;
+
+    switch (periodo) {
+      case 'day':
+        inicio = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+        fin = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 23, 59, 59);
+        break;
+      case 'week':
+        const diaSemana = ahora.getDay();
+        const diasAtras = diaSemana === 0 ? 6 : diaSemana - 1; // Lunes como primer día
+        inicio = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - diasAtras);
+        fin = new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate() + 6, 23, 59, 59);
+        break;
+      case 'month':
+        inicio = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+        fin = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0, 23, 59, 59);
+        break;
+      default:
+        return '';
+    }
+
+    const formatearFechaRango = (fecha) => {
+      return fecha.toLocaleDateString('es-PE', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    };
+
+    return `${formatearFechaRango(inicio)} - ${formatearFechaRango(fin)}`;
+  };
   // Obtener resumen de la caja
   const fetchResumen = useCallback(async () => {
     setLoading(true);
@@ -151,23 +187,28 @@ function Caja() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-4 lg:p-6">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-800">💰 Control de Caja</h2>
-          <p className="text-gray-600">Gestión centralizada de ingresos y egresos</p>
-        </div>
-        <div className="flex space-x-3">
-          <select
-            value={periodo}
-            onChange={(e) => setPeriodo(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          >
-            {periodos.map(p => (
-              <option key={p.value} value={p.value}>{p.label}</option>
-            ))}
-          </select>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 lg:mb-6 gap-3 lg:gap-4">
+        <div className="flex-1">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-1 lg:mb-2">
+            <h2 className="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-800">💰 Control de Caja</h2>
+            <select
+              value={periodo}
+              onChange={(e) => setPeriodo(e.target.value)}
+              className="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm w-fit"
+            >
+              {periodos.map(p => (
+                <option key={p.value} value={p.value}>{p.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <p className="text-gray-600 text-sm">Gestión centralizada de ingresos y egresos</p>
+            <p className="text-xs text-gray-500 font-medium">
+              📅 Período: {obtenerRangoFechas()}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -177,97 +218,69 @@ function Caja() {
         </div>
       )}
 
-      {/* Saldo Principal y Botones de Acción */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 mb-8 text-white">
-        <div className="text-center mb-6">
-          <h3 className="text-lg font-medium opacity-90">Saldo Actual</h3>
-          <p className={`text-5xl font-bold mb-2 ${
-            resumen?.saldoActual >= 0 ? 'text-green-200' : 'text-red-200'
-          }`}>
-            {resumen ? formatearMonto(resumen.saldoActual) : 'S/. 0.00'}
-          </p>
-          <p className="text-sm opacity-75">
-            Actualizado en tiempo real
-          </p>
-        </div>        <div className="flex justify-center space-x-4">
-          <button
-            onClick={() => setIsModalIngresoOpen(true)}
-            className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg"
-          >
-            ➕ Registrar Ingreso
-          </button>
-          <button
-            onClick={() => setIsModalEgresoOpen(true)}
-            className="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg"
-          >
-            ➖ Registrar Egreso
-          </button>
+      {/* Layout responsivo: Saldo Principal y Métricas */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 mb-6 lg:mb-8">
+        {/* Saldo Principal y Botones de Acción */}
+        <div className="lg:col-span-7">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-4 lg:p-6 text-white h-full">
+            <div className="text-center mb-4 lg:mb-6">
+              <h3 className="text-base lg:text-lg font-medium opacity-90">Saldo Actual</h3>
+              <p className={`text-3xl lg:text-4xl font-bold mb-2 ${
+                resumen?.saldoActual >= 0 ? 'text-green-200' : 'text-red-200'
+              }`}>
+                {resumen ? formatearMonto(resumen.saldoActual) : 'S/. 0.00'}
+              </p>
+              <p className="text-sm opacity-75">
+                Actualizado en tiempo real
+              </p>
+            </div>
+            
+            <div className="flex justify-center gap-2 sm:gap-4">
+              <button
+                onClick={() => setIsModalIngresoOpen(true)}
+                className="bg-green-500 hover:bg-green-600 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg text-sm sm:text-base"
+              >
+                ➕ Registrar Ingreso
+              </button>
+              <button
+                onClick={() => setIsModalEgresoOpen(true)}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg text-sm sm:text-base"
+              >
+                ➖ Registrar Egreso
+              </button>
+            </div>
+          </div>
         </div>
+
+        {/* Métricas del Período - Ocupa el resto del espacio */}
+        {resumen && (
+          <div className="lg:col-span-5">
+            <EstadisticasRapidas 
+              resumen={resumen}
+              periodos={periodos}
+              periodo={periodo}
+              formatearMonto={formatearMonto}
+            />
+          </div>
+        )}
       </div>
 
-      {/* Métricas del Período */}
-      {resumen && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-green-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Ingresos ({periodos.find(p => p.value === periodo)?.label})
-                </p>
-                <p className="text-2xl font-bold text-green-600">
-                  {formatearMonto(resumen.totalIngresos)}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <span className="text-green-600 text-xl">📈</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-red-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Egresos ({periodos.find(p => p.value === periodo)?.label})
-                </p>
-                <p className="text-2xl font-bold text-red-600">
-                  {formatearMonto(resumen.totalEgresos)}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                <span className="text-red-600 text-xl">📉</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Flujo Neto</p>
-                <p className={`text-2xl font-bold ${
-                  resumen.flujoNeto >= 0 ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {formatearMonto(resumen.flujoNeto)}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 text-xl">⚖️</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Lista de Movimientos */}
+      {/* Lista de Movimientos - Responsiva */}
       <div className="bg-white rounded-xl shadow-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-800">
-            Movimientos Recientes ({movimientos.length})
-          </h3>
+        <div className="px-4 lg:px-6 py-3 lg:py-4 border-b border-gray-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <h3 className="text-base lg:text-lg font-semibold text-gray-800">
+              Movimientos Recientes
+            </h3>
+            <span className="text-xs lg:text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+              {movimientos.length} registros
+            </span>
+          </div>
         </div>
         
         {movimientos.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
+            <div className="text-4xl mb-4">📊</div>
             <p className="text-lg mb-2">No hay movimientos registrados</p>
             <p className="text-sm">Los movimientos aparecerán aquí una vez que los registres</p>
           </div>
@@ -276,69 +289,92 @@ function Caja() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 sm:px-3 lg:px-4 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Fecha
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 sm:px-3 lg:px-4 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                     Tipo
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 sm:px-3 lg:px-4 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Categoría
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 sm:px-3 lg:px-4 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Descripción
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 sm:px-3 lg:px-4 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Monto
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 sm:px-3 lg:px-4 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                     Saldo
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 sm:px-3 lg:px-4 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Origen
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {movimientos.map((mov, index) => (
-                  <tr key={mov._id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatearFecha(mov.fecha)}
+                  <tr key={mov._id} className={`hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                    <td className="px-2 sm:px-3 lg:px-4 py-1.5 lg:py-2 whitespace-nowrap text-xs sm:text-sm text-gray-900">
+                      <div className="font-medium">{formatearFecha(mov.fecha)}</div>
+                      {/* Mostrar tipo en móvil como parte de la fecha */}
+                      <div className="md:hidden">
+                        <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full mt-1 ${
+                          mov.tipo === 'ingreso' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {mov.tipo === 'ingreso' ? '⬆️ Ingreso' : '⬇️ Egreso'}
+                        </span>
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-2 sm:px-3 lg:px-4 py-1.5 lg:py-2 whitespace-nowrap hidden md:table-cell">
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                         mov.tipo === 'ingreso' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
                         {mov.tipo === 'ingreso' ? '⬆️ Ingreso' : '⬇️ Egreso'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {categoriasDisponibles[mov.tipo + 's']?.find(c => c.value === mov.categoria)?.label || mov.categoria}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">
-                      <div className="truncate" title={mov.descripcion}>
-                        {mov.descripcion}
+                    <td className="px-2 sm:px-3 lg:px-4 py-1.5 lg:py-2 whitespace-nowrap text-xs sm:text-sm text-gray-900">
+                      <div className="font-medium">
+                        {categoriasDisponibles[mov.tipo + 's']?.find(c => c.value === mov.categoria)?.label || mov.categoria}
                       </div>
                     </td>
-                    <td className={`px-6 py-4 whitespace-nowrap text-sm font-bold ${
+                    <td className="px-2 sm:px-3 lg:px-4 py-1.5 lg:py-2 text-xs sm:text-sm text-gray-900 max-w-xs">
+                      <div className="truncate font-medium" title={mov.descripcion}>
+                        {mov.descripcion}
+                      </div>
+                      {/* Mostrar saldo en móvil como parte de la descripción */}
+                      <div className="lg:hidden mt-1">
+                        <span className={`text-xs font-medium ${
+                          mov.saldoActual >= 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          Saldo: {formatearMonto(mov.saldoActual)}
+                        </span>
+                      </div>
+                    </td>
+                    <td className={`px-2 sm:px-3 lg:px-4 py-1.5 lg:py-2 whitespace-nowrap text-xs sm:text-sm font-bold ${
                       mov.tipo === 'ingreso' ? 'text-green-600' : 'text-red-600'
                     }`}>
-                      {mov.tipo === 'ingreso' ? '+' : '-'}{formatearMonto(mov.monto)}
+                      <div className="font-bold">
+                        {mov.tipo === 'ingreso' ? '+' : '-'}{formatearMonto(mov.monto)}
+                      </div>
                     </td>
-                    <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
+                    <td className={`px-2 sm:px-3 lg:px-4 py-1.5 lg:py-2 whitespace-nowrap text-xs sm:text-sm font-medium hidden lg:table-cell ${
                       mov.saldoActual >= 0 ? 'text-green-600' : 'text-red-600'
                     }`}>
-                      {formatearMonto(mov.saldoActual)}
-                    </td>                    <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                      <div className="flex items-center space-x-2">
-                        <span>{mov.esAutomatico ? '🤖 Auto' : '✋ Manual'}</span>
+                      <div className="font-bold">
+                        {formatearMonto(mov.saldoActual)}
+                      </div>
+                    </td>
+                    <td className="px-2 sm:px-3 lg:px-4 py-1.5 lg:py-2 whitespace-nowrap text-xs sm:text-sm text-gray-500">
+                      <div className="flex items-center space-x-1 sm:space-x-2">
+                        <span className="text-xs font-medium">{mov.esAutomatico ? '🤖' : '✋'}</span>
                         <button
                           onClick={() => handleEliminarMovimiento(mov._id)}
                           className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded-md transition-colors duration-200"
                           title="Eliminar movimiento"
                           disabled={loading}
                         >
-                          🗑️
+                          <span className="text-xs">🗑️</span>
                         </button>
                       </div>
                     </td>
@@ -348,7 +384,9 @@ function Caja() {
             </table>
           </div>
         )}
-      </div>      {/* Modales */}
+      </div>
+
+      {/* Modales */}
       <ModalIngreso 
         isOpen={isModalIngresoOpen}
         onClose={() => setIsModalIngresoOpen(false)}

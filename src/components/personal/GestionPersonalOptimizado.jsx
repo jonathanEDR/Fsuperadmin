@@ -59,13 +59,13 @@ function GestionPersonal() {
     }
   };
 
-  // NUEVA FUNCIÓN: Cargar estadísticas mejoradas para todos los colaboradores
+  // NUEVA FUNCIÓN OPTIMIZADA: Cargar estadísticas mejoradas para todos los colaboradores
   const cargarEstadisticasMejoradas = async (colaboradoresEspecificos = null) => {
     try {
       setLoadingEstadisticas(true);
-      console.log('🔍 Cargando estadísticas mejoradas para colaboradores...');
+      console.log('� Cargando estadísticas mejoradas OPTIMIZADAS para colaboradores...');
       
-      // Usar colaboradores específicos o obtenerlos del estado actual o del servicio
+      // Usar colaboradores específicos o obtenerlos del estado actual
       let colaboradoresParaProcesar = colaboradoresEspecificos || colaboradores;
       if (colaboradoresParaProcesar.length === 0) {
         try {
@@ -77,34 +77,104 @@ function GestionPersonal() {
         }
       }
       
-      const estadisticasMap = {};
-      
-      console.log(`📊 Procesando ${colaboradoresParaProcesar.length} colaboradores para estadísticas mejoradas`);
-      
-      // Obtener estadísticas mejoradas para cada colaborador
-      for (const colaborador of colaboradoresParaProcesar) {
-        try {
-          console.log(`🔍 Obteniendo estadísticas mejoradas para: ${colaborador.nombre_negocio}`);
-          const estadisticas = await gestionPersonalService.obtenerEstadisticasMejoradas(colaborador.clerk_id);
-          estadisticasMap[colaborador.clerk_id] = estadisticas.estadisticas;
-          console.log(`✅ Estadísticas obtenidas para ${colaborador.nombre_negocio}:`, estadisticas.estadisticas);
-        } catch (error) {
-          console.warn(`⚠️ No se pudieron obtener estadísticas mejoradas para ${colaborador.nombre_negocio}:`, error.message);
-          // Usar estadísticas básicas como fallback
-          try {
-            const estadisticasBasicas = await gestionPersonalService.obtenerEstadisticasColaborador(colaborador.clerk_id);
-            estadisticasMap[colaborador.clerk_id] = estadisticasBasicas;
-            console.log(`📋 Usando estadísticas básicas para ${colaborador.nombre_negocio}:`, estadisticasBasicas);
-          } catch (basicError) {
-            console.error(`❌ Error al obtener estadísticas básicas para ${colaborador.nombre_negocio}:`, basicError.message);
-          }
-        }
+      if (colaboradoresParaProcesar.length === 0) {
+        console.log('ℹ️ No hay colaboradores para procesar estadísticas');
+        setEstadisticasMejoradas({});
+        return;
       }
       
-      console.log('📊 Estadísticas cargadas:', estadisticasMap);
+      console.log(`� Procesando ${colaboradoresParaProcesar.length} colaboradores con nuevo método BULK optimizado`);
+      
+      try {
+        // 🚀 OPTIMIZACIÓN: Usar endpoint bulk que procesa todos en paralelo
+        const colaboradorIds = colaboradoresParaProcesar.map(c => c.clerk_id);
+        const resultadoBulk = await gestionPersonalService.obtenerEstadisticasBulk(colaboradorIds);
+        
+        if (resultadoBulk.success && resultadoBulk.resultados) {
+          const estadisticasMap = {};
+          
+          resultadoBulk.resultados.forEach(resultado => {
+            if (resultado.success && resultado.estadisticas) {
+              estadisticasMap[resultado.colaboradorId] = resultado.estadisticas;
+              console.log(`✅ Estadísticas bulk obtenidas para ${resultado.colaboradorId}${resultado.fallback ? ' (fallback)' : ''}`);
+            } else {
+              console.warn(`⚠️ Error en estadísticas bulk para ${resultado.colaboradorId}:`, resultado.error);
+            }
+          });
+          
+          console.log(`🎯 Estadísticas bulk completadas: ${resultadoBulk.exitosos}/${resultadoBulk.totalProcesados} exitosos`);
+          setEstadisticasMejoradas(estadisticasMap);
+          return;
+        }
+      } catch (bulkError) {
+        console.warn('⚠️ Error con método bulk, usando método individual como fallback:', bulkError.message);
+      }
+      
+      // 🔄 FALLBACK: Si el método bulk falla, usar el método individual PARALELO
+      console.log('🔄 Usando método individual paralelo como fallback...');
+      
+      const promesasEstadisticas = colaboradoresParaProcesar.map(async (colaborador) => {
+        try {
+          const estadisticas = await gestionPersonalService.obtenerEstadisticasMejoradas(colaborador.clerk_id);
+          return { 
+            colaboradorId: colaborador.clerk_id, 
+            estadisticas: estadisticas.estadisticas,
+            nombre: colaborador.nombre_negocio,
+            success: true
+          };
+        } catch (error) {
+          console.warn(`⚠️ No se pudieron obtener estadísticas mejoradas para ${colaborador.nombre_negocio}:`, error.message);
+          
+          // Fallback a estadísticas básicas
+          try {
+            const estadisticasBasicas = await gestionPersonalService.obtenerEstadisticasColaborador(colaborador.clerk_id);
+            return { 
+              colaboradorId: colaborador.clerk_id, 
+              estadisticas: estadisticasBasicas,
+              nombre: colaborador.nombre_negocio,
+              success: true,
+              fallback: true
+            };
+          } catch (basicError) {
+            console.error(`❌ Error al obtener estadísticas básicas para ${colaborador.nombre_negocio}:`, basicError.message);
+            return { 
+              colaboradorId: colaborador.clerk_id, 
+              estadisticas: null,
+              nombre: colaborador.nombre_negocio,
+              success: false,
+              error: basicError.message
+            };
+          }
+        }
+      });
+      
+      // 🚀 Ejecutar todas las promesas en paralelo
+      const resultados = await Promise.all(promesasEstadisticas);
+      
+      // Mapear resultados exitosos
+      const estadisticasMap = {};
+      let exitosos = 0;
+      let conFallback = 0;
+      let conError = 0;
+      
+      resultados.forEach(resultado => {
+        if (resultado.success && resultado.estadisticas) {
+          estadisticasMap[resultado.colaboradorId] = resultado.estadisticas;
+          exitosos++;
+          if (resultado.fallback) conFallback++;
+          console.log(`✅ Estadísticas obtenidas para ${resultado.nombre}${resultado.fallback ? ' (fallback básico)' : ''}`);
+        } else {
+          conError++;
+          console.error(`❌ Error final para ${resultado.nombre}:`, resultado.error);
+        }
+      });
+      
+      console.log(`📊 Estadísticas individuales completadas: ${exitosos} exitosos (${conFallback} con fallback), ${conError} con errores`);
       setEstadisticasMejoradas(estadisticasMap);
+      
     } catch (error) {
-      console.error('❌ Error al cargar estadísticas mejoradas:', error);
+      console.error('❌ Error general al cargar estadísticas mejoradas:', error);
+      setEstadisticasMejoradas({});
     } finally {
       setLoadingEstadisticas(false);
     }
@@ -269,13 +339,9 @@ function GestionPersonal() {
   };
 
   const calcularTotales = (colaboradorId) => {
-    // Debug: mostrar qué estadísticas tenemos
-    console.log(`🔍 calcularTotales para colaborador ${colaboradorId}:`, estadisticasMejoradas[colaboradorId]);
-    
     // Primero intentar usar estadísticas mejoradas
     const estadisticas = estadisticasMejoradas[colaboradorId];
     if (estadisticas && typeof estadisticas === 'object') {
-      console.log(`✅ Usando estadísticas mejoradas para ${colaboradorId}`);
       return {
         gastos: estadisticas.totalGastos || 0,
         faltantes: estadisticas.totalFaltantes || 0,
@@ -380,8 +446,13 @@ function GestionPersonal() {
               <div className="p-8 text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
                 <p className="mt-2 text-gray-600">
-                  {loading ? 'Cargando colaboradores...' : 'Cargando estadísticas...'}
+                  {loading ? 'Cargando colaboradores...' : loadingEstadisticas ? 'Optimizando estadísticas...' : 'Cargando datos...'}
                 </p>
+                {loadingEstadisticas && (
+                  <p className="mt-1 text-xs text-blue-600">
+                    🚀 Procesando estadísticas en paralelo para mejor rendimiento
+                  </p>
+                )}
               </div>
             ) : colaboradores.length === 0 ? (
               <div className="p-8 text-center text-gray-500">

@@ -120,6 +120,22 @@ export const gestionPersonalService = {
     }
   },
 
+  // 🚀 NUEVO: Obtener estadísticas para múltiples colaboradores en paralelo (OPTIMIZACIÓN)
+  obtenerEstadisticasBulk: async (colaboradorIds = null) => {
+    try {
+      const params = new URLSearchParams();
+      if (colaboradorIds && Array.isArray(colaboradorIds)) {
+        params.append('colaboradorIds', colaboradorIds.join(','));
+      }
+      
+      const url = `/api/gestion-personal/estadisticas-bulk${params.toString() ? '?' + params.toString() : ''}`;
+      const response = await api.get(url);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Error al obtener estadísticas bulk');
+    }
+  },
+
   // Actualizar registro existente
   actualizarRegistro: async (registroId, datos) => {
     try {

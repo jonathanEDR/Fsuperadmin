@@ -1,0 +1,128 @@
+/* Mejoras de responsividad para el componente Caja */
+
+/* Estilos para pantallas pequeñas */
+@media (max-width: 640px) {
+  .caja-container {
+    padding: 1rem;
+  }
+  
+  .caja-header {
+    gap: 1rem;
+  }
+  
+  .caja-saldo-card {
+    padding: 1.5rem;
+  }
+  
+  .caja-saldo-text {
+    font-size: 2.5rem;
+  }
+  
+  .caja-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Estilos para tablets */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .caja-container {
+    padding: 1.5rem;
+  }
+  
+  .caja-saldo-text {
+    font-size: 3rem;
+  }
+  
+  .caja-estadisticas-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Estilos para desktop */
+@media (min-width: 1025px) {
+  .caja-container {
+    padding: 2rem;
+  }
+  
+  .caja-layout-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .caja-estadisticas-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Estilos para pantallas extra grandes */
+@media (min-width: 1280px) {
+  .caja-layout-grid {
+    grid-template-columns: 2fr 2fr;
+    gap: 2rem;
+  }
+  
+  .caja-movimientos-table {
+    font-size: 0.875rem;
+  }
+  
+  .caja-movimientos-table th,
+  .caja-movimientos-table td {
+    padding: 1rem;
+  }
+}
+
+/* Animaciones mejoradas */
+.caja-card-hover {
+  transition: all 0.2s ease-in-out;
+}
+
+.caja-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.caja-button-hover {
+  transition: all 0.2s ease-in-out;
+}
+
+.caja-button-hover:hover {
+  transform: scale(1.02);
+}
+
+/* Mejoras para accesibilidad */
+.caja-focus-ring:focus {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+}
+
+/* Estilos para el estado de carga */
+.caja-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Optimizaciones para impresión */
+@media print {
+  .caja-container {
+    padding: 0;
+    background: white;
+  }
+  
+  .caja-saldo-card {
+    background: white !important;
+    color: black !important;
+    border: 1px solid #ccc;
+  }
+  
+  .caja-button {
+    display: none;
+  }
+  
+  .caja-movimientos-mobile {
+    display: none;
+  }
+  
+  .caja-movimientos-desktop {
+    display: block !important;
+  }
+}

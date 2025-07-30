@@ -15,7 +15,7 @@ const ModalEgreso = ({ isOpen, onClose, onSuccess }) => {
     setError: setPersonalError
   } = usePersonalPayment();
   // Usar el hook de gestión personal para obtener colaboradores, registros y pagos
-  const { colaboradores, registros, pagos } = useGestionPersonalData();
+  const { colaboradores, registros, pagos, datosCobros } = useGestionPersonalData();
   const [montoPendiente, setMontoPendiente] = useState(0);
   const [selectedSection, setSelectedSection] = useState('');
   
@@ -31,25 +31,50 @@ const ModalEgreso = ({ isOpen, onClose, onSuccess }) => {
     proveedor: '',
     numeroComprobante: '',
     observaciones: ''
-  });// Cargar datos cuando se abre el modal
-  useEffect(() => {
-    // Ya no es necesario cargar colaboradores aquí
-  }, [isOpen]);
+  });
 
-  // Calcular monto pendiente por colaborador usando lógica local (igual que PagosRealizados)
+  // Cargar datos cuando se abre el modal
+  useEffect(() => {
+    if (isOpen) {
+      // Modal abierto - datos disponibles para cálculos
+    }
+  }, [isOpen, colaboradores, registros, pagos, datosCobros]);
+
+  // Calcular monto pendiente por colaborador usando EXACTAMENTE la misma lógica que PagosRealizados
   const calcularMontoPendienteColaborador = (colaboradorId) => {
     if (!colaboradorId) return 0;
+    
+    // Obtener registros de gestión del colaborador
     const registrosColaborador = (registros || []).filter(r => r.colaboradorUserId === colaboradorId);
     const pagosColaborador = (pagos || []).filter(p => p.colaboradorUserId === colaboradorId);
-    const totalGenerado = registrosColaborador.reduce((total, registro) => {
-      const pagodiario = registro.pagodiario || 0;
-      const faltante = registro.faltante || 0;
-      const adelanto = registro.adelanto || 0;
-      return total + (pagodiario - faltante - adelanto);
-    }, 0);
+    
+    // Calcular totales de gestión básica (pagosDiarios y adelantos)
+    const totalesGestion = registrosColaborador.reduce((totales, registro) => ({
+      pagosDiarios: totales.pagosDiarios + (registro.pagodiario || 0),
+      adelantos: totales.adelantos + (registro.adelanto || 0)
+    }), { pagosDiarios: 0, adelantos: 0 });
+    
+    // Calcular faltantes de cobros del colaborador (exactamente como en PagosRealizados)
+    let faltantesCobros = 0;
+    if (datosCobros && datosCobros.resumen && datosCobros.resumen.cobrosDetalle) {
+      // Filtrar cobros que pertenecen a este colaborador
+      const cobrosColaborador = datosCobros.resumen.cobrosDetalle.filter(cobro => 
+        cobro.colaboradorUserId === colaboradorId || cobro.vendedorUserId === colaboradorId
+      );
+      
+      faltantesCobros = cobrosColaborador.reduce((total, cobro) => total + (cobro.faltantes || 0), 0);
+    }
+    
+    // FÓRMULA EXACTA: totalAPagar = pagosDiarios - faltantesCobros - adelantos
+    const totalAPagar = totalesGestion.pagosDiarios - faltantesCobros - totalesGestion.adelantos;
+    
+    // El saldo pendiente es lo que debe cobrar menos lo que ya se le pagó
     const totalPagado = pagosColaborador.reduce((total, pago) => total + pago.montoTotal, 0);
-    return totalGenerado - totalPagado;
-  };  const categoriasEgreso = [
+    
+    return totalAPagar - totalPagado;
+  };
+
+  const categoriasEgreso = [
     // Finanzas
     { value: 'pago_personal_finanzas', label: 'Pago Personal', section: 'finanzas', icon: '👥', color: 'blue' },
     { value: 'materia_prima_finanzas', label: 'Materia Prima', section: 'finanzas', icon: '📦', color: 'blue' },
@@ -148,7 +173,7 @@ const ModalEgreso = ({ isOpen, onClose, onSuccess }) => {
         setMontoPendiente(monto);
         
         if (monto <= 0) {
-          setError('Este colaborador no tiene monto pendiente para pagar');
+          setError(`Este colaborador no tiene monto pendiente para pagar. Saldo actual: S/. ${monto.toFixed(2)}`);
         } else {
           // Limpiar error si hay monto válido
           if (error && error.includes('monto pendiente')) {
@@ -172,7 +197,12 @@ const ModalEgreso = ({ isOpen, onClose, onSuccess }) => {
         setMontoPendiente(monto);
         
         if (monto <= 0) {
-          setError('Este colaborador no tiene monto pendiente para pagar');
+          setError(`Este colaborador no tiene monto pendiente para pagar. Saldo actual: S/. ${monto.toFixed(2)}`);
+        } else {
+          // Limpiar error si hay monto válido
+          if (error && error.includes('monto pendiente')) {
+            setError(null);
+          }
         }
       } catch (err) {
         setError('Error al calcular el monto pendiente');
