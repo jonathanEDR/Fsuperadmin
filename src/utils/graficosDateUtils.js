@@ -78,8 +78,9 @@ export const calcularIndiceParaFecha = (fecha, filter, startDate) => {
       break;
       
     case 'mes':
-      // Para mes: índice basado en el día del mes (1-31 → 0-30)
-      indexPos = fecha.getDate() - 1;
+      // ✅ CORRECCIÓN: Para mes, calcular días transcurridos desde startDate
+      // No usar getDate() porque ignora el startDate
+      indexPos = Math.floor((fecha - startDate) / (24 * 60 * 60 * 1000));
       break;
       
     case 'anual':
