@@ -1,25 +1,31 @@
 import React, { useState } from 'react';
 import { CreditCard, DollarSign } from 'lucide-react';
+import { useRole } from '../../context/RoleContext';
 import Caja from '../Caja/Caja';
 import GastoList from '../gasto/GastoList';
 
 const GestionCaja = () => {
   const [activeTab, setActiveTab] = useState('caja');
+  const userRole = useRole(); // Usar el contexto de rol
 
   const tabs = [
     {
       id: 'caja',
       label: 'Caja',
       icon: CreditCard,
-      component: <Caja />
-    },
-    {
+      component: <Caja userRole={userRole} />
+    }
+  ];
+
+  // Solo agregar tab de gastos para super_admin
+  if (userRole === 'super_admin') {
+    tabs.push({
       id: 'gastos',
       label: 'Gastos',
       icon: DollarSign,
       component: <GastoList />
-    }
-  ];
+    });
+  }
 
   const activeTabData = tabs.find(tab => tab.id === activeTab);
 

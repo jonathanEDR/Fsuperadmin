@@ -3,8 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import AdminSidebar from '../sidebars/AdminSidebar';
 import { Menu, ChevronLeft, ChevronRight } from 'lucide-react';
+import { RoleContext } from '../../../context/RoleContext';
+import { useUserRole } from '../../../hooks/useUserRole';
 
 function AdminDashboardLayout({ children, onLogout }) {
+  const { userRole, isLoading: roleLoading } = useUserRole();
   const [isMobileView, setIsMobileView] = useState(window.innerWidth < 1024);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -27,8 +30,19 @@ function AdminDashboardLayout({ children, onLogout }) {
     }
   };
 
+  // DEBUG: Verificar el rol en AdminDashboard
+  React.useEffect(() => {
+    console.log('🔧 AdminDashboard - RoleContext.Provider value:', userRole);
+  }, [userRole]);
+
+  // Mostrar loading mientras se obtiene el rol
+  if (roleLoading) {
+    return <div className="flex items-center justify-center h-screen">Cargando...</div>;
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 flex relative">
+    <RoleContext.Provider value={userRole || 'user'}>
+      <div className="min-h-screen bg-gray-50 flex relative">
       {/* Botón de menú hamburguesa solo en móvil */}
       {isMobileView && (
         <button
@@ -49,6 +63,7 @@ function AdminDashboardLayout({ children, onLogout }) {
       )}
 
       <AdminSidebar
+        userRole={userRole}
         isCollapsed={isMobileView ? false : isSidebarCollapsed}
         toggleSidebar={toggleSidebar}
         isMobileView={isMobileView}
@@ -80,6 +95,7 @@ function AdminDashboardLayout({ children, onLogout }) {
         {children ? children : <Outlet />}
       </main>
     </div>
+    </RoleContext.Provider>
   );
 }
 

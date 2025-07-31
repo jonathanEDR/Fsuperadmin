@@ -125,6 +125,7 @@ function App() {
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="notas" element={<NotasPage />} />
               <Route path="productos" element={<ProductosPage />} />
+              <Route path="caja" element={<CajaPage />} />
               <Route path="categorias" element={<CategoriasPage />} />
               <Route path="ventas" element={<VentasPage />} />
               <Route path="catalogo" element={<CatalogoPage />} />

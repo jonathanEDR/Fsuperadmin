@@ -5,14 +5,21 @@ import ModalIngreso from './ModalIngreso';
 import ModalEgreso from './ModalEgreso';
 import EstadisticasRapidas from './EstadisticasRapidas';
 
-function Caja() {
-  const { getToken } = useAuth();  const [resumen, setResumen] = useState(null);
+function Caja({ userRole }) {
+  const { getToken } = useAuth();
+  
+  const [resumen, setResumen] = useState(null);
   const [movimientos, setMovimientos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isModalIngresoOpen, setIsModalIngresoOpen] = useState(false);
   const [isModalEgresoOpen, setIsModalEgresoOpen] = useState(false);
   const [periodo, setPeriodo] = useState('month');
+  
+  // Estados para paginación
+  const [currentLimit, setCurrentLimit] = useState(20);
+  const [hasMoreData, setHasMoreData] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const periodos = [
     { value: 'day', label: 'Hoy' },
@@ -76,27 +83,65 @@ function Caja() {
   }, [getToken, periodo]);
 
   // Obtener movimientos
-  const fetchMovimientos = useCallback(async () => {
+  const fetchMovimientos = useCallback(async (limit = currentLimit, append = false) => {
     try {
+      if (!append) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
+      
       const token = await getToken();
       if (!token) return;
 
-      const response = await api.get('/api/caja/movimientos?limit=20', {
+      const response = await api.get(`/api/caja/movimientos?limit=${limit}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      setMovimientos(response.data.movimientos || []);
+      const newMovimientos = response.data.movimientos || [];
+      const pagination = response.data.pagination;
+      
+      if (append) {
+        setMovimientos(newMovimientos);
+      } else {
+        setMovimientos(newMovimientos);
+      }
+      
+      // Verificar si hay más datos disponibles
+      setHasMoreData(pagination && pagination.currentPage < pagination.totalPages);
+      
     } catch (err) {
       console.error('Error al cargar movimientos:', err);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
     }
-  }, [getToken]);  useEffect(() => {
+  }, [getToken, currentLimit]);
+
+  // Función para cargar más registros
+  const handleLoadMore = useCallback(async () => {
+    let newLimit;
+    if (currentLimit === 20) {
+      newLimit = 50;
+    } else if (currentLimit === 50) {
+      newLimit = 100;
+    } else {
+      newLimit = currentLimit + 50; // Incrementar de 50 en 50 después de 100
+    }
+    
+    setCurrentLimit(newLimit);
+    await fetchMovimientos(newLimit, false);
+  }, [currentLimit, fetchMovimientos]);  useEffect(() => {
     fetchResumen();
     fetchMovimientos();
   }, [fetchResumen, fetchMovimientos]);
   // Función para actualizar datos después de registrar movimiento
   const handleMovimientoSuccess = useCallback(async () => {
+    // Resetear el límite y recargar desde el principio
+    setCurrentLimit(20);
+    setHasMoreData(true);
     await fetchResumen();
-    await fetchMovimientos();
+    await fetchMovimientos(20, false);
   }, [fetchResumen, fetchMovimientos]);
 
   // Función para eliminar movimiento
@@ -307,9 +352,18 @@ function Caja() {
                   <th className="px-2 sm:px-3 lg:px-4 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                     Saldo
                   </th>
-                  <th className="px-2 sm:px-3 lg:px-4 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Origen
-                  </th>
+                  {/* Solo mostrar columna Origen para super_admin */}
+                  {userRole === 'super_admin' && (
+                    <th className="px-2 sm:px-3 lg:px-4 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Origen
+                    </th>
+                  )}
+                  {/* Para admin, mostrar columna de acciones sin información de origen */}
+                  {userRole === 'admin' && (
+                    <th className="px-2 sm:px-3 lg:px-4 py-2 lg:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Acciones
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -365,23 +419,74 @@ function Caja() {
                         {formatearMonto(mov.saldoActual)}
                       </div>
                     </td>
-                    <td className="px-2 sm:px-3 lg:px-4 py-1.5 lg:py-2 whitespace-nowrap text-xs sm:text-sm text-gray-500">
-                      <div className="flex items-center space-x-1 sm:space-x-2">
-                        <span className="text-xs font-medium">{mov.esAutomatico ? '🤖' : '✋'}</span>
-                        <button
-                          onClick={() => handleEliminarMovimiento(mov._id)}
-                          className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded-md transition-colors duration-200"
-                          title="Eliminar movimiento"
-                          disabled={loading}
-                        >
-                          <span className="text-xs">🗑️</span>
-                        </button>
-                      </div>
-                    </td>
+                    {/* Solo mostrar columna Origen para super_admin */}
+                    {userRole === 'super_admin' && (
+                      <td className="px-2 sm:px-3 lg:px-4 py-1.5 lg:py-2 whitespace-nowrap text-xs sm:text-sm text-gray-500">
+                        <div className="flex items-center space-x-1 sm:space-x-2">
+                          <span className="text-xs font-medium">{mov.esAutomatico ? '🤖' : '✋'}</span>
+                          <button
+                            onClick={() => handleEliminarMovimiento(mov._id)}
+                            className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded-md transition-colors duration-200"
+                            title="Eliminar movimiento"
+                            disabled={loading}
+                          >
+                            <span className="text-xs">🗑️</span>
+                          </button>
+                        </div>
+                      </td>
+                    )}
+                    {/* Para admin, mostrar botón de eliminar en una columna separada sin mostrar origen */}
+                    {userRole === 'admin' && (
+                      <td className="px-2 sm:px-3 lg:px-4 py-1.5 lg:py-2 whitespace-nowrap text-xs sm:text-sm text-gray-500">
+                        <div className="flex items-center justify-center">
+                          <button
+                            onClick={() => handleEliminarMovimiento(mov._id)}
+                            className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded-md transition-colors duration-200"
+                            title="Eliminar movimiento"
+                            disabled={loading}
+                          >
+                            <span className="text-xs">🗑️</span>
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+        
+        {/* Botón Ver más - Solo visible para super_admin */}
+        {movimientos.length > 0 && hasMoreData && userRole === 'super_admin' && (
+          <div className="px-4 lg:px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <div className="text-center">
+              <button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              >
+                {loadingMore ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Cargando...
+                  </>
+                ) : (
+                  <>
+                    📄 Ver más registros 
+                    <span className="ml-2 text-xs bg-blue-500 px-2 py-1 rounded-full">
+                      {currentLimit === 20 ? '→ 50' : currentLimit === 50 ? '→ 100' : `→ ${currentLimit + 50}`}
+                    </span>
+                  </>
+                )}
+              </button>
+              <div className="mt-2 text-xs text-gray-500">
+                Mostrando {movimientos.length} registros • Límite actual: {currentLimit}
+              </div>
+            </div>
           </div>
         )}
       </div>
