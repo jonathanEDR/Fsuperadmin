@@ -19,12 +19,29 @@ const VentasLineChart = ({ userRole }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [timeFilter, setTimeFilter] = useState('mes'); // hoy, semana, mes, anual
+  const [isMobile, setIsMobile] = useState(false);
   const [totals, setTotals] = useState({
     ventasBrutas: 0,
     devoluciones: 0,
     ventasNetas: 0,
     cantidadVendida: 0
   });
+
+  // Detectar si es móvil
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      // En móvil, forzar vista de semana
+      if (mobile && timeFilter !== 'semana') {
+        setTimeFilter('semana');
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, [timeFilter]);
 
   const processVentasData = (ventas, devoluciones, filter, startDate, endDate) => {
     const labels = generarEtiquetasGrafico(filter, startDate, endDate);
@@ -260,26 +277,33 @@ const VentasLineChart = ({ userRole }) => {
           </h3>
         </div>
         
-        {/* Selector futurista para móvil y desktop */}
+        {/* Selector responsivo - Solo semana en móvil */}
         <div className="w-full sm:w-auto">
           {/* Vista única: Botones tecnológicos modernos */}
           <div className="relative bg-gradient-to-r from-slate-50 to-gray-100 p-1 rounded-2xl border border-gray-200 shadow-lg backdrop-blur-sm">
             {/* Indicador deslizante de fondo */}
             <div 
-              className="absolute top-1 bottom-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 rounded-xl transition-all duration-300 ease-out shadow-lg"
-              style={{
+              className={`absolute top-1 bottom-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 rounded-xl transition-all duration-300 ease-out shadow-lg ${
+                isMobile 
+                  ? 'w-full left-0' 
+                  : `width: ${100/4}%; left: ${(['hoy', 'semana', 'mes', 'anual'].indexOf(timeFilter)) * 25}%`
+              }`}
+              style={!isMobile ? {
                 width: `${100/4}%`,
                 left: `${(['hoy', 'semana', 'mes', 'anual'].indexOf(timeFilter)) * 25}%`,
-              }}
+              } : {}}
             ></div>
             
-            <div className="relative grid grid-cols-4 gap-0">
-              {[
-                { key: 'hoy', label: 'Hoy', icon: '⚡', desc: '24h' },
-                { key: 'semana', label: 'Semana', icon: '📊', desc: '7d' },
-                { key: 'mes', label: 'Mes', icon: '📈', desc: '30d' },
-                { key: 'anual', label: 'Año', icon: '🎯', desc: '365d' }
-              ].map((filter) => (
+            <div className={`relative ${isMobile ? 'grid grid-cols-1' : 'grid grid-cols-4 gap-0'}`}>
+              {(isMobile ? 
+                [{ key: 'semana', label: 'Esta Semana', icon: '📊', desc: '7 días' }] :
+                [
+                  { key: 'hoy', label: 'Hoy', icon: '⚡', desc: '24h' },
+                  { key: 'semana', label: 'Semana', icon: '📊', desc: '7d' },
+                  { key: 'mes', label: 'Mes', icon: '📈', desc: '30d' },
+                  { key: 'anual', label: 'Año', icon: '🎯', desc: '365d' }
+                ]
+              ).map((filter) => (
                 <button
                   key={filter.key}
                   onClick={() => setTimeFilter(filter.key)}
@@ -288,6 +312,7 @@ const VentasLineChart = ({ userRole }) => {
                       ? 'text-white shadow-lg z-10'
                       : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
                   }`}
+                  disabled={isMobile && filter.key !== 'semana'}
                 >
                   <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
                     <span className="text-lg sm:text-base">{filter.icon}</span>

@@ -540,9 +540,17 @@ function VentaList({
     handleCloseAddProduct();
   };
 
-  const handleUpdateQuantity = async (ventaActualizada) => {
+  const handleUpdateQuantity = async (ventaId, productoId, nuevaCantidad) => {
     try {
-      console.log('🔍 VentaList - handleUpdateQuantity recibió:', ventaActualizada);
+      console.log('🔍 VentaList - handleUpdateQuantity llamado con:', {
+        ventaId,
+        productoId,
+        nuevaCantidad
+      });
+      
+      const ventaActualizada = await ventaModificationHook.updateProductQuantity(ventaId, productoId, nuevaCantidad);
+      
+      console.log('✅ VentaList - Venta actualizada recibida:', ventaActualizada);
       
       if (ventaActualizada) {
         // Actualizar la venta en el estado local
@@ -579,14 +587,28 @@ function VentaList({
 
   const handleRemoveProduct = async (ventaId, productoId) => {
     try {
+      console.log('🔍 VentaList - handleRemoveProduct llamado con:', {
+        ventaId,
+        productoId
+      });
+      
       const ventaActualizada = await ventaModificationHook.removeProductFromVenta(ventaId, productoId);
+      
+      console.log('✅ VentaList - Producto eliminado, venta actualizada:', ventaActualizada);
+      
       // Actualizar la venta en el estado local
       setVentas(prevVentas => 
         prevVentas.map(venta => 
           venta._id === ventaId ? ventaActualizada : venta
         )
       );
+      
       showSuccess('Producto eliminado exitosamente');
+      
+      // Notificar al componente padre si hay callback
+      if (onVentaUpdated) {
+        onVentaUpdated(ventaActualizada);
+      }
     } catch (error) {
       console.error('Error al eliminar producto:', error);
       showError(error.message || 'Error al eliminar producto');
@@ -813,6 +835,7 @@ function VentaList({
         setSearchTerm={setSearchTerm}
         setFilters={setFilters}
         usuarios={usuarios}
+        onVentaUpdated={onVentaUpdated}
       />
 
       {ventasLimit < ventasToRender.length && (

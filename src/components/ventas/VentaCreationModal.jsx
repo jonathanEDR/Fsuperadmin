@@ -182,6 +182,17 @@ const [formData, setFormData] = useState({
     });
 
     return productos.filter(producto => {
+      // Validación básica de datos del producto
+      if (!producto.nombre || producto.nombre.trim() === '') {
+        console.warn('Producto sin nombre encontrado:', producto);
+        return false;
+      }
+      
+      if (!producto.precio || producto.precio <= 0) {
+        console.warn('Producto sin precio válido:', producto);
+        return false;
+      }
+      
       // Filtro de stock
       if (producto.cantidadRestante <= 0) return false;
       
@@ -228,6 +239,22 @@ const [formData, setFormData] = useState({
 
     if (!productoSeleccionado) {
       setError('Selecciona un producto');
+      return;
+    }
+
+    // Validación adicional para productos con datos incompletos
+    if (!productoSeleccionado.nombre || productoSeleccionado.nombre.trim() === '') {
+      setError('Este producto no tiene nombre válido. Contacta al administrador.');
+      return;
+    }
+
+    if (!productoSeleccionado.precio || productoSeleccionado.precio <= 0) {
+      setError('Este producto no tiene precio válido. Contacta al administrador.');
+      return;
+    }
+
+    if (cantidadSeleccionada <= 0) {
+      setError('La cantidad debe ser mayor a 0');
       return;
     }
 
@@ -296,6 +323,22 @@ const [formData, setFormData] = useState({
     try {
       if (carrito.length === 0) {
         throw new Error('Agrega al menos un producto');
+      }
+
+      // Validar que todos los productos del carrito tengan datos válidos
+      for (const item of carrito) {
+        if (!item.nombre || item.nombre.trim() === '') {
+          throw new Error('Hay productos sin nombre válido en el carrito');
+        }
+        if (!item.precioUnitario || item.precioUnitario <= 0) {
+          throw new Error('Hay productos sin precio válido en el carrito');
+        }
+        if (!item.cantidad || item.cantidad <= 0) {
+          throw new Error('Hay productos con cantidad inválida en el carrito');
+        }
+        if (!item.productoId) {
+          throw new Error('Hay productos sin ID válido en el carrito');
+        }
       }
 
       const token = await getToken();
@@ -531,9 +574,9 @@ const [formData, setFormData] = useState({
 
               {/* Lista de productos responsiva */}
               <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-3 sm:py-4 min-h-0">
-                <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-lg sm:text-base font-bold text-gray-900">Productos Disponibles</h3>
-                  <span className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-base sm:text-sm font-semibold">
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="text-2xl sm:text-base font-bold text-gray-900">Productos Disponibles</h3>
+                  <span className="px-3 py-2 sm:px-2 sm:py-1 bg-indigo-100 text-indigo-800 rounded-full text-xl sm:text-sm font-semibold">
                     {productosDisponibles.length}
                   </span>
                 </div>
@@ -543,12 +586,12 @@ const [formData, setFormData] = useState({
                     {productosDisponibles.map(producto => (
                       <div key={producto._id} className="bg-white border border-gray-200 rounded-lg p-4 sm:p-3 hover:shadow-md transition-shadow">
                         {/* Primera fila: Nombre y controles */}
-                        <div className="flex items-center justify-between mb-3 sm:mb-2">
+                        <div className="flex items-center justify-between mb-4 sm:mb-2">
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-gray-900 text-xl sm:text-sm truncate leading-tight">{producto.nombre}</h4>
+                            <h4 className="font-semibold text-gray-900 text-2xl sm:text-sm truncate leading-tight">{producto.nombre}</h4>
                           </div>
                           {/* Controles de cantidad y agregar */}
-                          <div className="flex items-center gap-2 ml-2">
+                          <div className="flex items-center gap-3 ml-3">
                             <input
                               type="number"
                               min="1"
@@ -562,7 +605,7 @@ const [formData, setFormData] = useState({
                                   [producto._id]: valor
                                 }));
                               }}
-                              className="w-20 sm:w-14 px-3 py-3 sm:px-2 sm:py-1 text-xl sm:text-sm border border-gray-300 rounded text-center focus:ring-2 focus:ring-indigo-500 font-bold"
+                              className="w-24 sm:w-14 px-4 py-4 sm:px-2 sm:py-1 text-2xl sm:text-sm border border-gray-300 rounded text-center focus:ring-2 focus:ring-indigo-500 font-bold"
                             />
                             
                             <button
@@ -583,7 +626,7 @@ const [formData, setFormData] = useState({
                                   setTimeout(() => setError(''), 3000);
                                 }
                               }}
-                              className="px-5 py-3 sm:px-2 sm:py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xl sm:text-sm font-bold shadow-md"
+                              className="px-6 py-4 sm:px-2 sm:py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-2xl sm:text-sm font-bold shadow-md"
                             >
                               +
                             </button>
@@ -592,24 +635,24 @@ const [formData, setFormData] = useState({
                         
                         {/* Categoría debajo del título si existe */}
                         {producto.categoryName && (
-                          <div className="mb-3 sm:mb-2">
-                            <span className="inline-block px-3 py-1 sm:px-2 sm:py-0.5 text-lg sm:text-xs bg-blue-100 text-blue-800 rounded-full">
+                          <div className="mb-4 sm:mb-2">
+                            <span className="inline-block px-4 py-2 sm:px-2 sm:py-0.5 text-xl sm:text-xs bg-blue-100 text-blue-800 rounded-full font-medium">
                               {producto.categoryName}
                             </span>
                           </div>
                         )}
                         
                         {/* Info del producto en tres columnas con letras más grandes */}
-                        <div className="grid grid-cols-3 gap-4 sm:gap-2">
+                        <div className="grid grid-cols-3 gap-6 sm:gap-2">
                           <div className="text-center">
-                            <div className="text-gray-500 text-lg sm:text-xs mb-2 sm:mb-1">Código</div>
-                            <span className="font-mono bg-gray-100 px-3 py-2 sm:px-1 sm:py-0.5 rounded text-xl sm:text-xs font-bold">
+                            <div className="text-gray-500 text-xl sm:text-xs mb-3 sm:mb-1 font-medium">Código</div>
+                            <span className="font-mono bg-gray-100 px-4 py-3 sm:px-1 sm:py-0.5 rounded text-2xl sm:text-xs font-bold block">
                               {producto.codigoProducto}
                             </span>
                           </div>
                           <div className="text-center">
-                            <div className="text-gray-500 text-lg sm:text-xs mb-2 sm:mb-1">Stock</div>
-                            <span className={`px-3 py-2 sm:px-1 sm:py-0.5 rounded font-bold text-xl sm:text-xs ${
+                            <div className="text-gray-500 text-xl sm:text-xs mb-3 sm:mb-1 font-medium">Stock</div>
+                            <span className={`px-4 py-3 sm:px-1 sm:py-0.5 rounded font-bold text-2xl sm:text-xs block ${
                               producto.cantidadRestante > 10 ? 'bg-green-100 text-green-800' :
                               producto.cantidadRestante > 5 ? 'bg-yellow-100 text-yellow-800' :
                               'bg-red-100 text-red-800'
@@ -618,8 +661,8 @@ const [formData, setFormData] = useState({
                             </span>
                           </div>
                           <div className="text-center">
-                            <div className="text-gray-500 text-lg sm:text-xs mb-2 sm:mb-1">Precio</div>
-                            <span className="font-bold text-green-600 bg-green-50 px-3 py-2 sm:px-1 sm:py-0.5 rounded text-2xl sm:text-sm">
+                            <div className="text-gray-500 text-xl sm:text-xs mb-3 sm:mb-1 font-medium">Precio</div>
+                            <span className="font-bold text-green-600 bg-green-50 px-4 py-3 sm:px-1 sm:py-0.5 rounded text-3xl sm:text-sm block">
                               S/ {producto.precio}
                             </span>
                           </div>
@@ -683,13 +726,13 @@ const [formData, setFormData] = useState({
             {carrito.length > 0 ? (
               <>
                 {/* Header del carrito responsivo */}
-                <div className="p-4 sm:p-4 bg-indigo-600 text-white flex-shrink-0">
+                <div className="p-6 sm:p-4 bg-indigo-600 text-white flex-shrink-0">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl sm:text-lg">🛒</span>
-                      <span className="font-semibold text-lg sm:text-base">Mi Carrito</span>
+                    <div className="flex items-center gap-4">
+                      <span className="text-3xl sm:text-lg">🛒</span>
+                      <span className="font-semibold text-2xl sm:text-base">Mi Carrito</span>
                     </div>
-                    <span className="bg-white/20 px-3 py-1.5 rounded-full text-sm sm:text-xs font-bold">
+                    <span className="bg-white/20 px-4 py-2 sm:px-3 sm:py-1.5 rounded-full text-lg sm:text-xs font-bold">
                       {carrito.length}
                     </span>
                   </div>
@@ -702,24 +745,24 @@ const [formData, setFormData] = useState({
                       <div className="flex items-center justify-between gap-3">
                         {/* Nombre del producto */}
                         <div className="flex-1 min-w-0">
-                          <h5 className="font-semibold text-gray-900 text-lg sm:text-sm truncate leading-tight">
+                          <h5 className="font-semibold text-gray-900 text-2xl sm:text-sm truncate leading-tight">
                             {item.nombre}
                           </h5>
                         </div>
                         
                         {/* Información del producto en línea */}
-                        <div className="flex items-center gap-4 sm:gap-2 text-base sm:text-xs">
+                        <div className="flex items-center gap-6 sm:gap-2 text-base sm:text-xs">
                           <div className="text-center">
-                            <div className="text-gray-500 text-sm sm:text-xs">Cant.</div>
-                            <div className="font-bold text-lg sm:text-sm">{item.cantidad}</div>
+                            <div className="text-gray-500 text-lg sm:text-xs font-medium">Cant.</div>
+                            <div className="font-bold text-2xl sm:text-sm">{item.cantidad}</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-gray-500 text-sm sm:text-xs">Precio</div>
-                            <div className="font-bold text-lg sm:text-sm">S/ {item.precioUnitario.toFixed(2)}</div>
+                            <div className="text-gray-500 text-lg sm:text-xs font-medium">Precio</div>
+                            <div className="font-bold text-2xl sm:text-sm">S/ {item.precioUnitario.toFixed(2)}</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-gray-500 text-sm sm:text-xs">Total</div>
-                            <div className="font-bold text-green-600 text-lg sm:text-sm">S/ {item.subtotal.toFixed(2)}</div>
+                            <div className="text-gray-500 text-lg sm:text-xs font-medium">Total</div>
+                            <div className="font-bold text-green-600 text-2xl sm:text-sm">S/ {item.subtotal.toFixed(2)}</div>
                           </div>
                         </div>
                         
@@ -738,25 +781,29 @@ const [formData, setFormData] = useState({
 
                 {/* Resumen y botones responsivos */}
                 <div className="p-4 sm:p-4 bg-white border-t flex-shrink-0">
-                  <div className="mb-4 sm:mb-4 flex justify-between items-center">
-                    <span className="text-xl sm:text-lg font-bold text-gray-900">Total:</span>
-                    <span className="text-2xl sm:text-2xl font-black text-green-600">
+                  <div className="mb-6 sm:mb-4 flex justify-between items-center">
+                    <span className="text-3xl sm:text-lg font-bold text-gray-900">Total:</span>
+                    <span className="text-4xl sm:text-2xl font-black text-green-600">
                       S/ {montoTotal.toFixed(2)}
                     </span>
                   </div>
                   
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <button
                       type="button"
                       onClick={handleClose}
-                      className="w-full px-4 py-4 sm:py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-lg sm:text-sm font-medium"
+                      className="w-full px-6 py-5 sm:py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-2xl sm:text-sm font-medium"
                     >
                       Cancelar
                     </button>
                     <button
-                      type="submit"
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleSubmit(e);
+                      }}
                       disabled={isSubmitting || carrito.length === 0}
-                      className="w-full px-4 py-4 sm:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-lg sm:text-sm font-medium"
+                      className="w-full px-6 py-5 sm:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-2xl sm:text-sm font-medium"
                     >
                       {isSubmitting ? 'Procesando...' : 'Crear Venta'}
                     </button>
@@ -765,10 +812,10 @@ const [formData, setFormData] = useState({
               </>
             ) : (
               <div className="flex-1 flex items-center justify-center text-gray-500 min-h-0">
-                <div className="text-center p-4">
-                  <div className="text-3xl sm:text-4xl mb-2">🛒</div>
-                  <p className="text-sm font-medium">Carrito vacío</p>
-                  <p className="text-xs text-gray-400">Agrega productos para comenzar</p>
+                <div className="text-center p-6">
+                  <div className="text-6xl sm:text-4xl mb-4">🛒</div>
+                  <p className="text-xl sm:text-sm font-medium">Carrito vacío</p>
+                  <p className="text-lg sm:text-xs text-gray-400 mt-2">Agrega productos para comenzar</p>
                 </div>
               </div>
             )}

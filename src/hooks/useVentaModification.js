@@ -51,6 +51,12 @@ export const useVentaModification = () => {
     setError(null);
     
     try {
+      console.log('🔍 useVentaModification - updateProductQuantity llamado:', {
+        ventaId,
+        productoId,
+        cantidad
+      });
+      
       const token = await getToken();
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/ventas/${ventaId}/productos/${productoId}`, {
         method: 'PUT',
@@ -69,9 +75,10 @@ export const useVentaModification = () => {
       }
 
       const data = await response.json();
+      console.log('✅ useVentaModification - Respuesta exitosa:', data);
       return data.venta;
     } catch (error) {
-      console.error('Error al actualizar cantidad:', error);
+      console.error('❌ Error en updateProductQuantity:', error);
       setError(error.message);
       throw error;
     } finally {

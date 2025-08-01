@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { DollarSign, RotateCcw, Clock, Plus, Check, ChevronDown, ChevronUp, User, Search, Filter, ShoppingCart } from 'lucide-react';
+import { DollarSign, RotateCcw, Clock, Plus, Check, ChevronDown, ChevronUp, User, Search, Filter, ShoppingCart, Package, X, Trash2 } from 'lucide-react';
 import ProductCard from './ProductCard';
 import ClienteCard from './ClienteCard';
+import QuantityModal from './QuantityModal';
 import withProductoSafeGuard from '../../hoc/withProductoSafeGuard';
+import './VentaCards.css';
 
 const VentaViews = ({
   ventasToRender,
@@ -25,13 +27,19 @@ const VentaViews = ({
   filters = {},
   setSearchTerm = () => {},
   setFilters = () => {},
-  usuarios = [] // Lista de usuarios para filtrado
+  usuarios = [], // Lista de usuarios para filtrado
+  onVentaUpdated = () => {} // Callback para notificar cambios
 }) => {
 
   // Estados para la vista de lista por cliente
   const [expandedClients, setExpandedClients] = useState({});
   const [clientSearchTerm, setClientSearchTerm] = useState('');
   const [selectedUserId, setSelectedUserId] = useState(''); // Filtro por usuario
+
+  // Estados para el modal de cantidad
+  const [showQuantityModal, setShowQuantityModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedVentaId, setSelectedVentaId] = useState(null);
 
   // Función para filtrar ventas según rol y usuario seleccionado
   const ventasFiltradas = useMemo(() => {
@@ -110,6 +118,33 @@ const VentaViews = ({
       ...prev,
       [clienteKey]: !prev[clienteKey]
     }));
+  };
+
+  // Funciones para manejar el modal de cantidad
+  const openQuantityModal = (producto, ventaId) => {
+    console.log('🔍 Abriendo modal de cantidad:', { producto, ventaId });
+    setSelectedProduct(producto);
+    setSelectedVentaId(ventaId);
+    setShowQuantityModal(true);
+  };
+
+  const closeQuantityModal = () => {
+    setShowQuantityModal(false);
+    setSelectedProduct(null);
+    setSelectedVentaId(null);
+  };
+
+  const handleQuantityConfirm = (responseData) => {
+    console.log('✅ Cantidad actualizada desde modal:', responseData);
+    
+    // La venta puede venir directamente o dentro de un objeto con la propiedad 'venta'
+    const venta = responseData?.venta || responseData;
+    
+    if (venta && onVentaUpdated) {
+      onVentaUpdated(venta);
+    }
+    
+    closeQuantityModal();
   };
 
   // Helper para determinar por qué no se puede eliminar una venta
@@ -389,10 +424,10 @@ const VentaViews = ({
     );
   };
 
-  // Vista de Tarjetas
+  // Vista de Líneas Compactas - Optimizada para móvil
   const renderCardsView = () => {
     return (
-      <>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4">
         {ventasToRender.map(venta => {
           const puedeFinalizar = (venta.userId === currentUserId || venta.user_info?.id === currentUserId || venta.userInfo?.id === currentUserId) && (userRole === 'user' || userRole === 'admin');
           
@@ -402,352 +437,318 @@ const VentaViews = ({
           };
           
           return (
-            <div key={venta._id} className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4">
-              {/* Cabecera de la venta */}
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2 sm:gap-0">
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900">
-                    Venta #{venta._id}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-gray-500">
-                    {new Date(venta.fechadeVenta).toLocaleDateString('es-ES', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </p>
-                </div>
-                {/* Estados de la venta */}
-                <div className="flex flex-col items-end gap-2 w-full sm:w-auto">
-                  {/* Estado de pago con detalles */}
-                  <div className="text-right w-full sm:w-auto">
-                    <span className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full ${
-                      venta.estadoPago === 'Pagado' 
-                        ? 'bg-green-100 text-green-800'
-                        : venta.estadoPago === 'Parcial'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {venta.estadoPago}
-                    </span>
-                    <div className="text-xs text-gray-500 mt-1">
-                      S/ {(venta.cantidadPagada || 0).toFixed(2)} / S/ {venta.montoTotal.toFixed(2)}
+            <div key={venta._id} className="venta-row bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 p-2 sm:p-4">
+              {/* Header de la venta - Compacto para móvil */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 sm:mb-3 gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+                  <div className="flex flex-col">
+                    <h3 className="text-xs sm:text-sm font-bold text-slate-700">
+                      Venta #{venta._id.slice(-8)}
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      {formatearFechaHora(venta.fechadeVenta)}
+                    </p>
+                  </div>
+                  
+                  {/* Información financiera - Stack en móvil, inline en desktop */}
+                  <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-6">
+                    <div className="text-center">
+                      <p className="text-xs text-blue-600 font-medium">Total</p>
+                      <p className="text-xs sm:text-sm font-bold text-blue-800">S/ {venta.montoTotal.toFixed(2)}</p>
                     </div>
-                    <div className={`text-xs font-medium ${
-                      (venta.debe || 0) <= 0 
-                        ? 'text-green-600' 
-                        : 'text-red-600'
-                    }`}>
-                      Debe: S/ {(venta.debe || 0).toFixed(2)}
+                    <div className="text-center">
+                      <p className="text-xs text-emerald-600 font-medium">Pagado</p>
+                      <p className="text-xs sm:text-sm font-bold text-emerald-800">S/ {(venta.cantidadPagada || 0).toFixed(2)}</p>
                     </div>
-                    {/* Barra de progreso de pago */}
-                    <div className="w-full sm:w-24 mt-2">
-                      <div className="bg-gray-200 rounded-full h-2">
-                        <div 
-                          className={`h-2 rounded-full ${
-                            venta.estadoPago === 'Pagado' 
-                              ? 'bg-green-500' 
-                              : venta.estadoPago === 'Parcial'
-                              ? 'bg-yellow-500'
-                              : 'bg-red-500'
-                          }`}
-                          style={{ 
-                            width: `${Math.min(100, ((venta.cantidadPagada || 0) / venta.montoTotal) * 100)}%` 
-                          }}
-                        ></div>
-                      </div>
-                      <div className="text-xs text-gray-500 text-center mt-1">
-                        {Math.round(((venta.cantidadPagada || 0) / venta.montoTotal) * 100)}%
-                      </div>
+                    <div className="text-center">
+                      <p className="text-xs text-rose-600 font-medium">Debe</p>
+                      <p className="text-xs sm:text-sm font-bold text-rose-800">S/ {(venta.debe || 0).toFixed(2)}</p>
                     </div>
                   </div>
-                  {/* Estado de finalización */}
+                </div>
+                
+                {/* Estados - Compactos */}
+                <div className="flex items-center gap-1 sm:gap-2 self-end sm:self-auto">
+                  <span className={`px-1.5 sm:px-2 py-1 text-xs font-medium rounded-md ${
+                    venta.estadoPago === 'Pagado' 
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : venta.estadoPago === 'Parcial'
+                      ? 'bg-amber-100 text-amber-700'
+                      : 'bg-rose-100 text-rose-700'
+                  }`}>
+                    {venta.estadoPago}
+                  </span>
+                  
                   {venta.isCompleted && (
-                    <span className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full ${
+                    <span className={`px-1.5 sm:px-2 py-1 text-xs rounded-md ${
                       venta.completionStatus === 'approved'
-                        ? 'bg-green-100 text-green-800'
+                        ? 'bg-green-100 text-green-700'
                         : venta.completionStatus === 'rejected'
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-yellow-100 text-yellow-800'
+                        ? 'bg-red-100 text-red-700'
+                        : 'bg-yellow-100 text-yellow-700'
                     }`}>
                       {venta.completionStatus === 'approved'
-                        ? 'Aprobada'
+                        ? '✓'
                         : venta.completionStatus === 'rejected'
-                        ? 'Rechazada'
-                        : 'Pendiente de revisión'}
+                        ? '✗'
+                        : '⏳'}
                     </span>
                   )}
                 </div>
               </div>
 
-              {/* Información del creador y propietario */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4 mt-2 mb-4 text-xs sm:text-sm">
-                {venta.creatorInfo && (
-                  <div className="bg-gray-50 p-2 sm:p-3 rounded-lg">
-                    <p className="font-medium text-gray-700">Creado por:</p>
-                    <p className="text-gray-900">{venta.creatorInfo.nombre_negocio || 'No especificado'}</p>
-                    <p className="text-gray-500 text-xs">{venta.creatorInfo.email}</p>
-                    <p className="text-gray-500 text-xs italic">Rol: {venta.creatorInfo.role}</p>
-                  </div>
-                )}
-                {venta.userInfo && venta.userInfo.id !== venta.creatorInfo?.id && (
-                  <div className="bg-gray-50 p-2 sm:p-3 rounded-lg">
-                    <p className="font-medium text-gray-700">Asignado a:</p>
-                    <p className="text-gray-900">{venta.userInfo.nombre_negocio || 'No especificado'}</p>
-                    <p className="text-gray-500 text-xs">{venta.userInfo.email}</p>
-                    <p className="text-gray-500 text-xs italic">Rol: {venta.userInfo.role}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Detalles del Cliente */}
-              <div className="mb-4">
-                <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2">Detalles del Cliente</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <p className="text-gray-600">
-                    <span className="font-medium">Nombre:</span> {venta.user_info?.nombre_negocio || 'N/A'}
-                  </p>
-                  <p className="text-gray-600">
-                    <span className="font-medium">Email:</span> {venta.user_info?.email || 'N/A'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Detalles de la Venta */}
-              <div className="mb-4">
-                <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2">Detalles de la Venta</h4>
-                <p className="text-gray-600 mb-2">
-                  <span className="font-medium">Fecha:</span> {formatearFechaHora(venta.fechadeVenta)}
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
-                  <p className="text-gray-600">
-                    <span className="font-medium">Monto Total:</span> S/ {venta.montoTotal.toFixed(2)}
-                  </p>
-                  <p className="text-gray-600">
-                    <span className="font-medium">Monto Pagado:</span> 
-                    <span className={`ml-1 font-semibold ${
-                      venta.cantidadPagada >= venta.montoTotal 
-                        ? 'text-green-600' 
-                        : venta.cantidadPagada > 0 
-                        ? 'text-yellow-600' 
-                        : 'text-red-600'
-                    }`}>
-                      S/ {(venta.cantidadPagada || 0).toFixed(2)}
+              {/* Línea del cliente con progreso inline */}
+              <div className="flex items-center justify-between mb-3 py-2 bg-slate-50 rounded-lg px-3">
+                <div className="flex items-center gap-3">
+                  <User className="w-4 h-4 text-slate-600" />
+                  <div>
+                    <span className="font-medium text-slate-800 text-sm">
+                      {venta.user_info?.nombre_negocio || 'Cliente sin nombre'}
                     </span>
-                  </p>
-                  <p className="text-gray-600">
-                    <span className="font-medium">Saldo Pendiente:</span> 
-                    <span className={`ml-1 font-semibold ${
-                      (venta.debe || 0) <= 0 
-                        ? 'text-green-600' 
-                        : 'text-red-600'
-                    }`}>
-                      S/ {(venta.debe || 0).toFixed(2)}
-                    </span>
-                  </p>
+                    <p className="text-xs text-slate-600">
+                      {venta.user_info?.email || 'Sin email'}
+                    </p>
+                  </div>
                 </div>
                 
-                {/* Desglose detallado de pagos */}
-                {venta.cobros_detalle && (venta.cobros_detalle.yape > 0 || venta.cobros_detalle.efectivo > 0 || venta.cobros_detalle.billetes > 0 || venta.cobros_detalle.faltantes > 0 || venta.cobros_detalle.gastosImprevistos > 0) && (
-                  <div className="mt-3 p-2 sm:p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <h5 className="text-xs font-semibold text-blue-800 mb-2">Desglose de Pagos:</h5>
-                    <div className="space-y-1 text-xs">
-                      {venta.cobros_detalle.yape > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-blue-700">💳 Yape:</span>
-                          <span className="font-medium text-blue-800">S/ {venta.cobros_detalle.yape.toFixed(2)}</span>
-                        </div>
-                      )}
-                      {venta.cobros_detalle.efectivo > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-blue-700">💵 Efectivo:</span>
-                          <span className="font-medium text-blue-800">S/ {venta.cobros_detalle.efectivo.toFixed(2)}</span>
-                        </div>
-                      )}
-                      {venta.cobros_detalle.billetes > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-blue-700">💰 Billetes:</span>
-                          <span className="font-medium text-blue-800">S/ {venta.cobros_detalle.billetes.toFixed(2)}</span>
-                        </div>
-                      )}
-                      {venta.cobros_detalle.faltantes > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-orange-700">⚠️ Faltantes:</span>
-                          <span className="font-medium text-orange-600">S/ {venta.cobros_detalle.faltantes.toFixed(2)}</span>
-                        </div>
-                      )}
-                      {venta.cobros_detalle.gastosImprevistos > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-red-700">🚨 Gastos Imprevistos:</span>
-                          <span className="font-medium text-red-600">S/ {venta.cobros_detalle.gastosImprevistos.toFixed(2)}</span>
-                        </div>
-                      )}
-                      <div className="border-t border-blue-300 pt-1 mt-2">
-                        <div className="flex justify-between font-semibold">
-                          <span className="text-blue-700">Total Ventas:</span>
-                          <span className="text-blue-800">
-                            S/ {((venta.cobros_detalle.yape || 0) + (venta.cobros_detalle.efectivo || 0) + (venta.cobros_detalle.billetes || 0) + (venta.cobros_detalle.faltantes || 0) + (venta.cobros_detalle.gastosImprevistos || 0)).toFixed(2)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between font-semibold mt-1">
-                          <span className="text-green-700">Cobro Neto:</span>
-                          <span className="text-green-800">
-                            S/ {((venta.cobros_detalle.yape || 0) + (venta.cobros_detalle.efectivo || 0) + (venta.cobros_detalle.billetes || 0)).toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
+                {/* Progreso inline al lado del email */}
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-600">Progreso:</span>
+                    <div className="w-20 bg-slate-200 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full transition-all duration-300 ${
+                          venta.estadoPago === 'Pagado' 
+                            ? 'bg-emerald-500' 
+                            : venta.estadoPago === 'Parcial'
+                            ? 'bg-amber-500'
+                            : 'bg-rose-500'
+                        }`}
+                        style={{ 
+                          width: `${Math.min(100, ((venta.cantidadPagada || 0) / venta.montoTotal) * 100)}%` 
+                        }}
+                      ></div>
                     </div>
+                    <span className="text-xs font-medium text-slate-700">
+                      {Math.round(((venta.cantidadPagada || 0) / venta.montoTotal) * 100)}%
+                    </span>
                   </div>
-                )}
+                </div>
               </div>
 
-              {/* Productos de la venta */}
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-xs sm:text-sm font-semibold text-gray-700">Productos</h4>
-                  {/* Botón para agregar más productos */}
+              {/* Productos en línea horizontal */}
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Package className="w-4 h-4 text-purple-600" />
+                    <span className="font-medium text-slate-800 text-sm">
+                      Productos ({venta.productos?.filter(prod => prod != null).length || 0})
+                    </span>
+                  </div>
                   {canEditDelete(venta) && venta.estadoPago !== 'Pagado' && (
                     <button
                       onClick={() => handleOpenAddProduct(venta)}
-                      className="flex items-center gap-1 px-3 py-1 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      className="p-1.5 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors border border-blue-200"
                       title="Agregar producto"
                     >
                       <Plus className="w-3 h-3" />
-                      Agregar Producto
                     </button>
                   )}
                 </div>
                 
-                {/* Tarjetas de productos */}
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
-                  {venta.productos?.filter(prod => prod != null).map((prod, idx) => {
-                    return (
-                      <ProductCard
-                        key={idx}
-                        producto={prod}
-                        ventaId={venta._id}
-                        venta={venta} // Pasar toda la venta para acceder a devoluciones
-                        onUpdateQuantity={handleUpdateQuantity}
-                        onRemoveProduct={handleRemoveProduct}
-                        canEdit={canEditDelete(venta) && venta.estadoPago !== 'Pagado'}
-                        loading={ventaModificationHook.loading}
-                      />
-                    );
-                  }) || (
-                    <div className="col-span-2 lg:col-span-3 xl:col-span-4 text-center text-gray-500 py-4">
-                      No hay productos en esta venta
+                {/* Lista vertical de productos con botones funcionalesn */}
+                <div className="space-y-2">
+                  {venta.productos?.filter(prod => prod != null).map((prod, idx) => (
+                    <div key={idx} className="flex items-center justify-between bg-white border border-slate-200 rounded-lg px-3 py-2">
+                      <div className="flex items-center gap-3 flex-1">
+                        <span className="font-medium text-slate-700 truncate">
+                          {prod.productoId?.nombre || prod.nombre || 'Sin nombre'}
+                        </span>
+                        <span className="text-emerald-600 font-medium text-sm">
+                          S/ {((prod.precioUnitario || prod.precio || 0) * (prod.cantidad || 0)).toFixed(2)}
+                        </span>
+                      </div>
+                      
+                      {/* Controles de cantidad - CON MODAL */}
+                      {canEditDelete(venta) && venta.estadoPago !== 'Pagado' ? (
+                        <div className="flex items-center gap-2">
+                          {/* Botón disminuir (-) */}
+                          <button
+                            onClick={() => {
+                              if ((prod.cantidad || 0) > 1) {
+                                // Si tiene más de 1, abrir modal para quitar
+                                openQuantityModal(prod, venta._id);
+                              } else {
+                                // Si solo tiene 1, eliminar directamente
+                                if (window.confirm('¿Eliminar este producto de la venta?')) {
+                                  handleRemoveProduct(venta._id, prod.productoId?._id || prod._id);
+                                }
+                              }
+                            }}
+                            className="w-8 h-8 flex items-center justify-center bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition-colors text-sm font-bold"
+                            title={(prod.cantidad || 0) > 1 ? "Disminuir cantidad" : "Eliminar producto"}
+                            disabled={loading}
+                          >
+                            -
+                          </button>
+                          
+                          {/* Cantidad actual */}
+                          <span className="text-slate-700 font-medium min-w-[3ch] text-center">
+                            {prod.cantidad || 0}
+                          </span>
+                          
+                          {/* Botón aumentar (+) */}
+                          <button
+                            onClick={() => openQuantityModal(prod, venta._id)}
+                            className="w-8 h-8 flex items-center justify-center bg-green-100 text-green-600 rounded-full hover:bg-green-200 transition-colors text-sm font-bold"
+                            title="Aumentar cantidad"
+                            disabled={loading}
+                          >
+                            +
+                          </button>
+                          
+                          {/* Botón eliminar producto */}
+                          <button
+                            onClick={async () => {
+                              try {
+                                if (window.confirm('¿Eliminar este producto de la venta?')) {
+                                  console.log('🗑️ Eliminando producto:', {
+                                    ventaId: venta._id,
+                                    productoId: prod.productoId?._id || prod._id
+                                  });
+                                  await handleRemoveProduct(venta._id, prod.productoId?._id || prod._id);
+                                }
+                              } catch (error) {
+                                console.error('❌ Error al eliminar producto:', error);
+                                alert('Error al eliminar producto: ' + error.message);
+                              }
+                            }}
+                            className="w-8 h-8 flex items-center justify-center bg-gray-100 text-red-500 rounded-full hover:bg-red-100 transition-colors ml-2"
+                            title="Eliminar producto"
+                            disabled={loading}
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        // Solo mostrar cantidad cuando no se puede editar
+                        <span className="text-slate-500 text-sm">
+                          x{prod.cantidad || 0}
+                        </span>
+                      )}
+                    </div>
+                  )) || (
+                    <div className="text-slate-500 text-sm py-2 text-center bg-slate-50 rounded-lg">
+                      No hay productos
                     </div>
                   )}
                 </div>
               </div>
-              
-              {/* Botones de acción */}
-              <div className="mt-4 flex flex-col sm:flex-row gap-2">
-                {/* Botón de pago */}
+
+              {/* Botones de acción en línea horizontal */}
+              <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+                {/* Botón de pago principal */}
                 {venta.estadoPago !== 'Pagado' && (
                   <button
                     onClick={() => handleOpenPayment(ventaParaPago)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium text-sm"
                     disabled={loading}
-                    title={userRole === 'user' ? 'Realizar pago de venta' : 'Procesar pago'}
                   >
                     <DollarSign className="w-4 h-4" />
-                    {userRole === 'user' ? 'Pagar Venta' : 'Procesar Pago'}
+                    {userRole === 'user' ? 'Realizar Pago' : 'Procesar Pago'}
                   </button>
                 )}
-                {/* Botón de Devolución - visible para todos los usuarios */}
+                
+                {/* Botón de Devolución */}
                 {(!venta.estado || venta.estado !== 'devuelta') && (
                   <button
                     onClick={() => handleOpenDevolucion(venta)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-sm"
                     disabled={loading}
-                    title="Agregar devolución"
                   >
                     <RotateCcw className="w-4 h-4" />
-                    Agregar Devolución
+                    Devolución
                   </button>
                 )}
-                {/* Estado de finalización o botón para finalizar */}
+                
+                {/* Botón Finalizar/Estado */}
                 {((venta.userId === currentUserId && (userRole === 'user' || userRole === 'admin')) || userRole === 'super_admin') && (
                   <>
-                    {/* Solo mostrar botón si la venta no está finalizada ni pendiente de revisión */}
                     {(!venta.completionStatus) && (
                       <button
                         onClick={() => handleFinalizarVenta(venta._id)}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
                         disabled={loading}
                       >
                         <Clock className="w-4 h-4" />
-                        Marcar como Finalizada
+                        Finalizar
                       </button>
                     )}
-                    {/* Permitir reenviar solo si fue rechazada */}
                     {(venta.completionStatus === 'rejected') && (
                       <button
                         onClick={() => handleFinalizarVenta(venta._id)}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
                         disabled={loading}
                       >
                         <Clock className="w-4 h-4" />
-                        Reenviar Venta
+                        Reenviar
                       </button>
                     )}
-                    {/* Si está pendiente, solo mostrar mensaje de espera */}
                     {venta.completionStatus === 'pending' && (
-                      <div className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg">
+                      <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 text-amber-700 rounded-lg text-sm border border-amber-200">
                         <Clock className="w-4 h-4" />
-                        Pendiente de aprobación
+                        Pendiente
                       </div>
                     )}
                     {venta.completionStatus === 'approved' && (
-                      <div className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-lg">
+                      <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-700 rounded-lg text-sm border border-emerald-200">
                         <Check className="w-4 h-4" />
                         Finalizada
                       </div>
                     )}
                   </>
                 )}
-                {/* Botones de aprobar/rechazar (solo para admin/super_admin) */}
+                
+                {/* Botones de aprobar/rechazar */}
                 {venta.completionStatus === 'pending' && 
                   ['admin', 'super_admin'].includes(userRole) && (
-                    <div className="flex flex-col sm:flex-row gap-2 w-full">
+                    <>
                       <button 
                         onClick={() => handleApproveReject(venta._id, 'approved')}
-                        className="flex-1 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                        className="flex items-center gap-2 px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm"
                         disabled={loading}
                       >
+                        <Check className="w-4 h-4" />
                         Aprobar
                       </button>
                       <button
                         onClick={() => handleApproveReject(venta._id, 'rejected')}
-                        className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                        className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
                         disabled={loading}
                       >
+                        <X className="w-4 h-4" />
                         Rechazar
                       </button>
-                    </div>
+                    </>
                 )}
-                {/* Botón de eliminar o mensaje informativo */}
+                
+                {/* Botón de eliminar */}
                 {canEditDelete(venta) ? (
                   <button
                     onClick={() => handleDeleteVenta(venta._id)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
                     disabled={loading}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
+                    <Trash2 className="w-4 h-4" />
                     Eliminar
                   </button>
                 ) : (
-                  // Mostrar razón por la que no se puede eliminar (solo para admin y super_admin)
                   ['admin', 'super_admin'].includes(userRole) && (
-                    <div className="flex-1 px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-center text-sm">
-                      <span className="text-xs">
-                        {getDeleteRestrictionReason(venta)}
-                      </span>
+                    <div 
+                      className="flex items-center gap-2 px-3 py-2 bg-slate-100 text-slate-500 rounded-lg text-xs cursor-help border border-slate-200"
+                      title={getDeleteRestrictionReason(venta)}
+                    >
+                      🚫 No disponible
                     </div>
                   )
                 )}
@@ -755,7 +756,7 @@ const VentaViews = ({
             </div>
           );
         })}
-      </>
+      </div>
     );
   };
 
@@ -941,11 +942,53 @@ const VentaViews = ({
 
   // Renderizado condicional basado en viewMode
   if (viewMode === 'table') {
-    return renderTableView();
+    return (
+      <>
+        {renderTableView()}
+        
+        {/* Modal de cantidad */}
+        <QuantityModal
+          isOpen={showQuantityModal}
+          onClose={closeQuantityModal}
+          producto={selectedProduct}
+          onConfirm={handleQuantityConfirm}
+          isUpdating={loading}
+          ventaId={selectedVentaId}
+        />
+      </>
+    );
   } else if (viewMode === 'lista') {
-    return renderListaView();
+    return (
+      <>
+        {renderListaView()}
+        
+        {/* Modal de cantidad */}
+        <QuantityModal
+          isOpen={showQuantityModal}
+          onClose={closeQuantityModal}
+          producto={selectedProduct}
+          onConfirm={handleQuantityConfirm}
+          isUpdating={loading}
+          ventaId={selectedVentaId}
+        />
+      </>
+    );
   } else {
-    return renderCardsView();
+    return (
+      <>
+        {renderCardsView()}
+        
+        {/* Modal de cantidad */}
+        <QuantityModal
+          isOpen={showQuantityModal}
+          onClose={closeQuantityModal}
+          producto={selectedProduct}
+          onConfirm={handleQuantityConfirm}
+          isUpdating={loading}
+          ventaId={selectedVentaId}
+        />
+      </>
+    );
   }
 };
 
