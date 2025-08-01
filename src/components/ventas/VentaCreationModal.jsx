@@ -401,360 +401,379 @@ const [formData, setFormData] = useState({
 
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
-      <div className="bg-white w-full max-w-lg sm:max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl h-auto min-h-[60vh] max-h-[298vh] overflow-y-auto rounded-lg shadow-xl relative p-0 sm:p-4">
-        {/* Header */}
-        <div className="flex items-center justify-between bg-purple-600 px-4 sm:px-6 py-4 rounded-t-none sm:rounded-t-lg sticky top-0 z-10">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-500 rounded-lg">
-              <ShoppingCart className="text-white" size={20} />
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-0 sm:p-3">
+      <div className="bg-white w-full h-full sm:w-full sm:max-w-7xl sm:h-[95vh] rounded-none sm:rounded-2xl shadow-2xl overflow-hidden border-0 sm:border border-gray-100 flex flex-col mx-auto">
+        {/* Header responsivo */}
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="p-1.5 sm:p-2 bg-white/20 rounded-lg">
+              <ShoppingCart className="text-white" size={16} />
             </div>
             <div>
               <h2 className="text-lg sm:text-xl font-bold text-white">Nueva Venta</h2>
-              <p className="text-xs sm:text-sm text-purple-200">Complete los detalles de la venta</p>
+              <p className="text-white/70 text-xs sm:text-sm hidden sm:block">Sistema de gestión</p>
             </div>
           </div>
           <button 
             onClick={handleClose}
-            className="text-white hover:text-purple-200 transition-colors"
+            className="text-white/80 hover:text-white hover:bg-white/20 transition-colors p-2 rounded-lg"
           >
-            <X size={24} />
+            <X size={18} />
           </button>
         </div>
 
-        {/* Error message */}
+        {/* Messages responsivos */}
         {error && (
-          <div className="px-3 sm:px-6 py-3 bg-red-50 border-b border-red-100">
+          <div className="mx-3 sm:mx-6 mt-2 sm:mt-3 p-3 bg-red-50 border-l-4 border-red-400 rounded-r-lg flex-shrink-0">
             <div className="flex items-center gap-2 text-red-600">
-              <AlertCircle size={16} />
-              <p className="text-sm">{error}</p>
+              <AlertCircle size={14} />
+              <p className="text-xs sm:text-sm font-medium">{error}</p>
             </div>
           </div>
         )}
 
-        {/* Success message */}
         {successMessage && (
-          <div className="px-3 sm:px-6 py-3 bg-green-50 border-b border-green-100">
+          <div className="mx-3 sm:mx-6 mt-2 sm:mt-3 p-3 bg-green-50 border-l-4 border-green-400 rounded-r-lg flex-shrink-0">
             <div className="flex items-center gap-2 text-green-600">
-              <Plus size={16} />
-              <p className="text-sm">{successMessage}</p>
+              <Plus size={14} />
+              <p className="text-xs sm:text-sm font-medium">{successMessage}</p>
             </div>
           </div>
         )}
 
-        <form
-          onSubmit={handleSubmit}
-          className="p-6 w-full flex-1 min-h-0 overflow-y-auto"
-        >
-          {/* Main two-column layout for web */}
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Left column: all form inputs */}
-            <div className="flex-1 min-w-0">
-              {/* User and Date Selection */}
-              <div className={`grid gap-4 mb-6 ${currentUserRole === 'user' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
-                {usuarios && usuarios.length > 0 && currentUserRole !== 'user' && (
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Asignar a Usuario
-                    </label>
-                    <select
-                      value={formData.targetUserId}
-                      onChange={(e) => setFormData(prev => ({ ...prev, targetUserId: e.target.value }))}
-                      className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    >
-                      <option value="">Seleccionar usuario...</option>
-                      {usuarios.map(user => (
-                        <option key={user.id} value={user.id}>
-                          {user.name} ({user.role === 'super_admin' ? 'Super Admin' : 
-                                      user.role === 'admin' ? 'Admin' : 
-                                      'Usuario'})
-                          {user.id === user?.id ? ' (Tú)' : ''}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Fecha de Venta
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={formData.fechadeVenta}
-                    onChange={(e) => setFormData(prev => ({ ...prev, fechadeVenta: e.target.value }))}
-                    className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Product Selection Section */}
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Agregar Productos</h3>
-                  <div className="text-sm text-gray-500">
-                    {productosDisponibles.length} productos disponibles
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  {/* Filtros de búsqueda */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">
-                        Buscar producto
-                      </label>
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-                        <input
-                          type="text"
-                          placeholder="Buscar por nombre o código..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">
-                        Filtrar por categoría
-                      </label>
-                      <div className="relative">
-                        <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+        {/* Contenido principal responsivo */}
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
+          {/* Panel principal: Formulario y productos */}
+          <div className="flex-1 flex flex-col overflow-hidden min-h-0 lg:order-1">
+            <form onSubmit={handleSubmit} className="flex flex-col h-full min-h-0">
+              {/* Controles superiores responsivos optimizados */}
+              <div className="p-3 sm:p-4 bg-gray-50 border-b space-y-3 flex-shrink-0">
+                {/* Primera fila: Usuario y Fecha en una sola línea */}
+                <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                  {usuarios && usuarios.length > 0 && currentUserRole !== 'user' ? (
+                    <>
+                      <div>
+                        <label className="block text-lg sm:text-base font-semibold text-gray-700 mb-2">
+                          👤 Usuario
+                        </label>
                         <select
-                          value={selectedCategory}
-                          onChange={(e) => setSelectedCategory(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                          value={formData.targetUserId}
+                          onChange={(e) => setFormData(prev => ({ ...prev, targetUserId: e.target.value }))}
+                          className="w-full p-4 sm:p-3 bg-white border border-gray-300 rounded-lg text-lg sm:text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         >
-                          <option value="">Todas las categorías</option>
-                          {categorias.map(categoria => (
-                            <option key={categoria._id} value={categoria._id}>
-                              {categoria.nombre}
+                          <option value="">Seleccionar...</option>
+                          {usuarios.map(user => (
+                            <option key={user.id} value={user.id}>
+                              {user.name} ({user.role === 'super_admin' ? 'Super' : user.role === 'admin' ? 'Admin' : 'User'})
                             </option>
                           ))}
                         </select>
                       </div>
+                      <div>
+                        <label className="block text-lg sm:text-base font-semibold text-gray-700 mb-2">
+                          📅 Fecha
+                        </label>
+                        <input
+                          type="datetime-local"
+                          value={formData.fechadeVenta}
+                          onChange={(e) => setFormData(prev => ({ ...prev, fechadeVenta: e.target.value }))}
+                          className="w-full p-4 sm:p-3 bg-white border border-gray-300 rounded-lg text-lg sm:text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          required
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="col-span-2">
+                      <label className="block text-lg sm:text-base font-semibold text-gray-700 mb-2">
+                        📅 Fecha
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={formData.fechadeVenta}
+                        onChange={(e) => setFormData(prev => ({ ...prev, fechadeVenta: e.target.value }))}
+                        className="w-full p-4 sm:p-3 bg-white border border-gray-300 rounded-lg text-lg sm:text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        required
+                      />
                     </div>
-                  </div>
+                  )}
+                </div>
 
-                  {/* Lista de productos */}
-                  <div className="max-h-80 overflow-y-auto border rounded-lg bg-white">
-                    {productosDisponibles.length > 0 ? (
-                      <div className="grid gap-2 p-2">
-                        {productosDisponibles.map(producto => (
-                          <div key={producto._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-medium text-gray-900 truncate">{producto.nombre}</h4>
-                                {producto.categoryName && (
-                                  <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
-                                    {producto.categoryName}
-                                  </span>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-4 text-sm text-gray-600">
-                                <span>Código: {producto.codigoProducto}</span>
-                                <span>Stock: {producto.cantidadRestante}</span>
-                                <span className="font-semibold text-green-600">S/ {producto.precio}</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 ml-4">
-                              <input
-                                type="number"
-                                min="1"
-                                max={producto.cantidadRestante}
-                                placeholder="Cantidad"
-                                value={cantidades[producto._id] || ''}
-                                onChange={(e) => {
-                                  const valor = e.target.value;
-                                  setCantidades(prev => ({
-                                    ...prev,
-                                    [producto._id]: valor
-                                  }));
-                                }}
-                                onKeyPress={(e) => {
-                                  if (e.key === 'Enter') {
-                                    const cantidad = parseInt(cantidades[producto._id]) || 0;
-                                    if (cantidad > 0 && cantidad <= producto.cantidadRestante) {
-                                      agregarProducto(producto, cantidad);
-                                      setCantidades(prev => ({
-                                        ...prev,
-                                        [producto._id]: ''
-                                      }));
-                                    }
-                                  }
-                                }}
-                                className="w-20 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
-                                id={`cantidad-${producto._id}`}
-                              />
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const cantidad = parseInt(cantidades[producto._id]) || 0;
-                                  if (cantidad > 0 && cantidad <= producto.cantidadRestante) {
-                                    agregarProducto(producto, cantidad);
-                                    // Limpiar solo este input específico después de agregar
-                                    setCantidades(prev => ({
-                                      ...prev,
-                                      [producto._id]: ''
-                                    }));
-                                  } else if (cantidad === 0) {
-                                    setError('La cantidad debe ser mayor a 0');
-                                    setTimeout(() => setError(''), 3000);
-                                  } else {
-                                    setError(`Solo hay ${producto.cantidadRestante} unidades disponibles`);
-                                    setTimeout(() => setError(''), 3000);
-                                  }
-                                }}
-                                className="px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 transition-colors"
-                              >
-                                Agregar
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="p-8 text-center text-gray-500">
-                        <Search size={48} className="mx-auto mb-2 text-gray-300" />
-                        <p>No se encontraron productos disponibles</p>
-                        {(searchTerm || selectedCategory) && (
-                          <p className="text-sm mt-1">Intenta ajustar los filtros de búsqueda</p>
-                        )}
-                      </div>
-                    )}
+                {/* Segunda fila: Filtros de búsqueda en una sola línea */}
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <input
+                      type="text"
+                      placeholder="Buscar..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-12 sm:pl-10 pr-4 sm:pr-3 py-4 sm:py-3 bg-white border border-gray-300 rounded-lg text-lg sm:text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                  </div>
+                  
+                  <div className="relative">
+                    <Filter className="absolute left-3 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="w-full pl-12 sm:pl-10 pr-4 sm:pr-3 py-4 sm:py-3 bg-white border border-gray-300 rounded-lg text-lg sm:text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    >
+                      <option value="">Todas</option>
+                      {categorias.map(categoria => (
+                        <option key={categoria._id} value={categoria._id}>
+                          {categoria.nombre}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               </div>
 
-              {/* Payment Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Estado de Pago
-                  </label>
-                  <select
-                    value={formData.estadoPago}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      estadoPago: e.target.value,
-                      cantidadPagada: e.target.value === 'Pagado' ? montoTotal : 0
-                    }))}
-                    className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    required
-                  >
-                    <option value="Pendiente">Pendiente</option>
-                    <option value="Parcial">Parcial</option>
-                    <option value="Pagado">Pagado</option>
-                  </select>
+              {/* Lista de productos responsiva */}
+              <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-3 sm:py-4 min-h-0">
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="text-lg sm:text-base font-bold text-gray-900">Productos Disponibles</h3>
+                  <span className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-base sm:text-sm font-semibold">
+                    {productosDisponibles.length}
+                  </span>
                 </div>
-
-                {formData.estadoPago === 'Parcial' && (
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Cantidad Pagada
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      max={montoTotal}
-                      value={formData.cantidadPagada}
-                      onChange={(e) => setFormData(prev => ({ ...prev, cantidadPagada: parseFloat(e.target.value) }))}
-                      className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                      required
-                    />
+                
+                {productosDisponibles.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-3">
+                    {productosDisponibles.map(producto => (
+                      <div key={producto._id} className="bg-white border border-gray-200 rounded-lg p-4 sm:p-3 hover:shadow-md transition-shadow">
+                        {/* Primera fila: Nombre y controles */}
+                        <div className="flex items-center justify-between mb-3 sm:mb-2">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-gray-900 text-xl sm:text-sm truncate leading-tight">{producto.nombre}</h4>
+                          </div>
+                          {/* Controles de cantidad y agregar */}
+                          <div className="flex items-center gap-2 ml-2">
+                            <input
+                              type="number"
+                              min="1"
+                              max={producto.cantidadRestante}
+                              placeholder="1"
+                              value={cantidades[producto._id] || ''}
+                              onChange={(e) => {
+                                const valor = e.target.value;
+                                setCantidades(prev => ({
+                                  ...prev,
+                                  [producto._id]: valor
+                                }));
+                              }}
+                              className="w-20 sm:w-14 px-3 py-3 sm:px-2 sm:py-1 text-xl sm:text-sm border border-gray-300 rounded text-center focus:ring-2 focus:ring-indigo-500 font-bold"
+                            />
+                            
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const cantidad = parseInt(cantidades[producto._id]) || 1;
+                                if (cantidad > 0 && cantidad <= producto.cantidadRestante) {
+                                  agregarProducto(producto, cantidad);
+                                  setCantidades(prev => ({
+                                    ...prev,
+                                    [producto._id]: ''
+                                  }));
+                                } else if (cantidad === 0) {
+                                  setError('La cantidad debe ser mayor a 0');
+                                  setTimeout(() => setError(''), 3000);
+                                } else {
+                                  setError(`Solo hay ${producto.cantidadRestante} unidades disponibles`);
+                                  setTimeout(() => setError(''), 3000);
+                                }
+                              }}
+                              className="px-5 py-3 sm:px-2 sm:py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xl sm:text-sm font-bold shadow-md"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                        
+                        {/* Categoría debajo del título si existe */}
+                        {producto.categoryName && (
+                          <div className="mb-3 sm:mb-2">
+                            <span className="inline-block px-3 py-1 sm:px-2 sm:py-0.5 text-lg sm:text-xs bg-blue-100 text-blue-800 rounded-full">
+                              {producto.categoryName}
+                            </span>
+                          </div>
+                        )}
+                        
+                        {/* Info del producto en tres columnas con letras más grandes */}
+                        <div className="grid grid-cols-3 gap-4 sm:gap-2">
+                          <div className="text-center">
+                            <div className="text-gray-500 text-lg sm:text-xs mb-2 sm:mb-1">Código</div>
+                            <span className="font-mono bg-gray-100 px-3 py-2 sm:px-1 sm:py-0.5 rounded text-xl sm:text-xs font-bold">
+                              {producto.codigoProducto}
+                            </span>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-gray-500 text-lg sm:text-xs mb-2 sm:mb-1">Stock</div>
+                            <span className={`px-3 py-2 sm:px-1 sm:py-0.5 rounded font-bold text-xl sm:text-xs ${
+                              producto.cantidadRestante > 10 ? 'bg-green-100 text-green-800' :
+                              producto.cantidadRestante > 5 ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {producto.cantidadRestante}
+                            </span>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-gray-500 text-lg sm:text-xs mb-2 sm:mb-1">Precio</div>
+                            <span className="font-bold text-green-600 bg-green-50 px-3 py-2 sm:px-1 sm:py-0.5 rounded text-2xl sm:text-sm">
+                              S/ {producto.precio}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Search size={40} className="mx-auto mb-3 text-gray-300" />
+                    <p className="text-lg sm:text-base">No hay productos disponibles</p>
                   </div>
                 )}
               </div>
 
-              
-            </div>
+              {/* Información de pago responsiva */}
+              <div className="p-3 sm:p-4 bg-gray-50 border-t flex-shrink-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                    <label className="block text-lg sm:text-base font-semibold text-gray-700 mb-2">Estado de Pago</label>
+                    <select
+                      value={formData.estadoPago}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        estadoPago: e.target.value,
+                        cantidadPagada: e.target.value === 'Pagado' ? montoTotal : 0
+                      }))}
+                      className="w-full p-4 sm:p-3 bg-white border border-gray-300 rounded-lg text-lg sm:text-base focus:ring-2 focus:ring-indigo-500"
+                      required
+                    >
+                      <option value="Pendiente">💤 Pendiente</option>
+                      <option value="Parcial">⏳ Parcial</option>
+                      <option value="Pagado">💰 Pagado</option>
+                    </select>
+                  </div>
 
-            {/* Right column: cart table (sticky on desktop) */}
-            <div className="flex-1 min-w-0 md:pl-2">
-              {carrito.length > 0 && (
-                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden mb-6 md:mb-0 md:sticky md:top-24">
-                  <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-                    <h4 className="font-medium text-gray-900">Productos en el carrito</h4>
+                  {formData.estadoPago !== 'Pendiente' && (
+                    <div>
+                      <label className="block text-lg sm:text-base font-semibold text-gray-700 mb-2">
+                        💳 Cantidad Pagada
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max={montoTotal}
+                        step="0.01"
+                        value={formData.cantidadPagada}
+                        onChange={(e) => setFormData(prev => ({ ...prev, cantidadPagada: parseFloat(e.target.value) || 0 }))}
+                        className="w-full p-4 sm:p-3 bg-white border border-gray-300 rounded-lg text-lg sm:text-base focus:ring-2 focus:ring-indigo-500"
+                        placeholder="0.00"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </form>
+          </div>
+
+          {/* Panel derecho: Carrito responsivo */}
+          <div className="w-full lg:w-96 xl:w-80 bg-gray-50 border-t lg:border-t-0 lg:border-l flex flex-col lg:order-2 flex-shrink-0">
+            {carrito.length > 0 ? (
+              <>
+                {/* Header del carrito responsivo */}
+                <div className="p-4 sm:p-4 bg-indigo-600 text-white flex-shrink-0">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl sm:text-lg">🛒</span>
+                      <span className="font-semibold text-lg sm:text-base">Mi Carrito</span>
+                    </div>
+                    <span className="bg-white/20 px-3 py-1.5 rounded-full text-sm sm:text-xs font-bold">
+                      {carrito.length}
+                    </span>
                   </div>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto</th>
-                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cantidad</th>
-                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Precio Unit.</th>
-                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Subtotal</th>
-                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {carrito.map((item, index) => (
-                          <tr key={index} className="hover:bg-gray-50">
-                            <td className="px-4 py-3 text-sm text-gray-900">{item.nombre}</td>
-                            <td className="px-4 py-3 text-sm text-gray-900">{item.cantidad}</td>
-                            <td className="px-4 py-3 text-sm text-gray-900">S/ {item.precioUnitario.toFixed(2)}</td>
-                            <td className="px-4 py-3 text-sm font-medium text-gray-900">S/ {item.subtotal.toFixed(2)}</td>
-                            <td className="px-4 py-3 text-sm">
-                              <button
-                                type="button"
-                                onClick={() => eliminarDelCarrito(index)}
-                                className="text-red-600 hover:text-red-800 transition-colors"
-                                title="Eliminar producto"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                </div>
+
+                {/* Items del carrito responsivos */}
+                <div className="flex-1 overflow-y-auto p-2 sm:p-3 space-y-2 min-h-0">
+                  {carrito.map((item, index) => (
+                    <div key={index} className="bg-white border rounded-lg p-3 sm:p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        {/* Nombre del producto */}
+                        <div className="flex-1 min-w-0">
+                          <h5 className="font-semibold text-gray-900 text-lg sm:text-sm truncate leading-tight">
+                            {item.nombre}
+                          </h5>
+                        </div>
+                        
+                        {/* Información del producto en línea */}
+                        <div className="flex items-center gap-4 sm:gap-2 text-base sm:text-xs">
+                          <div className="text-center">
+                            <div className="text-gray-500 text-sm sm:text-xs">Cant.</div>
+                            <div className="font-bold text-lg sm:text-sm">{item.cantidad}</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-gray-500 text-sm sm:text-xs">Precio</div>
+                            <div className="font-bold text-lg sm:text-sm">S/ {item.precioUnitario.toFixed(2)}</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-gray-500 text-sm sm:text-xs">Total</div>
+                            <div className="font-bold text-green-600 text-lg sm:text-sm">S/ {item.subtotal.toFixed(2)}</div>
+                          </div>
+                        </div>
+                        
+                        {/* Botón eliminar */}
+                        <button
+                          type="button"
+                          onClick={() => eliminarDelCarrito(index)}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded p-2 transition-colors flex-shrink-0"
+                        >
+                          <Trash2 size={20} className="sm:w-4 sm:h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Resumen y botones responsivos */}
+                <div className="p-4 sm:p-4 bg-white border-t flex-shrink-0">
+                  <div className="mb-4 sm:mb-4 flex justify-between items-center">
+                    <span className="text-xl sm:text-lg font-bold text-gray-900">Total:</span>
+                    <span className="text-2xl sm:text-2xl font-black text-green-600">
+                      S/ {montoTotal.toFixed(2)}
+                    </span>
                   </div>
-                  {/* Total de la venta debajo de la tabla */}
-                  <div className="flex justify-between items-center px-4 py-4 border-t bg-gray-50">
-                    <span className="text-gray-700 font-medium">Total de la venta:</span>
-                    <span className="text-2xl font-bold text-gray-900">S/ {montoTotal.toFixed(2)}</span>
-                  </div>
-                  {/* Botones de acción debajo del total */}
-                  <div className="flex justify-end gap-3 px-4 pb-4">
+                  
+                  <div className="space-y-3">
                     <button
                       type="button"
                       onClick={handleClose}
-                      className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center gap-2"
+                      className="w-full px-4 py-4 sm:py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-lg sm:text-sm font-medium"
                     >
-                      <X size={18} />
                       Cancelar
                     </button>
                     <button
                       type="submit"
                       disabled={isSubmitting || carrito.length === 0}
-                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-4 sm:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-lg sm:text-sm font-medium"
                     >
-                      {isSubmitting ? (
-                        <>
-                          <span className="animate-spin">
-                            <svg className="w-4 h-4" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                            </svg>
-                          </span>
-                          Creando...
-                        </>
-                      ) : (
-                        <>
-                          <Plus size={18} />
-                          Crear Venta
-                        </>
-                      )}
+                      {isSubmitting ? 'Procesando...' : 'Crear Venta'}
                     </button>
                   </div>
                 </div>
-              )}
-            </div>
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center text-gray-500 min-h-0">
+                <div className="text-center p-4">
+                  <div className="text-3xl sm:text-4xl mb-2">🛒</div>
+                  <p className="text-sm font-medium">Carrito vacío</p>
+                  <p className="text-xs text-gray-400">Agrega productos para comenzar</p>
+                </div>
+              </div>
+            )}
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

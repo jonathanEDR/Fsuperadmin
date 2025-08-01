@@ -244,32 +244,94 @@ const VentasLineChart = ({ userRole }) => {
 
   return (
     <div className="bg-white rounded-lg shadow p-2 sm:p-6 mb-4 sm:mb-8 overflow-hidden">
-      {/* Header con filtros */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-2">
-        <h3 className="text-base sm:text-xl font-bold text-gray-800 mb-2 sm:mb-0">
-          Evolución de Ventas - {getTimeFilterLabel()}
-        </h3>
-        {/* Contenedor de botones mejorado para móvil */}
-        <div className="grid grid-cols-2 sm:flex gap-2 w-full sm:w-auto">
-          {['hoy', 'semana', 'mes', 'anual'].map((filter) => (
-            <button
-              key={filter}
-              onClick={() => setTimeFilter(filter)}
-              className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
-                timeFilter === filter
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {filter.charAt(0).toUpperCase() + filter.slice(1)}
-            </button>
-          ))}
+      {/* Header con filtros tecnológicos modernos */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-lg blur-sm opacity-60"></div>
+            <div className="relative bg-white rounded-lg p-2 border border-gray-200">
+              <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+              </svg>
+            </div>
+          </div>
+          <h3 className="text-base sm:text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+            Evolución de Ventas
+          </h3>
+        </div>
+        
+        {/* Selector futurista para móvil y desktop */}
+        <div className="w-full sm:w-auto">
+          {/* Vista única: Botones tecnológicos modernos */}
+          <div className="relative bg-gradient-to-r from-slate-50 to-gray-100 p-1 rounded-2xl border border-gray-200 shadow-lg backdrop-blur-sm">
+            {/* Indicador deslizante de fondo */}
+            <div 
+              className="absolute top-1 bottom-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 rounded-xl transition-all duration-300 ease-out shadow-lg"
+              style={{
+                width: `${100/4}%`,
+                left: `${(['hoy', 'semana', 'mes', 'anual'].indexOf(timeFilter)) * 25}%`,
+              }}
+            ></div>
+            
+            <div className="relative grid grid-cols-4 gap-0">
+              {[
+                { key: 'hoy', label: 'Hoy', icon: '⚡', desc: '24h' },
+                { key: 'semana', label: 'Semana', icon: '📊', desc: '7d' },
+                { key: 'mes', label: 'Mes', icon: '📈', desc: '30d' },
+                { key: 'anual', label: 'Año', icon: '🎯', desc: '365d' }
+              ].map((filter) => (
+                <button
+                  key={filter.key}
+                  onClick={() => setTimeFilter(filter.key)}
+                  className={`relative px-3 sm:px-4 py-3 sm:py-3 rounded-xl font-medium transition-all duration-300 ease-out group hover:scale-105 ${
+                    timeFilter === filter.key
+                      ? 'text-white shadow-lg z-10'
+                      : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
+                    <span className="text-lg sm:text-base">{filter.icon}</span>
+                    <div className="flex flex-col sm:flex-row items-center gap-0 sm:gap-1">
+                      <span className="text-xs sm:text-sm font-bold leading-none">{filter.label}</span>
+                      <span className={`text-xs leading-none ${
+                        timeFilter === filter.key ? 'text-white/80' : 'text-gray-500'
+                      }`}>
+                        {filter.desc}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Efecto de brillo en hover */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  
+                  {/* Indicador activo adicional */}
+                  {timeFilter === filter.key && (
+                    <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-white rounded-full shadow-lg animate-pulse"></div>
+                  )}
+                </button>
+              ))}
+            </div>
+            
+            {/* Efectos de borde tecnológicos */}
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 rounded-2xl opacity-20 blur-sm -z-10"></div>
+          </div>
+          
+          {/* Información del período actual con diseño tech */}
+          <div className="mt-3 text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-full">
+              <div className="w-2 h-2 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full animate-pulse"></div>
+              <span className="text-xs sm:text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Analizando: {getTimeFilterLabel()}
+              </span>
+              <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-indigo-400 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Gráfico */}
-      <div className="mb-4 sm:mb-6 w-full overflow-x-auto">
-        <div className="min-w-[350px] sm:min-w-0" style={{height: '16rem', minHeight: '14rem'}}>
+      {/* Gráfico con altura responsiva mejorada */}
+      <div className="mb-4 sm:mb-6 w-full overflow-hidden">
+        <div className="w-full" style={{height: 'clamp(280px, 50vh, 400px)'}}>
           {chartData ? (
             <Line 
               data={chartData} 
@@ -282,11 +344,11 @@ const VentasLineChart = ({ userRole }) => {
                     position: 'top',
                     labels: {
                       usePointStyle: true,
-                      padding: 15,
-                      boxWidth: 12,
-                      boxHeight: 12,
+                      padding: window.innerWidth < 640 ? 8 : 15,
+                      boxWidth: window.innerWidth < 640 ? 8 : 12,
+                      boxHeight: window.innerWidth < 640 ? 8 : 12,
                       font: {
-                        size: window.innerWidth < 640 ? 10 : 12
+                        size: window.innerWidth < 640 ? 9 : 12
                       }
                     }
                   },
@@ -295,10 +357,10 @@ const VentasLineChart = ({ userRole }) => {
                     mode: 'index',
                     intersect: false,
                     titleFont: {
-                      size: 12
+                      size: window.innerWidth < 640 ? 11 : 12
                     },
                     bodyFont: {
-                      size: 11
+                      size: window.innerWidth < 640 ? 10 : 11
                     },
                     callbacks: {
                       label: function(context) {
@@ -311,7 +373,7 @@ const VentasLineChart = ({ userRole }) => {
                   y: { 
                     beginAtZero: true, 
                     title: { 
-                      display: true, 
+                      display: window.innerWidth >= 640, 
                       text: 'Monto (S/)',
                       font: {
                         size: window.innerWidth < 640 ? 10 : 12
@@ -319,16 +381,17 @@ const VentasLineChart = ({ userRole }) => {
                     },
                     ticks: {
                       font: {
-                        size: window.innerWidth < 640 ? 9 : 11
+                        size: window.innerWidth < 640 ? 8 : 11
                       },
                       callback: function(value) {
-                        return 'S/ ' + value;
-                      }
+                        return window.innerWidth < 640 ? `S/${value}` : `S/ ${value}`;
+                      },
+                      maxTicksLimit: window.innerWidth < 640 ? 5 : 8
                     }
                   },
                   x: { 
                     title: { 
-                      display: true, 
+                      display: window.innerWidth >= 640, 
                       text: 'Día del Mes',
                       font: {
                         size: window.innerWidth < 640 ? 10 : 12
@@ -336,8 +399,9 @@ const VentasLineChart = ({ userRole }) => {
                     },
                     ticks: {
                       font: {
-                        size: window.innerWidth < 640 ? 9 : 11
-                      }
+                        size: window.innerWidth < 640 ? 8 : 11
+                      },
+                      maxTicksLimit: window.innerWidth < 640 ? 6 : 12
                     }
                   },
                 },
@@ -349,34 +413,95 @@ const VentasLineChart = ({ userRole }) => {
               }} 
             />
           ) : (
-            <div className="h-64 sm:h-96 flex items-center justify-center text-gray-500">
-              <p>No se pudo renderizar el gráfico</p>
+            <div className="h-full flex items-center justify-center text-gray-500">
+              <p className="text-sm">No se pudo renderizar el gráfico</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Resumen de totales */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="text-center">
-          <div className="text-2xl font-bold text-green-600">S/ {totals.ventasBrutas.toFixed(2)}</div>
-          <div className="text-sm text-gray-600">Ventas Brutas</div>
-          <div className="text-xs text-gray-500 hidden sm:block">- {getTimeFilterLabel()}</div>
+      {/* Resumen de totales mejorado para móvil - Una sola fila */}
+      <div className="grid grid-cols-1 gap-3 sm:gap-4">
+        {/* Fila única en móvil con todas las métricas */}
+        <div className="grid grid-cols-4 gap-2 sm:hidden">
+          <div className="bg-gradient-to-br from-green-50 to-green-100 p-2 rounded-lg border border-green-200">
+            <div className="text-center">
+              <div className="text-sm font-bold text-green-600 truncate">
+                S/ {totals.ventasBrutas.toFixed(0)}
+              </div>
+              <div className="text-xs text-green-700 font-medium">Brutas</div>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-2 rounded-lg border border-blue-200">
+            <div className="text-center">
+              <div className="text-sm font-bold text-blue-600 truncate">
+                S/ {totals.ventasNetas.toFixed(0)}
+              </div>
+              <div className="text-xs text-blue-700 font-medium">Netas</div>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-br from-red-50 to-red-100 p-2 rounded-lg border border-red-200">
+            <div className="text-center">
+              <div className="text-sm font-bold text-red-600 truncate">
+                S/ {totals.devoluciones.toFixed(0)}
+              </div>
+              <div className="text-xs text-red-700 font-medium">Devol.</div>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-2 rounded-lg border border-purple-200">
+            <div className="text-center">
+              <div className="text-sm font-bold text-purple-600">
+                {totals.cantidadVendida}
+              </div>
+              <div className="text-xs text-purple-700 font-medium">Units</div>
+            </div>
+          </div>
         </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-blue-600">S/ {totals.ventasNetas.toFixed(2)}</div>
-          <div className="text-sm text-gray-600">Ventas Netas</div>
-          <div className="text-xs text-gray-500 hidden sm:block">- {getTimeFilterLabel()}</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-red-600">S/ {totals.devoluciones.toFixed(2)}</div>
-          <div className="text-sm text-gray-600">Devoluciones</div>
-          <div className="text-xs text-gray-500 hidden sm:block">- {getTimeFilterLabel()}</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-purple-600">{totals.cantidadVendida} unidades</div>
-          <div className="text-sm text-gray-600">Cantidad Vendida</div>
-          <div className="text-xs text-gray-500 hidden sm:block">- {getTimeFilterLabel()}</div>
+
+        {/* Grid tradicional para desktop */}
+        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-gradient-to-br from-green-50 to-green-100 p-3 sm:p-4 rounded-lg border border-green-200">
+            <div className="text-center">
+              <div className="text-lg sm:text-2xl font-bold text-green-600 truncate">
+                S/ {totals.ventasBrutas.toFixed(2)}
+              </div>
+              <div className="text-xs sm:text-sm text-green-700 font-medium">Ventas Brutas</div>
+              <div className="text-xs text-green-600 mt-1">{getTimeFilterLabel()}</div>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-3 sm:p-4 rounded-lg border border-blue-200">
+            <div className="text-center">
+              <div className="text-lg sm:text-2xl font-bold text-blue-600 truncate">
+                S/ {totals.ventasNetas.toFixed(2)}
+              </div>
+              <div className="text-xs sm:text-sm text-blue-700 font-medium">Ventas Netas</div>
+              <div className="text-xs text-blue-600 mt-1">{getTimeFilterLabel()}</div>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-br from-red-50 to-red-100 p-3 sm:p-4 rounded-lg border border-red-200">
+            <div className="text-center">
+              <div className="text-lg sm:text-2xl font-bold text-red-600 truncate">
+                S/ {totals.devoluciones.toFixed(2)}
+              </div>
+              <div className="text-xs sm:text-sm text-red-700 font-medium">Devoluciones</div>
+              <div className="text-xs text-red-600 mt-1">{getTimeFilterLabel()}</div>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-3 sm:p-4 rounded-lg border border-purple-200">
+            <div className="text-center">
+              <div className="text-lg sm:text-2xl font-bold text-purple-600">
+                {totals.cantidadVendida}
+              </div>
+              <div className="text-xs sm:text-sm text-purple-700 font-medium">Unidades</div>
+              <div className="text-xs text-purple-600 mt-1">{getTimeFilterLabel()}</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
