@@ -1,0 +1,601 @@
+/* ===== PLANETA MOVIMIENTOS PROFESIONAL - ESTILO DINÁMICO FLUIDO ===== */
+
+/* Importar design tokens centralizados */
+@import '../../../designTokens.css';
+
+/* ===== BASE DEL PLANETA DINÁMICO ===== */
+.planetaMovimientosPro {
+  /* Estructura base dinámica */
+  position: relative;
+  width: var(--planeta-size-base);
+  height: var(--planeta-size-base);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  
+  /* Sistema de transiciones unificado */
+  transition: var(--animation-smooth);
+  transform-style: preserve-3d;
+  transform: var(--planeta-transform-orbit);
+  
+  /* Sombras dinámicas profesionales */
+  box-shadow: var(--shadow-planeta-base);
+  
+  /* Z-index organizado */
+  z-index: var(--z-planeta-base);
+  pointer-events: auto;
+  
+  /* Animación base fluida */
+  animation: planetaRotacionMovimientos var(--animation-duration-slow) linear infinite;
+  
+  /* Filtros y efectos dinámicos */
+  backdrop-filter: var(--blur-light);
+  overflow: visible;
+  
+  /* Background dinámico profesional */
+  background: var(--gradient-movimientos-professional);
+  
+  /* Border fluido refinado */
+  border: 2px solid var(--color-movimientos-border);
+  
+  /* Efectos de flujo */
+  position: relative;
+}
+
+.planetaMovimientosPro::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    var(--color-movimientos-flow),
+    transparent 120deg,
+    var(--color-movimientos-flow) 240deg,
+    transparent
+  );
+  z-index: -1;
+  opacity: 0.4;
+  animation: rotacionFlujoEnergia var(--animation-duration-medium) linear infinite;
+}
+
+/* ===== ESTADOS DE INTERACCIÓN DINÁMICOS ===== */
+.planetaMovimientosPro:hover {
+  transform: var(--planeta-transform-hover) var(--planeta-transform-orbit);
+  z-index: var(--z-planeta-hover);
+  
+  /* Efectos visuales dinámicos mejorados */
+  filter: var(--filter-enhance);
+  box-shadow: var(--shadow-planeta-hover);
+  
+  /* Pausa animación para mejor UX */
+  animation-play-state: paused;
+}
+
+.planetaMovimientosPro.seleccionado {
+  transform: var(--planeta-transform-selected) var(--planeta-transform-orbit);
+  z-index: var(--z-planeta-selected);
+  
+  /* Efectos de selección dinámicos */
+  filter: var(--filter-selected);
+  box-shadow: var(--shadow-planeta-selected);
+  
+  /* Animación de selección dual */
+  animation: 
+    planetaRotacionMovimientos var(--animation-duration-medium) linear infinite,
+    planetaPulsoDinamico var(--animation-duration-pulse) ease-in-out infinite;
+}
+
+.planetaMovimientosPro.conAlerta {
+  /* Alerta de movimientos profesional */
+  animation: 
+    planetaRotacionMovimientos var(--animation-duration-slow) linear infinite,
+    alertaMovimientosCritica var(--animation-duration-fast) ease-in-out infinite;
+  
+  box-shadow: 
+    var(--shadow-planeta-alert),
+    0 0 40px var(--color-alert-glow);
+}
+
+/* ===== ESTADOS DE MOVIMIENTO ESPECÍFICOS ===== */
+.planetaMovimientosPro.transfiriendo {
+  /* Estado de transferencia activa */
+  background: var(--gradient-movimientos-transferring);
+  border-color: var(--color-movimientos-active);
+  
+  animation: 
+    planetaRotacionMovimientos var(--animation-duration-fast) linear infinite,
+    efectoTransferenciaActiva 1.8s ease-in-out infinite;
+  
+  box-shadow: 
+    var(--shadow-planeta-base),
+    0 0 30px var(--color-movimientos-glow);
+}
+
+.planetaMovimientosPro.sincronizando {
+  /* Estado de sincronización */
+  background: var(--gradient-movimientos-syncing);
+  border-color: var(--color-movimientos-sync);
+  
+  animation: 
+    planetaRotacionMovimientos var(--animation-duration-medium) linear infinite,
+    efectoSincronizacion 2.5s ease-in-out infinite;
+  
+  box-shadow: 
+    var(--shadow-planeta-base),
+    0 0 35px var(--color-movimientos-sync-glow);
+}
+
+.planetaMovimientosPro.completado {
+  /* Estado de movimientos completados */
+  background: var(--gradient-movimientos-completed);
+  border-color: var(--color-success-primary);
+  
+  box-shadow: 
+    var(--shadow-planeta-success),
+    0 0 35px var(--color-success-glow);
+  
+  animation: 
+    planetaRotacionMovimientos var(--animation-duration-medium) linear infinite,
+    celebracionMovimientos 3s ease-in-out infinite;
+}
+
+/* ===== FLUJOS DE DATOS PROFESIONALES ===== */
+.flujosDatosPro {
+  position: absolute;
+  top: -30px;
+  left: -30px;
+  right: -30px;
+  bottom: -30px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.lineaFlujoPro {
+  position: absolute;
+  width: 2px;
+  height: 25px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--color-movimientos-data),
+    transparent
+  );
+  border-radius: 2px;
+  opacity: 0;
+  
+  /* Animación de flujo de datos */
+  animation: flujoDataDinamico var(--animation-duration-medium) ease-in-out infinite;
+}
+
+.lineaFlujoPro:nth-child(1) {
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%) rotate(0deg);
+  animation-delay: 0s;
+}
+
+.lineaFlujoPro:nth-child(2) {
+  top: 50%;
+  right: 5px;
+  transform: translateY(-50%) rotate(90deg);
+  animation-delay: 0.4s;
+}
+
+.lineaFlujoPro:nth-child(3) {
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%) rotate(180deg);
+  animation-delay: 0.8s;
+}
+
+.lineaFlujoPro:nth-child(4) {
+  top: 50%;
+  left: 5px;
+  transform: translateY(-50%) rotate(270deg);
+  animation-delay: 1.2s;
+}
+
+/* ===== TRANSFERENCIAS VISUALES MEJORADAS ===== */
+.transferenciasVisualesPro {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.paqueteDatosPro {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--color-movimientos-packet);
+  border-radius: 50%;
+  opacity: 0;
+  
+  /* Sombra de paquete de datos */
+  box-shadow: 
+    0 0 4px var(--color-movimientos-packet),
+    0 0 8px var(--color-movimientos-packet-glow);
+  
+  /* Animación de paquete orbital */
+  animation: paqueteOrbital var(--animation-duration-slow) linear infinite;
+}
+
+.paqueteDatosPro:nth-child(1) {
+  animation-delay: 0s;
+  animation-duration: 3s;
+}
+
+.paqueteDatosPro:nth-child(2) {
+  animation-delay: 1s;
+  animation-duration: 3.5s;
+  animation-direction: reverse;
+}
+
+.paqueteDatosPro:nth-child(3) {
+  animation-delay: 2s;
+  animation-duration: 4s;
+}
+
+/* ===== EFECTOS DE CONEXIÓN AVANZADOS ===== */
+.efectosConexionPro {
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  right: -15px;
+  bottom: -15px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.redConexionPro {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 1px solid var(--color-movimientos-network);
+  border-radius: 50%;
+  opacity: 0;
+  
+  /* Efecto de red de conexión */
+  animation: redConexionPulso var(--animation-duration-pulse) ease-in-out infinite;
+}
+
+.redConexionPro:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.redConexionPro:nth-child(2) {
+  animation-delay: 1s;
+  transform: scale(1.2);
+}
+
+.redConexionPro:nth-child(3) {
+  animation-delay: 2s;
+  transform: scale(1.4);
+}
+
+/* ===== ICONO DEL PLANETA DINÁMICO ===== */
+.iconoPlanetaDinamicoPro {
+  position: relative;
+  z-index: 10;
+  font-size: 1.2rem;
+  color: var(--color-movimientos-icon);
+  
+  /* Efecto dinámico en el icono */
+  filter: drop-shadow(0 0 4px var(--color-movimientos-icon-glow));
+  text-shadow: 0 0 8px var(--color-movimientos-icon-glow);
+  
+  /* Transición suave */
+  transition: var(--animation-smooth);
+}
+
+.planetaMovimientosPro:hover .iconoPlanetaDinamicoPro {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 8px var(--color-movimientos-icon-glow));
+}
+
+.planetaMovimientosPro.seleccionado .iconoPlanetaDinamicoPro {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 12px var(--color-movimientos-icon-glow));
+  animation: iconoMovimientosBrillo var(--animation-duration-pulse) ease-in-out infinite;
+}
+
+/* ===== INDICADORES DE ACTIVIDAD REFINADOS ===== */
+.indicadoresActividadPro {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 16px;
+  height: 16px;
+  background: var(--color-movimientos-activity-bg);
+  border: 2px solid var(--color-movimientos-activity-border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 15;
+  opacity: 0;
+  
+  /* Efecto de actividad */
+  box-shadow: 0 0 8px var(--color-movimientos-activity-glow);
+  animation: indicadorActividad var(--animation-duration-pulse) ease-in-out infinite;
+}
+
+.puntosActividadPro {
+  width: 6px;
+  height: 6px;
+  background: var(--color-movimientos-activity-dots);
+  border-radius: 50%;
+  
+  /* Animación de puntos de actividad */
+  animation: puntosActividad var(--animation-duration-fast) ease-in-out infinite;
+}
+
+/* ===== BRILLO DINÁMICO REFINADO ===== */
+.brilloDinamicoPro {
+  position: absolute;
+  top: 20%;
+  left: 25%;
+  width: 18px;
+  height: 18px;
+  background: radial-gradient(
+    circle,
+    var(--color-movimientos-shine),
+    transparent 70%
+  );
+  border-radius: 50%;
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 9;
+  
+  /* Animación de brillo dinámico */
+  animation: brilloDinamicoSutil var(--animation-duration-slow) ease-in-out infinite;
+}
+
+/* ===== ANIMACIONES DINÁMICAS PROFESIONALES ===== */
+
+@keyframes planetaRotacionMovimientos {
+  0% { transform: var(--planeta-transform-orbit) rotateZ(0deg); }
+  100% { transform: var(--planeta-transform-orbit) rotateZ(360deg); }
+}
+
+@keyframes planetaPulsoDinamico {
+  0%, 100% { 
+    box-shadow: var(--shadow-planeta-selected);
+    transform: var(--planeta-transform-selected) var(--planeta-transform-orbit);
+  }
+  50% { 
+    box-shadow: 
+      var(--shadow-planeta-selected),
+      0 0 60px var(--color-movimientos-primary);
+    transform: var(--planeta-transform-selected) var(--planeta-transform-orbit) scale(1.05);
+  }
+}
+
+@keyframes alertaMovimientosCritica {
+  0%, 100% { 
+    border-color: var(--color-movimientos-border);
+  }
+  50% { 
+    border-color: var(--color-alert-primary);
+    box-shadow: 
+      var(--shadow-planeta-alert),
+      0 0 50px var(--color-alert-glow);
+  }
+}
+
+@keyframes rotacionFlujoEnergia {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes efectoTransferenciaActiva {
+  0%, 100% { 
+    filter: brightness(1.1) saturate(1.3);
+  }
+  50% { 
+    filter: brightness(1.4) saturate(1.6);
+  }
+}
+
+@keyframes efectoSincronizacion {
+  0%, 100% { 
+    transform: var(--planeta-transform-orbit) scale(1);
+  }
+  25% { 
+    transform: var(--planeta-transform-orbit) scale(1.05);
+  }
+  75% { 
+    transform: var(--planeta-transform-orbit) scale(0.98);
+  }
+}
+
+@keyframes celebracionMovimientos {
+  0%, 100% { 
+    transform: var(--planeta-transform-orbit);
+  }
+  25% { 
+    transform: var(--planeta-transform-orbit) scale(1.1);
+  }
+  75% { 
+    transform: var(--planeta-transform-orbit) scale(1.05);
+  }
+}
+
+@keyframes flujoDataDinamico {
+  0%, 100% { 
+    opacity: 0;
+    transform: translateX(-50%) translateY(0px) scale(0.5);
+  }
+  50% { 
+    opacity: 1;
+    transform: translateX(-50%) translateY(-10px) scale(1);
+  }
+}
+
+@keyframes paqueteOrbital {
+  0% { 
+    opacity: 0;
+    transform: rotate(0deg) translateX(20px) rotate(0deg);
+  }
+  10%, 90% { 
+    opacity: 1;
+  }
+  100% { 
+    opacity: 0;
+    transform: rotate(360deg) translateX(20px) rotate(-360deg);
+  }
+}
+
+@keyframes redConexionPulso {
+  0% { 
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% { 
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+  100% { 
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+@keyframes iconoMovimientosBrillo {
+  0%, 100% { 
+    filter: drop-shadow(0 0 12px var(--color-movimientos-icon-glow));
+  }
+  50% { 
+    filter: drop-shadow(0 0 20px var(--color-movimientos-icon-glow));
+  }
+}
+
+@keyframes indicadorActividad {
+  0%, 100% { 
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes puntosActividad {
+  0%, 100% { 
+    transform: scale(0.8);
+  }
+  50% { 
+    transform: scale(1.2);
+  }
+}
+
+@keyframes brilloDinamicoSutil {
+  0%, 100% { 
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+  50% { 
+    opacity: 0.9;
+    transform: scale(1.3);
+  }
+}
+
+/* ===== RESPONSIVE DESIGN DINÁMICO ===== */
+
+/* Tablet y pantallas medianas */
+@media (max-width: 1024px) {
+  .planetaMovimientosPro {
+    width: var(--planeta-size-medium);
+    height: var(--planeta-size-medium);
+  }
+  
+  .flujosDatosPro {
+    top: -25px;
+    left: -25px;
+    right: -25px;
+    bottom: -25px;
+  }
+  
+  .lineaFlujoPro {
+    height: 20px;
+  }
+}
+
+/* Mobile y pantallas pequeñas */
+@media (max-width: 768px) {
+  .planetaMovimientosPro {
+    width: var(--planeta-size-small);
+    height: var(--planeta-size-small);
+  }
+  
+  .iconoPlanetaDinamicoPro {
+    font-size: 1rem;
+  }
+  
+  .flujosDatosPro {
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+  }
+  
+  .lineaFlujoPro {
+    width: 1px;
+    height: 15px;
+  }
+  
+  .paqueteDatosPro {
+    width: 3px;
+    height: 3px;
+  }
+  
+  .brilloDinamicoPro {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+/* ===== ACCESIBILIDAD DINÁMICA AVANZADA ===== */
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .planetaMovimientosPro,
+  .planetaMovimientosPro *,
+  .planetaMovimientosPro::before,
+  .planetaMovimientosPro::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .planetaMovimientosPro {
+    border-width: 3px;
+    border-color: var(--color-contrast-high);
+  }
+  
+  .iconoPlanetaDinamicoPro {
+    filter: none;
+    color: var(--color-contrast-high);
+  }
+}
+
+/* Focus visible para accesibilidad */
+.planetaMovimientosPro:focus-visible {
+  outline: 2px solid var(--color-focus-primary);
+  outline-offset: 4px;
+}

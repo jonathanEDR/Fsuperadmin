@@ -1,0 +1,597 @@
+/* ===== PLANETA PRODUCCIÓN PROFESIONAL - ESTILO INDUSTRIAL MODERNO ===== */
+
+/* Importar design tokens centralizados */
+@import '../../../designTokens.css';
+
+/* ===== BASE DEL PLANETA INDUSTRIAL ===== */
+.planetaProduccionPro {
+  /* Estructura base industrial */
+  position: relative;
+  width: var(--planeta-size-base);
+  height: var(--planeta-size-base);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  
+  /* Sistema de transiciones unificado */
+  transition: var(--animation-smooth);
+  transform-style: preserve-3d;
+  transform: var(--planeta-transform-orbit);
+  
+  /* Sombras industriales profesionales */
+  box-shadow: var(--shadow-planeta-base);
+  
+  /* Z-index organizado */
+  z-index: var(--z-planeta-base);
+  pointer-events: auto;
+  
+  /* Animación base industrial */
+  animation: planetaRotacionProduccion var(--animation-duration-slow) linear infinite;
+  
+  /* Filtros y efectos industriales */
+  backdrop-filter: var(--blur-light);
+  overflow: visible;
+  
+  /* Background industrial profesional */
+  background: var(--gradient-produccion-professional);
+  
+  /* Border metálico refinado */
+  border: 2px solid var(--color-produccion-border);
+  
+  /* Efectos de maquinaria */
+  position: relative;
+}
+
+.planetaProduccionPro::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, 
+    var(--color-produccion-metallic), 
+    transparent, 
+    var(--color-produccion-metallic)
+  );
+  z-index: -1;
+  opacity: 0.3;
+  animation: rotacionAnilloMetalico var(--animation-duration-medium) linear infinite reverse;
+}
+
+/* ===== ESTADOS DE INTERACCIÓN INDUSTRIALES ===== */
+.planetaProduccionPro:hover {
+  transform: var(--planeta-transform-hover) var(--planeta-transform-orbit);
+  z-index: var(--z-planeta-hover);
+  
+  /* Efectos visuales industriales mejorados */
+  filter: var(--filter-enhance);
+  box-shadow: var(--shadow-planeta-hover);
+  
+  /* Pausa animación para mejor UX */
+  animation-play-state: paused;
+}
+
+.planetaProduccionPro.seleccionado {
+  transform: var(--planeta-transform-selected) var(--planeta-transform-orbit);
+  z-index: var(--z-planeta-selected);
+  
+  /* Efectos de selección industriales */
+  filter: var(--filter-selected);
+  box-shadow: var(--shadow-planeta-selected);
+  
+  /* Animación de selección dual */
+  animation: 
+    planetaRotacionProduccion var(--animation-duration-medium) linear infinite,
+    planetaPulsoIndustrial var(--animation-duration-pulse) ease-in-out infinite;
+}
+
+.planetaProduccionPro.conAlerta {
+  /* Alerta industrial profesional */
+  animation: 
+    planetaRotacionProduccion var(--animation-duration-slow) linear infinite,
+    alertaProduccionCritica var(--animation-duration-fast) ease-in-out infinite;
+  
+  box-shadow: 
+    var(--shadow-planeta-alert),
+    0 0 40px var(--color-alert-glow);
+}
+
+/* ===== ESTADOS DE PRODUCCIÓN ESPECÍFICOS ===== */
+.planetaProduccionPro.produciendo {
+  /* Estado de producción activa */
+  background: var(--gradient-produccion-active);
+  border-color: var(--color-produccion-working);
+  
+  animation: 
+    planetaRotacionProduccion var(--animation-duration-fast) linear infinite,
+    efectoMaquinariaActiva 1.5s ease-in-out infinite;
+  
+  box-shadow: 
+    var(--shadow-planeta-base),
+    0 0 30px var(--color-produccion-glow);
+}
+
+.planetaProduccionPro.completado {
+  /* Estado de producción completada */
+  background: var(--gradient-produccion-completed);
+  border-color: var(--color-success-primary);
+  
+  box-shadow: 
+    var(--shadow-planeta-success),
+    0 0 35px var(--color-success-glow);
+  
+  animation: 
+    planetaRotacionProduccion var(--animation-duration-medium) linear infinite,
+    celebracionProduccion 3s ease-in-out infinite;
+}
+
+.planetaProduccionPro.mantenimiento {
+  /* Estado de mantenimiento */
+  background: var(--gradient-produccion-maintenance);
+  border-color: var(--color-warning-primary);
+  filter: saturate(0.7) brightness(0.9);
+  
+  animation: 
+    planetaRotacionProduccion var(--animation-duration-slow) linear infinite,
+    efectoMantenimiento 2s ease-in-out infinite;
+}
+
+/* ===== EFECTOS MECÁNICOS PROFESIONALES ===== */
+.efectosMecanicosPro {
+  position: absolute;
+  top: -25px;
+  left: -25px;
+  right: -25px;
+  bottom: -25px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.engranajeMetalicoPro {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--color-produccion-gear);
+  border-radius: 2px;
+  opacity: 0.8;
+  
+  /* Efecto de engranaje */
+  box-shadow: 
+    0 0 4px var(--color-produccion-gear),
+    inset 0 0 4px rgba(0, 0, 0, 0.3);
+  
+  /* Animación de rotación mecánica */
+  animation: rotacionEngranaje var(--animation-duration-medium) linear infinite;
+}
+
+.engranajeMetalicoPro:nth-child(1) {
+  top: 10%;
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.engranajeMetalicoPro:nth-child(2) {
+  top: 20%;
+  right: 15%;
+  animation-delay: 0.5s;
+  animation-direction: reverse;
+}
+
+.engranajeMetalicoPro:nth-child(3) {
+  bottom: 20%;
+  left: 15%;
+  animation-delay: 1s;
+}
+
+.engranajeMetalicoPro:nth-child(4) {
+  bottom: 10%;
+  right: 20%;
+  animation-delay: 1.5s;
+  animation-direction: reverse;
+}
+
+/* ===== INDICADORES DE PROGRESO ELEGANTES ===== */
+.indicadoresProgresoPro {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.barraProgresoPro {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30px;
+  height: 3px;
+  background: var(--color-produccion-progress-bg);
+  border-radius: 2px;
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+}
+
+.progresoActivoPro {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-produccion-progress),
+    transparent
+  );
+  border-radius: 2px;
+  
+  /* Animación de progreso fluida */
+  animation: progresoIndustrial 2s ease-in-out infinite;
+}
+
+/* ===== VAPOR INDUSTRIAL REFINADO ===== */
+.vaporIndustrialPro {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 25px;
+  height: 35px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.chimeneavaporPro {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 3px;
+  height: 25px;
+  background: linear-gradient(
+    to top,
+    var(--color-produccion-steam),
+    transparent
+  );
+  border-radius: 50%;
+  opacity: 0;
+  transform: translateX(-50%);
+  
+  /* Animación de vapor industrial */
+  animation: vaporChimenea var(--animation-duration-medium) ease-out infinite;
+}
+
+.chimeneavaporPro:nth-child(1) {
+  left: 40%;
+  animation-delay: 0s;
+  width: 2px;
+}
+
+.chimeneavaporPro:nth-child(2) {
+  left: 50%;
+  animation-delay: 0.3s;
+  width: 3px;
+}
+
+.chimeneavaporPro:nth-child(3) {
+  left: 60%;
+  animation-delay: 0.6s;
+  width: 2px;
+}
+
+/* ===== ICONO DEL PLANETA INDUSTRIAL ===== */
+.iconoPlanetaIndustrialPro {
+  position: relative;
+  z-index: 10;
+  font-size: 1.2rem;
+  color: var(--color-produccion-icon);
+  
+  /* Efecto metálico en el icono */
+  filter: drop-shadow(0 0 4px var(--color-produccion-icon-glow));
+  text-shadow: 0 0 8px var(--color-produccion-icon-glow);
+  
+  /* Transición suave */
+  transition: var(--animation-smooth);
+}
+
+.planetaProduccionPro:hover .iconoPlanetaIndustrialPro {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 8px var(--color-produccion-icon-glow));
+}
+
+.planetaProduccionPro.seleccionado .iconoPlanetaIndustrialPro {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 12px var(--color-produccion-icon-glow));
+  animation: iconoIndustrialBrillo var(--animation-duration-pulse) ease-in-out infinite;
+}
+
+/* ===== EFECTO DE MAQUINARIA ACTIVA ===== */
+.efectoMaquinariaPro {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  pointer-events: none;
+  z-index: 8;
+  border: 1px solid var(--color-produccion-machinery);
+  border-radius: 50%;
+  opacity: 0;
+  
+  /* Efecto pulsante de maquinaria */
+  animation: maquinariaActiva var(--animation-duration-pulse) ease-out infinite;
+}
+
+/* ===== BRILLO METÁLICO REFINADO ===== */
+.brilloMetalicoPro {
+  position: absolute;
+  top: 20%;
+  left: 25%;
+  width: 15px;
+  height: 15px;
+  background: radial-gradient(
+    circle,
+    var(--color-produccion-metallic-shine),
+    transparent 70%
+  );
+  border-radius: 50%;
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 9;
+  
+  /* Animación de brillo metálico */
+  animation: brilloMetalicoSutil var(--animation-duration-slow) ease-in-out infinite;
+}
+
+/* ===== INDICADOR DE ESTADÍSTICAS INDUSTRIALES ===== */
+.indicadorEstadisticasPro {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 16px;
+  height: 16px;
+  background: var(--color-produccion-stats-bg);
+  border: 2px solid var(--color-produccion-stats-border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 15;
+  
+  /* Efecto de estadísticas */
+  box-shadow: 0 0 8px var(--color-produccion-stats-glow);
+}
+
+.numeroEstadisticasPro {
+  font-size: 0.6rem;
+  font-weight: bold;
+  color: var(--color-produccion-stats-text);
+  line-height: 1;
+}
+
+/* ===== ANIMACIONES INDUSTRIALES PROFESIONALES ===== */
+
+@keyframes planetaRotacionProduccion {
+  0% { transform: var(--planeta-transform-orbit) rotateZ(0deg); }
+  100% { transform: var(--planeta-transform-orbit) rotateZ(360deg); }
+}
+
+@keyframes planetaPulsoIndustrial {
+  0%, 100% { 
+    box-shadow: var(--shadow-planeta-selected);
+    transform: var(--planeta-transform-selected) var(--planeta-transform-orbit);
+  }
+  50% { 
+    box-shadow: 
+      var(--shadow-planeta-selected),
+      0 0 60px var(--color-produccion-primary);
+    transform: var(--planeta-transform-selected) var(--planeta-transform-orbit) scale(1.05);
+  }
+}
+
+@keyframes alertaProduccionCritica {
+  0%, 100% { 
+    border-color: var(--color-produccion-border);
+  }
+  50% { 
+    border-color: var(--color-alert-primary);
+    box-shadow: 
+      var(--shadow-planeta-alert),
+      0 0 50px var(--color-alert-glow);
+  }
+}
+
+@keyframes efectoMaquinariaActiva {
+  0%, 100% { 
+    filter: brightness(1.1) saturate(1.2);
+  }
+  50% { 
+    filter: brightness(1.3) saturate(1.4);
+  }
+}
+
+@keyframes celebracionProduccion {
+  0%, 100% { 
+    transform: var(--planeta-transform-orbit);
+  }
+  25% { 
+    transform: var(--planeta-transform-orbit) scale(1.1);
+  }
+  75% { 
+    transform: var(--planeta-transform-orbit) scale(1.05);
+  }
+}
+
+@keyframes efectoMantenimiento {
+  0%, 100% { 
+    opacity: 0.8;
+  }
+  50% { 
+    opacity: 1;
+  }
+}
+
+@keyframes rotacionAnilloMetalico {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes rotacionEngranaje {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes progresoIndustrial {
+  0% { 
+    left: -100%;
+  }
+  50% { 
+    left: 0%;
+  }
+  100% { 
+    left: 100%;
+  }
+}
+
+@keyframes vaporChimenea {
+  0% { 
+    opacity: 0;
+    transform: translateX(-50%) translateY(0px) scale(1);
+  }
+  20% { 
+    opacity: 0.7;
+  }
+  100% { 
+    opacity: 0;
+    transform: translateX(-50%) translateY(-30px) scale(1.8);
+  }
+}
+
+@keyframes iconoIndustrialBrillo {
+  0%, 100% { 
+    filter: drop-shadow(0 0 12px var(--color-produccion-icon-glow));
+  }
+  50% { 
+    filter: drop-shadow(0 0 20px var(--color-produccion-icon-glow));
+  }
+}
+
+@keyframes maquinariaActiva {
+  0% { 
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  50% { 
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+  100% { 
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+@keyframes brilloMetalicoSutil {
+  0%, 100% { 
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+  50% { 
+    opacity: 0.9;
+    transform: scale(1.2);
+  }
+}
+
+/* ===== RESPONSIVE DESIGN INDUSTRIAL ===== */
+
+/* Tablet y pantallas medianas */
+@media (max-width: 1024px) {
+  .planetaProduccionPro {
+    width: var(--planeta-size-medium);
+    height: var(--planeta-size-medium);
+  }
+  
+  .efectosMecanicosPro {
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+  }
+  
+  .engranajeMetalicoPro {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* Mobile y pantallas pequeñas */
+@media (max-width: 768px) {
+  .planetaProduccionPro {
+    width: var(--planeta-size-small);
+    height: var(--planeta-size-small);
+  }
+  
+  .iconoPlanetaIndustrialPro {
+    font-size: 1rem;
+  }
+  
+  .efectosMecanicosPro {
+    top: -15px;
+    left: -15px;
+    right: -15px;
+    bottom: -15px;
+  }
+  
+  .engranajeMetalicoPro {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .barraProgresoPro {
+    width: 25px;
+    height: 2px;
+  }
+  
+  .vaporIndustrialPro {
+    width: 20px;
+    height: 30px;
+  }
+}
+
+/* ===== ACCESIBILIDAD INDUSTRIAL AVANZADA ===== */
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .planetaProduccionPro,
+  .planetaProduccionPro *,
+  .planetaProduccionPro::before,
+  .planetaProduccionPro::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .planetaProduccionPro {
+    border-width: 3px;
+    border-color: var(--color-contrast-high);
+  }
+  
+  .iconoPlanetaIndustrialPro {
+    filter: none;
+    color: var(--color-contrast-high);
+  }
+}
+
+/* Focus visible para accesibilidad */
+.planetaProduccionPro:focus-visible {
+  outline: 2px solid var(--color-focus-primary);
+  outline-offset: 4px;
+}

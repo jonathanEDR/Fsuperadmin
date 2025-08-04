@@ -1,0 +1,679 @@
+/* ===== PLANETA MATERIALES - EFECTOS INDUSTRIALES ===== */
+
+.planetaMateriales {
+  position: absolute;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 5;
+  pointer-events: auto;
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  backdrop-filter: blur(1px);
+  transform-style: preserve-3d;
+  animation: 
+    rotacion-mecanica 20s linear infinite,
+    pulso-metalico 3.5s ease-in-out infinite;
+  
+  /* Efecto metálico con reflejo */
+  background-image: 
+    linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.1) 25%, transparent 50%, rgba(255, 255, 255, 0.1) 75%, transparent 100%);
+}
+
+.planetaMateriales:hover {
+  z-index: 15;
+  box-shadow: 
+    0 0 35px rgba(59, 130, 246, 0.9),
+    0 0 70px rgba(59, 130, 246, 0.5),
+    inset 0 0 25px rgba(255, 255, 255, 0.2);
+}
+
+.planetaMateriales:focus {
+  outline: none;
+  box-shadow: 
+    0 0 0 3px rgba(59, 130, 246, 0.4),
+    0 0 35px rgba(59, 130, 246, 0.9);
+}
+
+/* ===== NÚCLEO DEL PLANETA ===== */
+.nucleo {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.icono {
+  font-size: 1.5rem;
+  z-index: 4;
+  position: relative;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  animation: rotacion-herramienta 8s linear infinite;
+}
+
+.planetaMateriales:hover .icono {
+  font-size: 1.7rem;
+  transform: rotate(-15deg) scale(1.1);
+  filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.4));
+}
+
+/* ===== ESTADÍSTICAS ===== */
+.estadisticas {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 0.7rem;
+  z-index: 4;
+  opacity: 0.9;
+}
+
+.numero {
+  font-weight: bold;
+  font-size: 0.8rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+/* ===== ANILLO DE ENGRANAJES ===== */
+.anilloEngranajes {
+  position: absolute;
+  width: 140%;
+  height: 140%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1;
+  animation: rotacion-engranajes 12s linear infinite;
+}
+
+.engranaje {
+  position: absolute;
+  font-size: 0.8rem;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+  animation: rotacion-individual 8s linear infinite reverse;
+  filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.6));
+}
+
+.engranaje:nth-child(1) {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.engranaje:nth-child(2) {
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.engranaje:nth-child(3) {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.engranaje:nth-child(4) {
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.planetaMateriales:hover .engranaje {
+  opacity: 1;
+  font-size: 1rem;
+  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.8));
+}
+
+/* ===== CHISPAS METÁLICAS ===== */
+.chispasMetalicas {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.chispa {
+  position: absolute;
+  width: 2px;
+  height: 8px;
+  border-radius: 1px;
+  top: 20%;
+  left: 50%;
+  transform-origin: 0 40px;
+  opacity: 0.8;
+  animation: chispa-metalica 2s ease-in-out infinite;
+  box-shadow: 0 0 4px currentColor;
+}
+
+.chispa:nth-child(odd) {
+  width: 1.5px;
+  height: 6px;
+  animation-duration: 2.5s;
+}
+
+.chispa:nth-child(3n) {
+  width: 2.5px;
+  height: 10px;
+  animation-duration: 1.8s;
+}
+
+/* ===== ESTELA INDUSTRIAL ===== */
+.estelaIndustrial {
+  position: absolute;
+  height: 3px;
+  width: 30px;
+  top: 50%;
+  right: 100%;
+  transform: translateY(-50%);
+  border-radius: 2px;
+  opacity: 0.7;
+  animation: estela-industrial 2.5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== BRILLO METÁLICO ===== */
+.brilloMetalico {
+  position: absolute;
+  width: 130%;
+  height: 130%;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.3), transparent 60%);
+  animation: pulso-metalico 3.5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== REFLEJO METÁLICO ===== */
+.reflejoMetalico {
+  position: absolute;
+  width: 40%;
+  height: 40%;
+  top: 15%;
+  left: 15%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), transparent);
+  animation: reflejo-movimiento 4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ===== ESTADOS ESPECIALES ===== */
+
+/* Estado de Mantenimiento */
+.mantenimiento {
+  animation: 
+    rotacion-mecanica 20s linear infinite,
+    pulso-mantenimiento 2s ease-in-out infinite !important;
+}
+
+.indicadorMantenimiento {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.iconoMantenimiento {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 0.8rem;
+  background: rgba(245, 158, 11, 0.9);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: parpadeo-mantenimiento 1.5s ease-in-out infinite;
+}
+
+.pulsoMantenimiento {
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  border: 2px solid rgba(245, 158, 11, 0.6);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulso-mantenimiento-ring 2s ease-out infinite;
+}
+
+/* Estado Activo */
+.activo {
+  animation: 
+    rotacion-mecanica 15s linear infinite,
+    actividad-industrial 1.8s ease-in-out infinite !important;
+}
+
+.indicadorActivo {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.pulsoActivo {
+  position: absolute;
+  width: 140%;
+  height: 140%;
+  border: 3px solid rgba(34, 197, 94, 0.7);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulso-activo-industrial 1.5s ease-out infinite;
+}
+
+/* Estado Seleccionado */
+.seleccionado {
+  z-index: 20;
+  box-shadow: 
+    0 0 40px rgba(59, 130, 246, 1),
+    0 0 80px rgba(59, 130, 246, 0.6) !important;
+}
+
+.efectoSeleccion {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.anilloSeleccion {
+  position: absolute;
+  width: 125%;
+  height: 125%;
+  border: 3px solid rgba(59, 130, 246, 0.9);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulso-seleccion-industrial 2s ease-in-out infinite;
+}
+
+/* ===== VAPOR INDUSTRIAL ===== */
+.vaporIndustrial {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.vaporParticula {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle, rgba(156, 163, 175, 0.6), transparent);
+  border-radius: 50%;
+  animation: vapor-ascendente 4s ease-out infinite;
+}
+
+.vaporParticula:nth-child(1) {
+  top: 60%;
+  left: 20%;
+}
+
+.vaporParticula:nth-child(2) {
+  top: 70%;
+  right: 30%;
+}
+
+.vaporParticula:nth-child(3) {
+  top: 65%;
+  left: 70%;
+}
+
+/* ===== EFECTOS DE FORJA ===== */
+.efectoForja {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.forjaGlow {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.2), transparent 70%);
+  animation: forja-calor 1.5s ease-in-out infinite;
+}
+
+.forjaChispas {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.forjaChispa {
+  position: absolute;
+  width: 1px;
+  height: 4px;
+  background: linear-gradient(to top, #fbbf24, #f59e0b);
+  border-radius: 1px;
+  animation: chispa-forja 0.8s ease-out infinite;
+}
+
+.forjaChispa:nth-child(1) { top: 30%; left: 60%; }
+.forjaChispa:nth-child(2) { top: 40%; right: 25%; }
+.forjaChispa:nth-child(3) { bottom: 35%; left: 30%; }
+.forjaChispa:nth-child(4) { top: 25%; left: 40%; }
+.forjaChispa:nth-child(5) { bottom: 40%; right: 35%; }
+.forjaChispa:nth-child(6) { top: 50%; right: 45%; }
+
+/* ===== ANIMACIONES INDUSTRIALES ===== */
+
+@keyframes rotacion-mecanica {
+  from { transform: rotateX(-75deg) rotateY(0deg); }
+  to { transform: rotateX(-75deg) rotateY(-360deg); }
+}
+
+@keyframes rotacion-herramienta {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  50% { transform: rotate(0deg); }
+  75% { transform: rotate(-5deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes pulso-metalico {
+  0%, 100% { 
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% { 
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+@keyframes rotacion-engranajes {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes rotacion-individual {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes chispa-metalica {
+  0% { 
+    opacity: 0;
+    transform: scale(0) translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1) translateY(-3px);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1) translateY(-5px);
+  }
+  100% { 
+    opacity: 0;
+    transform: scale(0) translateY(-8px);
+  }
+}
+
+@keyframes estela-industrial {
+  0%, 100% { 
+    opacity: 0.5;
+    transform: translateY(-50%) scaleX(1);
+  }
+  50% { 
+    opacity: 0.9;
+    transform: translateY(-50%) scaleX(1.3);
+  }
+}
+
+@keyframes reflejo-movimiento {
+  0%, 100% { 
+    opacity: 0.3;
+    transform: translate(0, 0);
+  }
+  50% { 
+    opacity: 0.6;
+    transform: translate(5px, -5px);
+  }
+}
+
+@keyframes pulso-mantenimiento {
+  0%, 100% { 
+    filter: brightness(0.8) saturate(0.8);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+  }
+  50% { 
+    filter: brightness(1.2) saturate(1.2);
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.8);
+  }
+}
+
+@keyframes parpadeo-mantenimiento {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes pulso-mantenimiento-ring {
+  0% { 
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+  }
+  100% { 
+    transform: translate(-50%, -50%) scale(1.4);
+    opacity: 0;
+  }
+}
+
+@keyframes actividad-industrial {
+  0%, 100% { 
+    filter: brightness(1) saturate(1);
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.7);
+  }
+  50% { 
+    filter: brightness(1.6) saturate(1.5);
+    box-shadow: 0 0 35px rgba(34, 197, 94, 0.8);
+  }
+}
+
+@keyframes pulso-activo-industrial {
+  0% { 
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.9;
+  }
+  100% { 
+    transform: translate(-50%, -50%) scale(1.3);
+    opacity: 0;
+  }
+}
+
+@keyframes pulso-seleccion-industrial {
+  0%, 100% { 
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.9;
+  }
+  50% { 
+    transform: translate(-50%, -50%) scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes vapor-ascendente {
+  0% { 
+    transform: translateY(0px) scale(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.6;
+    transform: translateY(-8px) scale(1);
+  }
+  80% {
+    opacity: 0.3;
+    transform: translateY(-20px) scale(1.2);
+  }
+  100% { 
+    transform: translateY(-30px) scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes forja-calor {
+  0%, 100% { 
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes chispa-forja {
+  0% { 
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% { 
+    transform: translateY(-15px) scale(0);
+    opacity: 0;
+  }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .icono {
+    font-size: 1.2rem;
+  }
+  
+  .planetaMateriales:hover .icono {
+    font-size: 1.4rem;
+  }
+  
+  .estadisticas {
+    font-size: 0.6rem;
+    bottom: 2px;
+  }
+  
+  .numero {
+    font-size: 0.7rem;
+  }
+  
+  .engranaje {
+    font-size: 0.6rem;
+  }
+  
+  .chispa {
+    width: 1.5px;
+    height: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .icono {
+    font-size: 1rem;
+  }
+  
+  .planetaMateriales:hover .icono {
+    font-size: 1.2rem;
+  }
+  
+  .estadisticas {
+    display: none;
+  }
+  
+  .engranaje {
+    font-size: 0.5rem;
+  }
+  
+  .chispa {
+    width: 1px;
+    height: 4px;
+  }
+  
+  .estelaIndustrial {
+    height: 2px;
+    width: 20px;
+  }
+}
+
+/* ===== MODO SIN ANIMACIONES ===== */
+@media (prefers-reduced-motion: reduce) {
+  .planetaMateriales,
+  .anilloEngranajes,
+  .engranaje,
+  .chispa,
+  .estelaIndustrial,
+  .brilloMetalico,
+  .reflejoMetalico,
+  .pulsoMantenimiento,
+  .pulsoActivo,
+  .anilloSeleccion,
+  .vaporParticula,
+  .forjaGlow,
+  .forjaChispa,
+  .icono {
+    animation: none !important;
+  }
+  
+  .planetaMateriales:hover .icono {
+    transform: scale(1.1);
+  }
+}
+
+/* ===== MODO ALTO CONTRASTE ===== */
+@media (prefers-contrast: high) {
+  .planetaMateriales {
+    border: 3px solid white;
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
+  }
+  
+  .icono {
+    filter: contrast(2);
+  }
+  
+  .estadisticas {
+    background: rgba(255, 255, 255, 0.9);
+    color: black;
+    border-radius: 3px;
+    padding: 1px 3px;
+  }
+}

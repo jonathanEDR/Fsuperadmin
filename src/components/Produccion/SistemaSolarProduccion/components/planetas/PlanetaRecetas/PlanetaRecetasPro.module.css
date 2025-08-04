@@ -1,0 +1,557 @@
+/* ===== PLANETA RECETAS PROFESIONAL - ESTILO CULINARIO AVANZADO ===== */
+
+/* Importar design tokens centralizados */
+@import '../../../designTokens.css';
+
+/* ===== BASE DEL PLANETA ===== */
+.planetaRecetasPro {
+  /* Estructura base */
+  position: relative;
+  width: var(--planeta-size-base);
+  height: var(--planeta-size-base);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  
+  /* Sistema de transiciones unificado */
+  transition: var(--animation-smooth);
+  transform-style: preserve-3d;
+  transform: var(--planeta-transform-orbit);
+  
+  /* Sombras y elevación profesional */
+  box-shadow: var(--shadow-planeta-base);
+  
+  /* Z-index organizado */
+  z-index: var(--z-planeta-base);
+  pointer-events: auto;
+  
+  /* Animación base consistente */
+  animation: planetaRotacionRecetas var(--animation-duration-slow) linear infinite;
+  
+  /* Filtros y efectos */
+  backdrop-filter: var(--blur-light);
+  overflow: visible;
+  
+  /* Background culinario profesional */
+  background: 
+    var(--gradient-recetas-professional),
+    radial-gradient(circle at 35% 35%, var(--color-recetas-highlight), transparent 60%);
+  
+  /* Border refinado */
+  border: 2px solid var(--color-recetas-border);
+}
+
+/* ===== ESTADOS DE INTERACCIÓN PROFESIONALES ===== */
+.planetaRecetasPro:hover {
+  transform: var(--planeta-transform-hover) var(--planeta-transform-orbit);
+  z-index: var(--z-planeta-hover);
+  
+  /* Efectos visuales mejorados */
+  filter: var(--filter-enhance);
+  box-shadow: var(--shadow-planeta-hover);
+  
+  /* Pausa animación para mejor UX */
+  animation-play-state: paused;
+}
+
+.planetaRecetasPro.seleccionado {
+  transform: var(--planeta-transform-selected) var(--planeta-transform-orbit);
+  z-index: var(--z-planeta-selected);
+  
+  /* Efectos de selección avanzados */
+  filter: var(--filter-selected);
+  box-shadow: var(--shadow-planeta-selected);
+  
+  /* Animación de selección dual */
+  animation: 
+    planetaRotacionRecetas var(--animation-duration-medium) linear infinite,
+    planetaPulsoSeleccionado var(--animation-duration-pulse) ease-in-out infinite;
+}
+
+.planetaRecetasPro.conAlerta {
+  /* Alerta culinaria profesional */
+  animation: 
+    planetaRotacionRecetas var(--animation-duration-slow) linear infinite,
+    alertaRecetaCritica var(--animation-duration-fast) ease-in-out infinite;
+  
+  box-shadow: 
+    var(--shadow-planeta-alert),
+    0 0 40px var(--color-alert-glow);
+}
+
+/* ===== ESTADOS CULINARIOS ESPECÍFICOS ===== */
+.planetaRecetasPro.cocinando {
+  /* Estado de cocción activa */
+  background: var(--gradient-recetas-cooking);
+  border-color: var(--color-cooking-active);
+  
+  animation: 
+    planetaRotacionRecetas var(--animation-duration-fast) linear infinite,
+    efectoCoccionActiva 2s ease-in-out infinite;
+  
+  box-shadow: 
+    var(--shadow-planeta-base),
+    0 0 30px var(--color-cooking-glow);
+}
+
+.planetaRecetasPro.completado {
+  /* Estado de receta completada */
+  background: var(--gradient-recetas-completed);
+  border-color: var(--color-success-primary);
+  
+  box-shadow: 
+    var(--shadow-planeta-success),
+    0 0 35px var(--color-success-glow);
+  
+  animation: 
+    planetaRotacionRecetas var(--animation-duration-medium) linear infinite,
+    celebracionCompletado 3s ease-in-out infinite;
+}
+
+/* ===== EFECTOS DE COCCIÓN PROFESIONALES ===== */
+.efectosCoccionPro {
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ondaCalorPro {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 8px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-cooking-heat),
+    transparent
+  );
+  border-radius: 50px;
+  opacity: 0.7;
+  transform: translate(-50%, -50%);
+  
+  /* Efecto ondulante mejorado */
+  animation: ondaCalorFluctuante var(--animation-duration-medium) ease-in-out infinite;
+}
+
+.ondaCalorPro:nth-child(1) {
+  transform: translate(-50%, -70%);
+  animation-delay: 0s;
+  width: 35px;
+}
+
+.ondaCalorPro:nth-child(2) {
+  transform: translate(-50%, -50%);
+  animation-delay: 0.3s;
+  width: 40px;
+}
+
+.ondaCalorPro:nth-child(3) {
+  transform: translate(-50%, -30%);
+  animation-delay: 0.6s;
+  width: 32px;
+}
+
+/* ===== PARTÍCULAS DORADAS REFINADAS ===== */
+.particulasDoradasPro {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.particulaDoradaPro {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: var(--color-recetas-golden);
+  border-radius: 50%;
+  opacity: 0;
+  
+  /* Sombra dorada profesional */
+  box-shadow: 
+    0 0 6px var(--color-recetas-golden),
+    0 0 12px var(--color-recetas-golden-light);
+  
+  /* Animación flotante refinada */
+  animation: particulaFlotante var(--animation-duration-slow) ease-in-out infinite;
+}
+
+.particulaDoradaPro:nth-child(1) {
+  top: 20%;
+  left: 15%;
+  animation-delay: 0s;
+}
+
+.particulaDoradaPro:nth-child(2) {
+  top: 30%;
+  right: 20%;
+  animation-delay: 0.8s;
+}
+
+.particulaDoradaPro:nth-child(3) {
+  bottom: 25%;
+  left: 25%;
+  animation-delay: 1.6s;
+}
+
+.particulaDoradaPro:nth-child(4) {
+  bottom: 35%;
+  right: 15%;
+  animation-delay: 2.4s;
+}
+
+.particulaDoradaPro:nth-child(5) {
+  top: 50%;
+  left: 50%;
+  animation-delay: 3.2s;
+  transform: translate(-50%, -50%);
+}
+
+/* ===== VAPOR DE COCCIÓN PROFESIONAL ===== */
+.vaporCoccionPro {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 30px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.vaporPro {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(
+    to top,
+    var(--color-vapor-base),
+    transparent
+  );
+  border-radius: 50%;
+  opacity: 0;
+  transform: translateX(-50%);
+  
+  /* Animación de vapor fluida */
+  animation: vaporAscendente var(--animation-duration-medium) ease-out infinite;
+}
+
+.vaporPro:nth-child(1) {
+  left: 40%;
+  animation-delay: 0s;
+  width: 3px;
+}
+
+.vaporPro:nth-child(2) {
+  left: 50%;
+  animation-delay: 0.4s;
+  width: 4px;
+}
+
+.vaporPro:nth-child(3) {
+  left: 60%;
+  animation-delay: 0.8s;
+  width: 3px;
+}
+
+/* ===== ICONO DEL PLANETA PROFESIONAL ===== */
+.iconoPlanetaPro {
+  position: relative;
+  z-index: 10;
+  font-size: 1.2rem;
+  color: var(--color-recetas-icon);
+  
+  /* Efecto de brillantez en el icono */
+  filter: drop-shadow(0 0 4px var(--color-recetas-icon-glow));
+  
+  /* Transición suave */
+  transition: var(--animation-smooth);
+}
+
+.planetaRecetasPro:hover .iconoPlanetaPro {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 8px var(--color-recetas-icon-glow));
+}
+
+.planetaRecetasPro.seleccionado .iconoPlanetaPro {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 12px var(--color-recetas-icon-glow));
+  animation: iconoRecetasBrillo var(--animation-duration-pulse) ease-in-out infinite;
+}
+
+/* ===== EFECTO DE COMPLETADO PROFESIONAL ===== */
+.efectoCompletadoPro {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  pointer-events: none;
+  z-index: 8;
+}
+
+.anilloCompletadoPro {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px solid var(--color-success-primary);
+  border-radius: 50%;
+  opacity: 0;
+  
+  /* Efecto de celebración */
+  animation: anilloCompletado var(--animation-duration-pulse) ease-out infinite;
+  
+  /* Sombra de éxito */
+  box-shadow: 
+    0 0 20px var(--color-success-glow),
+    inset 0 0 20px var(--color-success-glow);
+}
+
+/* ===== BRILLO ESPECIAL REFINADO ===== */
+.brilloRecetasPro {
+  position: absolute;
+  top: 15%;
+  left: 20%;
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(
+    circle,
+    var(--color-recetas-shine),
+    transparent 70%
+  );
+  border-radius: 50%;
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 9;
+  
+  /* Animación de brillo sutil */
+  animation: brilloRecetasSutil var(--animation-duration-slow) ease-in-out infinite;
+}
+
+/* ===== ANIMACIONES PROFESIONALES ===== */
+
+@keyframes planetaRotacionRecetas {
+  0% { transform: var(--planeta-transform-orbit) rotateZ(0deg); }
+  100% { transform: var(--planeta-transform-orbit) rotateZ(360deg); }
+}
+
+@keyframes planetaPulsoSeleccionado {
+  0%, 100% { 
+    box-shadow: var(--shadow-planeta-selected);
+    transform: var(--planeta-transform-selected) var(--planeta-transform-orbit);
+  }
+  50% { 
+    box-shadow: 
+      var(--shadow-planeta-selected),
+      0 0 60px var(--color-recetas-primary);
+    transform: var(--planeta-transform-selected) var(--planeta-transform-orbit) scale(1.05);
+  }
+}
+
+@keyframes alertaRecetaCritica {
+  0%, 100% { 
+    border-color: var(--color-recetas-border);
+  }
+  50% { 
+    border-color: var(--color-alert-primary);
+    box-shadow: 
+      var(--shadow-planeta-alert),
+      0 0 50px var(--color-alert-glow);
+  }
+}
+
+@keyframes efectoCoccionActiva {
+  0%, 100% { 
+    filter: brightness(1.1) saturate(1.2);
+  }
+  50% { 
+    filter: brightness(1.3) saturate(1.4);
+  }
+}
+
+@keyframes celebracionCompletado {
+  0%, 100% { 
+    transform: var(--planeta-transform-orbit);
+  }
+  25% { 
+    transform: var(--planeta-transform-orbit) scale(1.1);
+  }
+  75% { 
+    transform: var(--planeta-transform-orbit) scale(1.05);
+  }
+}
+
+@keyframes ondaCalorFluctuante {
+  0%, 100% { 
+    opacity: 0.4;
+    transform: translate(-50%, -50%) scaleX(0.8);
+  }
+  50% { 
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scaleX(1.2);
+  }
+}
+
+@keyframes particulaFlotante {
+  0%, 100% { 
+    opacity: 0;
+    transform: translateY(0px) scale(0.5);
+  }
+  50% { 
+    opacity: 1;
+    transform: translateY(-10px) scale(1);
+  }
+}
+
+@keyframes vaporAscendente {
+  0% { 
+    opacity: 0;
+    transform: translateX(-50%) translateY(0px) scale(1);
+  }
+  20% { 
+    opacity: 0.6;
+  }
+  100% { 
+    opacity: 0;
+    transform: translateX(-50%) translateY(-25px) scale(1.5);
+  }
+}
+
+@keyframes iconoRecetasBrillo {
+  0%, 100% { 
+    filter: drop-shadow(0 0 12px var(--color-recetas-icon-glow));
+  }
+  50% { 
+    filter: drop-shadow(0 0 20px var(--color-recetas-icon-glow));
+  }
+}
+
+@keyframes anilloCompletado {
+  0% { 
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% { 
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+@keyframes brilloRecetasSutil {
+  0%, 100% { 
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+  50% { 
+    opacity: 0.8;
+    transform: scale(1.2);
+  }
+}
+
+/* ===== RESPONSIVE DESIGN PROFESIONAL ===== */
+
+/* Tablet y pantallas medianas */
+@media (max-width: 1024px) {
+  .planetaRecetasPro {
+    width: var(--planeta-size-medium);
+    height: var(--planeta-size-medium);
+  }
+  
+  .efectosCoccionPro {
+    top: -15px;
+    left: -15px;
+    right: -15px;
+    bottom: -15px;
+  }
+  
+  .ondaCalorPro {
+    width: 30px;
+    height: 6px;
+  }
+}
+
+/* Mobile y pantallas pequeñas */
+@media (max-width: 768px) {
+  .planetaRecetasPro {
+    width: var(--planeta-size-small);
+    height: var(--planeta-size-small);
+  }
+  
+  .iconoPlanetaPro {
+    font-size: 1rem;
+  }
+  
+  .efectosCoccionPro {
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+  }
+  
+  .ondaCalorPro {
+    width: 25px;
+    height: 5px;
+  }
+  
+  .particulaDoradaPro {
+    width: 2px;
+    height: 2px;
+  }
+  
+  .vaporPro {
+    width: 3px;
+    height: 15px;
+  }
+}
+
+/* ===== ACCESIBILIDAD AVANZADA ===== */
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .planetaRecetasPro,
+  .planetaRecetasPro *,
+  .planetaRecetasPro::before,
+  .planetaRecetasPro::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .planetaRecetasPro {
+    border-width: 3px;
+    border-color: var(--color-contrast-high);
+  }
+  
+  .iconoPlanetaPro {
+    filter: none;
+    color: var(--color-contrast-high);
+  }
+}
+
+/* Focus visible para accesibilidad */
+.planetaRecetasPro:focus-visible {
+  outline: 2px solid var(--color-focus-primary);
+  outline-offset: 4px;
+}

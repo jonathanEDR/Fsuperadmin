@@ -1,0 +1,562 @@
+/* ===== PLANETA INGREDIENTES - VERSIÓN PROFESIONAL ===== */
+@import '../../../designTokens.css';
+
+.planetaIngredientes {
+  /* Layout Base */
+  position: relative;
+  width: var(--planeta-size-base);
+  height: var(--planeta-size-base);
+  border-radius: var(--border-radius-full);
+  
+  /* Centrado y Display */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Interactividad */
+  cursor: pointer;
+  transition: all var(--duration-hover-transition) var(--easing-ease-out);
+  
+  /* Z-index y Pointer Events */
+  z-index: var(--z-planets-base);
+  pointer-events: auto;
+  
+  /* Visual Base */
+  background: var(--gradient-ingredientes);
+  border: var(--border-width-base) solid rgba(16, 185, 129, 0.3);
+  backdrop-filter: var(--filter-blur-light);
+  
+  /* Sombra Profesional */
+  --shadow-color-rgb: 16, 185, 129;
+  box-shadow: var(--shadow-elevation-2-colored);
+  
+  /* 3D Transform */
+  transform-style: preserve-3d;
+  transform: rotateX(-75deg) rotateY(0deg) scale(var(--state-normal-scale));
+  
+  /* Animaciones Base */
+  animation: 
+    planeta-rotation var(--duration-planet-rotation) linear infinite,
+    organic-breathing 6s ease-in-out infinite;
+}
+
+/* ===== ESTADOS DE INTERACCIÓN ===== */
+
+.planetaIngredientes:hover {
+  /* Elevación y Escala */
+  transform: rotateX(-75deg) rotateY(15deg) scale(var(--state-hover-scale));
+  z-index: var(--z-planets-hover);
+  
+  /* Sombra Hover */
+  box-shadow: var(--shadow-hover-colored);
+  
+  /* Filtros Mejorados */
+  filter: var(--filter-brightness-hover) var(--filter-saturate-enhanced);
+}
+
+.planetaIngredientes:focus {
+  outline: none;
+  box-shadow: 
+    var(--shadow-elevation-2-colored),
+    var(--shadow-focus);
+}
+
+.planetaIngredientes:active {
+  transform: rotateX(-75deg) rotateY(15deg) scale(var(--state-active-scale));
+  transition-duration: var(--timing-fast);
+}
+
+/* ===== ESTADOS ESPECÍFICOS ===== */
+
+.seleccionado {
+  transform: rotateX(-75deg) rotateY(0deg) scale(var(--state-selected-scale)) !important;
+  z-index: var(--z-planets-selected);
+  
+  box-shadow: 
+    var(--shadow-elevation-3-colored),
+    0 0 60px rgba(16, 185, 129, 0.6);
+  
+  animation: 
+    planeta-rotation calc(var(--duration-planet-rotation) * 0.8) linear infinite,
+    selected-pulse 3s ease-in-out infinite;
+}
+
+.alertaBajo {
+  animation: 
+    planeta-rotation var(--duration-planet-rotation) linear infinite,
+    alert-pulse 2s ease-in-out infinite,
+    organic-breathing 6s ease-in-out infinite;
+}
+
+/* ===== TAMAÑOS POR ÓRBITA ===== */
+
+.orbita1 {
+  width: var(--planeta-orbita-1-size);
+  height: var(--planeta-orbita-1-size);
+  box-shadow: var(--shadow-elevation-1-colored);
+}
+
+.orbita2 {
+  width: var(--planeta-orbita-2-size);
+  height: var(--planeta-orbita-2-size);
+  box-shadow: var(--shadow-elevation-2-colored);
+}
+
+.orbita3 {
+  width: var(--planeta-orbita-3-size);
+  height: var(--planeta-orbita-3-size);
+  box-shadow: var(--shadow-elevation-3-colored);
+  opacity: var(--opacity-visible);
+}
+
+/* ===== ELEMENTOS INTERNOS ===== */
+
+.nucleo {
+  position: relative;
+  z-index: var(--z-effects);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.icono {
+  font-size: 1.5rem;
+  z-index: calc(var(--z-effects) + 1);
+  transition: all var(--timing-base) var(--easing-ease-out);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  animation: icon-float 4s ease-in-out infinite;
+}
+
+.planetaIngredientes:hover .icono {
+  font-size: 1.7rem;
+  transform: rotate(8deg) scale(1.1);
+  filter: drop-shadow(0 4px 8px rgba(16, 185, 129, 0.6));
+}
+
+.estadisticas {
+  position: absolute;
+  bottom: var(--space-1);
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 0.75rem;
+  z-index: calc(var(--z-effects) + 1);
+  opacity: var(--opacity-visible);
+  transition: all var(--timing-base) var(--easing-ease-out);
+}
+
+.numero {
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  text-align: center;
+  padding: var(--space-1) var(--space-2);
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: var(--border-radius-base);
+  backdrop-filter: var(--filter-blur-light);
+}
+
+/* ===== EFECTOS AVANZADOS ===== */
+
+.anilloParticulas {
+  position: absolute;
+  width: 140%;
+  height: 140%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: var(--z-orbit-particles);
+  animation: orbit-rotation calc(var(--duration-orbit-rotation) / 3) linear infinite;
+}
+
+.particula {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: var(--border-radius-full);
+  background: var(--planeta-ingredientes-accent);
+  top: 0;
+  left: 50%;
+  transform-origin: 0 70px;
+  opacity: var(--opacity-muted);
+  animation: particle-organic var(--duration-particle-flow) ease-in-out infinite;
+  box-shadow: 
+    0 0 6px currentColor,
+    0 0 12px rgba(16, 185, 129, 0.4);
+}
+
+.particula:nth-child(odd) {
+  width: 2px;
+  height: 2px;
+  animation-duration: calc(var(--duration-particle-flow) * 1.5);
+  opacity: var(--opacity-muted);
+}
+
+.particula:nth-child(3n) {
+  width: 4px;
+  height: 4px;
+  animation-duration: calc(var(--duration-particle-flow) * 0.75);
+  opacity: var(--opacity-visible);
+}
+
+.estela {
+  position: absolute;
+  height: 2px;
+  width: var(--space-8);
+  top: 50%;
+  right: 100%;
+  transform: translateY(-50%);
+  border-radius: var(--border-radius-sm);
+  background: linear-gradient(90deg, 
+    rgba(16, 185, 129, 0.6), 
+    transparent
+  );
+  opacity: var(--opacity-muted);
+  animation: trail-organic 4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: var(--z-background);
+}
+
+.brilloOrganico {
+  position: absolute;
+  width: 130%;
+  height: 130%;
+  border-radius: var(--border-radius-full);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, 
+    rgba(16, 185, 129, 0.15), 
+    transparent 70%
+  );
+  animation: glow-organic 5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: var(--z-background);
+}
+
+.respiracion {
+  position: absolute;
+  width: 105%;
+  height: 105%;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--border-radius-full);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: breathing-ring 6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: var(--z-orbit-particles);
+}
+
+/* ===== INDICADORES DE ESTADO ===== */
+
+.indicadorAlerta {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: calc(var(--z-effects) + 2);
+}
+
+.pulsoAlerta {
+  position: absolute;
+  width: 160%;
+  height: 160%;
+  border: var(--border-width-base) solid rgba(239, 68, 68, 0.7);
+  border-radius: var(--border-radius-full);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: alert-ring 1.5s ease-out infinite;
+}
+
+.efectoSeleccion {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: calc(var(--z-effects) + 1);
+}
+
+.anilloSeleccion {
+  position: absolute;
+  width: 130%;
+  height: 130%;
+  border: var(--border-width-thick) solid rgba(16, 185, 129, 0.8);
+  border-radius: var(--border-radius-full);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: selection-ring 2.5s ease-in-out infinite;
+}
+
+.biomasaFlotante {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: var(--z-orbit-particles);
+}
+
+.biomasaParticula {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: radial-gradient(circle, 
+    rgba(16, 185, 129, 0.9), 
+    transparent
+  );
+  border-radius: var(--border-radius-full);
+  animation: biomass-float 4s ease-in-out infinite;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+.biomasaParticula:nth-child(1) { top: 20%; left: 30%; animation-delay: 0s; }
+.biomasaParticula:nth-child(2) { top: 70%; right: 25%; animation-delay: 1s; }
+.biomasaParticula:nth-child(3) { bottom: 30%; left: 60%; animation-delay: 2s; }
+.biomasaParticula:nth-child(4) { top: 40%; right: 40%; animation-delay: 3s; }
+
+/* ===== ANIMACIONES PROFESIONALES ===== */
+
+@keyframes planeta-rotation {
+  from { transform: rotateX(-75deg) rotateY(0deg) scale(var(--state-normal-scale)); }
+  to { transform: rotateX(-75deg) rotateY(-360deg) scale(var(--state-normal-scale)); }
+}
+
+@keyframes organic-breathing {
+  0%, 100% { 
+    filter: brightness(1) saturate(1);
+    box-shadow: var(--shadow-elevation-2-colored);
+  }
+  50% { 
+    filter: brightness(1.1) saturate(1.2);
+    box-shadow: 
+      var(--shadow-elevation-2-colored),
+      0 0 25px rgba(16, 185, 129, 0.4);
+  }
+}
+
+@keyframes selected-pulse {
+  0%, 100% { 
+    box-shadow: 
+      var(--shadow-elevation-3-colored),
+      0 0 60px rgba(16, 185, 129, 0.6);
+  }
+  50% { 
+    box-shadow: 
+      var(--shadow-elevation-3-colored),
+      0 0 80px rgba(16, 185, 129, 0.8);
+  }
+}
+
+@keyframes alert-pulse {
+  0%, 100% { 
+    filter: brightness(1) saturate(1);
+  }
+  50% { 
+    filter: brightness(1.4) saturate(1.6);
+    box-shadow: 
+      var(--shadow-elevation-2-colored),
+      0 0 40px rgba(239, 68, 68, 0.8);
+  }
+}
+
+@keyframes icon-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes orbit-rotation {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes particle-organic {
+  0% { 
+    opacity: 0;
+    transform: scale(0) translateY(0);
+  }
+  25% {
+    opacity: var(--opacity-visible);
+    transform: scale(1) translateY(-4px);
+  }
+  75% {
+    opacity: var(--opacity-visible);
+    transform: scale(1) translateY(-2px);
+  }
+  100% { 
+    opacity: 0;
+    transform: scale(0) translateY(0);
+  }
+}
+
+@keyframes trail-organic {
+  0%, 100% { 
+    opacity: var(--opacity-muted);
+    transform: translateY(-50%) scaleX(1);
+  }
+  50% { 
+    opacity: var(--opacity-visible);
+    transform: translateY(-50%) scaleX(1.3);
+  }
+}
+
+@keyframes glow-organic {
+  0%, 100% { 
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% { 
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+@keyframes breathing-ring {
+  0%, 100% { 
+    transform: translate(-50%, -50%) scale(1);
+    opacity: var(--opacity-muted);
+  }
+  50% { 
+    transform: translate(-50%, -50%) scale(1.05);
+    opacity: var(--opacity-visible);
+  }
+}
+
+@keyframes alert-ring {
+  0% { 
+    transform: translate(-50%, -50%) scale(1);
+    opacity: var(--opacity-visible);
+  }
+  100% { 
+    transform: translate(-50%, -50%) scale(1.4);
+    opacity: 0;
+  }
+}
+
+@keyframes selection-ring {
+  0%, 100% { 
+    transform: translate(-50%, -50%) scale(1);
+    opacity: var(--opacity-visible);
+  }
+  50% { 
+    transform: translate(-50%, -50%) scale(1.08);
+    opacity: var(--opacity-full);
+  }
+}
+
+@keyframes biomass-float {
+  0% { 
+    transform: translateY(0px) scale(0);
+    opacity: 0;
+  }
+  25% {
+    opacity: var(--opacity-visible);
+    transform: translateY(-6px) scale(1);
+  }
+  75% {
+    opacity: var(--opacity-visible);
+    transform: translateY(-10px) scale(1);
+  }
+  100% { 
+    transform: translateY(-15px) scale(0);
+    opacity: 0;
+  }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  .icono {
+    font-size: 1.2rem;
+  }
+  
+  .planetaIngredientes:hover .icono {
+    font-size: 1.4rem;
+  }
+  
+  .estadisticas {
+    font-size: 0.65rem;
+  }
+  
+  .numero {
+    font-size: 0.7rem;
+    padding: var(--space-1);
+  }
+  
+  .particula {
+    width: 2px;
+    height: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .icono {
+    font-size: 1rem;
+  }
+  
+  .planetaIngredientes:hover .icono {
+    font-size: 1.2rem;
+  }
+  
+  .estadisticas {
+    display: none; /* Ocultar en pantallas muy pequeñas */
+  }
+  
+  .particula {
+    width: 1.5px;
+    height: 1.5px;
+  }
+  
+  .estela {
+    height: 1px;
+    width: var(--space-6);
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+@media (prefers-reduced-motion: reduce) {
+  .planetaIngredientes,
+  .anilloParticulas,
+  .particula,
+  .estela,
+  .brilloOrganico,
+  .respiracion,
+  .pulsoAlerta,
+  .anilloSeleccion,
+  .biomasaParticula,
+  .icono {
+    animation: none !important;
+  }
+  
+  .planetaIngredientes:hover .icono {
+    transform: scale(1.1);
+  }
+}
+
+@media (prefers-contrast: high) {
+  .planetaIngredientes {
+    border: var(--border-width-thick) solid white;
+    background: var(--planeta-ingredientes-primary) !important;
+  }
+  
+  .icono {
+    filter: contrast(2);
+  }
+  
+  .numero {
+    background: rgba(255, 255, 255, 0.95);
+    color: black;
+  }
+}

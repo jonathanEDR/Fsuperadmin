@@ -7,6 +7,9 @@ import { materialService } from '../../services/materialService';
 import { recetaService } from '../../services/recetaService';
 import { produccionService } from '../../services/produccionService';
 
+// Importar el nuevo Sistema Solar
+import { SistemaSolarProduccion } from './SistemaSolarProduccion';
+
 
 const accesos = [
   {
@@ -72,6 +75,9 @@ const AccesosRapidosProduccion = () => {
   });
   const [loadingStats, setLoadingStats] = useState(true);
   
+  // Estado para alternar entre vistas
+  const [vistaActual, setVistaActual] = useState('tradicional'); // 'tradicional' | 'sistemaSolar'
+  
   // Buscar el segmento '/produccion' en la ruta actual
   const pathParts = location.pathname.split('/');
   const produccionIdx = pathParts.findIndex(p => p === 'produccion');
@@ -134,16 +140,99 @@ const AccesosRapidosProduccion = () => {
     cargarEstadisticas();
   }, []);
 
+  // Manejar click en planeta del sistema solar
+  const handlePlanetaClick = (tipo) => {
+    // Navegar directamente al módulo
+    const pathParts = location.pathname.split('/');
+    const produccionIdx = pathParts.findIndex(p => p === 'produccion');
+    let basePath = '';
+    if (produccionIdx !== -1) {
+      basePath = pathParts.slice(0, produccionIdx + 1).join('/');
+    } else {
+      basePath = pathParts.slice(0, 2).join('/');
+    }
+    
+    // Encontrar el acceso correspondiente
+    const acceso = accesos.find(a => a.to === tipo);
+    if (acceso) {
+      window.location.href = basePath + '/' + acceso.to;
+    }
+  };
+
+  // Si es vista de sistema solar, renderizar el componente nuevo
+  if (vistaActual === 'sistemaSolar') {
+    return (
+      <div className="p-6">
+        {/* Header con toggle */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Sistema de Producción
+            </h1>
+            <p className="text-gray-600">
+              Gestiona todos los aspectos de tu proceso de producción desde un solo lugar
+            </p>
+          </div>
+          
+          {/* Toggle de vista */}
+          <div className="flex items-center space-x-3">
+            <span className="text-sm text-gray-600">Vista:</span>
+            <button
+              onClick={() => setVistaActual('tradicional')}
+              className="px-3 py-2 text-sm rounded-lg border transition-colors hover:bg-gray-50"
+            >
+              📋 Tradicional
+            </button>
+            <button
+              onClick={() => setVistaActual('sistemaSolar')}
+              className="px-3 py-2 text-sm rounded-lg bg-blue-600 text-white transition-colors hover:bg-blue-700"
+            >
+              🌌 Sistema Solar
+            </button>
+          </div>
+        </div>
+
+        {/* Componente del Sistema Solar */}
+        <SistemaSolarProduccion
+          onPlanetaClick={handlePlanetaClick}
+          mostrarEstadisticas={true}
+          modoInteractivo={true}
+        />
+      </div>
+    );
+  }
+
+  // Vista tradicional (código original)
+
   return (
     <div className="p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Sistema de Producción
-        </h1>
-        <p className="text-gray-600">
-          Gestiona todos los aspectos de tu proceso de producción desde un solo lugar
-        </p>
+      {/* Header con toggle */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Sistema de Producción
+          </h1>
+          <p className="text-gray-600">
+            Gestiona todos los aspectos de tu proceso de producción desde un solo lugar
+          </p>
+        </div>
+        
+        {/* Toggle de vista */}
+        <div className="flex items-center space-x-3">
+          <span className="text-sm text-gray-600">Vista:</span>
+          <button
+            onClick={() => setVistaActual('tradicional')}
+            className="px-3 py-2 text-sm rounded-lg bg-blue-600 text-white transition-colors hover:bg-blue-700"
+          >
+            📋 Tradicional
+          </button>
+          <button
+            onClick={() => setVistaActual('sistemaSolar')}
+            className="px-3 py-2 text-sm rounded-lg border transition-colors hover:bg-gray-50"
+          >
+            🌌 Sistema Solar
+          </button>
+        </div>
       </div>
 
       {/* Grid de accesos rápidos */}

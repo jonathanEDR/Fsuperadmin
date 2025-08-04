@@ -84,9 +84,11 @@ const ModalAgregarCantidad = ({
 
     switch (tipoProducto) {
       case 'ingredientes':
+        // Calcular stock disponible: cantidad total - cantidad procesada
+        const stockDisponibleIngrediente = (producto.cantidad || 0) - (producto.procesado || 0);
         return {
           nombre: producto.nombre,
-          cantidadActual: producto.cantidad || 0,
+          cantidadActual: stockDisponibleIngrediente,
           unidad: producto.unidadMedida || 'unidad',
           referencia: producto.productoReferencia?.nombre || 'N/A'
         };

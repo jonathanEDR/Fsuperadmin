@@ -452,8 +452,10 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
   const obtenerCantidad = (producto) => {
     switch (tipoSeleccionado) {
       case 'ingredientes':
+        // Calcular stock disponible: cantidad total - cantidad procesada
+        const stockDisponible = (producto.cantidad || 0) - (producto.procesado || 0);
         return {
-          cantidad: producto.cantidad || 0,
+          cantidad: stockDisponible,
           unidad: producto.unidadMedida || 'unidad'
         };
       case 'materiales':

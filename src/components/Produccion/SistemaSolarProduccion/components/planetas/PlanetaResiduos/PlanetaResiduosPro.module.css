@@ -1,0 +1,383 @@
+/* 🌿 PLANETA RESIDUOS PROFESIONAL - CSS MODULE */
+
+.planetaResiduosPro {
+  /* 🌍 Base del planeta */
+  position: relative;
+  width: var(--planeta-size-medium);
+  height: var(--planeta-size-medium);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all var(--animation-duration-medium) var(--animation-easing-smooth);
+  
+  /* 🎯 Enfoque y accesibilidad */
+  outline: none;
+  
+  /* 🚀 Optimización de rendimiento */
+  will-change: transform, box-shadow, filter;
+  contain: layout style paint;
+}
+
+/* 🎨 NÚCLEO DEL PLANETA */
+.nucleo {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: 
+    radial-gradient(circle at 30% 30%, var(--planeta-residuos-highlight) 0%, transparent 50%),
+    linear-gradient(135deg, 
+      var(--planeta-residuos-primary) 0%,
+      var(--planeta-residuos-secondary) 50%,
+      var(--planeta-residuos-tertiary) 100%
+    );
+  box-shadow: var(--shadow-planeta-medium);
+  overflow: hidden;
+}
+
+.superficie {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: 
+    radial-gradient(circle at 40% 40%, rgba(255,255,255,0.2) 0%, transparent 60%),
+    linear-gradient(45deg, transparent 30%, rgba(76, 175, 80, 0.3) 50%, transparent 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconoReciclaje {
+  width: 35%;
+  height: 35%;
+  color: var(--planeta-residuos-icon);
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  z-index: 2;
+}
+
+.iconoSvg {
+  width: 100%;
+  height: 100%;
+  animation: reciclajeRotate 8s linear infinite;
+}
+
+/* 🌿 EFECTOS DE SOSTENIBILIDAD */
+.efectosSostenibilidad {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.ondaVerde {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--planeta-residuos-wave);
+  opacity: 0;
+  animation: ondaEcologica 4s ease-out infinite;
+}
+
+.ondaVerde:nth-child(2) {
+  animation-delay: 1.3s;
+}
+
+.ondaVerde:nth-child(3) {
+  animation-delay: 2.6s;
+}
+
+/* 🌟 ATMÓSFERA */
+.atmosfera {
+  position: absolute;
+  inset: -8%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--planeta-residuos-glow) 0%,
+    transparent 70%
+  );
+  opacity: 0.5;
+  animation: residuosGlow 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ♻️ ANILLO DE RECICLAJE */
+.anilloReciclaje {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 130%;
+  height: 130%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.particulaResiduos {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  background: var(--planeta-residuos-particle);
+  border-radius: 50%;
+  transform-origin: 0 65px;
+  animation: residuosOrbit 25s linear infinite;
+  box-shadow: 0 0 8px var(--planeta-residuos-particle);
+}
+
+.particulaResiduos:nth-child(odd) {
+  background: var(--success-color);
+  box-shadow: 0 0 8px var(--success-glow);
+}
+
+/* 📈 ESTADÍSTICAS FLOTANTES */
+.estadisticasFloating {
+  position: absolute;
+  top: -25%;
+  right: -20%;
+  background: var(--planeta-residuos-badge);
+  color: var(--text-on-accent);
+  padding: 6px 10px;
+  border-radius: 15px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-floating);
+  animation: residuosFloat 4s ease-in-out infinite;
+  text-align: center;
+}
+
+.contador {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.etiqueta {
+  display: block;
+  font-size: 0.6rem;
+  opacity: 0.8;
+}
+
+/* 🌱 INDICADOR DE IMPACTO */
+.indicadorImpacto {
+  position: absolute;
+  bottom: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 4px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.barraImpacto {
+  height: 100%;
+  background: linear-gradient(90deg, 
+    var(--success-color) 0%, 
+    var(--warning-color) 50%, 
+    var(--error-color) 100%
+  );
+  border-radius: 2px;
+  transition: width 0.8s ease;
+}
+
+.indicadorImpacto[data-estado="normal"] .barraImpacto {
+  width: 30%;
+  background: var(--success-color);
+}
+
+.indicadorImpacto[data-estado="alertaBajo"] .barraImpacto {
+  width: 70%;
+  background: var(--warning-color);
+  animation: alertaPulse 2s ease-in-out infinite;
+}
+
+.indicadorImpacto[data-estado="seleccionado"] .barraImpacto {
+  width: 50%;
+  background: var(--accent-color);
+}
+
+/* ✨ EFECTOS DE TRANSFORMACIÓN */
+.efectosTransformacion {
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+}
+
+.espiral {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--planeta-residuos-spiral);
+  animation: espiralTransformacion 3s linear infinite;
+  opacity: 0.6;
+}
+
+.particulas {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(2px 2px at 20% 30%, var(--success-color), transparent),
+    radial-gradient(2px 2px at 60% 70%, var(--planeta-residuos-particle), transparent),
+    radial-gradient(1px 1px at 90% 40%, var(--warning-color), transparent),
+    radial-gradient(1px 1px at 40% 80%, var(--success-color), transparent);
+  animation: particulasFlotantes 8s ease-in-out infinite;
+  opacity: 0.7;
+}
+
+/* 🎯 ESTADOS INTERACTIVOS */
+.planetaResiduosPro:hover .nucleo {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-planeta-large);
+}
+
+.planetaResiduosPro:hover .atmosfera {
+  opacity: 0.8;
+  transform: scale(1.1);
+}
+
+.planetaResiduosPro:hover .anilloReciclaje {
+  animation-duration: 20s;
+}
+
+.planetaResiduosPro:focus-visible {
+  outline: 2px solid var(--success-color);
+  outline-offset: 4px;
+}
+
+.planetaResiduosPro:active .nucleo {
+  transform: scale(0.98);
+}
+
+/* 📱 RESPONSIVE */
+.mobile {
+  width: var(--planeta-size-small);
+  height: var(--planeta-size-small);
+}
+
+.tablet {
+  width: var(--planeta-size-medium);
+  height: var(--planeta-size-medium);
+}
+
+.desktop {
+  width: var(--planeta-size-large);
+  height: var(--planeta-size-large);
+}
+
+/* 🌌 ÓRBITAS */
+.orbita1 {
+  --planeta-size-small: 55px;
+  --planeta-size-medium: 75px;
+  --planeta-size-large: 95px;
+}
+
+.orbita2 {
+  --planeta-size-small: 65px;
+  --planeta-size-medium: 85px;
+  --planeta-size-large: 105px;
+}
+
+.orbita3 {
+  --planeta-size-small: 75px;
+  --planeta-size-medium: 95px;
+  --planeta-size-large: 115px;
+}
+
+/* ✨ ANIMACIONES */
+@keyframes reciclajeRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes residuosGlow {
+  0%, 100% { 
+    opacity: 0.4; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.7; 
+    transform: scale(1.05);
+  }
+}
+
+@keyframes residuosOrbit {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes residuosFloat {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(2deg); }
+}
+
+@keyframes ondaEcologica {
+  0% { 
+    opacity: 0.8; 
+    transform: scale(1);
+  }
+  100% { 
+    opacity: 0; 
+    transform: scale(1.4);
+  }
+}
+
+@keyframes espiralTransformacion {
+  0% { transform: rotate(0deg) scale(1); }
+  100% { transform: rotate(360deg) scale(1.1); }
+}
+
+@keyframes particulasFlotantes {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg);
+    opacity: 0.7;
+  }
+  50% { 
+    transform: translateY(-10px) rotate(180deg);
+    opacity: 0.9;
+  }
+}
+
+@keyframes alertaPulse {
+  0%, 100% { 
+    opacity: 1; 
+    transform: scaleY(1);
+  }
+  50% { 
+    opacity: 0.7; 
+    transform: scaleY(1.2);
+  }
+}
+
+/* 🌟 EFECTOS ESPECIALES */
+.conEfectos .particulaResiduos {
+  animation-duration: 20s;
+}
+
+.conEfectos .iconoSvg {
+  animation-duration: 6s;
+}
+
+.selected .nucleo {
+  box-shadow: 
+    var(--shadow-planeta-large),
+    inset 0 0 20px rgba(76, 175, 80, 0.3);
+}
+
+.alertaBajo .nucleo {
+  animation: residuosShake 0.6s ease-in-out infinite alternate;
+}
+
+.alertaBajo .atmosfera {
+  background: radial-gradient(
+    circle,
+    var(--warning-glow) 0%,
+    transparent 70%
+  );
+}
+
+@keyframes residuosShake {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(3px); }
+}

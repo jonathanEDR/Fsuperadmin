@@ -1,0 +1,258 @@
+/* 🎨 PLANETA CATÁLOGO PROFESIONAL - CSS MODULE */
+
+.planetaCatalogoPro {
+  /* 🌍 Base del planeta */
+  position: relative;
+  width: var(--planeta-size-medium);
+  height: var(--planeta-size-medium);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all var(--animation-duration-medium) var(--animation-easing-smooth);
+  
+  /* 🎯 Enfoque y accesibilidad */
+  outline: none;
+  
+  /* 🚀 Optimización de rendimiento */
+  will-change: transform, box-shadow, filter;
+  contain: layout style paint;
+}
+
+/* 🎨 NÚCLEO DEL PLANETA */
+.nucleo {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: 
+    radial-gradient(circle at 30% 30%, var(--planeta-catalogo-highlight) 0%, transparent 50%),
+    linear-gradient(135deg, 
+      var(--planeta-catalogo-primary) 0%,
+      var(--planeta-catalogo-secondary) 50%,
+      var(--planeta-catalogo-tertiary) 100%
+    );
+  box-shadow: var(--shadow-planeta-medium);
+  overflow: hidden;
+}
+
+.superficie {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: 
+    radial-gradient(circle at 40% 40%, rgba(255,255,255,0.3) 0%, transparent 60%),
+    linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconoCatalogo {
+  width: 40%;
+  height: 40%;
+  color: var(--planeta-catalogo-icon);
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.iconoSvg {
+  width: 100%;
+  height: 100%;
+}
+
+/* 🌟 ATMÓSFERA */
+.atmosfera {
+  position: absolute;
+  inset: -10%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--planeta-catalogo-glow) 0%,
+    transparent 70%
+  );
+  opacity: 0.6;
+  animation: catalogoGlow 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* 📊 ANILLO DE CATÁLOGO */
+.anilloCatalogo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 140%;
+  height: 140%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.catalogoItem {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  background: var(--planeta-catalogo-particle);
+  border-radius: 50%;
+  transform-origin: 0 75px;
+  animation: catalogoRotate 20s linear infinite;
+  box-shadow: 0 0 6px var(--planeta-catalogo-particle);
+}
+
+/* 📈 ESTADÍSTICAS FLOTANTES */
+.estadisticasFloating {
+  position: absolute;
+  top: -20%;
+  right: -15%;
+  background: var(--planeta-catalogo-badge);
+  color: var(--text-on-accent);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-floating);
+  animation: catalogoFloat 3s ease-in-out infinite;
+}
+
+.contador {
+  display: block;
+}
+
+/* 🚨 INDICADOR DE ESTADO */
+.indicadorEstado {
+  position: absolute;
+  bottom: 10%;
+  right: 10%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--background-primary);
+  transition: all var(--animation-duration-fast) ease;
+}
+
+.indicadorEstado[data-estado="normal"] {
+  background: var(--success-color);
+  box-shadow: 0 0 8px var(--success-glow);
+}
+
+.indicadorEstado[data-estado="alertaBajo"] {
+  background: var(--warning-color);
+  box-shadow: 0 0 8px var(--warning-glow);
+  animation: alertaPulse 2s ease-in-out infinite;
+}
+
+.indicadorEstado[data-estado="seleccionado"] {
+  background: var(--accent-color);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+/* 🎯 ESTADOS INTERACTIVOS */
+.planetaCatalogoPro:hover .nucleo {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-planeta-large);
+}
+
+.planetaCatalogoPro:hover .atmosfera {
+  opacity: 0.8;
+  transform: scale(1.1);
+}
+
+.planetaCatalogoPro:hover .anilloCatalogo {
+  animation-duration: 15s;
+}
+
+.planetaCatalogoPro:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 4px;
+}
+
+.planetaCatalogoPro:active .nucleo {
+  transform: scale(0.98);
+}
+
+/* 📱 RESPONSIVE */
+.mobile {
+  width: var(--planeta-size-small);
+  height: var(--planeta-size-small);
+}
+
+.tablet {
+  width: var(--planeta-size-medium);
+  height: var(--planeta-size-medium);
+}
+
+.desktop {
+  width: var(--planeta-size-large);
+  height: var(--planeta-size-large);
+}
+
+/* 🌌 ÓRBITAS */
+.orbita1 {
+  --planeta-size-small: 60px;
+  --planeta-size-medium: 80px;
+  --planeta-size-large: 100px;
+}
+
+.orbita2 {
+  --planeta-size-small: 70px;
+  --planeta-size-medium: 90px;
+  --planeta-size-large: 110px;
+}
+
+.orbita3 {
+  --planeta-size-small: 80px;
+  --planeta-size-medium: 100px;
+  --planeta-size-large: 120px;
+}
+
+/* ✨ ANIMACIONES */
+@keyframes catalogoGlow {
+  0%, 100% { 
+    opacity: 0.4; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.8; 
+    transform: scale(1.05);
+  }
+}
+
+@keyframes catalogoRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes catalogoFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes alertaPulse {
+  0%, 100% { 
+    opacity: 1; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.7; 
+    transform: scale(1.1);
+  }
+}
+
+/* 🌟 EFECTOS ESPECIALES */
+.conParticulas .catalogoItem {
+  animation-duration: 15s;
+}
+
+.selected .nucleo {
+  box-shadow: 
+    var(--shadow-planeta-large),
+    inset 0 0 20px rgba(255,255,255,0.2);
+}
+
+.alertaBajo .nucleo {
+  animation: alertaShake 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes alertaShake {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(2px); }
+}

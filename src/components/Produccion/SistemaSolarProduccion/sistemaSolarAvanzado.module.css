@@ -1,0 +1,909 @@
+/* ===== SISTEMA SOLAR PRINCIPAL ===== */
+.sistema-solar-produccion {
+  position: relative;
+  min-height: 70vh;
+  padding: 2rem;
+  overflow: hidden;
+  perspective: 2000px;
+  perspective-origin: center center;
+  transform-style: preserve-3d;
+}
+
+.fondo-espacial {
+  background: 
+    linear-gradient(135deg, #000511 0%, #0a0a2e 25%, #1a1a3e 50%, #2d1b69 75%, #1a1a3e 100%),
+    radial-gradient(ellipse 200% 100% at center top, transparent 0%, rgba(0, 0, 0, 0.8) 100%);
+  color: white;
+  position: relative;
+}
+
+.fondo-espacial::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse 60% 40% at 30% 20%, rgba(138, 43, 226, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse 80% 60% at 70% 80%, rgba(75, 0, 130, 0.04) 0%, transparent 60%),
+    linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.1) 50%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.pausar-animaciones * {
+  animation-play-state: paused !important;
+}
+
+/* ===== SOL CENTRAL MEJORADO ===== */
+.sol-central {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: 
+    radial-gradient(circle at 30% 30%, #fff59d, #ffeb3b, #ff9800, #e65100),
+    radial-gradient(circle at 70% 70%, transparent, rgba(255, 193, 7, 0.3));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 0 25px rgba(255, 193, 7, 0.7),
+    0 0 50px rgba(255, 193, 7, 0.5),
+    0 0 75px rgba(255, 193, 7, 0.3),
+    0 0 100px rgba(255, 152, 0, 0.2);
+  animation: 
+    sol-pulso 6s ease-in-out infinite, 
+    sol-rotacion 30s linear infinite,
+    sol-brillo 8s ease-in-out infinite alternate;
+  position: relative;
+  z-index: 15;
+  border: 2px solid rgba(255, 235, 59, 0.3);
+  transform: rotateX(15deg) rotateY(0deg);
+  transform-style: preserve-3d;
+}
+
+.sol-central:hover {
+  transform: scale(1.15) rotateY(10deg);
+  box-shadow: 
+    0 0 35px rgba(255, 193, 7, 0.9),
+    0 0 70px rgba(255, 193, 7, 0.7),
+    0 0 105px rgba(255, 193, 7, 0.5),
+    0 0 140px rgba(255, 152, 0, 0.3);
+}
+
+.sol-central::before {
+  content: '';
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  border-radius: 50%;
+  background: radial-gradient(circle, transparent 60%, rgba(255, 193, 7, 0.1) 100%);
+  animation: sol-corona 8s linear infinite reverse;
+}
+
+.sol-icono {
+  font-size: 2rem;
+  z-index: 2;
+  position: relative;
+}
+
+/* ===== ÓRBITAS VISUALES MEJORADAS ===== */
+.orbita {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  transition: all 0.4s ease;
+  z-index: 1;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 0 15px rgba(255, 255, 255, 0.2),
+    inset 0 0 15px rgba(255, 255, 255, 0.1);
+  transform: rotateX(75deg) rotateY(0deg);
+  transform-style: preserve-3d;
+}
+
+/* Estilos de órbita por nivel específicos para CSS modules */
+.nivel1 {
+  border: 3px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 
+    0 0 25px rgba(255, 255, 255, 0.4),
+    inset 0 0 25px rgba(255, 255, 255, 0.2);
+  animation: orbita-pulso 8s ease-in-out infinite;
+  transform: rotateX(75deg) rotateY(0deg);
+  opacity: 1;
+}
+
+.nivel2 {
+  border: 3px solid rgba(138, 43, 226, 0.7);
+  box-shadow: 
+    0 0 30px rgba(138, 43, 226, 0.4),
+    inset 0 0 30px rgba(138, 43, 226, 0.2);
+  animation: orbita-pulso 10s ease-in-out infinite;
+  transform: rotateX(75deg) rotateY(0deg);
+  opacity: 0.9;
+}
+
+.nivel3 {
+  border: 3px solid rgba(75, 0, 130, 0.8);
+  box-shadow: 
+    0 0 35px rgba(75, 0, 130, 0.4),
+    inset 0 0 35px rgba(75, 0, 130, 0.2);
+  animation: orbita-pulso 12s ease-in-out infinite;
+  transform: rotateX(75deg) rotateY(0deg);
+  opacity: 0.8;
+}
+
+/* Efectos de hover en órbitas */
+.orbita:hover {
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    0 0 40px rgba(255, 255, 255, 0.4),
+    inset 0 0 40px rgba(255, 255, 255, 0.2);
+}
+
+/* Órbitas visibles */
+.orbita.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.orbita.oculta {
+  opacity: 0.1;
+  transform: scale(0.98);
+}
+
+/* Clase especial para órbitas súper visibles */
+.orbita.super-visible {
+  opacity: 1;
+  border-width: 3px;
+  filter: brightness(1.3);
+  animation: orbita-pulso 6s ease-in-out infinite, orbita-resplandor 3s ease-in-out infinite alternate;
+}
+
+.super-visible {
+  opacity: 1;
+  border-width: 4px;
+  filter: brightness(1.3) drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+  animation: orbita-pulso 6s ease-in-out infinite, orbita-resplandor 3s ease-in-out infinite alternate;
+}
+
+@keyframes orbita-resplandor {
+  0% { 
+    box-shadow: 
+      0 0 15px rgba(255, 255, 255, 0.3),
+      inset 0 0 15px rgba(255, 255, 255, 0.1);
+  }
+  100% { 
+    box-shadow: 
+      0 0 30px rgba(255, 255, 255, 0.6),
+      inset 0 0 30px rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* Partículas en las órbitas */
+.orbita::before {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.3), transparent);
+  border-radius: 50%;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  animation: particula-orbita 20s linear infinite;
+}
+
+.orbita::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle, rgba(173, 216, 230, 1), rgba(173, 216, 230, 0.3), transparent);
+  border-radius: 50%;
+  bottom: -2px;
+  right: 25%;
+  box-shadow: 0 0 8px rgba(173, 216, 230, 0.6);
+  animation: particula-orbita 25s linear infinite reverse;
+}
+
+/* ===== PLANETAS CON PERSPECTIVA 3D MEJORADA ===== */
+.planeta-modulo {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 4px 15px rgba(0, 0, 0, 0.3),
+    inset -8px -8px 16px rgba(0, 0, 0, 0.2),
+    inset 8px 8px 16px rgba(255, 255, 255, 0.1);
+  z-index: 5;
+  pointer-events: auto;
+  animation: planeta-rotacion-propia-3d 20s linear infinite;
+  transform-style: preserve-3d;
+  transform: rotateX(-75deg);
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.3), transparent 60%);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(1px);
+  overflow: visible;
+}
+
+/* Estela orbital para planetas */
+.planeta-modulo::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, transparent 60%, rgba(255, 255, 255, 0.1) 100%);
+  transform: scale(1.5);
+  animation: estela-orbital-planeta 3s ease-in-out infinite;
+  z-index: -1;
+  opacity: 0.3;
+}
+
+/* Planetas en órbita 1 - más grandes y brillantes (más cerca) */
+.orbita-container.nivel1 .planeta-modulo {
+  width: 58px;
+  height: 58px;
+  opacity: 1;
+  filter: brightness(1.1) contrast(1.1) saturate(1.2);
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.4),
+    inset -10px -10px 20px rgba(0, 0, 0, 0.3),
+    inset 10px 10px 20px rgba(255, 255, 255, 0.15),
+    0 0 25px rgba(255, 255, 255, 0.2);
+  animation: planeta-rotacion-propia-3d 18s linear infinite, planeta-pulso-suave 8s ease-in-out infinite;
+}
+
+/* Planetas en órbita 2 - tamaño medio con efectos medios */
+.orbita-container.nivel2 .planeta-modulo {
+  width: 46px;
+  height: 46px;
+  opacity: 0.95;
+  filter: brightness(1) contrast(1) saturate(1.1);
+  box-shadow: 
+    0 5px 18px rgba(0, 0, 0, 0.35),
+    inset -8px -8px 16px rgba(0, 0, 0, 0.25),
+    inset 8px 8px 16px rgba(255, 255, 255, 0.12),
+    0 0 20px rgba(255, 255, 255, 0.15);
+  animation: planeta-rotacion-propia-3d 22s linear infinite, planeta-pulso-suave 10s ease-in-out infinite;
+}
+
+/* Planetas en órbita 3 - más pequeños y tenues (más lejos) */
+.orbita-container.nivel3 .planeta-modulo {
+  width: 42px;
+  height: 42px;
+  opacity: 0.9;
+  filter: brightness(0.9) contrast(0.95) saturate(1);
+  box-shadow: 
+    0 4px 15px rgba(0, 0, 0, 0.3),
+    inset -6px -6px 12px rgba(0, 0, 0, 0.2),
+    inset 6px 6px 12px rgba(255, 255, 255, 0.1),
+    0 0 15px rgba(255, 255, 255, 0.1);
+  animation: planeta-rotacion-propia-3d 25s linear infinite, planeta-pulso-suave 12s ease-in-out infinite;
+}
+
+.planeta-modulo:hover {
+  transform: scale(1.25) rotateX(-75deg);
+  z-index: 25;
+  filter: brightness(1.3) contrast(1.2) saturate(1.3);
+  box-shadow: 
+    0 8px 30px rgba(0, 0, 0, 0.5),
+    inset -12px -12px 24px rgba(0, 0, 0, 0.3),
+    inset 12px 12px 24px rgba(255, 255, 255, 0.2),
+    0 0 40px rgba(255, 255, 255, 0.4);
+  animation-play-state: paused;
+}
+
+.planeta-modulo.con-alerta {
+  animation: 
+    planeta-alerta-3d 2s ease-in-out infinite, 
+    planeta-rotacion-propia-3d 20s linear infinite,
+    planeta-pulso-alerta 1.5s ease-in-out infinite;
+  box-shadow: 
+    0 4px 15px rgba(255, 0, 0, 0.4),
+    inset -8px -8px 16px rgba(255, 0, 0, 0.2),
+    inset 8px 8px 16px rgba(255, 255, 255, 0.1),
+    0 0 30px rgba(255, 0, 0, 0.6);
+}
+
+.planeta-modulo.seleccionado {
+  transform: scale(1.35) rotateX(-75deg);
+  box-shadow: 
+    0 10px 35px rgba(255, 255, 255, 0.6),
+    inset -12px -12px 24px rgba(0, 0, 0, 0.3),
+    inset 12px 12px 24px rgba(255, 255, 255, 0.25),
+    0 0 50px rgba(255, 255, 255, 0.8);
+  z-index: 30;
+  filter: brightness(1.4) contrast(1.3) saturate(1.4);
+  animation: 
+    planeta-rotacion-propia-3d 15s linear infinite,
+    planeta-seleccionado-pulso 3s ease-in-out infinite;
+}
+
+.planeta-icono {
+  font-size: 1.5rem;
+  z-index: 2;
+  position: relative;
+  text-shadow: 
+    0 0 8px rgba(255, 255, 255, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.3);
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
+  animation: icono-flotante 4s ease-in-out infinite;
+}
+
+/* ===== SATÉLITES ===== */
+.satelites-container {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  pointer-events: none;
+}
+
+.satelite-accion {
+  position: absolute;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  pointer-events: auto;
+  color: white;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  animation: satelite-orbita 8s linear infinite;
+}
+
+.satelite-accion:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.5);
+}
+
+.satelite-accion:nth-child(1) { animation-delay: 0s; }
+.satelite-accion:nth-child(2) { animation-delay: -2s; }
+.satelite-accion:nth-child(3) { animation-delay: -4s; }
+.satelite-accion:nth-child(4) { animation-delay: -6s; }
+
+/* ===== EFECTOS ESPACIALES ===== */
+.efectos-espaciales {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.estrella {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  animation: estrella-parpadeo 3s ease-in-out infinite;
+}
+
+.estrella.pequeña {
+  width: 1px;
+  height: 1px;
+}
+
+.estrella.mediana {
+  width: 2px;
+  height: 2px;
+}
+
+.estrella.grande {
+  width: 3px;
+  height: 3px;
+}
+
+.cometa {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: linear-gradient(45deg, #ffffff, #87ceeb);
+  border-radius: 50%;
+  animation: cometa-movimiento 15s linear infinite;
+}
+
+.cometa::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  width: 20px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.8), transparent);
+  transform: translateY(-50%);
+}
+
+.nebula {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(138, 43, 226, 0.1), transparent);
+  animation: nebula-movimiento 30s ease-in-out infinite;
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes sol-pulso {
+  0%, 100% { 
+    box-shadow: 
+      0 0 20px rgba(255, 193, 7, 0.6),
+      0 0 40px rgba(255, 193, 7, 0.4),
+      0 0 60px rgba(255, 193, 7, 0.2);
+  }
+  50% { 
+    box-shadow: 
+      0 0 30px rgba(255, 193, 7, 0.8),
+      0 0 60px rgba(255, 193, 7, 0.6),
+      0 0 90px rgba(255, 193, 7, 0.4);
+  }
+}
+
+@keyframes sol-rotacion {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes sol-corona {
+  from { transform: rotate(0deg) scale(1); }
+  to { transform: rotate(360deg) scale(1.1); }
+}
+
+@keyframes planeta-alerta {
+  0%, 100% { 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+  50% { 
+    box-shadow: 0 0 25px rgba(255, 0, 0, 0.8);
+  }
+}
+
+@keyframes satelite-orbita {
+  from { 
+    transform: rotate(0deg) translateX(75px) rotate(0deg);
+  }
+  to { 
+    transform: rotate(360deg) translateX(75px) rotate(-360deg);
+  }
+}
+
+@keyframes estrella-parpadeo {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+@keyframes cometa-movimiento {
+  0% { 
+    left: -50px; 
+    top: 20%; 
+    opacity: 0;
+  }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { 
+    left: 110%; 
+    top: 80%; 
+    opacity: 0;
+  }
+}
+
+@keyframes nebula-movimiento {
+  0%, 100% { 
+    transform: scale(1) rotate(0deg);
+    opacity: 0.3;
+  }
+  50% { 
+    transform: scale(1.2) rotate(180deg);
+    opacity: 0.6;
+  }
+}
+
+/* ===== ÓRBITAS DINÁMICAS - CONTENEDORES DE PLANETAS ===== */
+.orbita-container {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: rotateX(75deg);
+  transform-style: preserve-3d;
+}
+
+.orbita-container.nivel1 {
+  animation: orbitar-3d-nivel1 60s linear infinite;
+}
+
+.orbita-container.nivel2 {
+  animation: orbitar-3d-nivel2 90s linear infinite;
+}
+
+.orbita-container.nivel3 {
+  animation: orbitar-3d-nivel3 120s linear infinite;
+}
+
+/* ===== RESPONSIVE MEJORADO ===== */
+@media (max-width: 768px) {
+  .sistema-solar-produccion {
+    padding: 1rem;
+    min-height: 60vh;
+    perspective: 1500px;
+  }
+  
+  .sol-central {
+    width: 65px;
+    height: 65px;
+  }
+  
+  .sol-icono {
+    font-size: 1.6rem;
+  }
+  
+  .planeta-modulo {
+    width: 42px;
+    height: 42px;
+  }
+  
+  .orbita-container.nivel1 .planeta-modulo {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .orbita-container.nivel2 .planeta-modulo {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .orbita-container.nivel3 .planeta-modulo {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .planeta-icono {
+    font-size: 1.3rem;
+  }
+  
+  .satelite-accion {
+    width: 32px;
+    height: 32px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sistema-solar-produccion {
+    perspective: 1200px;
+  }
+  
+  .sol-central {
+    width: 55px;
+    height: 55px;
+  }
+  
+  .sol-icono {
+    font-size: 1.3rem;
+  }
+  
+  .planeta-modulo {
+    width: 38px;
+    height: 38px;
+  }
+  
+  .orbita-container.nivel1 .planeta-modulo {
+    width: 42px;
+    height: 42px;
+  }
+  
+  .orbita-container.nivel2 .planeta-modulo {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .orbita-container.nivel3 .planeta-modulo {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .planeta-icono {
+    font-size: 1.1rem;
+  }
+  
+  .satelites-container {
+    width: 140px;
+    height: 140px;
+  }
+  
+  .satelite-accion {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+}
+
+/* ===== ANIMACIONES PRINCIPALES ===== */
+@keyframes sol-pulso {
+  0%, 100% { 
+    transform: scale(1);
+    box-shadow: 
+      0 0 25px rgba(255, 193, 7, 0.7),
+      0 0 50px rgba(255, 193, 7, 0.5),
+      0 0 75px rgba(255, 193, 7, 0.3);
+  }
+  50% { 
+    transform: scale(1.05);
+    box-shadow: 
+      0 0 35px rgba(255, 193, 7, 0.9),
+      0 0 70px rgba(255, 193, 7, 0.7),
+      0 0 105px rgba(255, 193, 7, 0.5);
+  }
+}
+
+@keyframes sol-rotacion {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes sol-brillo {
+  0% { filter: brightness(1) saturate(1); }
+  100% { filter: brightness(1.2) saturate(1.3); }
+}
+
+/* Animaciones de órbitas visuales con perspectiva */
+@keyframes orbita-pulso {
+  0%, 100% { 
+    opacity: 0.8;
+    transform: scale(1) rotateX(75deg);
+    filter: brightness(1);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1.005) rotateX(75deg);
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes orbita-rotacion {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes particula-orbita {
+  0% { 
+    transform: rotate(0deg) translateX(0px);
+    opacity: 1;
+    filter: brightness(1);
+  }
+  25% {
+    opacity: 0.8;
+    filter: brightness(1.2);
+  }
+  50% {
+    opacity: 0.6;
+    filter: brightness(0.8);
+  }
+  75% {
+    opacity: 0.9;
+    filter: brightness(1.1);
+  }
+  100% { 
+    transform: rotate(360deg) translateX(5px);
+    opacity: 1;
+    filter: brightness(1);
+  }
+}
+
+/* Animaciones de planetas orbitando */
+@keyframes orbitar-nivel1 {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes orbitar-nivel2 {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes orbitar-nivel3 {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Animaciones 3D para órbitas */
+@keyframes orbitar-3d-nivel1 {
+  from { transform: rotateX(75deg) rotateZ(0deg); }
+  to { transform: rotateX(75deg) rotateZ(360deg); }
+}
+
+@keyframes orbitar-3d-nivel2 {
+  from { transform: rotateX(75deg) rotateZ(0deg); }
+  to { transform: rotateX(75deg) rotateZ(360deg); }
+}
+
+@keyframes orbitar-3d-nivel3 {
+  from { transform: rotateX(75deg) rotateZ(0deg); }
+  to { transform: rotateX(75deg) rotateZ(360deg); }
+}
+
+@keyframes planeta-rotacion-propia {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes planeta-rotacion-propia-3d {
+  from { transform: rotateX(-75deg) rotateY(0deg); }
+  to { transform: rotateX(-75deg) rotateY(-360deg); }
+}
+
+/* Nuevas animaciones mejoradas para planetas */
+@keyframes planeta-pulso-suave {
+  0%, 100% { 
+    filter: brightness(1) contrast(1) saturate(1);
+  }
+  50% { 
+    filter: brightness(1.1) contrast(1.05) saturate(1.1);
+  }
+}
+
+@keyframes planeta-alerta-3d {
+  0%, 100% { 
+    box-shadow: 
+      0 4px 15px rgba(255, 0, 0, 0.4),
+      inset -8px -8px 16px rgba(255, 0, 0, 0.2),
+      inset 8px 8px 16px rgba(255, 255, 255, 0.1),
+      0 0 20px rgba(255, 0, 0, 0.4);
+  }
+  50% { 
+    box-shadow: 
+      0 6px 25px rgba(255, 0, 0, 0.8),
+      inset -10px -10px 20px rgba(255, 0, 0, 0.4),
+      inset 10px 10px 20px rgba(255, 255, 255, 0.15),
+      0 0 40px rgba(255, 0, 0, 0.8);
+  }
+}
+
+@keyframes planeta-pulso-alerta {
+  0%, 100% { 
+    transform: rotateX(-75deg) scale(1);
+  }
+  50% { 
+    transform: rotateX(-75deg) scale(1.05);
+  }
+}
+
+@keyframes planeta-seleccionado-pulso {
+  0%, 100% { 
+    box-shadow: 
+      0 10px 35px rgba(255, 255, 255, 0.6),
+      inset -12px -12px 24px rgba(0, 0, 0, 0.3),
+      inset 12px 12px 24px rgba(255, 255, 255, 0.25),
+      0 0 50px rgba(255, 255, 255, 0.8);
+  }
+  50% { 
+    box-shadow: 
+      0 12px 45px rgba(255, 255, 255, 0.8),
+      inset -14px -14px 28px rgba(0, 0, 0, 0.35),
+      inset 14px 14px 28px rgba(255, 255, 255, 0.3),
+      0 0 70px rgba(255, 255, 255, 1);
+  }
+}
+
+@keyframes icono-flotante {
+  0%, 100% { 
+    transform: translateY(0px);
+    text-shadow: 
+      0 0 8px rgba(255, 255, 255, 0.5),
+      0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  50% { 
+    transform: translateY(-2px);
+    text-shadow: 
+      0 0 12px rgba(255, 255, 255, 0.7),
+      0 3px 6px rgba(0, 0, 0, 0.4);
+  }
+}
+
+@keyframes estela-orbital {
+  0% { 
+    opacity: 0.8;
+    transform: translateY(-50%) scale(1);
+  }
+  100% { 
+    opacity: 0.3;
+    transform: translateY(-50%) scale(1.5);
+  }
+}
+
+@keyframes estela-orbital-planeta {
+  0%, 100% { 
+    opacity: 0.2;
+    transform: scale(1.3);
+  }
+  50% { 
+    opacity: 0.4;
+    transform: scale(1.7);
+  }
+}
+
+@keyframes orbitar {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes planeta-pulso {
+  0%, 100% { 
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% { 
+    transform: scale(1.05);
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes satelite-orbita {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes aparecer-satelite {
+  from { 
+    opacity: 0;
+    transform: scale(0);
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes flotar {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes brillar {
+  0%, 100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.6); }
+}
+
+/* ===== MODO ALTO CONTRASTE ===== */
+@media (prefers-contrast: high) {
+  .planeta-modulo {
+    border: 2px solid white;
+  }
+  
+  .sol-central {
+    border: 3px solid white;
+  }
+  
+  .orbita {
+    border-color: white;
+    opacity: 0.5;
+  }
+}
+
+/* ===== MODO SIN ANIMACIONES ===== */
+@media (prefers-reduced-motion: reduce) {
+  .sol-central,
+  .planeta-modulo,
+  .satelite-accion,
+  .estrella,
+  .cometa,
+  .nebula,
+  .orbita-container {
+    animation: none !important;
+  }
+  
+  .pausar-animaciones * {
+    animation: none !important;
+  }
+}

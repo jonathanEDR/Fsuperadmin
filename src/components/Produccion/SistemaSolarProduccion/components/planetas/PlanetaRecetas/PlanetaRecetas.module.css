@@ -1,0 +1,508 @@
+/* ===== PLANETA RECETAS - EFECTOS DE COCCIÓN ===== */
+.planetaRecetas {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 4px 15px rgba(255, 140, 0, 0.3),
+    inset -8px -8px 16px rgba(139, 69, 19, 0.2),
+    inset 8px 8px 16px rgba(255, 165, 0, 0.1);
+  z-index: 5;
+  pointer-events: auto;
+  animation: planeta-rotacion-recetas 20s linear infinite;
+  transform-style: preserve-3d;
+  transform: rotateX(-75deg);
+  background: radial-gradient(circle at 35% 35%, rgba(255, 215, 0, 0.3), transparent 60%);
+  border: 2px solid rgba(255, 140, 0, 0.3);
+  backdrop-filter: blur(1px);
+  overflow: visible;
+}
+
+.planetaRecetas:hover {
+  transform: scale(1.25) rotateX(-75deg);
+  z-index: 25;
+  filter: brightness(1.3) contrast(1.2) saturate(1.3);
+  box-shadow: 
+    0 8px 30px rgba(255, 140, 0, 0.5),
+    inset -12px -12px 24px rgba(139, 69, 19, 0.3),
+    inset 12px 12px 24px rgba(255, 165, 0, 0.2),
+    0 0 40px rgba(255, 140, 0, 0.4);
+  animation-play-state: paused;
+}
+
+.planetaRecetas.seleccionado {
+  transform: scale(1.35) rotateX(-75deg);
+  box-shadow: 
+    0 10px 35px rgba(255, 140, 0, 0.6),
+    inset -12px -12px 24px rgba(139, 69, 19, 0.3),
+    inset 12px 12px 24px rgba(255, 165, 0, 0.25),
+    0 0 50px rgba(255, 140, 0, 0.8);
+  z-index: 30;
+  filter: brightness(1.4) contrast(1.3) saturate(1.4);
+  animation: 
+    planeta-rotacion-recetas 15s linear infinite,
+    planeta-seleccionado-pulso-recetas 3s ease-in-out infinite;
+}
+
+.planetaRecetas.conAlerta {
+  animation: 
+    planeta-alerta-recetas 2s ease-in-out infinite, 
+    planeta-rotacion-recetas 20s linear infinite,
+    planeta-pulso-alerta-recetas 1.5s ease-in-out infinite;
+  box-shadow: 
+    0 4px 15px rgba(255, 0, 0, 0.4),
+    inset -8px -8px 16px rgba(255, 0, 0, 0.2),
+    inset 8px 8px 16px rgba(255, 255, 255, 0.1),
+    0 0 30px rgba(255, 0, 0, 0.6);
+}
+
+/* ===== ESTADOS DE COCCIÓN ===== */
+.planetaRecetas.cocinando {
+  background: 
+    radial-gradient(circle at 30% 30%, #ff6b35, #f7931e, #ff8c00, #ff4500),
+    radial-gradient(circle at 70% 70%, transparent, rgba(255, 69, 0, 0.3));
+  animation: 
+    planeta-rotacion-recetas 15s linear infinite,
+    efecto-cocinando 2s ease-in-out infinite,
+    calor-intenso 3s ease-in-out infinite;
+  box-shadow: 
+    0 6px 25px rgba(255, 69, 0, 0.6),
+    inset -10px -10px 20px rgba(139, 69, 19, 0.3),
+    inset 10px 10px 20px rgba(255, 140, 0, 0.2),
+    0 0 40px rgba(255, 69, 0, 0.5);
+}
+
+.planetaRecetas.completado {
+  background: 
+    radial-gradient(circle at 30% 30%, #ffd700, #ffb347, #daa520, #b8860b),
+    radial-gradient(circle at 70% 70%, transparent, rgba(255, 215, 0, 0.3));
+  animation: 
+    planeta-rotacion-recetas 25s linear infinite,
+    efecto-completado-recetas 4s ease-in-out infinite,
+    brillo-dorado 2s ease-in-out infinite alternate;
+  box-shadow: 
+    0 8px 30px rgba(255, 215, 0, 0.7),
+    inset -12px -12px 24px rgba(184, 134, 11, 0.3),
+    inset 12px 12px 24px rgba(255, 215, 0, 0.2),
+    0 0 50px rgba(255, 215, 0, 0.6);
+}
+
+/* ===== EFECTOS DE COCCIÓN ===== */
+.efectosCoccion {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ondaCalor {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 69, 0, 0.6);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: onda-calor 3s ease-out infinite;
+}
+
+.ondaCalor:nth-child(2) {
+  animation-delay: 0.5s;
+  border-color: rgba(255, 140, 0, 0.5);
+}
+
+.ondaCalor:nth-child(3) {
+  animation-delay: 1s;
+  border-color: rgba(255, 165, 0, 0.4);
+}
+
+/* ===== PARTÍCULAS DORADAS ===== */
+.particulasDoradas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  border-radius: 50%;
+  overflow: visible;
+}
+
+.particula {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: radial-gradient(circle, #ffd700, #ffb347, transparent);
+  border-radius: 50%;
+  animation: particula-dorada 4s ease-in-out infinite;
+  box-shadow: 0 0 6px rgba(255, 215, 0, 0.8);
+}
+
+.particula:nth-child(1) {
+  top: 10%;
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.particula:nth-child(2) {
+  top: 30%;
+  right: 15%;
+  animation-delay: 0.8s;
+}
+
+.particula:nth-child(3) {
+  bottom: 25%;
+  left: 15%;
+  animation-delay: 1.6s;
+}
+
+.particula:nth-child(4) {
+  bottom: 10%;
+  right: 30%;
+  animation-delay: 2.4s;
+}
+
+.particula:nth-child(5) {
+  top: 50%;
+  left: 50%;
+  animation-delay: 3.2s;
+  transform: translate(-50%, -50%);
+}
+
+/* ===== VAPOR DE COCCIÓN ===== */
+.vaporCoccion {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 40px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.vapor {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.7), transparent);
+  border-radius: 50%;
+  animation: vapor-ascendente 3s ease-out infinite;
+}
+
+.vapor:nth-child(1) {
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.vapor:nth-child(2) {
+  left: 50%;
+  animation-delay: 0.5s;
+}
+
+.vapor:nth-child(3) {
+  right: 20%;
+  animation-delay: 1s;
+}
+
+/* ===== ICONO DEL PLANETA ===== */
+.iconoPlaneta {
+  font-size: 1.5rem;
+  z-index: 2;
+  position: relative;
+  text-shadow: 
+    0 0 8px rgba(255, 140, 0, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.3);
+  filter: drop-shadow(0 0 6px rgba(255, 140, 0, 0.3));
+  animation: icono-flotante-recetas 4s ease-in-out infinite;
+}
+
+/* ===== EFECTO DE COMPLETADO ===== */
+.efectoCompletado {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.anilloCompletado {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  border: 3px solid rgba(255, 215, 0, 0.8);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: anillo-completado 2s ease-in-out infinite;
+}
+
+/* ===== BRILLO ESPECIAL ===== */
+.brilloRecetas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120%;
+  height: 120%;
+  border-radius: 50%;
+  background: radial-gradient(circle, transparent 60%, rgba(255, 140, 0, 0.1) 100%);
+  transform: translate(-50%, -50%);
+  animation: brillo-recetas 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes planeta-rotacion-recetas {
+  from { transform: rotateX(-75deg) rotateY(0deg); }
+  to { transform: rotateX(-75deg) rotateY(-360deg); }
+}
+
+@keyframes planeta-seleccionado-pulso-recetas {
+  0%, 100% { 
+    box-shadow: 
+      0 10px 35px rgba(255, 140, 0, 0.6),
+      inset -12px -12px 24px rgba(139, 69, 19, 0.3),
+      inset 12px 12px 24px rgba(255, 165, 0, 0.25),
+      0 0 50px rgba(255, 140, 0, 0.8);
+  }
+  50% { 
+    box-shadow: 
+      0 12px 45px rgba(255, 140, 0, 0.8),
+      inset -14px -14px 28px rgba(139, 69, 19, 0.35),
+      inset 14px 14px 28px rgba(255, 165, 0, 0.3),
+      0 0 70px rgba(255, 140, 0, 1);
+  }
+}
+
+@keyframes planeta-alerta-recetas {
+  0%, 100% { 
+    box-shadow: 
+      0 4px 15px rgba(255, 0, 0, 0.4),
+      inset -8px -8px 16px rgba(255, 0, 0, 0.2),
+      inset 8px 8px 16px rgba(255, 255, 255, 0.1),
+      0 0 20px rgba(255, 0, 0, 0.4);
+  }
+  50% { 
+    box-shadow: 
+      0 6px 25px rgba(255, 0, 0, 0.8),
+      inset -10px -10px 20px rgba(255, 0, 0, 0.4),
+      inset 10px 10px 20px rgba(255, 255, 255, 0.15),
+      0 0 40px rgba(255, 0, 0, 0.8);
+  }
+}
+
+@keyframes planeta-pulso-alerta-recetas {
+  0%, 100% { 
+    transform: rotateX(-75deg) scale(1);
+  }
+  50% { 
+    transform: rotateX(-75deg) scale(1.05);
+  }
+}
+
+@keyframes efecto-cocinando {
+  0%, 100% { 
+    filter: brightness(1) saturate(1);
+  }
+  50% { 
+    filter: brightness(1.3) saturate(1.5);
+  }
+}
+
+@keyframes calor-intenso {
+  0%, 100% { 
+    box-shadow: 
+      0 6px 25px rgba(255, 69, 0, 0.6),
+      inset -10px -10px 20px rgba(139, 69, 19, 0.3),
+      inset 10px 10px 20px rgba(255, 140, 0, 0.2),
+      0 0 40px rgba(255, 69, 0, 0.5);
+  }
+  50% { 
+    box-shadow: 
+      0 8px 35px rgba(255, 69, 0, 0.8),
+      inset -12px -12px 24px rgba(139, 69, 19, 0.4),
+      inset 12px 12px 24px rgba(255, 140, 0, 0.3),
+      0 0 60px rgba(255, 69, 0, 0.7);
+  }
+}
+
+@keyframes efecto-completado-recetas {
+  0%, 100% { 
+    filter: brightness(1.2) saturate(1.3);
+  }
+  50% { 
+    filter: brightness(1.4) saturate(1.5);
+  }
+}
+
+@keyframes brillo-dorado {
+  0% { 
+    filter: hue-rotate(0deg) brightness(1.2);
+  }
+  100% { 
+    filter: hue-rotate(15deg) brightness(1.4);
+  }
+}
+
+@keyframes onda-calor {
+  0% {
+    width: 20px;
+    height: 20px;
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    width: 80px;
+    height: 80px;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2);
+  }
+}
+
+@keyframes particula-dorada {
+  0%, 100% {
+    opacity: 0;
+    transform: translateY(0px) scale(0.5);
+  }
+  25% {
+    opacity: 1;
+    transform: translateY(-5px) scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(-10px) scale(1.2);
+  }
+  75% {
+    opacity: 0.6;
+    transform: translateY(-8px) scale(0.8);
+  }
+}
+
+@keyframes vapor-ascendente {
+  0% {
+    bottom: 0;
+    opacity: 0;
+    transform: translateX(0) scale(0.5);
+  }
+  25% {
+    opacity: 0.8;
+    transform: translateX(-2px) scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translateX(2px) scale(1.2);
+  }
+  75% {
+    opacity: 0.3;
+    transform: translateX(-1px) scale(0.8);
+  }
+  100% {
+    top: -20px;
+    opacity: 0;
+    transform: translateX(0) scale(0.2);
+  }
+}
+
+@keyframes icono-flotante-recetas {
+  0%, 100% { 
+    transform: translateY(0px);
+    text-shadow: 
+      0 0 8px rgba(255, 140, 0, 0.5),
+      0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  50% { 
+    transform: translateY(-2px);
+    text-shadow: 
+      0 0 12px rgba(255, 140, 0, 0.7),
+      0 3px 6px rgba(0, 0, 0, 0.4);
+  }
+}
+
+@keyframes anillo-completado {
+  0% {
+    width: 60px;
+    height: 60px;
+    opacity: 1;
+    border-width: 3px;
+  }
+  50% {
+    width: 80px;
+    height: 80px;
+    opacity: 0.6;
+    border-width: 2px;
+  }
+  100% {
+    width: 100px;
+    height: 100px;
+    opacity: 0;
+    border-width: 1px;
+  }
+}
+
+@keyframes brillo-recetas {
+  0%, 100% { 
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% { 
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .planetaRecetas {
+    width: 42px;
+    height: 42px;
+  }
+  
+  .iconoPlaneta {
+    font-size: 1.3rem;
+  }
+  
+  .vaporCoccion {
+    width: 50px;
+    height: 35px;
+  }
+  
+  .vapor {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .planetaRecetas {
+    width: 38px;
+    height: 38px;
+  }
+  
+  .iconoPlaneta {
+    font-size: 1.1rem;
+  }
+  
+  .vaporCoccion {
+    width: 45px;
+    height: 30px;
+  }
+  
+  .vapor {
+    width: 5px;
+    height: 5px;
+  }
+}

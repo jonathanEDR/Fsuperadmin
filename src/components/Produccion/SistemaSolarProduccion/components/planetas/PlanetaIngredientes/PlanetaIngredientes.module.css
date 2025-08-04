@@ -1,0 +1,483 @@
+/* ===== PLANETA INGREDIENTES - EFECTOS ORGÁNICOS ===== */
+
+.planetaIngredientes {
+  position: absolute;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 5;
+  pointer-events: auto;
+  border: 2px solid rgba(16, 185, 129, 0.3);
+  backdrop-filter: blur(1px);
+  transform-style: preserve-3d;
+  animation: 
+    rotacion-ingredientes 25s linear infinite,
+    respiracion-natural 4s ease-in-out infinite;
+}
+
+.planetaIngredientes:hover {
+  z-index: 15;
+  box-shadow: 
+    0 0 30px rgba(16, 185, 129, 0.8),
+    0 0 60px rgba(16, 185, 129, 0.4),
+    inset 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.planetaIngredientes:focus {
+  outline: none;
+  box-shadow: 
+    0 0 0 3px rgba(16, 185, 129, 0.4),
+    0 0 30px rgba(16, 185, 129, 0.8);
+}
+
+/* ===== NÚCLEO DEL PLANETA ===== */
+.nucleo {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.icono {
+  font-size: 1.5rem;
+  z-index: 4;
+  position: relative;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  animation: flotar-icono 3s ease-in-out infinite;
+}
+
+.planetaIngredientes:hover .icono {
+  font-size: 1.7rem;
+  transform: rotate(5deg) scale(1.1);
+  filter: drop-shadow(0 4px 8px rgba(16, 185, 129, 0.4));
+}
+
+/* ===== ESTADÍSTICAS ===== */
+.estadisticas {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 0.7rem;
+  z-index: 4;
+  opacity: 0.9;
+}
+
+.numero {
+  font-weight: bold;
+  font-size: 0.8rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+/* ===== ANILLO DE PARTÍCULAS ===== */
+.anilloParticulas {
+  position: absolute;
+  width: 130%;
+  height: 130%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1;
+  animation: rotacion-anillo 20s linear infinite;
+}
+
+.particula {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  top: 0;
+  left: 50%;
+  transform-origin: 0 65px;
+  opacity: 0.8;
+  animation: particula-organica 4s ease-in-out infinite;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.particula:nth-child(odd) {
+  width: 2px;
+  height: 2px;
+  animation-duration: 6s;
+  opacity: 0.6;
+}
+
+.particula:nth-child(3n) {
+  width: 4px;
+  height: 4px;
+  animation-duration: 3s;
+  opacity: 1;
+}
+
+/* ===== ESTELA ORBITAL ===== */
+.estela {
+  position: absolute;
+  height: 2px;
+  top: 50%;
+  right: 100%;
+  transform: translateY(-50%);
+  border-radius: 1px;
+  opacity: 0.6;
+  animation: estela-organica 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== BRILLO ORGÁNICO ===== */
+.brilloOrganico {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.2), transparent 70%);
+  animation: pulso-organico 4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== RESPIRACIÓN NATURAL ===== */
+.respiracion {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 50%;
+  animation: respiracion-natural 5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ===== ESTADOS ESPECIALES ===== */
+
+/* Estado de Alerta Baja */
+.alertaBajo {
+  animation: 
+    rotacion-ingredientes 25s linear infinite,
+    alerta-organica 2s ease-in-out infinite !important;
+}
+
+.alertaBajo .icono {
+  animation: 
+    flotar-icono 3s ease-in-out infinite,
+    parpadeo-alerta 1.5s ease-in-out infinite;
+}
+
+.indicadorAlerta {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.pulsoAlerta {
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  border: 2px solid rgba(239, 68, 68, 0.6);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulso-alerta-organica 1.5s ease-out infinite;
+}
+
+/* Estado Seleccionado */
+.seleccionado {
+  z-index: 20;
+  box-shadow: 
+    0 0 35px rgba(16, 185, 129, 1),
+    0 0 70px rgba(16, 185, 129, 0.6) !important;
+}
+
+.efectoSeleccion {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.anilloSeleccion {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  border: 3px solid rgba(16, 185, 129, 0.8);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulso-seleccion-organica 2s ease-in-out infinite;
+}
+
+/* ===== BIOMASA FLOTANTE ===== */
+.biomasaFlotante {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.biomasaParticula {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.8), transparent);
+  border-radius: 50%;
+  animation: biomasa-flotacion 3s ease-in-out infinite;
+}
+
+.biomasaParticula:nth-child(1) {
+  top: 20%;
+  left: 30%;
+}
+
+.biomasaParticula:nth-child(2) {
+  top: 70%;
+  right: 25%;
+}
+
+.biomasaParticula:nth-child(3) {
+  bottom: 30%;
+  left: 60%;
+}
+
+.biomasaParticula:nth-child(4) {
+  top: 40%;
+  right: 40%;
+}
+
+/* ===== ANIMACIONES ORGÁNICAS ===== */
+
+@keyframes rotacion-ingredientes {
+  from { transform: rotateX(-75deg) rotateY(0deg); }
+  to { transform: rotateX(-75deg) rotateY(-360deg); }
+}
+
+@keyframes respiracion-natural {
+  0%, 100% { 
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% { 
+    transform: scale(1.02);
+    filter: brightness(1.1);
+  }
+}
+
+@keyframes flotar-icono {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes rotacion-anillo {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes particula-organica {
+  0% { 
+    opacity: 0;
+    transform: scale(0) translateY(0);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(1) translateY(-3px);
+  }
+  75% {
+    opacity: 1;
+    transform: scale(1) translateY(-1px);
+  }
+  100% { 
+    opacity: 0;
+    transform: scale(0) translateY(0);
+  }
+}
+
+@keyframes estela-organica {
+  0%, 100% { 
+    opacity: 0.4;
+    transform: translateY(-50%) scaleX(1);
+  }
+  50% { 
+    opacity: 0.8;
+    transform: translateY(-50%) scaleX(1.2);
+  }
+}
+
+@keyframes pulso-organico {
+  0%, 100% { 
+    opacity: 0.4;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% { 
+    opacity: 0.7;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+@keyframes alerta-organica {
+  0%, 100% { 
+    filter: brightness(1) saturate(1);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+  }
+  50% { 
+    filter: brightness(1.4) saturate(1.6);
+    box-shadow: 0 0 40px rgba(239, 68, 68, 0.8);
+  }
+}
+
+@keyframes parpadeo-alerta {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes pulso-alerta-organica {
+  0% { 
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+  }
+  100% { 
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes pulso-seleccion-organica {
+  0%, 100% { 
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+  }
+  50% { 
+    transform: translate(-50%, -50%) scale(1.05);
+    opacity: 1;
+  }
+}
+
+@keyframes biomasa-flotacion {
+  0% { 
+    transform: translateY(0px) scale(0);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+    transform: translateY(-5px) scale(1);
+  }
+  75% {
+    opacity: 1;
+    transform: translateY(-8px) scale(1);
+  }
+  100% { 
+    transform: translateY(-12px) scale(0);
+    opacity: 0;
+  }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .icono {
+    font-size: 1.2rem;
+  }
+  
+  .planetaIngredientes:hover .icono {
+    font-size: 1.4rem;
+  }
+  
+  .estadisticas {
+    font-size: 0.6rem;
+    bottom: 2px;
+  }
+  
+  .numero {
+    font-size: 0.7rem;
+  }
+  
+  .particula {
+    width: 2px;
+    height: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .icono {
+    font-size: 1rem;
+  }
+  
+  .planetaIngredientes:hover .icono {
+    font-size: 1.2rem;
+  }
+  
+  .estadisticas {
+    display: none;
+  }
+  
+  .particula {
+    width: 1.5px;
+    height: 1.5px;
+  }
+  
+  .estela {
+    height: 1px;
+  }
+}
+
+/* ===== MODO SIN ANIMACIONES ===== */
+@media (prefers-reduced-motion: reduce) {
+  .planetaIngredientes,
+  .anilloParticulas,
+  .particula,
+  .estela,
+  .brilloOrganico,
+  .respiracion,
+  .pulsoAlerta,
+  .anilloSeleccion,
+  .biomasaParticula,
+  .icono {
+    animation: none !important;
+  }
+  
+  .planetaIngredientes:hover .icono {
+    transform: scale(1.1);
+  }
+}
+
+/* ===== MODO ALTO CONTRASTE ===== */
+@media (prefers-contrast: high) {
+  .planetaIngredientes {
+    border: 3px solid white;
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  }
+  
+  .icono {
+    filter: contrast(2);
+  }
+  
+  .estadisticas {
+    background: rgba(255, 255, 255, 0.9);
+    color: black;
+    border-radius: 3px;
+    padding: 1px 3px;
+  }
+}

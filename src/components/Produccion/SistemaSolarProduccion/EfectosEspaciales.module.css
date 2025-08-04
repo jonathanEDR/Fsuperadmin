@@ -1,0 +1,109 @@
+/* ===== ANIMACIONES GLOBALES PARA EFECTOS ESPACIALES ===== */
+@keyframes titilar {
+  0%, 100% { 
+    opacity: 0.3; 
+    transform: scale(1); 
+  }
+  50% { 
+    opacity: 1; 
+    transform: scale(1.1); 
+  }
+}
+
+@keyframes titilarPulsar {
+  0%, 100% { 
+    opacity: 0.4; 
+    transform: scale(1); 
+  }
+  25% { 
+    opacity: 1; 
+    transform: scale(1.3); 
+  }
+  50% { 
+    opacity: 0.6; 
+    transform: scale(1.1); 
+  }
+  75% { 
+    opacity: 1; 
+    transform: scale(1.2); 
+  }
+}
+
+@keyframes rotarNebula {
+  from { 
+    transform: rotate(0deg); 
+  }
+  to { 
+    transform: rotate(360deg); 
+  }
+}
+
+@keyframes pulsarNebula {
+  0% { 
+    opacity: 0.05; 
+    transform: scale(1); 
+  }
+  100% { 
+    opacity: 0.15; 
+    transform: scale(1.1); 
+  }
+}
+
+@keyframes moverEstrellasFondo {
+  from { 
+    transform: translateX(0); 
+  }
+  to { 
+    transform: translateX(-200px); 
+  }
+}
+
+@keyframes flotarPolvo {
+  from { 
+    transform: translate(0, 0) rotate(0deg); 
+  }
+  to { 
+    transform: translate(-100px, -50px) rotate(360deg); 
+  }
+}
+
+@keyframes ondularGalaxia {
+  0%, 100% { 
+    transform: translateY(0) rotate(0deg) scale(1); 
+  }
+  33% { 
+    transform: translateY(-20px) rotate(1deg) scale(1.02); 
+  }
+  66% { 
+    transform: translateY(20px) rotate(-1deg) scale(0.98); 
+  }
+}
+
+/* ===== CLASES PARA APLICAR ANIMACIONES ===== */
+.titilar {
+  animation: titilar 3s ease-in-out infinite;
+}
+
+.titilarPulsar {
+  animation: titilarPulsar 4s ease-in-out infinite;
+}
+
+.rotarNebula {
+  animation: rotarNebula 30s linear infinite;
+}
+
+.pulsarNebula {
+  animation: pulsarNebula 8s ease-in-out infinite alternate;
+}
+
+.moverEstrellasFondo {
+  animation: moverEstrellasFondo 60s linear infinite;
+}
+
+.flotarPolvo {
+  animation: flotarPolvo 45s ease-in-out infinite;
+}
+
+.ondularGalaxia {
+  animation: ondularGalaxia 25s ease-in-out infinite;
+}
