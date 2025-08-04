@@ -26,6 +26,13 @@ import CajaPage from './Pages/CajaPage';
 import ProduccionPage from './Pages/ProduccionPage';
 import CatalogoPage from './Pages/CatalogoPage';
 
+// Importar páginas del módulo de finanzas
+import FinanzasPage from './Pages/FinanzasPage';
+import CuentasBancariasPage from './Pages/CuentasBancariasPage';
+import PrestamosPage from './Pages/PrestamosPage';
+import GarantiasPage from './Pages/GarantiasPage';
+import PagosFinanciamientoPage from './Pages/PagosFinanciamientoPage';
+
 // Componente para proteger rutas que requieren autenticación
 function ProtectedRoute({ children }) {
   return (
@@ -133,6 +140,7 @@ function App() {
               <Route path="personal" element={<PersonalPage />} />
               <Route path="perfil" element={<PerfilPage />} />
               <Route path="produccion/*" element={<ProduccionPage />} />
+              {/* Módulo de Finanzas - ELIMINADO del Admin */}
             </Route>
             
             {/* SuperAdminDashboard como layout persistente */}
@@ -156,6 +164,12 @@ function App() {
               <Route path="perfil" element={<PerfilPage />} />
               <Route path="caja" element={<CajaPage />} />
               <Route path="produccion/*" element={<ProduccionPage />} />
+              {/* Rutas del módulo de finanzas - SOLO PARA SUPER ADMIN */}
+              <Route path="finanzas" element={<FinanzasPage />} />
+              <Route path="cuentas-bancarias" element={<CuentasBancariasPage />} />
+              <Route path="prestamos" element={<PrestamosPage />} />
+              <Route path="garantias" element={<GarantiasPage />} />
+              <Route path="pagos-financiamiento" element={<PagosFinanciamientoPage />} />
             </Route>
             
             {/* UserDashboard como layout persistente */}

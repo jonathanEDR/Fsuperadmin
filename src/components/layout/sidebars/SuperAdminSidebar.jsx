@@ -2,6 +2,7 @@ import React from 'react';
 import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, UserCheck, X, ChevronLeft, ChevronRight, CreditCard, Factory, Grid3X3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
+import SubMenuFinanzas from '../../Finanzas/SubMenuFinanzas';
 
 function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebarOpen, onLogout }) {
   const navigate = useNavigate();
@@ -105,6 +106,13 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
                 </button>
               );
             })}
+            
+            {/* Submenú de Finanzas */}
+            <SubMenuFinanzas 
+              isCollapsed={isCollapsed}
+              userRole="super-admin"
+              onNavigate={isMobileView ? toggleSidebar : null}
+            />
           </nav>
         </div>
         
