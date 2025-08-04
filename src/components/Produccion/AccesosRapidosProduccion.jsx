@@ -1,5 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useResolvedPath } from 'react-router-dom';
+
+// Importar servicios para estadísticas
+import { ingredienteService } from '../../services/ingredienteService';
+import { materialService } from '../../services/materialService';
+import { recetaService } from '../../services/recetaService';
+import { produccionService } from '../../services/produccionService';
 
 
 const accesos = [
@@ -39,6 +45,13 @@ const accesos = [
     description: 'Procesos de producción'
   },
   {
+    label: 'Residuos y Malogrados',
+    to: 'residuos',
+    icon: '🗑️',
+    color: 'bg-gradient-to-br from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 text-red-800 border-red-200',
+    description: 'Gestión de residuos y productos malogrados'
+  },
+  {
     label: 'Movimientos de Inventario',
     to: 'movimientos',
     icon: '📊',
@@ -49,6 +62,16 @@ const accesos = [
 
 const AccesosRapidosProduccion = () => {
   const location = useLocation();
+  
+  // Estados para estadísticas
+  const [estadisticas, setEstadisticas] = useState({
+    totalRecetas: '-',
+    ingredientes: '-',
+    enProduccion: '-',
+    materiales: '-'
+  });
+  const [loadingStats, setLoadingStats] = useState(true);
+  
   // Buscar el segmento '/produccion' en la ruta actual
   const pathParts = location.pathname.split('/');
   const produccionIdx = pathParts.findIndex(p => p === 'produccion');
@@ -59,6 +82,57 @@ const AccesosRapidosProduccion = () => {
     // fallback: usar los dos primeros segmentos
     basePath = pathParts.slice(0, 2).join('/');
   }
+
+  // Cargar estadísticas reales
+  useEffect(() => {
+    const cargarEstadisticas = async () => {
+      try {
+        setLoadingStats(true);
+        
+        // Cargar datos en paralelo
+        const [
+          ingredientesRes,
+          materialesRes,
+          recetasRes,
+          produccionesRes
+        ] = await Promise.all([
+          ingredienteService.obtenerIngredientes({ activo: true }).catch(() => ({ data: [] })),
+          materialService.obtenerMateriales({ activo: true }).catch(() => ({ data: [] })),
+          recetaService.obtenerRecetas({ activo: true }).catch(() => ({ data: [] })),
+          produccionService.obtenerProducciones({ estado: 'en_proceso' }).catch(() => ({ data: { producciones: [] } }))
+        ]);
+
+        // Calcular estadísticas
+        const ingredientesActivos = ingredientesRes.data?.filter(ing => 
+          (ing.cantidad - (ing.procesado || 0)) > 0
+        ).length || 0;
+
+        const materialesActivos = materialesRes.data?.filter(mat => 
+          (mat.cantidad - (mat.utilizado || 0)) > 0
+        ).length || 0;
+
+        const recetasDisponibles = recetasRes.data?.filter(rec => 
+          (rec.inventario?.cantidadProducida || 0) > 0
+        ).length || 0;
+
+        const produccionesEnProceso = produccionesRes.data?.producciones?.length || 0;
+
+        setEstadisticas({
+          totalRecetas: recetasRes.data?.length || 0,
+          ingredientes: ingredientesActivos,
+          enProduccion: produccionesEnProceso,
+          materiales: materialesActivos
+        });
+        
+      } catch (error) {
+        console.error('Error al cargar estadísticas:', error);
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+
+    cargarEstadisticas();
+  }, []);
 
   return (
     <div className="p-6">
@@ -137,7 +211,13 @@ const AccesosRapidosProduccion = () => {
             </div>
             <div className="ml-2 md:ml-3 min-w-0 flex-1">
               <p className="text-xs md:text-sm font-medium text-gray-500 truncate">Total Recetas</p>
-              <p className="text-sm md:text-lg font-semibold text-gray-900">-</p>
+              <p className="text-sm md:text-lg font-semibold text-gray-900">
+                {loadingStats ? (
+                  <span className="animate-pulse bg-gray-200 h-4 w-8 rounded inline-block"></span>
+                ) : (
+                  estadisticas.totalRecetas
+                )}
+              </p>
             </div>
           </div>
         </div>
@@ -149,7 +229,13 @@ const AccesosRapidosProduccion = () => {
             </div>
             <div className="ml-2 md:ml-3 min-w-0 flex-1">
               <p className="text-xs md:text-sm font-medium text-gray-500 truncate">Ingredientes</p>
-              <p className="text-sm md:text-lg font-semibold text-gray-900">-</p>
+              <p className="text-sm md:text-lg font-semibold text-gray-900">
+                {loadingStats ? (
+                  <span className="animate-pulse bg-gray-200 h-4 w-8 rounded inline-block"></span>
+                ) : (
+                  estadisticas.ingredientes
+                )}
+              </p>
             </div>
           </div>
         </div>
@@ -161,7 +247,13 @@ const AccesosRapidosProduccion = () => {
             </div>
             <div className="ml-2 md:ml-3 min-w-0 flex-1">
               <p className="text-xs md:text-sm font-medium text-gray-500 truncate">En Producción</p>
-              <p className="text-sm md:text-lg font-semibold text-gray-900">-</p>
+              <p className="text-sm md:text-lg font-semibold text-gray-900">
+                {loadingStats ? (
+                  <span className="animate-pulse bg-gray-200 h-4 w-8 rounded inline-block"></span>
+                ) : (
+                  estadisticas.enProduccion
+                )}
+              </p>
             </div>
           </div>
         </div>
@@ -173,7 +265,13 @@ const AccesosRapidosProduccion = () => {
             </div>
             <div className="ml-2 md:ml-3 min-w-0 flex-1">
               <p className="text-xs md:text-sm font-medium text-gray-500 truncate">Materiales</p>
-              <p className="text-sm md:text-lg font-semibold text-gray-900">-</p>
+              <p className="text-sm md:text-lg font-semibold text-gray-900">
+                {loadingStats ? (
+                  <span className="animate-pulse bg-gray-200 h-4 w-8 rounded inline-block"></span>
+                ) : (
+                  estadisticas.materiales
+                )}
+              </p>
             </div>
           </div>
         </div>

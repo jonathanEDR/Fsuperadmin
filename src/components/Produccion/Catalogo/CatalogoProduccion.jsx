@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import catalogoProduccionService from '../../../services/catalogoProduccion.js';
 import FormularioCatalogoProducto from './FormularioCatalogoProducto';
 import AccesosRapidosProduccion from '../AccesosRapidosProduccion';
+import BreadcrumbProduccion from '../BreadcrumbProduccion';
 
 const CatalogoProduccion = ({ moduloActual = '' }) => {
   const [productos, setProductos] = useState([]);
@@ -188,6 +189,8 @@ const CatalogoProduccion = ({ moduloActual = '' }) => {
 
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
+      <BreadcrumbProduccion />
+      
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
@@ -505,8 +508,6 @@ const CatalogoProduccion = ({ moduloActual = '' }) => {
           )}
         </div>
       </div>
-
-      <AccesosRapidosProduccion />
 
       {mostrarFormulario && (
         <FormularioCatalogoProducto

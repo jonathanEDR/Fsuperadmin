@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AccesosRapidosProduccion from '../AccesosRapidosProduccion';
+import BreadcrumbProduccion from '../BreadcrumbProduccion';
 import { recetaService } from '../../../services/recetaService';
 import FormularioReceta from './FormularioReceta';
 import FormularioBasicoReceta from './FormularioBasicoReceta';
@@ -461,6 +462,8 @@ const GestionRecetas = () => {
 
   return (
     <div className="px-2 sm:px-6 py-4">
+      <BreadcrumbProduccion />
+      
       {/* 🎯 OPTIMIZADO: Header responsivo */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Gestión de Recetas</h1>
@@ -471,7 +474,6 @@ const GestionRecetas = () => {
           ➕ Nueva Receta
         </button>
       </div>
-      <AccesosRapidosProduccion />
 
       {error && (
         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded text-sm sm:text-base">

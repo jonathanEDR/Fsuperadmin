@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { movimientoUnificadoService } from '../../../services/movimientoUnificadoService';
 import { produccionService } from '../../../services/produccionService';
 import AccesosRapidosProduccion from '../AccesosRapidosProduccion';
+import BreadcrumbProduccion from '../BreadcrumbProduccion';
 import SelectorTipoProducto from './SelectorTipoProducto';
 import ModalAgregarCantidad from './ModalAgregarCantidad';
 import ModalProducirReceta from './ModalProducirReceta';
@@ -503,8 +504,7 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Accesos Rápidos */}
-      <AccesosRapidosProduccion />
+      <BreadcrumbProduccion />
       
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Header */}

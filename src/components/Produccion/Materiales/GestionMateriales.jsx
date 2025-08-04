@@ -3,7 +3,7 @@ import { materialService } from '../../../services/materialService';
 import FormularioMaterialMejorado from './FormularioMaterialMejorado';
 import AjusteMaterial from './AjusteMaterial';
 import MovimientosMaterial from './MovimientosMaterial';
-import AccesosRapidosProduccion from '../AccesosRapidosProduccion';
+import BreadcrumbProduccion from '../BreadcrumbProduccion';
 
 const GestionMateriales = () => {
   const [materiales, setMateriales] = useState([]);
@@ -112,6 +112,8 @@ const GestionMateriales = () => {
 
   return (
     <div className="space-y-6">
+      <BreadcrumbProduccion />
+      
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Gestión de Materiales</h1>
@@ -119,10 +121,6 @@ const GestionMateriales = () => {
         </div>
 
       </div>
-
-      <AccesosRapidosProduccion />
-
-    
 
       {/* Filtros optimizados para móvil */}
       <div className="bg-white p-2 md:p-4 rounded-lg shadow-sm border border-gray-200 mb-4 md:mb-6">

@@ -18,6 +18,7 @@ import VistaReceta from '../components/Produccion/Recetas/VistaReceta';
 import GestionProduccion from '../components/Produccion/Produccion/GestionProduccion';
 import NuevaProduccion from '../components/Produccion/Produccion/NuevaProduccion';
 import DetalleProduccion from '../components/Produccion/Produccion/DetalleProduccion';
+import GestionResiduos from '../components/Produccion/Residuos/GestionResiduos';
 import GestionMovimientos from '../components/Produccion/Movimientos/GestionMovimientos';
 
 const ProduccionPage = () => {
@@ -54,6 +55,9 @@ const ProduccionPage = () => {
         <Route path="/produccion" element={<GestionProduccion />} />
         <Route path="/produccion/nueva" element={<NuevaProduccion />} />
         <Route path="/produccion/detalle/:id" element={<DetalleProduccion />} />
+        
+        {/* Rutas de Residuos */}
+        <Route path="/residuos" element={<GestionResiduos />} />
         
         {/* Rutas de Movimientos */}
         <Route path="/movimientos" element={<GestionMovimientos />} />
