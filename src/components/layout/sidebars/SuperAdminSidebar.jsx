@@ -13,16 +13,38 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
     navigate('/login');
     if (onLogout) onLogout();
   };
-  const menuItems = [
-    { id: 'dashboard', icon: Home, label: 'Gestión de Usuarios', route: '/super-admin/usuarios' },
-    { id: 'notes', icon: FileText, label: 'Gestión de Notas', route: '/super-admin/notas' },
-    { id: 'productos', icon: Package, label: 'Gestión de Productos', route: '/super-admin/productos' },
-    { id: 'produccion', icon: Factory, label: 'Gestión de Producción', route: '/super-admin/produccion' },
-    { id: 'ventas', icon: ShoppingCart, label: 'Gestión de Ventas', route: '/super-admin/ventas' },
-    { id: 'catalogo', icon: Grid3X3, label: 'Catálogo de Productos', route: '/super-admin/catalogo' },
-    { id: 'caja', icon: CreditCard, label: 'Gestión de Caja', route: '/super-admin/caja' },
-    { id: 'personal', icon: UserCheck, label: 'Gestión de Personal', route: '/super-admin/personal' },
-    { id: 'profile', icon: UserCog, label: 'Mi Perfil', route: '/super-admin/perfil' },
+  // Organización por grupos lógicos
+  const menuGroups = [
+    {
+      title: "Gestión de Usuarios",
+      items: [
+        { id: 'dashboard', icon: Home, label: 'Gestión de Usuarios', route: '/super-admin/usuarios' },
+        { id: 'personal', icon: UserCheck, label: 'Gestión de Personal', route: '/super-admin/personal' },
+      ]
+    },
+    {
+      title: "Inventario y Ventas",
+      items: [
+        { id: 'productos', icon: Package, label: 'Gestión de Productos', route: '/super-admin/productos' },
+        { id: 'catalogo', icon: Grid3X3, label: 'Catálogo de Productos', route: '/super-admin/catalogo' },
+        { id: 'ventas', icon: ShoppingCart, label: 'Gestión de Ventas', route: '/super-admin/ventas' },
+      ]
+    },
+    {
+      title: "Operaciones",
+      items: [
+        { id: 'produccion', icon: Factory, label: 'Gestión de Producción', route: '/super-admin/produccion' },
+        { id: 'caja', icon: CreditCard, label: 'Gestión de Caja', route: '/super-admin/caja' },
+      ],
+      hasSubMenu: true // Indica que tiene el submenu de finanzas
+    },
+    {
+      title: "Herramientas",
+      items: [
+        { id: 'notes', icon: FileText, label: 'Gestión de Notas', route: '/super-admin/notas' },
+        { id: 'profile', icon: UserCog, label: 'Mi Perfil', route: '/super-admin/perfil' },
+      ]
+    }
   ];
 
   return (
@@ -54,10 +76,17 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
         <div className="p-4">
           <div className="flex items-center justify-between mb-6">
             {!isCollapsed && (
-              <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+              <button
+                onClick={() => {
+                  navigate('/super-admin/dashboard');
+                  if (isMobileView) toggleSidebar();
+                }}
+                className="text-xl font-bold text-gray-800 flex items-center gap-2 hover:text-purple-600 transition-colors cursor-pointer"
+                title="Ir al Dashboard Principal"
+              >
                 <Shield className="text-purple-600" size={24} />
                 <span className="transition-opacity duration-200">Panel Super Admin</span>
-              </h2>
+              </button>
             )}
             {/* Botón de toggle para móviles */}
             {isMobileView ? (
@@ -80,39 +109,60 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
             )}
           </div>
           
-          <nav className="space-y-2">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    navigate(item.route);
-                    if (isMobileView) toggleSidebar();
-                  }}
-                  className={`
-                    w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all
-                    hover:bg-purple-50 hover:text-purple-600
-                    ${isCollapsed ? 'justify-center' : ''}
-                  `}
-                  title={isCollapsed ? item.label : ""}
-                >
-                  <Icon size={20} className="flex-shrink-0" />
-                  {!isCollapsed && (
-                    <span className="font-medium whitespace-nowrap truncate">
-                      {item.label}
-                    </span>
+          <nav className="space-y-1">
+            {menuGroups.map((group, groupIndex) => (
+              <div key={group.title}>
+                {/* Título del grupo - solo visible cuando no está colapsado */}
+                {!isCollapsed && (
+                  <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    {group.title}
+                  </div>
+                )}
+                
+                {/* Items del grupo */}
+                <div className="space-y-1">
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          navigate(item.route);
+                          if (isMobileView) toggleSidebar();
+                        }}
+                        className={`
+                          w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all
+                          hover:bg-purple-50 hover:text-purple-600
+                          ${isCollapsed ? 'justify-center' : ''}
+                        `}
+                        title={isCollapsed ? item.label : ""}
+                      >
+                        <Icon size={20} className="flex-shrink-0" />
+                        {!isCollapsed && (
+                          <span className="font-medium whitespace-nowrap truncate">
+                            {item.label}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                  
+                  {/* Submenú de Finanzas dentro del grupo Operaciones */}
+                  {group.hasSubMenu && (
+                    <SubMenuFinanzas 
+                      isCollapsed={isCollapsed}
+                      userRole="super-admin"
+                      onNavigate={isMobileView ? toggleSidebar : null}
+                    />
                   )}
-                </button>
-              );
-            })}
-            
-            {/* Submenú de Finanzas */}
-            <SubMenuFinanzas 
-              isCollapsed={isCollapsed}
-              userRole="super-admin"
-              onNavigate={isMobileView ? toggleSidebar : null}
-            />
+                </div>
+                
+                {/* Separador entre grupos - excepto en el último grupo y cuando está colapsado */}
+                {!isCollapsed && groupIndex < menuGroups.length - 1 && (
+                  <div className="my-3 border-t border-gray-200"></div>
+                )}
+              </div>
+            ))}
           </nav>
         </div>
         

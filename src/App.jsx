@@ -28,6 +28,7 @@ import CatalogoPage from './Pages/CatalogoPage';
 
 // Importar páginas del módulo de finanzas
 import FinanzasPage from './Pages/FinanzasPage';
+import MovimientosCajaFinanzas from './components/Finanzas/MovimientosCajaFinanzas';
 import CuentasBancariasPage from './Pages/CuentasBancariasPage';
 import PrestamosPage from './Pages/PrestamosPage';
 import GarantiasPage from './Pages/GarantiasPage';
@@ -166,6 +167,7 @@ function App() {
               <Route path="produccion/*" element={<ProduccionPage />} />
               {/* Rutas del módulo de finanzas - SOLO PARA SUPER ADMIN */}
               <Route path="finanzas" element={<FinanzasPage />} />
+              <Route path="finanzas/movimientos-caja" element={<MovimientosCajaFinanzas />} />
               <Route path="cuentas-bancarias" element={<CuentasBancariasPage />} />
               <Route path="prestamos" element={<PrestamosPage />} />
               <Route path="garantias" element={<GarantiasPage />} />

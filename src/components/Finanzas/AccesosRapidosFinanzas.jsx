@@ -13,6 +13,13 @@ const accesos = [
     description: 'Resumen financiero general'
   },
   {
+    label: 'Movimientos de Caja',
+    to: 'movimientos-caja',
+    icon: '💸',
+    color: 'bg-gradient-to-br from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200 text-emerald-800 border-emerald-200',
+    description: 'Control de ingresos y egresos'
+  },
+  {
     label: 'Cuentas Bancarias',
     to: 'cuentas-bancarias',
     icon: '🏦',
@@ -63,46 +70,14 @@ const AccesosRapidosFinanzas = () => {
       try {
         setLoadingStats(true);
         
-        // Cargar datos en paralelo
-        const [
-          cuentasRes,
-          prestamosRes,
-          garantiasRes,
-          resumenRes
-        ] = await Promise.allSettled([
-          finanzasService.obtenerCuentasBancarias(),
-          finanzasService.obtenerPrestamos(),
-          finanzasService.obtenerGarantias(),
-          finanzasService.obtenerResumenFinanciero()
-        ]);
-
-        // Procesar resultados con validación defensiva
-        const cuentas = cuentasRes.status === 'fulfilled' && Array.isArray(cuentasRes.value?.data) 
-          ? cuentasRes.value.data 
-          : [];
-
-        const prestamos = prestamosRes.status === 'fulfilled' && Array.isArray(prestamosRes.value?.data)
-          ? prestamosRes.value.data
-          : [];
-
-        const garantias = garantiasRes.status === 'fulfilled' && Array.isArray(garantiasRes.value?.data)
-          ? garantiasRes.value.data
-          : [];
-
-        const resumen = resumenRes.status === 'fulfilled' && resumenRes.value?.data
-          ? resumenRes.value.data
-          : {};
-
-        // Calcular estadísticas
-        const prestamosActivos = prestamos.filter(p => p.estado === 'activo').length;
-        const garantiasVigentes = garantias.filter(g => g.estado === 'vigente' || g.estado === 'activa').length;
-        const saldoTotal = cuentas.reduce((total, cuenta) => total + (cuenta.saldo || 0), 0);
-
+        // Por ahora solo mostramos estadísticas estáticas hasta implementar los otros módulos
+        // TODO: Integrar con el servicio de movimientos de caja para obtener datos reales
+        
         setEstadisticas({
-          totalCuentas: cuentas.length,
-          prestamosActivos,
-          garantiasVigentes,
-          saldoTotal: `S/ ${saldoTotal.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`
+          totalCuentas: 0, // Módulo por implementar
+          prestamosActivos: 0, // Módulo por implementar
+          garantiasVigentes: 0, // Módulo por implementar  
+          saldoTotal: 'S/ 0.00' // Se puede obtener del módulo de movimientos de caja
         });
 
       } catch (error) {
@@ -116,69 +91,69 @@ const AccesosRapidosFinanzas = () => {
   }, []);
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+      <div className="text-center mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
           Sistema de Finanzas
         </h1>
-        <p className="text-gray-600">
+        <p className="text-sm sm:text-base text-gray-600">
           Gestiona todos los aspectos financieros desde un solo lugar
         </p>
       </div>
 
       {/* Estadísticas rápidas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm border">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
-              <span className="text-xl">🏦</span>
+              <span className="text-lg sm:text-xl">🏦</span>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Total Cuentas</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Total Cuentas</p>
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-600">
                 {loadingStats ? '...' : estadisticas.totalCuentas}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
+        <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm border">
           <div className="flex items-center">
             <div className="p-2 bg-yellow-100 rounded-lg">
-              <span className="text-xl">💰</span>
+              <span className="text-lg sm:text-xl">💰</span>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Préstamos Activos</p>
-              <p className="text-2xl font-bold text-yellow-600">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Préstamos Activos</p>
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-yellow-600">
                 {loadingStats ? '...' : estadisticas.prestamosActivos}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
+        <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm border">
           <div className="flex items-center">
             <div className="p-2 bg-purple-100 rounded-lg">
-              <span className="text-xl">🛡️</span>
+              <span className="text-lg sm:text-xl">🛡️</span>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Garantías Vigentes</p>
-              <p className="text-2xl font-bold text-purple-600">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Garantías Vigentes</p>
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-purple-600">
                 {loadingStats ? '...' : estadisticas.garantiasVigentes}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
+        <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm border">
           <div className="flex items-center">
             <div className="p-2 bg-green-100 rounded-lg">
-              <span className="text-xl">💵</span>
+              <span className="text-lg sm:text-xl">💵</span>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Saldo Total</p>
-              <p className="text-lg font-bold text-green-600">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Saldo Total</p>
+              <p className="text-sm sm:text-base lg:text-lg font-bold text-green-600 truncate">
                 {loadingStats ? '...' : estadisticas.saldoTotal}
               </p>
             </div>
@@ -189,10 +164,10 @@ const AccesosRapidosFinanzas = () => {
       {/* Accesos rápidos */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {accesos.map((acceso, index) => {
-          // Para Dashboard Financiero, usar la ruta de finanzas
+          // Construir la ruta correcta para finanzas
           const fullPath = acceso.to === '' 
             ? `${basePath}/finanzas`
-            : `${basePath}/${acceso.to}`;
+            : `${basePath}/finanzas/${acceso.to}`;
           const isActive = location.pathname === fullPath;
           
           // Debug: console.log para ver las rutas generadas

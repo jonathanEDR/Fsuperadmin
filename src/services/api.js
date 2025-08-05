@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 const api = axios.create({
-  baseURL: `${API_URL}/api`,
+  baseURL: API_URL, // Removido el '/api' para evitar duplicación
   headers: { 
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -13,11 +13,24 @@ const api = axios.create({
 // Interceptor para agregar el token a cada solicitud
 api.interceptors.request.use(  async config => {
     try {
+      console.log('🔍 API Interceptor - Procesando petición:', {
+        url: config.url,
+        method: config.method,
+        baseURL: config.baseURL
+      });
+      
       // Obtener el token y la sesión de Clerk
       const token = await window.Clerk?.session?.getToken();
       const user = window.Clerk?.user;
       
+      console.log('🔐 API Interceptor - Token y usuario:', {
+        hasToken: !!token,
+        hasUser: !!user,
+        userEmail: user?.primaryEmailAddress?.emailAddress
+      });
+      
       if (!token || !user) {
+        console.error('❌ API Interceptor - No hay sesión activa');
         throw new Error('No hay sesión activa');
       }
 
@@ -33,14 +46,16 @@ api.interceptors.request.use(  async config => {
       config.headers['Content-Type'] = 'application/json';
       config.headers['Accept'] = 'application/json';
       
+      console.log('✅ API Interceptor - Petición configurada exitosamente');
+      
     } catch (error) {
-      console.error('Error en la configuración de la petición:', error);
+      console.error('❌ Error en la configuración de la petición:', error);
       return Promise.reject(error);
     }
     return config;
   },
   error => {
-    console.error('Error en el interceptor de request:', error);
+    console.error('❌ Error en el interceptor de request:', error);
     return Promise.reject(error);
   }
 );
@@ -59,7 +74,7 @@ export default api;
 // Obtener todos los productos (inventario)
 export const getProductos = async () => {
   try {
-    const response = await api.get('/productos');  // Usando la instancia api
+    const response = await api.get('/api/productos');
     return response.data;
   } catch (error) {
     console.error('Error al obtener productos:', error);
@@ -70,7 +85,7 @@ export const getProductos = async () => {
 // Crear un nuevo producto (registrar producto)
 export const createProducto = async (producto) => {
   try {
-    const response = await api.post('/productos', producto);  // Usando la instancia api
+    const response = await api.post('/api/productos', producto);
     return response.data;
   } catch (error) {
     console.error('Error al agregar producto:', error);
@@ -82,7 +97,7 @@ export const createProducto = async (producto) => {
 // Obtener todas las ventas
 export const getVentas = async () => {
   try {
-    const response = await api.get('/ventas');  // Usando la instancia api
+    const response = await api.get('/api/ventas');
     return response.data;
   } catch (error) {
     console.error('Error al obtener ventas:', error);
@@ -94,7 +109,7 @@ export const getVentas = async () => {
 export const createVenta = async (venta) => {
   try {
     // Usar la instancia api configurada en lugar de axios directamente
-    const response = await api.post('/ventas', venta);
+    const response = await api.post('/api/ventas', venta);
     
     // Verificar si la respuesta contiene datos
     if (!response.data) {
