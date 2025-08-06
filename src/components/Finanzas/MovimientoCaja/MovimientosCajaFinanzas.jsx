@@ -10,7 +10,7 @@ import {
     TrendingDown,
     Wallet
 } from 'lucide-react';
-import { movimientosCajaService } from '../../services/movimientosCajaService';
+import { movimientosCajaService } from '../../../services/movimientosCajaService';
 import ModalIngresoFinanzas from './ModalIngresoFinanzas';
 import ModalEgresoFinanzas from './ModalEgresoFinanzas';
 import ModalArqueoFinanzas from './ModalArqueoFinanzas';

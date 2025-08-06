@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Minus, MinusCircle } from 'lucide-react';
-import { movimientosCajaService } from '../../services/movimientosCajaService';
+import { DollarSign, X, MinusCircle, Minus, Plus } from 'lucide-react';
+import { movimientosCajaService } from '../../../services/movimientosCajaService';
 
 const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
     const [formData, setFormData] = useState({

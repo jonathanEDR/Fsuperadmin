@@ -60,10 +60,7 @@ const TablaFinanciera = ({
             return '-';
         }
 
-        if (columna.render) {
-            return columna.render(item[columna.key], item);
-        }
-        
+        // NO aplicar render aquí - solo obtener el valor raw
         if (typeof columna.key === 'string' && columna.key.includes('.')) {
             return columna.key.split('.').reduce((obj, key) => obj?.[key], item);
         }

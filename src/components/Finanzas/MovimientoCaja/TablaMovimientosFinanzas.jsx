@@ -8,7 +8,7 @@ import {
     ArrowDownCircle,
     MoreVertical
 } from 'lucide-react';
-import { movimientosCajaService } from '../../services/movimientosCajaService';
+import { movimientosCajaService } from '../../../services/movimientosCajaService';
 
 const TablaMovimientosFinanzas = ({ movimientos, onRefresh }) => {
     const [menuAbierto, setMenuAbierto] = useState(null);

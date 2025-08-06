@@ -28,7 +28,7 @@ import CatalogoPage from './Pages/CatalogoPage';
 
 // Importar páginas del módulo de finanzas
 import FinanzasPage from './Pages/FinanzasPage';
-import MovimientosCajaFinanzas from './components/Finanzas/MovimientosCajaFinanzas';
+import { MovimientosCajaFinanzas } from './components/Finanzas/MovimientoCaja';
 import CuentasBancariasPage from './Pages/CuentasBancariasPage';
 import PrestamosPage from './Pages/PrestamosPage';
 import GarantiasPage from './Pages/GarantiasPage';
@@ -168,10 +168,10 @@ function App() {
               {/* Rutas del módulo de finanzas - SOLO PARA SUPER ADMIN */}
               <Route path="finanzas" element={<FinanzasPage />} />
               <Route path="finanzas/movimientos-caja" element={<MovimientosCajaFinanzas />} />
-              <Route path="cuentas-bancarias" element={<CuentasBancariasPage />} />
-              <Route path="prestamos" element={<PrestamosPage />} />
-              <Route path="garantias" element={<GarantiasPage />} />
-              <Route path="pagos-financiamiento" element={<PagosFinanciamientoPage />} />
+              <Route path="finanzas/cuentas-bancarias" element={<CuentasBancariasPage />} />
+              <Route path="finanzas/prestamos" element={<PrestamosPage />} />
+              <Route path="finanzas/garantias" element={<GarantiasPage />} />
+              <Route path="finanzas/pagos-financiamiento" element={<PagosFinanciamientoPage />} />
             </Route>
             
             {/* UserDashboard como layout persistente */}

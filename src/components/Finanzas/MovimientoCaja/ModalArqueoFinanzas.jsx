@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calculator, Banknote, Coins } from 'lucide-react';
-import { movimientosCajaService } from '../../services/movimientosCajaService';
+import { movimientosCajaService } from '../../../services/movimientosCajaService';
 
 const ModalArqueoFinanzas = ({ isOpen, onClose }) => {
     const [arqueo, setArqueo] = useState(null);

@@ -8,7 +8,7 @@ class FinanzasService {
      */
     static async obtenerResumen() {
         try {
-            const response = await api.get('/finanzas/resumen');
+            const response = await api.get('/api/finanzas/resumen');
             return response.data;
         } catch (error) {
             console.error('Error obteniendo resumen financiero:', error);
@@ -22,7 +22,7 @@ class FinanzasService {
     static async obtenerFlujoCaja(filtros = {}) {
         try {
             const params = new URLSearchParams(filtros);
-            const response = await api.get(`/finanzas/flujo-caja?${params}`);
+            const response = await api.get(`/api/finanzas/flujo-caja?${params}`);
             return response.data;
         } catch (error) {
             console.error('Error obteniendo flujo de caja:', error);
@@ -35,7 +35,7 @@ class FinanzasService {
      */
     static async obtenerProyecciones(meses = 12) {
         try {
-            const response = await api.get(`/finanzas/proyecciones?meses=${meses}`);
+            const response = await api.get(`/api/finanzas/proyecciones?meses=${meses}`);
             return response.data;
         } catch (error) {
             console.error('Error obteniendo proyecciones:', error);
@@ -48,7 +48,7 @@ class FinanzasService {
      */
     static async obtenerKPIs() {
         try {
-            const response = await api.get('/finanzas/kpis');
+            const response = await api.get('/api/finanzas/kpis');
             return response.data;
         } catch (error) {
             console.error('Error obteniendo KPIs:', error);
@@ -61,7 +61,7 @@ class FinanzasService {
      */
     static async obtenerAlertas() {
         try {
-            const response = await api.get('/finanzas/alertas');
+            const response = await api.get('/api/finanzas/alertas');
             return response.data;
         } catch (error) {
             console.error('Error obteniendo alertas:', error);
@@ -77,7 +77,8 @@ class FinanzasService {
     static async obtenerCuentasBancarias(filtros = {}) {
         try {
             const params = new URLSearchParams(filtros);
-            const response = await api.get(`/finanzas/cuentas-bancarias?${params}`);
+            // Usar la ruta directa de cuentas bancarias
+            const response = await api.get(`/api/cuentas-bancarias?${params}`);
             return response.data;
         } catch (error) {
             console.error('Error obteniendo cuentas bancarias:', error);
@@ -86,11 +87,24 @@ class FinanzasService {
     }
     
     /**
+     * Obtener resumen de cuentas bancarias
+     */
+    static async obtenerResumenCuentasBancarias() {
+        try {
+            const response = await api.get('/api/cuentas-bancarias/resumen');
+            return response.data;
+        } catch (error) {
+            console.error('Error obteniendo resumen de cuentas bancarias:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Obtener cuenta bancaria por ID
      */
     static async obtenerCuentaBancaria(id) {
         try {
-            const response = await api.get(`/finanzas/cuentas-bancarias/${id}`);
+            const response = await api.get(`/api/cuentas-bancarias/${id}`);
             return response.data;
         } catch (error) {
             console.error('Error obteniendo cuenta bancaria:', error);
@@ -103,7 +117,8 @@ class FinanzasService {
      */
     static async crearCuentaBancaria(datos) {
         try {
-            const response = await api.post('/finanzas/cuentas-bancarias', datos);
+            // Usar la ruta directa de cuentas bancarias
+            const response = await api.post('/api/cuentas-bancarias', datos);
             return response.data;
         } catch (error) {
             console.error('Error creando cuenta bancaria:', error);
@@ -116,7 +131,7 @@ class FinanzasService {
      */
     static async actualizarCuentaBancaria(id, datos) {
         try {
-            const response = await api.put(`/finanzas/cuentas-bancarias/${id}`, datos);
+            const response = await api.put(`/api/cuentas-bancarias/${id}`, datos);
             return response.data;
         } catch (error) {
             console.error('Error actualizando cuenta bancaria:', error);
@@ -129,7 +144,7 @@ class FinanzasService {
      */
     static async eliminarCuentaBancaria(id) {
         try {
-            const response = await api.delete(`/finanzas/cuentas-bancarias/${id}`);
+            const response = await api.delete(`/api/cuentas-bancarias/${id}`);
             return response.data;
         } catch (error) {
             console.error('Error eliminando cuenta bancaria:', error);
@@ -142,7 +157,7 @@ class FinanzasService {
      */
     static async realizarDeposito(id, datos) {
         try {
-            const response = await api.post(`/finanzas/cuentas-bancarias/${id}/depositar`, datos);
+            const response = await api.post(`/api/cuentas-bancarias/${id}/depositar`, datos);
             return response.data;
         } catch (error) {
             console.error('Error realizando depósito:', error);
@@ -155,7 +170,7 @@ class FinanzasService {
      */
     static async realizarRetiro(id, datos) {
         try {
-            const response = await api.post(`/finanzas/cuentas-bancarias/${id}/retirar`, datos);
+            const response = await api.post(`/api/cuentas-bancarias/${id}/retirar`, datos);
             return response.data;
         } catch (error) {
             console.error('Error realizando retiro:', error);
@@ -169,7 +184,7 @@ class FinanzasService {
     static async obtenerMovimientosCuenta(id, filtros = {}) {
         try {
             const params = new URLSearchParams(filtros);
-            const response = await api.get(`/finanzas/cuentas-bancarias/${id}/movimientos?${params}`);
+            const response = await api.get(`/api/cuentas-bancarias/${id}/movimientos?${params}`);
             return response.data;
         } catch (error) {
             console.error('Error obteniendo movimientos:', error);
@@ -592,7 +607,16 @@ class FinanzasService {
             'EUR': '€'
         };
         
-        return `${simbolos[moneda] || 'S/'} ${monto.toLocaleString('es-PE', { 
+        // Manejar casos donde monto no es un número
+        let montoNum;
+        if (typeof monto === 'object' && monto !== null) {
+            // Si es un objeto, intentar extraer el valor numérico
+            montoNum = monto.value || monto.amount || monto.saldo || 0;
+        } else {
+            montoNum = parseFloat(monto) || 0;
+        }
+        
+        return `${simbolos[moneda] || 'S/'} ${montoNum.toLocaleString('es-PE', { 
             minimumFractionDigits: 2,
             maximumFractionDigits: 2 
         })}`;

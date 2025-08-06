@@ -6,13 +6,16 @@ import React from 'react';
 const CampoFormulario = ({ 
     label, 
     name, 
+    id,
     type = 'text', 
+    tipo,
     value, 
     onChange, 
     error, 
     required = false,
     placeholder,
     options = [],
+    opciones = [],
     disabled = false,
     help,
     prefix,
@@ -20,8 +23,28 @@ const CampoFormulario = ({
     min,
     max,
     step,
-    className = ''
+    filas,
+    className = '',
+    icono
 }) => {
+    // Usar id si se proporciona, sino name
+    const fieldName = id || name;
+    // Usar tipo si se proporciona, sino type
+    const fieldType = tipo || type;
+    // Usar opciones si se proporciona, sino options
+    const fieldOptions = opciones.length > 0 ? opciones : options;
+
+    // Debug temporal - mejorado
+    console.log('🔧 CampoFormulario Debug MEJORADO:', {
+        id, 
+        name, 
+        fieldName,
+        value: JSON.stringify(value),
+        onChange: typeof onChange,
+        fieldType,
+        error,
+        hasError: !!error
+    });
     const baseClassName = `
         w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all
         ${error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'}
@@ -30,11 +53,11 @@ const CampoFormulario = ({
     `;
 
     const renderInput = () => {
-        switch (type) {
+        switch (fieldType) {
             case 'select':
                 return (
                     <select
-                        name={name}
+                        name={fieldName}
                         value={value || ''}
                         onChange={onChange}
                         disabled={disabled}
@@ -42,7 +65,7 @@ const CampoFormulario = ({
                         required={required}
                     >
                         <option value="">{placeholder || 'Seleccionar...'}</option>
-                        {options.map((option) => (
+                        {fieldOptions.map((option) => (
                             <option key={option.value} value={option.value}>
                                 {option.label}
                             </option>
@@ -53,13 +76,13 @@ const CampoFormulario = ({
             case 'textarea':
                 return (
                     <textarea
-                        name={name}
+                        name={fieldName}
                         value={value || ''}
                         onChange={onChange}
                         placeholder={placeholder}
                         disabled={disabled}
                         required={required}
-                        rows={4}
+                        rows={filas || 4}
                         className={baseClassName}
                     />
                 );
@@ -68,7 +91,7 @@ const CampoFormulario = ({
                 return (
                     <input
                         type="number"
-                        name={name}
+                        name={fieldName}
                         value={value || ''}
                         onChange={onChange}
                         placeholder={placeholder}
@@ -85,7 +108,7 @@ const CampoFormulario = ({
                 return (
                     <input
                         type="date"
-                        name={name}
+                        name={fieldName}
                         value={value || ''}
                         onChange={onChange}
                         disabled={disabled}
@@ -101,7 +124,7 @@ const CampoFormulario = ({
                     <div className="flex items-center">
                         <input
                             type="checkbox"
-                            name={name}
+                            name={fieldName}
                             checked={value || false}
                             onChange={onChange}
                             disabled={disabled}
@@ -119,8 +142,8 @@ const CampoFormulario = ({
             default:
                 return (
                     <input
-                        type={type}
-                        name={name}
+                        type={fieldType}
+                        name={fieldName}
                         value={value || ''}
                         onChange={onChange}
                         placeholder={placeholder}
@@ -132,7 +155,7 @@ const CampoFormulario = ({
         }
     };
 
-    if (type === 'checkbox') {
+    if (fieldType === 'checkbox') {
         return (
             <div className="mb-4">
                 {renderInput()}
@@ -148,7 +171,7 @@ const CampoFormulario = ({
 
     return (
         <div className="mb-4">
-            {label && type !== 'checkbox' && (
+            {label && fieldType !== 'checkbox' && (
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                     {label}
                     {required && <span className="text-red-500 ml-1">*</span>}
@@ -192,14 +215,54 @@ export const useFormulario = (valoresIniciales = {}, validaciones = {}) => {
     const [errores, setErrores] = React.useState({});
     const [tocados, setTocados] = React.useState({});
 
+    // Helper para establecer valores anidados
+    const establecerValorAnidado = (objeto, ruta, valor) => {
+        const partes = ruta.split('.');
+        const resultado = { ...objeto };
+        let actual = resultado;
+        
+        for (let i = 0; i < partes.length - 1; i++) {
+            if (!actual[partes[i]]) {
+                actual[partes[i]] = {};
+            } else {
+                actual[partes[i]] = { ...actual[partes[i]] };
+            }
+            actual = actual[partes[i]];
+        }
+        
+        actual[partes[partes.length - 1]] = valor;
+        return resultado;
+    };
+
+    // Helper para obtener valores anidados
+    const obtenerValorAnidado = (objeto, ruta) => {
+        const partes = ruta.split('.');
+        let actual = objeto;
+        
+        for (let i = 0; i < partes.length; i++) {
+            if (actual === null || actual === undefined) {
+                return '';
+            }
+            actual = actual[partes[i]];
+        }
+        
+        return actual || '';
+    };
+
     const manejarCambio = (e) => {
         const { name, value, type, checked } = e.target;
         const nuevoValor = type === 'checkbox' ? checked : value;
         
-        setValores(prev => ({
-            ...prev,
-            [name]: nuevoValor
-        }));
+        setValores(prev => {
+            if (name.includes('.')) {
+                return establecerValorAnidado(prev, name, nuevoValor);
+            } else {
+                return {
+                    ...prev,
+                    [name]: nuevoValor
+                };
+            }
+        });
 
         // Limpiar error cuando el usuario empiece a escribir
         if (errores[name]) {
@@ -219,7 +282,10 @@ export const useFormulario = (valoresIniciales = {}, validaciones = {}) => {
 
         // Validar campo al perder el foco
         if (validaciones[name]) {
-            const error = validaciones[name](valores[name], valores);
+            const valorCampo = name.includes('.') ? 
+                obtenerValorAnidado(valores, name) : 
+                valores[name];
+            const error = validaciones[name](valorCampo, valores);
             setErrores(prev => ({
                 ...prev,
                 [name]: error
@@ -230,10 +296,23 @@ export const useFormulario = (valoresIniciales = {}, validaciones = {}) => {
     const validarFormulario = () => {
         const nuevosErrores = {};
         
+        console.log('🔍 ValidarFormulario - Valores actuales:', JSON.stringify(valores, null, 2));
+        console.log('🔍 ValidarFormulario - Validaciones disponibles:', Object.keys(validaciones));
+        
         Object.keys(validaciones).forEach(campo => {
-            const error = validaciones[campo](valores[campo], valores);
+            const valorCampo = campo.includes('.') ? 
+                obtenerValorAnidado(valores, campo) : 
+                valores[campo];
+            console.log(`🔍 Validando campo ${campo}:`, {
+                valorCampo: JSON.stringify(valorCampo),
+                tieneValidacion: !!validaciones[campo]
+            });
+            const error = validaciones[campo](valorCampo, valores);
             if (error) {
+                console.log(`❌ Error en campo ${campo}:`, error);
                 nuevosErrores[campo] = error;
+            } else {
+                console.log(`✅ Campo ${campo} válido`);
             }
         });
 
@@ -252,6 +331,10 @@ export const useFormulario = (valoresIniciales = {}, validaciones = {}) => {
         setTocados({});
     };
 
+    const obtenerDatos = () => {
+        return valores;
+    };
+
     return {
         valores,
         errores,
@@ -260,7 +343,8 @@ export const useFormulario = (valoresIniciales = {}, validaciones = {}) => {
         manejarBlur,
         validarFormulario,
         resetear,
-        setValores
+        setValores,
+        obtenerDatos
     };
 };
 

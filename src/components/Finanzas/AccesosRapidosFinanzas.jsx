@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 // Importar servicios para estadísticas
-import { finanzasService } from '../../services/finanzasService';
+import { finanzasService, cuentasBancariasService } from '../../services/finanzasService';
 
 const accesos = [
   {
@@ -70,18 +70,29 @@ const AccesosRapidosFinanzas = () => {
       try {
         setLoadingStats(true);
         
-        // Por ahora solo mostramos estadísticas estáticas hasta implementar los otros módulos
-        // TODO: Integrar con el servicio de movimientos de caja para obtener datos reales
+        // Cargar estadísticas de cuentas bancarias
+        const responseCuentas = await cuentasBancariasService.obtenerTodos({});
+        const resumenFinanzas = await finanzasService.obtenerResumen();
+        
+        const cuentasData = responseCuentas.data.cuentas || [];
+        const resumenData = resumenFinanzas.data || {};
         
         setEstadisticas({
-          totalCuentas: 0, // Módulo por implementar
+          totalCuentas: cuentasData.length,
           prestamosActivos: 0, // Módulo por implementar
           garantiasVigentes: 0, // Módulo por implementar  
-          saldoTotal: 'S/ 0.00' // Se puede obtener del módulo de movimientos de caja
+          saldoTotal: `S/ ${(resumenData.saldoTotalPEN || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`
         });
 
       } catch (error) {
         console.error('Error al cargar estadísticas financieras:', error);
+        // En caso de error, mostrar valores por defecto
+        setEstadisticas({
+          totalCuentas: 0,
+          prestamosActivos: 0,
+          garantiasVigentes: 0,
+          saldoTotal: 'S/ 0.00'
+        });
       } finally {
         setLoadingStats(false);
       }

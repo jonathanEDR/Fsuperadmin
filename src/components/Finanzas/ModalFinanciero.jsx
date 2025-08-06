@@ -19,10 +19,11 @@ const ModalFinanciero = ({
     if (!isOpen) return null;
 
     const tamaños = {
-        sm: 'max-w-md',
-        md: 'max-w-lg',
-        lg: 'max-w-2xl',
-        xl: 'max-w-4xl',
+        xs: 'max-w-sm',     // 384px - Ultra compacto
+        sm: 'max-w-md',     // 448px - Compacto
+        md: 'max-w-lg',     // 512px - Mediano
+        lg: 'max-w-2xl',    // 672px - Grande
+        xl: 'max-w-4xl',    // 896px - Extra grande
         full: 'max-w-full mx-4'
     };
 
@@ -42,18 +43,32 @@ const ModalFinanciero = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                {/* Overlay */}
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50">
+            <div className="flex items-center justify-center min-h-screen p-4">
+                {/* Overlay - click to close */}
                 <div 
-                    className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
+                    className="absolute inset-0"
                     onClick={onClose}
                 ></div>
 
-                {/* Modal */}
-                <div className="inline-block w-full overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:w-full">
-                    <div className={`w-full ${tamaños[size]} mx-auto`}>
-                        <form onSubmit={manejarSubmit}>
+                {/* Modal Container - Centrado y responsivo */}
+                <div className={`
+                    ${tamaños[size]} 
+                    w-full 
+                    bg-white 
+                    rounded-lg 
+                    shadow-2xl 
+                    relative 
+                    z-10 
+                    transform 
+                    transition-all 
+                    duration-200 
+                    ease-out
+                    max-h-[90vh] 
+                    overflow-hidden
+                    mx-auto
+                `}>
+                    <form onSubmit={manejarSubmit}>
                             {/* Header */}
                             <div className="px-6 py-4 border-b border-gray-200">
                                 <div className="flex items-center justify-between">
@@ -73,19 +88,19 @@ const ModalFinanciero = ({
                                 </div>
                             </div>
 
-                            {/* Body */}
-                            <div className="px-6 py-4 max-h-96 overflow-y-auto">
+                            {/* Body - Scroll interno optimizado */}
+                            <div className="px-4 sm:px-6 py-4 max-h-[60vh] overflow-y-auto">
                                 {children}
                             </div>
 
-                            {/* Footer */}
-                            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                                <div className="flex justify-end space-x-3">
+                            {/* Footer - Botones responsivos */}
+                            <div className="px-4 sm:px-6 py-3 border-t border-gray-200 bg-gray-50">
+                                <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
                                     <button
                                         type="button"
                                         onClick={manejarCancel}
                                         disabled={loading}
-                                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                     >
                                         {cancelText}
                                     </button>
@@ -94,7 +109,7 @@ const ModalFinanciero = ({
                                         <button
                                             type="submit"
                                             disabled={loading || submitDisabled}
-                                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                            className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                         >
                                             {loading ? (
                                                 <div className="flex items-center">
@@ -114,7 +129,6 @@ const ModalFinanciero = ({
                         </form>
                     </div>
                 </div>
-            </div>
         </div>
     );
 };
