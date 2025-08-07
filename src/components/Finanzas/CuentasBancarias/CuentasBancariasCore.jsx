@@ -18,10 +18,7 @@ export const useCuentasBancarias = () => {
     
     // ========== ESTADOS DE MODALES ==========
     const [modalAbierto, setModalAbierto] = useState(false);
-    const [modalMovimiento, setModalMovimiento] = useState(false);
     const [cuentaEditando, setCuentaEditando] = useState(null);
-    const [cuentaMovimiento, setCuentaMovimiento] = useState(null);
-    const [tipoMovimiento, setTipoMovimiento] = useState('deposito');
     
     // ========== ESTADOS DE FILTROS Y PAGINACIÓN ==========
     const [filtros, setFiltros] = useState(filtrosIniciales);
@@ -29,7 +26,6 @@ export const useCuentasBancarias = () => {
     
     // ========== FORMULARIOS ==========
     const formularioCuenta = useFormularioCuentasBancarias(formularioInicialCuenta, validacionesCuenta);
-    const formularioMovimiento = useFormularioCuentasBancarias(formularioInicialMovimiento, validacionesMovimiento);
     
     // ========== FUNCIONES DE CARGA DE DATOS ==========
     const cargarCuentas = useCallback(async () => {
@@ -121,21 +117,9 @@ export const useCuentasBancarias = () => {
         setModalAbierto(true);
     };
 
-    const abrirModalMovimiento = (cuenta, tipo) => {
-        setCuentaMovimiento(cuenta);
-        setTipoMovimiento(tipo);
-        formularioMovimiento.resetear();
-        setModalMovimiento(true);
-    };
-
     const cerrarModalCuenta = () => {
         setModalAbierto(false);
         setCuentaEditando(null);
-    };
-
-    const cerrarModalMovimiento = () => {
-        setModalMovimiento(false);
-        setCuentaMovimiento(null);
     };
 
     // ========== FUNCIONES DE SUBMIT ==========
@@ -177,30 +161,6 @@ export const useCuentasBancarias = () => {
         }
     };
 
-    const manejarSubmitMovimiento = async (e) => {
-        e.preventDefault();
-        if (!formularioMovimiento.validarFormulario()) return;
-
-        try {
-            const datos = {
-                ...formularioMovimiento.valores,
-                monto: parseFloat(formularioMovimiento.valores.monto)
-            };
-
-            if (tipoMovimiento === 'deposito') {
-                await cuentasBancariasService.realizarDeposito(cuentaMovimiento._id, datos);
-            } else {
-                await cuentasBancariasService.realizarRetiro(cuentaMovimiento._id, datos);
-            }
-            
-            cerrarModalMovimiento();
-            cargarCuentas();
-            cargarResumen();
-        } catch (error) {
-            console.error('Error procesando movimiento:', error);
-        }
-    };
-
     // ========== FUNCIÓN DE ELIMINACIÓN ==========
     const eliminarCuenta = async (cuenta) => {
         if (window.confirm(`¿Estás seguro de eliminar la cuenta ${cuenta.nombre}?`)) {
@@ -230,25 +190,18 @@ export const useCuentasBancarias = () => {
         
         // Estados de modales
         modalAbierto,
-        modalMovimiento,
         cuentaEditando,
-        cuentaMovimiento,
-        tipoMovimiento,
         
         // Formularios
         formularioCuenta,
-        formularioMovimiento,
         
         // Funciones de modales
         abrirModalNuevaCuenta,
         abrirModalEditarCuenta,
-        abrirModalMovimiento,
         cerrarModalCuenta,
-        cerrarModalMovimiento,
         
         // Funciones de submit
         manejarSubmitCuenta,
-        manejarSubmitMovimiento,
         
         // Otras funciones
         eliminarCuenta,

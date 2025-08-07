@@ -28,7 +28,11 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
             numero: '',
             serie: ''
         },
-        observaciones: ''
+        observaciones: '',
+        // Nuevos campos para integración bancaria
+        tipoMovimiento: 'efectivo', // 'efectivo' o 'bancario'
+        afectaCuentaBancaria: false,
+        cuentaBancariaId: ''
     });
     
     const [loading, setLoading] = useState(false);
@@ -49,6 +53,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
         { value: 'transferencia', label: 'Transferencia', icon: '🏦' },
         { value: 'tarjeta', label: 'Tarjeta', icon: '💳' }
     ]);
+    const [cuentasDisponibles, setCuentasDisponibles] = useState([]);
     const [totalCalculado, setTotalCalculado] = useState(0);
     const [mostrarInfoAdicional, setMostrarInfoAdicional] = useState(false);
     
@@ -120,9 +125,10 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
         try {
             console.log('� Cargando opciones del modal...');
             
-            const [categoriasRes, metodosPagoRes] = await Promise.all([
+            const [categoriasRes, metodosPagoRes, cuentasRes] = await Promise.all([
                 movimientosCajaService.obtenerCategorias(),
-                movimientosCajaService.obtenerMetodosPago()
+                movimientosCajaService.obtenerMetodosPago(),
+                movimientosCajaService.obtenerCuentasDisponibles()
             ]);
             
             console.log('� Respuesta del servidor - Categorías:', categoriasRes);
@@ -149,6 +155,12 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                 }));
                 setMetodosPago(metodosPagoFormateados);
                 console.log('✅ Métodos de pago configurados desde servidor');
+            }
+
+            // Procesar cuentas bancarias
+            if (cuentasRes.success && cuentasRes.data && Array.isArray(cuentasRes.data)) {
+                setCuentasDisponibles(cuentasRes.data);
+                console.log('✅ Cuentas bancarias configuradas desde servidor');
             }
             
         } catch (error) {
@@ -193,10 +205,44 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
     };
     
     const handleInputChange = (field, value) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: value
-        }));
+        // Manejar cambio de tipo de movimiento
+        if (field === 'tipoMovimiento') {
+            setFormData(prev => ({
+                ...prev,
+                tipoMovimiento: value,
+                afectaCuentaBancaria: value === 'bancario',
+                // Limpiar campos específicos según el tipo
+                ...(value === 'bancario' ? {
+                    metodoPago: {
+                        tipo: 'transferencia',
+                        detalles: {
+                            billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0 },
+                            monedas: { m5: 0, m2: 0, m1: 0, c50: 0, c20: 0, c10: 0 },
+                            numeroOperacion: '',
+                            cuentaOrigen: '',
+                            banco: ''
+                        }
+                    }
+                } : {
+                    cuentaBancariaId: '',
+                    metodoPago: {
+                        tipo: 'efectivo',
+                        detalles: {
+                            billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0 },
+                            monedas: { m5: 0, m2: 0, m1: 0, c50: 0, c20: 0, c10: 0 },
+                            numeroOperacion: '',
+                            cuentaOrigen: '',
+                            banco: ''
+                        }
+                    }
+                })
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [field]: value
+            }));
+        }
     };
     
     const handleNestedChange = (path, value) => {
@@ -237,7 +283,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
         }
         
         // Validar efectivo si aplica
-        if (formData.metodoPago.tipo === 'efectivo') {
+        if (formData.tipoMovimiento === 'efectivo' && formData.incluirDesglose) {
             if (totalCalculado !== parseFloat(formData.monto)) {
                 const confirmar = window.confirm(
                     `El desglose de efectivo (S/ ${totalCalculado.toFixed(2)}) no coincide con el monto ingresado (S/ ${parseFloat(formData.monto).toFixed(2)}). ¿Deseas continuar?`
@@ -254,6 +300,14 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                 monto: parseFloat(formData.monto),
                 tipo: 'ingreso'
             };
+
+            // Si es movimiento bancario, incluir campos bancarios
+            if (formData.tipoMovimiento === 'bancario') {
+                dataToSend.afectaCuentaBancaria = true;
+                dataToSend.cuentaBancariaId = formData.cuentaBancariaId;
+            } else {
+                dataToSend.afectaCuentaBancaria = false;
+            }
             
             const response = await movimientosCajaService.registrarIngreso(dataToSend);
             
@@ -299,6 +353,43 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                             <h3 className="font-semibold text-lg text-gray-900 border-b pb-2">
                                 📝 Información Principal
                             </h3>
+                            
+                            {/* Selector de Tipo de Movimiento */}
+                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <label className="block text-sm font-semibold text-gray-800 mb-3">
+                                    🎯 Tipo de Movimiento *
+                                </label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div 
+                                        className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                                            formData.tipoMovimiento === 'efectivo' 
+                                                ? 'border-green-500 bg-green-50 text-green-800' 
+                                                : 'border-gray-300 bg-white hover:border-gray-400'
+                                        }`}
+                                        onClick={() => handleInputChange('tipoMovimiento', 'efectivo')}
+                                    >
+                                        <div className="text-center">
+                                            <div className="text-2xl mb-1">💵</div>
+                                            <div className="font-medium">Efectivo/Digital</div>
+                                            <div className="text-xs text-gray-600">Yape, Plin, Efectivo</div>
+                                        </div>
+                                    </div>
+                                    <div 
+                                        className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                                            formData.tipoMovimiento === 'bancario' 
+                                                ? 'border-blue-500 bg-blue-50 text-blue-800' 
+                                                : 'border-gray-300 bg-white hover:border-gray-400'
+                                        }`}
+                                        onClick={() => handleInputChange('tipoMovimiento', 'bancario')}
+                                    >
+                                        <div className="text-center">
+                                            <div className="text-2xl mb-1">🏦</div>
+                                            <div className="font-medium">Cuenta Bancaria</div>
+                                            <div className="text-xs text-gray-600">Afecta saldo bancario</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             
                             {/* Monto y Concepto en 2 columnas */}
                             <div className="grid grid-cols-2 gap-4">
@@ -347,43 +438,93 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                 />
                             </div>
                             
-                            {/* Tipo de Pago y Categoría en 2 columnas */}
+                            {/* Campos de método de pago y categoría/cuenta bancaria */}
                             <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-800 mb-2">
-                                        Tipo de Pago *
-                                    </label>
-                                    <select
-                                        value={formData.metodoPago.tipo}
-                                        onChange={(e) => handleNestedChange('metodoPago.tipo', e.target.value)}
-                                        className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 font-medium"
-                                        required
-                                    >
-                                        {metodosPago.map(metodo => (
-                                            <option key={metodo.value} value={metodo.value}>
-                                                {metodo.icon} {metodo.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-800 mb-2">
-                                        Categoría *
-                                    </label>
-                                    <select
-                                        value={formData.categoria}
-                                        onChange={(e) => handleInputChange('categoria', e.target.value)}
-                                        className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 font-medium"
-                                        required
-                                    >
-                                        {categorias.ingresos?.map(cat => (
-                                            <option key={cat.value} value={cat.value}>
-                                                {cat.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+                                {formData.tipoMovimiento === 'efectivo' ? (
+                                    // PARA MOVIMIENTOS EN EFECTIVO/DIGITAL
+                                    <>
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-800 mb-2">
+                                                Tipo de Pago *
+                                            </label>
+                                            <select
+                                                value={formData.metodoPago.tipo}
+                                                onChange={(e) => handleNestedChange('metodoPago.tipo', e.target.value)}
+                                                className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 font-medium"
+                                                required
+                                            >
+                                                {metodosPago.map(metodo => (
+                                                    <option key={metodo.value} value={metodo.value}>
+                                                        {metodo.icon} {metodo.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-800 mb-2">
+                                                Categoría *
+                                            </label>
+                                            <select
+                                                value={formData.categoria}
+                                                onChange={(e) => handleInputChange('categoria', e.target.value)}
+                                                className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 font-medium"
+                                                required
+                                            >
+                                                {categorias.ingresos?.map(cat => (
+                                                    <option key={cat.value} value={cat.value}>
+                                                        {cat.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </>
+                                ) : (
+                                    // PARA MOVIMIENTOS BANCARIOS
+                                    <>
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-800 mb-2">
+                                                🏦 Cuenta Bancaria * 
+                                            </label>
+                                            <select
+                                                value={formData.cuentaBancariaId}
+                                                onChange={(e) => handleInputChange('cuentaBancariaId', e.target.value)}
+                                                className="w-full px-3 py-2 text-base border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
+                                                required
+                                            >
+                                                <option value="">Seleccione una cuenta...</option>
+                                                {cuentasDisponibles.map(cuenta => (
+                                                    <option key={cuenta.value} value={cuenta.value}>
+                                                        {cuenta.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {cuentasDisponibles.length === 0 && (
+                                                <p className="text-sm text-orange-600 mt-1">
+                                                    ⚠️ No hay cuentas bancarias disponibles
+                                                </p>
+                                            )}
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-800 mb-2">
+                                                Categoría *
+                                            </label>
+                                            <select
+                                                value={formData.categoria}
+                                                onChange={(e) => handleInputChange('categoria', e.target.value)}
+                                                className="w-full px-3 py-2 text-base border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
+                                                required
+                                            >
+                                                {categorias.ingresos?.map(cat => (
+                                                    <option key={cat.value} value={cat.value}>
+                                                        {cat.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                             
                             {/* Detalles según método de pago */}
@@ -572,7 +713,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                         </div>
                         
                         {/* Columna 2: Desglose de Efectivo (Solo cuando es efectivo) */}
-                        {formData.metodoPago.tipo === 'efectivo' && (
+                        {formData.tipoMovimiento === 'efectivo' && formData.metodoPago.tipo === 'efectivo' && (
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
                                     <h3 className="font-semibold text-base text-gray-900">💵 Desglose de Efectivo</h3>
@@ -767,7 +908,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                 </div>
                                 
                                 {/* Alerta de Diferencia Compacta */}
-                                {parseFloat(formData.monto) > 0 && totalCalculado !== parseFloat(formData.monto) && (
+                                {formData.tipoMovimiento === 'efectivo' && formData.incluirDesglose && parseFloat(formData.monto) > 0 && totalCalculado !== parseFloat(formData.monto) && (
                                     <div className="p-2 bg-gradient-to-r from-yellow-100 to-orange-100 border-l-4 border-yellow-500 rounded text-xs">
                                         <div className="flex items-center justify-between text-yellow-800">
                                             <span className="flex items-center font-semibold">

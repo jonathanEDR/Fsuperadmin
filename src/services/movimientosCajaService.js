@@ -119,6 +119,52 @@ class MovimientosCajaService {
             throw this.handleError(error);
         }
     }
+
+    // === NUEVOS MÉTODOS PARA INTEGRACIÓN BANCARIA ===
+
+    async obtenerCuentasDisponibles() {
+        try {
+            const response = await api.get('/api/movimientos-caja/cuentas-disponibles');
+            return response.data;
+        } catch (error) {
+            console.error('❌ Error obteniendo cuentas disponibles:', error);
+            throw this.handleError(error);
+        }
+    }
+
+    async obtenerMovimientosIntegrados(filtros = {}) {
+        try {
+            const response = await api.get('/api/movimientos-caja/movimientos-integrados', { params: filtros });
+            return response.data;
+        } catch (error) {
+            console.error('❌ Error obteniendo movimientos integrados:', error);
+            throw this.handleError(error);
+        }
+    }
+
+    async anularMovimientoIntegrado(id, motivo) {
+        try {
+            const response = await api.put(`/api/movimientos-caja/${id}/anular-integrado`, { motivo });
+            return response.data;
+        } catch (error) {
+            console.error('❌ Error anulando movimiento integrado:', error);
+            throw this.handleError(error);
+        }
+    }
+
+    async obtenerResumenIntegracion(fechaInicio = null, fechaFin = null) {
+        try {
+            const params = {};
+            if (fechaInicio) params.fechaInicio = fechaInicio;
+            if (fechaFin) params.fechaFin = fechaFin;
+            
+            const response = await api.get('/api/movimientos-caja/resumen-integracion', { params });
+            return response.data;
+        } catch (error) {
+            console.error('❌ Error obteniendo resumen de integración:', error);
+            throw this.handleError(error);
+        }
+    }
     
     // === HELPERS ===
     

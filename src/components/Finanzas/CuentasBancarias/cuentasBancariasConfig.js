@@ -68,7 +68,21 @@ export const obtenerColumnas = () => [
     { 
         key: 'saldoActual', 
         titulo: 'Saldo',
-        render: (valor, fila) => `${valor >= 0 ? '+' : '-'} ${Math.abs(valor)}`
+        render: (valor, fila) => (
+            `${fila.moneda} ${valor.toFixed(2)}`
+        )
+    },
+    { 
+        key: 'ultimoMovimiento', 
+        titulo: 'Último Movimiento',
+        render: (valor, fila) => {
+            if (fila.ultimoMovimiento) {
+                const fecha = new Date(fila.ultimoMovimiento.fecha).toLocaleDateString();
+                const origen = fila.ultimoMovimiento.origen || 'Manual';
+                return `${fecha} - ${origen}`;
+            }
+            return 'Sin movimientos';
+        }
     },
     { 
         key: 'moneda', 
@@ -85,16 +99,10 @@ export const obtenerColumnas = () => [
 // ========== CONFIGURACIÓN DE ACCIONES ==========
 export const obtenerAcciones = (callbacks) => [
     {
-        label: 'Depositar',
-        icono: '💰',
+        label: 'Ver Movimientos',
+        icono: '�',
         color: 'green',
-        handler: (cuenta) => callbacks.abrirModalMovimiento(cuenta, 'deposito')
-    },
-    {
-        label: 'Retirar',
-        icono: '💸',
-        color: 'blue',
-        handler: (cuenta) => callbacks.abrirModalMovimiento(cuenta, 'retiro')
+        handler: (cuenta) => callbacks.verMovimientosCuenta && callbacks.verMovimientosCuenta(cuenta)
     },
     {
         label: 'Editar',
