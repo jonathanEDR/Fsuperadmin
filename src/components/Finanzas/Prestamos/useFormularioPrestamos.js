@@ -12,10 +12,22 @@ export const useFormularioPrestamos = (valoresIniciales = {}, validaciones = {})
         const { name, value, type, checked } = e.target;
         const nuevoValor = type === 'checkbox' ? checked : value;
         
-        setValores(prev => ({
-            ...prev,
-            [name]: nuevoValor
-        }));
+        // Manejar campos anidados (ej: "entidadFinanciera.nombre")
+        if (name.includes('.')) {
+            const [padre, hijo] = name.split('.');
+            setValores(prev => ({
+                ...prev,
+                [padre]: {
+                    ...prev[padre],
+                    [hijo]: nuevoValor
+                }
+            }));
+        } else {
+            setValores(prev => ({
+                ...prev,
+                [name]: nuevoValor
+            }));
+        }
 
         // Limpiar error cuando el usuario empiece a escribir
         if (errores[name]) {
@@ -35,7 +47,13 @@ export const useFormularioPrestamos = (valoresIniciales = {}, validaciones = {})
 
         // Validar campo al perder el foco
         if (validaciones[name]) {
-            const error = validaciones[name](valores[name], valores);
+            // Función helper para obtener valor anidado
+            const obtenerValor = (objeto, ruta) => {
+                return ruta.split('.').reduce((valor, clave) => valor && valor[clave], objeto);
+            };
+            
+            const valor = obtenerValor(valores, name);
+            const error = validaciones[name](valor, valores);
             setErrores(prev => ({
                 ...prev,
                 [name]: error
@@ -46,8 +64,14 @@ export const useFormularioPrestamos = (valoresIniciales = {}, validaciones = {})
     const validarFormulario = () => {
         const nuevosErrores = {};
         
+        // Función helper para obtener valor anidado
+        const obtenerValor = (objeto, ruta) => {
+            return ruta.split('.').reduce((valor, clave) => valor && valor[clave], objeto);
+        };
+        
         Object.keys(validaciones).forEach(campo => {
-            const error = validaciones[campo](valores[campo], valores);
+            const valor = obtenerValor(valores, campo);
+            const error = validaciones[campo](valor, valores);
             if (error) {
                 nuevosErrores[campo] = error;
             }
@@ -74,6 +98,10 @@ export const useFormularioPrestamos = (valoresIniciales = {}, validaciones = {})
         setTocados({});
     };
 
+    const obtenerDatos = () => {
+        return valores;
+    };
+
     return {
         valores,
         errores,
@@ -82,6 +110,7 @@ export const useFormularioPrestamos = (valoresIniciales = {}, validaciones = {})
         manejarBlur,
         validarFormulario,
         resetear,
-        setValores: establecerValores
+        setValores: establecerValores,
+        obtenerDatos
     };
 };

@@ -1,5 +1,5 @@
 // Barrel exports para el módulo Finanzas
-export { default as AccesosRapidosFinanzas } from './AccesosRapidosFinanzas';
+export { default as AccesosRapidosFinanzas } from './AccesosRapidosFinanzasOptimizado';
 
 // Módulos específicos
 export * from './CuentasBancarias';

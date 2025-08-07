@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import TablaCuentasBancarias from '../components/Finanzas/CuentasBancarias/TablaCuentasBancarias';
 import CampoCuentasBancarias from '../components/Finanzas/CuentasBancarias/CampoCuentasBancarias';
 import { finanzasService } from '../services/finanzasService';
@@ -10,10 +10,20 @@ import {
 } from '../components/Finanzas/CuentasBancarias';
 // Solo el modal de cuenta bancaria
 import ModalCuentaBancaria from '../components/Finanzas/CuentasBancarias/ModalCuentaBancaria';
+import FinanzasLayout from '../components/Finanzas/common/FinanzasLayout';
 
 const CuentasBancariasPage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [mostrarFiltros, setMostrarFiltros] = useState(false);
+    
+    // Detectar la ruta base para navegación correcta
+    const currentPath = location.pathname;
+    const baseRoute = currentPath.includes('/super-admin') 
+        ? '/super-admin/finanzas' 
+        : currentPath.includes('/admin')
+        ? '/admin/finanzas'
+        : '/finanzas';
     
     // Usar el hook personalizado que contiene toda la lógica
     const {
@@ -61,34 +71,32 @@ const CuentasBancariasPage = () => {
         eliminarCuenta
     });
 
+    // Acciones para la toolbar
+    const actions = (
+        <div className="flex gap-2">
+            <button
+                onClick={() => navigate(`${baseRoute}/movimientos-caja`)}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1"
+                title="Ir a Movimientos de Caja para gestionar ingresos y egresos bancarios"
+            >
+                💰 Movimientos
+            </button>
+            <button 
+                onClick={abrirModalNuevaCuenta}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors w-full sm:w-auto"
+            >
+                + Nueva Cuenta
+            </button>
+        </div>
+    );
+
     return (
-        <div className="p-3 sm:p-6 max-w-7xl mx-auto">
-            {/* Header Responsive */}
-            <div className="mb-6 sm:mb-8">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                    <div>
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">🏦 Cuentas Bancarias</h1>
-                        <p className="mt-2 text-sm sm:text-base text-gray-600">
-                            Gestiona tus cuentas bancarias y movimientos financieros
-                        </p>
-                    </div>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => navigate('/finanzas/movimientos-caja')}
-                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1"
-                            title="Ir a Movimientos de Caja para gestionar ingresos y egresos bancarios"
-                        >
-                            💰 Movimientos
-                        </button>
-                        <button 
-                            onClick={abrirModalNuevaCuenta}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors w-full sm:w-auto"
-                        >
-                            + Nueva Cuenta
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <FinanzasLayout 
+            currentModule="cuentas-bancarias"
+            title="Cuentas Bancarias"
+            loading={loading}
+            actions={actions}
+        >
 
             {/* Filtros Colapsables Mejorados */}
             <div className="bg-white rounded-lg shadow-sm border mb-6 overflow-hidden">
@@ -192,7 +200,7 @@ const CuentasBancariasPage = () => {
                 cuentaEditando={cuentaEditando}
                 formularioCuenta={formularioCuenta}
             />
-        </div>
+        </FinanzasLayout>
     );
 };
 

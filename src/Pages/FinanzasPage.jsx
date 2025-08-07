@@ -1,8 +1,8 @@
 import React from 'react';
-import AccesosRapidosFinanzas from '../components/Finanzas/AccesosRapidosFinanzas';
+import AccesosRapidosFinanzasSimple from '../components/Finanzas/AccesosRapidosFinanzasSimple';
 
 const FinanzasPage = () => {
-    return <AccesosRapidosFinanzas />;
+    return <AccesosRapidosFinanzasSimple />;
 };
 
 export default FinanzasPage;

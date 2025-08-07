@@ -15,6 +15,7 @@ import ModalIngresoFinanzas from './ModalIngresoFinanzas';
 import ModalEgresoFinanzas from './ModalEgresoFinanzas';
 import ModalArqueoFinanzas from './ModalArqueoFinanzas';
 import TablaMovimientosFinanzas from './TablaMovimientosFinanzas';
+import FinanzasLayout from '../common/FinanzasLayout';
 
 const MovimientosCajaFinanzas = () => {
     // Estados principales
@@ -132,46 +133,42 @@ const MovimientosCajaFinanzas = () => {
         );
     }
     
-    return (
-        <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
-                <div className="text-center sm:text-left">
-                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-                        💸 Movimientos de Caja
-                    </h1>
-                    <p className="text-sm sm:text-base text-gray-600">
-                        Control centralizado de ingresos y egresos
-                    </p>
-                </div>
-                
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                    <button
-                        onClick={() => setModalIngreso(true)}
-                        className="w-full sm:w-auto inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base"
-                    >
-                        <PlusCircle className="w-4 h-4 mr-2" />
-                        <span className="hidden sm:inline">Registrar </span>Ingreso
-                    </button>
-                    
-                    <button
-                        onClick={() => setModalEgreso(true)}
-                        className="w-full sm:w-auto inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm sm:text-base"
-                    >
-                        <MinusCircle className="w-4 h-4 mr-2" />
-                        <span className="hidden sm:inline">Registrar </span>Egreso
-                    </button>
-                    
-                    <button
-                        onClick={() => setModalArqueo(true)}
-                        className="w-full sm:w-auto inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
-                    >
-                        <Calculator className="w-4 h-4 mr-2" />
-                        <span className="hidden sm:inline">Arqueo de </span>Caja
-                    </button>
-                </div>
-            </div>
+    // Acciones específicas para la toolbar
+    const actions = (
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <button
+                onClick={() => setModalIngreso(true)}
+                className="w-full sm:w-auto inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base"
+            >
+                <PlusCircle className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Registrar </span>Ingreso
+            </button>
             
+            <button
+                onClick={() => setModalEgreso(true)}
+                className="w-full sm:w-auto inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm sm:text-base"
+            >
+                <MinusCircle className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Registrar </span>Egreso
+            </button>
+            
+            <button
+                onClick={() => setModalArqueo(true)}
+                className="w-full sm:w-auto inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+            >
+                <Calculator className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Arqueo de </span>Caja
+            </button>
+        </div>
+    );
+
+    return (
+        <FinanzasLayout 
+            currentModule="movimientos-caja"
+            title="Movimientos de Caja"
+            loading={loading}
+            actions={actions}
+        >
             {/* Resumen del Día */}
             {resumenDia && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -394,7 +391,7 @@ const MovimientosCajaFinanzas = () => {
                     onClose={() => setModalArqueo(false)}
                 />
             )}
-        </div>
+        </FinanzasLayout>
     );
 };
 

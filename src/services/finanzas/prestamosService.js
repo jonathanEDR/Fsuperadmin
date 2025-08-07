@@ -1,95 +1,24 @@
-import api from './api';
+import BaseFinanzasService from './BaseFinanzasService';
+import api from '../api';
 
 /**
- * Servicio específico para préstamos
- * Maneja todas las operaciones CRUD y cálculos relacionados con préstamos
+ * Servicio especializado para gestión de préstamos
+ * Extiende BaseFinanzasService y añade funcionalidades específicas de préstamos
+ * Incluye cálculos financieros, tabla de amortización y reportes
  */
-class PrestamosService {
-    // ==================== OPERACIONES CRUD ====================
-    
-    /**
-     * Obtener todos los préstamos
-     */
-    static async obtenerTodos(filtros = {}) {
-        try {
-            const params = new URLSearchParams();
-            
-            // Agregar filtros a los parámetros
-            Object.keys(filtros).forEach(key => {
-                if (filtros[key] !== '' && filtros[key] !== null && filtros[key] !== undefined) {
-                    params.append(key, filtros[key]);
-                }
-            });
-            
-            const response = await api.get(`/api/prestamos?${params}`);
-            return response.data;
-        } catch (error) {
-            console.error('Error obteniendo préstamos:', error);
-            throw error;
-        }
+class PrestamosServiceOptimizado extends BaseFinanzasService {
+    constructor() {
+        super('/api/prestamos');
     }
     
-    /**
-     * Obtener préstamo por ID
-     */
-    static async obtenerPorId(id) {
-        try {
-            const response = await api.get(`/api/prestamos/${id}`);
-            return response.data;
-        } catch (error) {
-            console.error('Error obteniendo préstamo:', error);
-            throw error;
-        }
-    }
-    
-    /**
-     * Crear nuevo préstamo
-     */
-    static async crear(datos) {
-        try {
-            const response = await api.post('/api/prestamos', datos);
-            return response.data;
-        } catch (error) {
-            console.error('Error creando préstamo:', error);
-            throw error;
-        }
-    }
-    
-    /**
-     * Actualizar préstamo existente
-     */
-    static async actualizar(id, datos) {
-        try {
-            const response = await api.put(`/api/prestamos/${id}`, datos);
-            return response.data;
-        } catch (error) {
-            console.error('Error actualizando préstamo:', error);
-            throw error;
-        }
-    }
-    
-    /**
-     * Eliminar préstamo
-     */
-    static async eliminar(id) {
-        try {
-            const response = await api.delete(`/api/prestamos/${id}`);
-            return response.data;
-        } catch (error) {
-            console.error('Error eliminando préstamo:', error);
-            throw error;
-        }
-    }
-    
-    // ==================== OPERACIONES ESPECIALES ====================
+    // ==================== OPERACIONES ESPECÍFICAS DE PRÉSTAMOS ====================
     
     /**
      * Aprobar préstamo
      */
-    static async aprobar(id, datos) {
+    async aprobar(id, datos) {
         try {
-            const response = await api.post(`/api/prestamos/${id}/aprobar`, datos);
-            return response.data;
+            return await this.ejecutarAccion(id, 'aprobar', datos);
         } catch (error) {
             console.error('Error aprobando préstamo:', error);
             throw error;
@@ -99,10 +28,9 @@ class PrestamosService {
     /**
      * Desembolsar préstamo
      */
-    static async desembolsar(id, datos) {
+    async desembolsar(id, datos) {
         try {
-            const response = await api.post(`/api/prestamos/${id}/desembolsar`, datos);
-            return response.data;
+            return await this.ejecutarAccion(id, 'desembolsar', datos);
         } catch (error) {
             console.error('Error desembolsando préstamo:', error);
             throw error;
@@ -112,22 +40,21 @@ class PrestamosService {
     /**
      * Cancelar préstamo
      */
-    static async cancelar(id, datos) {
+    async cancelar(id, datos) {
         try {
-            const response = await api.post(`/api/prestamos/${id}/cancelar`, datos);
-            return response.data;
+            return await this.ejecutarAccion(id, 'cancelar', datos);
         } catch (error) {
             console.error('Error cancelando préstamo:', error);
             throw error;
         }
     }
     
-    // ==================== CÁLCULOS Y UTILIDADES ====================
+    // ==================== CÁLCULOS FINANCIEROS ====================
     
     /**
      * Calcular cuota mensual
      */
-    static async calcularCuota(datos) {
+    async calcularCuota(datos) {
         try {
             const response = await api.post('/api/prestamos/utilidades/calcular-cuota', datos);
             return response.data;
@@ -140,10 +67,9 @@ class PrestamosService {
     /**
      * Obtener tabla de amortización
      */
-    static async obtenerTablaAmortizacion(id) {
+    async obtenerTablaAmortizacion(id) {
         try {
-            const response = await api.get(`/api/prestamos/${id}/tabla-amortizacion`);
-            return response.data;
+            return await this.obtenerRelacionados(id, 'tabla-amortizacion');
         } catch (error) {
             console.error('Error obteniendo tabla de amortización:', error);
             throw error;
@@ -153,7 +79,7 @@ class PrestamosService {
     /**
      * Generar tabla de amortización con parámetros
      */
-    static async generarTablaAmortizacion(datos) {
+    async generarTablaAmortizacion(datos) {
         try {
             const response = await api.post('/api/prestamos/utilidades/generar-amortizacion', datos);
             return response.data;
@@ -168,7 +94,7 @@ class PrestamosService {
     /**
      * Obtener resumen de préstamos
      */
-    static async obtenerResumen(filtros = {}) {
+    async obtenerResumen(filtros = {}) {
         try {
             const params = new URLSearchParams(filtros);
             const response = await api.get(`/api/prestamos/resumen?${params}`);
@@ -182,7 +108,7 @@ class PrestamosService {
     /**
      * Obtener estadísticas de préstamos
      */
-    static async obtenerEstadisticas(periodo = 'mensual') {
+    async obtenerEstadisticas(periodo = 'mensual') {
         try {
             const response = await api.get(`/api/prestamos/estadisticas?periodo=${periodo}`);
             return response.data;
@@ -192,12 +118,12 @@ class PrestamosService {
         }
     }
     
-    // ==================== OPCIONES Y CONFIGURACIÓN ====================
+    // ==================== CONFIGURACIÓN Y OPCIONES ====================
     
     /**
      * Obtener tipos de préstamo disponibles
      */
-    static obtenerTiposPrestamo() {
+    obtenerTiposPrestamo() {
         return [
             { value: 'personal', label: 'Personal' },
             { value: 'hipotecario', label: 'Hipotecario' },
@@ -212,9 +138,15 @@ class PrestamosService {
     /**
      * Obtener estados de préstamo disponibles
      */
-    static obtenerEstadosPrestamo() {
+    obtenerEstadosPrestamo() {
         return [
+            { value: 'solicitado', label: 'Solicitado', color: 'yellow' },
+            { value: 'en_evaluacion', label: 'En Evaluación', color: 'blue' },
             { value: 'aprobado', label: 'Aprobado', color: 'green' },
+            { value: 'rechazado', label: 'Rechazado', color: 'red' },
+            { value: 'desembolsado', label: 'Desembolsado', color: 'green' },
+            { value: 'vigente', label: 'Vigente', color: 'green' },
+            { value: 'vencido', label: 'Vencido', color: 'red' },
             { value: 'cancelado', label: 'Cancelado', color: 'gray' }
         ];
     }
@@ -222,7 +154,7 @@ class PrestamosService {
     /**
      * Obtener tipos de entidad financiera
      */
-    static obtenerTiposEntidad() {
+    obtenerTiposEntidad() {
         return [
             { value: 'banco', label: 'Banco' },
             { value: 'financiera', label: 'Financiera' },
@@ -232,13 +164,26 @@ class PrestamosService {
         ];
     }
     
-    // ==================== UTILIDADES DE FORMATEO ====================
+    // ==================== UTILIDADES Y FORMATEO ====================
     
     /**
      * Formatear moneda peruana
      */
-    static formatearMoneda(monto) {
-        return `S/ ${parseFloat(monto || 0).toLocaleString('es-PE', { 
+    formatearMoneda(monto, moneda = 'PEN') {
+        const simbolos = {
+            'PEN': 'S/',
+            'USD': '$',
+            'EUR': '€'
+        };
+        
+        let montoNum;
+        if (typeof monto === 'object' && monto !== null) {
+            montoNum = monto.value || monto.amount || monto.saldo || 0;
+        } else {
+            montoNum = parseFloat(monto) || 0;
+        }
+        
+        return `${simbolos[moneda] || 'S/'} ${montoNum.toLocaleString('es-PE', { 
             minimumFractionDigits: 2,
             maximumFractionDigits: 2 
         })}`;
@@ -247,14 +192,14 @@ class PrestamosService {
     /**
      * Formatear porcentaje
      */
-    static formatearPorcentaje(porcentaje) {
-        return `${parseFloat(porcentaje || 0).toFixed(2)}%`;
+    formatearPorcentaje(valor) {
+        return `${parseFloat(valor || 0).toFixed(2)}%`;
     }
     
     /**
      * Formatear fecha
      */
-    static formatearFecha(fecha) {
+    formatearFecha(fecha) {
         if (!fecha) return '-';
         return new Date(fecha).toLocaleDateString('es-PE');
     }
@@ -262,7 +207,7 @@ class PrestamosService {
     /**
      * Calcular totales de una lista de préstamos
      */
-    static calcularTotales(prestamos) {
+    calcularTotales(prestamos) {
         if (!Array.isArray(prestamos) || prestamos.length === 0) {
             return {
                 total: 0,
@@ -301,6 +246,39 @@ class PrestamosService {
             montoIntereses: 0
         });
     }
+    
+    /**
+     * Validar datos de préstamo
+     */
+    validarDatosPrestamo(datos) {
+        const errores = [];
+        
+        if (!datos.clienteNombre || datos.clienteNombre.trim().length < 3) {
+            errores.push('El nombre del cliente debe tener al menos 3 caracteres');
+        }
+        
+        if (!datos.tipo || !this.obtenerTiposPrestamo().find(t => t.value === datos.tipo)) {
+            errores.push('Debe seleccionar un tipo de préstamo válido');
+        }
+        
+        if (!datos.montoSolicitado || datos.montoSolicitado <= 0) {
+            errores.push('El monto solicitado debe ser mayor a 0');
+        }
+        
+        if (!datos.tasaInteres || datos.tasaInteres <= 0) {
+            errores.push('La tasa de interés debe ser mayor a 0');
+        }
+        
+        if (!datos.plazo || datos.plazo <= 0) {
+            errores.push('El plazo debe ser mayor a 0');
+        }
+        
+        return errores;
+    }
 }
 
-export default PrestamosService;
+// Exportar instancia singleton
+export default new PrestamosServiceOptimizado();
+
+// También exportar la clase para testing o herencia
+export { PrestamosServiceOptimizado };

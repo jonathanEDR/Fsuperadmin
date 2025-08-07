@@ -236,23 +236,28 @@ export const usePrestamos = () => {
             delete datos.plazo;
         }
         
-        // Asignar valores por defecto para prestatario (será llenado por el backend con datos del usuario)
-        datos.prestatario = {
-            nombre: 'Usuario del Sistema', // Placeholder, será reemplazado por el backend
-            documento: {
-                tipo: 'DNI',
-                numero: '00000000' // Placeholder, será reemplazado por el backend
-            },
-            telefono: '',
-            email: ''
-        };
-        
         // Asignar tipo de crédito como tipo de préstamo
         if (datos.tipoCredito) {
             datos.tipo = datos.tipoCredito;
+            delete datos.tipoCredito; // Eliminar campo original
         }
         
-        console.log('🔄 Datos transformados:', {
+        // Transformar montoSolicitado a número
+        if (datos.montoSolicitado) {
+            datos.montoSolicitado = parseFloat(datos.montoSolicitado) || 0;
+        }
+        
+        // Limpiar campos vacíos o inválidos
+        Object.keys(datos).forEach(key => {
+            if (key === '' || key === null || key === undefined) {
+                delete datos[key];
+            }
+        });
+        
+        // Preservar la estructura de entidadFinanciera
+        // No necesitamos transformar este campo ya que el backend lo espera tal como está
+        
+        console.log('🔄 Datos transformados para backend:', {
             original: datosFormulario,
             transformado: datos
         });
@@ -317,7 +322,9 @@ export const usePrestamos = () => {
         } finally {
             setLoading(false);
         }
-    };    // ========== FUNCIONES ESPECÍFICAS ==========
+    };
+    
+    // ========== FUNCIONES ESPECÍFICAS ==========
     const calcularCuota = async () => {
         if (!formularioCalculadora.validarFormulario()) {
             return;

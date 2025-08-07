@@ -48,7 +48,7 @@ const ModalPrestamo = ({
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <CampoPrestamos
-                                id="entidadFinanciera.nombre"
+                                name="entidadFinanciera.nombre"
                                 label="Nombre de la Entidad"
                                 value={formulario.valores.entidadFinanciera?.nombre || ''}
                                 onChange={formulario.manejarCambio}
@@ -58,7 +58,7 @@ const ModalPrestamo = ({
                             />
                             
                             <CampoPrestamos
-                                id="entidadFinanciera.codigo"
+                                name="entidadFinanciera.codigo"
                                 label="Código de la Entidad"
                                 value={formulario.valores.entidadFinanciera?.codigo || ''}
                                 onChange={formulario.manejarCambio}
@@ -67,13 +67,13 @@ const ModalPrestamo = ({
                             />
                             
                             <CampoPrestamos
-                                id="entidadFinanciera.tipo"
+                                name="entidadFinanciera.tipo"
                                 label="Tipo de Entidad"
-                                tipo="select"
+                                type="select"
                                 value={formulario.valores.entidadFinanciera?.tipo || ''}
                                 onChange={formulario.manejarCambio}
                                 error={formulario.errores['entidadFinanciera.tipo']}
-                                opciones={opcionesTipoEntidad}
+                                options={opcionesTipoEntidad}
                             />
                         </div>
                     </div>
@@ -86,20 +86,20 @@ const ModalPrestamo = ({
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <CampoPrestamos
-                                id="tipoCredito"
+                                name="tipoCredito"
                                 label="Tipo de Crédito"
-                                tipo="select"
+                                type="select"
                                 value={formulario.valores.tipoCredito || ''}
                                 onChange={formulario.manejarCambio}
                                 error={formulario.errores.tipoCredito}
                                 required
-                                opciones={tiposPrestamo}
+                                options={tiposPrestamo}
                             />
                             
                             <CampoPrestamos
-                                id="montoSolicitado"
+                                name="montoSolicitado"
                                 label="Monto Solicitado"
-                                tipo="number"
+                                type="number"
                                 value={formulario.valores.montoSolicitado || ''}
                                 onChange={formulario.manejarCambio}
                                 error={formulario.errores.montoSolicitado}
@@ -110,9 +110,9 @@ const ModalPrestamo = ({
                             />
                             
                             <CampoPrestamos
-                                id="tasaInteres.porcentaje"
+                                name="tasaInteres.porcentaje"
                                 label="Tasa de Interés (%)"
-                                tipo="number"
+                                type="number"
                                 value={formulario.valores.tasaInteres?.porcentaje || ''}
                                 onChange={formulario.manejarCambio}
                                 error={formulario.errores['tasaInteres.porcentaje']}
@@ -126,29 +126,29 @@ const ModalPrestamo = ({
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <CampoPrestamos
-                                id="tasaInteres.tipo"
+                                name="tasaInteres.tipo"
                                 label="Tipo de Tasa"
-                                tipo="select"
+                                type="select"
                                 value={formulario.valores.tasaInteres?.tipo || ''}
                                 onChange={formulario.manejarCambio}
                                 error={formulario.errores['tasaInteres.tipo']}
-                                opciones={opcionesTipoInteres}
+                                options={opcionesTipoInteres}
                             />
                             
                             <CampoPrestamos
-                                id="tasaInteres.periodo"
+                                name="tasaInteres.periodo"
                                 label="Período de Tasa"
-                                tipo="select"
+                                type="select"
                                 value={formulario.valores.tasaInteres?.periodo || ''}
                                 onChange={formulario.manejarCambio}
                                 error={formulario.errores['tasaInteres.periodo']}
-                                opciones={opcionesPeriodoInteres}
+                                options={opcionesPeriodoInteres}
                             />
                             
                             <CampoPrestamos
-                                id="plazo.cantidad"
+                                name="plazo.cantidad"
                                 label="Plazo"
-                                tipo="number"
+                                type="number"
                                 value={formulario.valores.plazo?.cantidad || ''}
                                 onChange={formulario.manejarCambio}
                                 error={formulario.errores['plazo.cantidad']}
@@ -158,13 +158,13 @@ const ModalPrestamo = ({
                             />
                             
                             <CampoPrestamos
-                                id="plazo.unidad"
+                                name="plazo.unidad"
                                 label="Unidad de Plazo"
-                                tipo="select"
+                                type="select"
                                 value={formulario.valores.plazo?.unidad || ''}
                                 onChange={formulario.manejarCambio}
                                 error={formulario.errores['plazo.unidad']}
-                                opciones={opcionesUnidadPlazo}
+                                options={opcionesUnidadPlazo}
                             />
                         </div>
                     </div>
@@ -176,25 +176,25 @@ const ModalPrestamo = ({
                         </h3>
                         
                         <CampoPrestamos
-                            id="proposito"
+                            name="proposito"
                             label="Propósito del Préstamo"
-                            tipo="textarea"
+                            type="textarea"
                             value={formulario.valores.proposito || ''}
                             onChange={formulario.manejarCambio}
                             error={formulario.errores.proposito}
                             placeholder="Describe el propósito del préstamo..."
-                            filas={3}
+                            rows={3}
                         />
                         
                         <CampoPrestamos
-                            id="observaciones"
+                            name="observaciones"
                             label="Observaciones"
-                            tipo="textarea"
+                            type="textarea"
                             value={formulario.valores.observaciones || ''}
                             onChange={formulario.manejarCambio}
                             error={formulario.errores.observaciones}
                             placeholder="Observaciones adicionales..."
-                            filas={3}
+                            rows={3}
                         />
                     </div>
 

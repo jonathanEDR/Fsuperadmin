@@ -6,6 +6,7 @@ import {
     ModalCalculadoraCuota, 
     ModalTablaAmortizacion 
 } from '../components/Finanzas/Prestamos';
+import FinanzasLayout from '../components/Finanzas/common/FinanzasLayout';
 
 const PrestamosPage = () => {
     try {
@@ -47,33 +48,31 @@ const PrestamosPage = () => {
             verTablaAmortizacion
         } = usePrestamos();
 
-        return (
-        <div className="p-6 max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="mb-8">
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900">💰 Gestión de Préstamos</h1>
-                        <p className="mt-2 text-gray-600">
-                            Administra solicitudes, préstamos activos y pagos
-                        </p>
-                    </div>
-                    <div className="flex space-x-3">
-                        <button 
-                            onClick={abrirModalCalculadora}
-                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                        >
-                            🧮 Calculadora
-                        </button>
-                        <button 
-                            onClick={abrirModalNuevoPrestamo}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                        >
-                            + Nuevo Préstamo
-                        </button>
-                    </div>
-                </div>
+        // Acciones para la toolbar
+        const actions = (
+            <div className="flex space-x-3">
+                <button 
+                    onClick={abrirModalCalculadora}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                    🧮 Calculadora
+                </button>
+                <button 
+                    onClick={abrirModalNuevoPrestamo}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                    + Nuevo Préstamo
+                </button>
             </div>
+        );
+
+        return (
+            <FinanzasLayout 
+                currentModule="prestamos"
+                title="Gestión de Préstamos"
+                loading={loading}
+                actions={actions}
+            >
 
                 {/* Tabla Principal con Tarjetas de Resumen */}
                 <TablaPrestamos
@@ -114,18 +113,23 @@ const PrestamosPage = () => {
                 tablaAmortizacion={tablaAmortizacion}
                 prestamo={prestamoEditando}
             />
-        </div>
+        </FinanzasLayout>
     );
     } catch (error) {
         console.error('🚨 Error en PrestamosPage:', error);
         return (
-            <div className="p-6 max-w-7xl mx-auto">
+            <FinanzasLayout 
+                currentModule="prestamos"
+                title="Gestión de Préstamos - Error"
+                loading={false}
+                actions={null}
+            >
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
                     <h2 className="font-bold text-lg">Error en la página de préstamos</h2>
                     <p>Por favor, revisa la consola para más detalles.</p>
                     <pre className="mt-2 text-sm">{error.message}</pre>
                 </div>
-            </div>
+            </FinanzasLayout>
         );
     }
 };

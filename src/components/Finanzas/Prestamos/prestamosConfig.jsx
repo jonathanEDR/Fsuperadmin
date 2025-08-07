@@ -177,13 +177,6 @@ export const columnasPrestamos = [
         titulo: 'Vencimiento', 
         tipo: 'fecha',
         render: (valor, fila, handlers) => {
-            console.log('🔍 Renderizando columna fechaVencimiento:', { 
-                valor, 
-                tieneHandlers: !!handlers, 
-                abrirModalDetalles: typeof handlers?.abrirModalDetallesPrestamo,
-                prestamo: fila.codigo 
-            });
-            
             // Si no hay fecha de vencimiento, calcularla
             let fechaVencimiento = valor;
             if (!fechaVencimiento && fila.fechaAprobacion && fila.plazoMeses) {
