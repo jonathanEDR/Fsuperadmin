@@ -1,6 +1,6 @@
 import React from 'react';
-import ModalFinanciero from '../ModalFinanciero';
-import CampoFormulario from '../CampoFormulario';
+import ModalCuentasBancarias from './ModalCuentasBancariasEspecifico';
+import CampoCuentasBancarias from './CampoCuentasBancarias';
 import { categoriasMovimiento } from './cuentasBancariasConfig';
 
 // ========== MODAL COMPACTO PARA MOVIMIENTOS ==========
@@ -13,7 +13,7 @@ export const ModalMovimientoBancario = ({
     formularioMovimiento
 }) => {
     return (
-        <ModalFinanciero
+        <ModalCuentasBancarias
             isOpen={isOpen}
             onClose={onClose}
             titulo={`${tipoMovimiento === 'deposito' ? 'Depositar en' : 'Retirar de'} ${cuentaMovimiento?.nombre}`}
@@ -34,7 +34,7 @@ export const ModalMovimientoBancario = ({
                 </div>
 
                 {/* Monto - Campo principal */}
-                <CampoFormulario
+                <CampoCuentasBancarias
                     label="Monto"
                     name="monto"
                     type="number"
@@ -49,7 +49,7 @@ export const ModalMovimientoBancario = ({
                 />
                 
                 {/* Descripción */}
-                <CampoFormulario
+                <CampoCuentasBancarias
                     label="Descripción"
                     name="descripcion"
                     value={formularioMovimiento.valores.descripcion}
@@ -61,7 +61,7 @@ export const ModalMovimientoBancario = ({
                 
                 {/* Campos opcionales en una fila */}
                 <div className="grid grid-cols-1 gap-2">
-                    <CampoFormulario
+                    <CampoCuentasBancarias
                         label="Referencia"
                         name="referencia"
                         value={formularioMovimiento.valores.referencia}
@@ -69,7 +69,7 @@ export const ModalMovimientoBancario = ({
                         placeholder="N° operación"
                     />
                     
-                    <CampoFormulario
+                    <CampoCuentasBancarias
                         label="Categoría"
                         name="categoria"
                         type="select"
@@ -96,7 +96,7 @@ export const ModalMovimientoBancario = ({
                     </div>
                 )}
             </div>
-        </ModalFinanciero>
+        </ModalCuentasBancarias>
     );
 };
 

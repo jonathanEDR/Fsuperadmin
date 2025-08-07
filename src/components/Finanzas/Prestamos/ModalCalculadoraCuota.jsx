@@ -1,5 +1,5 @@
 import React from 'react';
-import CampoFormulario from '../CampoFormulario';
+import CampoPrestamos from './CampoPrestamos';
 
 const ModalCalculadoraCuota = ({ 
     isOpen, 
@@ -37,7 +37,7 @@ const ModalCalculadoraCuota = ({
                 {/* Body */}
                 <div className="p-6">
                     <form onSubmit={manejarSubmit} className="space-y-4">
-                        <CampoFormulario
+                        <CampoPrestamos
                             id="monto"
                             label="Monto del Préstamo"
                             tipo="number"
@@ -51,7 +51,7 @@ const ModalCalculadoraCuota = ({
                             icono="💰"
                         />
                         
-                        <CampoFormulario
+                        <CampoPrestamos
                             id="tasaInteres"
                             label="Tasa de Interés Anual (%)"
                             tipo="number"
@@ -66,7 +66,7 @@ const ModalCalculadoraCuota = ({
                             icono="📈"
                         />
                         
-                        <CampoFormulario
+                        <CampoPrestamos
                             id="plazoMeses"
                             label="Plazo en Meses"
                             tipo="number"

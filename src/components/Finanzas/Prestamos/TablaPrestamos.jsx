@@ -1,7 +1,36 @@
 import React from 'react';
 import { columnasPrestamos, estadosColor, accionesPrestamos } from './prestamosConfig.jsx';
+import ModalDetallesPrestamo from './ModalDetallesPrestamo';
 
-const TablaPrestamos = ({ prestamos, loading, onEdit, onCancel, onVerAmortizacion }) => {
+const TablaPrestamos = ({ 
+    prestamos, 
+    loading, 
+    onEdit, 
+    onCancel, 
+    onVerAmortizacion,
+    // Estados del modal de detalles
+    modalDetallesPrestamo,
+    prestamoViendoDetalles,
+    onAbrirModalDetalles,
+    onCerrarModalDetalles
+}) => {
+    // 🔧 DEBUG: Verificar estados de préstamos
+    React.useEffect(() => {
+        if (prestamos && prestamos.length > 0) {
+            prestamos.forEach((prestamo, index) => {
+                if (prestamo.estado && !['aprobado', 'cancelado'].includes(prestamo.estado)) {
+                    console.warn(`🚨 PRÉSTAMO ${index} CON ESTADO INVÁLIDO:`, {
+                        id: prestamo._id,
+                        codigo: prestamo.codigo,
+                        estado: prestamo.estado,
+                        estadoType: typeof prestamo.estado,
+                        objetoCompleto: prestamo
+                    });
+                }
+            });
+        }
+    }, [prestamos]);
+    
     // Calcular totales y estadísticas
     const estadisticas = React.useMemo(() => {
         if (!prestamos || prestamos.length === 0) {
@@ -57,21 +86,16 @@ const TablaPrestamos = ({ prestamos, loading, onEdit, onCancel, onVerAmortizacio
         {
             key: 'acciones',
             titulo: 'Acciones',
-            ancho: '200px',
+            ancho: '120px',
             render: (prestamo) => (
-                <div className="flex space-x-1">
-                    {console.log('🔍 TABLA DEBUG - Préstamo recibido:', prestamo)}
-                    {console.log('🔍 TABLA DEBUG - Acciones disponibles:', accionesPrestamos)}
-                    
+                <div className="flex space-x-1 justify-center">
                     {prestamo ? (
                         <>
                             {accionesPrestamos.length > 0 ? (
                                 accionesPrestamos.map((accion, index) => {
-                                    console.log(`🔍 Renderizando acción ${index}:`, accion.label);
-                                    
                                     // Determinar la función a ejecutar
                                     let handleClick = () => {
-                                        console.log(`� Click en ${accion.label} para préstamo:`, prestamo._id);
+                                        console.log(`✨ ${accion.label} para préstamo:`, prestamo._id);
                                     };
                                     
                                     switch (accion.handler) {
@@ -83,7 +107,7 @@ const TablaPrestamos = ({ prestamos, loading, onEdit, onCancel, onVerAmortizacio
                                             break;
                                         case 'abrirModalEditarPrestamo':
                                             handleClick = () => {
-                                                console.log('🔥 Ejecutando abrirModalEditarPrestamo');
+                                                console.log('✏️ Editando préstamo:', prestamo._id);
                                                 onEdit(prestamo);
                                             };
                                             break;
@@ -102,10 +126,10 @@ const TablaPrestamos = ({ prestamos, loading, onEdit, onCancel, onVerAmortizacio
                                         <button
                                             key={`${accion.handler}-${index}`}
                                             onClick={handleClick}
-                                            className={`px-2 py-1 text-white rounded-md transition-colors text-xs ${accion.className}`}
-                                            title={accion.label}
+                                            className={accion.className}
+                                            title={accion.tooltip}
                                         >
-                                            {accion.icono} {accion.label}
+                                            <span className="text-sm">{accion.icono}</span>
                                         </button>
                                     );
                                 })
@@ -247,15 +271,16 @@ const TablaPrestamos = ({ prestamos, loading, onEdit, onCancel, onVerAmortizacio
                                             {columna.titulo}
                                         </th>
                                     ))}
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th 
+                                        className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        style={{ width: '120px' }}
+                                    >
                                         Acciones
                                     </th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {prestamos.map((prestamo, index) => {
-                                    console.log(`🔍 FILA ${index} - Prestamo:`, prestamo);
-                                    
                                     return (
                                         <tr key={prestamo._id || index} className="hover:bg-gray-50">
                                             {columnasPrestamos.map((columna) => {
@@ -264,16 +289,29 @@ const TablaPrestamos = ({ prestamos, loading, onEdit, onCancel, onVerAmortizacio
                                                     ? columna.key.split('.').reduce((obj, key) => obj?.[key], prestamo)
                                                     : prestamo[columna.key];
                                                 
+                                                // Crear objeto de handlers para pasar a la función render
+                                                const handlers = {
+                                                    abrirModalEditarPrestamo: onEdit,
+                                                    verTablaAmortizacion: onVerAmortizacion,
+                                                    cancelarPrestamo: onCancel,
+                                                    abrirModalDetallesPrestamo: onAbrirModalDetalles
+                                                };
+                                                
+                                                // Debug: verificar que el handler existe para la columna de vencimiento
+                                                if (columna.key === 'fechaVencimiento' && typeof onAbrirModalDetalles !== 'function') {
+                                                    console.warn('🚨 Handler abrirModalDetallesPrestamo no está definido como función:', onAbrirModalDetalles);
+                                                }
+                                                
                                                 return (
                                                     <td key={`${prestamo._id}-${columna.key}`} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                        {columna.render ? columna.render(valor, prestamo) : valor || '-'}
+                                                        {columna.render ? columna.render(valor, prestamo, handlers) : valor || '-'}
                                                     </td>
                                                 );
                                             })}
                                             
                                             {/* Columna de Acciones */}
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                <div className="flex space-x-1">
+                                                <div className="flex space-x-1 justify-center">
                                                     {accionesPrestamos.map((accion, accionIndex) => {
                                                         // Verificar si la acción debe mostrarse
                                                         const debeMostrar = accion.mostrar ? accion.mostrar(prestamo) : true;
@@ -284,7 +322,7 @@ const TablaPrestamos = ({ prestamos, loading, onEdit, onCancel, onVerAmortizacio
 
                                                         // Determinar la función a ejecutar
                                                         let handleClick = () => {
-                                                            console.log(`🔥 Click en ${accion.label} para préstamo:`, prestamo._id);
+                                                            console.log(`✨ ${accion.label} para préstamo:`, prestamo._id);
                                                         };
                                                         
                                                         switch (accion.handler) {
@@ -305,10 +343,10 @@ const TablaPrestamos = ({ prestamos, loading, onEdit, onCancel, onVerAmortizacio
                                                             <button
                                                                 key={`${accion.handler}-${accionIndex}`}
                                                                 onClick={handleClick}
-                                                                className={`px-2 py-1 text-white rounded-md transition-colors text-xs ${accion.className}`}
-                                                                title={accion.label}
+                                                                className={accion.className}
+                                                                title={accion.tooltip}
                                                             >
-                                                                {accion.icono} {accion.label}
+                                                                <span className="text-sm">{accion.icono}</span>
                                                             </button>
                                                         );
                                                     })}
@@ -345,6 +383,14 @@ const TablaPrestamos = ({ prestamos, loading, onEdit, onCancel, onVerAmortizacio
                     </div>
                 </div>
             )}
+
+            {/* Modal de Detalles del Préstamo */}
+            <ModalDetallesPrestamo
+                isOpen={modalDetallesPrestamo}
+                onClose={onCerrarModalDetalles}
+                prestamo={prestamoViendoDetalles}
+                loading={loading}
+            />
         </div>
     );
 };

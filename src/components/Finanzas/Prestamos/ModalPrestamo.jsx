@@ -1,5 +1,5 @@
 import React from 'react';
-import CampoFormulario from '../CampoFormulario';
+import CampoPrestamos from './CampoPrestamos';
 import { 
     opcionesTipoEntidad, 
     opcionesTipoInteres, 
@@ -47,7 +47,7 @@ const ModalPrestamo = ({
                         </h3>
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <CampoFormulario
+                            <CampoPrestamos
                                 id="entidadFinanciera.nombre"
                                 label="Nombre de la Entidad"
                                 value={formulario.valores.entidadFinanciera?.nombre || ''}
@@ -57,7 +57,7 @@ const ModalPrestamo = ({
                                 placeholder="Ej: Banco de Crédito del Perú"
                             />
                             
-                            <CampoFormulario
+                            <CampoPrestamos
                                 id="entidadFinanciera.codigo"
                                 label="Código de la Entidad"
                                 value={formulario.valores.entidadFinanciera?.codigo || ''}
@@ -66,7 +66,7 @@ const ModalPrestamo = ({
                                 placeholder="Ej: BCP"
                             />
                             
-                            <CampoFormulario
+                            <CampoPrestamos
                                 id="entidadFinanciera.tipo"
                                 label="Tipo de Entidad"
                                 tipo="select"
@@ -85,7 +85,7 @@ const ModalPrestamo = ({
                         </h3>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <CampoFormulario
+                            <CampoPrestamos
                                 id="tipoCredito"
                                 label="Tipo de Crédito"
                                 tipo="select"
@@ -96,7 +96,7 @@ const ModalPrestamo = ({
                                 opciones={tiposPrestamo}
                             />
                             
-                            <CampoFormulario
+                            <CampoPrestamos
                                 id="montoSolicitado"
                                 label="Monto Solicitado"
                                 tipo="number"
@@ -109,7 +109,7 @@ const ModalPrestamo = ({
                                 min="0"
                             />
                             
-                            <CampoFormulario
+                            <CampoPrestamos
                                 id="tasaInteres.porcentaje"
                                 label="Tasa de Interés (%)"
                                 tipo="number"
@@ -125,7 +125,7 @@ const ModalPrestamo = ({
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <CampoFormulario
+                            <CampoPrestamos
                                 id="tasaInteres.tipo"
                                 label="Tipo de Tasa"
                                 tipo="select"
@@ -135,7 +135,7 @@ const ModalPrestamo = ({
                                 opciones={opcionesTipoInteres}
                             />
                             
-                            <CampoFormulario
+                            <CampoPrestamos
                                 id="tasaInteres.periodo"
                                 label="Período de Tasa"
                                 tipo="select"
@@ -145,7 +145,7 @@ const ModalPrestamo = ({
                                 opciones={opcionesPeriodoInteres}
                             />
                             
-                            <CampoFormulario
+                            <CampoPrestamos
                                 id="plazo.cantidad"
                                 label="Plazo"
                                 tipo="number"
@@ -157,7 +157,7 @@ const ModalPrestamo = ({
                                 min="1"
                             />
                             
-                            <CampoFormulario
+                            <CampoPrestamos
                                 id="plazo.unidad"
                                 label="Unidad de Plazo"
                                 tipo="select"
@@ -175,7 +175,7 @@ const ModalPrestamo = ({
                             📝 Información Adicional
                         </h3>
                         
-                        <CampoFormulario
+                        <CampoPrestamos
                             id="proposito"
                             label="Propósito del Préstamo"
                             tipo="textarea"
@@ -186,7 +186,7 @@ const ModalPrestamo = ({
                             filas={3}
                         />
                         
-                        <CampoFormulario
+                        <CampoPrestamos
                             id="observaciones"
                             label="Observaciones"
                             tipo="textarea"

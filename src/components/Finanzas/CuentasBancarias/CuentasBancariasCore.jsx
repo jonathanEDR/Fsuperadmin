@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useFormulario } from '../CampoFormulario';
+import { useFormularioCuentasBancarias } from './useFormularioCuentasBancarias';
 import { cuentasBancariasService, finanzasService } from '../../../services/finanzasService';
 import {
     validacionesCuenta,
@@ -28,8 +28,8 @@ export const useCuentasBancarias = () => {
     const [paginacion, setPaginacion] = useState(paginacionInicial);
     
     // ========== FORMULARIOS ==========
-    const formularioCuenta = useFormulario(formularioInicialCuenta, validacionesCuenta);
-    const formularioMovimiento = useFormulario(formularioInicialMovimiento, validacionesMovimiento);
+    const formularioCuenta = useFormularioCuentasBancarias(formularioInicialCuenta, validacionesCuenta);
+    const formularioMovimiento = useFormularioCuentasBancarias(formularioInicialMovimiento, validacionesMovimiento);
     
     // ========== FUNCIONES DE CARGA DE DATOS ==========
     const cargarCuentas = useCallback(async () => {

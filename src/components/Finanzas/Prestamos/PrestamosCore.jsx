@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useFormulario } from '../CampoFormulario';
+import { useFormularioPrestamos } from './useFormularioPrestamos';
 import PrestamosService from '../../../services/prestamosService';
+import { limpiarDatosPrestamos } from '../../../utils/prestamosUtils';
 import {
     validacionesPrestamo,
     validacionesCalculadora,
@@ -21,7 +22,9 @@ export const usePrestamos = () => {
     const [modalAbierto, setModalAbierto] = useState(false);
     const [modalCalculadora, setModalCalculadora] = useState(false);
     const [modalTablaAmortizacion, setModalTablaAmortizacion] = useState(false);
+    const [modalDetallesPrestamo, setModalDetallesPrestamo] = useState(false);
     const [prestamoEditando, setPrestamoEditando] = useState(null);
+    const [prestamoViendoDetalles, setPrestamoViendoDetalles] = useState(null);
     
     // ========== ESTADOS ESPECÍFICOS ==========
     const [tablaAmortizacion, setTablaAmortizacion] = useState([]);
@@ -32,21 +35,8 @@ export const usePrestamos = () => {
     const [paginacion, setPaginacion] = useState(paginacionInicial);
     
     // ========== FORMULARIOS ==========
-    const formularioPrestamo = useFormulario(formularioInicialPrestamo, validacionesPrestamo);
-    const formularioCalculadora = useFormulario(formularioInicialCalculadora, validacionesCalculadora);
-    
-    // Debug temporal - formularios mejorado
-    console.log('🔧 PrestamosCore Debug MEJORADO:', {
-        formularioPrestamo: {
-            valores: JSON.stringify(formularioPrestamo.valores),
-            manejarCambio: typeof formularioPrestamo.manejarCambio,
-            errores: JSON.stringify(formularioPrestamo.errores)
-        },
-        formularioCalculadora: {
-            valores: JSON.stringify(formularioCalculadora.valores),
-            manejarCambio: typeof formularioCalculadora.manejarCambio
-        }
-    });
+    const formularioPrestamo = useFormularioPrestamos(formularioInicialPrestamo, validacionesPrestamo);
+    const formularioCalculadora = useFormularioPrestamos(formularioInicialCalculadora, validacionesCalculadora);
     
     // ========== FUNCIONES DE CARGA DE DATOS ==========
     const cargarPrestamos = useCallback(async () => {
@@ -63,17 +53,18 @@ export const usePrestamos = () => {
             const prestamosData = response.data.data || response.data.prestamos || response.data || [];
             const prestamosArray = Array.isArray(prestamosData) ? prestamosData : [];
             
-            console.log('🔍 Debug préstamos data MEJORADO:', {
-                responseData: response.data,
-                prestamosData,
-                prestamosArray,
-                count: prestamosArray.length,
-                primerPrestamo: prestamosArray.length > 0 ? prestamosArray[0] : null,
-                camposPrimerPrestamo: prestamosArray.length > 0 ? Object.keys(prestamosArray[0]) : [],
-                muestraDatos: prestamosArray.length > 0 ? prestamosArray.slice(0, 2) : []
-            });
+            // 🔧 LIMPIAR Y NORMALIZAR DATOS
+            const prestamosLimpios = limpiarDatosPrestamos(prestamosArray);
             
-            setPrestamos(prestamosArray);
+            const isDev = process.env.NODE_ENV === 'development';
+            if (isDev) {
+                console.log('🔍 Debug préstamos data:', {
+                    count: prestamosLimpios.length,
+                    primerPrestamo: prestamosLimpios.length > 0 ? prestamosLimpios[0] : null
+                });
+            }
+            
+            setPrestamos(prestamosLimpios);
             
             // Actualizar paginación si está disponible
             if (response.data.paginacion) {
@@ -136,7 +127,9 @@ export const usePrestamos = () => {
     };
     
     const abrirModalEditarPrestamo = (prestamo) => {
-        formularioPrestamo.setValores(prestamo);
+        // Transformar datos del backend al formato del formulario
+        const datosFormulario = transformarDatosParaFormulario(prestamo);
+        formularioPrestamo.setValores(datosFormulario);
         setPrestamoEditando(prestamo);
         setModalAbierto(true);
     };
@@ -164,9 +157,51 @@ export const usePrestamos = () => {
         setTablaAmortizacion([]);
     };
     
+    const abrirModalDetallesPrestamo = (prestamo) => {
+        setPrestamoViendoDetalles(prestamo);
+        setModalDetallesPrestamo(true);
+    };
+    
+    const cerrarModalDetallesPrestamo = () => {
+        setModalDetallesPrestamo(false);
+        setPrestamoViendoDetalles(null);
+    };
+    
     // ========== FUNCIONES DE CRUD ==========
     
     // Función para transformar datos del frontend al formato del backend
+    // ========== FUNCIONES DE TRANSFORMACIÓN DE DATOS ==========
+    const transformarDatosParaFormulario = (prestamo) => {
+        // Transformar de estructura del backend a estructura del formulario
+        const datosFormulario = {
+            entidadFinanciera: {
+                nombre: prestamo.entidadFinanciera?.nombre || '',
+                codigo: prestamo.entidadFinanciera?.codigo || '',
+                tipo: prestamo.entidadFinanciera?.tipo || 'banco'
+            },
+            tipoCredito: prestamo.tipo || prestamo.tipoCredito || '',
+            montoSolicitado: prestamo.montoSolicitado || '',
+            tasaInteres: {
+                porcentaje: prestamo.tasaInteres || '',
+                tipo: prestamo.tipoTasa || 'fija',
+                periodo: 'anual'
+            },
+            plazo: {
+                cantidad: prestamo.plazoMeses || '',
+                unidad: 'meses'
+            },
+            proposito: prestamo.proposito || prestamo.descripcion || '',
+            observaciones: prestamo.observaciones || ''
+        };
+        
+        console.log('🔄 Transformando datos para formulario:', {
+            original: prestamo,
+            transformado: datosFormulario
+        });
+        
+        return datosFormulario;
+    };
+
     const transformarDatosParaBackend = (datosFormulario) => {
         const datos = { ...datosFormulario };
         
@@ -382,10 +417,13 @@ export const usePrestamos = () => {
         loading,
         
         // Estados de modales
+        // Estados de modales
         modalAbierto,
         modalCalculadora,
         modalTablaAmortizacion,
+        modalDetallesPrestamo,
         prestamoEditando,
+        prestamoViendoDetalles,
         
         // Estados específicos
         tablaAmortizacion,
@@ -406,6 +444,8 @@ export const usePrestamos = () => {
         abrirModalCalculadora,
         cerrarModalCalculadora,
         cerrarModalTablaAmortizacion,
+        abrirModalDetallesPrestamo,
+        cerrarModalDetallesPrestamo,
         
         // Funciones de CRUD
         manejarSubmitPrestamo,

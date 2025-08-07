@@ -1,6 +1,6 @@
 import React from 'react';
-import ModalFinanciero from '../ModalFinanciero';
-import CampoFormulario from '../CampoFormulario';
+import ModalCuentasBancarias from './ModalCuentasBancariasEspecifico';
+import CampoCuentasBancarias from './CampoCuentasBancarias';
 import { finanzasService } from '../../../services/finanzasService';
 
 // ========== MODAL COMPACTO PARA CUENTAS BANCARIAS ==========
@@ -15,7 +15,7 @@ export const ModalCuentaBancaria = ({
     const monedas = finanzasService.obtenerMonedas();
 
     return (
-        <ModalFinanciero
+        <ModalCuentasBancarias
             isOpen={isOpen}
             onClose={onClose}
             titulo={cuentaEditando ? 'Editar Cuenta' : 'Nueva Cuenta Bancaria'}
@@ -26,7 +26,7 @@ export const ModalCuentaBancaria = ({
             {/* Layout ultra-compacto con padding responsivo */}
             <div className="space-y-3 p-1">
                 {/* Fila 1: Nombre */}
-                <CampoFormulario
+                <CampoCuentasBancarias
                     label="Nombre de la Cuenta"
                     name="nombre"
                     value={formularioCuenta.valores.nombre}
@@ -37,7 +37,7 @@ export const ModalCuentaBancaria = ({
                 />
                 
                 {/* Fila 2: Banco */}
-                <CampoFormulario
+                <CampoCuentasBancarias
                     label="Banco"
                     name="banco"
                     value={formularioCuenta.valores.banco}
@@ -49,7 +49,7 @@ export const ModalCuentaBancaria = ({
 
                 {/* Fila 3: Tipo y Titular en grid compacto */}
                 <div className="grid grid-cols-1 gap-3">
-                    <CampoFormulario
+                    <CampoCuentasBancarias
                         label="Tipo de Cuenta"
                         name="tipoCuenta"
                         type="select"
@@ -60,7 +60,7 @@ export const ModalCuentaBancaria = ({
                         required
                     />
                     
-                    <CampoFormulario
+                    <CampoCuentasBancarias
                         label="Titular"
                         name="titular"
                         value={formularioCuenta.valores.titular}
@@ -72,7 +72,7 @@ export const ModalCuentaBancaria = ({
                 </div>
 
                 {/* Fila 4: Número de cuenta */}
-                <CampoFormulario
+                <CampoCuentasBancarias
                     label="Número de Cuenta"
                     name="numeroCuenta"
                     value={formularioCuenta.valores.numeroCuenta}
@@ -84,7 +84,7 @@ export const ModalCuentaBancaria = ({
                 
                 {/* Fila 5: Moneda y Saldo en grid 2x1 */}
                 <div className="grid grid-cols-2 gap-2">
-                    <CampoFormulario
+                    <CampoCuentasBancarias
                         label="Moneda"
                         name="moneda"
                         type="select"
@@ -95,7 +95,7 @@ export const ModalCuentaBancaria = ({
                         required
                     />
                     
-                    <CampoFormulario
+                    <CampoCuentasBancarias
                         label="Saldo Inicial"
                         name="saldoInicial"
                         type="number"
@@ -110,7 +110,7 @@ export const ModalCuentaBancaria = ({
                 </div>
 
                 {/* Descripción opcional */}
-                <CampoFormulario
+                <CampoCuentasBancarias
                     label="Descripción (opcional)"
                     name="descripcion"
                     value={formularioCuenta.valores.descripcion}
@@ -118,7 +118,7 @@ export const ModalCuentaBancaria = ({
                     placeholder="Descripción breve..."
                 />
             </div>
-        </ModalFinanciero>
+        </ModalCuentasBancarias>
     );
 };
 

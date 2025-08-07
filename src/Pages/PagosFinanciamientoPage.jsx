@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, Trash2, Edit, Eye, CreditCard, Calendar, DollarSign, Building, User, CheckCircle, Clock, XCircle } from 'lucide-react';
-import TarjetaFinanciera from '../components/Finanzas/TarjetaFinanciera';
-import TablaFinanciera from '../components/Finanzas/TablaFinanciera';
-import ModalFinanciero from '../components/Finanzas/ModalFinanciero';
-import CampoFormulario, { useFormulario } from '../components/Finanzas/CampoFormulario';
+import TablaPagosFinanciamiento from '../components/Finanzas/PagosFinanciamiento/TablaPagosFinanciamiento';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import CampoPagosFinanciamiento from '../components/Finanzas/PagosFinanciamiento/CampoPagosFinanciamiento';
+import { useFormularioPagosFinanciamiento } from '../components/Finanzas/PagosFinanciamiento/useFormularioPagosFinanciamiento';
 import { pagosFinanciamientoService, prestamosService } from '../services/finanzasService';
 
 // Función de utilidad para validar objetos de préstamo
@@ -39,7 +40,7 @@ function PagosFinanciamientoPage() {
     montoPendiente: 0
   });
 
-  const nuevoPago = useFormulario({
+  const nuevoPago = useFormularioPagosFinanciamiento({
     prestamoId: '',
     numeroCuota: '',
     fechaPago: '',
@@ -377,7 +378,17 @@ function PagosFinanciamientoPage() {
       {/* Tarjetas de estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {tarjetasEstadisticas.map((tarjeta, index) => (
-          <TarjetaFinanciera key={index} {...tarjeta} />
+          <div key={index} className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">{tarjeta.titulo}</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">{tarjeta.valor}</p>
+              </div>
+              <div className={`p-3 rounded-full ${tarjeta.color} text-white`}>
+                {tarjeta.icono}
+              </div>
+            </div>
+          </div>
         ))}
       </div>
 
@@ -468,7 +479,7 @@ function PagosFinanciamientoPage() {
           </button>
         </div>
 
-        <TablaFinanciera
+        <TablaPagosFinanciamiento
           datos={pagos}
           columnas={columnasTabla}
           acciones={acciones}
@@ -478,18 +489,31 @@ function PagosFinanciamientoPage() {
       </div>
 
       {/* Modal */}
-      <ModalFinanciero
-        abierto={modalAbierto}
-        onClose={cerrarModal}
-        titulo={
-          tipoModal === 'crear' ? 'Nuevo Pago' :
-          tipoModal === 'editar' ? 'Editar Pago' :
-          'Detalles del Pago'
-        }
-        size="lg"
-      >
-        {tipoModal === 'ver' && pagoSeleccionado ? (
-          <div className="space-y-6">
+      {modalAbierto && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50">
+          <div className="flex items-center justify-center min-h-screen p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+              {/* Header */}
+              <div className="px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {tipoModal === 'crear' ? 'Nuevo Pago' :
+                     tipoModal === 'editar' ? 'Editar Pago' :
+                     'Detalles del Pago'}
+                  </h3>
+                  <button
+                    onClick={cerrarModal}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <XCircle className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="px-6 py-4 max-h-[60vh] overflow-y-auto">
+                {tipoModal === 'ver' && pagoSeleccionado ? (
+                  <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Información del Pago</h3>
@@ -568,7 +592,7 @@ function PagosFinanciamientoPage() {
         ) : (
           <form onSubmit={manejarSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <CampoFormulario
+              <CampoPagosFinanciamiento
                 label="Préstamo"
                 name="prestamoId"
                 type="select"
@@ -597,7 +621,7 @@ function PagosFinanciamientoPage() {
                 disabled={!Array.isArray(prestamos) || prestamos.length === 0}
               />
 
-              <CampoFormulario
+              <CampoPagosFinanciamiento
                 label="Número de Cuota"
                 name="numeroCuota"
                 type="number"
@@ -607,7 +631,7 @@ function PagosFinanciamientoPage() {
                 required
               />
 
-              <CampoFormulario
+              <CampoPagosFinanciamiento
                 label="Monto Principal"
                 name="montoPrincipal"
                 type="number"
@@ -618,7 +642,7 @@ function PagosFinanciamientoPage() {
                 required
               />
 
-              <CampoFormulario
+              <CampoPagosFinanciamiento
                 label="Monto Interés"
                 name="montoInteres"
                 type="number"
@@ -629,7 +653,7 @@ function PagosFinanciamientoPage() {
                 required
               />
 
-              <CampoFormulario
+              <CampoPagosFinanciamiento
                 label="Fecha de Vencimiento"
                 name="fechaVencimiento"
                 type="date"
@@ -638,7 +662,7 @@ function PagosFinanciamientoPage() {
                 required
               />
 
-              <CampoFormulario
+              <CampoPagosFinanciamiento
                 label="Método de Pago"
                 name="metodoPago"
                 type="select"
@@ -651,7 +675,7 @@ function PagosFinanciamientoPage() {
                 required
               />
 
-              <CampoFormulario
+              <CampoPagosFinanciamiento
                 label="Estado"
                 name="estado"
                 type="select"
@@ -665,7 +689,7 @@ function PagosFinanciamientoPage() {
               />
 
               {nuevoPago.formData?.estado || "" === 'realizado' && (
-                <CampoFormulario
+                <CampoPagosFinanciamiento
                   label="Fecha de Pago"
                   name="fechaPago"
                   type="date"
@@ -675,7 +699,7 @@ function PagosFinanciamientoPage() {
               )}
             </div>
 
-            <CampoFormulario
+            <CampoPagosFinanciamiento
               label="Referencia de Pago"
               name="referenciaPago"
               type="text"
@@ -684,7 +708,7 @@ function PagosFinanciamientoPage() {
               placeholder="Número de transacción, cheque, etc."
             />
 
-            <CampoFormulario
+            <CampoPagosFinanciamiento
               label="Observaciones"
               name="observaciones"
               type="textarea"
@@ -719,7 +743,23 @@ function PagosFinanciamientoPage() {
             </div>
           </form>
         )}
-      </ModalFinanciero>
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-3 border-t border-gray-200 bg-gray-50">
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={cerrarModal}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

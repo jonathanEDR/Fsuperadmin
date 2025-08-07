@@ -2,7 +2,6 @@ import React from 'react';
 import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, UserCheck, X, ChevronLeft, ChevronRight, CreditCard, Factory, Grid3X3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
-import SubMenuFinanzas from '../../Finanzas/SubMenuFinanzas';
 
 function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebarOpen, onLogout }) {
   const navigate = useNavigate();
@@ -35,8 +34,8 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
       items: [
         { id: 'produccion', icon: Factory, label: 'Gestión de Producción', route: '/super-admin/produccion' },
         { id: 'caja', icon: CreditCard, label: 'Gestión de Caja', route: '/super-admin/caja' },
-      ],
-      hasSubMenu: true // Indica que tiene el submenu de finanzas
+        { id: 'finanzas', icon: CreditCard, label: 'Finanzas', route: '/super-admin/finanzas' },
+      ]
     },
     {
       title: "Herramientas",
@@ -146,15 +145,6 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
                       </button>
                     );
                   })}
-                  
-                  {/* Submenú de Finanzas dentro del grupo Operaciones */}
-                  {group.hasSubMenu && (
-                    <SubMenuFinanzas 
-                      isCollapsed={isCollapsed}
-                      userRole="super-admin"
-                      onNavigate={isMobileView ? toggleSidebar : null}
-                    />
-                  )}
                 </div>
                 
                 {/* Separador entre grupos - excepto en el último grupo y cuando está colapsado */}

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, Trash2, Edit, Eye, Shield, Calendar, DollarSign, User, FileText } from 'lucide-react';
-import TarjetaFinanciera from '../components/Finanzas/TarjetaFinanciera';
-import TablaFinanciera from '../components/Finanzas/TablaFinanciera';
-import ModalFinanciero from '../components/Finanzas/ModalFinanciero';
-import CampoFormulario, { useFormulario } from '../components/Finanzas/CampoFormulario';
+import TablaGarantias from '../components/Finanzas/Garantias/TablaGarantias';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import CampoGarantia from '../components/Finanzas/Garantias/CampoGarantia';
+import { useFormularioGarantias } from '../components/Finanzas/Garantias/useFormularioGarantias';
 import { garantiasService } from '../services/finanzasService';
 
 function GarantiasPage() {
@@ -26,7 +27,7 @@ function GarantiasPage() {
     valorTotal: 0
   });
 
-  const nuevaGarantia = useFormulario({
+  const nuevaGarantia = useFormularioGarantias({
     tipo: '',
     descripcion: '',
     valorGarantia: '',
@@ -281,7 +282,17 @@ function GarantiasPage() {
       {/* Tarjetas de estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {tarjetasEstadisticas.map((tarjeta, index) => (
-          <TarjetaFinanciera key={index} {...tarjeta} />
+          <div key={index} className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">{tarjeta.titulo}</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">{tarjeta.valor}</p>
+              </div>
+              <div className={`p-3 rounded-full ${tarjeta.color} text-white`}>
+                {tarjeta.icono}
+              </div>
+            </div>
+          </div>
         ))}
       </div>
 
@@ -352,7 +363,7 @@ function GarantiasPage() {
           </button>
         </div>
 
-        <TablaFinanciera
+        <TablaGarantias
           datos={garantias}
           columnas={columnasTabla}
           acciones={acciones}
@@ -362,18 +373,33 @@ function GarantiasPage() {
       </div>
 
       {/* Modal */}
-      <ModalFinanciero
-        abierto={modalAbierto}
-        onClose={cerrarModal}
-        titulo={
-          tipoModal === 'crear' ? 'Nueva Garantía' :
-          tipoModal === 'editar' ? 'Editar Garantía' :
-          'Detalles de Garantía'
-        }
-        size="lg"
-      >
-        {tipoModal === 'ver' && garantiaSeleccionada ? (
-          <div className="space-y-6">
+      {modalAbierto && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50">
+          <div className="flex items-center justify-center min-h-screen p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+              {/* Header */}
+              <div className="px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {tipoModal === 'crear' ? 'Nueva Garantía' :
+                     tipoModal === 'editar' ? 'Editar Garantía' :
+                     'Detalles de Garantía'}
+                  </h3>
+                  <button
+                    onClick={cerrarModal}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="px-6 py-4 max-h-[60vh] overflow-y-auto">
+                {tipoModal === 'ver' && garantiaSeleccionada ? (
+                  <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Información General</h3>
@@ -441,7 +467,7 @@ function GarantiasPage() {
         ) : (
           <form onSubmit={manejarSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <CampoFormulario
+              <CampoGarantia
                 label="Tipo de Garantía"
                 name="tipo"
                 type="select"
@@ -451,7 +477,7 @@ function GarantiasPage() {
                 required
               />
 
-              <CampoFormulario
+              <CampoGarantia
                 label="Beneficiario"
                 name="beneficiario"
                 type="text"
@@ -460,7 +486,7 @@ function GarantiasPage() {
                 required
               />
 
-              <CampoFormulario
+              <CampoGarantia
                 label="Valor de la Garantía"
                 name="valorGarantia"
                 type="number"
@@ -471,7 +497,7 @@ function GarantiasPage() {
                 required
               />
 
-              <CampoFormulario
+              <CampoGarantia
                 label="Estado"
                 name="estado"
                 type="select"
@@ -484,7 +510,7 @@ function GarantiasPage() {
                 required
               />
 
-              <CampoFormulario
+              <CampoGarantia
                 label="Fecha de Otorgamiento"
                 name="fechaOtorgamiento"
                 type="date"
@@ -493,7 +519,7 @@ function GarantiasPage() {
                 required
               />
 
-              <CampoFormulario
+              <CampoGarantia
                 label="Fecha de Vencimiento"
                 name="fechaVencimiento"
                 type="date"
@@ -503,7 +529,7 @@ function GarantiasPage() {
               />
             </div>
 
-            <CampoFormulario
+            <CampoGarantia
               label="Descripción"
               name="descripcion"
               type="textarea"
@@ -512,7 +538,7 @@ function GarantiasPage() {
               rows={3}
             />
 
-            <CampoFormulario
+            <CampoGarantia
               label="Condiciones"
               name="condiciones"
               type="textarea"
@@ -521,7 +547,7 @@ function GarantiasPage() {
               rows={3}
             />
 
-            <CampoFormulario
+            <CampoGarantia
               label="Observaciones"
               name="observaciones"
               type="textarea"
@@ -547,7 +573,11 @@ function GarantiasPage() {
             </div>
           </form>
         )}
-      </ModalFinanciero>
+      </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

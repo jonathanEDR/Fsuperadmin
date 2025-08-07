@@ -5,7 +5,7 @@ import React from 'react';
 // ========== COLORES Y ETIQUETAS DE ESTADOS ==========
 export const estadosColor = {
     'aprobado': { color: 'bg-green-100 text-green-800', label: 'Aprobado', icono: '✅' },
-    'cancelado': { color: 'bg-gray-100 text-gray-800', label: 'Cancelado', icono: '❌' }
+    'cancelado': { color: 'bg-gray-100 text-gray-800', label: 'Cancelado', icono: '🚫' }
 };
 
 // ========== VALORES INICIALES DE FORMULARIOS ==========
@@ -136,13 +136,30 @@ export const columnasPrestamos = [
         titulo: 'Monto Aprobado',
         render: (valor, fila) => {
             const monto = valor || fila.montoSolicitado;
+            let estado = fila.estado || 'aprobado';
+            
+            // 🔧 LIMPIEZA: Solo permitir estados válidos
+            if (!['aprobado', 'cancelado'].includes(estado)) {
+                estado = 'aprobado'; // Estado por defecto
+                console.warn(`⚠️ Estado inválido "${fila.estado}" normalizado a "aprobado" para préstamo:`, fila._id);
+            }
+            
+            const configEstado = estadosColor[estado];
+            
             return (
-                <span className="font-semibold text-green-600">
-                    S/ {parseFloat(monto || 0).toLocaleString('es-PE', { 
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2 
-                    })}
-                </span>
+                <div className="text-left">
+                    <div className="font-semibold text-green-600">
+                        S/ {parseFloat(monto || 0).toLocaleString('es-PE', { 
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2 
+                        })}
+                    </div>
+                    <div className="mt-1">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${configEstado.color}`}>
+                            {configEstado.icono} {configEstado.label}
+                        </span>
+                    </div>
+                </div>
             );
         }
     },
@@ -159,50 +176,114 @@ export const columnasPrestamos = [
         key: 'fechaVencimiento', 
         titulo: 'Vencimiento', 
         tipo: 'fecha',
-        render: (valor) => {
-            if (!valor) return '-';
-            return new Date(valor).toLocaleDateString('es-PE');
-        }
-    },
-    { 
-        key: 'estado', 
-        titulo: 'Estado', 
-        render: (valor) => {
-            const config = estadosColor[valor] || estadosColor['aprobado']; // ✅ Estado por defecto: aprobado
+        render: (valor, fila, handlers) => {
+            console.log('🔍 Renderizando columna fechaVencimiento:', { 
+                valor, 
+                tieneHandlers: !!handlers, 
+                abrirModalDetalles: typeof handlers?.abrirModalDetallesPrestamo,
+                prestamo: fila.codigo 
+            });
+            
+            // Si no hay fecha de vencimiento, calcularla
+            let fechaVencimiento = valor;
+            if (!fechaVencimiento && fila.fechaAprobacion && fila.plazoMeses) {
+                const fechaInicio = new Date(fila.fechaAprobacion);
+                fechaInicio.setMonth(fechaInicio.getMonth() + parseInt(fila.plazoMeses));
+                fechaVencimiento = fechaInicio;
+            } else if (!fechaVencimiento && fila.fechaSolicitud && fila.plazoMeses) {
+                const fechaInicio = new Date(fila.fechaSolicitud);
+                fechaInicio.setMonth(fechaInicio.getMonth() + parseInt(fila.plazoMeses));
+                fechaVencimiento = fechaInicio;
+            }
+            
+            // Si aún no hay fecha, mostrar solo el botón
+            if (!fechaVencimiento) {
+                return (
+                    <div className="space-y-2">
+                        <div className="text-gray-500 text-sm">
+                            Sin fecha definida
+                        </div>
+                        <button
+                            onClick={() => {
+                                console.log('🎯 Clic en Ver Detalles - Sin fecha:', fila.codigo);
+                                handlers?.abrirModalDetallesPrestamo?.(fila);
+                            }}
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 text-xs font-medium rounded-md border border-blue-200 hover:border-blue-300 transition-all duration-200"
+                            title="Ver cronograma de pagos y detalles del préstamo"
+                        >
+                            <span>👁️</span>
+                            <span>Ver Detalles</span>
+                        </button>
+                    </div>
+                );
+            }
+            
+            const fecha = new Date(fechaVencimiento);
+            const hoy = new Date();
+            const diasHastaVencimiento = Math.ceil((fecha - hoy) / (1000 * 60 * 60 * 24));
+            
+            let estiloFecha = 'text-gray-700';
+            let icono = '📅';
+            
+            if (diasHastaVencimiento < 0) {
+                estiloFecha = 'text-red-600 font-semibold';
+                icono = '🚨';
+            } else if (diasHastaVencimiento <= 30) {
+                estiloFecha = 'text-orange-600 font-medium';
+                icono = '⚠️';
+            } else if (diasHastaVencimiento <= 90) {
+                estiloFecha = 'text-yellow-600';
+                icono = '⏰';
+            }
+            
             return (
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
-                    {config.label}
-                </span>
+                <div className="space-y-2">
+                    <div className={`${estiloFecha} flex items-center gap-1`}>
+                        <span>{icono}</span>
+                        <span>{fecha.toLocaleDateString('es-PE')}</span>
+                    </div>
+                    <button
+                        onClick={() => {
+                            console.log('🎯 Clic en Ver Detalles - Con fecha:', fila.codigo);
+                            handlers?.abrirModalDetallesPrestamo?.(fila);
+                        }}
+                        className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 text-xs font-medium rounded-md border border-blue-200 hover:border-blue-300 transition-all duration-200"
+                        title="Ver cronograma de pagos y detalles del préstamo"
+                    >
+                        <span>👁️</span>
+                        <span>Ver Detalles</span>
+                    </button>
+                </div>
             );
         }
     }
 ];
 
-// ========== CONFIGURACIÓN DE ACCIONES DE TABLA (TEMPORAL - PARA DEBUG) ==========
+// ========== CONFIGURACIÓN DE ACCIONES DE TABLA (OPTIMIZADA CON ICONOS) ==========
 export const accionesPrestamos = [
     {
         label: 'Editar',
         icono: '✏️',
         color: 'blue',
         handler: 'abrirModalEditarPrestamo',
-        className: 'bg-blue-500 hover:bg-blue-600'
-        // ⚠️ TEMPORAL: Sin condición mostrar para debug
+        className: 'bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-md transition-colors',
+        tooltip: 'Editar préstamo'
     },
     {
-        label: 'Ver Tabla',
+        label: 'Tabla',
         icono: '📊',
         color: 'purple',
         handler: 'verTablaAmortizacion',
-        className: 'bg-purple-500 hover:bg-purple-600'
-        // ⚠️ TEMPORAL: Sin condición mostrar para debug
+        className: 'bg-purple-500 hover:bg-purple-600 text-white p-2 rounded-md transition-colors',
+        tooltip: 'Ver tabla de amortización'
     },
     {
         label: 'Cancelar',
         icono: '❌',
         color: 'red',
         handler: 'cancelarPrestamo',
-        className: 'bg-red-500 hover:bg-red-600'
-        // ⚠️ TEMPORAL: Sin condición mostrar para debug
+        className: 'bg-red-500 hover:bg-red-600 text-white p-2 rounded-md transition-colors',
+        tooltip: 'Cancelar préstamo'
     }
 ];
 

@@ -1,6 +1,9 @@
 // Barrel exports para CuentasBancarias
 export { useCuentasBancarias } from './CuentasBancariasCore';
 export { default as TablaCuentasBancarias } from './TablaCuentasBancarias';
-// Los modales ahora están separados en archivos individuales
-// export { ModalCuenta, ModalMovimiento } from './CuentasBancariasModals';
+export { default as CampoCuentasBancarias } from './CampoCuentasBancarias';
+export { default as ModalCuentasBancarias } from './ModalCuentasBancariasEspecifico';
+export { ModalCuentaBancaria } from './ModalCuentaBancaria';
+export { ModalMovimientoBancario } from './ModalMovimientoBancario';
+export { useFormularioCuentasBancarias } from './useFormularioCuentasBancarias';
 export * from './cuentasBancariasConfig';

@@ -1,6 +1,6 @@
 import React from 'react';
 import TablaCuentasBancarias from '../components/Finanzas/CuentasBancarias/TablaCuentasBancarias';
-import CampoFormulario from '../components/Finanzas/CampoFormulario';
+import CampoCuentasBancarias from '../components/Finanzas/CuentasBancarias/CampoCuentasBancarias';
 import { finanzasService } from '../services/finanzasService';
 import {
     useCuentasBancarias,
@@ -82,7 +82,7 @@ const CuentasBancariasPage = () => {
             <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6 mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Filtros</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <CampoFormulario
+                    <CampoCuentasBancarias
                         label="Banco"
                         name="banco"
                         value={filtros.banco}
@@ -90,7 +90,7 @@ const CuentasBancariasPage = () => {
                         placeholder="Buscar por banco..."
                     />
                     
-                    <CampoFormulario
+                    <CampoCuentasBancarias
                         label="Tipo de Cuenta"
                         name="tipoCuenta"
                         type="select"
@@ -100,7 +100,7 @@ const CuentasBancariasPage = () => {
                         placeholder="Todos los tipos"
                     />
                     
-                    <CampoFormulario
+                    <CampoCuentasBancarias
                         label="Moneda"
                         name="moneda"
                         type="select"
@@ -110,7 +110,7 @@ const CuentasBancariasPage = () => {
                         placeholder="Todas las monedas"
                     />
                     
-                    <CampoFormulario
+                    <CampoCuentasBancarias
                         label="Estado"
                         name="activa"
                         type="select"

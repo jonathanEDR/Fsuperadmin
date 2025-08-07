@@ -1,5 +1,5 @@
 import React from 'react';
-import TablaFinanciera from '../TablaFinanciera';
+import TablaPrestamosEspecifica from './TablaPrestamosEspecifica';
 import { columnasAmortizacion } from './prestamosConfig.jsx';
 
 const ModalTablaAmortizacion = ({ 
@@ -115,7 +115,7 @@ const ModalTablaAmortizacion = ({
                 {/* Tabla */}
                 <div className="flex-1 overflow-auto" style={{ maxHeight: 'calc(90vh - 280px)' }}>
                     {tablaAmortizacion && tablaAmortizacion.length > 0 ? (
-                        <TablaFinanciera
+                        <TablaPrestamosEspecifica
                             datos={tablaAmortizacion}
                             columnas={columnasAmortizacion}
                             loading={false}

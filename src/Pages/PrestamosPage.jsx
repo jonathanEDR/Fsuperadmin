@@ -18,7 +18,9 @@ const PrestamosPage = () => {
             modalAbierto,
             modalCalculadora,
             modalTablaAmortizacion,
+            modalDetallesPrestamo,
             prestamoEditando,
+            prestamoViendoDetalles,
             calculoCuota,
             tablaAmortizacion,
             
@@ -37,6 +39,8 @@ const PrestamosPage = () => {
             abrirModalCalculadora,
             cerrarModalCalculadora,
             cerrarModalTablaAmortizacion,
+            abrirModalDetallesPrestamo,
+            cerrarModalDetallesPrestamo,
             
             // Funciones de cálculo
             calcularCuota,
@@ -78,6 +82,11 @@ const PrestamosPage = () => {
                     onEdit={abrirModalEditarPrestamo}
                     onCancel={cancelarPrestamo} // ✅ Nueva función para cancelar
                     onVerAmortizacion={verTablaAmortizacion}
+                    // Props para el modal de detalles
+                    modalDetallesPrestamo={modalDetallesPrestamo}
+                    prestamoViendoDetalles={prestamoViendoDetalles}
+                    onAbrirModalDetalles={abrirModalDetallesPrestamo}
+                    onCerrarModalDetalles={cerrarModalDetallesPrestamo}
                 />
 
             {/* Modal Préstamo */}
