@@ -7,6 +7,7 @@ const TablaPrestamos = ({
     loading, 
     onEdit, 
     onCancel, 
+    onDelete,
     onVerAmortizacion,
     // Estados del modal de detalles
     modalDetallesPrestamo,
@@ -14,17 +15,15 @@ const TablaPrestamos = ({
     onAbrirModalDetalles,
     onCerrarModalDetalles
 }) => {
-    // 🔧 DEBUG: Verificar estados de préstamos
+    // Validar estados de préstamos en modo desarrollo
     React.useEffect(() => {
-        if (prestamos && prestamos.length > 0) {
+        if (process.env.NODE_ENV === 'development' && prestamos && prestamos.length > 0) {
             prestamos.forEach((prestamo, index) => {
                 if (prestamo.estado && !['aprobado', 'cancelado'].includes(prestamo.estado)) {
-                    console.warn(`🚨 PRÉSTAMO ${index} CON ESTADO INVÁLIDO:`, {
+                    console.warn(`⚠️ Préstamo ${index} con estado inválido:`, {
                         id: prestamo._id,
                         codigo: prestamo.codigo,
-                        estado: prestamo.estado,
-                        estadoType: typeof prestamo.estado,
-                        objetoCompleto: prestamo
+                        estado: prestamo.estado
                     });
                 }
             });
@@ -95,30 +94,31 @@ const TablaPrestamos = ({
                                 accionesPrestamos.map((accion, index) => {
                                     // Determinar la función a ejecutar
                                     let handleClick = () => {
-                                        console.log(`✨ ${accion.label} para préstamo:`, prestamo._id);
+                                        // Handler por defecto - no hace nada
                                     };
                                     
                                     switch (accion.handler) {
                                         case 'verTablaAmortizacion':
                                             handleClick = () => {
-                                                console.log('🔥 Ejecutando verTablaAmortizacion');
                                                 onVerAmortizacion(prestamo);
                                             };
                                             break;
                                         case 'abrirModalEditarPrestamo':
                                             handleClick = () => {
-                                                console.log('✏️ Editando préstamo:', prestamo._id);
                                                 onEdit(prestamo);
                                             };
                                             break;
                                         case 'cancelarPrestamo':
                                             handleClick = () => {
-                                                console.log('🔥 Ejecutando cancelarPrestamo');
                                                 onCancel(prestamo);
                                             };
                                             break;
+                                        case 'eliminarPrestamo':
+                                            handleClick = () => {
+                                                onDelete && onDelete(prestamo);
+                                            };
+                                            break;
                                         default:
-                                            console.log('⚠️ Handler no reconocido:', accion.handler);
                                             break;
                                     }
 
@@ -143,7 +143,7 @@ const TablaPrestamos = ({
                 </div>
             )
         }
-    ], [onEdit, onCancel, onVerAmortizacion]);
+    ], [onEdit, onCancel, onDelete, onVerAmortizacion]);
 
     return (
         <div className="space-y-6">
@@ -322,7 +322,7 @@ const TablaPrestamos = ({
 
                                                         // Determinar la función a ejecutar
                                                         let handleClick = () => {
-                                                            console.log(`✨ ${accion.label} para préstamo:`, prestamo._id);
+                                                            // Handler por defecto - no hace nada
                                                         };
                                                         
                                                         switch (accion.handler) {
@@ -334,6 +334,11 @@ const TablaPrestamos = ({
                                                                 break;
                                                             case 'cancelarPrestamo':
                                                                 handleClick = () => onCancel(prestamo);
+                                                                break;
+                                                            case 'eliminarPrestamo':
+                                                                handleClick = () => {
+                                                                    onDelete && onDelete(prestamo);
+                                                                };
                                                                 break;
                                                             default:
                                                                 break;

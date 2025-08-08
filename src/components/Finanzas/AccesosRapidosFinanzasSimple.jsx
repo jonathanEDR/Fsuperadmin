@@ -86,7 +86,10 @@ const AccesosRapidosFinanzasSimple = () => {
                         const isActive = currentPath === fullPath || 
                                         (acceso.to === '' && currentPath.endsWith('/finanzas'));
 
-                        console.log('🔗 Ruta generada:', fullPath, 'Ruta actual:', currentPath, 'Activo:', isActive);
+                        // Log solo en desarrollo si es necesario para debugging
+                        if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug')) {
+                            console.log('🔗 Ruta:', fullPath, 'Activo:', isActive);
+                        }
 
                         return (
                             <Link

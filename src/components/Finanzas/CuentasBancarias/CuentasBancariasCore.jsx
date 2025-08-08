@@ -41,13 +41,10 @@ export const useCuentasBancarias = () => {
             const cuentasData = response.data.data || response.data.cuentas || response.data || [];
             const cuentasArray = Array.isArray(cuentasData) ? cuentasData : [];
             
-            // Debug: verificar estructura de datos
-            console.log('🔍 Debug cuentas data:', {
-                responseData: response.data,
-                cuentasData: cuentasData,
-                primeraAccount: cuentasArray[0],
-                saldoExample: cuentasArray[0]?.saldoActual
-            });
+            // Solo mostrar cantidad en desarrollo
+            if (process.env.NODE_ENV === 'development') {
+                console.log('📋 Cuentas cargadas:', cuentasArray.length);
+            }
             
             setCuentas(cuentasArray);
             
@@ -68,10 +65,10 @@ export const useCuentasBancarias = () => {
 
     const cargarResumen = useCallback(async () => {
         try {
-            console.log('🔍 Cargando resumen de cuentas bancarias...');
             const response = await finanzasService.obtenerResumenCuentasBancarias();
-            console.log('📊 Resumen obtenido:', response);
-            console.log('📊 Datos del resumen:', response.data);
+            if (process.env.NODE_ENV === 'development') {
+                console.log('📊 Resumen cuentas cargado:', response.data?.length || 'Sin datos');
+            }
             setResumenCuentas(response.data);
         } catch (error) {
             console.error('❌ Error cargando resumen:', error);
@@ -126,10 +123,7 @@ export const useCuentasBancarias = () => {
     const manejarSubmitCuenta = async (e) => {
         e.preventDefault();
         
-        console.log('🔍 Valores del formulario antes de validar:', formularioCuenta.valores);
-        
         if (!formularioCuenta.validarFormulario()) {
-            console.log('❌ Errores de validación:', formularioCuenta.errores);
             return;
         }
 
@@ -140,14 +134,10 @@ export const useCuentasBancarias = () => {
                 saldoInicial: parseFloat(formularioCuenta.valores.saldoInicial) || 0
             };
             
-            console.log('📤 Enviando datos al servidor:', datosParaEnviar);
-            
             if (cuentaEditando) {
                 const response = await cuentasBancariasService.actualizar(cuentaEditando._id, datosParaEnviar);
-                console.log('✅ Cuenta actualizada:', response);
             } else {
                 const response = await cuentasBancariasService.crear(datosParaEnviar);
-                console.log('✅ Cuenta creada:', response);
             }
             
             cerrarModalCuenta();

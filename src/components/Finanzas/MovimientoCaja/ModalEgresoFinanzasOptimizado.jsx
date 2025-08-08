@@ -25,8 +25,6 @@ import { movimientosCajaService } from '../../../services/finanzas';
  * - Eliminación de re-renders innecesarios
  */
 const ModalEgresoFinanzasOptimizado = memo(({ isOpen, onClose, onSuccess }) => {
-    console.log('🔄 [ModalEgresoFinanzasOptimizado] Render');
-
     // Hooks optimizados
     const {
         formData,
@@ -90,8 +88,6 @@ const ModalEgresoFinanzasOptimizado = memo(({ isOpen, onClose, onSuccess }) => {
                 monto: parseFloat(formData.monto),
                 afectaCuentaBancaria: !!(formData.cuentaBancariaId && formData.cuentaBancariaId.trim())
             };
-
-            console.log('📊 [DEBUG] Datos enviados al backend:', dataToSend);
 
             // Limpiar campos opcionales vacíos
             if (!dataToSend.proveedor.nombre) delete dataToSend.proveedor;

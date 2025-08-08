@@ -57,11 +57,8 @@ export const usePrestamos = () => {
             const prestamosLimpios = limpiarDatosPrestamos(prestamosArray);
             
             const isDev = process.env.NODE_ENV === 'development';
-            if (isDev) {
-                console.log('🔍 Debug préstamos data:', {
-                    count: prestamosLimpios.length,
-                    primerPrestamo: prestamosLimpios.length > 0 ? prestamosLimpios[0] : null
-                });
+            if (isDev && prestamosLimpios.length > 0) {
+                console.log('� Préstamos cargados:', prestamosLimpios.length);
             }
             
             setPrestamos(prestamosLimpios);
@@ -257,10 +254,10 @@ export const usePrestamos = () => {
         // Preservar la estructura de entidadFinanciera
         // No necesitamos transformar este campo ya que el backend lo espera tal como está
         
-        console.log('🔄 Datos transformados para backend:', {
-            original: datosFormulario,
-            transformado: datos
-        });
+        // Log solo en desarrollo
+        if (process.env.NODE_ENV === 'development') {
+            console.log('🔄 Datos transformados:', datos);
+        }
         
         return datos;
     };
@@ -280,10 +277,8 @@ export const usePrestamos = () => {
             
             if (prestamoEditando) {
                 await PrestamosService.actualizar(prestamoEditando._id, datosPrestamo);
-                console.log('✅', mensajes.exito.actualizar);
             } else {
                 await PrestamosService.crear(datosPrestamo);
-                console.log('✅', mensajes.exito.crear);
             }
             
             await cargarPrestamos();
@@ -304,7 +299,6 @@ export const usePrestamos = () => {
         
         try {
             setLoading(true);
-            console.log('🔄 Cancelando préstamo:', prestamo._id);
             
             // Actualizar el estado a cancelado
             const datosActualizacion = {
@@ -314,11 +308,44 @@ export const usePrestamos = () => {
             };
             
             await PrestamosService.actualizar(prestamo._id, datosActualizacion);
-            console.log('✅', mensajes.exito.cancelar);
             await cargarPrestamos();
         } catch (error) {
             console.error('Error cancelando préstamo:', error);
-            console.log('❌', mensajes.error.cancelar);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const eliminarPrestamo = async (prestamo) => {
+        const mensaje = `¿Estás seguro de que deseas eliminar el préstamo ${prestamo.codigo}?\n\n` +
+                       `⚠️ ADVERTENCIA: Esta acción también eliminará:\n` +
+                       `• El movimiento de caja asociado\n` +
+                       `• Las garantías asociadas\n` +
+                       `• Todos los registros relacionados\n\n` +
+                       `Esta acción NO se puede deshacer.`;
+        
+        if (!window.confirm(mensaje)) {
+            return;
+        }
+        
+        try {
+            setLoading(true);
+            
+            const response = await PrestamosService.eliminar(prestamo._id);
+            
+            // Mostrar mensaje de éxito
+            alert(`✅ Préstamo ${prestamo.codigo} eliminado exitosamente.\n\nSe han eliminado todas las referencias asociadas.`);
+            
+            // Recargar la lista de préstamos
+            await cargarPrestamos();
+            
+        } catch (error) {
+            console.error('Error eliminando préstamo:', error);
+            
+            // Mostrar mensaje de error específico
+            const mensajeError = error.response?.data?.message || error.message || 'Error desconocido';
+            alert(`❌ Error al eliminar el préstamo:\n\n${mensajeError}`);
+            
         } finally {
             setLoading(false);
         }
@@ -457,6 +484,7 @@ export const usePrestamos = () => {
         // Funciones de CRUD
         manejarSubmitPrestamo,
         cancelarPrestamo, // ✅ Nueva función para cancelar
+        eliminarPrestamo, // ✅ Nueva función para eliminar
         
         // Funciones específicas
         calcularCuota,

@@ -143,7 +143,6 @@ const ModalTablaAmortizacion = ({
                             <button
                                 onClick={() => {
                                     // TODO: Implementar exportación a PDF
-                                    console.log('Exportar a PDF');
                                 }}
                                 className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-sm"
                             >
@@ -152,7 +151,6 @@ const ModalTablaAmortizacion = ({
                             <button
                                 onClick={() => {
                                     // TODO: Implementar exportación a Excel
-                                    console.log('Exportar a Excel');
                                 }}
                                 className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-sm"
                             >

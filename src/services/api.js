@@ -13,24 +13,17 @@ const api = axios.create({
 // Interceptor para agregar el token a cada solicitud
 api.interceptors.request.use(  async config => {
     try {
-      console.log('🔍 API Interceptor - Procesando petición:', {
-        url: config.url,
-        method: config.method,
-        baseURL: config.baseURL
-      });
+      // Solo logs en desarrollo para debugging
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔍 API Request:', config.method?.toUpperCase(), config.url);
+      }
       
       // Obtener el token y la sesión de Clerk
       const token = await window.Clerk?.session?.getToken();
       const user = window.Clerk?.user;
       
-      console.log('🔐 API Interceptor - Token y usuario:', {
-        hasToken: !!token,
-        hasUser: !!user,
-        userEmail: user?.primaryEmailAddress?.emailAddress
-      });
-      
       if (!token || !user) {
-        console.error('❌ API Interceptor - No hay sesión activa');
+        console.error('❌ No hay sesión activa');
         throw new Error('No hay sesión activa');
       }
 
@@ -45,8 +38,6 @@ api.interceptors.request.use(  async config => {
       // Headers estándar
       config.headers['Content-Type'] = 'application/json';
       config.headers['Accept'] = 'application/json';
-      
-      console.log('✅ API Interceptor - Petición configurada exitosamente');
       
     } catch (error) {
       console.error('❌ Error en la configuración de la petición:', error);

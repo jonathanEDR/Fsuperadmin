@@ -62,7 +62,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
         if (isOpen) {
             // Cargar opciones del servidor de manera asíncrona (opcional - no bloquea)
             cargarOpciones().catch(() => {
-                console.log('Usando opciones por defecto');
+                // Usar opciones por defecto
             });
             
             // Reset form when modal opens
@@ -123,16 +123,11 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
     
     const cargarOpciones = async () => {
         try {
-            console.log('� Cargando opciones del modal...');
-            
             const [categoriasRes, metodosPagoRes, cuentasRes] = await Promise.all([
                 movimientosCajaService.obtenerCategorias(),
                 movimientosCajaService.obtenerMetodosPago(),
                 movimientosCajaService.obtenerCuentasDisponibles()
             ]);
-            
-            console.log('� Respuesta del servidor - Categorías:', categoriasRes);
-            console.log('� Respuesta del servidor - Métodos de Pago:', metodosPagoRes);
             
             // Procesar categorías
             if (categoriasRes.success && categoriasRes.data && categoriasRes.data.ingresos) {

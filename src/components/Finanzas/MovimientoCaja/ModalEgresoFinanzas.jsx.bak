@@ -1,5 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { DollarSign, X, MinusCircle, Minus, Plus } from 'lucide-react';
+import React, { useState, useEffect } from 'rea    // Cargar opciones cuando se abre el modal
+    useEffect(() => {
+        if (isOpen) {
+            cargarOpciones();
+        }
+    }, [isOpen]);
+    
+    // Calcular total de efectivo automáticamente DollarSign, X, MinusCircle, Minus, Plus } from 'lucide-react';
 import { movimientosCajaService } from '../../../services/movimientosCajaService';
 
 const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {

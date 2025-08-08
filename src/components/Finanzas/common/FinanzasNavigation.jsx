@@ -8,12 +8,25 @@ import { Link, useLocation } from 'react-router-dom';
 const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadisticas = null }) => {
     const location = useLocation();
     
-    // Configuración de módulos de finanzas
+    // Determinar ruta base dinámicamente según el contexto actual
+    const baseRoute = useMemo(() => {
+        const currentPath = location.pathname;
+        
+        if (currentPath.includes('/super-admin')) {
+            return '/super-admin/finanzas';
+        } else if (currentPath.includes('/admin')) {
+            return '/admin/finanzas';
+        } else {
+            return '/finanzas'; // fallback
+        }
+    }, [location.pathname]);
+    
+    // Configuración de módulos de finanzas con rutas dinámicas
     const modulosFinanzas = useMemo(() => [
         {
             id: 'dashboard',
             label: 'Dashboard',
-            to: '/finanzas',
+            to: baseRoute,
             icon: '📊',
             color: 'bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 text-blue-800 border-blue-200',
             description: 'Resumen financiero general',
@@ -22,7 +35,7 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
         {
             id: 'movimientos-caja',
             label: 'Movimientos',
-            to: '/finanzas/movimientos-caja',
+            to: `${baseRoute}/movimientos-caja`,
             icon: '💸',
             color: 'bg-gradient-to-br from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200 text-emerald-800 border-emerald-200',
             description: 'Ingresos y egresos',
@@ -31,7 +44,7 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
         {
             id: 'cuentas-bancarias',
             label: 'Cuentas',
-            to: '/finanzas/cuentas-bancarias',
+            to: `${baseRoute}/cuentas-bancarias`,
             icon: '🏦',
             color: 'bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 text-green-800 border-green-200',
             description: 'Cuentas bancarias',
@@ -40,7 +53,7 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
         {
             id: 'prestamos',
             label: 'Préstamos',
-            to: '/finanzas/prestamos',
+            to: `${baseRoute}/prestamos`,
             icon: '💰',
             color: 'bg-gradient-to-br from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 text-yellow-800 border-yellow-200',
             description: 'Gestión de préstamos',
@@ -49,7 +62,7 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
         {
             id: 'garantias',
             label: 'Garantías',
-            to: '/finanzas/garantias',
+            to: `${baseRoute}/garantias`,
             icon: '🛡️',
             color: 'bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 text-purple-800 border-purple-200',
             description: 'Gestión de garantías',
@@ -58,13 +71,13 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
         {
             id: 'pagos-financiamiento',
             label: 'Pagos',
-            to: '/finanzas/pagos-financiamiento',
+            to: `${baseRoute}/pagos-financiamiento`,
             icon: '💳',
             color: 'bg-gradient-to-br from-indigo-50 to-indigo-100 hover:from-indigo-100 hover:to-indigo-200 text-indigo-800 border-indigo-200',
             description: 'Pagos y financiamiento',
             badge: estadisticas?.pagos?.pendientes || null
         }
-    ], [estadisticas]);
+    ], [estadisticas, baseRoute]);
 
     // Determinar módulo activo
     const moduloActivo = useMemo(() => {
@@ -111,7 +124,7 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
                                 <ol className="flex items-center space-x-2">
                                     <li>
                                         <Link 
-                                            to="/finanzas" 
+                                            to={baseRoute} 
                                             className="text-gray-500 hover:text-gray-700 transition-colors"
                                         >
                                             Dashboard

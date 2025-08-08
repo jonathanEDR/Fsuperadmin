@@ -198,7 +198,6 @@ export const columnasPrestamos = [
                         </div>
                         <button
                             onClick={() => {
-                                console.log('🎯 Clic en Ver Detalles - Sin fecha:', fila.codigo);
                                 handlers?.abrirModalDetallesPrestamo?.(fila);
                             }}
                             className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 text-xs font-medium rounded-md border border-blue-200 hover:border-blue-300 transition-all duration-200"
@@ -237,7 +236,6 @@ export const columnasPrestamos = [
                     </div>
                     <button
                         onClick={() => {
-                            console.log('🎯 Clic en Ver Detalles - Con fecha:', fila.codigo);
                             handlers?.abrirModalDetallesPrestamo?.(fila);
                         }}
                         className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 text-xs font-medium rounded-md border border-blue-200 hover:border-blue-300 transition-all duration-200"
@@ -277,6 +275,14 @@ export const accionesPrestamos = [
         handler: 'cancelarPrestamo',
         className: 'bg-red-500 hover:bg-red-600 text-white p-2 rounded-md transition-colors',
         tooltip: 'Cancelar préstamo'
+    },
+    {
+        label: 'Eliminar',
+        icono: '🗑️',
+        color: 'gray',
+        handler: 'eliminarPrestamo',
+        className: 'bg-gray-500 hover:bg-gray-600 text-white p-2 rounded-md transition-colors',
+        tooltip: 'Eliminar préstamo (elimina también el movimiento de caja)'
     }
 ];
 

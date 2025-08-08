@@ -32,6 +32,7 @@ const PrestamosPage = () => {
             // Funciones de CRUD
             manejarSubmitPrestamo,
             cancelarPrestamo, // ✅ Nueva función para cancelar
+            eliminarPrestamo, // ✅ Nueva función para eliminar
             
             // Funciones de modales
             abrirModalNuevoPrestamo,
@@ -80,6 +81,7 @@ const PrestamosPage = () => {
                     loading={loading}
                     onEdit={abrirModalEditarPrestamo}
                     onCancel={cancelarPrestamo} // ✅ Nueva función para cancelar
+                    onDelete={eliminarPrestamo} // ✅ Nueva función para eliminar
                     onVerAmortizacion={verTablaAmortizacion}
                     // Props para el modal de detalles
                     modalDetallesPrestamo={modalDetallesPrestamo}
