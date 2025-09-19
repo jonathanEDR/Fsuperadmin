@@ -4,6 +4,7 @@ import { useAuth } from '@clerk/clerk-react';
 import ModalIngreso from './ModalIngreso';
 import ModalEgreso from './ModalEgreso';
 import EstadisticasRapidas from './EstadisticasRapidas';
+import DateRangePicker from '../common/DateRangePicker';
 
 function Caja({ userRole }) {
   const { getToken } = useAuth();
@@ -14,53 +15,26 @@ function Caja({ userRole }) {
   const [error, setError] = useState(null);
   const [isModalIngresoOpen, setIsModalIngresoOpen] = useState(false);
   const [isModalEgresoOpen, setIsModalEgresoOpen] = useState(false);
-  const [periodo, setPeriodo] = useState('month');
+  
+  // Estados para rango de fechas personalizado
+  const [fechaInicio, setFechaInicio] = useState(() => {
+    // Por defecto: primer día del mes actual
+    const now = new Date();
+    const primerDiaMes = new Date(now.getFullYear(), now.getMonth(), 1);
+    return primerDiaMes.toISOString().split('T')[0];
+  });
+  
+  const [fechaFin, setFechaFin] = useState(() => {
+    // Por defecto: día actual
+    const now = new Date();
+    return now.toISOString().split('T')[0];
+  });
   
   // Estados para paginación
   const [currentLimit, setCurrentLimit] = useState(20);
   const [hasMoreData, setHasMoreData] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  const periodos = [
-    { value: 'day', label: 'Hoy' },
-    { value: 'week', label: 'Esta Semana' },
-    { value: 'month', label: 'Este Mes' }
-  ];
-
-  // Función para obtener el rango de fechas del período seleccionado
-  const obtenerRangoFechas = () => {
-    const ahora = new Date();
-    let inicio, fin;
-
-    switch (periodo) {
-      case 'day':
-        inicio = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
-        fin = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 23, 59, 59);
-        break;
-      case 'week':
-        const diaSemana = ahora.getDay();
-        const diasAtras = diaSemana === 0 ? 6 : diaSemana - 1; // Lunes como primer día
-        inicio = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - diasAtras);
-        fin = new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate() + 6, 23, 59, 59);
-        break;
-      case 'month':
-        inicio = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
-        fin = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0, 23, 59, 59);
-        break;
-      default:
-        return '';
-    }
-
-    const formatearFechaRango = (fecha) => {
-      return fecha.toLocaleDateString('es-PE', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      });
-    };
-
-    return `${formatearFechaRango(inicio)} - ${formatearFechaRango(fin)}`;
-  };
   // Obtener resumen de la caja
   const fetchResumen = useCallback(async () => {
     setLoading(true);
@@ -69,7 +43,8 @@ function Caja({ userRole }) {
       const token = await getToken();
       if (!token) throw new Error('No estás autorizado');
 
-      const response = await api.get(`/api/caja/resumen?periodo=${periodo}`, {
+      // Usar fechas personalizadas en lugar de período
+      const response = await api.get(`/api/caja/resumen?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -80,7 +55,7 @@ function Caja({ userRole }) {
     } finally {
       setLoading(false);
     }
-  }, [getToken, periodo]);
+  }, [getToken, fechaInicio, fechaFin]);
 
   // Obtener movimientos
   const fetchMovimientos = useCallback(async (limit = currentLimit, append = false) => {
@@ -94,7 +69,8 @@ function Caja({ userRole }) {
       const token = await getToken();
       if (!token) return;
 
-      const response = await api.get(`/api/caja/movimientos?limit=${limit}`, {
+      // Incluir fechas en la consulta de movimientos
+      const response = await api.get(`/api/caja/movimientos?limit=${limit}&fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -116,7 +92,7 @@ function Caja({ userRole }) {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [getToken, currentLimit]);
+  }, [getToken, currentLimit, fechaInicio, fechaFin]);
 
   // Función para cargar más registros
   const handleLoadMore = useCallback(async () => {
@@ -238,21 +214,22 @@ function Caja({ userRole }) {
         <div className="flex-1">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-1 lg:mb-2">
             <h2 className="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-800">💰 Control de Caja</h2>
-            <select
-              value={periodo}
-              onChange={(e) => setPeriodo(e.target.value)}
-              className="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm w-fit"
-            >
-              {periodos.map(p => (
-                <option key={p.value} value={p.value}>{p.label}</option>
-              ))}
-            </select>
           </div>
+          
+          {/* Filtro de Rango de Fechas */}
+          <div className="mb-4">
+            <DateRangePicker
+              fechaInicio={fechaInicio}
+              fechaFin={fechaFin}
+              onFechaInicioChange={setFechaInicio}
+              onFechaFinChange={setFechaFin}
+              label="Período"
+              className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm"
+            />
+          </div>
+          
           <div className="flex flex-col gap-0.5">
             <p className="text-gray-600 text-sm">Gestión centralizada de ingresos y egresos</p>
-            <p className="text-xs text-gray-500 font-medium">
-              📅 Período: {obtenerRangoFechas()}
-            </p>
           </div>
         </div>
       </div>
@@ -302,8 +279,8 @@ function Caja({ userRole }) {
           <div className="lg:col-span-5">
             <EstadisticasRapidas 
               resumen={resumen}
-              periodos={periodos}
-              periodo={periodo}
+              fechaInicio={fechaInicio}
+              fechaFin={fechaFin}
               formatearMonto={formatearMonto}
             />
           </div>

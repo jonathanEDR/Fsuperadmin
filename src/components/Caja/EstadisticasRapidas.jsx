@@ -1,12 +1,30 @@
 import React from 'react';
 
-const EstadisticasRapidas = ({ resumen, periodos, periodo, formatearMonto }) => {
+const EstadisticasRapidas = ({ resumen, fechaInicio, fechaFin, formatearMonto }) => {
   if (!resumen) return null;
+
+  // Formatear el rango de fechas para mostrar
+  const formatearRangoFechas = () => {
+    if (!fechaInicio || !fechaFin) return '';
+    
+    const inicio = new Date(fechaInicio);
+    const fin = new Date(fechaFin);
+    
+    const formatearFecha = (fecha) => {
+      return fecha.toLocaleDateString('es-PE', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    };
+    
+    return `${formatearFecha(inicio)} - ${formatearFecha(fin)}`;
+  };
 
   const estadisticas = [
     {
       label: `Ingresos`,
-      labelCompleto: `Ingresos (${periodos.find(p => p.value === periodo)?.label})`,
+      labelCompleto: `Ingresos (${formatearRangoFechas()})`,
       valor: resumen.totalIngresos,
       color: 'green',
       icono: '📈',
@@ -14,7 +32,7 @@ const EstadisticasRapidas = ({ resumen, periodos, periodo, formatearMonto }) => 
     },
     {
       label: `Egresos`,
-      labelCompleto: `Egresos (${periodos.find(p => p.value === periodo)?.label})`,
+      labelCompleto: `Egresos (${formatearRangoFechas()})`,
       valor: resumen.totalEgresos,
       color: 'red',
       icono: '📉',

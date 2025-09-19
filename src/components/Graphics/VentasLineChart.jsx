@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import api from '../../services/api';
@@ -14,150 +14,176 @@ import {
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-const VentasLineChart = ({ userRole }) => {
+const VentasLineChart = React.memo(({ userRole }) => {
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [timeFilter, setTimeFilter] = useState('mes'); // hoy, semana, mes, anual
-  const [isMobile, setIsMobile] = useState(false);
   const [totals, setTotals] = useState({
     ventasBrutas: 0,
     devoluciones: 0,
     ventasNetas: 0,
     cantidadVendida: 0
   });
+  
+  // Estados para filtro de fechas - valores por defecto: últimos 30 días
+  const [fechaInicio, setFechaInicio] = useState(() => {
+    const hace30Dias = new Date();
+    hace30Dias.setDate(hace30Dias.getDate() - 30);
+    return hace30Dias.toISOString().split('T')[0];
+  });
+  
+  const [fechaFin, setFechaFin] = useState(() => {
+    return new Date().toISOString().split('T')[0];
+  });
+
+  // State para almacenar las etiquetas originales para el tooltip
+  const [originalLabels, setOriginalLabels] = useState([]);
 
   // Detectar si es móvil
+  const [isMobile, setIsMobile] = useState(false);
+  
   useEffect(() => {
     const checkMobile = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      // En móvil, forzar vista de semana
-      if (mobile && timeFilter !== 'semana') {
-        setTimeFilter('semana');
-      }
+      setIsMobile(window.innerWidth < 768);
     };
-
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
-  }, [timeFilter]);
+  }, []);
 
-  const processVentasData = (ventas, devoluciones, filter, startDate, endDate) => {
-    const labels = generarEtiquetasGrafico(filter, startDate, endDate);
-    const dataPoints = labels.map(() => ({ 
-      ventasBrutas: 0, 
-      devoluciones: 0, 
-      ventasNetas: 0,
-      cantidadVendida: 0 
-    }));
+  // Función para obtener datos de ventas
+  const fetchVentasData = useCallback(async () => {
+    if (!fechaInicio || !fechaFin) {
+      return;
+    }
 
-    // Procesar ventas - SOLO ventas reales, no montos ajustados por devoluciones
-    ventas.forEach((venta) => {
-      const fechaVenta = extraerFechaValida(venta, [
-        'fechadeVenta',
-        'createdAt', 
-        'updatedAt'
-      ]) || new Date();
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Usar el endpoint específico para gráficos que incluye fechadeVenta
+      const [ventasRes, devolucionesRes] = await Promise.all([
+        api.get(`/api/ventas/graficos?startDate=${fechaInicio}&endDate=${fechaFin}`),
+        api.get('/api/devoluciones?limit=1000').catch(() => ({ data: { devoluciones: [] } }))
+      ]);
+
+      const ventas = ventasRes.data.ventas || ventasRes.data || [];
+      const devoluciones = devolucionesRes.data.devoluciones || devolucionesRes.data || [];
+
+      await processVentasData(ventas, devoluciones);
+    } catch (err) {
+      console.error('❌ VentasChart - Error al cargar datos:', err);
+      setError('Error al cargar datos: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [fechaInicio, fechaFin]);
+
+  // Función para procesar datos de ventas
+  const processVentasData = useCallback(async (ventas, devoluciones) => {
+    try {
+      if (!fechaInicio || !fechaFin) {
+        return;
+      }
+
+      // Validar que los arrays sean válidos
+      const ventasValidas = Array.isArray(ventas) ? ventas : [];
+      const devolucionesValidas = Array.isArray(devoluciones) ? devoluciones : [];
+
+      // Configurar fechas como en la implementación original
+      const startDate = new Date(fechaInicio);
+      const endDate = new Date(fechaFin);
+      endDate.setHours(23, 59, 59, 999); // Incluir todo el día final
+
+      // Generar etiquetas para el rango de fechas
+      const labels = [];
+      const fechaActual = new Date(startDate);
       
-      if (fechaEnRango(fechaVenta, startDate, endDate)) {
-        const indexPos = calcularIndiceParaFecha(fechaVenta, filter, startDate);
-        if (indexPos >= 0 && indexPos < dataPoints.length) {
-          // Usar montoOriginal si existe (monto antes de devoluciones), sino montoTotal
-          const montoVentaBruta = Number(venta.montoOriginal || venta.montoTotal || 0);
-          dataPoints[indexPos].ventasBrutas += montoVentaBruta;
-          dataPoints[indexPos].cantidadVendida += Number(venta.cantidadVendida || 0);
-        }
+      while (fechaActual <= endDate) {
+        labels.push(fechaActual.toISOString().split('T')[0]);
+        fechaActual.setDate(fechaActual.getDate() + 1);
       }
-    });
-
-    // Procesar devoluciones - Solo restar del total, no afectar ventas brutas
-    // Crear un mapa de devoluciones por venta para ajustar las ventas brutas
-    const devolucionesPorVenta = {};
-    devoluciones.forEach((devolucion) => {
-      const ventaId = devolucion.ventaId || devolucion.venta;
-      if (ventaId) {
-        if (!devolucionesPorVenta[ventaId]) {
-          devolucionesPorVenta[ventaId] = 0;
-        }
-        devolucionesPorVenta[ventaId] += Number(devolucion.monto || devolucion.montoDevolucion || 0);
+      
+      // Guardar las etiquetas originales para el tooltip
+      setOriginalLabels(labels);
+      
+      if (labels.length === 0) {
+        console.error('❌ VentasChart - No se pudieron generar etiquetas');
+        setError('Error al generar las etiquetas del gráfico');
+        return;
       }
-    });
 
-    // Si no hay campo montoOriginal, intentar recalcular las ventas brutas
-    if (Object.keys(devolucionesPorVenta).length > 0) {
-      // Recalcular ventas brutas sumando las devoluciones al montoTotal actual
-      ventas.forEach((venta) => {
-        const devolucionTotal = devolucionesPorVenta[venta._id] || 0;
-        if (devolucionTotal > 0) {
-          const fechaVenta = extraerFechaValida(venta, ['fechadeVenta', 'createdAt', 'updatedAt']);
-          if (fechaVenta && fechaEnRango(fechaVenta, startDate, endDate)) {
-            const indexPos = calcularIndiceParaFecha(fechaVenta, filter, startDate);
-            if (indexPos >= 0 && indexPos < dataPoints.length) {
-              // Ajustar: ventas brutas = monto actual + devoluciones
-              const montoOriginalCalculado = Number(venta.montoTotal || 0) + devolucionTotal;
-              const diferencia = montoOriginalCalculado - Number(venta.montoTotal || 0);
-              
-              dataPoints[indexPos].ventasBrutas += diferencia;
+      // Inicializar estructura de datos
+      const dataPoints = labels.map(() => ({ 
+        ventasBrutas: 0, 
+        devoluciones: 0, 
+        ventasNetas: 0,
+        cantidadVendida: 0 
+      }));
+
+      // Procesar ventas - filtrar por rango de fechas
+      let ventasProcesadas = 0;
+      let ventasEnRango = 0;
+      
+      ventasValidas.forEach(venta => {
+        ventasProcesadas++;
+        if (!venta || !venta.fechadeVenta) {
+          return;
+        }
+        
+        const fechaVenta = new Date(venta.fechadeVenta);
+        
+        // Ya no necesitamos filtrar por rango porque el backend ya lo hace
+        ventasEnRango++;
+        // Calcular índice basado en días desde startDate
+        const diasDesdeInicio = Math.floor((fechaVenta - startDate) / (1000 * 60 * 60 * 24));
+        const index = Math.max(0, Math.min(diasDesdeInicio, labels.length - 1));
+        
+        if (index >= 0 && index < dataPoints.length) {
+            const montoVenta = parseFloat(venta?.montoTotal) || 0;
+            dataPoints[index].ventasBrutas += montoVenta;
+            
+            // Calcular cantidad vendida
+            if (Array.isArray(venta.productos)) {
+              const cantidad = venta.productos.reduce((sum, prod) => {
+                return sum + (parseInt(prod?.cantidad) || 0);
+              }, 0);
+              dataPoints[index].cantidadVendida += cantidad;
             }
+        }
+        
+        // Solo mostrar las primeras 5 ventas para evitar spam
+        if (ventasProcesadas >= 5) return;
+      });
+      
+      // Procesar devoluciones - filtrar por rango de fechas
+      devolucionesValidas.forEach(devolucion => {
+        if (!devolucion || !devolucion.fechaDevolucion) return;
+        
+        const fechaDevolucion = new Date(devolucion.fechaDevolucion);
+        if (fechaDevolucion >= startDate && fechaDevolucion <= endDate) {
+          // Calcular índice basado en días desde startDate
+          const diasDesdeInicio = Math.floor((fechaDevolucion - startDate) / (1000 * 60 * 60 * 24));
+          const index = Math.max(0, Math.min(diasDesdeInicio, labels.length - 1));
+          
+          if (index >= 0 && index < dataPoints.length) {
+            const montoDevolucion = parseFloat(devolucion?.monto) || 0;
+            dataPoints[index].devoluciones += montoDevolucion;
           }
         }
       });
-    }
 
-    // Procesar devoluciones como eventos separados
-    devoluciones.forEach((devolucion) => {
-      const fechaDevolucion = extraerFechaValida(devolucion, [
-        'fechaDevolucion',
-        'createdAt',
-        'updatedAt'
-      ]);
-      
-      if (!fechaDevolucion) {
-        return;
-      }
-      
-      if (fechaEnRango(fechaDevolucion, startDate, endDate)) {
-        const indexPos = calcularIndiceParaFecha(fechaDevolucion, filter, startDate);
-        
-        if (indexPos >= 0 && indexPos < dataPoints.length) {
-          const montoDevolucion = Number(devolucion.monto || devolucion.montoDevolucion || 0);
-          dataPoints[indexPos].devoluciones += montoDevolucion;
-        }
-      }
-    });
+      // Calcular ventas netas
+      dataPoints.forEach(point => {
+        point.ventasNetas = point.ventasBrutas - point.devoluciones;
+      });
 
-    // Calcular ventas netas
-    dataPoints.forEach(point => {
-      point.ventasNetas = point.ventasBrutas - point.devoluciones;
-    });
-    
-    return { labels, dataPoints };
-  };
-
-  const fetchVentasData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      // Obtener ventas y devoluciones
-      const [ventasResponse, devolucionesResponse] = await Promise.all([
-        api.get('/api/ventas?limit=1000'),
-        api.get('/api/devoluciones?limit=1000').catch(() => ({ data: { devoluciones: [] } }))
-      ]);
-      
-      const ventas = ventasResponse.data.ventas || ventasResponse.data || [];
-      const devoluciones = devolucionesResponse.data.devoluciones || devolucionesResponse.data || [];
-      
-      const { startDate, endDate } = calcularRangoFechas(timeFilter);
-      const { labels, dataPoints } = processVentasData(ventas, devoluciones, timeFilter, startDate, endDate);
-      
       // Calcular totales del período
       let totalVentasBrutas = 0;
-      let totalDevoluciones = 0; 
+      let totalDevoluciones = 0;
       let totalVentasNetas = 0;
       let totalCantidadVendida = 0;
 
-      // Calcular totales punto por punto para asegurar consistencia
       dataPoints.forEach(point => {
         totalVentasBrutas += point.ventasBrutas;
         totalDevoluciones += point.devoluciones;
@@ -165,19 +191,23 @@ const VentasLineChart = ({ userRole }) => {
         totalCantidadVendida += point.cantidadVendida;
       });
 
-      // Verificación cruzada: las ventas netas también pueden calcularse como diferencia total
-      const ventasNetasCalculadas = totalVentasBrutas - totalDevoluciones;
-      
       const periodTotals = {
         ventasBrutas: totalVentasBrutas,
         devoluciones: totalDevoluciones,
-        ventasNetas: ventasNetasCalculadas, // Usar el cálculo directo para mayor precisión
+        ventasNetas: totalVentasNetas,
         cantidadVendida: totalCantidadVendida
       };
       
       setTotals(periodTotals);
-      setChartData({
-        labels,
+      
+      const newChartData = {
+        labels: labels.map(dateStr => {
+          const date = new Date(dateStr + 'T00:00:00');
+          return date.toLocaleDateString('es-ES', { 
+            day: '2-digit', 
+            month: '2-digit' 
+          });
+        }),
         datasets: [
           {
             label: 'Ventas Brutas (S/)',
@@ -205,64 +235,68 @@ const VentasLineChart = ({ userRole }) => {
             borderWidth: 3,
           },
         ],
-      });
+      };
+      
+      if (!newChartData.labels || newChartData.labels.length === 0) {
+        console.error('❌ VentasChart - Sin datos válidos para mostrar');
+        setError('No hay datos para mostrar en el período seleccionado');
+        return;
+      }
+      
+      setChartData(newChartData);
     } catch (err) {
       setError('No se pudo cargar el gráfico de ventas: ' + err.message);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [fechaInicio, fechaFin]);
 
+  // Función para obtener la etiqueta del filtro
+  const getTimeFilterLabel = useCallback(() => {
+    if (!fechaInicio || !fechaFin) return 'Selecciona un rango de fechas';
+    
+    const inicio = new Date(fechaInicio);
+    const fin = new Date(fechaFin);
+    const diferenciaDias = Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24)) + 1;
+    
+    return `${inicio.toLocaleDateString('es-ES')} - ${fin.toLocaleDateString('es-ES')} (${diferenciaDias} ${diferenciaDias === 1 ? 'día' : 'días'})`;
+  }, [fechaInicio, fechaFin]);
+
+  // Efecto para cargar datos cuando cambian las fechas
+  useEffect(() => {
+    if (fechaInicio && fechaFin) {
+      const timer = setTimeout(() => {
+        fetchVentasData();
+      }, 300); // Debounce de 300ms para evitar múltiples llamadas
+
+      return () => clearTimeout(timer);
+    }
+  }, [fetchVentasData, fechaInicio, fechaFin]);
+
+  // Efecto inicial para cargar datos por defecto
   useEffect(() => {
     fetchVentasData();
-  }, [timeFilter]);
+  }, []); // Solo se ejecuta una vez al montar el componente
 
-  const getTimeFilterLabel = () => {
-    switch (timeFilter) {
-      case 'hoy': return 'Hoy';
-      case 'semana': return 'Esta Semana';
-      case 'mes': return 'Este Mes';
-      case 'anual': return 'Este Año';
-      default: return 'Período';
-    }
-  };
-
-  if (loading) return (
-    <div className="bg-white rounded-lg shadow p-2 sm:p-6 mb-4 sm:mb-8">
-      <div className="py-8 text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600 text-sm">Cargando gráfico de ventas...</p>
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg shadow p-6 mb-8">
+        <div className="text-center">
+          <div className="text-red-500 text-lg mb-2">⚠️ Error</div>
+          <p className="text-gray-600">{error}</p>
+          <button 
+            onClick={fetchVentasData}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            🔄 Reintentar
+          </button>
+        </div>
       </div>
-    </div>
-  );
-
-  if (error) return (
-    <div className="bg-white rounded-lg shadow p-2 sm:p-6 mb-4 sm:mb-8">
-      <div className="py-8 text-center text-red-600">
-        <p className="font-semibold">Error al cargar el gráfico</p>
-        <p className="text-xs sm:text-sm mt-2">{error}</p>
-        <button 
-          onClick={fetchVentasData}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          Reintentar
-        </button>
-      </div>
-    </div>
-  );
-
-  if (!chartData) return (
-    <div className="bg-white rounded-lg shadow p-2 sm:p-6 mb-4 sm:mb-8">
-      <div className="py-8 text-center text-gray-600">
-        <p>No hay datos disponibles para mostrar</p>
-      </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg shadow p-2 sm:p-6 mb-4 sm:mb-8 overflow-hidden">
-      {/* Header con filtros tecnológicos modernos */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
+      {/* Header simplificado */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div className="flex items-center gap-3">
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-lg blur-sm opacity-60"></div>
@@ -277,87 +311,103 @@ const VentasLineChart = ({ userRole }) => {
           </h3>
         </div>
         
-        {/* Selector responsivo - Solo semana en móvil */}
-        <div className="w-full sm:w-auto">
-          {/* Vista única: Botones tecnológicos modernos */}
-          <div className="relative bg-gradient-to-r from-slate-50 to-gray-100 p-1 rounded-2xl border border-gray-200 shadow-lg backdrop-blur-sm">
-            {/* Indicador deslizante de fondo */}
-            <div 
-              className={`absolute top-1 bottom-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 rounded-xl transition-all duration-300 ease-out shadow-lg ${
-                isMobile 
-                  ? 'w-full left-0' 
-                  : `width: ${100/4}%; left: ${(['hoy', 'semana', 'mes', 'anual'].indexOf(timeFilter)) * 25}%`
-              }`}
-              style={!isMobile ? {
-                width: `${100/4}%`,
-                left: `${(['hoy', 'semana', 'mes', 'anual'].indexOf(timeFilter)) * 25}%`,
-              } : {}}
-            ></div>
-            
-            <div className={`relative ${isMobile ? 'grid grid-cols-1' : 'grid grid-cols-4 gap-0'}`}>
-              {(isMobile ? 
-                [{ key: 'semana', label: 'Esta Semana', icon: '📊', desc: '7 días' }] :
-                [
-                  { key: 'hoy', label: 'Hoy', icon: '⚡', desc: '24h' },
-                  { key: 'semana', label: 'Semana', icon: '📊', desc: '7d' },
-                  { key: 'mes', label: 'Mes', icon: '📈', desc: '30d' },
-                  { key: 'anual', label: 'Año', icon: '🎯', desc: '365d' }
-                ]
-              ).map((filter) => (
-                <button
-                  key={filter.key}
-                  onClick={() => setTimeFilter(filter.key)}
-                  className={`relative px-3 sm:px-4 py-3 sm:py-3 rounded-xl font-medium transition-all duration-300 ease-out group hover:scale-105 ${
-                    timeFilter === filter.key
-                      ? 'text-white shadow-lg z-10'
-                      : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
-                  }`}
-                  disabled={isMobile && filter.key !== 'semana'}
-                >
-                  <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
-                    <span className="text-lg sm:text-base">{filter.icon}</span>
-                    <div className="flex flex-col sm:flex-row items-center gap-0 sm:gap-1">
-                      <span className="text-xs sm:text-sm font-bold leading-none">{filter.label}</span>
-                      <span className={`text-xs leading-none ${
-                        timeFilter === filter.key ? 'text-white/80' : 'text-gray-500'
-                      }`}>
-                        {filter.desc}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  {/* Efecto de brillo en hover */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  
-                  {/* Indicador activo adicional */}
-                  {timeFilter === filter.key && (
-                    <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-white rounded-full shadow-lg animate-pulse"></div>
-                  )}
-                </button>
-              ))}
-            </div>
-            
-            {/* Efectos de borde tecnológicos */}
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 rounded-2xl opacity-20 blur-sm -z-10"></div>
+        {/* Información del período actual */}
+        <div className="text-center">
+          <span className="text-xs sm:text-sm text-gray-600 font-medium">
+            📊 {getTimeFilterLabel()}
+          </span>
+        </div>
+      </div>
+
+      {/* Panel de selección de fechas siempre visible */}
+      <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+          {/* Fecha de inicio */}
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              📅 Fecha de Inicio
+            </label>
+            <input
+              type="date"
+              value={fechaInicio}
+              onChange={(e) => setFechaInicio(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              max={fechaFin || new Date().toISOString().split('T')[0]}
+            />
           </div>
-          
-          {/* Información del período actual con diseño tech */}
-          <div className="mt-3 text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-full">
-              <div className="w-2 h-2 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full animate-pulse"></div>
-              <span className="text-xs sm:text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                Analizando: {getTimeFilterLabel()}
-              </span>
-              <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-indigo-400 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
-            </div>
+
+          {/* Fecha de fin */}
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              📅 Fecha de Fin
+            </label>
+            <input
+              type="date"
+              value={fechaFin}
+              onChange={(e) => setFechaFin(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              min={fechaInicio}
+              max={new Date().toISOString().split('T')[0]}
+            />
+          </div>
+
+          {/* Botones de accesos rápidos */}
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={() => {
+                const hoy = new Date();
+                const hace7Dias = new Date();
+                hace7Dias.setDate(hoy.getDate() - 7);
+                setFechaInicio(hace7Dias.toISOString().split('T')[0]);
+                setFechaFin(hoy.toISOString().split('T')[0]);
+              }}
+              className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-xs font-medium whitespace-nowrap transition-colors"
+            >
+              Últimos 7 días
+            </button>
+            
+            <button
+              onClick={() => {
+                const hoy = new Date();
+                const hace30Dias = new Date();
+                hace30Dias.setDate(hoy.getDate() - 30);
+                setFechaInicio(hace30Dias.toISOString().split('T')[0]);
+                setFechaFin(hoy.toISOString().split('T')[0]);
+              }}
+              className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-xs font-medium whitespace-nowrap transition-colors"
+            >
+              Últimos 30 días
+            </button>
           </div>
         </div>
+
+        {/* Información del rango */}
+        {fechaInicio && fechaFin && (
+          <div className="mt-3 pt-3 border-t border-blue-200">
+            <p className="text-sm text-blue-800">
+              📊 Analizando desde {new Date(fechaInicio).toLocaleDateString('es-ES')} hasta {new Date(fechaFin).toLocaleDateString('es-ES')}
+              {(() => {
+                const inicio = new Date(fechaInicio);
+                const fin = new Date(fechaFin);
+                const diferencia = Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24)) + 1;
+                return ` (${diferencia} ${diferencia === 1 ? 'día' : 'días'})`;
+              })()}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Gráfico con altura responsiva mejorada */}
       <div className="mb-4 sm:mb-6 w-full overflow-hidden">
         <div className="w-full" style={{height: 'clamp(280px, 50vh, 400px)'}}>
-          {chartData ? (
+          {loading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="flex flex-col items-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                <p className="mt-2 text-gray-600">Cargando datos...</p>
+              </div>
+            </div>
+          ) : chartData ? (
             <Line 
               data={chartData} 
               options={{
@@ -388,149 +438,125 @@ const VentasLineChart = ({ userRole }) => {
                       size: window.innerWidth < 640 ? 10 : 11
                     },
                     callbacks: {
+                      title: function(context) {
+                        const index = context[0].dataIndex;
+                        // Usar las etiquetas originales guardadas en el state
+                        if (originalLabels && originalLabels[index]) {
+                          const originalDate = originalLabels[index];
+                          const date = new Date(originalDate + 'T00:00:00');
+                          return date.toLocaleDateString('es-ES', { 
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          });
+                        }
+                        return '';
+                      },
                       label: function(context) {
-                        return `${context.dataset.label}: S/ ${context.parsed.y.toFixed(2)}`;
+                        const value = context.parsed.y;
+                        const label = context.dataset.label || '';
+                        return `${label}: S/ ${value.toFixed(2)}`;
                       }
                     }
                   }
                 },
                 scales: {
-                  y: { 
-                    beginAtZero: true, 
-                    title: { 
-                      display: window.innerWidth >= 640, 
-                      text: 'Monto (S/)',
+                  x: {
+                    display: true,
+                    grid: {
+                      color: 'rgba(0,0,0,0.1)',
+                    },
+                    ticks: {
+                      maxTicksLimit: window.innerWidth < 640 ? 5 : 10,
                       font: {
-                        size: window.innerWidth < 640 ? 10 : 12
+                        size: window.innerWidth < 640 ? 9 : 11
                       }
+                    }
+                  },
+                  y: {
+                    display: true,
+                    grid: {
+                      color: 'rgba(0,0,0,0.1)',
                     },
                     ticks: {
                       font: {
-                        size: window.innerWidth < 640 ? 8 : 11
+                        size: window.innerWidth < 640 ? 9 : 11
                       },
                       callback: function(value) {
-                        return window.innerWidth < 640 ? `S/${value}` : `S/ ${value}`;
-                      },
-                      maxTicksLimit: window.innerWidth < 640 ? 5 : 8
-                    }
-                  },
-                  x: { 
-                    title: { 
-                      display: window.innerWidth >= 640, 
-                      text: 'Día del Mes',
-                      font: {
-                        size: window.innerWidth < 640 ? 10 : 12
+                        return 'S/ ' + value.toFixed(0);
                       }
-                    },
-                    ticks: {
-                      font: {
-                        size: window.innerWidth < 640 ? 8 : 11
-                      },
-                      maxTicksLimit: window.innerWidth < 640 ? 6 : 12
                     }
-                  },
-                },
-                interaction: {
-                  mode: 'nearest',
-                  axis: 'x',
-                  intersect: false
+                  }
                 }
-              }} 
+              }}
             />
           ) : (
-            <div className="h-full flex items-center justify-center text-gray-500">
-              <p className="text-sm">No se pudo renderizar el gráfico</p>
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <div className="text-gray-400 text-6xl mb-4">📊</div>
+                <p className="text-gray-500">No hay datos para mostrar</p>
+                <p className="text-gray-400 text-sm">Selecciona un rango de fechas válido</p>
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Resumen de totales mejorado para móvil - Una sola fila */}
-      <div className="grid grid-cols-1 gap-3 sm:gap-4">
-        {/* Fila única en móvil con todas las métricas */}
-        <div className="grid grid-cols-4 gap-2 sm:hidden">
-          <div className="bg-gradient-to-br from-green-50 to-green-100 p-2 rounded-lg border border-green-200">
-            <div className="text-center">
-              <div className="text-sm font-bold text-green-600 truncate">
-                S/ {totals.ventasBrutas.toFixed(0)}
-              </div>
-              <div className="text-xs text-green-700 font-medium">Brutas</div>
+      {/* Panel de totales mejorado */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3 sm:p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs sm:text-sm font-medium text-green-800">Ventas Brutas</p>
+              <p className="text-base sm:text-xl font-bold text-green-900">
+                S/ {totals.ventasBrutas.toFixed(2)}
+              </p>
             </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-2 rounded-lg border border-blue-200">
-            <div className="text-center">
-              <div className="text-sm font-bold text-blue-600 truncate">
-                S/ {totals.ventasNetas.toFixed(0)}
-              </div>
-              <div className="text-xs text-blue-700 font-medium">Netas</div>
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-red-50 to-red-100 p-2 rounded-lg border border-red-200">
-            <div className="text-center">
-              <div className="text-sm font-bold text-red-600 truncate">
-                S/ {totals.devoluciones.toFixed(0)}
-              </div>
-              <div className="text-xs text-red-700 font-medium">Devol.</div>
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-2 rounded-lg border border-purple-200">
-            <div className="text-center">
-              <div className="text-sm font-bold text-purple-600">
-                {totals.cantidadVendida}
-              </div>
-              <div className="text-xs text-purple-700 font-medium">Units</div>
-            </div>
+            <div className="text-green-600 text-xl sm:text-2xl">💰</div>
           </div>
         </div>
 
-        {/* Grid tradicional para desktop */}
-        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="bg-gradient-to-br from-green-50 to-green-100 p-3 sm:p-4 rounded-lg border border-green-200">
-            <div className="text-center">
-              <div className="text-lg sm:text-2xl font-bold text-green-600 truncate">
-                S/ {totals.ventasBrutas.toFixed(2)}
-              </div>
-              <div className="text-xs sm:text-sm text-green-700 font-medium">Ventas Brutas</div>
-              <div className="text-xs text-green-600 mt-1">{getTimeFilterLabel()}</div>
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-3 sm:p-4 rounded-lg border border-blue-200">
-            <div className="text-center">
-              <div className="text-lg sm:text-2xl font-bold text-blue-600 truncate">
-                S/ {totals.ventasNetas.toFixed(2)}
-              </div>
-              <div className="text-xs sm:text-sm text-blue-700 font-medium">Ventas Netas</div>
-              <div className="text-xs text-blue-600 mt-1">{getTimeFilterLabel()}</div>
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-red-50 to-red-100 p-3 sm:p-4 rounded-lg border border-red-200">
-            <div className="text-center">
-              <div className="text-lg sm:text-2xl font-bold text-red-600 truncate">
+        <div className="bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-lg p-3 sm:p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs sm:text-sm font-medium text-red-800">Devoluciones</p>
+              <p className="text-base sm:text-xl font-bold text-red-900">
                 S/ {totals.devoluciones.toFixed(2)}
-              </div>
-              <div className="text-xs sm:text-sm text-red-700 font-medium">Devoluciones</div>
-              <div className="text-xs text-red-600 mt-1">{getTimeFilterLabel()}</div>
+              </p>
             </div>
+            <div className="text-red-600 text-xl sm:text-2xl">↩️</div>
           </div>
-          
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-3 sm:p-4 rounded-lg border border-purple-200">
-            <div className="text-center">
-              <div className="text-lg sm:text-2xl font-bold text-purple-600">
-                {totals.cantidadVendida}
-              </div>
-              <div className="text-xs sm:text-sm text-purple-700 font-medium">Unidades</div>
-              <div className="text-xs text-purple-600 mt-1">{getTimeFilterLabel()}</div>
+        </div>
+
+        <div className="bg-gradient-to-r from-blue-50 to-sky-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs sm:text-sm font-medium text-blue-800">Ventas Netas</p>
+              <p className="text-base sm:text-xl font-bold text-blue-900">
+                S/ {totals.ventasNetas.toFixed(2)}
+              </p>
             </div>
+            <div className="text-blue-600 text-xl sm:text-2xl">📈</div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-lg p-3 sm:p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs sm:text-sm font-medium text-purple-800">Cantidad</p>
+              <p className="text-base sm:text-xl font-bold text-purple-900">
+                {totals.cantidadVendida} unid.
+              </p>
+            </div>
+            <div className="text-purple-600 text-xl sm:text-2xl">📦</div>
           </div>
         </div>
       </div>
     </div>
   );
-};
+});
+
+VentasLineChart.displayName = 'VentasLineChart';
 
 export default VentasLineChart;
