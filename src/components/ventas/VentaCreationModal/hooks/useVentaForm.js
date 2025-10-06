@@ -15,9 +15,8 @@ export const useVentaForm = (onVentaCreated, onClose) => {
   // Estado del formulario
   const [formData, setFormData] = useState({
     fechadeVenta: getLocalDateTimeString(),
-    estadoPago: 'Pendiente',
-    cantidadPagada: 0,
-    targetUserId: ''
+    targetUserId: '',
+    clienteNombre: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,9 +49,8 @@ export const useVentaForm = (onVentaCreated, onClose) => {
   const resetearFormulario = useCallback(() => {
     setFormData({
       fechadeVenta: getLocalDateTimeString(),
-      estadoPago: 'Pendiente',
-      cantidadPagada: 0,
-      targetUserId: ''
+      targetUserId: '',
+      clienteNombre: ''
     });
     setError('');
     setSuccessMessage('');
@@ -95,10 +93,15 @@ export const useVentaForm = (onVentaCreated, onClose) => {
         })),
         fechadeVenta: formData.fechadeVenta,
         montoTotal,
-        estadoPago: formData.estadoPago,
-        cantidadPagada: Number(formData.cantidadPagada) || 0,
+        estadoPago: 'Pendiente', // Siempre pendiente en la creación
+        cantidadPagada: 0, // Siempre 0 en la creación
         targetUserId: formData.targetUserId || undefined
       };
+
+      // Si es venta sin registro, incluir nombre del cliente
+      if (formData.targetUserId === 'sin-registro' && formData.clienteNombre) {
+        ventaData.clienteNombre = formData.clienteNombre;
+      }
 
       // Enviar petición al backend
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/ventas`, {
@@ -145,7 +148,6 @@ export const useVentaForm = (onVentaCreated, onClose) => {
     } catch (error) {
       const errorMessage = error.message || 'Error al crear la venta';
       setError(errorMessage);
-      console.error('Error creating venta:', error);
       return { success: false, error: errorMessage };
     } finally {
       setIsSubmitting(false);

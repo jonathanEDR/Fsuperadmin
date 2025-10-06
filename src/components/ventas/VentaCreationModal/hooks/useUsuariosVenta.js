@@ -90,7 +90,6 @@ export const useUsuariosVenta = (currentUserRole) => {
         setError('');
       } catch (error) {
         setError('Error al cargar la lista de usuarios: ' + error.message);
-        console.error('Error loading users:', error);
         
         // Fallback: agregar usuario actual
         if (user) {

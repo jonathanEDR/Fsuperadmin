@@ -1,8 +1,8 @@
-import React from 'react';
-import { User, CreditCard, FileText, DollarSign } from 'lucide-react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { User, Search, UserPlus, ChevronDown, X } from 'lucide-react';
 
 /**
- * FormularioVenta - Formulario de datos de la venta
+ * FormularioVenta - Formulario simplificado para selección de cliente
  * 
  * @component
  * @param {Object} props
@@ -28,143 +28,217 @@ const FormularioVenta = React.memo(({
   loadingUsuarios = false,
   errores = {}
 }) => {
-  const metodoPagoOptions = [
-    { value: 'efectivo', label: 'Efectivo' },
-    { value: 'tarjeta', label: 'Tarjeta' },
-    { value: 'transferencia', label: 'Transferencia' },
-    { value: 'mixto', label: 'Mixto' }
-  ];
+  // Estados locales
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [showClienteNombre, setShowClienteNombre] = useState(false);
+  const dropdownRef = useRef(null);
 
-  const handleChange = (field, value) => {
-    onFormChange({ ...formData, [field]: value });
+  // Cerrar dropdown al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Filtrar usuarios según búsqueda
+  const usuariosFiltrados = useMemo(() => {
+    if (!searchTerm.trim()) return usuarios;
+    
+    const search = searchTerm.toLowerCase();
+    return usuarios.filter(u => 
+      u.name?.toLowerCase().includes(search) ||
+      u.email?.toLowerCase().includes(search)
+    );
+  }, [usuarios, searchTerm]);
+
+  // Obtener usuario seleccionado
+  const usuarioSeleccionado = useMemo(() => {
+    if (!formData.targetUserId) return null;
+    if (formData.targetUserId === 'sin-registro') {
+      return { id: 'sin-registro', name: '🆕 Cliente Sin Registro', email: 'sin-registro@sistema.local' };
+    }
+    return usuarios.find(u => u.id === formData.targetUserId);
+  }, [formData.targetUserId, usuarios]);
+
+  const handleSelectCliente = (clienteId) => {
+    // Actualizar cliente seleccionado
+    onFormChange({ ...formData, targetUserId: clienteId });
+    
+    // Si selecciona "sin-registro", mostrar campo de nombre
+    if (clienteId === 'sin-registro') {
+      setShowClienteNombre(true);
+    } else {
+      setShowClienteNombre(false);
+      // Limpiar clienteNombre si había uno
+      if (formData.clienteNombre) {
+        onFormChange({ ...formData, targetUserId: clienteId, clienteNombre: '' });
+      }
+    }
+    
+    // Cerrar dropdown y limpiar búsqueda
+    setIsOpen(false);
+    setSearchTerm('');
+  };
+
+  const handleClearSelection = () => {
+    onFormChange({ ...formData, targetUserId: '', clienteNombre: '' });
+    setShowClienteNombre(false);
+    setSearchTerm('');
   };
 
   return (
-    <div className="space-y-4">
-      {/* Cliente */}
+    <div className="space-y-3 sm:space-y-4">
+      {/* Cliente - Combobox Unificado */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          <User size={16} className="inline mr-1" />
+        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+          <User size={14} className="sm:w-4 sm:h-4 inline mr-1" />
           Cliente *
         </label>
         
         {loadingUsuarios ? (
-          <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-            <span className="text-sm text-gray-600">Cargando clientes...</span>
+          <div className="flex items-center gap-2 p-2.5 sm:p-3 bg-gray-50 rounded-lg">
+            <div className="animate-spin rounded-full h-3.5 w-3.5 sm:h-4 sm:w-4 border-b-2 border-blue-600"></div>
+            <span className="text-xs sm:text-sm text-gray-600">Cargando clientes...</span>
           </div>
         ) : (
-          <select
-            value={formData.targetUserId || formData.clienteId || ''}
-            onChange={(e) => handleChange('targetUserId', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              errores.targetUserId || errores.clienteId ? 'border-red-500 bg-red-50' : 'border-gray-300'
-            }`}
-            required
-          >
-            <option value="">Seleccionar cliente...</option>
-            {usuarios.map((usuario) => (
-              <option key={usuario._id} value={usuario._id}>
-                {usuario.firstName} {usuario.lastName}
-                {usuario.email && ` (${usuario.email})`}
-              </option>
-            ))}
-          </select>
+          <div ref={dropdownRef} className="relative">
+            {/* Input de búsqueda / Mostrar selección */}
+            <div className={`relative flex items-center border rounded-lg ${
+              errores.targetUserId ? 'border-red-500 bg-red-50' : 'border-gray-300'
+            }`}>
+              <Search size={16} className="sm:w-[18px] sm:h-[18px] absolute left-2.5 sm:left-3 text-gray-400 pointer-events-none" />
+              
+              <input
+                type="text"
+                placeholder={usuarioSeleccionado ? usuarioSeleccionado.name : "Buscar cliente..."}
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setIsOpen(true);
+                }}
+                onFocus={() => setIsOpen(true)}
+                className={`w-full pl-8 sm:pl-10 pr-16 sm:pr-20 py-2 sm:py-2.5 text-sm sm:text-base bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg ${
+                  usuarioSeleccionado ? 'font-medium text-gray-700' : 'text-gray-500'
+                }`}
+              />
+              
+              <div className="absolute right-1.5 sm:right-2 flex items-center gap-0.5 sm:gap-1">
+                {usuarioSeleccionado && (
+                  <button
+                    type="button"
+                    onClick={handleClearSelection}
+                    className="p-1 hover:bg-gray-200 rounded transition-colors"
+                    title="Limpiar selección"
+                  >
+                    <X size={14} className="sm:w-4 sm:h-4 text-gray-500" />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(!isOpen)}
+                  className="p-1 hover:bg-gray-200 rounded transition-colors"
+                >
+                  <ChevronDown size={16} className="sm:w-[18px] sm:h-[18px] text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}" />
+                </button>
+              </div>
+            </div>
+
+            {/* Dropdown de opciones */}
+            {isOpen && (
+              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 sm:max-h-60 overflow-auto">
+                {/* Opción especial: Cliente Sin Registro */}
+                <div
+                  onClick={() => handleSelectCliente('sin-registro')}
+                  className={`px-3 py-2 sm:px-4 sm:py-3 cursor-pointer transition-colors border-b border-gray-100 ${
+                    formData.targetUserId === 'sin-registro'
+                      ? 'bg-yellow-50 border-l-4 border-l-yellow-500'
+                      : 'hover:bg-yellow-50'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <UserPlus size={14} className="sm:w-4 sm:h-4 text-yellow-600 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-sm sm:text-base font-medium text-gray-900 truncate">🆕 Cliente Sin Registro</p>
+                      <p className="text-[10px] sm:text-xs text-gray-500 truncate">Venta directa sin cliente registrado</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Lista de clientes */}
+                {usuariosFiltrados.length > 0 ? (
+                  usuariosFiltrados.map((usuario) => (
+                    <div
+                      key={usuario.id}
+                      onClick={() => handleSelectCliente(usuario.id)}
+                      className={`px-3 py-2 sm:px-4 sm:py-2.5 cursor-pointer transition-colors ${
+                        formData.targetUserId === usuario.id
+                          ? 'bg-blue-50 border-l-4 border-l-blue-500'
+                          : 'hover:bg-gray-50'
+                      }`}
+                    >
+                      <p className="text-sm sm:text-base font-medium text-gray-900 truncate">{usuario.name}</p>
+                      {usuario.email && (
+                        <p className="text-[10px] sm:text-xs text-gray-500 truncate">{usuario.email}</p>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-3 py-2.5 sm:px-4 sm:py-3 text-center text-gray-500">
+                    <Search size={18} className="sm:w-5 sm:h-5 mx-auto mb-1 text-gray-400" />
+                    <p className="text-xs sm:text-sm">No se encontraron clientes</p>
+                    {searchTerm && (
+                      <p className="text-[10px] sm:text-xs mt-1">Busca: "{searchTerm}"</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         )}
         
-        {(errores.targetUserId || errores.clienteId) && (
-          <p className="text-red-500 text-xs mt-1">⚠️ {errores.targetUserId || errores.clienteId}</p>
+        {errores.targetUserId && (
+          <p className="text-red-500 text-[10px] sm:text-xs mt-1">⚠️ {errores.targetUserId}</p>
+        )}
+
+        {/* Campo adicional: Nombre del cliente cuando es "sin-registro" */}
+        {showClienteNombre && formData.targetUserId === 'sin-registro' && (
+          <div className="mt-2.5 sm:mt-3 p-2.5 sm:p-3 bg-yellow-50 border border-yellow-200 rounded-lg animate-fadeIn">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+              <UserPlus size={14} className="sm:w-4 sm:h-4 inline mr-1" />
+              Nombre del Cliente (opcional)
+            </label>
+            <input
+              type="text"
+              placeholder="Ej: Juan Pérez, Cliente mostrador, etc."
+              value={formData.clienteNombre || ''}
+              onChange={(e) => onFormChange({ ...formData, clienteNombre: e.target.value })}
+              className="w-full px-2.5 py-2 sm:px-3 sm:py-2 text-sm sm:text-base border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+            />
+            <p className="text-[10px] sm:text-xs text-yellow-700 mt-1">
+              💡 Este campo te ayudará a identificar esta venta posteriormente
+            </p>
+          </div>
         )}
       </div>
 
-      {/* Método de Pago */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          <CreditCard size={16} className="inline mr-1" />
-          Método de Pago *
-        </label>
-        
-        <select
-          value={formData.metodoPago || 'efectivo'}
-          onChange={(e) => handleChange('metodoPago', e.target.value)}
-          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-            errores.metodoPago ? 'border-red-500 bg-red-50' : 'border-gray-300'
-          }`}
-          required
-        >
-          {metodoPagoOptions.map((metodo) => (
-            <option key={metodo.value} value={metodo.value}>
-              {metodo.label}
-            </option>
-          ))}
-        </select>
-        
-        {errores.metodoPago && (
-          <p className="text-red-500 text-xs mt-1">⚠️ {errores.metodoPago}</p>
-        )}
-      </div>
-
-      {/* Monto Pagado (opcional) */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          <DollarSign size={16} className="inline mr-1" />
-          Monto Pagado (opcional)
-        </label>
-        
-        <input
-          type="number"
-          step="0.01"
-          min="0"
-          value={formData.montoPagado || ''}
-          onChange={(e) => handleChange('montoPagado', parseFloat(e.target.value) || 0)}
-          placeholder="0.00"
-          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-            errores.montoPagado ? 'border-red-500 bg-red-50' : 'border-gray-300'
-          }`}
-        />
-        
-        {errores.montoPagado && (
-          <p className="text-red-500 text-xs mt-1">⚠️ {errores.montoPagado}</p>
-        )}
-        
-        <p className="text-xs text-gray-500 mt-1">
-          Dejar en blanco si el pago es completo
+      {/* Información sobre el proceso de pago */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 sm:p-3">
+        <p className="text-blue-800 text-xs sm:text-sm">
+          ℹ️ <strong>Nota:</strong> La venta se creará con estado <strong>"Pendiente"</strong>. 
+          El pago se gestionará posteriormente desde el módulo de <strong>Cobros</strong>.
         </p>
-      </div>
-
-      {/* Notas */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          <FileText size={16} className="inline mr-1" />
-          Notas (opcional)
-        </label>
-        
-        <textarea
-          value={formData.notas || ''}
-          onChange={(e) => handleChange('notas', e.target.value)}
-          placeholder="Información adicional sobre la venta..."
-          rows={3}
-          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none ${
-            errores.notas ? 'border-red-500 bg-red-50' : 'border-gray-300'
-          }`}
-          maxLength={500}
-        />
-        
-        {formData.notas && (
-          <p className="text-xs text-gray-500 mt-1">
-            {formData.notas.length}/500 caracteres
-          </p>
-        )}
-        
-        {errores.notas && (
-          <p className="text-red-500 text-xs mt-1">⚠️ {errores.notas}</p>
-        )}
       </div>
 
       {/* Resumen de validación */}
       {Object.keys(errores).length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-          <p className="text-red-700 text-sm font-medium">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-2.5 sm:p-3">
+          <p className="text-red-700 text-xs sm:text-sm font-medium">
             ⚠️ Por favor corrige los errores antes de continuar
           </p>
         </div>

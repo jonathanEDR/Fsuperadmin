@@ -29,15 +29,18 @@ export const useCarrito = () => {
       return false;
     }
 
+    // Obtener precio (puede ser precio o precioVenta)
+    const precio = producto.precio || producto.precioVenta || 0;
+
     // Calcular subtotal
-    const subtotal = calcularSubtotal(producto.precio, cantidad);
+    const subtotal = calcularSubtotal(precio, cantidad);
     
     // Agregar al carrito
     setCarrito(prevCarrito => [...prevCarrito, {
       productoId: producto._id,
       nombre: producto.nombre,
       cantidad: cantidad,
-      precioUnitario: producto.precio,
+      precioUnitario: precio,
       subtotal
     }]);
 

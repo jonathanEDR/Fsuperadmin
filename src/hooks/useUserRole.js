@@ -39,7 +39,6 @@ export const useUserRole = () => {
         const profileData = await response.json();
         const role = profileData.user?.role || 'user';
         
-        console.log('🔍 useUserRole - Role fetched from backend:', role);
         setUserRole(role);
 
       } catch (error) {

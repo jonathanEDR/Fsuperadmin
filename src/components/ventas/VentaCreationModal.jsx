@@ -11,7 +11,7 @@ import {
 } from './VentaCreationModal/hooks';
 
 // Importar utilidades
-import { calcularSubtotal } from './VentaCreationModal/utils';
+import { calcularSubtotalCarrito } from './VentaCreationModal/utils';
 
 // Importar componentes UI
 import {
@@ -49,8 +49,7 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
   const {
     carrito,
     agregarProducto,
-    removerProducto,
-    actualizarCantidad,
+    eliminarProducto,
     limpiarCarrito
   } = useCarrito();
 
@@ -62,18 +61,18 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
     error: errorProductos,
     searchTerm,
     selectedCategory,
-    productosFiltrados,
+    productosDisponibles,
     setSearchTerm,
     setSelectedCategory,
-    actualizarStockLocal
-  } = useProductosVenta(getToken);
+    actualizarStockMultiple
+  } = useProductosVenta();
 
   // Hook: Gestión de usuarios
   const {
     usuarios,
     loading: loadingUsuarios,
     error: errorUsuarios
-  } = useUsuariosVenta(getToken, user?.id, userRole);
+  } = useUsuariosVenta(userRole);
 
   // Hook: Gestión del formulario
   const {
@@ -86,14 +85,14 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
   } = useVentaForm(onVentaCreated, onClose);
 
   // Calcular subtotal del carrito
-  const subtotal = useMemo(() => calcularSubtotal(carrito), [carrito]);
+  const subtotal = useMemo(() => calcularSubtotalCarrito(carrito), [carrito]);
 
   /**
-   * Manejar agregar producto al carrito
+   * Manejar agregar producto al carrito con cantidad
    */
-  const handleAgregarProducto = useCallback((producto) => {
+  const handleAgregarProducto = useCallback((producto, cantidad) => {
     try {
-      agregarProducto(producto);
+      agregarProducto(producto, cantidad);
       setError('');
     } catch (err) {
       setError(err.message);
@@ -121,7 +120,7 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
       }
 
       // Enviar venta
-      const resultado = await enviarVenta(carrito, subtotal, actualizarStockLocal);
+      const resultado = await enviarVenta(carrito, subtotal, actualizarStockMultiple);
 
       if (resultado.success) {
         // Mensaje de éxito
@@ -146,7 +145,7 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
     formData.targetUserId,
     subtotal,
     enviarVenta,
-    actualizarStockLocal,
+    actualizarStockMultiple,
     limpiarCarrito
   ]);
 
@@ -180,21 +179,32 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
   const puedeGuardar = carrito.length > 0 && formData.targetUserId && !guardando;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-7xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="bg-white rounded-lg sm:rounded-xl shadow-2xl max-w-7xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col">
         
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <ShoppingBag size={28} />
-            <h2 className="text-2xl font-bold">Nueva Venta</h2>
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-2.5 sm:px-6 sm:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-6 flex-1 min-w-0">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <ShoppingBag size={20} className="sm:w-7 sm:h-7 flex-shrink-0" />
+              <h2 className="text-base sm:text-2xl font-bold truncate">Nueva Venta</h2>
+            </div>
+            {/* Total a facturar en el header */}
+            {subtotal > 0 && (
+              <div className="bg-white/20 backdrop-blur-sm px-2 py-1 sm:px-4 sm:py-2 rounded-md sm:rounded-lg border border-white/30">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <span className="text-xs sm:text-sm font-medium text-white/90">Total:</span>
+                  <span className="text-sm sm:text-xl font-bold text-white whitespace-nowrap">S/ {subtotal.toFixed(2)}</span>
+                </div>
+              </div>
+            )}
           </div>
           <button
             onClick={handleCerrar}
             disabled={guardando}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors disabled:opacity-50"
+            className="p-1.5 sm:p-2 hover:bg-white/20 rounded-lg transition-colors disabled:opacity-50 flex-shrink-0"
           >
-            <X size={24} />
+            <X size={20} className="sm:w-6 sm:h-6" />
           </button>
         </div>
 
@@ -206,12 +216,12 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
         )}
 
         {/* Contenido principal */}
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             
             {/* Columna Izquierda: Productos */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+            <div className="space-y-3 sm:space-y-4">
+              <h3 className="text-sm sm:text-lg font-semibold text-gray-900 border-b pb-1.5 sm:pb-2">
                 📦 Productos Disponibles
               </h3>
 
@@ -226,7 +236,7 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
 
               {/* Lista de productos */}
               <ListaProductosDisponibles
-                productos={productosFiltrados}
+                productos={productosDisponibles}
                 onAgregarProducto={handleAgregarProducto}
                 loading={loadingProductos}
                 error={errorProductos}
@@ -234,17 +244,16 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
             </div>
 
             {/* Columna Derecha: Carrito y Formulario */}
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               
               {/* Carrito */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-4">
+                <h3 className="text-sm sm:text-lg font-semibold text-gray-900 border-b pb-1.5 sm:pb-2 mb-3 sm:mb-4">
                   🛒 Carrito de Compra
                 </h3>
                 <CarritoVenta
                   carrito={carrito}
-                  onRemoverProducto={removerProducto}
-                  onActualizarCantidad={actualizarCantidad}
+                  onRemoverProducto={eliminarProducto}
                   onLimpiarCarrito={limpiarCarrito}
                   subtotal={subtotal}
                 />
@@ -253,7 +262,7 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
               {/* Formulario */}
               {carrito.length > 0 && (
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-4">
+                  <h3 className="text-sm sm:text-lg font-semibold text-gray-900 border-b pb-1.5 sm:pb-2 mb-3 sm:mb-4">
                     📝 Datos de la Venta
                   </h3>
                   <FormularioVenta
@@ -270,7 +279,7 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
         </div>
 
         {/* Footer con botones */}
-        <div className="border-t border-gray-200 px-6 py-4 bg-gray-50">
+        <div className="border-t border-gray-200 px-3 py-2.5 sm:px-6 sm:py-4 bg-gray-50">
           <BotonesAccion
             onGuardar={handleGuardarVenta}
             onCancelar={handleCerrar}

@@ -52,7 +52,6 @@ function VentasManager({ userRole: userRoleProp }) {
       });
 
       if (!response.ok) {
-        console.warn('VentasManager - No se pudieron cargar las devoluciones');
         return ventas;
       }
 
@@ -80,7 +79,6 @@ function VentasManager({ userRole: userRoleProp }) {
 
       return ventasEnriquecidas;
     } catch (error) {
-      console.warn('VentasManager - Error al cargar devoluciones:', error);
       return ventas;
     }
   };
@@ -107,7 +105,6 @@ function VentasManager({ userRole: userRoleProp }) {
       setVentas(ventasConDevoluciones);
       
     } catch (error) {
-      console.error('Error:', error);
       setError('Error al cargar ventas');
     } finally {
       setLoading(false);
@@ -128,9 +125,7 @@ function VentasManager({ userRole: userRoleProp }) {
       // Recargar las listas de ventas después de crear una venta
       await fetchVentas();
       setIsModalOpen(false);
-      console.log('✅ Venta creada y listas actualizadas');
     } catch (error) {
-      console.error('Error al refrescar las listas:', error);
       setError('Error al refrescar la lista de ventas');
     } finally {
       setLoading(false);
@@ -142,7 +137,6 @@ function VentasManager({ userRole: userRoleProp }) {
     try {
       await fetchVentas();
     } catch (error) {
-      console.error('Error al refrescar las listas después de actualización:', error);
       setError('Error al refrescar los datos');
     }
   }, []);
@@ -152,7 +146,7 @@ function VentasManager({ userRole: userRoleProp }) {
     try {
       await fetchVentas();
     } catch (error) {
-      console.error('Error al refrescar después de pago:', error);
+      // Silent error handling
     }
   }, []);
 
@@ -161,7 +155,7 @@ function VentasManager({ userRole: userRoleProp }) {
     try {
       await fetchVentas();
     } catch (error) {
-      console.error('Error al refrescar después de devolución:', error);
+      // Silent error handling
     }
   }, []);
 

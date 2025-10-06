@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Plus, Package } from 'lucide-react';
 
 /**
@@ -7,7 +7,7 @@ import { Plus, Package } from 'lucide-react';
  * @component
  * @param {Object} props
  * @param {Array} props.productos - Lista de productos filtrados
- * @param {Function} props.onAgregarProducto - Callback para agregar producto al carrito
+ * @param {Function} props.onAgregarProducto - Callback para agregar producto al carrito (recibe producto y cantidad)
  * @param {boolean} props.loading - Estado de carga
  * @param {string} props.error - Mensaje de error si existe
  * 
@@ -25,6 +25,41 @@ const ListaProductosDisponibles = React.memo(({
   loading = false,
   error = null
 }) => {
+  // Estado para manejar las cantidades de cada producto
+  const [cantidades, setCantidades] = useState({});
+
+  /**
+   * Obtener la cantidad actual de un producto
+   */
+  const getCantidad = (productoId) => {
+    return cantidades[productoId] || 1;
+  };
+
+  /**
+   * Actualizar la cantidad de un producto
+   */
+  const actualizarCantidad = (productoId, nuevaCantidad) => {
+    const cantidad = Math.max(1, Math.min(nuevaCantidad, 999));
+    setCantidades(prev => ({
+      ...prev,
+      [productoId]: cantidad
+    }));
+  };
+
+  /**
+   * Manejar agregar producto con cantidad
+   */
+  const handleAgregar = (producto) => {
+    const cantidad = getCantidad(producto._id);
+    onAgregarProducto(producto, cantidad);
+    // Resetear la cantidad después de agregar
+    setCantidades(prev => {
+      const newState = { ...prev };
+      delete newState[producto._id];
+      return newState;
+    });
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -74,49 +109,81 @@ const ListaProductosDisponibles = React.memo(({
               </h4>
               
               <div className="flex flex-wrap items-center gap-2 mt-1">
-                {producto.codigo && (
+                {(producto.codigoProducto || producto.codigo) && (
                   <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                    {producto.codigo}
+                    {producto.codigoProducto || producto.codigo}
                   </span>
                 )}
                 
-                {producto.categoria && (
+                {(producto.categoryName || producto.categoria) && (
                   <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
-                    {producto.categoria}
+                    {producto.categoryName || producto.categoria}
                   </span>
                 )}
               </div>
 
               <div className="flex items-center gap-4 mt-2">
                 <span className="text-sm font-medium text-green-600">
-                  ${producto.precio?.toFixed(2) || '0.00'}
+                  S/ {(producto.precio || producto.precioVenta)?.toFixed(2) || '0.00'}
                 </span>
                 
                 <span className={`text-sm ${
-                  producto.stock > 10 
+                  (producto.cantidadRestante || producto.stock) > 10 
                     ? 'text-green-600' 
-                    : producto.stock > 0 
+                    : (producto.cantidadRestante || producto.stock) > 0 
                     ? 'text-yellow-600' 
                     : 'text-red-600'
                 }`}>
-                  Stock: {producto.stock || 0}
+                  Stock: {producto.cantidadRestante || producto.stock || 0}
                 </span>
               </div>
             </div>
 
-            {/* Botón agregar */}
-            <button
-              onClick={() => onAgregarProducto(producto)}
-              disabled={!producto.stock || producto.stock <= 0}
-              className={`flex-shrink-0 p-2 rounded-lg transition-all duration-200 ${
-                producto.stock > 0
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-lg'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
-              title={producto.stock > 0 ? 'Agregar al carrito' : 'Sin stock disponible'}
-            >
-              <Plus size={20} />
-            </button>
+            {/* Controles de cantidad y agregar */}
+            <div className="flex items-center gap-2">
+              {/* Input de cantidad */}
+              <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                <button
+                  onClick={() => actualizarCantidad(producto._id, getCantidad(producto._id) - 1)}
+                  disabled={getCantidad(producto._id) <= 1}
+                  className="px-2 py-1 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  type="button"
+                >
+                  −
+                </button>
+                <input
+                  type="number"
+                  min="1"
+                  max={producto.cantidadRestante || producto.stock || 999}
+                  value={getCantidad(producto._id)}
+                  onChange={(e) => actualizarCantidad(producto._id, parseInt(e.target.value) || 1)}
+                  className="w-14 text-center border-0 focus:outline-none focus:ring-0 py-1"
+                />
+                <button
+                  onClick={() => actualizarCantidad(producto._id, getCantidad(producto._id) + 1)}
+                  disabled={getCantidad(producto._id) >= (producto.cantidadRestante || producto.stock)}
+                  className="px-2 py-1 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  type="button"
+                >
+                  +
+                </button>
+              </div>
+
+              {/* Botón agregar */}
+              <button
+                onClick={() => handleAgregar(producto)}
+                disabled={!(producto.cantidadRestante || producto.stock) || (producto.cantidadRestante || producto.stock) <= 0}
+                className={`flex-shrink-0 px-3 py-2 rounded-lg transition-all duration-200 flex items-center gap-1 ${
+                  (producto.cantidadRestante || producto.stock) > 0
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-lg'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+                title={(producto.cantidadRestante || producto.stock) > 0 ? 'Agregar al carrito' : 'Sin stock disponible'}
+              >
+                <Plus size={18} />
+                <span className="text-sm font-medium">Agregar</span>
+              </button>
+            </div>
           </div>
         </div>
       ))}

@@ -36,10 +36,8 @@ const VentasSelectionList = ({ onVentaSelect, selectedVentas = [], onError }) =>
     const loadVentas = async () => {
       try {
         setLoading(true);
-        console.log('Iniciando carga de ventas pendientes...');
         
         const response = await api.get('/api/cobros/ventas-pendientes');
-        console.log('Respuesta del servidor:', response.data);
         
         let ventasData = [];
         if (response.data && response.data.ventas) {
@@ -50,24 +48,9 @@ const VentasSelectionList = ({ onVentaSelect, selectedVentas = [], onError }) =>
           throw new Error('No se encontraron ventas pendientes');
         }
 
-        console.log('📊 Datos de ventas recibidos del servidor:', ventasData);
-
         // Validar y procesar cada venta
         const ventasProcesadas = ventasData.map((venta, index) => {
-          console.log(`🔍 Venta ${index + 1} - Datos originales:`, {
-            _id: venta._id,
-            montoTotal: venta.montoTotal,
-            montoTotalNeto: venta.montoTotalNeto,
-            cantidadPagada: venta.cantidadPagada,
-            productos: venta.productos?.map(p => ({
-              cantidad: p.cantidad,
-              precioUnitario: p.precioUnitario,
-              subtotal: p.cantidad * p.precioUnitario
-            }))
-          });
-
           if (!venta._id || (!venta.montoTotal && !venta.montoTotalNeto)) {
-            console.warn('Venta con datos incompletos:', venta);
             return null;
           }
 
@@ -83,18 +66,6 @@ const VentasSelectionList = ({ onVentaSelect, selectedVentas = [], onError }) =>
             return sum + (parseFloat(producto.cantidad || 0) * parseFloat(producto.precioUnitario || 0));
           }, 0) || 0;
 
-          console.log(`Procesando venta ${venta._id}:`, {
-            montoTotalOriginal: venta.montoTotal,
-            montoTotalNetoOriginal: venta.montoTotalNeto,
-            montoPendienteBackend: venta.montoPendiente,
-            montoTotalParseado: montoTotal,
-            montoTotalNeto: montoTotalNeto,
-            cantidadPagada: cantidadPagada,
-            montoPendienteFinal: montoPendiente,
-            totalDesdeProductos: totalDesdeProductos,
-            diferencia: Math.abs(montoTotal - totalDesdeProductos)
-          });
-
           return {
             ...venta,
             cantidadPagada,
@@ -105,11 +76,9 @@ const VentasSelectionList = ({ onVentaSelect, selectedVentas = [], onError }) =>
           };
         }).filter(Boolean);
 
-        console.log('Ventas procesadas:', ventasProcesadas);
         setVentas(ventasProcesadas);
         setFilteredVentas(ventasProcesadas);
       } catch (error) {
-        console.error('Error al cargar ventas:', error);
         onError?.(error.message || 'Error al cargar las ventas pendientes');
       } finally {
         setLoading(false);
@@ -140,7 +109,6 @@ const VentasSelectionList = ({ onVentaSelect, selectedVentas = [], onError }) =>
 
   // Manejar la selección de una venta
   const handleVentaClick = (venta) => {
-    console.log('Seleccionando venta:', venta);
     // Asegurarse de que todos los valores numéricos sean números
     const ventaDetails = {
       _id: venta._id,
@@ -151,7 +119,6 @@ const VentasSelectionList = ({ onVentaSelect, selectedVentas = [], onError }) =>
       productos: venta.productos,
       estadoPago: venta.estadoPago
     };
-    console.log('Enviando detalles de venta:', ventaDetails);
     onVentaSelect(venta._id, ventaDetails);
   };
 

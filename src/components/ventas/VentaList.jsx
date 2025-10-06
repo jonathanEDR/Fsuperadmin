@@ -119,7 +119,6 @@ function VentaList({
       const data = await response.json();
       setProductos(data);
     } catch (err) {
-      console.error('Error al cargar productos:', err);
       setError(err.message);
     }
   };
@@ -177,13 +176,10 @@ function VentaList({
         // ahora VentasManager se encarga de eso cuando usa props.
         // Solo se ejecuta esta función cuando NO hay ventasProp.
         setVentas(ventasActivas);
-        console.log('📦 VentaList - Ventas cargadas (sin enriquecimiento porque se usa standalone):', ventasActivas.length);
       } else {
-        console.warn('Estructura de respuesta inesperada:', data);
         setVentas([]);
       }
     } catch (error) {
-      console.error('Error al cargar ventas:', error);
       setError(error.message || 'Error al cargar las ventas');
       setVentas([]);
     } finally {
@@ -232,11 +228,9 @@ function VentaList({
         setUsuarios(mappedUsers);
         setError('');
       } else {
-        console.error('Formato de respuesta inesperado:', data);
         setError('Error al cargar la lista de usuarios');
       }
     } catch (err) {
-      console.error('Error al cargar usuarios:', err);
       const errorMessage = err.response?.data?.message || 
                          err.response?.data?.error || 
                          'Error al cargar la lista de usuarios';
@@ -251,7 +245,6 @@ function VentaList({
 
     try {
       // VERIFICACIÓN ADICIONAL: Consultar devoluciones antes de eliminar
-      console.log('🔍 VERIFICANDO DEVOLUCIONES antes de eliminar venta:', ventaId);
       const token = await getToken();
       
       const devolucionesResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/devoluciones`, {
@@ -270,7 +263,6 @@ function VentaList({
         );
 
         if (tieneDevolucion) {
-          console.log('❌ ELIMINACIÓN BLOQUEADA: Venta tiene devoluciones asociadas');
           showError('No se puede eliminar esta venta porque tiene devoluciones asociadas');
           return;
         }
@@ -301,7 +293,6 @@ function VentaList({
         onVentaUpdated();
       }
     } catch (error) {
-      console.error('Error al eliminar la venta:', error);
       showError(error.message || 'Error al eliminar la venta');
     }
   };
@@ -326,11 +317,6 @@ function VentaList({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('Error Response:', {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorData
-        });
         throw new Error(errorData.message || 'Error al marcar la venta como finalizada');
       }
 
@@ -346,7 +332,6 @@ function VentaList({
         onVentaUpdated(responseData.venta || {});
       }
     } catch (error) {
-      console.error('Error:', error);
       setError(error.message);
       setTimeout(() => setError(null), 3000);
     } finally {
@@ -406,7 +391,6 @@ function VentaList({
         onVentaUpdated(responseData.venta);
       }
     } catch (error) {
-      console.error('Error detallado:', error);
       setError(error.message || 'Error al procesar la venta');
       setTimeout(() => setError(null), 3000);
     } finally {
@@ -438,12 +422,7 @@ function VentaList({
         fechaCobro: paymentData.fechaCobro || new Date().toISOString().split('T')[0] // Incluir fecha de cobro
       };
 
-      console.log('Procesando pago con:', pagoCompleto);
-      console.log('Datos recibidos del modal:', paymentData);
-      
       await procesarPagoVenta(selectedVentaForPayment._id, pagoCompleto);
-      
-      console.log('💰 PAYMENT PROCESSED - Reloading ventas to check updated payment status');
       
       setSuccess(userRole === 'user' ? 'Pago realizado exitosamente' : 'Pago procesado exitosamente');
       handleClosePayment();
@@ -457,7 +436,6 @@ function VentaList({
         await loadVentas(); // Esto recargará las ventas con devoluciones actualizadas
       }
     } catch (error) {
-      console.error('Error al procesar el pago:', error);
       setError(error.message || 'Error al procesar el pago. Por favor, verifica los datos e intenta nuevamente.');
     } finally {
       setLoading(false);
@@ -479,19 +457,12 @@ function VentaList({
       setLoading(true);
       const token = await getToken();
       
-      console.log('🔍 VentaList - Datos recibidos:', devolucionData);
-      
       // Enviar devolución y recibir venta actualizada
       const response = await api.post('/api/devoluciones', devolucionData, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      console.log('✅ VentaList - Respuesta del servidor:', response.data);
-
-      console.log('🔄 DEVOLUTION PROCESSED - Reloading ventas to check updated devolution status');
-      
       // SIEMPRE recargar todas las ventas para asegurar datos actualizados
-      console.log('🔄 VentaList - Recargando todas las ventas después de devolución');
       await loadVentas();
 
       showSuccess('Devolución procesada exitosamente');
@@ -510,7 +481,6 @@ function VentaList({
         await loadVentas();
       }
     } catch (error) {
-      console.error('Error al procesar la devolución:', error);
       showError(error.response?.data?.message || 'Error al procesar la devolución');
     } finally {
       setLoading(false);

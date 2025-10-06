@@ -97,6 +97,12 @@ export const validarCarrito = (carrito) => {
  * @param {number} montoTotal - Monto total de la venta
  * @returns {Object} - { valid: boolean, error: string }
  */
+/**
+ * Valida los datos del formulario de venta
+ * @param {Object} formData - Datos del formulario
+ * @param {number} montoTotal - Monto total de la venta
+ * @returns {Object} - { valid: boolean, error: string }
+ */
 export const validarFormularioVenta = (formData, montoTotal) => {
   if (!formData.fechadeVenta) {
     return { 
@@ -105,17 +111,17 @@ export const validarFormularioVenta = (formData, montoTotal) => {
     };
   }
 
-  if (formData.cantidadPagada < 0) {
+  if (!formData.targetUserId) {
     return { 
       valid: false, 
-      error: 'La cantidad pagada no puede ser negativa' 
+      error: 'Debes seleccionar un cliente' 
     };
   }
 
-  if (formData.cantidadPagada > montoTotal) {
+  if (montoTotal <= 0) {
     return { 
       valid: false, 
-      error: 'La cantidad pagada no puede ser mayor al total' 
+      error: 'El monto total debe ser mayor a 0' 
     };
   }
 

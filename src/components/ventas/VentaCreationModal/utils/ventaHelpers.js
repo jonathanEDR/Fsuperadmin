@@ -70,6 +70,18 @@ export const calcularSubtotal = (precio, cantidad) => {
 };
 
 /**
+ * Calcula el subtotal total del carrito
+ * @param {Array} carrito - Array de items del carrito
+ * @returns {number} - Subtotal total
+ */
+export const calcularSubtotalCarrito = (carrito) => {
+  if (!Array.isArray(carrito) || carrito.length === 0) {
+    return 0;
+  }
+  return carrito.reduce((total, item) => total + (item.subtotal || 0), 0);
+};
+
+/**
  * Formatea un número como precio en formato local
  * @param {number} precio - Precio a formatear
  * @returns {string} - Precio formateado

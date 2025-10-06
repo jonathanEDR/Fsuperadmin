@@ -14,7 +14,6 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
   
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
-      console.error('Usuario no autenticado');
       onClose();
     }
   }, [isLoaded, isSignedIn, onClose]);
@@ -70,25 +69,14 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
   }, [formData.yape, formData.efectivo, formData.billetes, formData.faltantes, formData.gastosImprevistos]);
   // Manejar selección de ventas
   const handleVentaSelection = (ventaId, ventaDetails = null) => {
-    console.log('Seleccionando venta:', { ventaId, detalles: ventaDetails });
-    
     // Asegurarnos de que tenemos los detalles de la venta
     if (!ventaDetails) {
-      console.error('No se recibieron los detalles de la venta');
       setError('Error: No se pueden obtener los detalles de la venta');
       return;
     }    // Procesar los detalles de la venta usando montoTotal original
     const montoTotal = parseFloat(ventaDetails.montoTotal || 0);
     const cantidadPagada = parseFloat(ventaDetails.cantidadPagada || 0);
     const montoPendiente = Math.max(0, montoTotal - cantidadPagada);
-    
-    console.log(`CobroCreationModal - Procesando venta ${ventaId}:`, {
-      montoTotalOriginal: ventaDetails.montoTotal,
-      montoTotalNetoOriginal: ventaDetails.montoTotalNeto,
-      montoTotalFinal: montoTotal,
-      cantidadPagada: cantidadPagada,
-      montoPendienteFinal: montoPendiente
-    });
     
     const detallesProcesados = {
       ...ventaDetails,
@@ -113,13 +101,6 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
       ...prev,
       [ventaId]: detallesProcesados
     }));
-
-    console.log('Detalles actualizados:', {
-      ventaId,
-      detalles: detallesProcesados,
-      montoTotal: detallesProcesados.montoTotal,
-      montoPendiente: detallesProcesados.montoPendiente
-    });
   };
 
   // Manejar cambios en los campos
@@ -216,10 +197,6 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
       }
 
       console.log('🔍 Debug - Datos antes de enviar:');
-      console.log('Selected ventas:', selectedVentas);
-      console.log('Ventas details:', ventasDetails);
-      console.log('Form data:', formData);
-
       // Preparar los datos en el formato que espera el servicio
       const ventasParaServicio = selectedVentas.map(ventaId => {
         const venta = ventasDetails[ventaId];
@@ -242,18 +219,10 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
         fechaCobro: convertLocalDateTimeToISO(formData.fechaCobro)
       };
 
-      console.log('📤 Datos del cobro a enviar:', {
-        cobroData,
-        ventasTotal,
-        totalMetodosPago,
-        ventasSeleccionadas: selectedVentas.length
-      });
-
       await createCobro(cobroData);
       onCobroCreated(true);
       onClose();
     } catch (err) {
-      console.error('Error al crear cobro:', err);
       setError(err.message || 'Error al crear el cobro');
       setIsSubmitting(false);
     }
@@ -271,8 +240,6 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
   // Nuevo: función para procesar el pago (crear cobro individual)
   const handleProcesarPago = async (pagoData) => {
     try {
-      console.log('Procesando pago individual para venta:', ventaParaPagar, pagoData);
-      
       if (!ventaParaPagar) {
         throw new Error('No se encontró la venta para procesar el pago');
       }
@@ -306,8 +273,6 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
         fechaCobro: convertLocalDateTimeToISO(pagoData.fechaCobro)
       };
 
-      console.log('Datos del cobro individual a crear:', cobroIndividual);
-
       // Usar el mismo servicio para crear el cobro
       await createCobro(cobroIndividual);
       
@@ -319,10 +284,7 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
         onCobroCreated(true);
       }
       
-      console.log('Cobro individual creado exitosamente');
-      
     } catch (error) {
-      console.error('Error al procesar pago individual:', error);
       setError(error.message || 'Error al procesar el pago individual');
     }
   };

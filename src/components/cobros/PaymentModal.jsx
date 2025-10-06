@@ -98,7 +98,6 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta }) => {
       fechaCobro: convertLocalDateTimeToISO(formData.fechaCobro)
     };
 
-    console.log('Datos del formulario validados:', validatedData);
     onSubmit(validatedData);
   };
 

@@ -23,7 +23,9 @@ api.interceptors.request.use(  async config => {
       const user = window.Clerk?.user;
       
       if (!token || !user) {
-        console.error('❌ No hay sesión activa');
+        if (process.env.NODE_ENV === 'development') {
+          console.error('❌ No hay sesión activa');
+        }
         throw new Error('No hay sesión activa');
       }
 

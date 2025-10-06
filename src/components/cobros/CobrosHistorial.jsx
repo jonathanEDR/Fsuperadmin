@@ -11,7 +11,6 @@ const formatDate = (dateString) => {
     if (isNaN(date.getTime())) return '-';
     return format(date, "d 'de' MMMM, yyyy HH:mm", { locale: es });
   } catch (error) {
-    console.error('Error formateando fecha:', error);
     return '-';
   }
 };
@@ -23,7 +22,6 @@ const formatCurrency = (amount) => {
 };
 
 const formatPaymentTypes = (payment) => {
-  console.log('Datos del payment recibido:', payment); // Debug log
   const types = [];
   
   if (payment.yape && parseFloat(payment.yape) > 0) {
@@ -42,7 +40,6 @@ const formatPaymentTypes = (payment) => {
     types.push(`Gastos: ${formatCurrency(payment.gastosImprevistos)}`);
   }
   
-  console.log('Types generados:', types); // Debug log
   return types.length > 0 ? types : ['Sin especificar'];
 };
 
@@ -71,11 +68,8 @@ const CobrosHistorial = ({ userRole }) => {
       setError(null);
       
       const pageToFetch = isLoadMore ? currentPage + 1 : 1;
-      console.log('Obteniendo cobros, página:', pageToFetch, 'isLoadMore:', isLoadMore);
       
       const data = await getCobrosHistorial(pageToFetch, ITEMS_PER_PAGE);
-      console.log('Datos recibidos del servicio:', data);
-      console.log('Primer cobro recibido:', data.cobros?.[0]); // Debug específico
       
       if (isLoadMore) {
         setPayments(prevPayments => [...prevPayments, ...(data.cobros || [])]);
@@ -89,16 +83,8 @@ const CobrosHistorial = ({ userRole }) => {
       setTotalCobros(data.totalCobros || data.total || 0);
       setHasMore(pageToFetch < (data.totalPages || 1));
       
-      console.log('Estado actualizado:', {
-        cobrosLength: isLoadMore ? payments.length + (data.cobros?.length || 0) : data.cobros?.length || 0,
-        totalCobros: data.totalCobros || data.total || 0,
-        hasMore: pageToFetch < (data.totalPages || 1),
-        currentPage: pageToFetch
-      });
-      
     } catch (err) {
       setError(err.message);
-      console.error('Error al cargar los cobros:', err);
     } finally {
       setIsLoading(false);
       setLoadingMore(false);
@@ -125,7 +111,6 @@ const CobrosHistorial = ({ userRole }) => {
       await fetchCobros(false);
     } catch (err) {
       setError(err.message);
-      console.error('Error al eliminar el cobro:', err);
     } finally {
       setIsLoading(false);
     }

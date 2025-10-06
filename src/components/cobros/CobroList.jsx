@@ -55,14 +55,6 @@ const CobroList = ({ userRole }) => {
         const cantidadPagada = parseFloat(venta.cantidadPagada || 0);
         const deudaVenta = Math.max(0, montoTotal - cantidadPagada);
         
-        console.log(`CobroList - Calculando deuda para venta ${venta._id}:`, {
-          montoTotal: venta.montoTotal,
-          montoTotalNeto: venta.montoTotalNeto,
-          montoTotalParseado: montoTotal,
-          cantidadPagada: cantidadPagada,
-          deudaVenta: deudaVenta
-        });
-        
         return sum + deudaVenta;
       }, 0) || 0;
       
@@ -73,7 +65,6 @@ const CobroList = ({ userRole }) => {
 
       setError(null);
     } catch (err) {
-      console.error('Error loading data:', err);
       setError(err.message || 'Error al cargar los datos');
       setPendingVentas([]);
       setPaymentHistory([]);
