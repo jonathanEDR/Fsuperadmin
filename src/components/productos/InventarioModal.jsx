@@ -1,6 +1,136 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { X, Calendar, Package, User, FileText } from 'lucide-react';
+import SearchableSelect from '../common/SearchableSelect';
+
+// Componente especializado para selección de productos con búsqueda
+const ProductoSearchableSelect = ({ catalogoProductos, value, onChange, required }) => {
+  // Preparar opciones para SearchableSelect
+  const options = useMemo(() => {
+    const productoOptions = [];
+
+    // Agrupar productos por categoría
+    const productosPorCategoria = catalogoProductos.reduce((acc, producto) => {
+      const categoria = producto.categoria || 'Sin categoría';
+      if (!acc[categoria]) {
+        acc[categoria] = [];
+      }
+      acc[categoria].push(producto);
+      return acc;
+    }, {});
+
+    // Ordenar categorías alfabéticamente
+    const categoriasOrdenadas = Object.keys(productosPorCategoria).sort();
+
+    // Crear opciones agrupadas
+    categoriasOrdenadas.forEach(categoria => {
+      // Agregar header de categoría (no seleccionable)
+      productoOptions.push({
+        id: `header-${categoria}`,
+        label: `── ${categoria.toUpperCase()} ──`,
+        code: '',
+        isHeader: true,
+        categoria
+      });
+
+      // Agregar productos de la categoría
+      productosPorCategoria[categoria]
+        .sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''))
+        .forEach(producto => {
+          productoOptions.push({
+            id: producto._id,
+            label: `${producto.nombre} (Stock: ${producto.cantidadRestante || 0})`,
+            code: producto.codigoProducto,
+            categoria: categoria,
+            stock: producto.cantidadRestante || 0
+          });
+        });
+    });
+
+    return productoOptions;
+  }, [catalogoProductos]);
+
+  // Función personalizada para filtrar opciones
+  const filterFunction = (options, searchTerm) => {
+    if (!searchTerm.trim()) return options;
+    
+    const term = searchTerm.toLowerCase();
+    
+    return options.filter(option => {
+      // No filtrar headers, siempre mostrarlos
+      if (option.isHeader) return true;
+      
+      // Buscar en código, nombre y categoría
+      return (
+        option.code?.toLowerCase().includes(term) ||
+        option.label.toLowerCase().includes(term) ||
+        option.categoria?.toLowerCase().includes(term)
+      );
+    });
+  };
+
+  // Función personalizada para renderizar opciones
+  const renderOption = (option, index, isHighlighted, onSelect) => {
+    if (option.isHeader) {
+      return (
+        <div
+          key={option.id}
+          className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 border-b border-gray-200"
+        >
+          {option.label}
+        </div>
+      );
+    }
+
+    const stockColor = option.stock > 10 ? 'text-green-600' : 
+                      option.stock > 0 ? 'text-yellow-600' : 'text-red-600';
+
+    return (
+      <div
+        key={option.id}
+        onClick={onSelect}
+        className={`
+          px-3 py-2 cursor-pointer transition-colors duration-150 border-l-4
+          ${isHighlighted 
+            ? 'bg-blue-100 text-blue-900 border-blue-400' 
+            : 'text-gray-900 hover:bg-gray-50 border-transparent hover:border-gray-200'
+          }
+        `}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center">
+              <span className="font-mono text-sm text-gray-600 mr-2 font-medium">
+                {option.code}
+              </span>
+              <span className="truncate">{option.label.replace(/ \(Stock:.*\)$/, '')}</span>
+            </div>
+          </div>
+          <div className="ml-2">
+            <span className={`text-sm font-medium ${stockColor}`}>
+              Stock: {option.stock}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <SearchableSelect
+      options={options}
+      value={value}
+      onChange={onChange}
+      placeholder="Buscar producto por código, nombre o categoría..."
+      searchPlaceholder="Buscar productos..."
+      required={required}
+      renderOption={renderOption}
+      filterFn={filterFunction}
+      className="mt-1"
+      name="productoId"
+    />
+  );
+};
 
 const InventarioModal = ({
   isOpen,
@@ -55,44 +185,14 @@ const InventarioModal = ({
                 <div>
                   <label className="block text-sm sm:text-base font-medium text-gray-700 mb-1 sm:mb-2">
                     Producto Registrado * 
-                    <span className="text-xs sm:text-sm text-gray-500 ml-1">(Organizados por categoría)</span>
+                    <span className="text-xs sm:text-sm text-gray-500 ml-1">(Con búsqueda inteligente)</span>
                   </label>
-                  <select
-                    name="productoId"
+                  <ProductoSearchableSelect
+                    catalogoProductos={catalogoProductos}
                     value={inventarioForm.productoId || ''}
-                    onChange={e => setInventarioForm(f => ({ ...f, productoId: e.target.value }))}
+                    onChange={(value) => setInventarioForm(f => ({ ...f, productoId: value }))}
                     required
-                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base py-2 sm:py-3"
-                  >
-                    <option value="">-- Selecciona un producto registrado --</option>
-                    {(() => {
-                      // Agrupar productos por categoría
-                      const productosPorCategoria = catalogoProductos.reduce((acc, producto) => {
-                        const categoria = producto.categoria || 'Sin categoría';
-                        if (!acc[categoria]) {
-                          acc[categoria] = [];
-                        }
-                        acc[categoria].push(producto);
-                        return acc;
-                      }, {});
-
-                      // Ordenar categorías alfabéticamente
-                      const categoriasOrdenadas = Object.keys(productosPorCategoria).sort();
-
-                      return categoriasOrdenadas.map(categoria => (
-                        <optgroup key={categoria} label={categoria}>
-                          {productosPorCategoria[categoria]
-                            .sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''))
-                            .map(producto => (
-                              <option key={producto._id} value={producto._id}>
-                                {producto.codigoProducto} - {producto.nombre} (Stock: {producto.cantidadRestante || 0})
-                              </option>
-                            ))
-                          }
-                        </optgroup>
-                      ));
-                    })()}
-                  </select>
+                  />
                 </div>
               </div>
             </div>
@@ -258,5 +358,7 @@ const InventarioModal = ({
     </div>
   );
 };
+
+
 
 export default InventarioModal;

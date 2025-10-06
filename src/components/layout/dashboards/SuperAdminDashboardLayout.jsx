@@ -29,10 +29,10 @@ function SuperAdminDashboardLayout({ children, onLogout }) {
     }
   };
 
-  // DEBUG: Verificar el rol en SuperAdmin
-  React.useEffect(() => {
-    console.log('🔧 SuperAdminDashboard - RoleContext.Provider value:', userRole);
-  }, [userRole]);
+  // DEBUG: Verificar el rol en SuperAdmin (deshabilitado para reducir ruido)
+  // React.useEffect(() => {
+  //   console.log('🔧 SuperAdminDashboard - RoleContext.Provider value:', userRole);
+  // }, [userRole]);
 
   // Mostrar loading mientras se obtiene el rol
   if (roleLoading) {

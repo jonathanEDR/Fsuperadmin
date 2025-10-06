@@ -3,6 +3,7 @@ import { X, Plus } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import api from '../../services/api';
 import categoryService from '../../services/categoryService';
+import SearchableSelect from '../common/SearchableSelect';
 
 
 const ProductCreationModal = ({ 
@@ -54,7 +55,7 @@ const ProductCreationModal = ({
 
         // Si estamos editando, cargar los datos iniciales
         if (isEditing && initialData) {
-          console.log('[ProductCreationModal] Cargando datos para edición:', initialData);
+          // console.log('[ProductCreationModal] Cargando datos para edición:', initialData);
           
           // Buscar la categoría completa
           const categoria = categoriesData.find(cat => cat._id === initialData.categoryId);
@@ -140,9 +141,9 @@ const ProductCreationModal = ({
         };
       }
 
-      console.log('[ProductCreationModal] Datos enviados al backend:', data);
-      console.log('[ProductCreationModal] Modo edición:', isEditing);
-      console.log('[ProductCreationModal] ID del producto:', initialData?._id);
+      // console.log('[ProductCreationModal] Datos enviados al backend:', data);
+      // console.log('[ProductCreationModal] Modo edición:', isEditing);
+      // console.log('[ProductCreationModal] ID del producto:', initialData?._id);
 
       let response;
       if (isEditing && initialData?._id) {
@@ -151,7 +152,7 @@ const ProductCreationModal = ({
         response = await api.post('/api/productos', data);
       }
 
-      console.log('[ProductCreationModal] Respuesta del backend:', response);
+      // console.log('[ProductCreationModal] Respuesta del backend:', response);
 
       if (onSuccess) {
         onSuccess(response.data);
@@ -247,51 +248,91 @@ const ProductCreationModal = ({
           {/* Categoría - Solo mostrar en modo creación */}
           {!isEditing && (
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Categoría *
               </label>
-              <select
+              <SearchableSelect
                 name="categoryId"
+                options={categories.map(cat => ({
+                  id: cat._id,
+                  label: cat.nombre,
+                  description: cat.descripcion
+                }))}
                 value={formData.categoryId}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                required
-              >
-                <option value="">Selecciona una categoría</option>
-                {categories.map(category => (
-                  <option key={category._id} value={category._id}>
-                    {category.nombre}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => handleChange({
+                  target: { name: 'categoryId', value }
+                })}
+                placeholder="Selecciona una categoría"
+                searchPlaceholder="Buscar categorías..."
+                required={true}
+                className="mt-1"
+              />
+              {selectedCategory && (
+                <div className="mt-2 p-2 bg-blue-50 rounded text-sm text-blue-700">
+                  <strong>Categoría seleccionada:</strong> {selectedCategory.nombre}
+                  {selectedCategory.descripcion && (
+                    <>
+                      <br />
+                      <span className="text-blue-600">{selectedCategory.descripcion}</span>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
           {/* Producto del Catálogo - Solo mostrar en modo creación */}
           {!isEditing && (
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Producto del Catálogo *
               </label>
-              <select
+              <SearchableSelect
                 name="catalogoProductoId"
+                options={catalogoProductos.map(producto => ({
+                  id: producto._id,
+                  code: producto.codigoproducto || producto.codigoProducto,
+                  label: producto.nombre,
+                  description: producto.descripcion,
+                  categoria: producto.categoria
+                }))}
                 value={formData.catalogoProductoId}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                required
-              >
-                <option value="">Selecciona un producto</option>
-                {catalogoProductos.map(producto => (
-                  <option key={producto._id} value={producto._id}>
-                    {producto.codigoproducto || producto.codigoProducto} - {producto.nombre}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => handleChange({
+                  target: { name: 'catalogoProductoId', value }
+                })}
+                placeholder="Selecciona un producto del catálogo"
+                searchPlaceholder="Buscar por código o nombre..."
+                required={true}
+                className="mt-1"
+                filterFn={(productos, searchTerm) => {
+                  const term = searchTerm.toLowerCase();
+                  return productos.filter(producto => 
+                    producto.label.toLowerCase().includes(term) ||
+                    (producto.code && producto.code.toLowerCase().includes(term)) ||
+                    (producto.categoria && producto.categoria.toLowerCase().includes(term))
+                  );
+                }}
+              />
               {selectedCatalogo && (
                 <div className="mt-2 p-2 bg-blue-50 rounded text-sm text-blue-700">
-                  <strong>Producto seleccionado:</strong> {selectedCatalogo.nombre}
-                  <br />
-                  <strong>Código:</strong> {selectedCatalogo.codigoproducto || selectedCatalogo.codigoProducto}
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <strong>Producto:</strong> {selectedCatalogo.nombre}
+                    </div>
+                    <div>
+                      <strong>Código:</strong> {selectedCatalogo.codigoproducto || selectedCatalogo.codigoProducto}
+                    </div>
+                    {selectedCatalogo.categoria && (
+                      <div className="col-span-2">
+                        <strong>Categoría:</strong> {selectedCatalogo.categoria}
+                      </div>
+                    )}
+                    {selectedCatalogo.descripcion && (
+                      <div className="col-span-2">
+                        <strong>Descripción:</strong> {selectedCatalogo.descripcion}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -299,48 +340,119 @@ const ProductCreationModal = ({
 
           {/* Precio - Siempre editable */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Precio * {isEditing && <span className="text-blue-600">(Editable)</span>}
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              💰 Precio * {isEditing && <span className="text-blue-600">(Campo editable)</span>}
             </label>
-            <input
-              type="number"
-              name="precio"
-              value={formData.precio}
-              onChange={handleChange}
-              required
-              min="0"
-              step="0.01"
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Ingresa el precio del producto"
-            />
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm font-medium">
+                S/
+              </span>
+              <input
+                type="number"
+                name="precio"
+                value={formData.precio}
+                onChange={handleChange}
+                required
+                min="0"
+                step="0.01"
+                className={`
+                  pl-8 pr-3 py-2 w-full border rounded-md shadow-sm focus:outline-none transition-colors duration-200
+                  ${formData.precio && parseFloat(formData.precio) > 0
+                    ? 'border-green-300 focus:border-green-500 focus:ring-green-500' 
+                    : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                  }
+                `}
+                placeholder="0.00"
+              />
+            </div>
+            {formData.precio && parseFloat(formData.precio) > 0 && (
+              <p className="mt-1 text-xs text-green-600">
+                ✓ Precio válido: S/ {parseFloat(formData.precio).toFixed(2)}
+              </p>
+            )}
           </div>
 
           {/* Cantidad - Solo en modo creación */}
           {!isEditing && (
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Cantidad *
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                📦 Cantidad Inicial *
               </label>
-              <input
-                type="number"
-                name="cantidad"
-                value={formData.cantidad}
-                onChange={handleChange}
-                required
-                min="0"
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Ingresa la cantidad inicial"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  name="cantidad"
+                  value={formData.cantidad}
+                  onChange={handleChange}
+                  required
+                  min="0"
+                  className={`
+                    pr-16 py-2 w-full border rounded-md shadow-sm focus:outline-none transition-colors duration-200
+                    ${formData.cantidad && parseInt(formData.cantidad) >= 0
+                      ? 'border-green-300 focus:border-green-500 focus:ring-green-500' 
+                      : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                    }
+                  `}
+                  placeholder="0"
+                />
+                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
+                  unidades
+                </span>
+              </div>
+              {formData.cantidad && parseInt(formData.cantidad) >= 0 && (
+                <p className="mt-1 text-xs text-green-600">
+                  ✓ Stock inicial: {parseInt(formData.cantidad)} unidades
+                </p>
+              )}
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-300"
-          >
-            {isSubmitting ? 'Procesando...' : (isEditing ? 'Actualizar Precio' : 'Crear Producto')}
-          </button>
+          {/* Botones de acción */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            >
+              Cancelar
+            </button>
+            
+            <button
+              type="submit"
+              disabled={isSubmitting || (!isEditing && (!formData.categoryId || !formData.catalogoProductoId))}
+              className={`
+                flex-1 flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
+                ${isSubmitting || (!isEditing && (!formData.categoryId || !formData.catalogoProductoId))
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                }
+                transition-colors duration-200
+              `}
+            >
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Procesando...
+                </>
+              ) : (
+                isEditing ? '💾 Actualizar Precio' : '✨ Crear Producto'
+              )}
+            </button>
+          </div>
+
+          {/* Hint de ayuda */}
+          {!isEditing && (
+            <div className="mt-3 p-3 bg-gray-50 rounded-md">
+              <p className="text-xs text-gray-600">
+                <strong>💡 Tip:</strong> Usa la búsqueda para encontrar rápidamente categorías y productos. 
+                Puedes buscar por nombre, código o categoría.
+              </p>
+            </div>
+          )}
         </form>
       </div>
     </div>

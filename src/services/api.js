@@ -13,10 +13,8 @@ const api = axios.create({
 // Interceptor para agregar el token a cada solicitud
 api.interceptors.request.use(  async config => {
     try {
-      // Solo logs en desarrollo para debugging
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🔍 API Request:', config.method?.toUpperCase(), config.url);
-      }
+      // Logs deshabilitados para reducir ruido en consola
+      // console.log('🔍 API Request:', config.method?.toUpperCase(), config.url);
       
       // Obtener el token y la sesión de Clerk
       const token = await window.Clerk?.session?.getToken();

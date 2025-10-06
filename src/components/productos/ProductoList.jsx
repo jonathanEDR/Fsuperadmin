@@ -56,8 +56,7 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
           };
         });
         
-        console.log('[DEBUG] Productos registrados para modal:', productosParaModal);
-        console.log('[DEBUG] Productos originales:', productosRes.data);
+
         
         setCatalogoProductos(productosParaModal);
       } catch (err) {
@@ -146,14 +145,14 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
     inventarioHook.clearError();
   };
 
-  // Función para crear una nueva categoría desde el modal
+  // Función de callback cuando se actualiza una categoría (opcional, el modal ya maneja todo internamente)
   const handleCategoryModalSubmit = async (formData) => {
-    try {
-      await categoryService.createCategory(formData);
-    } catch (err) {
-      // Puedes mostrar un error si lo deseas
-      console.error('Error al crear categoría:', err);
-    }
+    // El modal ya maneja la creación/edición internamente
+    // Este callback es opcional para cualquier lógica adicional
+    console.log('Categoría actualizada:', formData);
+    
+    // Podrías refrescar datos relacionados aquí si fuera necesario
+    // await fetchProductos();
   };
   const { user } = useUser();
   const [currentUserId, setCurrentUserId] = useState(null);
