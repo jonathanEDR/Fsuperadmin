@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import DashboardCard from '../components/common/DashboardCard';
 import ProductosVendidosDashboard from '../components/Graphics/ProductosVendidosDashboardNew';
+import VentasLineChart from '../components/Graphics/VentasLineChart';
 import { useProductosVendidosHoy } from '../hooks/useProductosVendidosHoy';
 import { useRole } from '../context/RoleContext';
 import { Package, TrendingUp, BarChart3 } from 'lucide-react';
@@ -36,7 +37,7 @@ function BienvenidaPage() {
 
       {/* Dashboard Cards Grid */}
       <div className={`grid gap-6 transition-all duration-500 ${
-        expandedCard ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+        expandedCard ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'
       }`}>
         
         {/* Card: Productos Vendidos Hoy */}
@@ -55,6 +56,25 @@ function BienvenidaPage() {
           {/* Contenido expandible con el gráfico completo */}
           <div className="min-h-[600px]">
             <ProductosVendidosDashboard userRole={userRole} />
+          </div>
+        </DashboardCard>
+
+        {/* Card: Evolución de Ventas - NUEVA TARJETA */}
+        <DashboardCard
+          title="Evolución de Ventas"
+          value="📈"
+          subtitle="Tendencias y Métricas"
+          icon={<TrendingUp size={32} />}
+          color="blue"
+          loading={false}
+          error={null}
+          expandable={true}
+          isExpanded={expandedCard === 'evolucion-ventas'}
+          onExpandToggle={() => handleCardExpand('evolucion-ventas')}
+        >
+          {/* Contenido expandible con el gráfico de ventas */}
+          <div className="min-h-[600px]">
+            <VentasLineChart userRole={userRole} />
           </div>
         </DashboardCard>
 

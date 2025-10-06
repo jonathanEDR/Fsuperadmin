@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Plus, Grid3X3 } from 'lucide-react';
 import VentaList from './VentaList';
-import VentasFinalizadas from './VentasFinalizadas';
 import VentaCreationModal from './VentaCreationModal';
 import { useRole } from '../../context/RoleContext';
 import { useVentasLimpias } from '../../hooks/useVentasLimpias';
@@ -18,14 +17,11 @@ function VentasManager({ userRole: userRoleProp }) {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ventas, setVentas] = useState([]);
-  const [ventasFinalizadas, setVentasFinalizadas] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [loadingFinalizadas, setLoadingFinalizadas] = useState(false);
   const [error, setError] = useState(null);
 
   // Limpiar ventas para evitar errores de productos null
   const ventasLimpias = useVentasLimpias(ventas);
-  const ventasFinalizadasLimpias = useVentasLimpias(ventasFinalizadas);
 
   // Admins, super_admins y usuarios pueden crear ventas
   const canShowAddButton = ['admin', 'super_admin', 'user'].includes(userRole);
@@ -118,50 +114,19 @@ function VentasManager({ userRole: userRoleProp }) {
     }
   };
 
-  // Fetch ventas finalizadas
-  const fetchVentasFinalizadas = async () => {
-    try {
-      setLoadingFinalizadas(true);
-      const token = await getToken();
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/ventas/finalizadas?limit=1000&offset=0`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (!response.ok) {
-        throw new Error('Error al cargar ventas finalizadas');
-      }
-      const data = await response.json();
-      
-      // ENRIQUECER CON DEVOLUCIONES - Igual que las ventas activas
-      const ventasFinalizadasConDevoluciones = await enrichVentasWithDevoluciones(data.ventas || []);
-      setVentasFinalizadas(ventasFinalizadasConDevoluciones);
-      
-      console.log('✅ VentasManager - Ventas finalizadas cargadas y enriquecidas:', ventasFinalizadasConDevoluciones.length);
-    } catch (error) {
-      setError('Error al cargar ventas finalizadas');
-    } finally {
-      setLoadingFinalizadas(false);
-    }
-  };
+
 
   // Fetch devoluciones - REMOVIDO: ahora se maneja en GestionVentas
 
   useEffect(() => {
     fetchVentas();
-    fetchVentasFinalizadas();
-    // Eliminado: fetchDevoluciones() - ya no se necesita aquí
   }, []);
 
   const handleVentaCreated = async (venta) => {
     try {
       setLoading(true);
       // Recargar las listas de ventas después de crear una venta
-      await Promise.all([
-        fetchVentas(),
-        fetchVentasFinalizadas()
-      ]);
+      await fetchVentas();
       setIsModalOpen(false);
       console.log('✅ Venta creada y listas actualizadas');
     } catch (error) {
@@ -173,47 +138,32 @@ function VentasManager({ userRole: userRoleProp }) {
   };
 
   // Función para manejar actualizaciones de ventas
-  const handleVentaUpdated = async () => {
+  const handleVentaUpdated = useCallback(async () => {
     try {
-      console.log('🔄 VentasManager - Recargando datos después de actualización de venta');
-      await Promise.all([
-        fetchVentas(),
-        fetchVentasFinalizadas()
-      ]);
-      console.log('✅ VentasManager - Datos de ventas actualizados');
+      await fetchVentas();
     } catch (error) {
       console.error('Error al refrescar las listas después de actualización:', error);
       setError('Error al refrescar los datos');
     }
-  };
+  }, []);
 
   // Función específica para cuando se procesa un pago
-  const handlePagoProcessed = async () => {
+  const handlePagoProcessed = useCallback(async () => {
     try {
-      console.log('🔄 VentasManager - Recargando datos después de procesar pago');
-      await Promise.all([
-        fetchVentas(), // Recargar ventas porque cambia el estado de pago
-        fetchVentasFinalizadas() // Recargar finalizadas por si cambia el estado
-      ]);
-      console.log('✅ VentasManager - Datos actualizados después de pago');
+      await fetchVentas();
     } catch (error) {
-      console.error('Error al refrescar datos después de pago:', error);
+      console.error('Error al refrescar después de pago:', error);
     }
-  };
+  }, []);
 
   // Función específica para cuando se procesa una devolución
-  const handleDevolucionProcessed = async () => {
+  const handleDevolucionProcessed = useCallback(async () => {
     try {
-      console.log('🔄 VentasManager - Recargando datos después de procesar devolución');
-      await Promise.all([
-        fetchVentas(), // Recargar ventas para actualizar devoluciones
-        fetchVentasFinalizadas() // Recargar finalizadas por si hay devoluciones
-      ]);
-      console.log('✅ VentasManager - Datos actualizados después de devolución');
+      await fetchVentas();
     } catch (error) {
-      console.error('Error al refrescar datos después de devolución:', error);
+      console.error('Error al refrescar después de devolución:', error);
     }
-  };
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -269,14 +219,6 @@ function VentasManager({ userRole: userRoleProp }) {
             userRole={userRole}
           />
         )}
-      </div>
-
-      <div className="bg-white shadow-lg rounded-xl p-6">
-        <VentasFinalizadas 
-          userRole={userRole} 
-          ventasFinalizadas={ventasFinalizadasLimpias} 
-          loading={loadingFinalizadas}
-        />
       </div>
     </div>
   );

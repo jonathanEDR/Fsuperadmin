@@ -6,7 +6,6 @@ import { procesarPagoVenta } from '../../services/cobroService';
 import { PaymentModal } from '../cobros';
 import { QuickDevolucionModal } from '../devoluciones';
 import { VentaCreationModal } from '.';
-import VentasLineChart from '../Graphics/VentasLineChart';
 import { format } from 'date-fns';
 import clsx from 'clsx';
 import { useRole } from '../../context/RoleContext';
@@ -743,11 +742,6 @@ function VentaList({
           </div>
         </div>
       )}
-
-      {/* Gráfico de Análisis de Ventas - Visible para todos los roles */}
-      <div className="mb-8">
-        <VentasLineChart userRole={userRole} />
-      </div>
 
       {/* Selector de Vista */}
       <div className="flex justify-between items-center mb-6">

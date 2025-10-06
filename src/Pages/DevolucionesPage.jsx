@@ -3,7 +3,7 @@ import { GestionVentas } from '../components/ventas';
 import { useUserRole } from '../hooks/useUserRole';
 import ProductoErrorBoundary from '../components/common/ProductoErrorBoundary';
 
-function CobrosPage() {
+function DevolucionesPage() {
   const { userRole, isLoading, error } = useUserRole();
 
   // Mostrar loading mientras se obtiene el rol
@@ -12,7 +12,7 @@ function CobrosPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando cobros...</p>
+          <p className="mt-4 text-gray-600">Cargando devoluciones...</p>
         </div>
       </div>
     );
@@ -37,4 +37,4 @@ function CobrosPage() {
   );
 }
 
-export default CobrosPage;
+export default DevolucionesPage;

@@ -61,7 +61,6 @@ const cleanProductArray = (productos) => {
   return productos
     .filter(producto => {
       if (producto == null) {
-        console.warn('🔧 ProductoSafeGuard: Producto null/undefined filtrado');
         return false;
       }
       return true;
@@ -69,7 +68,6 @@ const cleanProductArray = (productos) => {
     .map(producto => {
       // Asegurar que el producto tenga estructura básica
       if (!producto.productoId && !producto.nombre) {
-        console.warn('🔧 ProductoSafeGuard: Producto sin nombre normalizado:', producto);
         return {
           ...producto,
           nombre: producto.nombre || 'Producto sin nombre',

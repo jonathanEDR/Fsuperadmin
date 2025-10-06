@@ -18,6 +18,8 @@ import UsuariosPage from './Pages/UsuariosPage';
 import ProductosPage from './Pages/ProductosPage';
 import CategoriasPage from './Pages/CategoriasPage';
 import VentasPage from './Pages/VentasPage';
+import CobrosPage from './Pages/CobrosPage';
+import DevolucionesPage from './Pages/DevolucionesPage';
 import PersonalPage from './Pages/PersonalPage';
 import NotasPage from './Pages/NotasPage';
 import PerfilPage from './Pages/PerfilPage';
@@ -136,6 +138,8 @@ function App() {
               <Route path="caja" element={<CajaPage />} />
               <Route path="categorias" element={<CategoriasPage />} />
               <Route path="ventas" element={<VentasPage />} />
+              <Route path="cobros" element={<CobrosPage />} />
+              <Route path="devoluciones" element={<DevolucionesPage />} />
               <Route path="catalogo" element={<CatalogoPage />} />
               <Route path="pagos-realizados" element={<PagosRealizadosPage />} />
               <Route path="personal" element={<PersonalPage />} />
@@ -158,6 +162,8 @@ function App() {
               <Route path="usuarios" element={<UsuariosPage />} />
               <Route path="productos" element={<ProductosPage />} />
               <Route path="ventas" element={<VentasPage />} />
+              <Route path="cobros" element={<CobrosPage />} />
+              <Route path="devoluciones" element={<DevolucionesPage />} />
               <Route path="catalogo" element={<CatalogoPage />} />
               <Route path="pagos-realizados" element={<PagosRealizadosPage />} />
               <Route path="personal" element={<PersonalPage />} />

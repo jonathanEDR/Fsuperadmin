@@ -181,8 +181,6 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [productosTerminados, setProductosTerminados] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isReservaModalOpen, setIsReservaModalOpen] = useState(false);
-  const [isSubmittingReserva, setIsSubmittingReserva] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isCatalogoModalOpen, setIsCatalogoModalOpen] = useState(false);
   
@@ -525,40 +523,7 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
     }
   }, [getToken]);
 
-  // Función para manejar la creación de reservas
-  const handleCreateReserva = async (reservaData) => {
-    try {
-      setIsSubmittingReserva(true);
-      setError(null);
 
-      const token = await getToken();
-      if (!token) {
-        throw new Error('No estás autorizado');
-      }
-
-      const response = await api.post('/api/reservas', reservaData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      console.log('Reserva creada exitosamente:', response.data);
-      
-      // Recargar productos para actualizar el stock
-      await fetchProductos();
-      
-      // Cerrar modal
-      setIsReservaModalOpen(false);
-      
-      // Mostrar mensaje de éxito (opcional)
-      alert('Reserva creada exitosamente');
-      
-    } catch (error) {
-      console.error('Error al crear reserva:', error);
-      const errorMsg = error.response?.data?.message || error.message || 'Error al crear la reserva';
-      setError(errorMsg);
-    } finally {
-      setIsSubmittingReserva(false);
-    }
-  };
 
   return (
     <div className="container mx-auto px-4 py-8">
