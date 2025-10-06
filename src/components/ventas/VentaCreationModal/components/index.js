@@ -10,3 +10,4 @@ export { default as ListaProductosDisponibles } from './ListaProductosDisponible
 export { default as CarritoVenta } from './CarritoVenta';
 export { default as FormularioVenta } from './FormularioVenta';
 export { default as BotonesAccion } from './BotonesAccion';
+export { default as MiniModalStock } from './MiniModalStock';

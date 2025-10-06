@@ -140,6 +140,24 @@ export const useProductosVenta = () => {
   };
 
   /**
+   * Incrementa el stock de un producto (para cuando se agrega inventario)
+   */
+  const incrementarStockProducto = (productoId, cantidadAgregada) => {
+    setProductos(prevProductos => 
+      prevProductos.map(producto => {
+        if (producto._id === productoId) {
+          return {
+            ...producto,
+            cantidadRestante: (producto.cantidadRestante || 0) + parseInt(cantidadAgregada),
+            stock: (producto.stock || 0) + parseInt(cantidadAgregada) // Para compatibilidad con ambos campos
+          };
+        }
+        return producto;
+      })
+    );
+  };
+
+  /**
    * Actualiza el stock de múltiples productos
    */
   const actualizarStockMultiple = (items) => {
@@ -184,6 +202,7 @@ export const useProductosVenta = () => {
     setSelectedCategory,
     productosDisponibles,
     actualizarStockProducto,
+    incrementarStockProducto,
     actualizarStockMultiple,
     buscarProductoPorId,
     limpiarFiltros,

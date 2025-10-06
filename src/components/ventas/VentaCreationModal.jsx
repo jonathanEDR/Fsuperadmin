@@ -64,6 +64,8 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
     productosDisponibles,
     setSearchTerm,
     setSelectedCategory,
+    actualizarStockProducto,
+    incrementarStockProducto,
     actualizarStockMultiple
   } = useProductosVenta();
 
@@ -261,6 +263,7 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
                 onAgregarProducto={handleAgregarProducto}
                 loading={loadingProductos}
                 error={errorProductos}
+                onStockUpdated={incrementarStockProducto}
               />
             </div>
 

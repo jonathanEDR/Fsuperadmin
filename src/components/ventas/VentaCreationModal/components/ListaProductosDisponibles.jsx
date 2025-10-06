@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Plus, Package } from 'lucide-react';
+import { Plus, Package, Zap } from 'lucide-react';
+import MiniModalStock from './MiniModalStock';
 
 /**
  * ListaProductosDisponibles - Muestra la lista de productos filtrados
@@ -23,10 +24,15 @@ const ListaProductosDisponibles = React.memo(({
   productos = [],
   onAgregarProducto,
   loading = false,
-  error = null
+  error = null,
+  onStockUpdated // Nuevo prop para notificar cuando se actualiza stock
 }) => {
   // Estado para manejar las cantidades de cada producto
   const [cantidades, setCantidades] = useState({});
+  
+  // Estado para el mini modal de stock
+  const [showStockModal, setShowStockModal] = useState(false);
+  const [selectedProducto, setSelectedProducto] = useState(null);
 
   /**
    * Obtener la cantidad actual de un producto
@@ -58,6 +64,38 @@ const ListaProductosDisponibles = React.memo(({
       delete newState[producto._id];
       return newState;
     });
+  };
+
+  /**
+   * Abrir modal para agregar stock
+   */
+  const handleAgregarStock = (producto) => {
+    setSelectedProducto(producto);
+    setShowStockModal(true);
+  };
+
+  /**
+   * Manejar cuando se agrega stock exitosamente
+   */
+  const handleStockAdded = (response, cantidadAgregada) => {
+    console.log('Stock agregado exitosamente:', response);
+    
+    // Notificar al componente padre para refrescar productos
+    if (onStockUpdated) {
+      onStockUpdated(selectedProducto._id, cantidadAgregada);
+    }
+    
+    // Cerrar modal
+    setShowStockModal(false);
+    setSelectedProducto(null);
+  };
+
+  /**
+   * Cerrar modal de stock
+   */
+  const handleCloseStockModal = () => {
+    setShowStockModal(false);
+    setSelectedProducto(null);
   };
 
   // Loading state
@@ -95,12 +133,13 @@ const ListaProductosDisponibles = React.memo(({
 
   // Products list
   return (
-    <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
-      {productos.map((producto) => (
-        <div
-          key={producto._id}
-          className="bg-white border border-gray-200 rounded-lg p-3 hover:border-purple-400 hover:shadow-md transition-all duration-200"
-        >
+    <>
+      <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
+        {productos.map((producto) => (
+          <div
+            key={producto._id}
+            className="bg-white border border-gray-200 rounded-lg p-3 hover:border-purple-400 hover:shadow-md transition-all duration-200"
+          >
           <div className="flex items-start justify-between gap-3">
             {/* Información del producto */}
             <div className="flex-1 min-w-0">
@@ -169,6 +208,16 @@ const ListaProductosDisponibles = React.memo(({
                 </button>
               </div>
 
+              {/* Botón +Stock (siempre visible) */}
+              <button
+                onClick={() => handleAgregarStock(producto)}
+                className="flex-shrink-0 px-2 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-all duration-200 flex items-center gap-1 hover:shadow-lg"
+                title="Agregar stock rápido"
+              >
+                <Zap size={16} />
+                <span className="text-xs font-medium">+Stock</span>
+              </button>
+
               {/* Botón agregar */}
               <button
                 onClick={() => handleAgregar(producto)}
@@ -187,7 +236,16 @@ const ListaProductosDisponibles = React.memo(({
           </div>
         </div>
       ))}
-    </div>
+      </div>
+
+      {/* Mini Modal para agregar stock */}
+      <MiniModalStock
+        isOpen={showStockModal}
+        onClose={handleCloseStockModal}
+        producto={selectedProducto}
+        onStockAdded={handleStockAdded}
+      />
+    </>
   );
 });
 
