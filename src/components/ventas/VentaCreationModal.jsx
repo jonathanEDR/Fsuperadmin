@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { X, ShoppingBag } from 'lucide-react';
+import { X, ShoppingBag, Calendar } from 'lucide-react';
 import { useAuth, useUser } from '@clerk/clerk-react';
 
 // Importar hooks personalizados
@@ -183,29 +183,50 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
       <div className="bg-white rounded-lg sm:rounded-xl shadow-2xl max-w-7xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col">
         
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-2.5 sm:px-6 sm:py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-6 flex-1 min-w-0">
+        <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-3 py-2.5 sm:px-6 sm:py-4">
+          <div className="flex items-center justify-between gap-1 sm:gap-4 flex-wrap">
+            {/* Sección izquierda: Título */}
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <ShoppingBag size={20} className="sm:w-7 sm:h-7 flex-shrink-0" />
-              <h2 className="text-base sm:text-2xl font-bold truncate">Nueva Venta</h2>
+              <h2 className="text-base sm:text-2xl font-bold whitespace-nowrap">Nueva Venta</h2>
             </div>
-            {/* Total a facturar en el header */}
-            {subtotal > 0 && (
-              <div className="bg-white/20 backdrop-blur-sm px-2 py-1 sm:px-4 sm:py-2 rounded-md sm:rounded-lg border border-white/30">
-                <div className="flex items-center gap-1 sm:gap-2">
-                  <span className="text-xs sm:text-sm font-medium text-white/90">Total:</span>
-                  <span className="text-sm sm:text-xl font-bold text-white whitespace-nowrap">S/ {subtotal.toFixed(2)}</span>
-                </div>
+            
+            {/* Fecha de Venta - Siempre visible, adaptativa */}
+            <div className="bg-white/10 backdrop-blur-sm px-2 py-1 sm:px-3 sm:py-1.5 rounded-md border border-white/20 order-2 lg:order-none">
+              <div className="flex items-center gap-1 sm:gap-2">
+                <Calendar size={14} className="sm:w-4 sm:h-4 text-white/80 flex-shrink-0" />
+                <input
+                  type="datetime-local"
+                  value={formData.fechadeVenta || ''}
+                  onChange={(e) => actualizarFormulario({ fechadeVenta: e.target.value })}
+                  className="bg-transparent text-white text-xs sm:text-sm font-medium border-none outline-none w-28 sm:w-40"
+                  style={{ colorScheme: 'dark' }}
+                />
               </div>
-            )}
+            </div>
+            
+            {/* Sección derecha: Total + Botón cerrar */}
+            <div className="flex items-center gap-2 sm:gap-3 order-1 lg:order-none">
+              {/* Total a facturar */}
+              {subtotal > 0 && (
+                <div className="bg-white/20 backdrop-blur-sm px-2 py-1 sm:px-4 sm:py-2 rounded-md border border-white/30">
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <span className="text-xs sm:text-sm font-medium text-white/90">Total:</span>
+                    <span className="text-sm sm:text-lg font-bold text-white whitespace-nowrap">S/ {subtotal.toFixed(2)}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Botón cerrar */}
+              <button
+                onClick={handleCerrar}
+                disabled={guardando}
+                className="p-1.5 sm:p-2 hover:bg-white/20 rounded-lg transition-colors disabled:opacity-50 flex-shrink-0"
+              >
+                <X size={20} className="sm:w-6 sm:h-6" />
+              </button>
+            </div>
           </div>
-          <button
-            onClick={handleCerrar}
-            disabled={guardando}
-            className="p-1.5 sm:p-2 hover:bg-white/20 rounded-lg transition-colors disabled:opacity-50 flex-shrink-0"
-          >
-            <X size={20} className="sm:w-6 sm:h-6" />
-          </button>
         </div>
 
         {/* Mensaje de éxito */}

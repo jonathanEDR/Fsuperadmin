@@ -64,7 +64,7 @@ const ListaProductosDisponibles = React.memo(({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
         <span className="ml-3 text-gray-600">Cargando productos...</span>
       </div>
     );
@@ -99,7 +99,7 @@ const ListaProductosDisponibles = React.memo(({
       {productos.map((producto) => (
         <div
           key={producto._id}
-          className="bg-white border border-gray-200 rounded-lg p-3 hover:border-blue-400 hover:shadow-md transition-all duration-200"
+          className="bg-white border border-gray-200 rounded-lg p-3 hover:border-purple-400 hover:shadow-md transition-all duration-200"
         >
           <div className="flex items-start justify-between gap-3">
             {/* Información del producto */}
@@ -116,7 +116,7 @@ const ListaProductosDisponibles = React.memo(({
                 )}
                 
                 {(producto.categoryName || producto.categoria) && (
-                  <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+                  <span className="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded">
                     {producto.categoryName || producto.categoria}
                   </span>
                 )}
@@ -175,7 +175,7 @@ const ListaProductosDisponibles = React.memo(({
                 disabled={!(producto.cantidadRestante || producto.stock) || (producto.cantidadRestante || producto.stock) <= 0}
                 className={`flex-shrink-0 px-3 py-2 rounded-lg transition-all duration-200 flex items-center gap-1 ${
                   (producto.cantidadRestante || producto.stock) > 0
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-lg'
+                    ? 'bg-purple-600 hover:bg-purple-700 text-white hover:shadow-lg'
                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 }`}
                 title={(producto.cantidadRestante || producto.stock) > 0 ? 'Agregar al carrito' : 'Sin stock disponible'}

@@ -401,33 +401,38 @@ const CatalogoVentasPageView = ({ userRole = 'user' }) => {
 
         {/* Footer con resumen del carrito */}
         {carrito.length > 0 && (
-          <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-orange-500 to-yellow-400 p-4 shadow-lg z-40">
-            <div className="max-w-7xl mx-auto flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <span className="text-gray-900 font-medium">
-                  {carrito.length} producto{carrito.length !== 1 ? 's' : ''} en el carrito
-                </span>
-                <span className="font-bold text-gray-900 text-lg">
-                  Total: S/ {totalCarrito.toFixed(2)}
-                </span>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                {!vistaCarrito && (
+          <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-500 shadow-2xl z-40 border-t-4 border-purple-400">
+            <div className="max-w-7xl mx-auto p-3 sm:p-4">
+              {/* Layout móvil y desktop */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+                {/* Info del carrito */}
+                <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-4">
+                  <span className="text-white text-xs sm:text-sm font-medium">
+                    {carrito.length} producto{carrito.length !== 1 ? 's' : ''}
+                  </span>
+                  <span className="font-bold text-white text-sm sm:text-lg">
+                    Total: S/ {totalCarrito.toFixed(2)}
+                  </span>
+                </div>
+                
+                {/* Botones - Verticales en móvil, horizontales en desktop */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  {!vistaCarrito && (
+                    <button
+                      onClick={() => setVistaCarrito(true)}
+                      className="bg-white bg-opacity-30 backdrop-blur-sm text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg hover:bg-opacity-40 transition-all border-2 border-white font-bold shadow-md text-sm sm:text-base"
+                    >
+                      Ver Carrito
+                    </button>
+                  )}
                   <button
-                    onClick={() => setVistaCarrito(true)}
-                    className="bg-white bg-opacity-20 backdrop-blur-sm text-gray-900 px-4 py-2 rounded-lg hover:bg-opacity-30 transition-all border border-gray-900 border-opacity-20 font-medium"
+                    onClick={handleConfirmarVenta}
+                    className="bg-white text-purple-600 px-4 py-2 sm:px-6 sm:py-2.5 rounded-lg hover:bg-purple-600 hover:text-white transition-all font-bold shadow-lg flex items-center justify-center gap-2 border-2 border-white text-sm sm:text-base"
                   >
-                    Ver Carrito
+                    <Plus size={16} className="sm:w-5 sm:h-5" />
+                    Confirmar Venta
                   </button>
-                )}
-                <button
-                  onClick={handleConfirmarVenta}
-                  className="bg-gray-900 text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors font-medium shadow-lg flex items-center gap-2"
-                >
-                  <Plus size={16} />
-                  Confirmar Venta
-                </button>
+                </div>
               </div>
             </div>
           </div>

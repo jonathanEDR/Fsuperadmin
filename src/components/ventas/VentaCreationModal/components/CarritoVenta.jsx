@@ -59,7 +59,7 @@ const CarritoVenta = React.memo(({
         {carrito.map((item, index) => (
           <div
             key={`${item.productoId}-${index}`}
-            className="bg-white border border-gray-200 rounded-lg p-2 sm:p-3 hover:border-blue-300 transition-colors"
+            className="bg-white border border-gray-200 rounded-lg p-2 sm:p-3 hover:border-purple-300 transition-colors"
           >
             <div className="flex items-start justify-between gap-2 sm:gap-3">
               {/* Info del producto */}
@@ -72,7 +72,7 @@ const CarritoVenta = React.memo(({
                   <span className="text-xs sm:text-sm text-gray-600">
                     S/ {(item.precioUnitario || 0).toFixed(2)} c/u
                   </span>
-                  <span className="text-xs sm:text-sm font-medium text-blue-600">
+                  <span className="text-xs sm:text-sm font-medium text-purple-600">
                     × {item.cantidad}
                   </span>
                   <span className="text-xs sm:text-sm font-semibold text-green-600">

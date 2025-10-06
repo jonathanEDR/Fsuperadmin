@@ -80,7 +80,7 @@ const BotonesAccion = React.memo(({
           className={`px-4 py-1.5 sm:px-6 sm:py-2 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 flex items-center gap-1.5 sm:gap-2 ${
             deshabilitarGuardar || guardando
               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl'
+              : 'bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg hover:shadow-xl'
           }`}
           title={
             deshabilitarGuardar

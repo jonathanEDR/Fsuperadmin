@@ -103,7 +103,7 @@ const FormularioVenta = React.memo(({
         
         {loadingUsuarios ? (
           <div className="flex items-center gap-2 p-2.5 sm:p-3 bg-gray-50 rounded-lg">
-            <div className="animate-spin rounded-full h-3.5 w-3.5 sm:h-4 sm:w-4 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-3.5 w-3.5 sm:h-4 sm:w-4 border-b-2 border-purple-600"></div>
             <span className="text-xs sm:text-sm text-gray-600">Cargando clientes...</span>
           </div>
         ) : (
@@ -123,7 +123,7 @@ const FormularioVenta = React.memo(({
                   setIsOpen(true);
                 }}
                 onFocus={() => setIsOpen(true)}
-                className={`w-full pl-8 sm:pl-10 pr-16 sm:pr-20 py-2 sm:py-2.5 text-sm sm:text-base bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg ${
+                className={`w-full pl-8 sm:pl-10 pr-16 sm:pr-20 py-2 sm:py-2.5 text-sm sm:text-base bg-transparent focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-lg ${
                   usuarioSeleccionado ? 'font-medium text-gray-700' : 'text-gray-500'
                 }`}
               />
@@ -178,7 +178,7 @@ const FormularioVenta = React.memo(({
                       onClick={() => handleSelectCliente(usuario.id)}
                       className={`px-3 py-2 sm:px-4 sm:py-2.5 cursor-pointer transition-colors ${
                         formData.targetUserId === usuario.id
-                          ? 'bg-blue-50 border-l-4 border-l-blue-500'
+                          ? 'bg-purple-50 border-l-4 border-l-purple-500'
                           : 'hover:bg-gray-50'
                       }`}
                     >
@@ -218,7 +218,7 @@ const FormularioVenta = React.memo(({
               placeholder="Ej: Juan Pérez, Cliente mostrador, etc."
               value={formData.clienteNombre || ''}
               onChange={(e) => onFormChange({ ...formData, clienteNombre: e.target.value })}
-              className="w-full px-2.5 py-2 sm:px-3 sm:py-2 text-sm sm:text-base border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+              className="w-full px-2.5 py-2 sm:px-3 sm:py-2 text-sm sm:text-base border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
             />
             <p className="text-[10px] sm:text-xs text-yellow-700 mt-1">
               💡 Este campo te ayudará a identificar esta venta posteriormente
@@ -228,8 +228,8 @@ const FormularioVenta = React.memo(({
       </div>
 
       {/* Información sobre el proceso de pago */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 sm:p-3">
-        <p className="text-blue-800 text-xs sm:text-sm">
+      <div className="bg-purple-50 border border-purple-200 rounded-lg p-2.5 sm:p-3">
+        <p className="text-purple-800 text-xs sm:text-sm">
           ℹ️ <strong>Nota:</strong> La venta se creará con estado <strong>"Pendiente"</strong>. 
           El pago se gestionará posteriormente desde el módulo de <strong>Cobros</strong>.
         </p>
