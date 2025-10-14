@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { Package, Plus, Edit2, Trash2, Users, Search, X } from 'lucide-react';
+import { Package, Plus, Edit2, Trash2, Users, Search, X, FileSpreadsheet } from 'lucide-react';
 import ProductCreationModal from './ProductCreationModal';
 import InventarioHistorial from './InventarioHistorial';
 import InventarioModal from './InventarioModal';
 import { Dialog } from '@headlessui/react';
 import CatalogoModal from './CatalogoModal';
 import CategoryModal from './CategoryModal';
+import BulkUploadModal from './BulkUploadModal';
 import api from '../../services/api';
 import categoryService from '../../services/categoryService';
 import useInventarioProducto from '../../hooks/useInventarioProducto';
@@ -182,6 +183,7 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isCatalogoModalOpen, setIsCatalogoModalOpen] = useState(false);
+  const [isBulkUploadModalOpen, setIsBulkUploadModalOpen] = useState(false);
   
   // Estados para filtros
   const [filtros, setFiltros] = useState({
@@ -572,7 +574,7 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
             <span className="hidden sm:inline">Ver / Agregar Catálogo</span>
             <span className="sm:hidden">Catálogo</span>
           </button>
-          
+
           <button
             onClick={() => setIsCategoryModalOpen(true)}
             className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 shadow-sm"
@@ -581,7 +583,7 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
             <span className="hidden sm:inline">Ver / Agregar Categorías</span>
             <span className="sm:hidden">Categorías</span>
           </button>
-        
+
           <button
             onClick={() => setIsModalOpen(true)}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
@@ -590,7 +592,20 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
             <span className="hidden sm:inline">Agregar Producto</span>
             <span className="sm:hidden">Producto</span>
           </button>
-              {/* Botón registrar entrada (solo para admin) */}
+
+          {/* Botón Importar Masivo (solo para admin) */}
+          {isAdminUser && (
+            <button
+              onClick={() => setIsBulkUploadModalOpen(true)}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all flex items-center gap-2 shadow-lg transform hover:scale-105"
+            >
+              <FileSpreadsheet size={18} />
+              <span className="hidden sm:inline">Importar Masivo</span>
+              <span className="sm:hidden">Excel</span>
+            </button>
+          )}
+
+          {/* Botón registrar entrada (solo para admin) */}
           {isAdminUser && (
             <button
               onClick={() => setIsInventarioModalOpen(true)}
@@ -657,7 +672,15 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
         onSubmit={handleCategoryModalSubmit}
       />
 
-  
+      {/* Modal de carga masiva */}
+      <BulkUploadModal
+        isOpen={isBulkUploadModalOpen}
+        onClose={() => setIsBulkUploadModalOpen(false)}
+        onSuccess={async () => {
+          await fetchProductos();
+          console.log('Productos actualizados tras importación masiva');
+        }}
+      />
 
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
