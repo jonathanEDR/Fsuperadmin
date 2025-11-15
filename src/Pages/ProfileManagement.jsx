@@ -27,6 +27,7 @@ const ProfileManagement = ({ userRole }) => {
 
   // Función para verificar si el usuario puede editar a otro usuario
   const canEditUser = (targetUser) => {
+    console.log('ProfileManagement - userRole:', userRole, 'targetUser.role:', targetUser?.role);
     if (userRole === 'super_admin') return true;
     if (userRole === 'admin') {
       return targetUser.role === 'user';

@@ -19,7 +19,7 @@ function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggle
     { id: 'cobros', icon: DollarSign, label: 'Gestión de Cobros', route: '/admin/cobros' },
     { id: 'devoluciones', icon: RotateCcw, label: 'Gestión de Devoluciones', route: '/admin/devoluciones' },
     { id: 'catalogo', icon: Grid3X3, label: 'Catálogo de Productos', route: '/admin/catalogo' },
-    { id: 'personal', icon: UserCheck, label: 'Gestión de Personal', route: '/admin/personal' },
+    { id: 'personal', icon: UserCheck, label: 'Gestión de Personal', route: '/admin/personal-v2' },
     { id: 'perfil', icon: UserCog, label: 'Mi Perfil', route: '/admin/perfil' }
   ];
 
@@ -97,9 +97,16 @@ function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggle
                 >
                   <Icon size={20} className="flex-shrink-0" />
                   {!isCollapsed && (
-                    <span className="font-medium whitespace-nowrap truncate">
-                      {item.label}
-                    </span>
+                    <div className="flex items-center justify-between flex-1 gap-2">
+                      <span className="font-medium whitespace-nowrap truncate">
+                        {item.label}
+                      </span>
+                      {item.badge && (
+                        <span className={`${item.badgeColor || 'bg-blue-500'} text-white text-xs px-2 py-0.5 rounded-full font-semibold`}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </button>
               );

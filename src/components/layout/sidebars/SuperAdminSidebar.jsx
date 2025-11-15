@@ -18,7 +18,7 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
       title: "Gestión de Usuarios",
       items: [
         { id: 'dashboard', icon: Home, label: 'Gestión de Usuarios', route: '/super-admin/usuarios' },
-        { id: 'personal', icon: UserCheck, label: 'Gestión de Personal', route: '/super-admin/personal' },
+        { id: 'personal', icon: UserCheck, label: 'Gestión de Personal', route: '/super-admin/personal-v2' },
       ]
     },
     {
@@ -140,9 +140,16 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
                       >
                         <Icon size={20} className="flex-shrink-0" />
                         {!isCollapsed && (
-                          <span className="font-medium whitespace-nowrap truncate">
-                            {item.label}
-                          </span>
+                          <div className="flex items-center justify-between flex-1 gap-2">
+                            <span className="font-medium whitespace-nowrap truncate">
+                              {item.label}
+                            </span>
+                            {item.badge && (
+                              <span className={`${item.badgeColor || 'bg-blue-500'} text-white text-xs px-2 py-0.5 rounded-full font-semibold`}>
+                                {item.badge}
+                              </span>
+                            )}
+                          </div>
                         )}
                       </button>
                     );

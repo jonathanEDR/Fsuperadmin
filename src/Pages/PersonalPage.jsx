@@ -1,10 +1,10 @@
 import React from 'react';
-import { GestionPersonal } from '../components/personal';
+import { GestionPersonalV2 } from '../components/personal-v2';
 
 function PersonalPage() {
   return (
     <div>
-      <GestionPersonal />
+      <GestionPersonalV2 />
     </div>
   );
 }

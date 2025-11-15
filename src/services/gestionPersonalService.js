@@ -231,6 +231,16 @@ export const gestionPersonalService = {
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Error al exportar datos');
     }
+  },
+
+  // 🚀 NUEVO V2: Obtener todos los datos en una sola petición optimizada
+  obtenerDatosCompletos: async () => {
+    try {
+      const response = await api.get('/api/gestion-personal/datos-completos');
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Error al obtener datos completos');
+    }
   }
 };
 

@@ -3,7 +3,6 @@ import { useAuth } from '@clerk/clerk-react';
 import { useMovimiento } from '../../hooks/useMovimiento';
 import { usePersonalPayment } from '../../hooks/usePersonalPayment';
 import api from '../../services/api';
-import useGestionPersonalData from '../personal/useGestionPersonalData';
 import styles from './Modal.module.css';
 
 const ModalEgreso = ({ isOpen, onClose, onSuccess }) => {
@@ -15,12 +14,39 @@ const ModalEgreso = ({ isOpen, onClose, onSuccess }) => {
     error: personalError,
     setError: setPersonalError
   } = usePersonalPayment();
-  // Usar el hook de gestión personal para obtener colaboradores, registros y pagos
-  const { colaboradores, registros, pagos,datosCobros } = useGestionPersonalData();
+  // Estado local para datos de gestión personal (fetched from V2 API)
+  const [colaboradores, setColaboradores] = useState([]);
+  const [registros, setRegistros] = useState([]);
+  const [pagos, setPagos] = useState([]);
+  const [datosCobros, setDatosCobros] = useState(null);
   const [montoPendiente, setMontoPendiente] = useState(0);
   const [selectedSection, setSelectedSection] = useState('');
   // Estado para controlar la visibilidad del panel derecho
   const [showRightPanel, setShowRightPanel] = useState(false);
+  
+  // Fetch personal management data when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const fetchPersonalData = async () => {
+        try {
+          const token = await getToken();
+          const response = await api.get('/api/gestion-personal/datos-completos', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          const { colaboradores: cols, registros: regs, pagos: pgs, datosCobros: dc } = response.data;
+          setColaboradores(cols || []);
+          setRegistros(regs || []);
+          setPagos(pgs || []);
+          setDatosCobros(dc || null);
+        } catch (err) {
+          console.error('Error fetching personal data:', err);
+        }
+      };
+      
+      fetchPersonalData();
+    }
+  }, [isOpen, getToken]);
   
   const [formData, setFormData] = useState({
     tipo: 'egreso',

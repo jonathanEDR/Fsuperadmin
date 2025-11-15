@@ -23,6 +23,7 @@ import DevolucionesPage from './Pages/DevolucionesPage';
 import PersonalPage from './Pages/PersonalPage';
 import NotasPage from './Pages/NotasPage';
 import PerfilPage from './Pages/PerfilPage';
+import { GestionPersonalV2 } from './components/personal-v2'; // NUEVO MÓDULO V2
 import UserDashboardLayout from './components/layout/dashboards/UserDashboardLayout';
 import CajaPage from './Pages/CajaPage';
 import ProduccionPage from './Pages/ProduccionPage';
@@ -143,6 +144,7 @@ function App() {
               <Route path="catalogo" element={<CatalogoPage />} />
               <Route path="pagos-realizados" element={<PagosRealizadosPage />} />
               <Route path="personal" element={<PersonalPage />} />
+              <Route path="personal-v2" element={<GestionPersonalV2 />} /> {/* RUTA TEMPORAL PARA TESTING */}
               <Route path="perfil" element={<PerfilPage />} />
               <Route path="produccion/*" element={<ProduccionPage />} />
               {/* Módulo de Finanzas - ELIMINADO del Admin */}
@@ -167,6 +169,7 @@ function App() {
               <Route path="catalogo" element={<CatalogoPage />} />
               <Route path="pagos-realizados" element={<PagosRealizadosPage />} />
               <Route path="personal" element={<PersonalPage />} />
+              <Route path="personal-v2" element={<GestionPersonalV2 />} /> {/* RUTA TEMPORAL PARA TESTING */}
               <Route path="notas" element={<NotasPage />} />
               <Route path="perfil" element={<PerfilPage />} />
               <Route path="caja" element={<CajaPage />} />
