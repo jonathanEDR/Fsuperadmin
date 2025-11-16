@@ -3,6 +3,7 @@ import { DollarSign, RotateCcw, Clock, Plus, Check, ChevronDown, ChevronUp, User
 import ProductCard from './ProductCard';
 import ClienteCard from './ClienteCard';
 import QuantityModal from './QuantityModal';
+import CobrosDetalleModal from './CobrosDetalleModal';
 import withProductoSafeGuard from '../../hoc/withProductoSafeGuard';
 import './VentaCards.css';
 
@@ -40,6 +41,16 @@ const VentaViews = ({
   const [showQuantityModal, setShowQuantityModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedVentaId, setSelectedVentaId] = useState(null);
+
+  // Estados para el modal de cobros detalle
+  const [isCobrosModalOpen, setIsCobrosModalOpen] = useState(false);
+  const [selectedVentaForCobros, setSelectedVentaForCobros] = useState(null);
+
+  // Función para abrir el modal de cobros detalle
+  const handleOpenCobrosDetalle = (venta) => {
+    setSelectedVentaForCobros(venta);
+    setIsCobrosModalOpen(true);
+  };
 
   // Función para filtrar ventas según rol y usuario seleccionado
   const ventasFiltradas = useMemo(() => {
@@ -287,7 +298,17 @@ const VentaViews = ({
                             ? 'text-yellow-600' 
                             : 'text-red-600'
                         }`}>
-                          Pagado: S/ {(venta.cantidadPagada || 0).toFixed(2)}
+                          {venta.cantidadPagada > 0 ? (
+                            <button
+                              onClick={() => handleOpenCobrosDetalle(venta)}
+                              className="hover:underline cursor-pointer inline-flex items-center gap-1"
+                              title="Ver detalle de pagos"
+                            >
+                              💳 Pagado: S/ {(venta.cantidadPagada || 0).toFixed(2)}
+                            </button>
+                          ) : (
+                            <span>Pagado: S/ 0.00</span>
+                          )}
                         </div>
                         <div className={`text-xs font-medium ${
                           (venta.debe || 0) <= 0 
@@ -458,7 +479,17 @@ const VentaViews = ({
                     </div>
                     <div className="text-center">
                       <p className="text-xs text-emerald-600 font-medium">Pagado</p>
-                      <p className="text-xs sm:text-sm font-bold text-emerald-800">S/ {(venta.cantidadPagada || 0).toFixed(2)}</p>
+                      {venta.cantidadPagada > 0 ? (
+                        <button
+                          onClick={() => handleOpenCobrosDetalle(venta)}
+                          className="text-xs sm:text-sm font-bold text-emerald-800 hover:text-emerald-600 hover:underline cursor-pointer transition-colors inline-flex items-center gap-1"
+                          title="Ver detalle de pagos"
+                        >
+                          💳 S/ {(venta.cantidadPagada || 0).toFixed(2)}
+                        </button>
+                      ) : (
+                        <p className="text-xs sm:text-sm font-bold text-emerald-800">S/ 0.00</p>
+                      )}
                     </div>
                     <div className="text-center">
                       <p className="text-xs text-rose-600 font-medium">Debe</p>
@@ -955,6 +986,13 @@ const VentaViews = ({
           isUpdating={loading}
           ventaId={selectedVentaId}
         />
+
+        {/* Modal de Detalle de Cobros */}
+        <CobrosDetalleModal
+          isOpen={isCobrosModalOpen}
+          onClose={() => setIsCobrosModalOpen(false)}
+          venta={selectedVentaForCobros}
+        />
       </>
     );
   } else if (viewMode === 'lista') {
@@ -971,6 +1009,13 @@ const VentaViews = ({
           isUpdating={loading}
           ventaId={selectedVentaId}
         />
+
+        {/* Modal de Detalle de Cobros */}
+        <CobrosDetalleModal
+          isOpen={isCobrosModalOpen}
+          onClose={() => setIsCobrosModalOpen(false)}
+          venta={selectedVentaForCobros}
+        />
       </>
     );
   } else {
@@ -986,6 +1031,13 @@ const VentaViews = ({
           onConfirm={handleQuantityConfirm}
           isUpdating={loading}
           ventaId={selectedVentaId}
+        />
+
+        {/* Modal de Detalle de Cobros */}
+        <CobrosDetalleModal
+          isOpen={isCobrosModalOpen}
+          onClose={() => setIsCobrosModalOpen(false)}
+          venta={selectedVentaForCobros}
         />
       </>
     );
