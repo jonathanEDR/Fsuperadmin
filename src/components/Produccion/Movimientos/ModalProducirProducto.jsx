@@ -1,3 +1,4 @@
+// Modal Producir Stock - Optimizado para móviles v3.0 - Layout Vertical Completo
 import React, { useState, useEffect } from 'react';
 import { movimientoUnificadoService } from '../../../services/movimientoUnificadoService';
 
@@ -17,6 +18,11 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('ingredientes');
+  
+  // Estados para acordeones en móvil
+  const [mostrarIngredientes, setMostrarIngredientes] = useState(true);
+  const [mostrarRecetas, setMostrarRecetas] = useState(false);
+  const [mostrarInfoProducto, setMostrarInfoProducto] = useState(true);
 
   useEffect(() => {
     if (isOpen && producto) {
@@ -58,11 +64,6 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
       
       setIngredientesDisponibles(ingredientesConStock);
       setRecetasDisponibles(recetasConStock);
-      
-      console.log('✅ Recursos cargados:', {
-        ingredientes: ingredientesConStock.length,
-        recetas: recetasConStock.length
-      });
       
     } catch (error) {
       console.error('Error al cargar recursos:', error);
@@ -250,18 +251,6 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
         recetasUtilizadas: formData.consumirRecursos ? formData.recetasUtilizadas : []
       };
 
-      console.log('🚀 Enviando datos de producción:', {
-        ...datosProduccion,
-        ingredientesUtilizados: datosProduccion.ingredientesUtilizados.map(ing => ({
-          ...ing,
-          ingredienteInfo: obtenerIngredienteInfo(ing.ingrediente)
-        })),
-        recetasUtilizadas: datosProduccion.recetasUtilizadas.map(rec => ({
-          ...rec,
-          recetaInfo: obtenerRecetaInfo(rec.receta)
-        }))
-      });
-
       await movimientoUnificadoService.agregarCantidad(datosProduccion);
 
       onSuccess?.();
@@ -279,37 +268,37 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
   const costoTotal = calcularCostoTotal();
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[95vh] flex flex-col">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-0 sm:p-4">
+      <div className="bg-white sm:rounded-xl shadow-2xl w-full h-full sm:h-auto sm:max-w-xl lg:max-w-3xl sm:max-h-[95vh] flex flex-col">
         
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
-            <span className="text-3xl">🏭</span>
+        {/* Header - Más compacto en móvil */}
+        <div className="flex items-center justify-between p-2 sm:p-4 lg:p-6 border-b border-gray-200 bg-white sticky top-0 z-10">
+          <div className="flex items-center space-x-2">
+            <span className="text-xl sm:text-2xl lg:text-3xl">🏭</span>
             <div>
-              <h3 className="text-xl font-semibold text-gray-900">
-                Producir: {producto.nombre}
+              <h3 className="text-sm sm:text-lg lg:text-xl font-semibold text-gray-900 line-clamp-1">
+                {producto.nombre}
               </h3>
-              <p className="text-sm text-gray-500">
-                Especifica los ingredientes y recetas que se utilizarán
+              <p className="text-xs text-gray-500 hidden sm:block">
+                Especifica los ingredientes y recetas
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
             disabled={enviando}
-            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors"
+            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1.5 sm:p-2 rounded-lg transition-colors flex-shrink-0"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        {/* Error */}
+        {/* Error - Más compacto en móvil */}
         {error && (
-          <div className="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-600">{error}</p>
+          <div className="mx-2 sm:mx-4 lg:mx-6 mt-2 sm:mt-3 p-2 sm:p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-xs sm:text-sm text-red-600">{error}</p>
           </div>
         )}
 
@@ -319,176 +308,192 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
-            <div className="flex-1 flex overflow-hidden">
+          <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
+            {/* Contenedor principal con scroll único */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-2 sm:p-4 lg:p-6 space-y-3 sm:space-y-4">
               
-              {/* Columna Izquierda: Información del Producto */}
-              <div className="w-1/3 border-r border-gray-200 p-6 flex flex-col">
-                <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                  <h4 className="font-medium text-gray-800 mb-3">Información del Producto</h4>
-                  <div className="space-y-2 text-sm">
-                    <div>
-                      <span className="text-gray-500">Código:</span>
-                      <p className="font-medium">{producto.codigo}</p>
+              {/* Costo Total - Sticky en móvil, arriba para visibilidad */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-2 sm:p-3 sticky top-0 z-10 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-green-800 text-xs sm:text-sm">💰 Costo Total</h4>
+                    <div className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600">
+                      S/.{costoTotal.toFixed(2)}
                     </div>
-                    <div>
-                      <span className="text-gray-500">Stock Actual:</span>
-                      <p className="font-medium">{producto.cantidad || 0} {producto.unidadMedida || 'unidad'}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Después de producir:</span>
-                      <p className="font-medium text-green-600">
-                        {(producto.cantidad || 0) + formData.cantidadProducir} {producto.unidadMedida || 'unidad'}
-                      </p>
-                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-green-600">Por unidad</p>
+                    <p className="text-sm sm:text-base font-semibold text-green-700">
+                      S/.{(costoTotal / formData.cantidadProducir).toFixed(2)}
+                    </p>
                   </div>
                 </div>
+              </div>
 
-                <div className="space-y-4 flex-1">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Cantidad a Producir *
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      step="1"
-                      value={formData.cantidadProducir}
-                      onChange={(e) => setFormData(prev => ({ ...prev, cantidadProducir: parseInt(e.target.value) || 1 }))}
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                      disabled={enviando}
-                      required
-                    />
+              {/* Tarjeta de Cantidades - Más visual y compacta */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-3 sm:p-4">
+                <div className="grid grid-cols-3 gap-2 sm:gap-4">
+                  <div className="text-center">
+                    <div className="text-xs sm:text-sm text-gray-600 mb-1">Cantidad Actual</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-purple-600">
+                      {producto.cantidad || 0}
+                    </div>
+                    <div className="text-xs text-gray-500">{producto.unidadMedida || 'unidad'}</div>
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Operador Responsable *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.operador}
-                      onChange={(e) => setFormData(prev => ({ ...prev, operador: e.target.value }))}
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Nombre del operador"
-                      disabled={enviando}
-                      required
-                    />
+                  <div className="text-center border-x border-blue-200">
+                    <div className="text-xs sm:text-sm text-gray-600 mb-1">A Producir</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-green-600">
+                      +{formData.cantidadProducir}
+                    </div>
+                    <div className="text-xs text-gray-500">{producto.unidadMedida || 'unidad'}</div>
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Observaciones
-                    </label>
-                    <textarea
-                      value={formData.observaciones}
-                      onChange={(e) => setFormData(prev => ({ ...prev, observaciones: e.target.value }))}
-                      rows={3}
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 resize-none"
-                      placeholder="Observaciones adicionales..."
-                      disabled={enviando}
-                    />
+                  <div className="text-center">
+                    <div className="text-xs sm:text-sm text-gray-600 mb-1">Cantidad Final</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-blue-600">
+                      {(producto.cantidad || 0) + formData.cantidadProducir}
+                    </div>
+                    <div className="text-xs text-gray-500">{producto.unidadMedida || 'unidad'}</div>
                   </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-blue-200 text-center">
+                  <div className="text-xs text-gray-600">Producto: <span className="font-semibold">{producto.codigo}</span></div>
+                </div>
+              </div>
 
-                  {/* Checkbox para consumir recursos */}
-                  <div className="flex items-center space-x-2">
+              {/* Formulario de Producción - Vertical */}
+              <div className="space-y-2 sm:space-y-3">
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                    Cantidad a Producir *
+                  </label>
+                  <input
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    value={formData.cantidadProducir}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      const rounded = Math.round(value * 100) / 100;
+                      setFormData(prev => ({ ...prev, cantidadProducir: rounded }));
+                    }}
+                    onBlur={(e) => {
+                      const value = parseFloat(e.target.value) || 0.01;
+                      const rounded = Math.max(0.01, Math.round(value * 100) / 100);
+                      setFormData(prev => ({ ...prev, cantidadProducir: rounded }));
+                    }}
+                    className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={enviando}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                    Operador Responsable *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.operador}
+                    onChange={(e) => setFormData(prev => ({ ...prev, operador: e.target.value }))}
+                    className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Nombre del operador"
+                    disabled={enviando}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                    Observaciones (opcional)
+                  </label>
+                  <textarea
+                    value={formData.observaciones}
+                    onChange={(e) => setFormData(prev => ({ ...prev, observaciones: e.target.value }))}
+                    rows={2}
+                    className="w-full p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-base sm:text-sm"
+                    placeholder="Observaciones adicionales..."
+                    disabled={enviando}
+                  />
+                </div>
+
+                {/* Checkbox para consumir recursos */}
+                <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-3">
+                  <div className="flex items-start space-x-3">
                     <input
                       type="checkbox"
                       id="consumirRecursos"
                       checked={formData.consumirRecursos}
                       onChange={(e) => setFormData(prev => ({ ...prev, consumirRecursos: e.target.checked }))}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-0.5 flex-shrink-0"
                       disabled={enviando}
                     />
-                    <label htmlFor="consumirRecursos" className="text-sm text-gray-700">
-                      Consumir ingredientes y recetas del inventario
-                    </label>
-                  </div>
-                  {!formData.consumirRecursos && (
-                    <p className="text-xs text-orange-600 bg-orange-50 p-2 rounded">
-                      ⚠️ Los recursos no se descontarán del inventario
-                    </p>
-                  )}
-                </div>
-
-                {/* Resumen de Costos */}
-                <div className="bg-green-50 rounded-lg p-4 mt-4">
-                  <h4 className="font-medium text-green-800 mb-2">💰 Costo Total</h4>
-                  <div className="text-2xl font-bold text-green-600">
-                    S/.{costoTotal.toFixed(2)}
-                  </div>
-                  <div className="text-sm text-green-600 mt-1">
-                    Costo por unidad: S/.{(costoTotal / formData.cantidadProducir).toFixed(2)}
+                    <div className="flex-1">
+                      <label htmlFor="consumirRecursos" className="text-sm sm:text-base font-semibold text-gray-900 cursor-pointer block">
+                        🏭 Consumir ingredientes y recetas del inventario
+                      </label>
+                      <p className="text-xs sm:text-sm text-gray-700 mt-1">
+                        {formData.consumirRecursos 
+                          ? '✅ Los recursos se descontarán automáticamente' 
+                          : '⚠️ No se modificará el inventario de recursos'}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Columna Derecha: Recursos a Utilizar */}
-              <div className="flex-1 flex flex-col">
-                
-                {/* Tabs */}
-                <div className="flex border-b border-gray-200">
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('ingredientes')}
-                    className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-                      activeTab === 'ingredientes' 
-                        ? 'border-blue-500 text-blue-600' 
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
+              {/* Acordeón: Ingredientes */}
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setMostrarIngredientes(!mostrarIngredientes)}
+                  className="w-full bg-green-50 p-2 sm:p-3 flex items-center justify-between hover:bg-green-100 transition-colors"
+                >
+                  <h4 className="font-medium text-gray-800 text-sm sm:text-base flex items-center gap-2">
                     🥬 Ingredientes ({formData.ingredientesUtilizados.length})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('recetas')}
-                    className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-                      activeTab === 'recetas' 
-                        ? 'border-blue-500 text-blue-600' 
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                    }`}
+                  </h4>
+                  <svg 
+                    className={`w-5 h-5 text-gray-600 transition-transform ${mostrarIngredientes ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
                   >
-                    📋 Recetas ({formData.recetasUtilizadas.length})
-                  </button>
-                </div>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {mostrarIngredientes && (
+                  <div className="p-2 sm:p-3 bg-white space-y-2 sm:space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs sm:text-sm text-gray-600">Ingredientes para producir</p>
+                      <button
+                        type="button"
+                        onClick={agregarIngrediente}
+                        disabled={enviando}
+                        className="px-2 sm:px-3 py-1.5 bg-green-600 text-white rounded text-xs sm:text-sm hover:bg-green-700 transition-colors"
+                      >
+                        + Agregar
+                      </button>
+                    </div>
 
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6">
-                  
-                  {/* Tab Ingredientes */}
-                  {activeTab === 'ingredientes' && (
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-lg font-medium text-gray-900">Ingredientes a Utilizar</h4>
-                        <button
-                          type="button"
-                          onClick={agregarIngrediente}
-                          disabled={enviando}
-                          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                        >
-                          + Agregar Ingrediente
-                        </button>
+                    {formData.ingredientesUtilizados.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <div className="text-3xl mb-2">🥬</div>
+                        <p className="text-sm">No hay ingredientes</p>
                       </div>
-
-                      {formData.ingredientesUtilizados.length === 0 ? (
-                        <div className="text-center py-12 text-gray-500">
-                          <div className="text-4xl mb-4">🥬</div>
-                          <p>No hay ingredientes agregados</p>
-                          <p className="text-sm">Haz clic en "Agregar Ingrediente" para comenzar</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          {formData.ingredientesUtilizados.map((item, index) => {
-                            const ingredienteInfo = obtenerIngredienteInfo(item.ingrediente);
-                            const disponible = (ingredienteInfo?.cantidad || 0) - (ingredienteInfo?.procesado || 0);
-                            const stockInsuficiente = formData.consumirRecursos && item.cantidadUtilizada > disponible;
-                            
-                            return (
-                              <div key={index} className={`border rounded-lg p-4 ${stockInsuficiente ? 'bg-red-50 border-red-200' : 'bg-gray-50'}`}>
-                                <div className="grid grid-cols-12 gap-3 items-center">
-                                  
-                                  {/* Selector de ingrediente */}
-                                  <div className="col-span-5">
+                    ) : (
+                      <div className="space-y-2">
+                        {formData.ingredientesUtilizados.map((item, index) => {
+                          const ingredienteInfo = obtenerIngredienteInfo(item.ingrediente);
+                          const disponible = (ingredienteInfo?.cantidad || 0) - (ingredienteInfo?.procesado || 0);
+                          const stockInsuficiente = formData.consumirRecursos && item.cantidadUtilizada > disponible;
+                          
+                          return (
+                            <div key={index} className={`border rounded-lg p-2 sm:p-3 ${stockInsuficiente ? 'bg-red-50 border-red-200' : 'bg-gray-50'}`}>
+                              <div className="space-y-2">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex-1">
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Ingrediente</label>
                                     <select
                                       value={item.ingrediente}
                                       onChange={(e) => {
@@ -498,7 +503,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                                           actualizarIngrediente(index, 'costoUnitario', ing.precioUnitario || 0);
                                         }
                                       }}
-                                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                      className="w-full p-1.5 sm:p-2 border border-gray-300 rounded text-xs sm:text-sm focus:ring-blue-500 focus:border-blue-500"
                                       disabled={enviando}
                                     >
                                       <option value="">Seleccionar...</option>
@@ -509,111 +514,135 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                                       ))}
                                     </select>
                                     {ingredienteInfo && (
-                                      <div className={`text-xs mt-1 ${stockInsuficiente ? 'text-red-600' : 'text-gray-500'}`}>
+                                      <div className={`text-xs mt-0.5 ${stockInsuficiente ? 'text-red-600' : 'text-gray-500'}`}>
                                         Disponible: {disponible} {ingredienteInfo.unidadMedida}
-                                        {stockInsuficiente && ' ❌ Insuficiente'}
+                                        {stockInsuficiente && ' ❌'}
                                       </div>
                                     )}
                                   </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => eliminarIngrediente(index)}
+                                    disabled={enviando}
+                                    className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors flex-shrink-0"
+                                  >
+                                    🗑️
+                                  </button>
+                                </div>
 
-                                  {/* Cantidad */}
-                                  <div className="col-span-3">
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Cantidad</label>
                                     <input
                                       type="number"
                                       step="0.01"
                                       min="0"
                                       value={item.cantidadUtilizada}
-                                      onChange={(e) => actualizarIngrediente(index, 'cantidadUtilizada', parseFloat(e.target.value) || 0)}
-                                      placeholder="Cantidad"
-                                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                      onChange={(e) => {
+                                        const value = parseFloat(e.target.value) || 0;
+                                        const rounded = Math.round(value * 100) / 100;
+                                        actualizarIngrediente(index, 'cantidadUtilizada', rounded);
+                                      }}
+                                      placeholder="0"
+                                      className="w-full p-1.5 sm:p-2 border border-gray-300 rounded text-xs sm:text-sm focus:ring-blue-500 focus:border-blue-500"
                                       disabled={enviando}
                                     />
                                     {ingredienteInfo && (
-                                      <div className="text-xs text-gray-500 mt-1">
+                                      <div className="text-xs text-gray-500 mt-0.5">
                                         {ingredienteInfo.unidadMedida}
                                       </div>
                                     )}
                                   </div>
 
-                                  {/* Costo */}
-                                  <div className="col-span-3 text-center">
-                                    <div className="font-medium text-gray-900">
-                                      S/.{(item.cantidadUtilizada * (ingredienteInfo?.precioUnitario || 0)).toFixed(2)}
+                                  <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Costo</label>
+                                    <div className="p-1.5 sm:p-2 bg-gray-100 border border-gray-200 rounded text-xs sm:text-sm">
+                                      <div className="font-semibold text-gray-900">
+                                        S/.{(item.cantidadUtilizada * (ingredienteInfo?.precioUnitario || 0)).toFixed(2)}
+                                      </div>
+                                      <div className="text-xs text-gray-500">
+                                        @ S/.{(ingredienteInfo?.precioUnitario || 0).toFixed(2)}
+                                      </div>
                                     </div>
-                                    <div className="text-xs text-gray-500">
-                                      @ S/.{(ingredienteInfo?.precioUnitario || 0).toFixed(2)}
-                                    </div>
-                                  </div>
-
-                                  {/* Eliminar */}
-                                  <div className="col-span-1">
-                                    <button
-                                      type="button"
-                                      onClick={() => eliminarIngrediente(index)}
-                                      disabled={enviando}
-                                      className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
-                                    >
-                                      🗑️
-                                    </button>
                                   </div>
                                 </div>
                               </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Tab Recetas */}
-                  {activeTab === 'recetas' && (
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-lg font-medium text-gray-900">Recetas a Utilizar</h4>
-                        <button
-                          type="button"
-                          onClick={agregarReceta}
-                          disabled={enviando}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                        >
-                          + Agregar Receta
-                        </button>
+                            </div>
+                          );
+                        })}
                       </div>
+                    )}
+                  </div>
+                )}
+              </div>
 
-                      {formData.recetasUtilizadas.length === 0 ? (
-                        <div className="text-center py-12 text-gray-500">
-                          <div className="text-4xl mb-4">📋</div>
-                          <p>No hay recetas agregadas</p>
-                          <p className="text-sm">Haz clic en "Agregar Receta" para comenzar</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          {formData.recetasUtilizadas.map((item, index) => {
-                            const recetaInfo = obtenerRecetaInfo(item.receta);
-                            const disponible = recetaInfo?.inventario?.cantidadProducida || 0;
-                            const stockInsuficiente = formData.consumirRecursos && item.cantidadUtilizada > disponible;
-                            
-                            // Calcular costo de la receta
-                            let costoReceta = 0;
-                            if (recetaInfo?.ingredientes?.length > 0 && recetaInfo.rendimiento?.cantidad > 0) {
-                              costoReceta = recetaInfo.ingredientes.reduce((subtotal, ingredienteReceta) => {
-                                const ingredienteInfo = ingredientesDisponibles.find(ing => ing._id === ingredienteReceta.ingrediente);
-                                return subtotal + (ingredienteReceta.cantidad * (ingredienteInfo?.precioUnitario || 0));
-                              }, 0) / recetaInfo.rendimiento.cantidad;
-                            }
+              {/* Acordeón: Recetas */}
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setMostrarRecetas(!mostrarRecetas)}
+                  className="w-full bg-blue-50 p-2 sm:p-3 flex items-center justify-between hover:bg-blue-100 transition-colors"
+                >
+                  <h4 className="font-medium text-gray-800 text-sm sm:text-base flex items-center gap-2">
+                    📋 Recetas ({formData.recetasUtilizadas.length})
+                  </h4>
+                  <svg 
+                    className={`w-5 h-5 text-gray-600 transition-transform ${mostrarRecetas ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {mostrarRecetas && (
+                  <div className="p-2 sm:p-3 bg-white space-y-2 sm:space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs sm:text-sm text-gray-600">Recetas para producir</p>
+                      <button
+                        type="button"
+                        onClick={agregarReceta}
+                        disabled={enviando}
+                        className="px-2 sm:px-3 py-1.5 bg-blue-600 text-white rounded text-xs sm:text-sm hover:bg-blue-700 transition-colors"
+                      >
+                        + Agregar
+                      </button>
+                    </div>
 
-                            return (
-                              <div key={index} className={`border rounded-lg p-4 ${stockInsuficiente ? 'bg-red-50 border-red-200' : 'bg-gray-50'}`}>
-                                <div className="grid grid-cols-12 gap-3 items-center">
-                                  
-                                  {/* Selector de receta */}
-                                  <div className="col-span-5">
+                    {formData.recetasUtilizadas.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <div className="text-3xl mb-2">📋</div>
+                        <p className="text-sm">No hay recetas</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {formData.recetasUtilizadas.map((item, index) => {
+                          const recetaInfo = obtenerRecetaInfo(item.receta);
+                          const disponible = recetaInfo?.inventario?.cantidadProducida || 0;
+                          const stockInsuficiente = formData.consumirRecursos && item.cantidadUtilizada > disponible;
+                          
+                          // Calcular costo de la receta
+                          let costoReceta = 0;
+                          if (recetaInfo?.ingredientes?.length > 0 && recetaInfo.rendimiento?.cantidad > 0) {
+                            costoReceta = recetaInfo.ingredientes.reduce((subtotal, ingredienteReceta) => {
+                              const ingredienteInfo = ingredientesDisponibles.find(ing => ing._id === ingredienteReceta.ingrediente);
+                              return subtotal + (ingredienteReceta.cantidad * (ingredienteInfo?.precioUnitario || 0));
+                            }, 0) / recetaInfo.rendimiento.cantidad;
+                          }
+
+                          return (
+                            <div key={index} className={`border rounded-lg p-2 sm:p-3 ${stockInsuficiente ? 'bg-red-50 border-red-200' : 'bg-gray-50'}`}>
+                              <div className="space-y-2">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex-1">
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Receta</label>
                                     <select
                                       value={item.receta}
                                       onChange={(e) => {
                                         actualizarReceta(index, 'receta', e.target.value);
                                       }}
-                                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                      className="w-full p-1.5 sm:p-2 border border-gray-300 rounded text-xs sm:text-sm focus:ring-blue-500 focus:border-blue-500"
                                       disabled={enviando}
                                     >
                                       <option value="">Seleccionar...</option>
@@ -624,83 +653,88 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                                       ))}
                                     </select>
                                     {recetaInfo && (
-                                      <div className={`text-xs mt-1 ${stockInsuficiente ? 'text-red-600' : 'text-gray-500'}`}>
-                                        Disponible: {disponible} {recetaInfo.rendimiento?.unidadMedida || 'unidad'}
-                                        {stockInsuficiente && ' ❌ Insuficiente'}
+                                      <div className={`text-xs mt-0.5 ${stockInsuficiente ? 'text-red-600' : 'text-gray-500'}`}>
+                                        Disponible: {disponible} {recetaInfo.rendimiento?.unidadMedida || 'u'}
+                                        {stockInsuficiente && ' ❌'}
                                       </div>
                                     )}
                                   </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => eliminarReceta(index)}
+                                    disabled={enviando}
+                                    className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors flex-shrink-0"
+                                  >
+                                    🗑️
+                                  </button>
+                                </div>
 
-                                  {/* Cantidad */}
-                                  <div className="col-span-3">
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Cantidad</label>
                                     <input
                                       type="number"
                                       step="0.01"
                                       min="0"
                                       value={item.cantidadUtilizada}
-                                      onChange={(e) => actualizarReceta(index, 'cantidadUtilizada', parseFloat(e.target.value) || 0)}
-                                      placeholder="Cantidad"
-                                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                      onChange={(e) => {
+                                        const value = parseFloat(e.target.value) || 0;
+                                        const rounded = Math.round(value * 100) / 100;
+                                        actualizarReceta(index, 'cantidadUtilizada', rounded);
+                                      }}
+                                      placeholder="0"
+                                      className="w-full p-1.5 sm:p-2 border border-gray-300 rounded text-xs sm:text-sm focus:ring-blue-500 focus:border-blue-500"
                                       disabled={enviando}
                                     />
                                     {recetaInfo && (
-                                      <div className="text-xs text-gray-500 mt-1">
+                                      <div className="text-xs text-gray-500 mt-0.5">
                                         {recetaInfo.rendimiento?.unidadMedida || 'unidad'}
                                       </div>
                                     )}
                                   </div>
 
-                                  {/* Costo */}
-                                  <div className="col-span-3 text-center">
-                                    <div className="font-medium text-gray-900">
-                                      S/.{(item.cantidadUtilizada * costoReceta).toFixed(2)}
+                                  <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Costo</label>
+                                    <div className="p-1.5 sm:p-2 bg-gray-100 border border-gray-200 rounded text-xs sm:text-sm">
+                                      <div className="font-semibold text-gray-900">
+                                        S/.{(item.cantidadUtilizada * costoReceta).toFixed(2)}
+                                      </div>
+                                      <div className="text-xs text-gray-500">
+                                        @ S/.{costoReceta.toFixed(2)}
+                                      </div>
                                     </div>
-                                    <div className="text-xs text-gray-500">
-                                      @ S/.{costoReceta.toFixed(2)}
-                                    </div>
-                                  </div>
-
-                                  {/* Eliminar */}
-                                  <div className="col-span-1">
-                                    <button
-                                      type="button"
-                                      onClick={() => eliminarReceta(index)}
-                                      disabled={enviando}
-                                      className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
-                                    >
-                                      🗑️
-                                    </button>
                                   </div>
                                 </div>
                               </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  
-                </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
               </div>
             </div>
 
-            {/* Footer con botones */}
-            <div className="border-t border-gray-200 px-6 py-4 bg-gray-50">
-              <div className="flex justify-end space-x-3">
+            {/* Footer con botones - Sticky */}
+            <div className="border-t border-gray-200 px-2 sm:px-4 lg:px-6 py-2 sm:py-3 bg-white sticky bottom-0">
+              <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={onClose}
                   disabled={enviando}
-                  className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={enviando || (!formData.ingredientesUtilizados.length && !formData.recetasUtilizadas.length)}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
                 >
-                  {enviando ? 'Produciendo...' : 'Producir'}
+                  {enviando ? 'Produciendo...' : '🏭 Producir'}
                 </button>
               </div>
             </div>

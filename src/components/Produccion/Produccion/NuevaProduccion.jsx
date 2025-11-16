@@ -285,34 +285,34 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-2 mx-auto p-4 border w-[95%] max-w-6xl shadow-lg rounded-md bg-white max-h-[95vh] flex flex-col">
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-0 sm:p-4">
+      <div className="relative sm:top-2 mx-auto p-2 sm:p-4 border-0 sm:border w-full sm:w-[95%] max-w-6xl shadow-lg sm:rounded-md bg-white h-full sm:h-auto sm:max-h-[95vh] flex flex-col">
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex justify-between items-center mb-4 pb-3 border-b">
-            <h3 className="text-lg font-semibold text-gray-900">
+          <div className="flex justify-between items-center mb-2 sm:mb-4 pb-2 sm:pb-3 border-b">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">
               Nueva Producción
               <span className="text-xs text-blue-500 ml-2 hidden sm:inline">(Manual - Con Catálogo)</span>
             </h3>
             <button
               type="button"
               onClick={onCancelar}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-400 hover:text-gray-600 transition-colors p-1"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+            <div className="mb-2 sm:mb-3 p-2 sm:p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-xs sm:text-sm">
               ⚠️ {error}
             </div>
           )}
           
-          {/* Información sobre Producción Manual - Compacta */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+          {/* Información sobre Producción Manual - Oculta en móvil */}
+          <div className="hidden sm:block bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
             <div className="flex items-center">
               <span className="text-xl mr-2">⚡</span>
               <div>
@@ -322,21 +322,21 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex-1 overflow-hidden">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
+          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+            <div className="flex flex-col lg:grid lg:grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
               {/* COLUMNA IZQUIERDA - Información del Producto */}
-              <div className="space-y-4 overflow-y-auto pr-2">
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <h4 className="font-medium text-gray-700 mb-3">Información del Producto</h4>
+              <div className="space-y-2 sm:space-y-3 lg:overflow-y-auto lg:pr-2">
+                <div className="bg-gray-50 p-2 sm:p-3 rounded-lg">
+                  <h4 className="text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">Información del Producto</h4>
 
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     {/* Selector del Catálogo */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                         🏭 Producto del Catálogo *
                       </label>
                       {formData.productoDelCatalogo ? (
-                        <div className={`p-3 border rounded-md ${
+                        <div className={`p-2 sm:p-3 border rounded-md ${
                           nombreDisponible === true ? 'bg-green-50 border-green-200' :
                           nombreDisponible === false ? 'bg-red-50 border-red-200' : 
                           'bg-green-50 border-green-200'
@@ -389,22 +389,22 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                       )}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Cantidad Producida *</label>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Cantidad Producida *</label>
                       <input 
                         type="number" 
                         min="1" 
                         step="1" 
                         value={formData.cantidadProducida} 
                         onChange={(e) => setFormData(prev => ({ ...prev, cantidadProducida: parseInt(e.target.value) || 1 }))} 
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" 
+                        className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Unidad de Medida *</label>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Unidad de Medida *</label>
                       <select 
                         value={formData.unidadMedida} 
                         onChange={(e) => setFormData(prev => ({ ...prev, unidadMedida: e.target.value }))} 
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       >
                         <option value="unidades">Unidades</option>
                         <option value="kg">Kilogramos</option>
@@ -413,22 +413,22 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Operador Responsable *</label>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Operador Responsable *</label>
                       <input 
                         type="text" 
                         value={formData.operador} 
                         onChange={(e) => setFormData(prev => ({ ...prev, operador: e.target.value }))} 
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" 
+                        className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                         placeholder="Nombre del operador" 
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Observaciones</label>
                       <textarea 
                         value={formData.observaciones} 
                         onChange={(e) => setFormData(prev => ({ ...prev, observaciones: e.target.value }))} 
                         rows={2} 
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" 
+                        className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                         placeholder="Observaciones adicionales (opcional)" 
                       />
                     </div>
@@ -437,9 +437,9 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
               </div>
               
               {/* COLUMNA DERECHA - Ingredientes y Recetas */}
-              <div className="space-y-4 overflow-y-auto pl-2">
+              <div className="space-y-2 sm:space-y-3 lg:overflow-y-auto lg:pl-2">
                 {/* Ingredientes Básicos */}
-                <div className="bg-green-50 p-3 rounded-lg">
+                <div className="bg-green-50 p-2 sm:p-3 rounded-lg">
                   <div className="flex items-center gap-2 mb-3">
                     <h4 className="font-medium text-gray-700 flex items-center gap-2">
                       <span className="bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
@@ -449,11 +449,11 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                     </h4>
                   </div>
                   
-                  <div className="mb-3">
+                  <div className="mb-2 sm:mb-3">
                     <button 
                       type="button" 
                       onClick={agregarIngrediente} 
-                      className="w-full py-2 px-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
+                      className="w-full py-2 px-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-xs sm:text-sm font-medium"
                     >
                       ➕ Agregar Ingrediente
                     </button>
@@ -638,8 +638,8 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                   )}
 
                   {/* Resumen de costos compacto */}
-                  <div className="mt-4 p-2 bg-white rounded-md border">
-                    <div className="grid grid-cols-3 gap-2 text-xs text-center">
+                  <div className="mt-2 sm:mt-3 lg:mt-4 p-2 bg-white rounded-md border">
+                    <div className="grid grid-cols-3 gap-1 sm:gap-2 text-xs text-center">
                       <div>
                         <div className="font-bold text-green-600">
                           S/.{formData.ingredientesUtilizados.reduce((total, item) => 
@@ -664,12 +664,12 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                   </div>
 
                   {/* Botones de acción */}
-                  <div className="mt-4 pt-3 border-t border-gray-200 bg-gray-50 -mx-3 -mb-3 px-3 pb-3 rounded-b-lg">
-                    <div className="flex justify-end space-x-3">
+                  <div className="mt-2 sm:mt-3 lg:mt-4 pt-2 sm:pt-3 border-t border-gray-200 bg-gray-50 -mx-2 sm:-mx-3 -mb-2 sm:-mb-3 px-2 sm:px-3 pb-2 sm:pb-3 rounded-b-lg">
+                    <div className="flex gap-2 sm:gap-3">
                       <button 
                         type="button" 
                         onClick={onCancelar} 
-                        className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors font-medium" 
+                        className="flex-1 px-3 sm:px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors text-sm sm:text-base font-medium" 
                         disabled={enviando}
                       >
                         Cancelar
@@ -677,7 +677,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                       <button 
                         type="submit" 
                         disabled={enviando} 
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 font-medium"
+                        className="flex-1 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm sm:text-base font-medium"
                       >
                         {enviando ? 'Creando...' : 'Crear Producción'}
                       </button>
@@ -691,12 +691,12 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
 
         {/* Modal Selector del Catálogo */}
         {mostrarSelectorCatalogo && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[85vh] flex flex-col">
-              <div className="flex items-center justify-between p-6 border-b">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-0 sm:p-4">
+            <div className="bg-white sm:rounded-xl shadow-2xl w-full h-full sm:h-auto sm:max-w-5xl sm:max-h-[85vh] flex flex-col">
+              <div className="flex items-center justify-between p-3 sm:p-4 lg:p-6 border-b">
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900">🏭 Catálogo de Producción</h3>
-                  <p className="text-sm text-gray-500 mt-1">Selecciona un producto para continuar</p>
+                  <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900">🏭 Catálogo de Producción</h3>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">Selecciona un producto para continuar</p>
                 </div>
                 <button
                   onClick={() => setMostrarSelectorCatalogo(false)}

@@ -61,8 +61,6 @@ const ModalAgregarCantidad = ({
         precio: parseFloat(precio) || null
       });
 
-      console.log('✅ Cantidad agregada exitosamente:', resultado);
-      
       if (onSuccess) {
         onSuccess(resultado.data);
       }

@@ -47,12 +47,7 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
         ...filtros
       };
       
-      console.log('🔍 Cargando historial de producciones para:', producto.nombre);
-      console.log('📋 Filtros aplicados:', filtrosBusqueda);
-      
       const response = await movimientoUnificadoService.obtenerHistorial(filtrosBusqueda);
-      
-      console.log('📦 Respuesta del servicio de movimientos:', response);
       
       // Extraer movimientos de la respuesta
       let movimientos = [];
@@ -65,8 +60,6 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
       } else if (Array.isArray(response)) {
         movimientos = response;
       }
-      
-      console.log('📋 Movimientos extraídos:', movimientos.length);
       
       // Filtrar movimientos que correspondan al producto específico
       const movimientosDelProducto = movimientos.filter(mov => {
@@ -81,7 +74,6 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
       });
       
       setHistorialProducciones(movimientosDelProducto);
-      console.log('✅ Movimientos de producción filtrados:', movimientosDelProducto.length);
       
     } catch (error) {
       console.error('❌ Error al cargar historial de producciones:', error);

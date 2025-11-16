@@ -90,7 +90,6 @@ export const movimientoUnificadoService = {
    * Obtener tipos de productos disponibles
    */
   async obtenerTipos() {
-    console.log('🔍 Obteniendo tipos de productos...');
     const response = await api.get('/movimientos-unificados/tipos');
     return response.data;
   },
@@ -99,7 +98,6 @@ export const movimientoUnificadoService = {
    * Obtener productos por tipo
    */
   async obtenerProductosPorTipo(tipo) {
-    console.log(`🔍 Obteniendo productos para tipo: ${tipo}`);
     const response = await api.get(`/movimientos-unificados/productos/${tipo}`);
     return response.data;
   },
@@ -120,20 +118,6 @@ export const movimientoUnificadoService = {
     ingredientesUtilizados = [],
     recetasUtilizadas = []
   }) {
-    console.log('📝 Agregando cantidad:', {
-      tipoProducto,
-      productoId,
-      cantidad,
-      motivo,
-      precio,
-      consumirIngredientes,
-      operador,
-      observaciones,
-      costoTotal,
-      ingredientesUtilizados: ingredientesUtilizados.length,
-      recetasUtilizadas: recetasUtilizadas.length
-    });
-    
     const data = {
       tipoProducto,
       productoId,
@@ -170,8 +154,6 @@ export const movimientoUnificadoService = {
    * Obtener historial de movimientos con filtros
    */
   async obtenerHistorial(filtros = {}) {
-    console.log('📊 Obteniendo historial de movimientos:', filtros);
-    
     const params = new URLSearchParams();
     
     if (filtros.tipoProducto) params.append('tipoProducto', filtros.tipoProducto);
@@ -190,8 +172,6 @@ export const movimientoUnificadoService = {
    * Eliminar movimiento
    */
   async eliminarMovimiento(movimientoId) {
-    console.log('🗑️ Eliminando movimiento:', movimientoId);
-    
     const response = await api.delete(`/movimientos-unificados/movimiento/${movimientoId}`);
     return response.data;
   },
@@ -200,8 +180,6 @@ export const movimientoUnificadoService = {
    * Obtener estadísticas de movimientos
    */
   async obtenerEstadisticas(filtros = {}) {
-    console.log('📈 Obteniendo estadísticas de movimientos:', filtros);
-    
     const params = new URLSearchParams();
     if (filtros.fechaInicio) params.append('fechaInicio', filtros.fechaInicio);
     if (filtros.fechaFin) params.append('fechaFin', filtros.fechaFin);
@@ -214,8 +192,6 @@ export const movimientoUnificadoService = {
    * Obtener detalles de un producto específico con su historial
    */
   async obtenerDetalleProducto(tipoProducto, productoId) {
-    console.log(`🔍 Obteniendo detalles del producto: ${tipoProducto}/${productoId}`);
-    
     const response = await api.get(`/movimientos-unificados/producto/${tipoProducto}/${productoId}`);
     return response.data;
   },
@@ -225,8 +201,6 @@ export const movimientoUnificadoService = {
    */
   async obtenerResumen() {
     try {
-      console.log('📊 Obteniendo resumen rápido...');
-      
       // Obtener estadísticas recientes (últimos 30 días)
       const fechaInicio = new Date();
       fechaInicio.setDate(fechaInicio.getDate() - 30);

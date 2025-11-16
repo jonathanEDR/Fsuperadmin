@@ -135,5 +135,108 @@ export const recetaService = {
   async limpiarRecetasInactivas() {
     const response = await api.post('/recetas/limpiar-inactivas');
     return response.data;
+  },
+
+  // ============= PRODUCCIÓN AJUSTABLE =============
+
+  /**
+   * Calcular producción escalada
+   * @param {string} id - ID de la receta
+   * @param {number} escala - Factor de escala (0.5 = 50%, 1 = 100%, 2 = 200%)
+   * @returns {Promise} Cálculo de ingredientes y rendimiento sugeridos
+   */
+  async calcularEscala(id, escala = 1) {
+    const response = await api.get(`/recetas/${id}/calcular-escala?escala=${escala}`);
+    return response.data;
+  },
+
+  /**
+   * Producir receta con cantidades ajustables
+   * @param {string} id - ID de la receta
+   * @param {Object} datos - Datos de producción ajustable
+   * @param {Array} datos.ingredientesAjustados - Lista de ingredientes con cantidades reales
+   * @param {Object} datos.rendimientoReal - Rendimiento real obtenido
+   * @param {string} datos.motivo - Motivo de la producción
+   * @param {string} datos.observaciones - Observaciones adicionales
+   * @param {string} datos.operador - Nombre del operador
+   * @returns {Promise} Resultado de la producción
+   */
+  async producirRecetaAjustable(id, datos) {
+    const response = await api.post(`/recetas/${id}/producir-ajustable`, datos);
+    return response.data;
+  },
+
+  /**
+   * Obtener historial de producciones de una receta
+   * @param {string} id - ID de la receta
+   * @returns {Promise} Historial completo de producciones
+   */
+  async obtenerHistorialProduccion(id) {
+    const response = await api.get(`/recetas/${id}/historial-produccion`);
+    return response.data;
+  },
+
+  // ============= VERSIONADO DE RECETAS =============
+
+  /**
+   * Crear nueva versión de una receta
+   * @param {string} id - ID de la receta base
+   * @param {Object} cambios - Cambios a aplicar en la nueva versión
+   * @param {string} motivoCambio - Motivo del cambio de versión
+   * @returns {Promise} Nueva versión de la receta
+   */
+  async crearVersion(id, cambios, motivoCambio) {
+    const response = await api.post(`/recetas/${id}/crear-version`, {
+      cambios,
+      motivoCambio
+    });
+    return response.data;
+  },
+
+  /**
+   * Obtener todas las versiones de una receta
+   * @param {string} id - ID de la receta
+   * @returns {Promise} Lista de todas las versiones
+   */
+  async obtenerVersiones(id) {
+    const response = await api.get(`/recetas/${id}/versiones`);
+    return response.data;
+  },
+
+  // ============= RECETAS ANIDADAS =============
+
+  /**
+   * Validar si una receta puede ser anidada sin crear ciclos
+   * @param {string} id - ID de la receta contenedora
+   * @param {string} recetaAnidarId - ID de la receta a anidar
+   * @returns {Promise} Validación de la receta anidada
+   */
+  async validarRecetaAnidada(id, recetaAnidarId) {
+    const response = await api.post(`/recetas/${id}/validar-anidada`, {
+      recetaAnidarId
+    });
+    return response.data;
+  },
+
+  /**
+   * Obtener árbol completo de ingredientes (expandiendo recetas anidadas)
+   * @param {string} id - ID de la receta
+   * @param {number} maxNivel - Nivel máximo de expansión (default: 5)
+   * @returns {Promise} Árbol completo de ingredientes
+   */
+  async obtenerArbolIngredientes(id, maxNivel = 5) {
+    const response = await api.get(`/recetas/${id}/arbol-ingredientes?maxNivel=${maxNivel}`);
+    return response.data;
+  },
+
+  /**
+   * Calcular costo incluyendo recetas anidadas
+   * @param {string} id - ID de la receta
+   * @param {number} cantidad - Cantidad a producir
+   * @returns {Promise} Costo total con recetas anidadas
+   */
+  async calcularCostoConAnidadas(id, cantidad = 1) {
+    const response = await api.get(`/recetas/${id}/costo-con-anidadas?cantidad=${cantidad}`);
+    return response.data;
   }
 };

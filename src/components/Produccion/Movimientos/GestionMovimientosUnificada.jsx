@@ -6,6 +6,7 @@ import BreadcrumbProduccion from '../BreadcrumbProduccion';
 import SelectorTipoProducto from './SelectorTipoProducto';
 import ModalAgregarCantidad from './ModalAgregarCantidad';
 import ModalProducirReceta from './ModalProducirReceta';
+import ModalProducirRecetaAjustable from './ModalProducirRecetaAjustable';
 import ModalProducirProducto from './ModalProducirProducto';
 import ModalIncrementarStock from './ModalIncrementarStock';
 import HistorialProduccion from './HistorialProduccion';
@@ -25,10 +26,12 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
   // Estados del modal
   const [modalOpen, setModalOpen] = useState(false);
   const [modalRecetaOpen, setModalRecetaOpen] = useState(false);
+  const [modalRecetaAjustableOpen, setModalRecetaAjustableOpen] = useState(false);
   const [modalProduccionOpen, setModalProduccionOpen] = useState(false);
   const [modalIncrementarOpen, setModalIncrementarOpen] = useState(false);
   const [historialProduccionOpen, setHistorialProduccionOpen] = useState(false);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
+  const [mostrarSelectorModal, setMostrarSelectorModal] = useState(false);
   
   // Estados de filtros
   const [filtros, setFiltros] = useState({
@@ -66,7 +69,6 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
    */
   const cargarProductos = async () => {
     if (!tipoSeleccionado) {
-      console.log('⚠️ No hay tipo seleccionado, saltando carga de productos');
       return;
     }
     
@@ -74,22 +76,8 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
     setError('');
     
     try {
-      console.log(`🔍 Cargando productos para tipo: ${tipoSeleccionado}`);
-      
       const response = await movimientoUnificadoService.obtenerProductosPorTipo(tipoSeleccionado);
       const productosData = response.data || [];
-      
-      console.log(`📦 Productos recibidos del backend:`, productosData.map(p => ({
-        id: p._id,
-        nombre: p.nombre,
-        tipo: tipoSeleccionado,
-        cantidad: p.cantidad,
-        stock: p.stock,
-        inventario: p.inventario,
-        cantidadProducida: p.cantidadProducida,
-        unidadMedida: p.unidadMedida,
-        rendimiento: p.rendimiento
-      })));
       
       // FORZAR NUEVA REFERENCIA - SOLUCION DEL BUG
       const productosConNuevasReferencias = productosData.map(producto => ({
@@ -100,20 +88,6 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
       
       setProductos(productosConNuevasReferencias);
       setProductosOriginales(productosConNuevasReferencias);
-      
-      console.log(`✅ ${productosData.length} productos cargados y establecidos en el estado`);
-      
-      // Log específico para producción
-      if (tipoSeleccionado === 'produccion') {
-        console.log('🏭 Productos de producción actualizados:', productosData.map(p => ({
-          id: p._id,
-          nombre: p.nombre,
-          cantidadActual: p.cantidad,
-          moduloSistema: p.moduloSistema,
-          catalogoId: p.catalogoProductoId,
-          inventarioId: p.inventarioProductoId
-        })));
-      }
       
     } catch (error) {
       console.error('❌ Error al cargar productos:', error);
@@ -136,32 +110,17 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
         tipoProducto: tipoSeleccionado || undefined
       };
       
-      console.log('🔍 Cargando historial con filtros:', filtrosHistorial);
-      
       const response = await movimientoUnificadoService.obtenerHistorial(filtrosHistorial);
       const historialData = response.data || {};
       
       // VALIDACIÓN: Asegurar que movimientos es un array
       const movimientos = historialData.movimientos;
       if (!Array.isArray(movimientos)) {
-        console.error('🚨 PROBLEMA: movimientos no es un array en frontend:', typeof movimientos, movimientos);
         setHistorial([]);
         return;
       }
       
       setHistorial(movimientos);
-      console.log(`✅ ${movimientos.length} movimientos cargados para tipo: ${tipoSeleccionado}`);
-      
-      // Log específico para recetas
-      if (tipoSeleccionado === 'recetas') {
-        console.log('🧪 Movimientos de recetas en frontend:', historialData.movimientos?.map(m => ({
-          id: m._id,
-          item: m.item?.nombre,
-          tipo: m.tipo,
-          cantidad: m.cantidad,
-          fecha: m.fecha
-        })));
-      }
       
     } catch (error) {
       console.error('Error al cargar historial:', error);
@@ -212,9 +171,9 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
   const abrirModalAgregar = (producto) => {
     setProductoSeleccionado(producto);
     
-    // Si es una receta, abrir el modal específico para recetas
+    // Si es una receta, mostrar selector de tipo de modal
     if (tipoSeleccionado === 'recetas') {
-      setModalRecetaOpen(true);
+      setMostrarSelectorModal(true);
     } 
     // Si es producción, abrir el modal simple para incrementar stock
     else if (tipoSeleccionado === 'produccion') {
@@ -223,6 +182,22 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
     else {
       setModalOpen(true);
     }
+  };
+
+  /**
+   * Abrir modal de receta (básico)
+   */
+  const abrirModalRecetaBasico = () => {
+    setMostrarSelectorModal(false);
+    setModalRecetaOpen(true);
+  };
+
+  /**
+   * Abrir modal de receta ajustable
+   */
+  const abrirModalRecetaAjustable = () => {
+    setMostrarSelectorModal(false);
+    setModalRecetaAjustableOpen(true);
   };
 
   /**
@@ -237,12 +212,8 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
    * Manejar éxito al agregar cantidad
    */
   const handleSuccessAgregar = async (resultado) => {
-    console.log('✅ Cantidad agregada exitosamente:', resultado);
-    
     try {
       // Forzar recarga completa de todos los datos
-      console.log('🔄 Recargando datos después de agregar cantidad...');
-      
       // Pequeño delay para asegurar que la DB se actualice
       await new Promise(resolve => setTimeout(resolve, 100));
       
@@ -254,8 +225,6 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
         cargarHistorial(),
         cargarEstadisticas()
       ]);
-      
-      console.log('✅ Datos recargados correctamente');
       
       // Mostrar mensaje de éxito
       alert(`✅ Cantidad agregada exitosamente al producto ${productoSeleccionado?.nombre || 'seleccionado'}`);
@@ -275,17 +244,6 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
       const produccionId = extraerProduccionId(movimiento.motivo);
       
       if (!produccionId) {
-        // SOLUCIÓN MEJORADA: Dar más información sobre por qué no se pudo identificar
-        console.error('❌ No se pudo extraer el ID de producción del motivo:', movimiento.motivo);
-        console.error('📋 Información del movimiento:', {
-          id: movimiento._id,
-          tipo: movimiento.tipo,
-          tipoItem: movimiento.tipoItem,
-          motivo: movimiento.motivo,
-          operador: movimiento.operador,
-          fecha: movimiento.fecha
-        });
-        
         throw new Error(
           `No se pudo identificar la producción asociada al movimiento.\n\n` +
           `Motivo del movimiento: "${movimiento.motivo}"\n\n` +
@@ -294,12 +252,8 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
         );
       }
       
-      console.log('🔍 Eliminando producción completa:', produccionId);
-      
       // Eliminar la producción completa usando el servicio importado
       const resultado = await produccionService.eliminarProduccion(produccionId);
-      
-      console.log('✅ Producción completa eliminada:', resultado);
       alert(`✅ Producción eliminada exitosamente.\nSe revirtió todo el stock generado por la producción.`);
       
     } catch (error) {
@@ -314,24 +268,19 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
   const extraerProduccionId = (motivo) => {
     if (!motivo) return null;
     
-    console.log('🔍 Analizando motivo para extraer ID:', motivo);
-    
     // SOLUCIÓN: Buscar patrones como "ID: XXXXX" al final del motivo
     // Esto funciona con el nuevo formato: "Producción: observación - ID: 64f1234567890abcdef12345"
     const idMatches = motivo.match(/ID:\s*([a-fA-F0-9]{24})/);
     if (idMatches) {
-      console.log('✅ ID encontrado:', idMatches[1]);
       return idMatches[1];
     }
     
     // Mantener compatibilidad con el formato anterior: "Producción: XXXXX" 
     const legacyMatches = motivo.match(/[Pp]roducción[:\s]*([a-fA-F0-9]{24})/);
     if (legacyMatches) {
-      console.log('✅ ID encontrado (formato legacy):', legacyMatches[1]);
       return legacyMatches[1];
     }
     
-    console.log('❌ No se pudo extraer ID del motivo');
     return null;
   };
   const handleEliminarMovimiento = async (movimientoId) => {
@@ -911,10 +860,89 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
         onSuccess={handleSuccessAgregar}
       />
 
-      {/* Modal para producir recetas */}
+      {/* Modal selector de tipo de producción */}
+      {mostrarSelectorModal && productoSeleccionado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">
+              🎯 Tipo de Producción
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Selecciona cómo deseas producir <strong>{productoSeleccionado.nombre}</strong>:
+            </p>
+            
+            <div className="space-y-3">
+              {/* Opción: Producción Rápida */}
+              <button
+                onClick={abrirModalRecetaBasico}
+                className="w-full p-4 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left group"
+              >
+                <div className="flex items-start">
+                  <span className="text-3xl mr-4">⚡</span>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-gray-800 group-hover:text-blue-700">
+                      Producción Rápida
+                    </h4>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Produce en lotes fijos según la receta original. <strong>Rápido y sencillo.</strong>
+                    </p>
+                    <ul className="text-xs text-gray-500 mt-2 space-y-1">
+                      <li>✓ Cantidades automáticas</li>
+                      <li>✓ Validación de stock</li>
+                      <li>✓ Proceso simplificado</li>
+                    </ul>
+                  </div>
+                </div>
+              </button>
+
+              {/* Opción: Producción Ajustable */}
+              <button
+                onClick={abrirModalRecetaAjustable}
+                className="w-full p-4 border-2 border-green-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all text-left group bg-green-50"
+              >
+                <div className="flex items-start">
+                  <span className="text-3xl mr-4">🔧</span>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-gray-800 group-hover:text-green-700">
+                      Producción Ajustable
+                      <span className="ml-2 px-2 py-0.5 bg-green-600 text-white text-xs rounded-full">NUEVO</span>
+                    </h4>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Control total: ajusta ingredientes, registra mermas, bonificaciones. <strong>Máxima flexibilidad.</strong>
+                    </p>
+                    <ul className="text-xs text-gray-500 mt-2 space-y-1">
+                      <li>✓ Ajuste de cantidades por ingrediente</li>
+                      <li>✓ Rendimiento real vs planeado</li>
+                      <li>✓ Registro de diferencias y motivos</li>
+                      <li>✓ Historial completo de producciones</li>
+                    </ul>
+                  </div>
+                </div>
+              </button>
+            </div>
+
+            <button
+              onClick={() => setMostrarSelectorModal(false)}
+              className="w-full mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para producir recetas (básico) */}
       <ModalProducirReceta
         isOpen={modalRecetaOpen}
         onClose={() => setModalRecetaOpen(false)}
+        receta={productoSeleccionado}
+        onSuccess={handleSuccessAgregar}
+      />
+
+      {/* Modal para producir recetas (ajustable) */}
+      <ModalProducirRecetaAjustable
+        isOpen={modalRecetaAjustableOpen}
+        onClose={() => setModalRecetaAjustableOpen(false)}
         receta={productoSeleccionado}
         onSuccess={handleSuccessAgregar}
       />

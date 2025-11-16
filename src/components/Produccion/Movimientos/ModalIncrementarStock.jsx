@@ -41,8 +41,6 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
       const recetasResponse = await recetaService.obtenerRecetas({ activo: true });
       setRecetasDisponibles(recetasResponse.data || []);
       
-      console.log('🔍 Recetas cargadas con ingredientes:', recetasResponse.data?.[0]);
-      
     } catch (error) {
       console.error('❌ Error al cargar recursos:', error);
       setError('Error al cargar ingredientes y recetas disponibles');
@@ -250,9 +248,7 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
         observaciones: `Producción con ${formData.ingredientesUtilizados.length} ingredientes y ${formData.recetasUtilizadas.length} recetas`
       };
 
-      console.log('📤 Enviando datos de producción:', datosMovimiento);
       const response = await movimientoUnificadoService.agregarCantidad(datosMovimiento);
-      console.log('✅ Producción completada:', response);
 
       // Notificar éxito y cerrar modal
       onSuccess && onSuccess({
@@ -291,103 +287,94 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
   // La cantidad final será la cantidad actual + cantidad a agregar
   const cantidadFinal = cantidadActual + (parseInt(formData.cantidadAgregar) || 0);
 
+  // Calcular costo total para mostrar en header
+  const costoTotal = calcularCostoTotal();
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-7xl max-h-[95vh] flex flex-col">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-0 sm:p-4">
+      <div className="bg-white sm:rounded-xl shadow-2xl w-full h-full sm:h-auto sm:max-w-xl lg:max-w-3xl sm:max-h-[95vh] flex flex-col">
         
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
-            <span className="text-3xl">🏭</span>
+        {/* Header con Cantidad Final y Costo Total */}
+        <div className="flex items-center justify-between p-2 sm:p-3 border-b border-gray-200 bg-gradient-to-r from-white to-blue-50">
+          <div className="flex items-center space-x-2">
+            <span className="text-lg sm:text-xl lg:text-2xl">🏭</span>
             <div>
-              <h3 className="text-xl font-semibold text-gray-900">
+              <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">
                 Producir Stock
               </h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs text-gray-500 line-clamp-1">
                 {producto.nombre}
               </p>
             </div>
           </div>
-          <button
-            onClick={handleClose}
-            disabled={enviando}
-            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          
+          {/* Cantidad Final y Costo Total en Header */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Cantidad Final */}
+            <div className="bg-blue-100 border border-blue-300 rounded-md px-3 py-1.5 min-w-[90px] text-center">
+              <div className="text-xs text-blue-700 font-medium">📦 Final</div>
+              <div className="text-base sm:text-lg font-bold text-blue-600">
+                {cantidadFinal}
+              </div>
+              <div className="text-xs text-blue-500">{producto.unidadMedida || 'u'}</div>
+            </div>
+            
+            {/* Costo Total */}
+            <div className="bg-green-100 border border-green-300 rounded-md px-3 py-1.5 min-w-[90px] text-center">
+              <div className="text-xs text-green-700 font-medium">💰 Costo</div>
+              <div className="text-base sm:text-lg font-bold text-green-600 truncate">
+                S/.{costoTotal.toFixed(2)}
+              </div>
+            </div>
+            
+            <button
+              onClick={handleClose}
+              disabled={enviando}
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors ml-1"
+            >
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-600">{error}</p>
+          <div className="mx-2 sm:mx-4 lg:mx-6 mt-2 sm:mt-3 p-2 sm:p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-xs sm:text-sm text-red-600">{error}</p>
           </div>
         )}
 
-        {/* Formulario principal con layout de dos columnas */}
-        <form onSubmit={handleSubmit} className="flex-1 flex overflow-hidden">
-          {/* Columna Izquierda */}
-          <div className="w-1/2 border-r border-gray-200 flex flex-col">
+        {/* Formulario principal - Vertical en móvil, 2 columnas en desktop */}
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+          {/* Columna Izquierda - Full width en móvil */}
+          <div className="w-full lg:w-1/2 lg:border-r border-gray-200 flex flex-col overflow-y-auto">
             {/* Información del Producto */}
-            <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="bg-white p-4 rounded-lg shadow-sm text-center">
-                  <div className="text-sm font-medium text-gray-500">Cantidad Actual</div>
-                  <div className="text-2xl font-bold text-purple-600">
+            <div className="p-2 sm:p-2.5 lg:p-3 bg-gradient-to-r from-purple-50 to-green-50">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-white p-2 rounded-md shadow-sm text-center border border-purple-200">
+                  <div className="text-xs sm:text-sm font-medium text-gray-500">📊 Cantidad Actual</div>
+                  <div className="text-xl sm:text-2xl font-bold text-purple-600">
                     {cantidadActual}
                   </div>
-                  <div className="text-xs text-gray-400">{producto.unidadMedida || 'unidades'}</div>
+                  <div className="text-xs text-gray-500">{producto.unidadMedida || 'unidades'}</div>
                 </div>
-                <div className="bg-white p-4 rounded-lg shadow-sm text-center">
-                  <div className="text-sm font-medium text-gray-500">A Producir</div>
-                  <div className="text-2xl font-bold text-green-600">
+                <div className="bg-white p-2 rounded-md shadow-sm text-center border border-green-200">
+                  <div className="text-xs sm:text-sm font-medium text-gray-500">➕ A Producir</div>
+                  <div className="text-xl sm:text-2xl font-bold text-green-600">
                     +{formData.cantidadAgregar}
                   </div>
-                  <div className="text-xs text-gray-400">{producto.unidadMedida || 'unidades'}</div>
-                </div>
-                <div className="bg-white p-4 rounded-lg shadow-sm text-center col-span-2">
-                  <div className="text-sm font-medium text-gray-500">Cantidad Final</div>
-                  <div className="text-3xl font-bold text-blue-600">
-                    {cantidadFinal}
-                  </div>
-                  <div className="text-xs text-gray-400">{producto.unidadMedida || 'unidades'}</div>
-                </div>
-              </div>
-              
-              {/* Información contextual */}
-              <div className="p-3 bg-white/50 rounded-lg">
-                <div className="text-xs text-gray-600 space-y-1">
-                  <p><strong>Producto:</strong> {producto.nombre} (Ref: {producto.codigo || 'N/A'})</p>
-                  <p><strong>Cantidad actual producida:</strong> {cantidadActual} {producto.unidadMedida || 'unidades'}</p>
-                  <p><strong>Nueva cantidad a producir:</strong> {formData.cantidadAgregar} {producto.unidadMedida || 'unidades'}</p>
+                  <div className="text-xs text-gray-500">{producto.unidadMedida || 'unidades'}</div>
                 </div>
               </div>
             </div>
 
             {/* Formulario básico */}
-            <div className="flex-1 p-6 space-y-6 overflow-y-auto">
-              
-              {/* Información de Producción */}
-              <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                <div className="flex items-start space-x-3">
-                  <div className="text-xl text-purple-500">🏭</div>
-                  <div>
-                    <h4 className="text-sm font-medium text-purple-900 mb-1">Producción con Recursos</h4>
-                    <ul className="text-xs text-purple-700 space-y-1">
-                      <li>• Se consumirán los ingredientes y recetas especificados</li>
-                      <li>• Se calculará el costo real de producción</li>
-                      <li>• Se registrará como movimiento de producción</li>
-                      <li>• Se validará la disponibilidad de recursos</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
+            <div className="flex-1 p-2 sm:p-3 lg:p-4 space-y-2 sm:space-y-2.5 lg:space-y-3 overflow-y-auto">
               {/* Cantidad a Producir */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Cantidad a Producir *
                 </label>
                 <input
@@ -399,26 +386,23 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                     ...prev, 
                     cantidadAgregar: parseInt(e.target.value) || 1 
                   }))}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-lg"
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm"
                   disabled={enviando}
                   required
                   autoFocus
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Especifica cuántas unidades deseas producir
-                </p>
               </div>
 
               {/* Operador Responsable */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Operador Responsable *
                 </label>
                 <input
                   type="text"
                   value={formData.operador}
                   onChange={(e) => setFormData(prev => ({ ...prev, operador: e.target.value }))}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm"
                   placeholder="Nombre del operador"
                   disabled={enviando}
                   required
@@ -427,15 +411,15 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
 
               {/* Motivo */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Motivo (Opcional)
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                  Observaciones (Opcional)
                 </label>
                 <textarea
                   value={formData.motivo}
                   onChange={(e) => setFormData(prev => ({ ...prev, motivo: e.target.value }))}
-                  rows={3}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 resize-none"
-                  placeholder="Razón para realizar la producción..."
+                  rows={2}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-base sm:text-sm"
+                  placeholder="Observaciones adicionales..."
                   disabled={enviando}
                 />
               </div>
@@ -474,92 +458,96 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
           </div>
 
           {/* Columna Derecha - Recursos para Producción */}
-          <div className="w-1/2 flex flex-col">
-            <div className="p-6 border-b border-gray-200">
+          <div className="w-full lg:w-1/2 flex flex-col overflow-y-auto lg:overflow-visible">
+            <div className="p-2 sm:p-3 lg:p-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h4 className="text-lg font-medium text-gray-900">🏭 Recursos para Producción</h4>
+                <h4 className="text-sm sm:text-base lg:text-lg font-medium text-gray-900">🏭 Recursos para Producción</h4>
                 {loadingRecursos && (
-                  <div className="flex items-center space-x-2 text-blue-600">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                    <span className="text-sm">Cargando recursos...</span>
+                  <div className="flex items-center space-x-1 sm:space-x-2 text-blue-600">
+                    <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-blue-600"></div>
+                    <span className="text-xs sm:text-sm">Cargando...</span>
                   </div>
                 )}
               </div>
 
               {/* Checkbox para consumir recursos */}
-              <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                <div className="flex items-center space-x-2">
+              <div className="mt-2 p-2 sm:p-2.5 bg-amber-50 rounded-lg border-2 border-amber-300">
+                <div className="flex items-start space-x-2 sm:space-x-3">
                   <input
                     type="checkbox"
                     id="consumirRecursos"
                     checked={formData.consumirRecursos}
                     onChange={(e) => setFormData(prev => ({ ...prev, consumirRecursos: e.target.checked }))}
-                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                    className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded mt-0.5 flex-shrink-0"
                     disabled={enviando}
                   />
-                  <label htmlFor="consumirRecursos" className="text-sm text-yellow-800 font-medium">
-                    Consumir ingredientes y recetas del inventario
-                  </label>
+                  <div className="flex-1">
+                    <label htmlFor="consumirRecursos" className="text-xs sm:text-sm font-semibold text-gray-900 cursor-pointer block">
+                      Consumir ingredientes y recetas del inventario
+                    </label>
+                    {!formData.consumirRecursos && (
+                      <p className="text-xs text-amber-700 mt-1">
+                        ⚠️ Los recursos no se descontarán del inventario
+                      </p>
+                    )}
+                  </div>
                 </div>
-                {!formData.consumirRecursos && (
-                  <p className="text-xs text-yellow-700 mt-1 ml-6">
-                    ⚠️ Los recursos no se descontarán del inventario (solo para simulación)
-                  </p>
-                )}
               </div>
             </div>
 
             {/* Contenido scrolleable de recursos */}
             <div className="flex-1 overflow-y-auto">
                 {/* Botones para agregar recursos */}
-                <div className="p-4 bg-gray-50 border-b">
-                  <div className="grid grid-cols-2 gap-3">
+                <div className="p-2 sm:p-2.5 lg:p-3 bg-gray-50 border-b">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     <button
                       type="button"
-                      className="px-4 py-3 text-sm font-medium bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors flex items-center justify-center space-x-2"
+                      className="px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 text-xs sm:text-sm font-medium bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors flex items-center justify-center space-x-1 sm:space-x-2"
                       onClick={agregarIngrediente}
                       disabled={enviando}
                     >
                       <span>🥬</span>
-                      <span>+ Ingrediente ({formData.ingredientesUtilizados.length})</span>
+                      <span className="hidden sm:inline">+ Ingrediente</span>
+                      <span className="sm:hidden">+</span>
+                      <span>({formData.ingredientesUtilizados.length})</span>
                     </button>
                     <button
                       type="button"
-                      className="px-4 py-3 text-sm font-medium bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-colors flex items-center justify-center space-x-2"
+                      className="px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 text-xs sm:text-sm font-medium bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-colors flex items-center justify-center space-x-1 sm:space-x-2"
                       onClick={agregarReceta}
                       disabled={enviando}
                     >
                       <span>📋</span>
-                      <span>+ Receta ({formData.recetasUtilizadas.length})</span>
+                      <span className="hidden sm:inline">+ Receta</span>
+                      <span className="sm:hidden">+</span>
+                      <span>({formData.recetasUtilizadas.length})</span>
                     </button>
                   </div>
                 </div>
 
                 {/* Lista de Ingredientes */}
                 {formData.ingredientesUtilizados.length > 0 && (
-                  <div className="p-4 border-b">
-                    <h5 className="text-sm font-medium text-gray-800 mb-3">🥬 Ingredientes Utilizados</h5>
-                    <div className="space-y-3">
+                  <div className="p-2 sm:p-3 border-b bg-green-50">
+                    <h5 className="text-xs sm:text-sm font-medium text-gray-800 mb-2">🥬 Ingredientes ({formData.ingredientesUtilizados.length})</h5>
+                    <div className="space-y-2">
                       {formData.ingredientesUtilizados.map((item, index) => {
                         const ingredienteInfo = obtenerIngredienteInfo(item.ingrediente);
                         const disponible = (ingredienteInfo?.cantidad || 0) - (ingredienteInfo?.procesado || 0);
                         const stockInsuficiente = formData.consumirRecursos && item.cantidadUtilizada > disponible;
                         
                         return (
-                          <div key={index} className={`p-3 border rounded-lg ${stockInsuficiente ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}>
-                            <div className="space-y-2">
+                          <div key={index} className={`p-2 border rounded-md ${stockInsuficiente ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'}`}>
+                            <div className="space-y-1.5">
                               <select
                                 value={item.ingrediente}
                                 onChange={(e) => {
                                   actualizarIngrediente(index, 'ingrediente', e.target.value);
                                   const ing = obtenerIngredienteInfo(e.target.value);
-                                  console.log('🥬 Ingrediente seleccionado:', ing);
                                   if (ing) {
-                                    console.log(`💰 Precio unitario: S/.${ing.precioUnitario || 0}`);
                                     actualizarIngrediente(index, 'costoUnitario', ing.precioUnitario || 0);
                                   }
                                 }}
-                                className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-blue-500 focus:border-blue-500"
                                 disabled={enviando}
                                 required
                               >
@@ -570,15 +558,15 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                                   </option>
                                 ))}
                               </select>
-                              <div className="grid grid-cols-2 gap-2">
+                              <div className="grid grid-cols-3 gap-1.5">
                                 <input
                                   type="number"
                                   min="0.01"
                                   step="0.01"
                                   value={item.cantidadUtilizada}
                                   onChange={(e) => actualizarIngrediente(index, 'cantidadUtilizada', parseFloat(e.target.value) || 0)}
-                                  className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500"
-                                  placeholder="Cantidad"
+                                  className="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="Cant."
                                   disabled={enviando}
                                   required
                                 />
@@ -588,23 +576,23 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                                   step="0.01"
                                   value={item.costoUnitario}
                                   onChange={(e) => actualizarIngrediente(index, 'costoUnitario', parseFloat(e.target.value) || 0)}
-                                  className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500"
-                                  placeholder="Costo S/."
+                                  className="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="S/."
                                   disabled={enviando}
                                 />
-                              </div>
-                              <div className="flex justify-between items-center">
-                                <span className="text-xs text-gray-500">
-                                  Total: S/.{((item.cantidadUtilizada || 0) * (item.costoUnitario || 0)).toFixed(2)}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => eliminarIngrediente(index)}
-                                  className="p-1 text-red-600 hover:bg-red-100 rounded transition-colors"
-                                  disabled={enviando}
-                                >
-                                  🗑️
-                                </button>
+                                <div className="flex items-center justify-between gap-1">
+                                  <span className="text-xs font-semibold text-green-600">
+                                    S/.{((item.cantidadUtilizada || 0) * (item.costoUnitario || 0)).toFixed(2)}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => eliminarIngrediente(index)}
+                                    className="p-0.5 text-red-600 hover:bg-red-100 rounded transition-colors"
+                                    disabled={enviando}
+                                  >
+                                    🗑️
+                                  </button>
+                                </div>
                               </div>
                             </div>
                             {stockInsuficiente && (
@@ -621,9 +609,9 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
 
                 {/* Lista de Recetas */}
                 {formData.recetasUtilizadas.length > 0 && (
-                  <div className="p-4 border-b">
-                    <h5 className="text-sm font-medium text-gray-800 mb-3">📋 Recetas Utilizadas</h5>
-                    <div className="space-y-3">
+                  <div className="p-2 sm:p-3 bg-blue-50">
+                    <h5 className="text-xs sm:text-sm font-medium text-gray-800 mb-2">📋 Recetas ({formData.recetasUtilizadas.length})</h5>
+                    <div className="space-y-2">
                       {formData.recetasUtilizadas.map((item, index) => {
                         const recetaInfo = obtenerRecetaInfo(item.receta);
                         const producido = recetaInfo?.inventario?.cantidadProducida || 0;
@@ -632,32 +620,25 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                         const stockInsuficiente = formData.consumirRecursos && item.cantidadUtilizada > disponible;
                         
                         return (
-                          <div key={index} className={`p-3 border rounded-lg ${stockInsuficiente ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}>
-                            <div className="space-y-2">
+                          <div key={index} className={`p-2 border rounded-md ${stockInsuficiente ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'}`}>
+                            <div className="space-y-1.5">
                               <select
                                 value={item.receta}
                                 onChange={(e) => {
                                   actualizarReceta(index, 'receta', e.target.value);
                                   const rec = obtenerRecetaInfo(e.target.value);
                                   let precio = 0;
-                                  console.log('🔍 Receta seleccionada:', rec);
                                   
                                   if (rec && rec.ingredientes && rec.ingredientes.length > 0 && rec.rendimiento?.cantidad > 0) {
                                     let costoTotal = 0;
-                                    console.log('📋 Ingredientes de la receta:', rec.ingredientes);
-                                    console.log('📏 Rendimiento:', rec.rendimiento);
                                     
                                     for (const ing of rec.ingredientes) {
                                       if (ing.ingrediente && typeof ing.ingrediente.precioUnitario === 'number') {
                                         const costoIngrediente = (Number(ing.cantidad) || 0) * (Number(ing.ingrediente.precioUnitario) || 0);
                                         costoTotal += costoIngrediente;
-                                        console.log(`💰 ${ing.ingrediente.nombre}: ${ing.cantidad} x S/.${ing.ingrediente.precioUnitario} = S/.${costoIngrediente}`);
                                       }
                                     }
                                     precio = costoTotal / Number(rec.rendimiento.cantidad);
-                                    console.log(`🎯 Precio calculado: S/.${costoTotal} ÷ ${rec.rendimiento.cantidad} = S/.${precio}`);
-                                  } else {
-                                    console.log('⚠️ No se pudo calcular precio - datos faltantes');
                                   }
                                   
                                   actualizarReceta(index, 'costoUnitario', precio);
@@ -683,15 +664,15 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                                   );
                                 })}
                               </select>
-                              <div className="grid grid-cols-2 gap-2">
+                              <div className="grid grid-cols-3 gap-1.5">
                                 <input
                                   type="number"
                                   min="0.01"
                                   step="0.01"
                                   value={item.cantidadUtilizada}
                                   onChange={(e) => actualizarReceta(index, 'cantidadUtilizada', parseFloat(e.target.value) || 0)}
-                                  className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500"
-                                  placeholder="Cantidad"
+                                  className="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="Cant."
                                   disabled={enviando}
                                   required
                                 />
@@ -701,23 +682,23 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                                   step="0.01"
                                   value={item.costoUnitario}
                                   onChange={(e) => actualizarReceta(index, 'costoUnitario', parseFloat(e.target.value) || 0)}
-                                  className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500"
-                                  placeholder="Costo S/."
+                                  className="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="S/."
                                   disabled={enviando}
                                 />
-                              </div>
-                              <div className="flex justify-between items-center">
-                                <span className="text-xs text-gray-500">
-                                  Total: S/.{((item.cantidadUtilizada || 0) * (item.costoUnitario || 0)).toFixed(2)}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => eliminarReceta(index)}
-                                  className="p-1 text-red-600 hover:bg-red-100 rounded transition-colors"
-                                  disabled={enviando}
-                                >
-                                  🗑️
-                                </button>
+                                <div className="flex items-center justify-between gap-1">
+                                  <span className="text-xs font-semibold text-blue-600">
+                                    S/.{((item.cantidadUtilizada || 0) * (item.costoUnitario || 0)).toFixed(2)}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => eliminarReceta(index)}
+                                    className="p-0.5 text-red-600 hover:bg-red-100 rounded transition-colors"
+                                    disabled={enviando}
+                                  >
+                                    🗑️
+                                  </button>
+                                </div>
                               </div>
                             </div>
                             {stockInsuficiente && (
