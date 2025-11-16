@@ -69,8 +69,9 @@ export const useUsuariosVenta = (currentUserRole) => {
           user?.id
         );
 
-        // Si el filtro deja vacío y el usuario actual existe, agrégalo manualmente
-        if (filteredUsers.length === 0 && user) {
+        // Fallback solo para 'admin' y 'user', NO para 'super_admin'
+        // Super_admin nunca debe verse a sí mismo en la lista
+        if (filteredUsers.length === 0 && user && currentUserRole !== 'super_admin') {
           const currentUserObj = {
             id: user.id,
             name: user.fullName || user.email || 'Tú',
@@ -91,8 +92,9 @@ export const useUsuariosVenta = (currentUserRole) => {
       } catch (error) {
         setError('Error al cargar la lista de usuarios: ' + error.message);
         
-        // Fallback: agregar usuario actual
-        if (user) {
+        // Fallback: agregar usuario actual (excepto super_admin)
+        // Super_admin no puede asignarse ventas a sí mismo
+        if (user && currentUserRole !== 'super_admin') {
           const currentUserObj = {
             id: user.id,
             name: user.fullName || user.email || 'Tú',

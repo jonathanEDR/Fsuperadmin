@@ -10,6 +10,8 @@ import { User, Search, UserPlus, ChevronDown, X } from 'lucide-react';
  * @param {Function} props.onFormChange - Callback para cambios en el formulario
  * @param {Array} props.usuarios - Lista de usuarios disponibles
  * @param {boolean} props.loadingUsuarios - Estado de carga de usuarios
+ * @param {string} props.userRole - Rol del usuario actual (user, admin, super_admin)
+ * @param {string} props.currentUserName - Nombre del usuario actual
  * @param {Object} props.errores - Objeto con errores de validación
  * 
  * @example
@@ -18,6 +20,8 @@ import { User, Search, UserPlus, ChevronDown, X } from 'lucide-react';
  *   onFormChange={handleChange}
  *   usuarios={clientesData}
  *   loadingUsuarios={false}
+ *   userRole="user"
+ *   currentUserName="Juan Pérez"
  *   errores={{}}
  * />
  */
@@ -26,6 +30,8 @@ const FormularioVenta = React.memo(({
   onFormChange,
   usuarios = [],
   loadingUsuarios = false,
+  userRole = 'user',
+  currentUserName = 'Usuario',
   errores = {}
 }) => {
   // Estados locales
@@ -92,21 +98,25 @@ const FormularioVenta = React.memo(({
     setSearchTerm('');
   };
 
+  // Determinar si debe mostrar el selector de clientes
+  const mostrarSelectorClientes = userRole !== 'user';
+
   return (
     <div className="space-y-3 sm:space-y-4">
-      {/* Cliente - Combobox Unificado */}
-      <div>
-        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
-          <User size={14} className="sm:w-4 sm:h-4 inline mr-1" />
-          Cliente *
-        </label>
-        
-        {loadingUsuarios ? (
-          <div className="flex items-center gap-2 p-2.5 sm:p-3 bg-gray-50 rounded-lg">
-            <div className="animate-spin rounded-full h-3.5 w-3.5 sm:h-4 sm:w-4 border-b-2 border-purple-600"></div>
-            <span className="text-xs sm:text-sm text-gray-600">Cargando clientes...</span>
-          </div>
-        ) : (
+      {/* Cliente - Mostrar selector solo para admin/super_admin */}
+      {mostrarSelectorClientes ? (
+        <div>
+          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+            <User size={14} className="sm:w-4 sm:h-4 inline mr-1" />
+            Cliente *
+          </label>
+          
+          {loadingUsuarios ? (
+            <div className="flex items-center gap-2 p-2.5 sm:p-3 bg-gray-50 rounded-lg">
+              <div className="animate-spin rounded-full h-3.5 w-3.5 sm:h-4 sm:w-4 border-b-2 border-purple-600"></div>
+              <span className="text-xs sm:text-sm text-gray-600">Cargando clientes...</span>
+            </div>
+          ) : (
           <div ref={dropdownRef} className="relative">
             {/* Input de búsqueda / Mostrar selección */}
             <div className={`relative flex items-center border rounded-lg ${
@@ -144,14 +154,14 @@ const FormularioVenta = React.memo(({
                   onClick={() => setIsOpen(!isOpen)}
                   className="p-1 hover:bg-gray-200 rounded transition-colors"
                 >
-                  <ChevronDown size={16} className="sm:w-[18px] sm:h-[18px] text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}" />
+                  <ChevronDown size={16} className={`sm:w-[18px] sm:h-[18px] text-gray-500 transition-transform ${isOpen ? '' : 'rotate-180'}`} />
                 </button>
               </div>
             </div>
 
-            {/* Dropdown de opciones */}
+            {/* Dropdown de opciones - Desplegado hacia arriba */}
             {isOpen && (
-              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 sm:max-h-60 overflow-auto">
+              <div className="absolute z-50 w-full bottom-full mb-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 sm:max-h-60 overflow-auto">
                 {/* Opción especial: Cliente Sin Registro */}
                 <div
                   onClick={() => handleSelectCliente('sin-registro')}
@@ -200,38 +210,54 @@ const FormularioVenta = React.memo(({
               </div>
             )}
           </div>
-        )}
-        
-        {errores.targetUserId && (
-          <p className="text-red-500 text-[10px] sm:text-xs mt-1">⚠️ {errores.targetUserId}</p>
-        )}
+          )}
+          
+          {errores.targetUserId && (
+            <p className="text-red-500 text-[10px] sm:text-xs mt-1">⚠️ {errores.targetUserId}</p>
+          )}
 
-        {/* Campo adicional: Nombre del cliente cuando es "sin-registro" */}
-        {showClienteNombre && formData.targetUserId === 'sin-registro' && (
-          <div className="mt-2.5 sm:mt-3 p-2.5 sm:p-3 bg-yellow-50 border border-yellow-200 rounded-lg animate-fadeIn">
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
-              <UserPlus size={14} className="sm:w-4 sm:h-4 inline mr-1" />
-              Nombre del Cliente (opcional)
-            </label>
-            <input
-              type="text"
-              placeholder="Ej: Juan Pérez, Cliente mostrador, etc."
-              value={formData.clienteNombre || ''}
-              onChange={(e) => onFormChange({ ...formData, clienteNombre: e.target.value })}
-              className="w-full px-2.5 py-2 sm:px-3 sm:py-2 text-sm sm:text-base border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-            />
-            <p className="text-[10px] sm:text-xs text-yellow-700 mt-1">
-              💡 Este campo te ayudará a identificar esta venta posteriormente
-            </p>
+          {/* Campo adicional: Nombre del cliente cuando es "sin-registro" */}
+          {showClienteNombre && formData.targetUserId === 'sin-registro' && (
+            <div className="mt-2.5 sm:mt-3 p-2.5 sm:p-3 bg-yellow-50 border border-yellow-200 rounded-lg animate-fadeIn">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+                <UserPlus size={14} className="sm:w-4 sm:h-4 inline mr-1" />
+                Nombre del Cliente (opcional)
+              </label>
+              <input
+                type="text"
+                placeholder="Ej: Juan Pérez, Cliente mostrador, etc."
+                value={formData.clienteNombre || ''}
+                onChange={(e) => onFormChange({ ...formData, clienteNombre: e.target.value })}
+                className="w-full px-2.5 py-2 sm:px-3 sm:py-2 text-sm sm:text-base border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              />
+              <p className="text-[10px] sm:text-xs text-yellow-700 mt-1">
+                💡 Este campo te ayudará a identificar esta venta posteriormente
+              </p>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* Vista simplificada para usuarios normales - Solo muestra su nombre */
+        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-3 sm:p-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="bg-purple-100 p-2 rounded-full">
+              <User size={18} className="sm:w-5 sm:h-5 text-purple-600" />
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm text-purple-600 font-medium">Comprando para:</p>
+              <p className="text-sm sm:text-base font-bold text-purple-900">{currentUserName}</p>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Información sobre el proceso de pago */}
       <div className="bg-purple-50 border border-purple-200 rounded-lg p-2.5 sm:p-3">
         <p className="text-purple-800 text-xs sm:text-sm">
-          ℹ️ <strong>Nota:</strong> La venta se creará con estado <strong>"Pendiente"</strong>. 
-          El pago se gestionará posteriormente desde el módulo de <strong>Cobros</strong>.
+          ℹ️ <strong>Nota:</strong> La venta se creará con estado <strong>"Pendiente"</strong>.
+          {userRole === 'user' 
+            ? ' El administrador gestionará el pago posteriormente.' 
+            : ' El pago se gestionará posteriormente desde el módulo de Cobros.'}
         </p>
       </div>
 

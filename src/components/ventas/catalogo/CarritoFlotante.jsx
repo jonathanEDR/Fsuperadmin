@@ -20,9 +20,9 @@ const CarritoFlotante = ({
   };
 
   return (
-    <div className="w-full lg:w-96 bg-white border-l border-gray-200 flex flex-col">
+    <div className="w-full lg:w-96 bg-white border-l border-gray-200 flex flex-col max-h-[90vh] lg:max-h-screen">
       {/* Header del carrito */}
-      <div className="flex items-center justify-between p-4 border-b-2 border-purple-200 bg-gradient-to-r from-purple-50 via-white to-purple-50">
+      <div className="flex items-center justify-between p-4 border-b-2 border-purple-200 bg-gradient-to-r from-purple-50 via-white to-purple-50 flex-shrink-0">
         <div className="flex items-center gap-2">
           <ShoppingCart className="text-purple-600" size={24} />
           <h3 className="font-bold text-gray-900 text-lg">
@@ -35,7 +35,8 @@ const CarritoFlotante = ({
         
         <button
           onClick={onCerrar}
-          className="text-gray-400 hover:text-gray-600 transition-colors lg:hidden"
+          className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors"
+          title="Cerrar carrito"
         >
           <X size={20} />
         </button>
@@ -44,7 +45,7 @@ const CarritoFlotante = ({
       {/* Contenido del carrito */}
       {carrito.length === 0 ? (
         /* Carrito vacío */
-        <div className="flex-1 flex items-center justify-center p-8">
+        <div className="flex-1 flex items-center justify-center p-8 min-h-[300px]">
           <div className="text-center">
             <ShoppingCart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-lg mb-2">Carrito vacío</p>
@@ -55,8 +56,8 @@ const CarritoFlotante = ({
         </div>
       ) : (
         <>
-          {/* Lista de productos */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {/* Lista de productos con scroll controlado */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-purple-50">
             {carrito.map(item => (
               <div key={item.productoId} className="bg-white rounded-lg p-3 border-2 border-purple-200 hover:border-purple-400 transition-colors shadow-sm">
                 {/* Información del producto */}
@@ -150,8 +151,8 @@ const CarritoFlotante = ({
             ))}
           </div>
 
-          {/* Footer del carrito */}
-          <div className="border-t-2 border-purple-200 p-4 bg-gradient-to-b from-white to-purple-50 space-y-4">
+          {/* Footer del carrito - Siempre visible */}
+          <div className="border-t-2 border-purple-200 p-4 bg-gradient-to-b from-white to-purple-50 space-y-4 flex-shrink-0">
             {/* Resumen del total */}
             <div className="space-y-2">
               <div className="flex justify-between text-sm text-purple-600 font-medium">

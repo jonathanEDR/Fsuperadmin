@@ -115,10 +115,15 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
         return;
       }
 
-      // Validar cliente seleccionado
-      if (!formData.targetUserId) {
+      // Validar cliente seleccionado (excepto para usuarios normales que se auto-asignan)
+      if (!formData.targetUserId && userRole !== 'user') {
         setError('Debes seleccionar un cliente');
         return;
+      }
+
+      // Auto-asignar usuario actual si es rol 'user' y no tiene targetUserId
+      if (userRole === 'user' && !formData.targetUserId && user?.id) {
+        actualizarFormulario({ targetUserId: user.id });
       }
 
       // Enviar venta
@@ -161,6 +166,15 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
       onClose();
     }
   }, [guardando, onClose]);
+
+  /**
+   * Auto-asignar usuario actual para rol 'user'
+   */
+  useEffect(() => {
+    if (isOpen && userRole === 'user' && user?.id && !formData.targetUserId) {
+      actualizarFormulario({ targetUserId: user.id });
+    }
+  }, [isOpen, userRole, user?.id, formData.targetUserId, actualizarFormulario]);
 
   /**
    * Resetear estado al cerrar
@@ -294,6 +308,8 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
                     onFormChange={actualizarFormulario}
                     usuarios={usuarios}
                     loadingUsuarios={loadingUsuarios}
+                    userRole={userRole}
+                    currentUserName={user?.fullName || user?.email || 'Usuario'}
                     errores={{}}
                   />
                 </div>

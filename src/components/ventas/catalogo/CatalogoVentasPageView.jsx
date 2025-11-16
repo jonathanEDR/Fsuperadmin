@@ -387,15 +387,17 @@ const CatalogoVentasPageView = ({ userRole = 'user' }) => {
         {/* Carrito flotante (móvil y tablet) */}
         {vistaCarrito && !isDesktop && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-            <CarritoFlotante
-              carrito={carrito}
-              totalCarrito={totalCarrito}
-              onActualizarCantidad={actualizarCantidadCarrito}
-              onEliminarProducto={eliminarDelCarrito}
-              onLimpiarCarrito={limpiarCarrito}
-              onConfirmarVenta={handleConfirmarVenta}
-              onCerrar={() => setVistaCarrito(false)}
-            />
+            <div className="w-full max-w-md max-h-[90vh] overflow-hidden rounded-lg shadow-2xl">
+              <CarritoFlotante
+                carrito={carrito}
+                totalCarrito={totalCarrito}
+                onActualizarCantidad={actualizarCantidadCarrito}
+                onEliminarProducto={eliminarDelCarrito}
+                onLimpiarCarrito={limpiarCarrito}
+                onConfirmarVenta={handleConfirmarVenta}
+                onCerrar={() => setVistaCarrito(false)}
+              />
+            </div>
           </div>
         )}
 

@@ -8,6 +8,11 @@
  * @param {string} currentRole - Rol del usuario actual (user, admin, super_admin)
  * @param {string} currentUserId - ID del usuario actual
  * @returns {Array} - Lista filtrada de usuarios
+ * 
+ * Reglas de negocio:
+ * - super_admin: Solo puede asignar ventas a 'admin' y 'user' (NO a sí mismo ni a otros super_admin)
+ * - admin: Puede asignar ventas a 'user' y a sí mismo (NO a super_admin)
+ * - user: Solo puede comprarse a sí mismo
  */
 export const filterUsersByRole = (users, currentRole, currentUserId) => {
   if (!users || !currentRole) {
@@ -16,13 +21,22 @@ export const filterUsersByRole = (users, currentRole, currentUserId) => {
 
   const filteredUsers = users.filter(user => {
     const isSelf = user.id === currentUserId;
+    
     switch (currentRole) {
       case 'super_admin':
-        return user.role !== 'super_admin' || isSelf;
+        // Super admin NO puede asignarse ventas a sí mismo
+        // Solo puede asignar a admin y user
+        return user.role === 'admin' || user.role === 'user';
+      
       case 'admin':
-       return user.role !== 'super_admin';  
+        // Admin puede asignar a users y a sí mismo
+        // NO puede asignar a super_admin
+        return user.role === 'user' || (user.role === 'admin' && isSelf);
+      
       case 'user':
+        // User solo puede comprarse a sí mismo
         return isSelf;
+      
       default:
         return false;
     }
