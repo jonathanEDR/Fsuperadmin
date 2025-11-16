@@ -91,7 +91,7 @@ export const useVentaForm = (onVentaCreated, onClose) => {
           precioUnitario: item.precioUnitario,
           subtotal: item.subtotal
         })),
-        fechadeVenta: formData.fechadeVenta,
+        fechadeVenta: formData.fechadeVenta + ':00.000-05:00', // Agregar timezone de Perú (UTC-5)
         montoTotal,
         estadoPago: 'Pendiente', // Siempre pendiente en la creación
         cantidadPagada: 0, // Siempre 0 en la creación
