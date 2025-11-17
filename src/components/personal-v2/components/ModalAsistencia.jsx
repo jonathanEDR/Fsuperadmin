@@ -10,12 +10,34 @@
  * - Estado de asistencia
  * - Horarios entrada/salida
  * - Justificación y permisos
+ * 
+ * IMPORTANTE: Usa zona horaria de Perú (America/Lima UTC-5)
  */
 
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, Clock, User, AlertCircle } from 'lucide-react';
 import { asistenciaService } from '../../../services';
 import { useAuth } from '@clerk/clerk-react';
+
+/**
+ * Convertir hora local de Perú a UTC (ISO)
+ * @param {string} fecha - Fecha en formato YYYY-MM-DD
+ * @param {string} hora - Hora en formato HH:mm
+ * @returns {string} - Fecha/hora en formato ISO UTC
+ */
+const convertirHoraPeruAUTC = (fecha, hora) => {
+  if (!fecha || !hora) return null;
+  
+  // Asegurar que la hora tenga segundos
+  const horaNormalizada = hora.includes(':') && hora.split(':').length === 2 
+    ? `${hora}:00` 
+    : hora;
+  
+  // Construir string con offset de Perú (-05:00)
+  const fechaHoraPerú = `${fecha}T${horaNormalizada}-05:00`;
+  const fechaUTC = new Date(fechaHoraPerú);
+  return fechaUTC.toISOString();
+};
 
 const ModalAsistencia = ({
   isOpen,
@@ -90,11 +112,20 @@ const ModalAsistencia = ({
     return date.toISOString().split('T')[0];
   };
   
-  // Formatear hora para input
+  // Formatear hora para input (considerando zona horaria de Perú)
   const formatTimeForInput = (fecha) => {
     if (!fecha) return '';
     const date = new Date(fecha);
-    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    
+    // Formatear usando zona horaria de Perú
+    const horaPerú = date.toLocaleString('es-PE', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'America/Lima'
+    });
+    
+    return horaPerú;
   };
   
   // Manejar cambio en inputs
@@ -160,13 +191,13 @@ const ModalAsistencia = ({
         motivoPermiso: formData.motivoPermiso
       };
       
-      // Agregar horarios si están presentes
+      // Agregar horarios si están presentes (convertir de hora Perú a UTC)
       if (formData.horaEntrada) {
-        datos.horaEntrada = new Date(`${formData.fecha}T${formData.horaEntrada}`).toISOString();
+        datos.horaEntrada = convertirHoraPeruAUTC(formData.fecha, formData.horaEntrada);
       }
       
       if (formData.horaSalida) {
-        datos.horaSalida = new Date(`${formData.fecha}T${formData.horaSalida}`).toISOString();
+        datos.horaSalida = convertirHoraPeruAUTC(formData.fecha, formData.horaSalida);
       }
       
       if (modo === 'editar') {

@@ -28,24 +28,27 @@ const ListaAsistencias = React.memo(({
     );
   }, [asistencias]);
   
-  // Formatear fecha
+  // Formatear fecha (usando zona horaria de Perú)
   const formatearFecha = (fecha) => {
     const date = new Date(fecha);
     return date.toLocaleDateString('es-PE', {
       weekday: 'short',
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
+      timeZone: 'America/Lima'
     });
   };
   
-  // Formatear hora
+  // Formatear hora (usando zona horaria de Perú)
   const formatearHora = (fecha) => {
     if (!fecha) return '--:--';
     const date = new Date(fecha);
     return date.toLocaleTimeString('es-PE', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'America/Lima'
     });
   };
   
