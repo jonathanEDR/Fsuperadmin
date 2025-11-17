@@ -3,11 +3,13 @@
  * Muestra estadísticas, información y permite gestionar registros
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { ArrowLeft, Plus, UserCircle, Calendar, DollarSign } from 'lucide-react';
 import EstadisticasCard from './EstadisticasCard';
 import FiltrosFecha from './FiltrosFecha';
 import RegistrosTable from './RegistrosTable';
+import AsistenciaResumenCard from './AsistenciaResumenCard';
+import useAsistencias from '../hooks/useAsistencias';
 
 const ColaboradorDetalle = React.memo(({ 
   colaborador,
@@ -17,8 +19,15 @@ const ColaboradorDetalle = React.memo(({
   onCrearRegistro,
   onEliminarRegistro,
   formatearMoneda,
-  loading
+  loading,
+  onCambiarTabAsistencias // Nueva prop para cambiar al tab de asistencias
 }) => {
+  
+  // Hook de asistencias para el colaborador
+  const {
+    state: asistenciaState,
+    actions: asistenciaActions
+  } = useAsistencias();
   
   // Estado de filtros
   const [filtroFecha, setFiltroFecha] = useState('historico');
@@ -33,6 +42,23 @@ const ColaboradorDetalle = React.memo(({
       [field]: value
     }));
   };
+  
+  // Cargar asistencias del colaborador cuando se abre el detalle
+  useEffect(() => {
+    if (colaborador?.clerk_id) {
+      const hoy = new Date();
+      asistenciaActions.setFiltroColaborador(colaborador.clerk_id);
+      asistenciaActions.setFiltroMes(hoy.getFullYear(), hoy.getMonth() + 1);
+      asistenciaActions.cargarAsistencias();
+      
+      // Cargar estadísticas del mes actual
+      asistenciaActions.cargarEstadisticas(
+        colaborador.clerk_id,
+        hoy.getFullYear(),
+        hoy.getMonth() + 1
+      );
+    }
+  }, [colaborador?.clerk_id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Calcular totales basados en estadísticas (incluyendo cobros automáticos)
   const totales = useMemo(() => ({
@@ -107,6 +133,12 @@ const ColaboradorDetalle = React.memo(({
       <EstadisticasCard 
         totales={totales}
         formatearMoneda={formatearMoneda}
+      />
+      
+      {/* Resumen de asistencias del mes */}
+      <AsistenciaResumenCard
+        estadisticasAsistencia={asistenciaState.estadisticasAsistencia}
+        onVerDetalle={onCambiarTabAsistencias}
       />
 
       {/* Filtros de fecha */}

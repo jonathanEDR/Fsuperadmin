@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, UserCog, LogOut, Shield, Users, Package, ShoppingCart, Menu, X, ChevronLeft, ChevronRight, UserCheck, Factory, Grid3X3, Wallet, RotateCcw, DollarSign } from 'lucide-react';
+import { Home, UserCog, LogOut, Shield, Users, Package, ShoppingCart, Menu, X, ChevronLeft, ChevronRight, UserCheck, Factory, Grid3X3, Wallet, RotateCcw, DollarSign, QrCode } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 
@@ -20,6 +20,7 @@ function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggle
     { id: 'devoluciones', icon: RotateCcw, label: 'Gestión de Devoluciones', route: '/admin/devoluciones' },
     { id: 'catalogo', icon: Grid3X3, label: 'Catálogo de Productos', route: '/admin/catalogo' },
     { id: 'personal', icon: UserCheck, label: 'Gestión de Personal', route: '/admin/personal-v2' },
+    { id: 'qr-asistencias', icon: QrCode, label: 'Código QR Asistencias', route: '/admin/qr-asistencias', badge: 'NUEVO', badgeColor: 'bg-green-500' },
     { id: 'perfil', icon: UserCog, label: 'Mi Perfil', route: '/admin/perfil' }
   ];
 

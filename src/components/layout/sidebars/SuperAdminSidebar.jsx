@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, UserCheck, X, ChevronLeft, ChevronRight, CreditCard, Factory, Grid3X3, RotateCcw, DollarSign } from 'lucide-react';
+import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, UserCheck, X, ChevronLeft, ChevronRight, CreditCard, Factory, Grid3X3, RotateCcw, DollarSign, QrCode } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 
@@ -19,6 +19,7 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
       items: [
         { id: 'dashboard', icon: Home, label: 'Gestión de Usuarios', route: '/super-admin/usuarios' },
         { id: 'personal', icon: UserCheck, label: 'Gestión de Personal', route: '/super-admin/personal-v2' },
+        { id: 'qr-asistencias', icon: QrCode, label: 'Código QR Asistencias', route: '/super-admin/qr-asistencias', badge: 'NUEVO', badgeColor: 'bg-green-500' },
       ]
     },
     {

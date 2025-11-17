@@ -6,11 +6,17 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import useGestionPersonal from './hooks/useGestionPersonal';
+import useAsistencias from './hooks/useAsistencias';
 import ColaboradoresTable from './components/ColaboradoresTable';
 import ColaboradorDetalle from './components/ColaboradorDetalle';
 import PagosRealizados from './components/PagosRealizados';
 import ProfileManagement from '../../Pages/ProfileManagement';
 import RegistroModal from './components/RegistroModal';
+import CalendarioAsistencias from './components/CalendarioAsistencias';
+import ListaAsistencias from './components/ListaAsistencias';
+import ReporteAsistencias from './components/ReporteAsistencias';
+import ModalAsistencia from './components/ModalAsistencia';
+import FiltrosAsistencia from './components/FiltrosAsistencia';
 import api from '../../services/api';
 
 function GestionPersonalV2() {
@@ -45,6 +51,12 @@ function GestionPersonalV2() {
     formatearMoneda
   } = actions;
   
+  // Hook de asistencias
+  const {
+    state: asistenciaState,
+    actions: asistenciaActions
+  } = useAsistencias();
+  
   // Estado para tabs
   const [tabActual, setTabActual] = useState('personal');
   
@@ -64,6 +76,13 @@ function GestionPersonalV2() {
     };
     fetchUserRole();
   }, []);
+  
+  // Cargar asistencias cuando se selecciona el tab
+  useEffect(() => {
+    if (tabActual === 'asistencias') {
+      asistenciaActions.cargarAsistencias();
+    }
+  }, [tabActual]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
@@ -113,6 +132,16 @@ function GestionPersonalV2() {
             Pagos Realizados
           </button>
           <button
+            onClick={() => setTabActual('asistencias')}
+            className={`px-4 py-2 font-medium text-sm transition-colors ${
+              tabActual === 'asistencias'
+                ? 'text-blue-600 border-b-2 border-blue-600'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            Control de Asistencias
+          </button>
+          <button
             onClick={() => setTabActual('colaboradores')}
             className={`px-4 py-2 font-medium text-sm transition-colors ${
               tabActual === 'colaboradores'
@@ -156,6 +185,10 @@ function GestionPersonalV2() {
               onEliminarRegistro={abrirConfirmacion}
               formatearMoneda={formatearMoneda}
               loading={selectors.isLoading}
+              onCambiarTabAsistencias={() => {
+                asistenciaActions.setFiltroColaborador(detalleColaborador.clerk_id);
+                setTabActual('asistencias');
+              }}
             />
           ) : null}
         </>
@@ -172,6 +205,67 @@ function GestionPersonalV2() {
           formatearMoneda={formatearMoneda}
           loading={selectors.isLoading}
         />
+      )}
+      
+      {tabActual === 'asistencias' && (
+        <div className="space-y-6">
+          {/* Filtros de asistencias */}
+          <FiltrosAsistencia
+            filtros={asistenciaState.filtrosAsistencia}
+            colaboradores={colaboradores}
+            onFiltrosChange={asistenciaActions.setFiltrosAsistencia}
+            onVistaChange={asistenciaActions.setVistaAsistencia}
+            vistaActual={asistenciaState.vistaAsistencia}
+            onNuevaAsistencia={() => asistenciaActions.abrirModalAsistencia('crear')}
+            onResetFiltros={asistenciaActions.resetFiltros}
+          />
+          
+          {/* Contenido según vista seleccionada */}
+          {asistenciaState.vistaAsistencia === 'calendario' && (
+            <CalendarioAsistencias
+              asistencias={asistenciaState.asistencias}
+              filtros={asistenciaState.filtrosAsistencia}
+              onDiaClick={(modo, asistencia) => asistenciaActions.abrirModalAsistencia(modo, asistencia)}
+              onCargarDatos={(filtros) => {
+                asistenciaActions.setFiltrosAsistencia(filtros);
+                asistenciaActions.cargarAsistencias(filtros);
+              }}
+              onNuevaAsistencia={(fecha) => {
+                asistenciaActions.abrirModalAsistencia('crear', null, null);
+              }}
+              loading={asistenciaState.loading}
+            />
+          )}
+          
+          {asistenciaState.vistaAsistencia === 'lista' && (
+            <ListaAsistencias
+              asistencias={asistenciaState.asistencias}
+              onEditar={(asistencia) => asistenciaActions.abrirModalAsistencia('editar', asistencia)}
+              onEliminar={asistenciaActions.eliminarAsistencia}
+              loading={asistenciaState.loading}
+            />
+          )}
+          
+          {asistenciaState.vistaAsistencia === 'reporte' && (
+            <ReporteAsistencias
+              asistencias={asistenciaState.asistencias}
+              filtros={asistenciaState.filtrosAsistencia}
+              loading={asistenciaState.loading}
+            />
+          )}
+          
+          {/* Modal de asistencia */}
+          <ModalAsistencia
+            isOpen={asistenciaState.modalAsistencia.isOpen}
+            modo={asistenciaState.modalAsistencia.modo}
+            asistencia={asistenciaState.modalAsistencia.asistencia}
+            colaboradores={colaboradores}
+            colaboradorPreseleccionado={asistenciaState.modalAsistencia.colaboradorPreseleccionado}
+            onClose={asistenciaActions.cerrarModalAsistencia}
+            onSubmit={asistenciaActions.registrarAsistencia}
+            onUpdate={asistenciaActions.actualizarAsistencia}
+          />
+        </div>
       )}
       
       {tabActual === 'colaboradores' && (

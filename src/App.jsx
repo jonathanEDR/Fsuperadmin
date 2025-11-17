@@ -28,6 +28,8 @@ import UserDashboardLayout from './components/layout/dashboards/UserDashboardLay
 import CajaPage from './Pages/CajaPage';
 import ProduccionPage from './Pages/ProduccionPage';
 import CatalogoPage from './Pages/CatalogoPage';
+import GestionQR from './components/QR/GestionQR'; // NUEVO: Sistema de QR para Asistencias
+import EscanerQR from './components/QR/EscanerQR'; // NUEVO: Escáner QR para Usuarios
 
 // Importar páginas del módulo de finanzas
 import FinanzasPage from './Pages/FinanzasPage';
@@ -145,6 +147,7 @@ function App() {
               <Route path="pagos-realizados" element={<PagosRealizadosPage />} />
               <Route path="personal" element={<PersonalPage />} />
               <Route path="personal-v2" element={<GestionPersonalV2 />} /> {/* RUTA TEMPORAL PARA TESTING */}
+              <Route path="qr-asistencias" element={<GestionQR />} /> {/* NUEVO: Gestión de Códigos QR */}
               <Route path="perfil" element={<PerfilPage />} />
               <Route path="produccion/*" element={<ProduccionPage />} />
               {/* Módulo de Finanzas - ELIMINADO del Admin */}
@@ -170,6 +173,7 @@ function App() {
               <Route path="pagos-realizados" element={<PagosRealizadosPage />} />
               <Route path="personal" element={<PersonalPage />} />
               <Route path="personal-v2" element={<GestionPersonalV2 />} /> {/* RUTA TEMPORAL PARA TESTING */}
+              <Route path="qr-asistencias" element={<GestionQR />} /> {/* NUEVO: Gestión de Códigos QR */}
               <Route path="notas" element={<NotasPage />} />
               <Route path="perfil" element={<PerfilPage />} />
               <Route path="caja" element={<CajaPage />} />
@@ -197,6 +201,7 @@ function App() {
               <Route path="notas" element={<NotasPage />} />
               <Route path="ventas" element={<VentasPage />} />
               <Route path="catalogo" element={<CatalogoPage />} />
+              <Route path="escaner-qr" element={<EscanerQR />} /> {/* NUEVO: Escáner QR Asistencias */}
               <Route path="perfil" element={<PerfilPage />} />
             </Route>
             

@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserCircle, FileText, LogOut, ShoppingBag, ChevronLeft, ChevronRight, X, Grid3X3 } from 'lucide-react';
+import { UserCircle, FileText, LogOut, ShoppingBag, ChevronLeft, ChevronRight, X, Grid3X3, QrCode } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 
@@ -16,6 +16,7 @@ function Sidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebarOpen }) {
     { id: 'notes', icon: FileText, label: 'Mis Notas', route: '/user/notas' },
     { id: 'ventas', icon: ShoppingBag, label: 'Mis Ventas', route: '/user/ventas' },
     { id: 'catalogo', icon: Grid3X3, label: 'Catálogo de Productos', route: '/user/catalogo' },
+    { id: 'escaner-qr', icon: QrCode, label: 'Registro de Asistencia', route: '/user/escaner-qr', badge: 'NUEVO', badgeColor: 'bg-green-500' },
     { id: 'profile', icon: UserCircle, label: 'Mi Perfil', route: '/user/perfil' },
   ];
 
@@ -83,9 +84,16 @@ function Sidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebarOpen }) {
                 >
                   <Icon size={20} className="flex-shrink-0" />
                   {!isCollapsed && (
-                    <span className="font-medium whitespace-nowrap truncate">
-                      {item.label}
-                    </span>
+                    <div className="flex items-center justify-between flex-1 gap-2">
+                      <span className="font-medium whitespace-nowrap truncate">
+                        {item.label}
+                      </span>
+                      {item.badge && (
+                        <span className={`${item.badgeColor || 'bg-blue-500'} text-white text-xs px-2 py-0.5 rounded-full font-semibold`}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </button>
               );
