@@ -70,15 +70,15 @@ function UserGestionPersonal() {
   };  const calcularTotales = () => {
     const registrosOrdenados = ordenarRegistros();
     const totales = {
-      gastos: 0,
       pagosDiarios: 0,
+      bonificaciones: 0,
       faltantes: 0,
       adelantos: 0
     };
 
     registrosOrdenados.forEach(registro => {
-      totales.gastos += registro.monto || 0;
       totales.pagosDiarios += registro.pagodiario || 0;
+      totales.bonificaciones += registro.bonificacion || 0;
       totales.faltantes += registro.faltante || 0;
       totales.adelantos += registro.adelanto || 0;
     });
@@ -88,7 +88,8 @@ function UserGestionPersonal() {
   const registrosPaginados = registrosOrdenados.slice(0, registrosMostrados);
   const totales = calcularTotales();
   const pagosRealizadosTotal = calcularPagosRealizados();
-  const totalAPagar = totales.pagosDiarios - (totales.faltantes + totales.adelantos) - pagosRealizadosTotal;
+  const pagosPendientes = totales.pagosDiarios - pagosRealizadosTotal;
+  const totalAPagar = (totales.pagosDiarios + totales.bonificaciones) - (totales.faltantes + totales.adelantos) - pagosRealizadosTotal;
   const hayMasRegistros = registrosOrdenados.length > registrosMostrados;
   return (
     <div className="max-w-6xl mx-auto p-4 mx-2">
@@ -107,14 +108,14 @@ function UserGestionPersonal() {
        {/* Resumen de totales */}
       <div className="bg-white p-4 rounded-lg shadow mb-4">
         <h3 className="text-lg font-medium mb-3">Resumen Total</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 gap-y-4 text-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 gap-y-4 text-center">
           <div>
-            <p className="text-sm text-gray-600">Gastos</p>
-            <p className="text-lg font-bold text-red-600">{formatearMoneda(totales.gastos)}</p>
+            <p className="text-sm text-gray-600">Pagos Pendientes</p>
+            <p className="text-lg font-bold text-green-600">{formatearMoneda(pagosPendientes)}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-600">Pagos Recibidos</p>
-            <p className="text-lg font-bold text-green-600">{formatearMoneda(totales.pagosDiarios)}</p>
+            <p className="text-sm text-gray-600">Bonificaciones</p>
+            <p className="text-lg font-bold text-purple-600">{formatearMoneda(totales.bonificaciones)}</p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Faltantes</p>
@@ -123,10 +124,6 @@ function UserGestionPersonal() {
           <div>
             <p className="text-sm text-gray-600">Adelantos</p>
             <p className="text-lg font-bold text-blue-600">{formatearMoneda(totales.adelantos)}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-600">Pagos Realizados</p>
-            <p className="text-lg font-bold text-green-700">{formatearMoneda(pagosRealizadosTotal)}</p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Total a Pagar</p>
@@ -141,8 +138,8 @@ function UserGestionPersonal() {
           <h3 className="text-lg font-medium">
             Mis Registros ({registrosOrdenados.reduce((total, registro) => {
               let count = 0;
-              if (registro.monto && registro.monto > 0) count++;
               if (registro.pagodiario && registro.pagodiario > 0) count++;
+              if (registro.bonificacion && registro.bonificacion > 0) count++;
               if (registro.faltante && registro.faltante > 0) count++;
               if (registro.adelanto && registro.adelanto > 0) count++;
               return total + count;
@@ -174,20 +171,25 @@ function UserGestionPersonal() {
                     </span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 gap-y-1 text-xs">
-                    {registro.monto && registro.monto > 0 && (
-                      <div>
-                        <span className="text-gray-600">Gasto:</span>
-                        <span className="block text-red-600 font-bold">
-                          {formatearMoneda(registro.monto)}
-                        </span>
-                      </div>
-                    )}
                     {registro.pagodiario && registro.pagodiario > 0 && (
                       <div>
                         <span className="text-gray-600">Pago Diario:</span>
                         <span className="block text-green-600 font-bold">
                           {formatearMoneda(registro.pagodiario)}
                         </span>
+                      </div>
+                    )}
+                    {registro.bonificacion && registro.bonificacion > 0 && (
+                      <div>
+                        <span className="text-gray-600">Bonificación:</span>
+                        <span className="block text-purple-600 font-bold">
+                          {formatearMoneda(registro.bonificacion)}
+                        </span>
+                        {registro.descripcionBonificacion && (
+                          <span className="block text-gray-500 text-xs italic mt-0.5">
+                            {registro.descripcionBonificacion}
+                          </span>
+                        )}
                       </div>
                     )}
                     {registro.faltante && registro.faltante > 0 && (
