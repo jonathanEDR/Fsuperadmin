@@ -15,7 +15,11 @@ const ModalGenerarQR = ({ isOpen, onClose, onGenerar, loading = false }) => {
     notas: '',
     requiereGeolocalizacion: true,
     horaInicio: '06:00',
-    horaFin: '23:00'
+    horaFin: '23:00',
+    // Configuración de tardanzas
+    horarioEntradaEsperado: '08:00',
+    toleranciaTardanza: 10,
+    aplicarDeteccionTardanza: true
   });
 
   const [errores, setErrores] = useState({});
@@ -29,7 +33,10 @@ const ModalGenerarQR = ({ isOpen, onClose, onGenerar, loading = false }) => {
       notas: '',
       requiereGeolocalizacion: true,
       horaInicio: '06:00',
-      horaFin: '23:00'
+      horaFin: '23:00',
+      horarioEntradaEsperado: '08:00',
+      toleranciaTardanza: 10,
+      aplicarDeteccionTardanza: true
     });
     setErrores({});
     onClose();
@@ -85,7 +92,11 @@ const ModalGenerarQR = ({ isOpen, onClose, onGenerar, loading = false }) => {
         horariosPermitidos: {
           horaInicio: formData.horaInicio,
           horaFin: formData.horaFin
-        }
+        },
+        // Configuración de detección de tardanzas
+        horarioEntradaEsperado: formData.horarioEntradaEsperado,
+        toleranciaTardanza: parseInt(formData.toleranciaTardanza),
+        aplicarDeteccionTardanza: formData.aplicarDeteccionTardanza
       }
     };
 
@@ -281,11 +292,124 @@ const ModalGenerarQR = ({ isOpen, onClose, onGenerar, loading = false }) => {
             )}
           </div>
 
+          {/* Configuración de Detección de Tardanzas */}
+          <div className="space-y-4 pt-4 border-t">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <div className="w-6 h-6 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-sm font-bold">
+                3
+              </div>
+              <Clock size={20} />
+              Detección de Tardanzas
+            </h3>
+
+            {/* Activar detección */}
+            <div className="flex items-start gap-3 bg-orange-50 p-4 rounded-lg border border-orange-200">
+              <input
+                type="checkbox"
+                name="aplicarDeteccionTardanza"
+                id="aplicarDeteccionTardanza"
+                checked={formData.aplicarDeteccionTardanza}
+                onChange={handleChange}
+                className="mt-1 w-4 h-4 text-orange-600 rounded focus:ring-orange-500"
+                disabled={loading}
+              />
+              <label htmlFor="aplicarDeteccionTardanza" className="flex-1 cursor-pointer">
+                <span className="text-sm font-medium text-gray-900 block">
+                  Detectar Tardanzas Automáticamente
+                </span>
+                <span className="text-xs text-gray-600">
+                  El sistema marcará como "tardanza" si el colaborador llega después de la hora esperada + tolerancia
+                </span>
+              </label>
+            </div>
+
+            {/* Horario esperado y tolerancia */}
+            {formData.aplicarDeteccionTardanza && (
+              <div className="bg-gray-50 p-4 rounded-lg space-y-4 border border-gray-200">
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Horario de entrada esperado */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Hora de Entrada Esperada
+                    </label>
+                    <input
+                      type="time"
+                      name="horarioEntradaEsperado"
+                      value={formData.horarioEntradaEsperado}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      disabled={loading}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Hora a la que deben llegar
+                    </p>
+                  </div>
+
+                  {/* Tolerancia */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Tolerancia (minutos)
+                    </label>
+                    <input
+                      type="number"
+                      name="toleranciaTardanza"
+                      value={formData.toleranciaTardanza}
+                      onChange={handleChange}
+                      min="0"
+                      max="60"
+                      step="5"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      disabled={loading}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Minutos de gracia
+                    </p>
+                  </div>
+                </div>
+
+                {/* Ejemplo visual */}
+                <div className="bg-white p-3 rounded border border-orange-200">
+                  <p className="text-xs font-medium text-gray-700 mb-2">💡 Ejemplo:</p>
+                  <div className="space-y-1 text-xs text-gray-600">
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-600">✓</span>
+                      <span>Entrada antes de <strong>{formData.horarioEntradaEsperado}</strong> = Presente</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-600">✓</span>
+                      <span>Entrada entre <strong>{formData.horarioEntradaEsperado}</strong> y <strong>{
+                        (() => {
+                          const [h, m] = formData.horarioEntradaEsperado.split(':').map(Number);
+                          const totalMin = h * 60 + m + parseInt(formData.toleranciaTardanza);
+                          const newH = Math.floor(totalMin / 60) % 24;
+                          const newM = totalMin % 60;
+                          return `${String(newH).padStart(2, '0')}:${String(newM).padStart(2, '0')}`;
+                        })()
+                      }</strong> = Presente</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-orange-600">⚠</span>
+                      <span>Entrada después de <strong>{
+                        (() => {
+                          const [h, m] = formData.horarioEntradaEsperado.split(':').map(Number);
+                          const totalMin = h * 60 + m + parseInt(formData.toleranciaTardanza);
+                          const newH = Math.floor(totalMin / 60) % 24;
+                          const newM = totalMin % 60;
+                          return `${String(newH).padStart(2, '0')}:${String(newM).padStart(2, '0')}`;
+                        })()
+                      }</strong> = Tardanza</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Configuración Adicional */}
           <div className="space-y-4 pt-4 border-t">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <div className="w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-sm font-bold">
-                3
+                4
               </div>
               <MapPin size={20} />
               Configuración Adicional

@@ -90,9 +90,10 @@ const EscanerQR = () => {
 
       if (response.success) {
         setRegistroResult({
-          tipo: response.data.tipoRegistro, // 'entrada' o 'salida'
+          tipo: response.data.tipoRegistro || response.data.tipo, // 'entrada' o 'salida'
+          estado: response.data.estado || 'presente', // presente, tardanza, etc
           mensaje: response.data.mensaje,
-          hora: response.data.hora,
+          hora: response.data.hora || new Date().toISOString(), // Usar hora del servidor o actual
           colaborador: response.data.colaborador,
           success: true
         });
@@ -137,14 +138,30 @@ const EscanerQR = () => {
   }, [mostrarEscaner]);
 
   /**
-   * Formatear hora
+   * Formatear hora en zona horaria de Perú
    */
   const formatearHora = (fecha) => {
-    return new Date(fecha).toLocaleTimeString('es-PE', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
+    if (!fecha) return 'Hora no disponible';
+    
+    try {
+      const date = new Date(fecha);
+      
+      // Verificar si la fecha es válida
+      if (isNaN(date.getTime())) {
+        return 'Hora no disponible';
+      }
+      
+      // Formatear en zona horaria de Perú
+      return date.toLocaleTimeString('es-PE', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: 'America/Lima'
+      });
+    } catch (error) {
+      console.error('Error al formatear hora:', error);
+      return 'Hora no disponible';
+    }
   };
 
   return (
@@ -254,9 +271,19 @@ const EscanerQR = () => {
                 {registroResult.tipo === 'entrada' ? '¡Entrada Registrada!' : '¡Salida Registrada!'}
               </h2>
               
-              <p className="text-green-800 text-center mb-6">
+              <p className="text-green-800 text-center mb-4">
                 {registroResult.mensaje}
               </p>
+
+              {/* Badge de estado (si es tardanza) */}
+              {registroResult.tipo === 'entrada' && registroResult.estado === 'tardanza' && (
+                <div className="bg-orange-100 border border-orange-300 rounded-lg p-3 mb-4">
+                  <p className="text-orange-800 text-center text-sm font-medium flex items-center justify-center gap-2">
+                    <Clock size={16} />
+                    <span>⚠️ Registro marcado como TARDANZA</span>
+                  </p>
+                </div>
+              )}
 
               {/* Información del Registro */}
               <div className="bg-white rounded-lg p-4 space-y-3">
