@@ -10,14 +10,9 @@ import api from './api';
  */
 export const generarQR = async (data) => {
   try {
-    console.log('🔵 [QR Service Frontend] Llamando a POST /api/qr-asistencia/generar');
-    console.log('🔵 [QR Service Frontend] Data enviada:', data);
     const response = await api.post('/api/qr-asistencia/generar', data);
-    console.log('✅ [QR Service Frontend] QR generado:', response.data);
     return response.data;
   } catch (error) {
-    console.error('❌ [QR Service Frontend] Error al generar QR:', error);
-    console.error('❌ [QR Service Frontend] Error response:', error.response?.data);
     throw error.response?.data || error;
   }
 };
@@ -27,18 +22,12 @@ export const generarQR = async (data) => {
  */
 export const obtenerQRActivo = async () => {
   try {
-    console.log('🔵 [QR Service Frontend] Llamando a GET /api/qr-asistencia/activo');
     const response = await api.get('/api/qr-asistencia/activo');
-    console.log('✅ [QR Service Frontend] Response status:', response.status);
-    console.log('✅ [QR Service Frontend] Response data:', response.data);
     // El backend ahora devuelve 200 con data: null si no hay QR activo
     return response.data;
   } catch (error) {
     // Solo errores reales (500, etc.)
-    console.error('❌ [QR Service Frontend] Error al obtener QR activo:', error);
-    console.error('❌ [QR Service Frontend] Error response:', error.response);
-    console.error('❌ [QR Service Frontend] Error data:', error.response?.data);
-    console.error('❌ [QR Service Frontend] Error status:', error.response?.status);
+    console.error('Error al obtener QR activo:', error);
     throw error.response?.data || error;
   }
 };
@@ -84,13 +73,9 @@ export const obtenerEstadisticas = async (id) => {
  */
 export const obtenerEstadisticasGenerales = async () => {
   try {
-    console.log('🔵 [QR Service Frontend] Llamando a GET /api/qr-asistencia/estadisticas/general');
     const response = await api.get('/api/qr-asistencia/estadisticas/general');
-    console.log('✅ [QR Service Frontend] Estadísticas recibidas:', response.data);
     return response.data;
   } catch (error) {
-    console.error('❌ [QR Service Frontend] Error al obtener estadísticas:', error);
-    console.error('❌ [QR Service Frontend] Error response:', error.response?.data);
     throw error.response?.data || error;
   }
 };

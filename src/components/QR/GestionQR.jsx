@@ -72,25 +72,20 @@ const GestionQR = () => {
    */
   const cargarQRActivo = async () => {
     try {
-      console.log('🔵 [Frontend] Cargando QR activo...');
       const response = await qrAsistenciaService.obtenerQRActivo();
-      console.log('🔵 [Frontend] Response recibida:', response);
       
       if (response.success && response.data) {
-        console.log('✅ [Frontend] QR activo encontrado');
         setQrActivo(response.data.qr);
         setQrImageUrl(response.data.qrImageUrl);
       } else {
         // No hay QR activo - esto es normal si no se ha generado ninguno
-        console.log('⚠️ [Frontend] No hay QR activo');
         setQrActivo(null);
         setQrImageUrl(null);
       }
     } catch (err) {
-      // Solo mostrar error si es diferente a "no hay QR activo"
+      // Solo mostrar error si es diferente a "no hay código QR activo"
       if (!err.message?.includes('No hay código QR activo')) {
-        console.error('❌ [Frontend] Error al cargar QR activo:', err);
-        console.error('❌ [Frontend] Error completo:', JSON.stringify(err, null, 2));
+        console.error('Error al cargar QR activo:', err);
       }
       setQrActivo(null);
       setQrImageUrl(null);
@@ -102,9 +97,7 @@ const GestionQR = () => {
    */
   const cargarEstadisticas = async () => {
     try {
-      console.log('🔵 [Frontend] Cargando estadísticas...');
       const response = await qrAsistenciaService.obtenerEstadisticasGenerales();
-      console.log('🔵 [Frontend] Estadísticas recibidas:', response);
       
       if (response.success) {
         setEstadisticasGenerales(response.data);
