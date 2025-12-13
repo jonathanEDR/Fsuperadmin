@@ -79,6 +79,14 @@ const VentasLineChart = React.memo(({ userRole }) => {
     }
   }, [fechaInicio, fechaFin]);
 
+  // Función auxiliar para obtener fecha solo (YYYY-MM-DD) considerando zona horaria de Perú
+  const obtenerFechaSoloLocal = useCallback((fecha) => {
+    if (!fecha) return null;
+    // Usar toLocaleDateString para obtener la fecha en zona horaria de Perú
+    const fechaLocal = fecha.toLocaleDateString('en-CA', { timeZone: 'America/Lima' }); // Formato YYYY-MM-DD
+    return fechaLocal;
+  }, []);
+
   // Función para procesar datos de ventas
   const processVentasData = useCallback(async (ventas, devoluciones) => {
     try {
@@ -90,17 +98,21 @@ const VentasLineChart = React.memo(({ userRole }) => {
       const ventasValidas = Array.isArray(ventas) ? ventas : [];
       const devolucionesValidas = Array.isArray(devoluciones) ? devoluciones : [];
 
-      // Configurar fechas como en la implementación original
-      const startDate = new Date(fechaInicio);
-      const endDate = new Date(fechaFin);
-      endDate.setHours(23, 59, 59, 999); // Incluir todo el día final
+      // Configurar fechas en zona horaria local de Perú
+      // Crear fechas a medianoche en hora local para evitar problemas de zona horaria
+      const startDate = new Date(fechaInicio + 'T00:00:00');
+      const endDate = new Date(fechaFin + 'T23:59:59.999');
 
-      // Generar etiquetas para el rango de fechas
+      // Generar etiquetas para el rango de fechas (usando hora local)
       const labels = [];
       const fechaActual = new Date(startDate);
       
       while (fechaActual <= endDate) {
-        labels.push(fechaActual.toISOString().split('T')[0]);
+        // Usar formato local en lugar de ISO para evitar desfase de zona horaria
+        const año = fechaActual.getFullYear();
+        const mes = String(fechaActual.getMonth() + 1).padStart(2, '0');
+        const dia = String(fechaActual.getDate()).padStart(2, '0');
+        labels.push(`${año}-${mes}-${dia}`);
         fechaActual.setDate(fechaActual.getDate() + 1);
       }
       
@@ -131,15 +143,20 @@ const VentasLineChart = React.memo(({ userRole }) => {
           return;
         }
         
-        const fechaVenta = new Date(venta.fechadeVenta);
+        // ✅ CORRECCIÓN: Usar procesarFechaParaGrafico para manejar zona horaria correctamente
+        const fechaVenta = procesarFechaParaGrafico(venta.fechadeVenta);
+        if (!fechaVenta) {
+          return;
+        }
         
-        // Ya no necesitamos filtrar por rango porque el backend ya lo hace
-        ventasEnRango++;
-        // Calcular índice basado en días desde startDate
-        const diasDesdeInicio = Math.floor((fechaVenta - startDate) / (1000 * 60 * 60 * 24));
-        const index = Math.max(0, Math.min(diasDesdeInicio, labels.length - 1));
+        // Obtener fecha solo (YYYY-MM-DD) en zona horaria de Perú
+        const fechaSoloVenta = obtenerFechaSoloLocal(fechaVenta);
+        
+        // Encontrar el índice correcto basado en la fecha local
+        const index = labels.indexOf(fechaSoloVenta);
         
         if (index >= 0 && index < dataPoints.length) {
+            ventasEnRango++;
             const montoVenta = parseFloat(venta?.montoTotal) || 0;
             dataPoints[index].ventasBrutas += montoVenta;
             
@@ -151,25 +168,25 @@ const VentasLineChart = React.memo(({ userRole }) => {
               dataPoints[index].cantidadVendida += cantidad;
             }
         }
-        
-        // Solo mostrar las primeras 5 ventas para evitar spam
-        if (ventasProcesadas >= 5) return;
       });
       
       // Procesar devoluciones - filtrar por rango de fechas
       devolucionesValidas.forEach(devolucion => {
         if (!devolucion || !devolucion.fechaDevolucion) return;
         
-        const fechaDevolucion = new Date(devolucion.fechaDevolucion);
-        if (fechaDevolucion >= startDate && fechaDevolucion <= endDate) {
-          // Calcular índice basado en días desde startDate
-          const diasDesdeInicio = Math.floor((fechaDevolucion - startDate) / (1000 * 60 * 60 * 24));
-          const index = Math.max(0, Math.min(diasDesdeInicio, labels.length - 1));
-          
-          if (index >= 0 && index < dataPoints.length) {
-            const montoDevolucion = parseFloat(devolucion?.monto) || 0;
-            dataPoints[index].devoluciones += montoDevolucion;
-          }
+        // ✅ CORRECCIÓN: Usar procesarFechaParaGrafico para manejar zona horaria correctamente
+        const fechaDevolucion = procesarFechaParaGrafico(devolucion.fechaDevolucion);
+        if (!fechaDevolucion) return;
+        
+        // Obtener fecha solo (YYYY-MM-DD) en zona horaria de Perú
+        const fechaSoloDevolucion = obtenerFechaSoloLocal(fechaDevolucion);
+        
+        // Encontrar el índice correcto basado en la fecha local
+        const index = labels.indexOf(fechaSoloDevolucion);
+        
+        if (index >= 0 && index < dataPoints.length) {
+          const montoDevolucion = parseFloat(devolucion?.monto) || 0;
+          dataPoints[index].devoluciones += montoDevolucion;
         }
       });
 
@@ -247,7 +264,7 @@ const VentasLineChart = React.memo(({ userRole }) => {
     } catch (err) {
       setError('No se pudo cargar el gráfico de ventas: ' + err.message);
     }
-  }, [fechaInicio, fechaFin]);
+  }, [fechaInicio, fechaFin, obtenerFechaSoloLocal]);
 
   // Función para obtener la etiqueta del filtro
   const getTimeFilterLabel = useCallback(() => {
