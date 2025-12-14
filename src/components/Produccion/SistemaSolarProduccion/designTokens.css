@@ -278,7 +278,7 @@
 }
 
 /* ===== TOKENS ESPECÍFICOS PARA PLANETA RECETAS PROFESIONAL ===== */
-
+:root {
   /* Colores específicos de recetas profesionales */
   --color-recetas-primary: var(--planeta-recetas-primary);
   --color-recetas-secondary: var(--planeta-recetas-secondary);
@@ -443,6 +443,7 @@
   --planeta-transform-orbit: rotateX(-75deg);
   --planeta-transform-hover: scale(1.25);
   --planeta-transform-selected: scale(1.35);
+}
 
 @media (max-width: 480px) {
   :root {

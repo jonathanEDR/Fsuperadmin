@@ -40,13 +40,14 @@ const ListaAsistencias = React.memo(({
     });
   };
   
-  // Formatear hora (usando zona horaria de Perú)
+  // Formatear hora (usando zona horaria de Perú) - CON SEGUNDOS
   const formatearHora = (fecha) => {
-    if (!fecha) return '--:--';
+    if (!fecha) return '--:--:--';
     const date = new Date(fecha);
     return date.toLocaleTimeString('es-PE', {
       hour: '2-digit',
       minute: '2-digit',
+      second: '2-digit',
       hour12: false,
       timeZone: 'America/Lima'
     });

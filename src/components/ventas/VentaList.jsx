@@ -4,6 +4,7 @@ import { DollarSign, ShoppingCart, RotateCcw, Plus, Clock, Check, X, Search, Pac
 import { api } from '../../services';
 import { procesarPagoVenta } from '../../services/cobroService';
 import { PaymentModal } from '../cobros';
+import SucursalModal from '../cobros/SucursalModal';
 import { QuickDevolucionModal } from '../devoluciones';
 import { VentaCreationModal } from '.';
 import { format } from 'date-fns';
@@ -57,6 +58,7 @@ function VentaList({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [success, setSuccess] = useState('');
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isSucursalModalOpen, setIsSucursalModalOpen] = useState(false);
   const [selectedVentaForPayment, setSelectedVentaForPayment] = useState(null);
   const [isDevolucionModalOpen, setIsDevolucionModalOpen] = useState(false);
   const [selectedVentaForDevolucion, setSelectedVentaForDevolucion] = useState(null);
@@ -419,6 +421,8 @@ function VentaList({
         faltantes: parseFloat(paymentData.faltantes) || 0,
         gastosImprevistos: parseFloat(paymentData.gastosImprevistos) || 0,
         descripcion: paymentData.descripcion || '',
+        sucursalId: paymentData.sucursalId || null,
+        sucursalNombre: paymentData.sucursalNombre || '',
         fechaCobro: paymentData.fechaCobro || new Date().toISOString().split('T')[0] // Incluir fecha de cobro
       };
 
@@ -644,6 +648,39 @@ function VentaList({
     return false;
   };
 
+  // ✅ NUEVA FUNCIÓN: Verificar si se puede modificar cantidad de productos
+  // Permite a usuarios modificar cantidades en sus propias ventas pendientes
+  const canModifyQuantity = (venta) => {
+    // Verificar si la venta está pagada - no se puede modificar
+    if (venta.estadoPago === 'Pagado') {
+      return false;
+    }
+
+    // Verificar si la venta está finalizada/aprobada
+    if (venta.completionStatus === 'approved' || venta.completionStatus === 'pending') {
+      return false;
+    }
+
+    // Super Admin puede modificar cualquier venta pendiente
+    if (userRole === 'super_admin') {
+      return true;
+    }
+    
+    // Admin puede modificar ventas de usuarios normales y las suyas
+    if (userRole === 'admin') {
+      return venta.creatorInfo?.role !== 'super_admin';
+    }
+    
+    // ✅ NUEVO: Usuario puede modificar sus propias ventas pendientes
+    if (userRole === 'user') {
+      // Verificar que sea su propia venta
+      const esPropia = venta.userId === currentUserId || venta.creatorId === currentUserId;
+      return esPropia;
+    }
+    
+    return false;
+  };
+
   const canCreateVenta = () => {
     return ['super_admin', 'admin', 'user'].includes(userRole);
   };
@@ -785,6 +822,7 @@ function VentaList({
         loading={loading}
         formatearFechaHora={formatearFechaHora}
         canEditDelete={canEditDelete}
+        canModifyQuantity={canModifyQuantity}
         handleOpenPayment={handleOpenPayment}
         handleOpenDevolucion={handleOpenDevolucion}
         handleFinalizarVenta={handleFinalizarVenta}
@@ -834,8 +872,16 @@ function VentaList({
           onClose={handleClosePayment}
           onSubmit={handleProcessPayment}
           venta={selectedVentaForPayment}
+          onOpenSucursalModal={() => setIsSucursalModalOpen(true)}
         />
       )}
+
+      {/* Modal de Sucursales */}
+      <SucursalModal
+        isOpen={isSucursalModalOpen}
+        onClose={() => setIsSucursalModalOpen(false)}
+        userRole={userRole}
+      />
 
       {/* Modal de Devolución */}
       {selectedVentaForDevolucion && (

@@ -15,9 +15,9 @@ export const agruparRegistrosPorFecha = (registros) => {
   const grupos = {};
 
   registros.forEach(registro => {
-    // Obtener fecha en formato local
+    // Obtener fecha en formato local con zona horaria de Perú
     const fecha = new Date(registro.fechaDeGestion);
-    const fechaKey = fecha.toLocaleDateString('es-PE');
+    const fechaKey = fecha.toLocaleDateString('es-PE', { timeZone: 'America/Lima' });
 
     // Inicializar grupo si no existe
     if (!grupos[fechaKey]) {

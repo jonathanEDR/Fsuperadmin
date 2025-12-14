@@ -25,7 +25,7 @@ const ModalAsistenciasDia = React.memo(({
   
   if (!isOpen) return null;
   
-  // Formatear fecha
+  // Formatear fecha - Con zona horaria de Perú
   const formatearFecha = (fecha) => {
     if (!fecha) return '';
     const date = new Date(fecha);
@@ -33,17 +33,20 @@ const ModalAsistenciasDia = React.memo(({
       weekday: 'long',
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
+      timeZone: 'America/Lima'
     });
   };
   
-  // Formatear hora
+  // Formatear hora - Con zona horaria de Perú - CON SEGUNDOS
   const formatearHora = (fecha) => {
-    if (!fecha) return '--:--';
+    if (!fecha) return '--:--:--';
     const date = new Date(fecha);
     return date.toLocaleTimeString('es-PE', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: 'America/Lima'
     });
   };
   

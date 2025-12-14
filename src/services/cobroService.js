@@ -121,6 +121,8 @@ export const createCobro = async (cobroData) => {
       distribucionPagos,
       ...montos,
       descripcion: cobroData.descripcion || '',
+      sucursalId: cobroData.sucursalId || null,
+      sucursalNombre: cobroData.sucursalNombre || '',
       fechaCobro: cobroData.fechaCobro
     };
 
@@ -206,6 +208,8 @@ export const procesarPagoVenta = async (ventaId, datoPago) => {
       }],
       ...montos,
       descripcion: datoPago.descripcion || '',
+      sucursalId: datoPago.sucursalId || null,
+      sucursalNombre: datoPago.sucursalNombre || '',
       fechaCobro: datoPago.fechaCobro // Incluir la fecha de cobro
     };
 

@@ -30,6 +30,25 @@ const CalendarioAsistencias = React.memo(({
   
   const { año, mes, colaboradorId } = filtros;
   
+  // Obtener fecha en zona horaria de Perú (YYYY-MM-DD)
+  const obtenerFechaLocalPeru = (fechaISO) => {
+    const date = new Date(fechaISO);
+    return date.toLocaleDateString('en-CA', { timeZone: 'America/Lima' }); // YYYY-MM-DD
+  };
+  
+  // Obtener partes de fecha en zona horaria de Perú
+  const obtenerPartesFechaPeru = (fechaISO) => {
+    const date = new Date(fechaISO);
+    const fechaStr = date.toLocaleDateString('es-PE', { 
+      timeZone: 'America/Lima',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }); // DD/MM/YYYY
+    const [dia, mes, año] = fechaStr.split('/').map(Number);
+    return { dia, mes, año };
+  };
+  
   // Verificar si una fecha es hoy (definir ANTES de useMemo)
   const esHoy = (fecha) => {
     const hoy = new Date();
@@ -55,12 +74,12 @@ const CalendarioAsistencias = React.memo(({
     for (let dia = 1; dia <= diasEnMes; dia++) {
       const fecha = new Date(año, mes - 1, dia);
       
-      // Buscar asistencia(s) para este día
+      // Buscar asistencia(s) para este día - CORREGIDO para zona horaria de Perú
       const asistenciasDia = asistencias.filter(a => {
-        const fechaAsistencia = new Date(a.fecha);
-        return fechaAsistencia.getDate() === dia &&
-               fechaAsistencia.getMonth() === mes - 1 &&
-               fechaAsistencia.getFullYear() === año;
+        const partes = obtenerPartesFechaPeru(a.fecha);
+        return partes.dia === dia &&
+               partes.mes === mes &&
+               partes.año === año;
       });
       
       dias.push({

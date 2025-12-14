@@ -89,7 +89,8 @@ const RegistrosTable = React.memo(({
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      timeZone: 'America/Lima'
     });
   };
 
@@ -97,7 +98,8 @@ const RegistrosTable = React.memo(({
     return new Date(fecha).toLocaleDateString('es-PE', {
       day: '2-digit',
       month: 'short',
-      year: 'numeric'
+      year: 'numeric',
+      timeZone: 'America/Lima'
     });
   };
 

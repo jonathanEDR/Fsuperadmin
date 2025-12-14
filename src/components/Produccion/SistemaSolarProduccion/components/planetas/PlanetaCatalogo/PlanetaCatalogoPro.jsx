@@ -146,8 +146,7 @@ PlanetaCatalogoPro.defaultProps = {
   estado: 'normal',
   orbita: 3,
   responsive: 'desktop',
-  efectosActivos: true,
-  responsive: 'desktop'
+  efectosActivos: true
 };
 
 // PropTypes para desarrollo

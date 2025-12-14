@@ -17,14 +17,28 @@ const CalendarioSeleccionDias = React.memo(({
   const [diasSeleccionados, setDiasSeleccionados] = useState(new Set());
   const [hoveredDia, setHoveredDia] = useState(null);
 
-  // Agrupar registros por día del mes actual
+  // Función auxiliar para obtener partes de fecha en zona horaria de Perú
+  const obtenerPartesFechaPeru = useCallback((fechaISO) => {
+    const date = new Date(fechaISO);
+    const fechaStr = date.toLocaleDateString('es-PE', { 
+      timeZone: 'America/Lima',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }); // DD/MM/YYYY
+    const [dia, mes, año] = fechaStr.split('/').map(Number);
+    return { dia, mes, año };
+  }, []);
+
+  // Agrupar registros por día del mes actual - Con zona horaria de Perú
   const registrosPorDia = useMemo(() => {
     const agrupados = {};
     
     registrosPendientes.forEach(registro => {
-      const fecha = new Date(registro.fechaDeGestion);
-      if (fecha.getMonth() === mesActual && fecha.getFullYear() === añoActual) {
-        const dia = fecha.getDate();
+      const partes = obtenerPartesFechaPeru(registro.fechaDeGestion);
+      // Nota: mesActual es 0-indexed, partes.mes es 1-indexed
+      if (partes.mes === mesActual + 1 && partes.año === añoActual) {
+        const dia = partes.dia;
         if (!agrupados[dia]) {
           agrupados[dia] = [];
         }
@@ -33,7 +47,7 @@ const CalendarioSeleccionDias = React.memo(({
     });
     
     return agrupados;
-  }, [registrosPendientes, mesActual, añoActual]);
+  }, [registrosPendientes, mesActual, añoActual, obtenerPartesFechaPeru]);
 
   // Calcular monto total del día usando sistema de registros independientes
   const calcularMontoDia = useCallback((registros) => {

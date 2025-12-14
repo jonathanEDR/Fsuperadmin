@@ -32,9 +32,13 @@ const PagosRealizados = React.memo(({
   const [registrosSeleccionados, setRegistrosSeleccionados] = useState([]);
   const [registrosPendientes, setRegistrosPendientes] = useState([]);
   
-  // Estado del formulario
+  // Estado del formulario - Usar fecha local de Perú
+  const obtenerFechaHoyPeru = () => {
+    return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
+  };
+  
   const [formData, setFormData] = useState({
-    fechaPago: new Date().toISOString().split('T')[0],
+    fechaPago: obtenerFechaHoyPeru(),
     montoTotal: 0,
     metodoPago: 'efectivo',
     observaciones: '',
@@ -195,7 +199,7 @@ const PagosRealizados = React.memo(({
     setRegistrosSeleccionados([]);
     
     setFormData({
-      fechaPago: new Date().toISOString().split('T')[0],
+      fechaPago: obtenerFechaHoyPeru(),
       montoTotal: 0,
       metodoPago: 'efectivo',
       observaciones: '',
@@ -211,7 +215,7 @@ const PagosRealizados = React.memo(({
     setRegistrosSeleccionados([]);
     setRegistrosPendientes([]);
     setFormData({
-      fechaPago: new Date().toISOString().split('T')[0],
+      fechaPago: obtenerFechaHoyPeru(),
       montoTotal: 0,
       metodoPago: 'efectivo',
       observaciones: '',
@@ -242,7 +246,8 @@ const PagosRealizados = React.memo(({
 
     const dataToSubmit = {
       colaboradorUserId: colaboradorSeleccionado.clerk_id,
-      fechaPago: new Date(formData.fechaPago).toISOString(),
+      // Convertir fecha local de Perú a UTC/ISO para enviar al backend
+      fechaPago: new Date(formData.fechaPago + 'T12:00:00-05:00').toISOString(),
       registrosIds: registrosPagoDiario.map(r => r._id), // NUEVO: Solo IDs de pago_diario
       metodoPago: formData.metodoPago,
       observaciones: formData.observaciones.trim(),
@@ -269,7 +274,8 @@ const PagosRealizados = React.memo(({
     return new Date(fecha).toLocaleDateString('es-PE', {
       day: '2-digit',
       month: 'short',
-      year: 'numeric'
+      year: 'numeric',
+      timeZone: 'America/Lima'
     });
   };
 

@@ -140,6 +140,7 @@ const CobrosHistorial = ({ userRole }) => {
             <tr>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Usuario</th>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Sucursal</th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipos de Cobro</th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto Total</th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Descripción</th>
@@ -149,7 +150,7 @@ const CobrosHistorial = ({ userRole }) => {
           <tbody className="bg-white divide-y divide-gray-200">
             {payments.length === 0 ? (
               <tr>
-                <td colSpan="6" className="px-4 py-4 text-center text-gray-500">No hay registros de cobros disponibles</td>
+                <td colSpan="7" className="px-4 py-4 text-center text-gray-500">No hay registros de cobros disponibles</td>
               </tr>
             ) : (
               payments.map((payment) => (
@@ -165,6 +166,19 @@ const CobrosHistorial = ({ userRole }) => {
                       <span className="font-medium">{payment.creatorName || 'Usuario no especificado'}</span>
                       <span className="text-xs text-gray-500">{payment.creatorEmail || ''}</span>
                     </div>
+                  </td>
+                  
+                  {/* Sucursal */}
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 hidden lg:table-cell">
+                    {payment.sucursalNombre ? (
+                      <div className="flex items-center">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                          {payment.sucursalNombre}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 text-xs">Sin sucursal</span>
+                    )}
                   </td>
                   
                   {/* Tipos de Cobro */}

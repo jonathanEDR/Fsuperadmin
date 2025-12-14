@@ -84,16 +84,17 @@ const ModalAsistencia = ({
           motivoPermiso: asistencia.motivoPermiso || ''
         });
       } else {
-        // Modo crear: valores por defecto
+        // Modo crear: valores por defecto - Con zona horaria de Perú
         const hoy = new Date();
+        const fechaHoyPeru = hoy.toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
         const fechaDefault = fechaPreseleccionada 
           ? formatDateForInput(fechaPreseleccionada)
-          : hoy.toISOString().split('T')[0];
+          : fechaHoyPeru;
         
         setFormData({
           colaboradorUserId: colaboradorPreseleccionado?.clerk_id || '',
           fecha: fechaDefault,
-          horaEntrada: '08:00',
+          horaEntrada: '08:00:00',
           horaSalida: '',
           estado: 'presente',
           tipoRegistro: 'manual_admin',
@@ -105,22 +106,24 @@ const ModalAsistencia = ({
     }
   }, [isOpen, modo, asistencia, colaboradorPreseleccionado, fechaPreseleccionada]);
   
-  // Formatear fecha para input
+  // Formatear fecha para input - Con zona horaria de Perú
   const formatDateForInput = (fecha) => {
     if (!fecha) return '';
     const date = new Date(fecha);
-    return date.toISOString().split('T')[0];
+    // Usar toLocaleDateString con formato 'en-CA' para obtener YYYY-MM-DD en hora de Perú
+    return date.toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
   };
   
-  // Formatear hora para input (considerando zona horaria de Perú)
+  // Formatear hora para input (considerando zona horaria de Perú) - CON SEGUNDOS
   const formatTimeForInput = (fecha) => {
     if (!fecha) return '';
     const date = new Date(fecha);
     
-    // Formatear usando zona horaria de Perú
+    // Formatear usando zona horaria de Perú incluyendo segundos
     const horaPerú = date.toLocaleString('es-PE', {
       hour: '2-digit',
       minute: '2-digit',
+      second: '2-digit',
       hour12: false,
       timeZone: 'America/Lima'
     });
@@ -309,6 +312,7 @@ const ModalAsistencia = ({
                 value={formData.horaEntrada}
                 onChange={handleChange}
                 disabled={loading}
+                step="1"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -324,6 +328,7 @@ const ModalAsistencia = ({
                 value={formData.horaSalida}
                 onChange={handleChange}
                 disabled={loading}
+                step="1"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>

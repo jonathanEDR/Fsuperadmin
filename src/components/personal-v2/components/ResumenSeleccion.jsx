@@ -38,11 +38,12 @@ const ResumenSeleccion = React.memo(({
       new Date(a.fechaDeGestion) - new Date(b.fechaDeGestion)
     );
 
-    // Agrupar por fecha para contar días únicos
+    // Agrupar por fecha para contar días únicos - Con zona horaria de Perú
     const registrosPorFecha = {};
     
     registrosOrdenados.forEach(registro => {
-      const fechaKey = new Date(registro.fechaDeGestion).toISOString().split('T')[0];
+      // Usar zona horaria de Perú para obtener la fecha correcta
+      const fechaKey = new Date(registro.fechaDeGestion).toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
       if (!registrosPorFecha[fechaKey]) {
         registrosPorFecha[fechaKey] = [];
       }

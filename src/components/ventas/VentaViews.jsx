@@ -15,6 +15,7 @@ const VentaViews = ({
   loading,
   formatearFechaHora,
   canEditDelete,
+  canModifyQuantity, // ✅ NUEVO: Permiso para modificar cantidades
   handleOpenPayment,
   handleOpenDevolucion,
   handleFinalizarVenta,
@@ -576,7 +577,8 @@ const VentaViews = ({
                       Productos ({venta.productos?.filter(prod => prod != null).length || 0})
                     </span>
                   </div>
-                  {canEditDelete(venta) && venta.estadoPago !== 'Pagado' && (
+                  {/* Botón agregar producto - Usuarios también pueden agregar a sus propias ventas */}
+                  {canModifyQuantity(venta) && venta.estadoPago !== 'Pagado' && (
                     <button
                       onClick={() => handleOpenAddProduct(venta)}
                       className="p-1.5 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors border border-blue-200"
@@ -587,7 +589,7 @@ const VentaViews = ({
                   )}
                 </div>
                 
-                {/* Lista vertical de productos con botones funcionalesn */}
+                {/* Lista vertical de productos con botones funcionales */}
                 <div className="space-y-2">
                   {venta.productos?.filter(prod => prod != null).map((prod, idx) => (
                     <div key={idx} className="flex items-center justify-between bg-white border border-slate-200 rounded-lg px-3 py-2">
@@ -600,8 +602,8 @@ const VentaViews = ({
                         </span>
                       </div>
                       
-                      {/* Controles de cantidad - CON MODAL */}
-                      {canEditDelete(venta) && venta.estadoPago !== 'Pagado' ? (
+                      {/* Controles de cantidad - CON MODAL - Usar canModifyQuantity para usuarios */}
+                      {canModifyQuantity(venta) && venta.estadoPago !== 'Pagado' ? (
                         <div className="flex items-center gap-2">
                           {/* Botón disminuir (-) */}
                           <button
