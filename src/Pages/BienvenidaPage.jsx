@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import DashboardCard from '../components/common/DashboardCard';
 import ProductosVendidosDashboard from '../components/Graphics/ProductosVendidosDashboardNew';
 import VentasLineChart from '../components/Graphics/VentasLineChart';
+import CobrosLineChart from '../components/Graphics/CobrosLineChart';
 import { useProductosVendidosHoy } from '../hooks/useProductosVendidosHoy';
 import { useRole } from '../context/RoleContext';
-import { Package, TrendingUp, BarChart3 } from 'lucide-react';
+import { Package, TrendingUp, BarChart3, DollarSign } from 'lucide-react';
 
 function BienvenidaPage() {
   const userRole = useRole();
@@ -75,6 +76,25 @@ function BienvenidaPage() {
           {/* Contenido expandible con el gráfico de ventas */}
           <div className="min-h-[600px]">
             <VentasLineChart userRole={userRole} />
+          </div>
+        </DashboardCard>
+
+        {/* Card: Control de Cobros */}
+        <DashboardCard
+          title="Control de Cobros"
+          value="💵"
+          subtitle="Pagos y Recaudación"
+          icon={<DollarSign size={32} />}
+          color="emerald"
+          loading={false}
+          error={null}
+          expandable={true}
+          isExpanded={expandedCard === 'control-cobros'}
+          onExpandToggle={() => handleCardExpand('control-cobros')}
+        >
+          {/* Contenido expandible con el gráfico de cobros */}
+          <div className="min-h-[600px]">
+            <CobrosLineChart userRole={userRole} />
           </div>
         </DashboardCard>
 
