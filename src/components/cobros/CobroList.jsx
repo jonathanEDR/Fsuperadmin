@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useUser, useSession } from '@clerk/clerk-react';
 import { DollarSign } from 'lucide-react';
 import { 
@@ -8,22 +8,24 @@ import {
 import CobrosHistorial from './CobrosHistorial';
 import CobroCreationModal from './CobroCreationModal';
 import CobroResumen from './CobroResumen';
-import CobrosLineChart from '../Graphics/CobrosLineChart';
 
 const CobroList = ({ userRole }) => {
   const { user } = useUser();
   const { session } = useSession();
   const [pendingVentas, setPendingVentas] = useState([]);
-  const [paymentHistory, setPaymentHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [debtInfo, setDebtInfo] = useState(null);
+  
+  // Ref para controlar si ya se cargó inicialmente
+  const initialLoadDone = useRef(false);
+  // Ref para el ID del usuario (evita re-renders por cambio de objeto)
+  const userIdRef = useRef(null);
 
-  const loadData = async () => {
+  // Función para cargar datos - memoizada
+  const loadData = useCallback(async () => {
     if (!user || !session) {
       setLoading(false);
       setError('Por favor, inicie sesión para acceder a esta función.');
@@ -39,22 +41,16 @@ const CobroList = ({ userRole }) => {
         throw new Error('No se encontró una sesión activa. Por favor, inicie sesión nuevamente.');
       }
 
-      const [ventasResponse, historyResponse] = await Promise.all([
-        getPendingVentas(),
-        getPaymentHistory(currentPage)
-      ]);
+      // Solo cargar ventas pendientes (el historial lo carga CobrosHistorial)
+      const ventasResponse = await getPendingVentas();
 
       setPendingVentas(ventasResponse || []);
-      setPaymentHistory(historyResponse?.cobros || []);
-      setTotalPages(historyResponse?.totalPages || 1);
 
       // Calcular información de deuda usando montoTotal original
       const totalDebt = ventasResponse?.reduce((sum, venta) => {
-        // Usar montoTotal original como la deuda real del cliente
         const montoTotal = parseFloat(venta.montoTotal || 0);
         const cantidadPagada = parseFloat(venta.cantidadPagada || 0);
         const deudaVenta = Math.max(0, montoTotal - cantidadPagada);
-        
         return sum + deudaVenta;
       }, 0) || 0;
       
@@ -67,31 +63,49 @@ const CobroList = ({ userRole }) => {
     } catch (err) {
       setError(err.message || 'Error al cargar los datos');
       setPendingVentas([]);
-      setPaymentHistory([]);
-      setTotalPages(1);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, session]);
 
+  // Efecto para carga inicial - solo cuando cambia el userId
   useEffect(() => {
-    loadData();
-  }, [user, session, currentPage]);
+    const currentUserId = user?.id;
+    
+    // Solo cargar si hay usuario y es diferente al anterior o es la primera carga
+    if (currentUserId && (currentUserId !== userIdRef.current || !initialLoadDone.current)) {
+      userIdRef.current = currentUserId;
+      initialLoadDone.current = true;
+      loadData();
+    } else if (!currentUserId && userIdRef.current) {
+      // Usuario cerró sesión
+      userIdRef.current = null;
+      initialLoadDone.current = false;
+      setPendingVentas([]);
+      setDebtInfo(null);
+      setLoading(false);
+    }
+  }, [user?.id, loadData]);
 
-  const handleCobroCreated = async (result) => {
+  // Callback cuando se crea un cobro - memoizado
+  const handleCobroCreated = useCallback(async (result) => {
     if (result) {
       setSuccess('Pago registrado exitosamente');
       setTimeout(() => setSuccess(''), 3000);
       await loadData();
       setShowPaymentModal(false);
     }
-  };
+  }, [loadData]);
 
-  const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setCurrentPage(newPage);
-    }
-  };
+  // Callback para cerrar modal - memoizado
+  const handleCloseModal = useCallback(() => {
+    setShowPaymentModal(false);
+  }, []);
+
+  // Callback para abrir modal - memoizado
+  const handleOpenModal = useCallback(() => {
+    setShowPaymentModal(true);
+  }, []);
 
   if (loading) {
     return (
@@ -129,17 +143,10 @@ const CobroList = ({ userRole }) => {
         </div>
       </div>
 
-      {/* Gráfico de Cobros - Solo para Super Admin */}
-      {userRole === 'super_admin' && (
-        <div className="mb-4 sm:mb-8 overflow-x-auto">
-          <CobrosLineChart userRole={userRole} />
-        </div>
-      )}
-
       {/* Botón para Nuevo Cobro */}
       <div className="mb-4 sm:mb-8">
         <button
-          onClick={() => setShowPaymentModal(true)}
+          onClick={handleOpenModal}
           className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
         >
           <DollarSign size={18} />
@@ -157,13 +164,14 @@ const CobroList = ({ userRole }) => {
       {showPaymentModal && (
         <CobroCreationModal
           isOpen={true}
-          onClose={() => setShowPaymentModal(false)}
+          onClose={handleCloseModal}
           ventasData={pendingVentas}
           onCobroCreated={handleCobroCreated}
+          userRole={userRole}
         />
       )}
     </div>
   );
 };
 
-export default CobroList;
+export default React.memo(CobroList);

@@ -7,7 +7,7 @@ import { getSucursalesActivas } from '../../services/sucursalService';
 import PaymentModal from './PaymentModal';
 import { getLocalDateString, getLocalDateTimeString, isValidDateNotFuture, convertLocalDateTimeToISO } from '../../utils/dateUtils';
 
-const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
+const CobroCreationModal = ({ isOpen, onClose, onCobroCreated, userRole = 'user' }) => {
   const { user, isLoaded, isSignedIn } = useUser();
   const [selectedVentas, setSelectedVentas] = useState([]);
   const [ventasDetails, setVentasDetails] = useState({});
@@ -451,14 +451,16 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
                     <label className="block text-sm font-medium text-gray-700">
                       Sucursal (opcional)
                     </label>
-                    <button
-                      type="button"
-                      onClick={() => setIsSucursalModalOpen(true)}
-                      className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                    >
-                      <Building2 size={14} />
-                      Gestionar
-                    </button>
+                    {userRole !== 'user' && (
+                      <button
+                        type="button"
+                        onClick={() => setIsSucursalModalOpen(true)}
+                        className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                      >
+                        <Building2 size={14} />
+                        Gestionar
+                      </button>
+                    )}
                   </div>
                   <select
                     name="sucursalId"
@@ -656,6 +658,7 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
         onSubmit={handleProcesarPago}
         venta={ventaParaPagar || { montoTotal: 0 }}
         onOpenSucursalModal={() => setIsSucursalModalOpen(true)}
+        userRole={userRole}
       />
 
       {/* Modal de Sucursales */}
@@ -668,7 +671,7 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated }) => {
             setSucursales(response.sucursales || []);
           }).catch(console.error);
         }}
-        userRole="user"
+        userRole={userRole}
       />
     </div>
   );

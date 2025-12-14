@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef, memo } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Info, Trash2 } from 'lucide-react';
 import { getCobrosHistorial, deleteCobro } from '../../services/cobroService';
 
+// Funciones de formato movidas fuera del componente para evitar recrearlas
 const formatDate = (dateString) => {
   if (!dateString) return '-';
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return '-';
+    // Usar timezone de Perú para consistencia
     return format(date, "d 'de' MMMM, yyyy HH:mm", { locale: es });
   } catch (error) {
     return '-';
@@ -54,14 +56,18 @@ const CobrosHistorial = ({ userRole }) => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
-  useEffect(() => {
-    fetchCobros();
-  }, []);
-  const fetchCobros = async (isLoadMore = false) => {
+  
+  // Ref para controlar si ya se cargó inicialmente
+  const initialLoadDone = useRef(false);
+  const isMounted = useRef(true);
+  
+  // Función fetchCobros memoizada con useCallback
+  const fetchCobros = useCallback(async (isLoadMore = false) => {
+    if (!isMounted.current) return;
+    
     try {
       if (!isLoadMore) {
         setIsLoading(true);
-        setCurrentPage(1);
       } else {
         setLoadingMore(true);
       }
@@ -70,6 +76,8 @@ const CobrosHistorial = ({ userRole }) => {
       const pageToFetch = isLoadMore ? currentPage + 1 : 1;
       
       const data = await getCobrosHistorial(pageToFetch, ITEMS_PER_PAGE);
+      
+      if (!isMounted.current) return;
       
       if (isLoadMore) {
         setPayments(prevPayments => [...prevPayments, ...(data.cobros || [])]);
@@ -84,23 +92,54 @@ const CobrosHistorial = ({ userRole }) => {
       setHasMore(pageToFetch < (data.totalPages || 1));
       
     } catch (err) {
-      setError(err.message);
+      if (isMounted.current) {
+        setError(err.message);
+      }
     } finally {
-      setIsLoading(false);
-      setLoadingMore(false);
+      if (isMounted.current) {
+        setIsLoading(false);
+        setLoadingMore(false);
+      }
     }
-  };
+  }, [currentPage]);
 
-  const handleLoadMore = () => {
+  // Efecto de carga inicial - solo una vez
+  useEffect(() => {
+    isMounted.current = true;
+    
+    if (!initialLoadDone.current) {
+      initialLoadDone.current = true;
+      fetchCobros(false);
+    }
+    
+    return () => {
+      isMounted.current = false;
+    };
+  }, []); // Sin dependencias - solo se ejecuta al montar
+
+  // Handler para cargar más - memoizado
+  const handleLoadMore = useCallback(() => {
     if (!loadingMore && hasMore) {
       fetchCobros(true);
     }
-  };
+  }, [loadingMore, hasMore, fetchCobros]);
 
-  const handleDeleteClick = (cobro) => {
+  // Handler para click en eliminar - memoizado
+  const handleDeleteClick = useCallback((cobro) => {
     setSelectedCobro(cobro);
     setDeleteModalOpen(true);
-  };  const handleConfirmDelete = async () => {
+  }, []);
+  
+  // Handler para cerrar modal - memoizado
+  const handleCloseDeleteModal = useCallback(() => {
+    setDeleteModalOpen(false);
+    setSelectedCobro(null);
+  }, []);
+  
+  // Handler para confirmar eliminación - memoizado
+  const handleConfirmDelete = useCallback(async () => {
+    if (!selectedCobro) return;
+    
     try {
       setIsLoading(true);
       await deleteCobro(selectedCobro._id);
@@ -108,13 +147,14 @@ const CobrosHistorial = ({ userRole }) => {
       setSelectedCobro(null);
       // Recargar los datos desde el principio después de eliminar
       setCurrentPage(1);
+      initialLoadDone.current = false;
       await fetchCobros(false);
     } catch (err) {
       setError(err.message);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedCobro, fetchCobros]);
 
   if (isLoading) {
     return (
@@ -241,7 +281,7 @@ const CobrosHistorial = ({ userRole }) => {
             <p className="mb-4">¿Estás seguro que deseas eliminar este cobro? Esta acción no se puede deshacer.</p>
             <div className="flex justify-end gap-2">
               <button
-                onClick={() => setDeleteModalOpen(false)}
+                onClick={handleCloseDeleteModal}
                 className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
               >
                 Cancelar
@@ -291,4 +331,4 @@ const CobrosHistorial = ({ userRole }) => {
   );
 };
 
-export default CobrosHistorial;
+export default memo(CobrosHistorial);

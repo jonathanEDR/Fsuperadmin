@@ -3,7 +3,7 @@ import { X, DollarSign, Building2 } from 'lucide-react';
 import { getLocalDateTimeString, isValidDateNotFuture, convertLocalDateTimeToISO } from '../../utils/dateUtils';
 import { getSucursalesActivas } from '../../services/sucursalService';
 
-const PaymentModal = ({ isOpen, onClose, onSubmit, venta, onOpenSucursalModal }) => {
+const PaymentModal = ({ isOpen, onClose, onSubmit, venta, onOpenSucursalModal, userRole = 'user' }) => {
   const [formData, setFormData] = useState({
     yape: 0,
     efectivo: 0,
@@ -269,7 +269,7 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta, onOpenSucursalModal })
                     <label className="block text-sm font-medium text-gray-700">
                       Sucursal (opcional)
                     </label>
-                    {onOpenSucursalModal && (
+                    {onOpenSucursalModal && userRole !== 'user' && (
                       <button
                         type="button"
                         onClick={onOpenSucursalModal}

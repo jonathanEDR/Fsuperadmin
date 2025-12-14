@@ -873,6 +873,7 @@ function VentaList({
           onSubmit={handleProcessPayment}
           venta={selectedVentaForPayment}
           onOpenSucursalModal={() => setIsSucursalModalOpen(true)}
+          userRole={userRole}
         />
       )}
 

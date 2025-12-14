@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { Wallet, Receipt, TrendingUp, AlertCircle } from 'lucide-react';
 
-const CobroResumen = ({ debtInfo }) => {
-  if (!debtInfo) return null;
+// Función de formato movida fuera del componente
+const formatCurrency = (amount) => {
+  return `S/. ${(amount || 0).toFixed(2)}`;
+};
 
-  const formatCurrency = (amount) => {
-    return `S/. ${(amount || 0).toFixed(2)}`;
-  };
-
-  const getDebtStatus = () => {
+const CobroResumen = memo(({ debtInfo }) => {
+  // Memoizar el cálculo del estado de deuda
+  const debtStatus = useMemo(() => {
+    if (!debtInfo) return null;
+    
     if (debtInfo.totalDebt === 0) {
       return { color: 'text-green-600', bgColor: 'bg-green-100', icon: TrendingUp, message: 'Sin deudas pendientes' };
     } else if (debtInfo.totalDebt > 0 && debtInfo.totalDebt <= 500) {
@@ -16,9 +18,16 @@ const CobroResumen = ({ debtInfo }) => {
     } else {
       return { color: 'text-red-600', bgColor: 'bg-red-100', icon: AlertCircle, message: 'Requiere atención' };
     }
-  };
+  }, [debtInfo?.totalDebt]);
 
-  const debtStatus = getDebtStatus();
+  // Memoizar el promedio por venta
+  const averagePerSale = useMemo(() => {
+    if (!debtInfo || debtInfo.pendingVentasCount === 0) return 0;
+    return debtInfo.totalDebt / debtInfo.pendingVentasCount;
+  }, [debtInfo?.totalDebt, debtInfo?.pendingVentasCount]);
+
+  if (!debtInfo || !debtStatus) return null;
+
   const StatusIcon = debtStatus.icon;
 
   return (
@@ -67,10 +76,7 @@ const CobroResumen = ({ debtInfo }) => {
           <div className="flex-1 min-w-0">
             <p className="text-xs sm:text-sm text-gray-500">Promedio por Venta</p>
             <p className="text-lg sm:text-2xl font-bold text-gray-900">
-              {debtInfo.pendingVentasCount > 0 
-                ? formatCurrency(debtInfo.totalDebt / debtInfo.pendingVentasCount)
-                : formatCurrency(0)
-              }
+              {formatCurrency(averagePerSale)}
             </p>
             <p className="text-xs text-gray-400 mt-1">
               {debtInfo.pendingVentasCount > 0 ? 'deuda promedio' : 'sin ventas pendientes'}
@@ -80,6 +86,6 @@ const CobroResumen = ({ debtInfo }) => {
       </div>
     </div>
   );
-};
+});
 
 export default CobroResumen;
