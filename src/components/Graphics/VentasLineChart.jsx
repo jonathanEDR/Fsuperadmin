@@ -158,7 +158,9 @@ const VentasLineChart = React.memo(({ userRole }) => {
         if (index >= 0 && index < dataPoints.length) {
             ventasEnRango++;
             const montoVenta = parseFloat(venta?.montoTotal) || 0;
-            dataPoints[index].ventasBrutas += montoVenta;
+            // ✅ CORRECCIÓN: El montoTotal del backend ya es NETO (después de devoluciones)
+            // Por eso lo guardamos en ventasNetas primero, luego calcularemos ventasBrutas
+            dataPoints[index].ventasNetas += montoVenta;
             
             // Calcular cantidad vendida
             if (Array.isArray(venta.productos)) {
@@ -190,9 +192,10 @@ const VentasLineChart = React.memo(({ userRole }) => {
         }
       });
 
-      // Calcular ventas netas
+      // ✅ CORRECCIÓN: Calcular ventas BRUTAS a partir de las netas
+      // Fórmula correcta: Ventas Brutas = Ventas Netas + Devoluciones
       dataPoints.forEach(point => {
-        point.ventasNetas = point.ventasBrutas - point.devoluciones;
+        point.ventasBrutas = point.ventasNetas + point.devoluciones;
       });
 
       // Calcular totales del período
