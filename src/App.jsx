@@ -148,6 +148,7 @@ function App() {
               <Route path="personal" element={<PersonalPage />} />
               <Route path="personal-v2" element={<GestionPersonalV2 />} /> {/* RUTA TEMPORAL PARA TESTING */}
               <Route path="qr-asistencias" element={<GestionQR />} /> {/* NUEVO: Gestión de Códigos QR */}
+              <Route path="escaner-qr" element={<EscanerQR />} /> {/* NUEVO: Escáner QR Asistencias */}
               <Route path="perfil" element={<PerfilPage />} />
               <Route path="produccion/*" element={<ProduccionPage />} />
               {/* Módulo de Finanzas - ELIMINADO del Admin */}
@@ -174,6 +175,7 @@ function App() {
               <Route path="personal" element={<PersonalPage />} />
               <Route path="personal-v2" element={<GestionPersonalV2 />} /> {/* RUTA TEMPORAL PARA TESTING */}
               <Route path="qr-asistencias" element={<GestionQR />} /> {/* NUEVO: Gestión de Códigos QR */}
+              <Route path="escaner-qr" element={<EscanerQR />} /> {/* NUEVO: Escáner QR Asistencias */}
               <Route path="notas" element={<NotasPage />} />
               <Route path="perfil" element={<PerfilPage />} />
               <Route path="caja" element={<CajaPage />} />
