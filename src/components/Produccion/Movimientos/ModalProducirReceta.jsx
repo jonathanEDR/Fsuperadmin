@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { movimientoUnificadoService } from '../../../services/movimientoUnificadoService';
 import { ingredienteService } from '../../../services/ingredienteService';
+import { getLocalDateTimeString } from '../../../utils/fechaHoraUtils';
 
 const ModalProducirReceta = ({ isOpen, onClose, receta, onSuccess }) => {
   const [formData, setFormData] = useState({
     cantidadProducir: 1,
     motivo: 'Producción de receta',
+    fechaProduccion: '',
     consumirIngredientes: true
   });
   
@@ -26,6 +28,7 @@ const ModalProducirReceta = ({ isOpen, onClose, receta, onSuccess }) => {
     setFormData({
       cantidadProducir: 1,
       motivo: 'Producción de receta',
+      fechaProduccion: getLocalDateTimeString(),
       consumirIngredientes: true
     });
     setError('');
@@ -146,9 +149,11 @@ const ModalProducirReceta = ({ isOpen, onClose, receta, onSuccess }) => {
         tipoProducto: 'recetas',
         cantidad: formData.cantidadProducir,
         motivo: formData.motivo,
+        fechaProduccion: formData.fechaProduccion,
         consumirIngredientes: formData.consumirIngredientes
       };
 
+      console.log('📅 ModalProducirReceta - Enviando fecha:', formData.fechaProduccion);
       await movimientoUnificadoService.agregarCantidad(payload);
 
       onSuccess?.();
@@ -309,6 +314,25 @@ const ModalProducirReceta = ({ isOpen, onClose, receta, onSuccess }) => {
             <label htmlFor="consumirIngredientes" className="text-sm text-gray-700">
               Consumir ingredientes del inventario al producir
             </label>
+          </div>
+
+          {/* Fecha y Hora de Producción */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              📅 Fecha y Hora de Producción
+            </label>
+            <input
+              type="datetime-local"
+              value={formData.fechaProduccion}
+              onChange={(e) => handleChange('fechaProduccion', e.target.value)}
+              max={getLocalDateTimeString()}
+              step="1"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={enviando}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Selecciona cuándo se realizó la producción
+            </p>
           </div>
 
           {/* Motivo */}

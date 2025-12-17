@@ -116,7 +116,8 @@ export const movimientoUnificadoService = {
     observaciones = '',
     costoTotal = 0,
     ingredientesUtilizados = [],
-    recetasUtilizadas = []
+    recetasUtilizadas = [],
+    fechaProduccion = null // NUEVO: Campo para la fecha de producción
   }) {
     const data = {
       tipoProducto,
@@ -124,6 +125,12 @@ export const movimientoUnificadoService = {
       cantidad,
       motivo
     };
+
+    // Agregar fecha de producción si se proporciona
+    if (fechaProduccion) {
+      data.fechaProduccion = fechaProduccion;
+      console.log('📅 movimientoUnificadoService - Enviando fechaProduccion:', fechaProduccion);
+    }
 
     // Solo agregar precio si es para ingredientes/materiales y se proporciona
     if ((tipoProducto === 'ingredientes' || tipoProducto === 'materiales') && precio !== null && precio !== undefined) {

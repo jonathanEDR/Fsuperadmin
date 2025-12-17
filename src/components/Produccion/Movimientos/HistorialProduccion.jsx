@@ -138,7 +138,9 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
       month: 'short',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      second: '2-digit', // Agregar segundos
+      timeZone: 'America/Lima' // Usar zona horaria de Perú
     });
   };
 

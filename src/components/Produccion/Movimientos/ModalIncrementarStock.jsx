@@ -3,12 +3,14 @@ import { movimientoUnificadoService } from '../../../services/movimientoUnificad
 import { produccionService } from '../../../services/produccionService';
 import { ingredienteService } from '../../../services/ingredienteService';
 import { recetaService } from '../../../services/recetaService';
+import { getLocalDateTimeString } from '../../../utils/fechaHoraUtils';
 
 const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
   const [formData, setFormData] = useState({
     cantidadAgregar: 1,
     motivo: '',
     operador: '',
+    fechaProduccion: '', // NUEVO: Campo para fecha de producción
     ingredientesUtilizados: [], // Siempre disponible para producción
     recetasUtilizadas: [], // Siempre disponible para producción
     consumirRecursos: true // Siempre true para producción real
@@ -54,12 +56,23 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
       cantidadAgregar: 1,
       motivo: '',
       operador: '',
+      fechaProduccion: getLocalDateTimeString(), // Inicializar con fecha/hora actual
       ingredientesUtilizados: [],
       recetasUtilizadas: [],
       consumirRecursos: true
     });
     setError('');
   };
+
+  // Inicializar fecha cuando se abre el modal
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(prev => ({
+        ...prev,
+        fechaProduccion: getLocalDateTimeString()
+      }));
+    }
+  }, [isOpen]);
 
   // Funciones para manejar ingredientes
   const agregarIngrediente = () => {
@@ -234,6 +247,7 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
         motivo: formData.motivo || `Producción: ${producto.nombre}`,
         operador: formData.operador.trim(),
         consumirIngredientes: formData.consumirRecursos,
+        fechaProduccion: formData.fechaProduccion, // NUEVO: Enviar fecha de producción
         ingredientesUtilizados: formData.ingredientesUtilizados.map(ing => ({
           ingrediente: ing.ingrediente,
           cantidadUtilizada: ing.cantidadUtilizada,
@@ -247,6 +261,8 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
         costoTotal: calcularCostoTotal(),
         observaciones: `Producción con ${formData.ingredientesUtilizados.length} ingredientes y ${formData.recetasUtilizadas.length} recetas`
       };
+
+      console.log('📅 ModalIncrementarStock - Enviando fecha:', formData.fechaProduccion);
 
       const response = await movimientoUnificadoService.agregarCantidad(datosMovimiento);
 
@@ -407,6 +423,25 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                   disabled={enviando}
                   required
                 />
+              </div>
+
+              {/* Fecha y Hora de Producción */}
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                  📅 Fecha y Hora de Producción
+                </label>
+                <input
+                  type="datetime-local"
+                  value={formData.fechaProduccion}
+                  onChange={(e) => setFormData(prev => ({ ...prev, fechaProduccion: e.target.value }))}
+                  max={getLocalDateTimeString()}
+                  step="1"
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm"
+                  disabled={enviando}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Selecciona cuándo se realizó la producción
+                </p>
               </div>
 
               {/* Motivo */}

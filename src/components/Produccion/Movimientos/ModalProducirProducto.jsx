@@ -1,12 +1,14 @@
 // Modal Producir Stock - Optimizado para móviles v3.0 - Layout Vertical Completo
 import React, { useState, useEffect } from 'react';
 import { movimientoUnificadoService } from '../../../services/movimientoUnificadoService';
+import { getLocalDateTimeString } from '../../../utils/fechaHoraUtils';
 
 const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
   const [formData, setFormData] = useState({
     cantidadProducir: 1,
     operador: '',
     observaciones: '',
+    fechaProduccion: '', // NUEVO: Campo para fecha de producción
     ingredientesUtilizados: [],
     recetasUtilizadas: [],
     consumirRecursos: true // Flag para decidir si consumir del inventario
@@ -36,6 +38,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
       cantidadProducir: 1,
       operador: '',
       observaciones: '',
+      fechaProduccion: getLocalDateTimeString(), // Inicializar con fecha/hora actual
       ingredientesUtilizados: [],
       recetasUtilizadas: [],
       consumirRecursos: true
@@ -245,11 +248,14 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
         motivo: `Producción: ${formData.observaciones?.trim() || 'Producción manual'}`,
         operador: formData.operador?.trim() || 'Usuario',
         observaciones: formData.observaciones?.trim() || '',
+        fechaProduccion: formData.fechaProduccion, // NUEVO: Enviar fecha de producción
         costoTotal: calcularCostoTotal(),
         // Solo incluir ingredientes y recetas si se van a consumir
         ingredientesUtilizados: formData.consumirRecursos ? formData.ingredientesUtilizados : [],
         recetasUtilizadas: formData.consumirRecursos ? formData.recetasUtilizadas : []
       };
+
+      console.log('📅 ModalProducirProducto - Enviando fecha:', formData.fechaProduccion);
 
       await movimientoUnificadoService.agregarCantidad(datosProduccion);
 
@@ -401,6 +407,25 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                     disabled={enviando}
                     required
                   />
+                </div>
+
+                {/* Fecha y Hora de Producción */}
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                    📅 Fecha y Hora de Producción
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formData.fechaProduccion}
+                    onChange={(e) => setFormData(prev => ({ ...prev, fechaProduccion: e.target.value }))}
+                    max={getLocalDateTimeString()}
+                    step="1"
+                    className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={enviando}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Selecciona cuándo se realizó la producción
+                  </p>
                 </div>
 
                 <div>

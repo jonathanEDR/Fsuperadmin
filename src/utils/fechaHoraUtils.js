@@ -64,9 +64,10 @@ export const formatearFecha = (fecha) => {
 
 /**
  * Obtiene la fecha y hora actual para input datetime-local
- * @returns {string} - Fecha en formato YYYY-MM-DDTHH:mm
+ * @param {boolean} includeSeconds - Si se deben incluir los segundos (default: true)
+ * @returns {string} - Fecha en formato YYYY-MM-DDTHH:mm:ss o YYYY-MM-DDTHH:mm
  */
-export const getLocalDateTimeString = () => {
+export const getLocalDateTimeString = (includeSeconds = true) => {
   const now = new Date();
   
   // Obtener componentes de fecha local
@@ -75,7 +76,11 @@ export const getLocalDateTimeString = () => {
   const day = String(now.getDate()).padStart(2, '0');
   const hours = String(now.getHours()).padStart(2, '0');
   const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
   
+  if (includeSeconds) {
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+  }
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 

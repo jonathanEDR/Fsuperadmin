@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { movimientoUnificadoService } from '../../../services/movimientoUnificadoService';
+import { getLocalDateTimeString } from '../../../utils/fechaHoraUtils';
 
 const ModalAgregarCantidad = ({ 
   isOpen, 
@@ -11,6 +12,7 @@ const ModalAgregarCantidad = ({
   const [cantidad, setCantidad] = useState('');
   const [motivo, setMotivo] = useState('');
   const [precio, setPrecio] = useState('');
+  const [fechaProduccion, setFechaProduccion] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [errores, setErrores] = useState({});
 
@@ -20,6 +22,7 @@ const ModalAgregarCantidad = ({
       setCantidad('');
       setMotivo('Entrada manual');
       setPrecio('');
+      setFechaProduccion(getLocalDateTimeString()); // Fecha y hora actual por defecto
       setErrores({});
     }
   }, [isOpen]);
@@ -53,12 +56,15 @@ const ModalAgregarCantidad = ({
     setEnviando(true);
     
     try {
+      console.log('📅 ModalAgregarCantidad - Enviando fecha:', fechaProduccion);
+      
       const resultado = await movimientoUnificadoService.agregarCantidad({
         tipoProducto,
         productoId: producto._id,
         cantidad: parseFloat(cantidad),
         motivo: motivo || 'Entrada manual',
-        precio: parseFloat(precio) || null
+        precio: parseFloat(precio) || null,
+        fechaProduccion: fechaProduccion // Enviar la fecha seleccionada
       });
 
       if (onSuccess) {
@@ -210,6 +216,36 @@ const ModalAgregarCantidad = ({
             {errores.cantidad && (
               <p className="mt-1 text-sm text-red-600">{errores.cantidad}</p>
             )}
+          </div>
+
+          {/* Campo Fecha de Producción */}
+          <div className="mb-4">
+            <label htmlFor="fechaProduccion" className="block text-sm font-medium text-gray-700 mb-2">
+              📅 Fecha y Hora de Producción
+            </label>
+            <input
+              type="datetime-local"
+              id="fechaProduccion"
+              value={fechaProduccion}
+              onChange={(e) => setFechaProduccion(e.target.value)}
+              max={getLocalDateTimeString()} // No permitir fechas futuras
+              step="1" // Incluir segundos
+              disabled={enviando}
+              className={`
+                w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2
+                ${errores.fechaProduccion 
+                  ? 'border-red-300 focus:ring-red-500' 
+                  : 'border-gray-300 focus:ring-blue-500'
+                }
+                ${enviando ? 'bg-gray-100 cursor-not-allowed' : ''}
+              `}
+            />
+            {errores.fechaProduccion && (
+              <p className="mt-1 text-sm text-red-600">{errores.fechaProduccion}</p>
+            )}
+            <p className="mt-1 text-xs text-gray-500">
+              Selecciona la fecha y hora en que se realizó la producción
+            </p>
           </div>
 
           {/* Campo Precio (para ingredientes y materiales) */}

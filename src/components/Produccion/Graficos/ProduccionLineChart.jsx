@@ -64,17 +64,36 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
     setLoading(true);
     setError(null);
 
+    const urlEndpoint = `/api/produccion/estadisticas/graficos?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
+    
+    // Log estratégico: URL y rango de fechas
+    console.log('📊 ProduccionLineChart - Petición:', { url: urlEndpoint, fechaInicio, fechaFin });
+
     try {
-      const response = await api.get(`/api/produccion/estadisticas/graficos?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`);
+      const response = await api.get(urlEndpoint);
+      
+      // Validar estructura de respuesta
+      if (!response.data || !response.data.data) {
+        console.error('❌ ProduccionLineChart - Estructura de respuesta inválida:', response.data);
+        setError('Estructura de datos incorrecta');
+        return;
+      }
       
       const { producciones, produccionesPorDia, totales } = response.data.data;
+      
+      // Log estratégico: Resumen de datos recibidos
+      console.log('📊 ProduccionLineChart - Datos:', {
+        producciones: producciones?.length || 0,
+        dias: Object.keys(produccionesPorDia || {}).length,
+        totales: totales
+      });
       
       // Guardar detalles por día para el tooltip
       setDetallesPorDia(produccionesPorDia || {});
       
       await processProduccionData(producciones, totales);
     } catch (err) {
-      console.error('❌ ProduccionChart - Error al cargar datos:', err);
+      console.error('❌ ProduccionLineChart - Error:', err.message, err.response?.status);
       setError('Error al cargar datos: ' + err.message);
     } finally {
       setLoading(false);
@@ -111,7 +130,7 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
       setOriginalLabels(labels);
       
       if (labels.length === 0) {
-        console.error('❌ ProduccionChart - No se pudieron generar etiquetas');
+        console.error('❌ ProduccionLineChart - No se pudieron generar etiquetas');
         setError('Error al generar las etiquetas del gráfico');
         return;
       }
@@ -220,13 +239,14 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
       };
       
       if (!newChartData.labels || newChartData.labels.length === 0) {
-        console.error('❌ ProduccionChart - Sin datos válidos para mostrar');
+        console.error('❌ ProduccionLineChart - Sin datos válidos para mostrar');
         setError('No hay datos para mostrar en el período seleccionado');
         return;
       }
       
       setChartData(newChartData);
     } catch (err) {
+      console.error('❌ ProduccionLineChart - Error:', err.message);
       setError('No se pudo cargar el gráfico de producción: ' + err.message);
     }
   }, [fechaInicio, fechaFin, obtenerFechaSoloLocal]);
