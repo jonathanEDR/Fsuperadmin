@@ -48,6 +48,13 @@ const accesos = [
     description: 'Procesos de producción'
   },
   {
+    label: 'Gráficos de Producción',
+    to: 'graficos',
+    icon: '📈',
+    color: 'bg-gradient-to-br from-cyan-50 to-cyan-100 hover:from-cyan-100 hover:to-cyan-200 text-cyan-800 border-cyan-200',
+    description: 'Estadísticas y gráficos de producción'
+  },
+  {
     label: 'Residuos y Malogrados',
     to: 'residuos',
     icon: '🗑️',

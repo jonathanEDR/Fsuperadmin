@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { recetaService } from '../../../services/recetaService';
+import { formatearFecha as formatearFechaUtil } from '../../../utils/fechaHoraUtils';
 import HistorialFases from './HistorialFases';
 
 const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
@@ -99,13 +100,8 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
   };
 
   const formatearFecha = (fecha) => {
-    return new Date(fecha).toLocaleString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    if (!fecha) return 'N/A';
+    return formatearFechaUtil(fecha);
   };
 
   // Usar recetaActual si está disponible, sino usar receta original

@@ -3,18 +3,30 @@ import DashboardCard from '../components/common/DashboardCard';
 import ProductosVendidosDashboard from '../components/Graphics/ProductosVendidosDashboardNew';
 import VentasLineChart from '../components/Graphics/VentasLineChart';
 import CobrosLineChart from '../components/Graphics/CobrosLineChart';
+import RegistrosDiariosLineChart from '../components/Graphics/RegistrosDiariosLineChart';
+import ProduccionLineChart from '../components/Produccion/Graficos/ProduccionLineChart';
 import { useProductosVendidosHoy } from '../hooks/useProductosVendidosHoy';
+import { useDashboardResumenHoy } from '../hooks/useDashboardResumenHoy';
 import { useRole } from '../context/RoleContext';
-import { Package, TrendingUp, BarChart3, DollarSign } from 'lucide-react';
+import { Package, TrendingUp, BarChart3, DollarSign, Factory, ClipboardList } from 'lucide-react';
 
 function BienvenidaPage() {
   const userRole = useRole();
   const { 
     totalProductosHoy, 
-    productoMasVendido, 
-    loading, 
-    error 
+    loading: loadingProductos, 
+    error: errorProductos 
   } = useProductosVendidosHoy();
+
+  // Hook para obtener resumen del día (ventas, cobros, producción, registros)
+  const {
+    ventasNetas,
+    totalCobros,
+    costoProduccion,
+    registrosDiarios,
+    loading: loadingResumen,
+    error: errorResumen
+  } = useDashboardResumenHoy();
 
   // Estado para controlar qué tarjeta está expandida
   const [expandedCard, setExpandedCard] = useState(null);
@@ -22,6 +34,11 @@ function BienvenidaPage() {
   // Función para manejar la expansión de tarjetas
   const handleCardExpand = (cardId) => {
     setExpandedCard(expandedCard === cardId ? null : cardId);
+  };
+
+  // Función para formatear montos
+  const formatMonto = (monto) => {
+    return `S/ ${monto.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   return (
@@ -32,13 +49,13 @@ function BienvenidaPage() {
           Bienvenido al Panel Super Admin
         </h1>
         <p className="text-gray-600">
-          Resumen ejecutivo de tu negocio y análisis de productos vendidos
+          Resumen ejecutivo de tu negocio - Datos del día de hoy
         </p>
       </div>
 
       {/* Dashboard Cards Grid */}
       <div className={`grid gap-6 transition-all duration-500 ${
-        expandedCard ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'
+        expandedCard ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'
       }`}>
         
         {/* Card: Productos Vendidos Hoy */}
@@ -48,8 +65,8 @@ function BienvenidaPage() {
           subtitle="unidades vendidas"
           icon="📦"
           color="green"
-          loading={loading}
-          error={error}
+          loading={loadingProductos}
+          error={errorProductos}
           expandable={true}
           isExpanded={expandedCard === 'productos-vendidos'}
           onExpandToggle={() => handleCardExpand('productos-vendidos')}
@@ -60,15 +77,15 @@ function BienvenidaPage() {
           </div>
         </DashboardCard>
 
-        {/* Card: Evolución de Ventas - NUEVA TARJETA */}
+        {/* Card: Ventas Netas del Día */}
         <DashboardCard
-          title="Evolución de Ventas"
-          value="📈"
-          subtitle="Tendencias y Métricas"
+          title="Ventas del Día"
+          value={formatMonto(ventasNetas)}
+          subtitle="ventas netas hoy"
           icon={<TrendingUp size={32} />}
           color="blue"
-          loading={false}
-          error={null}
+          loading={loadingResumen}
+          error={errorResumen}
           expandable={true}
           isExpanded={expandedCard === 'evolucion-ventas'}
           onExpandToggle={() => handleCardExpand('evolucion-ventas')}
@@ -79,15 +96,15 @@ function BienvenidaPage() {
           </div>
         </DashboardCard>
 
-        {/* Card: Control de Cobros */}
+        {/* Card: Cobros del Día */}
         <DashboardCard
-          title="Control de Cobros"
-          value="💵"
-          subtitle="Pagos y Recaudación"
+          title="Cobros del Día"
+          value={formatMonto(totalCobros)}
+          subtitle="recaudación hoy"
           icon={<DollarSign size={32} />}
           color="emerald"
-          loading={false}
-          error={null}
+          loading={loadingResumen}
+          error={errorResumen}
           expandable={true}
           isExpanded={expandedCard === 'control-cobros'}
           onExpandToggle={() => handleCardExpand('control-cobros')}
@@ -98,33 +115,43 @@ function BienvenidaPage() {
           </div>
         </DashboardCard>
 
-        {/* Card: Producto Más Vendido Hoy - Solo mostrar si no hay tarjeta expandida */}
-        {!expandedCard && (
-          <DashboardCard
-            title="Producto Más Vendido Hoy"
-            value={productoMasVendido?.cantidad || 0}
-            subtitle={productoMasVendido?.nombre || 'Sin ventas hoy'}
-            icon="🏆"
-            color="purple"
-            loading={loading}
-            error={error}
-            expandable={false}
-          />
-        )}
+        {/* Card: Producción del Día */}
+        <DashboardCard
+          title="Producción del Día"
+          value={formatMonto(costoProduccion)}
+          subtitle="costo de producción hoy"
+          icon={<Factory size={32} />}
+          color="purple"
+          loading={loadingResumen}
+          error={errorResumen}
+          expandable={true}
+          isExpanded={expandedCard === 'produccion-diaria'}
+          onExpandToggle={() => handleCardExpand('produccion-diaria')}
+        >
+          {/* Contenido expandible con el gráfico de producción */}
+          <div className="min-h-[600px]">
+            <ProduccionLineChart userRole={userRole} />
+          </div>
+        </DashboardCard>
 
-        {/* Card: Análisis de Tendencias - Solo mostrar si no hay tarjeta expandida */}
-        {!expandedCard && (
-          <DashboardCard
-            title="Análisis de Tendencias"
-            value="📊"
-            subtitle="Próximamente"
-            icon={<TrendingUp size={32} />}
-            color="blue"
-            loading={false}
-            error={null}
-            expandable={false}
-          />
-        )}
+        {/* Card: Registros y Pagos del Personal */}
+        <DashboardCard
+          title="Personal del Día"
+          value={formatMonto(registrosDiarios)}
+          subtitle="devengado + pagos"
+          icon={<ClipboardList size={32} />}
+          color="orange"
+          loading={loadingResumen}
+          error={errorResumen}
+          expandable={true}
+          isExpanded={expandedCard === 'registros-diarios'}
+          onExpandToggle={() => handleCardExpand('registros-diarios')}
+        >
+          {/* Contenido expandible con tabs de registros diarios y pagos realizados */}
+          <div className="min-h-[600px]">
+            <RegistrosDiariosLineChart userRole={userRole} />
+          </div>
+        </DashboardCard>
 
       </div>
 
@@ -164,8 +191,8 @@ function BienvenidaPage() {
             <div>
               <h3 className="text-blue-800 font-medium">Consejo del día</h3>
               <p className="text-blue-700 text-sm mt-1">
-                Haz clic en la tarjeta "Productos Vendidos Hoy" para ver el análisis completo 
-                con gráficos detallados y tendencias de tus productos más vendidos.
+                Haz clic en cualquier tarjeta para ver el análisis completo 
+                con gráficos detallados y tendencias históricas.
               </p>
             </div>
           </div>

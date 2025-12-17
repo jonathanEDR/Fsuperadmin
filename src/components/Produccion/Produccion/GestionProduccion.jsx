@@ -4,6 +4,7 @@ import BreadcrumbProduccion from '../BreadcrumbProduccion';
 import { produccionService } from '../../../services/produccionService';
 import NuevaProduccion from './NuevaProduccion';
 import DetalleProduccion from './DetalleProduccion';
+import { formatearFecha, getLocalDateTimeString } from '../../../utils/fechaHoraUtils';
 
 const GestionProduccion = () => {
   const [producciones, setProducciones] = useState([]);
@@ -133,18 +134,16 @@ const GestionProduccion = () => {
     return labels[estado] || estado;
   };
 
-  const formatearFecha = (fecha) => {
-    return new Date(fecha).toLocaleString('es-ES', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  // Usar utilidades de fecha robustas de fechaHoraUtils
+  const formatearFechaLocal = (fecha) => {
+    if (!fecha) return 'N/A';
+    return formatearFecha(fecha);
   };
 
   const obtenerFechaHoy = () => {
-    return new Date().toISOString().split('T')[0];
+    // Usar zona horaria de Perú para obtener la fecha actual
+    const now = new Date();
+    return now.toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
   };
 
   if (loading && filtros.pagina === 1) {

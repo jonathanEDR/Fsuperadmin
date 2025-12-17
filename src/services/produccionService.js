@@ -128,6 +128,12 @@ export const produccionService = {
     return response.data;
   },
 
+  // 📊 Obtener estadísticas para gráficos (con zona horaria de Perú)
+  async obtenerEstadisticasGraficos(fechaInicio, fechaFin) {
+    const response = await api.get(`/produccion/estadisticas/graficos?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`);
+    return response.data;
+  },
+
   // Actualizar producción
   async actualizarProduccion(id, datos) {
     const response = await api.put(`/produccion/${id}`, datos);

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { recetaService } from '../../../services/recetaService';
+import { formatearFecha as formatearFechaUtil } from '../../../utils/fechaHoraUtils';
 
 const TablaHistorialGeneral = ({ recetas, onActualizar }) => {
   const [loading, setLoading] = useState(false);
@@ -18,19 +19,13 @@ const TablaHistorialGeneral = ({ recetas, onActualizar }) => {
     }
   };
 
-  // Formatear fecha
+  // Formatear fecha usando utilidades robustas de Perú
   const formatearFecha = (fecha) => {
     if (!fecha) return 'En progreso';
-    return new Date(fecha).toLocaleString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return formatearFechaUtil(fecha);
   };
 
-  // Calcular duración
+  // Calcular duración usando zona horaria de Perú
   const calcularDuracion = (fechaInicio, fechaFinalizacion) => {
     if (!fechaInicio) return '';
     

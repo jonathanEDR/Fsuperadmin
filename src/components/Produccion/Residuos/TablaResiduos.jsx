@@ -1,6 +1,14 @@
 import React from 'react';
 import { residuoService } from '../../../services/residuoService';
 
+// Función para verificar si puede eliminar usando zona horaria de Perú
+const puedeEliminarResiduo = (fechaResiduo) => {
+  // Obtener fecha de hoy en zona horaria de Perú
+  const hoyPeru = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
+  const fechaResiduoPeru = new Date(fechaResiduo).toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
+  return hoyPeru === fechaResiduoPeru;
+};
+
 const TablaResiduos = ({ 
   residuos, 
   loading, 
@@ -11,9 +19,7 @@ const TablaResiduos = ({
 }) => {
 
   const puedeEliminar = (fechaResiduo) => {
-    const hoy = new Date();
-    const fecha = new Date(fechaResiduo);
-    return hoy.toDateString() === fecha.toDateString();
+    return puedeEliminarResiduo(fechaResiduo);
   };
 
   if (loading) {

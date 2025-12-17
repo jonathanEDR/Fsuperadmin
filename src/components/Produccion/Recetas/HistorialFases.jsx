@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatearFecha as formatearFechaUtil } from '../../../utils/fechaHoraUtils';
 
 const HistorialFases = ({ receta, onReiniciar }) => {
   if (!receta || !receta.historicoFases || receta.historicoFases.length === 0) {
@@ -45,16 +46,10 @@ const HistorialFases = ({ receta, onReiniciar }) => {
     }
   };
 
-  // Función para formatear fecha
+  // Función para formatear fecha usando utilidades robustas de Perú
   const formatearFecha = (fecha) => {
     if (!fecha) return 'En progreso';
-    return new Date(fecha).toLocaleString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return formatearFechaUtil(fecha);
   };
 
   // Función para calcular duración

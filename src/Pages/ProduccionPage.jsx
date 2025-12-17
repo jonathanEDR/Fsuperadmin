@@ -20,6 +20,7 @@ import NuevaProduccion from '../components/Produccion/Produccion/NuevaProduccion
 import DetalleProduccion from '../components/Produccion/Produccion/DetalleProduccion';
 import GestionResiduos from '../components/Produccion/Residuos/GestionResiduos';
 import GestionMovimientos from '../components/Produccion/Movimientos/GestionMovimientos';
+import GraficosProduccionPage from '../components/Produccion/Graficos/GraficosProduccionPage';
 
 const ProduccionPage = () => {
   return (
@@ -55,6 +56,9 @@ const ProduccionPage = () => {
         <Route path="/produccion" element={<GestionProduccion />} />
         <Route path="/produccion/nueva" element={<NuevaProduccion />} />
         <Route path="/produccion/detalle/:id" element={<DetalleProduccion />} />
+        
+        {/* Rutas de Gráficos */}
+        <Route path="/graficos" element={<GraficosProduccionPage />} />
         
         {/* Rutas de Residuos */}
         <Route path="/residuos" element={<GestionResiduos />} />

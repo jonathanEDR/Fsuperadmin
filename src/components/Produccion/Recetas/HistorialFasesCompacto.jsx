@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatearFecha } from '../../../utils/fechaHoraUtils';
 
 const HistorialFasesCompacto = ({ receta }) => {
   if (!receta || !receta.historicoFases || receta.historicoFases.length === 0) {
@@ -23,15 +24,16 @@ const HistorialFasesCompacto = ({ receta }) => {
     }
   };
 
-  // Formatear fecha compacta
+  // Formatear fecha compacta usando zona horaria de Perú
   const formatearFechaCompacta = (fecha) => {
     if (!fecha) return '';
     const date = new Date(fecha);
-    return date.toLocaleDateString('es-ES', { 
+    return date.toLocaleDateString('es-PE', { 
       day: '2-digit', 
       month: '2-digit',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      timeZone: 'America/Lima'
     });
   };
 

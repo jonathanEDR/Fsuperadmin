@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@clerk/clerk-react';
-import { startOfDay, endOfDay } from 'date-fns';
 
 export const useProductosVendidosHoy = () => {
   const [data, setData] = useState({
@@ -11,6 +10,12 @@ export const useProductosVendidosHoy = () => {
   });
 
   const { getToken } = useAuth();
+
+  // Función para obtener la fecha de hoy en formato YYYY-MM-DD (zona horaria Perú)
+  const obtenerFechaHoy = useCallback(() => {
+    const ahora = new Date();
+    return ahora.toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
+  }, []);
 
   const fetchProductosHoy = async () => {
     try {
@@ -27,16 +32,14 @@ export const useProductosVendidosHoy = () => {
         'Content-Type': 'application/json'
       };
 
-      // Fechas de hoy
-      const now = new Date();
-      const startDate = startOfDay(now);
-      const endDate = endOfDay(now);
+      // Fecha de hoy en zona horaria Perú
+      const fechaHoy = obtenerFechaHoy();
 
-      console.log('🔍 Fetching productos para hoy:', { startDate, endDate });
+      console.log('🔍 Fetching productos para hoy:', fechaHoy);
 
-      // Fetch ventas de hoy - Simplificado sin parámetros de fecha primero
+      // Fetch ventas de hoy con filtro de fecha y límite alto
       const ventasResponse = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/ventas`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/ventas?fechaInicio=${fechaHoy}&fechaFin=${fechaHoy}&limit=1000`,
         { headers }
       );
 
@@ -47,92 +50,43 @@ export const useProductosVendidosHoy = () => {
       }
 
       const ventasResult = await ventasResponse.json();
-      console.log('✅ Ventas obtenidas:', ventasResult);
+      console.log('✅ Ventas del día obtenidas:', ventasResult);
 
       const ventasData = ventasResult.ventas || ventasResult || [];
 
-      // 🔍 DEBUGGING: Analizar estructura de datos
-      console.log('🔍 Analizando estructura de ventas:');
-      if (ventasData.length > 0) {
-        console.log('📋 Primera venta (estructura):', {
-          fechaVenta: ventasData[0].fechaVenta,
-          createdAt: ventasData[0].createdAt,
-          estadoPago: ventasData[0].estadoPago,
-          completionStatus: ventasData[0].completionStatus,
-          productos: ventasData[0].productos
-        });
-        
-        if (ventasData[0].productos && ventasData[0].productos.length > 0) {
-          console.log('📦 Primer producto (estructura):', ventasData[0].productos[0]);
-        }
-      }
+      console.log('📅 Ventas del día encontradas:', ventasData.length);
 
-      // Procesar datos - filtrar solo ventas de hoy
+      // Procesar datos de ventas del día
       let totalProductosHoy = 0;
       const resumenProductos = {};
 
-      // Filtrar y contar productos vendidos hoy
-      const ventasHoy = ventasData.filter(venta => {
-        // ✅ CORRECCIÓN: Usar el campo REAL del modelo (fechadeVenta)
-        const fechaVenta = new Date(venta.fechadeVenta || venta.createdAt);
-        const esHoy = fechaVenta >= startDate && fechaVenta <= endDate;
-        
-        if (esHoy) {
-          console.log('✅ Venta de hoy encontrada:', {
-            id: venta._id,
-            fecha: fechaVenta.toISOString(),
-            estado: venta.estadoPago,
-            completion: venta.completionStatus,
-            totalProductos: venta.productos?.length || 0
-          });
-        }
-        
-        return esHoy;
-      });
-
-      console.log('📅 Ventas de hoy encontradas:', ventasHoy.length, 'de', ventasData.length, 'ventas totales');
-
-      // Procesar cada venta de hoy
-      ventasHoy.forEach((venta, index) => {
+      // Procesar cada venta (ya vienen filtradas por el backend)
+      ventasData.forEach((venta, index) => {
         console.log(`🏪 Procesando venta ${index + 1}:`, {
           id: venta._id,
           estadoPago: venta.estadoPago,
-          completionStatus: venta.completionStatus,
           cantidadProductos: venta.productos?.length || 0
         });
 
-        if (venta.estadoPago === 'Pagado' && venta.completionStatus === 'approved') {
-          if (venta.productos && Array.isArray(venta.productos)) {
-            venta.productos.forEach((producto, prodIndex) => {
-              console.log(`  📦 Producto ${prodIndex + 1}:`, {
-                nombre: producto.nombre || producto.title,
-                nombreEnProductoId: producto.productoId?.nombre,
-                cantidad: producto.cantidad,
-                tipo: typeof producto.cantidad,
-                productoCompleto: producto
-              });
-
-              if (producto && producto.cantidad) {
-                const cantidad = parseInt(producto.cantidad) || 0;
-                totalProductosHoy += cantidad;
-                
-                // ✅ CORRECCIÓN: Acceder correctamente al nombre del producto
-                const nombreProducto = producto.productoId?.nombre || 
-                                     producto.nombre || 
-                                     producto.title || 
-                                     'Producto sin nombre';
-                
-                if (!resumenProductos[nombreProducto]) {
-                  resumenProductos[nombreProducto] = 0;
-                }
-                resumenProductos[nombreProducto] += cantidad;
-                
-                console.log(`    ✅ Agregado: ${cantidad} unidades de "${nombreProducto}"`);
+        // Contar productos de TODAS las ventas del día (no solo las pagadas)
+        if (venta.productos && Array.isArray(venta.productos)) {
+          venta.productos.forEach((producto) => {
+            if (producto && producto.cantidad) {
+              const cantidad = parseInt(producto.cantidad) || 0;
+              totalProductosHoy += cantidad;
+              
+              // Acceder correctamente al nombre del producto
+              const nombreProducto = producto.productoId?.nombre || 
+                                   producto.nombre || 
+                                   producto.title || 
+                                   'Producto sin nombre';
+              
+              if (!resumenProductos[nombreProducto]) {
+                resumenProductos[nombreProducto] = 0;
               }
-            });
-          }
-        } else {
-          console.log(`  ❌ Venta saltada - Estado: ${venta.estadoPago}, Completion: ${venta.completionStatus}`);
+              resumenProductos[nombreProducto] += cantidad;
+            }
+          });
         }
       });
 

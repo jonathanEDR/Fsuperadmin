@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { produccionService } from '../../../services/produccionService';
-import { formatearFecha } from '../../../utils/dateUtils';
+import { formatearFecha } from '../../../utils/fechaHoraUtils';
 
 const DetalleProduccion = ({ produccionId, produccion: produccionProp, onClose, onProduccionActualizada, esModal = false }) => {
   const [produccion, setProduccion] = useState(produccionProp || null);
