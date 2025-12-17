@@ -65,9 +65,6 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
     setError(null);
 
     const urlEndpoint = `/api/produccion/estadisticas/graficos?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
-    
-    // Log estratégico: URL y rango de fechas
-    console.log('📊 ProduccionLineChart - Petición:', { url: urlEndpoint, fechaInicio, fechaFin });
 
     try {
       const response = await api.get(urlEndpoint);
@@ -80,13 +77,6 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
       }
       
       const { producciones, produccionesPorDia, totales } = response.data.data;
-      
-      // Log estratégico: Resumen de datos recibidos
-      console.log('📊 ProduccionLineChart - Datos:', {
-        producciones: producciones?.length || 0,
-        dias: Object.keys(produccionesPorDia || {}).length,
-        totales: totales
-      });
       
       // Guardar detalles por día para el tooltip
       setDetallesPorDia(produccionesPorDia || {});

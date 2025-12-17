@@ -35,8 +35,6 @@ export const useProductosVendidosHoy = () => {
       // Fecha de hoy en zona horaria Perú
       const fechaHoy = obtenerFechaHoy();
 
-      console.log('🔍 Fetching productos para hoy:', fechaHoy);
-
       // Fetch ventas de hoy con filtro de fecha y límite alto
       const ventasResponse = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/ventas?fechaInicio=${fechaHoy}&fechaFin=${fechaHoy}&limit=1000`,
@@ -45,16 +43,12 @@ export const useProductosVendidosHoy = () => {
 
       if (!ventasResponse.ok) {
         const errorText = await ventasResponse.text();
-        console.error('❌ Error en ventas response:', ventasResponse.status, errorText);
         throw new Error(`Error al obtener las ventas: ${ventasResponse.status}`);
       }
 
       const ventasResult = await ventasResponse.json();
-      console.log('✅ Ventas del día obtenidas:', ventasResult);
 
       const ventasData = ventasResult.ventas || ventasResult || [];
-
-      console.log('📅 Ventas del día encontradas:', ventasData.length);
 
       // Procesar datos de ventas del día
       let totalProductosHoy = 0;
@@ -62,12 +56,6 @@ export const useProductosVendidosHoy = () => {
 
       // Procesar cada venta (ya vienen filtradas por el backend)
       ventasData.forEach((venta, index) => {
-        console.log(`🏪 Procesando venta ${index + 1}:`, {
-          id: venta._id,
-          estadoPago: venta.estadoPago,
-          cantidadProductos: venta.productos?.length || 0
-        });
-
         // Contar productos de TODAS las ventas del día (no solo las pagadas)
         if (venta.productos && Array.isArray(venta.productos)) {
           venta.productos.forEach((producto) => {
@@ -95,8 +83,6 @@ export const useProductosVendidosHoy = () => {
         .sort(([,a], [,b]) => b - a)
         .slice(0, 1)
         .map(([nombre, cantidad]) => ({ nombre, cantidad }))[0] || null;
-
-      console.log('📊 Resultados:', { totalProductosHoy, productoMasVendido, resumenProductos });
 
       setData({
         totalProductosHoy,

@@ -125,11 +125,9 @@ export const movimientoUnificadoService = {
       cantidad,
       motivo
     };
-
     // Agregar fecha de producción si se proporciona
     if (fechaProduccion) {
       data.fechaProduccion = fechaProduccion;
-      console.log('📅 movimientoUnificadoService - Enviando fechaProduccion:', fechaProduccion);
     }
 
     // Solo agregar precio si es para ingredientes/materiales y se proporciona
@@ -338,8 +336,6 @@ export const movimientoUnificadoService = {
    * Eliminar un movimiento
    */
   async eliminarMovimiento(movimientoId) {
-    console.log('🗑️ Eliminando movimiento:', movimientoId);
-    
     const response = await api.delete(`/movimientos-unificados/movimiento/${movimientoId}`);
     
     return response.data;
