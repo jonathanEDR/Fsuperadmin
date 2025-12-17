@@ -114,41 +114,66 @@ export const useDashboardResumenHoy = () => {
       if (produccionRes.status === 'fulfilled' && produccionRes.value?.data) {
         const responseData = produccionRes.value.data;
         
+        // DEBUG: Ver estructura completa de la respuesta
+        console.log('🏭 Producción - Response completa:', JSON.stringify(responseData, null, 2));
+        
         // Manejar diferentes formatos de respuesta
         if (responseData.success && responseData.data?.totales) {
           costoProduccion = responseData.data.totales.costoTotalProduccion || 0;
           unidadesProducidas = responseData.data.totales.totalUnidadesProducidas || 0;
           totalProducciones = responseData.data.totales.totalProducciones || 0;
+          console.log('🏭 Producción - Formato success.data.totales:', { costoProduccion, unidadesProducidas, totalProducciones });
         } else if (responseData.totales) {
           // Formato alternativo sin wrapper 'data'
           costoProduccion = responseData.totales.costoTotalProduccion || 0;
           unidadesProducidas = responseData.totales.totalUnidadesProducidas || 0;
           totalProducciones = responseData.totales.totalProducciones || 0;
+          console.log('🏭 Producción - Formato totales:', { costoProduccion, unidadesProducidas, totalProducciones });
+        } else {
+          console.log('🏭 Producción - ⚠️ Formato NO reconocido, keys:', Object.keys(responseData));
         }
+      } else {
+        console.log('🏭 Producción - ❌ No hay data o rejected');
       }
 
       // Procesar pagos al personal - con manejo robusto
       if (pagosRes.status === 'fulfilled' && pagosRes.value?.data) {
         const responseData = pagosRes.value.data;
         
+        // DEBUG: Ver estructura completa
+        console.log('💰 Pagos Personal - Response completa:', JSON.stringify(responseData, null, 2));
+        
         if (responseData.success && responseData.data?.totales) {
           pagosPersonal = responseData.data.totales.montoTotalPagado || 0;
           cantidadPagosPersonal = responseData.data.totales.totalPagos || 0;
+          console.log('💰 Pagos - Formato success.data.totales:', { pagosPersonal, cantidadPagosPersonal });
         } else if (responseData.totales) {
           pagosPersonal = responseData.totales.montoTotalPagado || 0;
           cantidadPagosPersonal = responseData.totales.totalPagos || 0;
+          console.log('💰 Pagos - Formato totales:', { pagosPersonal, cantidadPagosPersonal });
+        } else {
+          console.log('💰 Pagos - ⚠️ Formato NO reconocido, keys:', Object.keys(responseData));
         }
+      } else {
+        console.log('💰 Pagos Personal - ❌ No hay data o rejected');
       }
 
       // Procesar registros diarios - con manejo robusto
       if (registrosRes.status === 'fulfilled' && registrosRes.value?.data) {
         const responseData = registrosRes.value.data;
         
+        // DEBUG: Ver estructura completa
+        console.log('📋 Registros Diarios - Response completa:', JSON.stringify(responseData, null, 2));
+        
         let totalesData = null;
         if (responseData.success && responseData.data?.totales) {
           totalesData = responseData.data.totales;
+          console.log('📋 Registros - Formato success.data.totales');
         } else if (responseData.totales) {
           totalesData = responseData.totales;
+          console.log('📋 Registros - Formato totales');
+        } else {
+          console.log('📋 Registros - ⚠️ Formato NO reconocido, keys:', Object.keys(responseData));
         }
         
         if (totalesData) {
@@ -157,7 +182,10 @@ export const useDashboardResumenHoy = () => {
           const bonificaciones = totalesData.sumaBonificaciones || 0;
           registrosDiarios = pagosDiarios + bonificaciones;
           cantidadRegistrosDiarios = totalesData.totalRegistros || 0;
+          console.log('📋 Registros - Valores:', { pagosDiarios, bonificaciones, registrosDiarios, cantidadRegistrosDiarios });
         }
+      } else {
+        console.log('📋 Registros Diarios - ❌ No hay data o rejected');
       }
 
       setResumen({
