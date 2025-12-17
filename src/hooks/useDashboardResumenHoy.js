@@ -35,9 +35,9 @@ export const useDashboardResumenHoy = () => {
 
     try {
       const fechaHoy = obtenerFechaHoy();
-      const isDev = import.meta.env.DEV;
       
-      if (isDev) console.log('📊 Dashboard - Obteniendo datos para fecha:', fechaHoy);
+      // Log siempre para debug (temporalmente)
+      console.log('📊 useDashboardResumenHoy - Fecha:', fechaHoy);
       
       // Hacer todas las llamadas en paralelo
       const [ventasRes, cobrosRes, produccionRes, pagosRes, registrosRes] = await Promise.allSettled([
@@ -53,22 +53,21 @@ export const useDashboardResumenHoy = () => {
         api.get(`/api/gestion-personal/estadisticas/registros-diarios?fechaInicio=${fechaHoy}&fechaFin=${fechaHoy}`)
       ]);
 
-      // Debug: Log de resultados (solo en desarrollo)
-      if (isDev) {
-        console.log('📊 Dashboard - Resultados:', {
-          ventas: ventasRes.status,
-          cobros: cobrosRes.status,
-          produccion: produccionRes.status,
-          pagos: pagosRes.status,
-          registros: registrosRes.status
-        });
+      // Log de resultados (temporalmente siempre)
+      console.log('📊 useDashboardResumenHoy - Status:', {
+        ventas: ventasRes.status,
+        cobros: cobrosRes.status,
+        produccion: produccionRes.status,
+        pagos: pagosRes.status,
+        registros: registrosRes.status
+      });
 
-        if (produccionRes.status === 'rejected') {
-          console.error('❌ Producción error:', produccionRes.reason);
-        }
-        if (registrosRes.status === 'rejected') {
-          console.error('❌ Registros error:', registrosRes.reason);
-        }
+      // Log de errores si los hay
+      if (produccionRes.status === 'rejected') {
+        console.error('❌ Producción error:', produccionRes.reason?.message || produccionRes.reason);
+      }
+      if (registrosRes.status === 'rejected') {
+        console.error('❌ Registros error:', registrosRes.reason?.message || registrosRes.reason);
       }
 
       let ventasNetas = 0;
