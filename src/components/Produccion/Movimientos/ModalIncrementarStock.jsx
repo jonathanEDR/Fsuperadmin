@@ -589,7 +589,7 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                                 <option value="">Seleccionar ingrediente...</option>
                                 {ingredientesDisponibles.map(ing => (
                                   <option key={ing._id} value={ing._id}>
-                                    {ing.nombre} (Disp: {(ing.cantidad || 0) - (ing.procesado || 0)})
+                                    {ing.nombre} (Disp: {((ing.cantidad || 0) - (ing.procesado || 0)).toFixed(2)})
                                   </option>
                                 ))}
                               </select>
@@ -598,8 +598,8 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                                   type="number"
                                   min="0.01"
                                   step="0.01"
-                                  value={item.cantidadUtilizada}
-                                  onChange={(e) => actualizarIngrediente(index, 'cantidadUtilizada', parseFloat(e.target.value) || 0)}
+                                  value={Math.round(item.cantidadUtilizada * 100) / 100}
+                                  onChange={(e) => actualizarIngrediente(index, 'cantidadUtilizada', Math.round((parseFloat(e.target.value) || 0) * 100) / 100)}
                                   className="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-blue-500 focus:border-blue-500"
                                   placeholder="Cant."
                                   disabled={enviando}
@@ -609,8 +609,8 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                                   type="number"
                                   min="0"
                                   step="0.01"
-                                  value={item.costoUnitario}
-                                  onChange={(e) => actualizarIngrediente(index, 'costoUnitario', parseFloat(e.target.value) || 0)}
+                                  value={Math.round(item.costoUnitario * 100) / 100}
+                                  onChange={(e) => actualizarIngrediente(index, 'costoUnitario', Math.round((parseFloat(e.target.value) || 0) * 100) / 100)}
                                   className="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-blue-500 focus:border-blue-500"
                                   placeholder="S/."
                                   disabled={enviando}
@@ -694,7 +694,7 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                                   
                                   return (
                                     <option key={rec._id} value={rec._id}>
-                                      {rec.nombre} (Disp: {disponible})
+                                      {rec.nombre} (Disp: {disponible.toFixed(2)})
                                     </option>
                                   );
                                 })}
@@ -704,8 +704,8 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                                   type="number"
                                   min="0.01"
                                   step="0.01"
-                                  value={item.cantidadUtilizada}
-                                  onChange={(e) => actualizarReceta(index, 'cantidadUtilizada', parseFloat(e.target.value) || 0)}
+                                  value={Math.round(item.cantidadUtilizada * 100) / 100}
+                                  onChange={(e) => actualizarReceta(index, 'cantidadUtilizada', Math.round((parseFloat(e.target.value) || 0) * 100) / 100)}
                                   className="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-blue-500 focus:border-blue-500"
                                   placeholder="Cant."
                                   disabled={enviando}
@@ -715,8 +715,8 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                                   type="number"
                                   min="0"
                                   step="0.01"
-                                  value={item.costoUnitario}
-                                  onChange={(e) => actualizarReceta(index, 'costoUnitario', parseFloat(e.target.value) || 0)}
+                                  value={Math.round(item.costoUnitario * 100) / 100}
+                                  onChange={(e) => actualizarReceta(index, 'costoUnitario', Math.round((parseFloat(e.target.value) || 0) * 100) / 100)}
                                   className="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-blue-500 focus:border-blue-500"
                                   placeholder="S/."
                                   disabled={enviando}

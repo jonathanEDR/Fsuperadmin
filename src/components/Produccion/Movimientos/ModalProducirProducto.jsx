@@ -154,15 +154,17 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
       const receta = obtenerRecetaInfo(item.receta);
       let costoReceta = 0;
       if (receta?.ingredientes?.length > 0 && receta.rendimiento?.cantidad > 0) {
-        costoReceta = receta.ingredientes.reduce((subtotal, ingredienteReceta) => {
+        const costoTotalIngredientes = receta.ingredientes.reduce((subtotal, ingredienteReceta) => {
           const ingredienteInfo = ingredientesDisponibles.find(ing => ing._id === ingredienteReceta.ingrediente);
           return subtotal + (ingredienteReceta.cantidad * (ingredienteInfo?.precioUnitario || 0));
-        }, 0) / receta.rendimiento.cantidad;
+        }, 0);
+        // Redondear a 2 decimales para evitar números largos
+        costoReceta = Math.round((costoTotalIngredientes / receta.rendimiento.cantidad) * 100) / 100;
       }
       return total + (item.cantidadUtilizada * costoReceta);
     }, 0);
 
-    return costoIngredientes + costoRecetas;
+    return Math.round((costoIngredientes + costoRecetas) * 100) / 100;
   };
 
   const validarFormulario = () => {
@@ -540,7 +542,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                                     </select>
                                     {ingredienteInfo && (
                                       <div className={`text-xs mt-0.5 ${stockInsuficiente ? 'text-red-600' : 'text-gray-500'}`}>
-                                        Disponible: {disponible} {ingredienteInfo.unidadMedida}
+                                        Disponible: {disponible.toFixed(2)} {ingredienteInfo.unidadMedida}
                                         {stockInsuficiente && ' ❌'}
                                       </div>
                                     )}
@@ -562,7 +564,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                                       type="number"
                                       step="0.01"
                                       min="0"
-                                      value={item.cantidadUtilizada}
+                                      value={Math.round(item.cantidadUtilizada * 100) / 100}
                                       onChange={(e) => {
                                         const value = parseFloat(e.target.value) || 0;
                                         const rounded = Math.round(value * 100) / 100;
@@ -647,13 +649,14 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                           const disponible = recetaInfo?.inventario?.cantidadProducida || 0;
                           const stockInsuficiente = formData.consumirRecursos && item.cantidadUtilizada > disponible;
                           
-                          // Calcular costo de la receta
+                          // Calcular costo de la receta - redondeado a 2 decimales
                           let costoReceta = 0;
                           if (recetaInfo?.ingredientes?.length > 0 && recetaInfo.rendimiento?.cantidad > 0) {
-                            costoReceta = recetaInfo.ingredientes.reduce((subtotal, ingredienteReceta) => {
+                            const costoTotalIngredientes = recetaInfo.ingredientes.reduce((subtotal, ingredienteReceta) => {
                               const ingredienteInfo = ingredientesDisponibles.find(ing => ing._id === ingredienteReceta.ingrediente);
                               return subtotal + (ingredienteReceta.cantidad * (ingredienteInfo?.precioUnitario || 0));
-                            }, 0) / recetaInfo.rendimiento.cantidad;
+                            }, 0);
+                            costoReceta = Math.round((costoTotalIngredientes / recetaInfo.rendimiento.cantidad) * 100) / 100;
                           }
 
                           return (
@@ -679,7 +682,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                                     </select>
                                     {recetaInfo && (
                                       <div className={`text-xs mt-0.5 ${stockInsuficiente ? 'text-red-600' : 'text-gray-500'}`}>
-                                        Disponible: {disponible} {recetaInfo.rendimiento?.unidadMedida || 'u'}
+                                        Disponible: {disponible.toFixed(2)} {recetaInfo.rendimiento?.unidadMedida || 'u'}
                                         {stockInsuficiente && ' ❌'}
                                       </div>
                                     )}
@@ -701,7 +704,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                                       type="number"
                                       step="0.01"
                                       min="0"
-                                      value={item.cantidadUtilizada}
+                                      value={Math.round(item.cantidadUtilizada * 100) / 100}
                                       onChange={(e) => {
                                         const value = parseFloat(e.target.value) || 0;
                                         const rounded = Math.round(value * 100) / 100;
