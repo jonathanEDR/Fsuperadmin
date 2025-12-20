@@ -73,16 +73,18 @@ const IngredientesBarChart = React.memo(() => {
       return;
     }
 
-    // Generar colores basados en el nivel de stock
+    // Generar colores basados en el nivel de inventario DISPONIBLE
     const backgroundColors = ingredientes.map(ing => {
-      if (ing.cantidad === 0) return 'rgba(239, 68, 68, 0.7)'; // Rojo - sin stock
-      if (ing.cantidad < 10) return 'rgba(245, 158, 11, 0.7)'; // Amarillo - bajo stock
-      return 'rgba(16, 185, 129, 0.7)'; // Verde - stock normal
+      const disponible = ing.disponible || 0;
+      if (disponible === 0) return 'rgba(239, 68, 68, 0.7)'; // Rojo - sin inventario disponible
+      if (disponible < 10) return 'rgba(245, 158, 11, 0.7)'; // Amarillo - bajo inventario
+      return 'rgba(16, 185, 129, 0.7)'; // Verde - inventario normal
     });
 
     const borderColors = ingredientes.map(ing => {
-      if (ing.cantidad === 0) return 'rgb(239, 68, 68)';
-      if (ing.cantidad < 10) return 'rgb(245, 158, 11)';
+      const disponible = ing.disponible || 0;
+      if (disponible === 0) return 'rgb(239, 68, 68)';
+      if (disponible < 10) return 'rgb(245, 158, 11)';
       return 'rgb(16, 185, 129)';
     });
 
@@ -96,8 +98,8 @@ const IngredientesBarChart = React.memo(() => {
       }),
       datasets: [
         {
-          label: 'Stock Actual',
-          data: ingredientes.map(ing => ing.cantidad),
+          label: 'Inventario Disponible',
+          data: ingredientes.map(ing => ing.disponible || 0),
           backgroundColor: backgroundColors,
           borderColor: borderColors,
           borderWidth: 2,
@@ -153,7 +155,7 @@ const IngredientesBarChart = React.memo(() => {
             </div>
           </div>
           <h3 className="text-base sm:text-xl font-bold bg-gradient-to-r from-green-800 to-emerald-600 bg-clip-text text-transparent">
-            Stock de Ingredientes
+            Inventario Disponible de Ingredientes
           </h3>
         </div>
         
@@ -266,7 +268,7 @@ const IngredientesBarChart = React.memo(() => {
                         const index = context.dataIndex;
                         const ing = ingredientesData[index];
                         if (ing) {
-                          return `Stock: ${ing.cantidad} ${ing.unidadMedida}`;
+                          return `Disponible: ${ing.disponible || 0} ${ing.unidadMedida}`;
                         }
                         return '';
                       },
@@ -275,7 +277,7 @@ const IngredientesBarChart = React.memo(() => {
                         const ing = ingredientesData[index];
                         if (ing) {
                           const lines = [];
-                          lines.push(`Disponible: ${ing.disponible} ${ing.unidadMedida}`);
+                          lines.push(`Stock total: ${ing.cantidad} ${ing.unidadMedida}`);
                           lines.push(`Precio unitario: ${formatCurrency(ing.precioUnitario)}`);
                           lines.push(`Costo total: ${formatCurrency(ing.costoTotal)}`);
                           return lines;
@@ -290,7 +292,7 @@ const IngredientesBarChart = React.memo(() => {
                     display: true,
                     title: {
                       display: !isMobile,
-                      text: 'Cantidad en Stock',
+                      text: 'Inventario Disponible',
                       font: {
                         size: 12,
                         weight: 'bold'
