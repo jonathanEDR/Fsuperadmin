@@ -87,21 +87,24 @@ export const getLocalDateTimeString = (includeSeconds = true) => {
 /**
  * Convierte fecha/hora local a ISO para enviar al backend
  * Específicamente para zona horaria de Perú (UTC-5)
- * @param {string} localDateTime - Fecha en formato YYYY-MM-DDTHH:mm
- * @returns {string} - Fecha en formato ISO
+ * @param {string} localDateTime - Fecha en formato YYYY-MM-DDTHH:mm o YYYY-MM-DDTHH:mm:ss
+ * @returns {string} - Fecha en formato YYYY-MM-DDTHH:mm:ss
  */
 export const convertLocalDateTimeToISO = (localDateTime) => {
   if (!localDateTime) return '';
   
   try {
-    // NO agregamos offset aquí, el backend se encargará de interpretarlo correctamente
-    // Solo agregamos segundos para completar el formato
-    const fechaCompleta = localDateTime + ':00';
+    // Verificar si ya tiene segundos (formato YYYY-MM-DDTHH:mm:ss)
+    const tieneSegundos = localDateTime.split(':').length === 3;
+    
+    // Solo agregar ':00' si NO tiene segundos
+    const fechaCompleta = tieneSegundos ? localDateTime : localDateTime + ':00';
     
     console.log('🕐 Conversión de fecha (Frontend):', {
       fechaLocal: localDateTime,
+      tieneSegundos,
       fechaCompleta: fechaCompleta,
-      nota: 'Enviando sin offset, backend interpretará como hora de Perú'
+      nota: 'Enviando formato YYYY-MM-DDTHH:mm:ss al backend'
     });
     
     return fechaCompleta;

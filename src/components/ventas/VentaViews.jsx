@@ -224,7 +224,10 @@ const VentaViews = ({
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {ventasToRender.map(venta => {
-                const puedeFinalizar = (venta.userId === currentUserId || venta.user_info?.id === currentUserId || venta.userInfo?.id === currentUserId) && (userRole === 'user' || userRole === 'admin');
+                // Super admin puede finalizar todas las ventas, usuarios/admin solo las suyas
+                const puedeFinalizar = userRole === 'super_admin' || 
+                  ((venta.userId === currentUserId || venta.user_info?.id === currentUserId || venta.userInfo?.id === currentUserId) && 
+                  (userRole === 'user' || userRole === 'admin'));
                 const ventaParaPago = {
                   ...venta,
                   montoPendiente: venta.debe || (venta.montoTotal - (venta.cantidadPagada || 0))
@@ -451,7 +454,10 @@ const VentaViews = ({
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4">
         {ventasToRender.map(venta => {
-          const puedeFinalizar = (venta.userId === currentUserId || venta.user_info?.id === currentUserId || venta.userInfo?.id === currentUserId) && (userRole === 'user' || userRole === 'admin');
+          // Super admin puede finalizar todas las ventas, usuarios/admin solo las suyas
+          const puedeFinalizar = userRole === 'super_admin' || 
+            ((venta.userId === currentUserId || venta.user_info?.id === currentUserId || venta.userInfo?.id === currentUserId) && 
+            (userRole === 'user' || userRole === 'admin'));
           
           const ventaParaPago = {
             ...venta,
