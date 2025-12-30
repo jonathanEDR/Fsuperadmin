@@ -45,7 +45,17 @@ export default function useGastos() {
       const montoTotal = parseFloat(nuevoGasto.costoUnidad) * parseFloat(nuevoGasto.cantidad);
       const fechaLocal = new Date(nuevoGasto.fechaGasto);
       const fechaISO = fechaLocal.toISOString();
-      await api.post('/api/gastos', { ...nuevoGasto, montoTotal, fechaGasto: fechaISO }, {
+
+      // Preparar datos incluyendo nuevos campos del catalogo
+      const gastoData = {
+        ...nuevoGasto,
+        montoTotal,
+        fechaGasto: fechaISO,
+        catalogoGastoId: nuevoGasto.catalogoGastoId || null,
+        unidadMedida: nuevoGasto.unidadMedida || 'unidad'
+      };
+
+      await api.post('/api/gastos', gastoData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       await fetchGastos();
@@ -63,7 +73,17 @@ export default function useGastos() {
     try {
       const token = await getToken();
       const montoTotal = parseFloat(gasto.costoUnidad) * parseFloat(gasto.cantidad);
-      await api.put(`/api/gastos/${gasto._id}`, { ...gasto, montoTotal, fechaGasto: gasto.fechaGasto }, {
+
+      // Preparar datos incluyendo nuevos campos del catalogo
+      const gastoData = {
+        ...gasto,
+        montoTotal,
+        fechaGasto: gasto.fechaGasto,
+        catalogoGastoId: gasto.catalogoGastoId || null,
+        unidadMedida: gasto.unidadMedida || 'unidad'
+      };
+
+      await api.put(`/api/gastos/${gasto._id}`, gastoData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       await fetchGastos();

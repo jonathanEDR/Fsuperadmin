@@ -10,6 +10,20 @@ export const estadosColor = {
 
 // ========== VALORES INICIALES DE FORMULARIOS ==========
 export const formularioInicialPrestamo = {
+    // Tipo de prestatario (nuevo)
+    tipoPrestatario: 'particular',
+    prestatarioRef: null,
+    prestatarioInfo: null,
+    // Información del prestatario particular
+    prestatario: {
+        nombre: '',
+        tipoDocumento: 'DNI',
+        documento: '',
+        telefono: '',
+        email: '',
+        direccion: ''
+    },
+    // Entidad financiera
     entidadFinanciera: {
         nombre: '',
         codigo: '',
@@ -27,7 +41,15 @@ export const formularioInicialPrestamo = {
         unidad: 'meses'
     },
     proposito: '',
-    observaciones: ''
+    observaciones: '',
+    // Descuento de nómina (para trabajadores)
+    descuentoNomina: {
+        aplicable: false,
+        tipoDescuento: 'cuota_completa',
+        porcentaje: 100,
+        montoFijo: 0,
+        periodoDescuento: 'mensual'
+    }
 };
 
 export const formularioInicialCalculadora = {
@@ -385,6 +407,36 @@ export const opcionesPeriodoInteres = [
 export const opcionesUnidadPlazo = [
     { value: 'meses', label: 'Meses' },
     { value: 'años', label: 'Años' }
+];
+
+// ========== OPCIONES PARA PRÉSTAMOS A EXTERNOS/TRABAJADORES ==========
+export const opcionesTipoPrestatario = [
+    { value: 'particular', label: 'Particular' },
+    { value: 'trabajador', label: 'Trabajador/Empleado' },
+    { value: 'proveedor', label: 'Proveedor' },
+    { value: 'cliente', label: 'Cliente' },
+    { value: 'interno', label: 'Interno' },
+    { value: 'otro', label: 'Otro' }
+];
+
+export const opcionesTipoContrato = [
+    { value: 'indefinido', label: 'Contrato Indefinido' },
+    { value: 'plazo_fijo', label: 'Plazo Fijo' },
+    { value: 'por_obra', label: 'Por Obra/Servicio' },
+    { value: 'practicas', label: 'Prácticas' },
+    { value: 'otro', label: 'Otro' }
+];
+
+export const opcionesTipoDescuento = [
+    { value: 'cuota_completa', label: 'Cuota Completa' },
+    { value: 'porcentaje', label: 'Porcentaje del Sueldo' },
+    { value: 'monto_fijo', label: 'Monto Fijo' }
+];
+
+export const opcionesPeriodoDescuento = [
+    { value: 'semanal', label: 'Semanal' },
+    { value: 'quincenal', label: 'Quincenal' },
+    { value: 'mensual', label: 'Mensual' }
 ];
 
 // ========== MENSAJES DE TEXTO ==========

@@ -448,53 +448,55 @@ class FinanzasService {
     }
     
     // ==================== GARANTÍAS ====================
-    
+    // NOTA: Se recomienda usar el nuevo garantiasService de services/finanzas/garantiasService.js
+    // Estas rutas están corregidas para compatibilidad
+
     /**
      * Obtener garantías
      */
     static async obtenerGarantias(filtros = {}) {
         try {
             const params = new URLSearchParams(filtros);
-            const response = await api.get(`/finanzas/garantias?${params}`);
+            const response = await api.get(`/garantias?${params}`);
             return response.data;
         } catch (error) {
             console.error('Error obteniendo garantías:', error);
             throw error;
         }
     }
-    
+
     /**
      * Crear garantía
      */
     static async crearGarantia(datos) {
         try {
-            const response = await api.post('/finanzas/garantias', datos);
+            const response = await api.post('/garantias', datos);
             return response.data;
         } catch (error) {
             console.error('Error creando garantía:', error);
             throw error;
         }
     }
-    
+
     /**
      * Aprobar garantía
      */
     static async aprobarGarantia(id, datos) {
         try {
-            const response = await api.post(`/finanzas/garantias/${id}/aprobar`, datos);
+            const response = await api.post(`/garantias/${id}/aprobar`, datos);
             return response.data;
         } catch (error) {
             console.error('Error aprobando garantía:', error);
             throw error;
         }
     }
-    
+
     /**
      * Obtener garantías de un préstamo
      */
     static async obtenerGarantiasPrestamo(prestamoId) {
         try {
-            const response = await api.get(`/finanzas/garantias/prestamo/${prestamoId}`);
+            const response = await api.get(`/garantias/prestamo/${prestamoId}`);
             return response.data;
         } catch (error) {
             console.error('Error obteniendo garantías del préstamo:', error);
@@ -507,7 +509,7 @@ class FinanzasService {
      */
     static async obtenerGarantiaPorId(id) {
         try {
-            const response = await api.get(`/finanzas/garantias/${id}`);
+            const response = await api.get(`/garantias/${id}`);
             return response.data;
         } catch (error) {
             console.error('Error obteniendo garantía por ID:', error);
@@ -520,7 +522,7 @@ class FinanzasService {
      */
     static async actualizarGarantia(id, datos) {
         try {
-            const response = await api.put(`/finanzas/garantias/${id}`, datos);
+            const response = await api.put(`/garantias/${id}`, datos);
             return response.data;
         } catch (error) {
             console.error('Error actualizando garantía:', error);
@@ -533,7 +535,7 @@ class FinanzasService {
      */
     static async eliminarGarantia(id) {
         try {
-            const response = await api.delete(`/finanzas/garantias/${id}`);
+            const response = await api.delete(`/garantias/${id}`);
             return response.data;
         } catch (error) {
             console.error('Error eliminando garantía:', error);

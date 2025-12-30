@@ -1,16 +1,17 @@
 /**
  * Índice principal de servicios de finanzas optimizados
- * 
+ *
  * NUEVA ARQUITECTURA - MODULAR Y ESCALABLE
  * ===============================================
- * 
+ *
  * Estructura:
  * - BaseFinanzasService: Servicio base con operaciones CRUD comunes
  * - FinanzasService: Coordinador principal y dashboard
  * - CuentasBancariasService: Gestión especializada de cuentas
- * - PrestamosService: Gestión especializada de préstamos  
+ * - PrestamosService: Gestión especializada de préstamos
+ * - GarantiasService: Gestión especializada de garantías
  * - MovimientosCajaService: Gestión especializada de movimientos
- * 
+ *
  * Beneficios:
  * ✅ Separación de responsabilidades (SRP)
  * ✅ Reutilización de código (DRY)
@@ -25,6 +26,7 @@ export { default as FinanzasService, finanzasService } from './finanzasService';
 // ==================== SERVICIOS ESPECIALIZADOS ====================
 export { default as cuentasBancariasService, CuentasBancariasService } from './cuentasBancariasService';
 export { default as prestamosService, PrestamosServiceOptimizado } from './prestamosService';
+export { default as garantiasService, GarantiasService } from './garantiasService';
 export { default as movimientosCajaService, MovimientosCajaServiceOptimizado } from './movimientosCajaService';
 
 // ==================== SERVICIO BASE ====================
@@ -37,10 +39,11 @@ export default FinanzasService;
 
 // ==================== CONFIGURACIÓN DE SERVICIOS ====================
 export const SERVICIOS_CONFIG = {
-    version: '2.0.0',
+    version: '2.1.0',
     modulos: {
         cuentasBancarias: 'CuentasBancariasService',
-        prestamos: 'PrestamosServiceOptimizado', 
+        prestamos: 'PrestamosServiceOptimizado',
+        garantias: 'GarantiasService',
         movimientosCaja: 'MovimientosCajaServiceOptimizado',
         coordinador: 'FinanzasService'
     },
@@ -50,7 +53,8 @@ export const SERVICIOS_CONFIG = {
         'Validaciones incorporadas',
         'Formateo de datos consistente',
         'Patrón singleton para performance',
-        'Extensibilidad para nuevos módulos'
+        'Extensibilidad para nuevos módulos',
+        'Gestión completa de garantías'
     ]
 };
 

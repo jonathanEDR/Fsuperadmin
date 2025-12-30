@@ -5,7 +5,7 @@ import { usePrestamosModals } from './hooks/usePrestamosModals';
 import { PrestamosTable } from './components/PrestamosTable';
 import { PrestamosFilters } from './components/PrestamosFilters';
 import { PrestamosResumen } from './components/PrestamosResumen';
-import { ModalPrestamo } from './components/ModalPrestamo';
+import ModalPrestamo from './ModalPrestamo';
 import { ModalCalculadora } from './components/ModalCalculadora';
 import { ModalTablaAmortizacion } from './components/ModalTablaAmortizacion';
 import { ModalDetallesPrestamo } from './components/ModalDetallesPrestamo';
@@ -37,7 +37,12 @@ const PrestamosOptimizado = React.memo(() => {
         limpiarFiltros,
         cambiarPagina,
         loading: loadingData,
-        error: errorData
+        error: errorData,
+        // Trabajadores/Externos
+        trabajadores,
+        loadingTrabajadores,
+        buscarTrabajadores,
+        seleccionarTrabajador
     } = usePrestamosData();
     
     const {
@@ -209,12 +214,16 @@ const PrestamosOptimizado = React.memo(() => {
             {/* MODALES */}
             {modalAbierto && (
                 <ModalPrestamo
-                    open={modalAbierto}
+                    isOpen={modalAbierto}
                     onClose={cerrarModal}
                     onSubmit={handleSubmitPrestamo}
                     formulario={formularioPrestamo}
                     prestamoEditando={prestamoEditando}
                     loading={formularioPrestamo.isSubmitting}
+                    trabajadores={trabajadores}
+                    onBuscarTrabajador={buscarTrabajadores}
+                    onSeleccionarTrabajador={seleccionarTrabajador}
+                    loadingTrabajadores={loadingTrabajadores}
                 />
             )}
             

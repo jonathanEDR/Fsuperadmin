@@ -17,7 +17,7 @@ export const usePrestamos = () => {
     const [prestamos, setPrestamos] = useState([]);
     const [resumenPrestamos, setResumenPrestamos] = useState(null);
     const [loading, setLoading] = useState(true);
-    
+
     // ========== ESTADOS DE MODALES ==========
     const [modalAbierto, setModalAbierto] = useState(false);
     const [modalCalculadora, setModalCalculadora] = useState(false);
@@ -25,10 +25,15 @@ export const usePrestamos = () => {
     const [modalDetallesPrestamo, setModalDetallesPrestamo] = useState(false);
     const [prestamoEditando, setPrestamoEditando] = useState(null);
     const [prestamoViendoDetalles, setPrestamoViendoDetalles] = useState(null);
-    
+
     // ========== ESTADOS ESPECÍFICOS ==========
     const [tablaAmortizacion, setTablaAmortizacion] = useState([]);
     const [calculoCuota, setCalculoCuota] = useState(null);
+
+    // ========== ESTADOS PARA TRABAJADORES/EXTERNOS ==========
+    const [trabajadores, setTrabajadores] = useState([]);
+    const [loadingTrabajadores, setLoadingTrabajadores] = useState(false);
+    const [trabajadorSeleccionado, setTrabajadorSeleccionado] = useState(null);
     
     // ========== ESTADOS DE FILTROS Y PAGINACIÓN ==========
     const [filtros, setFiltros] = useState(filtrosIniciales);
@@ -201,18 +206,18 @@ export const usePrestamos = () => {
 
     const transformarDatosParaBackend = (datosFormulario) => {
         const datos = { ...datosFormulario };
-        
+
         // Transformar estructura de tasa de interés
         if (datos.tasaInteres && typeof datos.tasaInteres === 'object') {
             datos.tasaInteres = parseFloat(datos.tasaInteres.porcentaje) || 0;
             datos.tipoTasa = datos.tasaInteres.tipo || 'fija';
         }
-        
+
         // Transformar plazo a plazoMeses
         if (datos.plazo && typeof datos.plazo === 'object') {
             const cantidad = parseInt(datos.plazo.cantidad) || 0;
             const unidad = datos.plazo.unidad || 'meses';
-            
+
             // Convertir todo a meses
             switch (unidad) {
                 case 'años':
@@ -228,37 +233,60 @@ export const usePrestamos = () => {
                     datos.plazoMeses = cantidad;
                     break;
             }
-            
+
             // Eliminar el campo plazo original
             delete datos.plazo;
         }
-        
+
         // Asignar tipo de crédito como tipo de préstamo
         if (datos.tipoCredito) {
             datos.tipo = datos.tipoCredito;
             delete datos.tipoCredito; // Eliminar campo original
         }
-        
+
         // Transformar montoSolicitado a número
         if (datos.montoSolicitado) {
             datos.montoSolicitado = parseFloat(datos.montoSolicitado) || 0;
         }
-        
+
+        // ==================== CAMPOS PARA PRÉSTAMOS A TRABAJADORES/EXTERNOS ====================
+        // Asegurar que tipoPrestatario se envíe (por defecto 'particular')
+        datos.tipoPrestatario = datos.tipoPrestatario || 'particular';
+
+        // Mantener prestatarioRef si existe (referencia al trabajador)
+        if (datos.prestatarioRef) {
+            datos.prestatarioRef = datos.prestatarioRef;
+        }
+
+        // Limpiar prestatarioInfo ya que solo es para mostrar en el form
+        delete datos.prestatarioInfo;
+
+        // Mantener descuentoNomina si está habilitado
+        if (datos.descuentoNomina) {
+            datos.descuentoNomina = {
+                aplicable: datos.descuentoNomina.aplicable || false,
+                tipoDescuento: datos.descuentoNomina.tipoDescuento || 'cuota_completa',
+                porcentaje: parseFloat(datos.descuentoNomina.porcentaje) || 0,
+                montoFijo: parseFloat(datos.descuentoNomina.montoFijo) || 0,
+                periodoDescuento: datos.descuentoNomina.periodoDescuento || 'mensual'
+            };
+        }
+
         // Limpiar campos vacíos o inválidos
         Object.keys(datos).forEach(key => {
             if (key === '' || key === null || key === undefined) {
                 delete datos[key];
             }
         });
-        
+
         // Preservar la estructura de entidadFinanciera
         // No necesitamos transformar este campo ya que el backend lo espera tal como está
-        
+
         // Log solo en desarrollo
         if (process.env.NODE_ENV === 'development') {
-            console.log('🔄 Datos transformados:', datos);
+            console.log('🔄 Datos transformados para backend:', datos);
         }
-        
+
         return datos;
     };
     
@@ -442,7 +470,48 @@ export const usePrestamos = () => {
     const cambiarPagina = (nuevaPagina) => {
         setPaginacion(prev => ({ ...prev, paginaActual: nuevaPagina }));
     };
-    
+
+    // ========== FUNCIONES PARA TRABAJADORES/EXTERNOS ==========
+
+    /**
+     * Buscar trabajadores disponibles para préstamos
+     */
+    const buscarTrabajadores = useCallback(async (busqueda = '') => {
+        try {
+            setLoadingTrabajadores(true);
+            const response = await PrestamosService.obtenerTrabajadoresDisponibles({
+                buscar: busqueda,
+                estado: 'activo'
+            });
+
+            if (response.success) {
+                setTrabajadores(response.data || []);
+            } else {
+                setTrabajadores([]);
+            }
+        } catch (err) {
+            console.error('Error buscando trabajadores:', err);
+            setTrabajadores([]);
+        } finally {
+            setLoadingTrabajadores(false);
+        }
+    }, []);
+
+    /**
+     * Manejar selección de trabajador
+     */
+    const manejarSeleccionTrabajador = useCallback((trabajador) => {
+        setTrabajadorSeleccionado(trabajador);
+    }, []);
+
+    /**
+     * Limpiar selección de trabajador al cerrar modal
+     */
+    const limpiarTrabajadorSeleccionado = useCallback(() => {
+        setTrabajadorSeleccionado(null);
+        setTrabajadores([]);
+    }, []);
+
     // ========== RETURN DEL HOOK ==========
     return {
         // Estados principales
@@ -494,9 +563,20 @@ export const usePrestamos = () => {
         actualizarFiltros,
         limpiarFiltros,
         cambiarPagina,
-        
+
         // Funciones de carga
         cargarPrestamos,
-        cargarResumen
+        cargarResumen,
+
+        // ========== TRABAJADORES/EXTERNOS ==========
+        // Estados
+        trabajadores,
+        loadingTrabajadores,
+        trabajadorSeleccionado,
+
+        // Funciones
+        buscarTrabajadores,
+        manejarSeleccionTrabajador,
+        limpiarTrabajadorSeleccionado
     };
 };

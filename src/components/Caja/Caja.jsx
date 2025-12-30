@@ -165,7 +165,25 @@ function Caja({ userRole }) {
       { value: 'ingreso_extra', label: 'Ingreso Extra' }
     ],
     egresos: [
+      // Pagos al personal por departamento
       { value: 'pago_personal', label: 'Pago Personal' },
+      { value: 'pago_personal_finanzas', label: 'Pago Personal (Finanzas)' },
+      { value: 'pago_personal_produccion', label: 'Pago Personal (Producción)' },
+      { value: 'pago_personal_ventas', label: 'Pago Personal (Ventas)' },
+      { value: 'pago_personal_admin', label: 'Pago Personal (Admin)' },
+      // Materia prima por departamento
+      { value: 'materia_prima', label: 'Materia Prima' },
+      { value: 'materia_prima_finanzas', label: 'Materia Prima (Finanzas)' },
+      { value: 'materia_prima_produccion', label: 'Materia Prima (Producción)' },
+      { value: 'materia_prima_ventas', label: 'Materia Prima (Ventas)' },
+      { value: 'materia_prima_admin', label: 'Materia Prima (Admin)' },
+      // Otros por departamento
+      { value: 'otros', label: 'Otros Gastos' },
+      { value: 'otros_finanzas', label: 'Otros (Finanzas)' },
+      { value: 'otros_produccion', label: 'Otros (Producción)' },
+      { value: 'otros_ventas', label: 'Otros (Ventas)' },
+      { value: 'otros_admin', label: 'Otros (Admin)' },
+      // Categorías generales
       { value: 'pago_proveedor', label: 'Pago a Proveedor' },
       { value: 'gasto_operativo', label: 'Gasto Operativo' },
       { value: 'servicio_basico', label: 'Servicio Básico' },

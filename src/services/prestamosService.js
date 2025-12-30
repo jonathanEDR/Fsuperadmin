@@ -163,8 +163,131 @@ class PrestamosService {
         }
     }
     
+    // ==================== PRÉSTAMOS A EXTERNOS/TRABAJADORES ====================
+
+    /**
+     * Obtener lista de trabajadores disponibles para préstamos
+     */
+    static async obtenerTrabajadoresDisponibles(filtros = {}) {
+        try {
+            const params = new URLSearchParams();
+            Object.keys(filtros).forEach(key => {
+                if (filtros[key] !== '' && filtros[key] !== null && filtros[key] !== undefined) {
+                    params.append(key, filtros[key]);
+                }
+            });
+            const response = await api.get(`/api/prestamos/externos/trabajadores?${params}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error obteniendo trabajadores disponibles:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Obtener información completa de un trabajador
+     */
+    static async obtenerInfoTrabajador(trabajadorId) {
+        try {
+            const response = await api.get(`/api/prestamos/externos/trabajador/${trabajadorId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error obteniendo información del trabajador:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Calcular capacidad de endeudamiento de un trabajador
+     */
+    static async calcularCapacidadEndeudamiento(trabajadorId) {
+        try {
+            const response = await api.get(`/api/prestamos/externos/trabajador/${trabajadorId}/capacidad`);
+            return response.data;
+        } catch (error) {
+            console.error('Error calculando capacidad de endeudamiento:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Validar si un prestatario puede recibir un préstamo
+     */
+    static async validarPrestatario(datos) {
+        try {
+            const response = await api.post('/api/prestamos/externos/validar-prestatario', datos);
+            return response.data;
+        } catch (error) {
+            console.error('Error validando prestatario:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Calcular descuento de nómina para un préstamo
+     */
+    static async calcularDescuentoNomina(datos) {
+        try {
+            const response = await api.post('/api/prestamos/externos/calcular-descuento', datos);
+            return response.data;
+        } catch (error) {
+            console.error('Error calculando descuento de nómina:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Obtener préstamos filtrados por tipo de prestatario
+     */
+    static async obtenerPrestamosPorTipo(tipo = 'todos', limite = 50, pagina = 1) {
+        try {
+            const response = await api.get(`/api/prestamos/externos/por-tipo?tipo=${tipo}&limite=${limite}&pagina=${pagina}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error obteniendo préstamos por tipo:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Obtener resumen de préstamos a trabajadores
+     */
+    static async obtenerResumenTrabajadores() {
+        try {
+            const response = await api.get('/api/prestamos/externos/resumen-trabajadores');
+            return response.data;
+        } catch (error) {
+            console.error('Error obteniendo resumen de trabajadores:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Obtener tipos de prestatario disponibles
+     */
+    static async obtenerTiposPrestatario() {
+        try {
+            const response = await api.get('/api/prestamos/externos/tipos-prestatario');
+            return response.data;
+        } catch (error) {
+            console.error('Error obteniendo tipos de prestatario:', error);
+            // Retornar valores por defecto en caso de error
+            return {
+                success: true,
+                data: [
+                    { value: 'particular', label: 'Particular' },
+                    { value: 'trabajador', label: 'Trabajador/Empleado' },
+                    { value: 'proveedor', label: 'Proveedor' },
+                    { value: 'cliente', label: 'Cliente' },
+                    { value: 'interno', label: 'Interno' },
+                    { value: 'otro', label: 'Otro' }
+                ]
+            };
+        }
+    }
+
     // ==================== REPORTES Y ESTADÍSTICAS ====================
-    
+
     /**
      * Obtener resumen de préstamos
      */
