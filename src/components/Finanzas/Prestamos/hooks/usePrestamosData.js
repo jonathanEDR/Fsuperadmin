@@ -24,6 +24,7 @@ export const usePrestamosData = () => {
     
     // Estados de filtros y paginación
     const [filtros, setFiltros] = useState({
+        tipoPrestamo: '', // NUEVO: 'recibido', 'otorgado' o '' (todos)
         estado: '',
         entidadFinanciera: '',
         tipoCredito: '',
@@ -172,6 +173,7 @@ export const usePrestamosData = () => {
     
     const limpiarFiltros = useCallback(() => {
         setFiltros({
+            tipoPrestamo: '', // NUEVO
             estado: '',
             entidadFinanciera: '',
             tipoCredito: '',

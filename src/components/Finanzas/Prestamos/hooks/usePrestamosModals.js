@@ -5,35 +5,57 @@ import { prestamosService } from '../../../../services/finanzas';
  * Hook optimizado para gestión de modales de préstamos
  * Maneja estado de modales, calculadora y tabla de amortización
  * Separado para mejor organización y performance
+ *
+ * ACTUALIZADO: Soporte para modal de préstamos otorgados separado
  */
 export const usePrestamosModals = () => {
-    
+
     // Estados de modales
     const [modalAbierto, setModalAbierto] = useState(false);
+    const [modalPrestamoOtorgado, setModalPrestamoOtorgado] = useState(false); // NUEVO
     const [modalCalculadora, setModalCalculadora] = useState(false);
     const [modalTablaAmortizacion, setModalTablaAmortizacion] = useState(false);
     const [modalDetallesPrestamo, setModalDetallesPrestamo] = useState(false);
-    
+
     // Estados de contenido de modales
     const [prestamoEditando, setPrestamoEditando] = useState(null);
     const [prestamoViendoDetalles, setPrestamoViendoDetalles] = useState(null);
     const [tablaAmortizacion, setTablaAmortizacion] = useState([]);
     const [calculoCuota, setCalculoCuota] = useState(null);
     const [loadingCalculos, setLoadingCalculos] = useState(false);
-    
-    // Funciones de modal de préstamo principal
+
+    // Funciones de modal de préstamo RECIBIDO (de bancos/financieras)
     const abrirModalNuevo = useCallback(() => {
         setPrestamoEditando(null);
         setModalAbierto(true);
     }, []);
-    
+
     const abrirModalEditar = useCallback((prestamo) => {
         setPrestamoEditando(prestamo);
-        setModalAbierto(true);
+        // Determinar qué modal abrir según el tipo de préstamo
+        const tipoPrestatario = prestamo.tipoPrestatario || 'particular';
+        const esPrestamoOtorgado = ['trabajador', 'proveedor', 'cliente', 'particular', 'otro'].includes(tipoPrestatario);
+
+        if (esPrestamoOtorgado) {
+            setModalPrestamoOtorgado(true);
+        } else {
+            setModalAbierto(true);
+        }
     }, []);
-    
+
     const cerrarModal = useCallback(() => {
         setModalAbierto(false);
+        setPrestamoEditando(null);
+    }, []);
+
+    // Funciones de modal de préstamo OTORGADO (a trabajadores/externos)
+    const abrirModalPrestamoOtorgado = useCallback(() => {
+        setPrestamoEditando(null);
+        setModalPrestamoOtorgado(true);
+    }, []);
+
+    const cerrarModalPrestamoOtorgado = useCallback(() => {
+        setModalPrestamoOtorgado(false);
         setPrestamoEditando(null);
     }, []);
     
@@ -160,10 +182,10 @@ export const usePrestamosModals = () => {
     
     // Estado agregado de modales para optimización
     const estadoModales = useMemo(() => ({
-        algunModalAbierto: modalAbierto || modalCalculadora || modalTablaAmortizacion || modalDetallesPrestamo,
-        totalModalesAbiertos: [modalAbierto, modalCalculadora, modalTablaAmortizacion, modalDetallesPrestamo]
+        algunModalAbierto: modalAbierto || modalPrestamoOtorgado || modalCalculadora || modalTablaAmortizacion || modalDetallesPrestamo,
+        totalModalesAbiertos: [modalAbierto, modalPrestamoOtorgado, modalCalculadora, modalTablaAmortizacion, modalDetallesPrestamo]
                               .filter(Boolean).length
-    }), [modalAbierto, modalCalculadora, modalTablaAmortizacion, modalDetallesPrestamo]);
+    }), [modalAbierto, modalPrestamoOtorgado, modalCalculadora, modalTablaAmortizacion, modalDetallesPrestamo]);
     
     // Datos de calculadora procesados
     const datosCalculadora = useMemo(() => {
@@ -178,34 +200,39 @@ export const usePrestamosModals = () => {
     return {
         // Estados de modales
         modalAbierto,
+        modalPrestamoOtorgado, // NUEVO
         modalCalculadora,
         modalTablaAmortizacion,
         modalDetallesPrestamo,
-        
+
         // Contenido de modales
         prestamoEditando,
         prestamoViendoDetalles,
         tablaAmortizacion,
         calculoCuota: datosCalculadora,
-        
+
         // Estados de control
         loadingCalculos,
         estadoModales,
-        
-        // Funciones de modal principal
+
+        // Funciones de modal préstamo RECIBIDO (de bancos)
         abrirModalNuevo,
         abrirModalEditar,
         cerrarModal,
-        
+
+        // Funciones de modal préstamo OTORGADO (a terceros) - NUEVO
+        abrirModalPrestamoOtorgado,
+        cerrarModalPrestamoOtorgado,
+
         // Funciones de calculadora
         abrirModalCalculadora,
         cerrarModalCalculadora,
         calcularCuota,
-        
+
         // Funciones de tabla de amortización
         abrirModalTablaAmortizacion,
         cerrarModalTablaAmortizacion,
-        
+
         // Funciones de detalles
         abrirModalDetalles,
         cerrarModalDetalles

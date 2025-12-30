@@ -6,9 +6,10 @@ import { PrestamosTable } from './components/PrestamosTable';
 import { PrestamosFilters } from './components/PrestamosFilters';
 import { PrestamosResumen } from './components/PrestamosResumen';
 import ModalPrestamo from './ModalPrestamo';
-import { ModalCalculadora } from './components/ModalCalculadora';
-import { ModalTablaAmortizacion } from './components/ModalTablaAmortizacion';
-import { ModalDetallesPrestamo } from './components/ModalDetallesPrestamo';
+import ModalPrestamoOtorgado from './ModalPrestamoOtorgado';
+import ModalCalculadoraCuota from './ModalCalculadoraCuota';
+import ModalTablaAmortizacion from './ModalTablaAmortizacion';
+import ModalDetallesPrestamo from './ModalDetallesPrestamo';
 
 /**
  * Componente principal optimizado para gestión de préstamos
@@ -47,6 +48,7 @@ const PrestamosOptimizado = React.memo(() => {
     
     const {
         modalAbierto,
+        modalPrestamoOtorgado, // NUEVO
         modalCalculadora,
         modalTablaAmortizacion,
         modalDetallesPrestamo,
@@ -59,6 +61,8 @@ const PrestamosOptimizado = React.memo(() => {
         abrirModalNuevo,
         abrirModalEditar,
         cerrarModal,
+        abrirModalPrestamoOtorgado, // NUEVO
+        cerrarModalPrestamoOtorgado, // NUEVO
         abrirModalCalculadora,
         cerrarModalCalculadora,
         calcularCuota,
@@ -69,6 +73,7 @@ const PrestamosOptimizado = React.memo(() => {
     } = usePrestamosModals();
     
     const formularioPrestamo = usePrestamoForm();
+    const formularioPrestamoOtorgado = usePrestamoForm(); // NUEVO - formulario para préstamos otorgados
     const formularioCalculadora = usePrestamoForm();
     
     // CALLBACKS MEMOIZADOS
@@ -116,16 +121,18 @@ const PrestamosOptimizado = React.memo(() => {
     
     const handleSubmitPrestamo = useCallback(async (e) => {
         e.preventDefault();
-        
+
         if (!formularioPrestamo.validateForm()) {
             return;
         }
-        
+
         formularioPrestamo.setIsSubmitting(true);
-        
+
         try {
             const datosPrestamo = formularioPrestamo.transformToBackend();
-            
+            // Para préstamos recibidos, asegurar tipoPrestatario = 'interno'
+            datosPrestamo.tipoPrestatario = 'interno';
+
             if (prestamoEditando) {
                 await handleActualizarPrestamo(prestamoEditando._id, datosPrestamo);
             } else {
@@ -139,6 +146,74 @@ const PrestamosOptimizado = React.memo(() => {
         prestamoEditando,
         handleActualizarPrestamo,
         handleCrearPrestamo
+    ]);
+
+    // NUEVO: Handler para submit de préstamo OTORGADO
+    const handleSubmitPrestamoOtorgado = useCallback(async (e) => {
+        e.preventDefault();
+
+        // No validar formulario completo ya que faltan campos de entidad financiera
+        // Solo validar campos esenciales
+        const valores = formularioPrestamoOtorgado.formData;
+        if (!valores.montoSolicitado || valores.montoSolicitado <= 0) {
+            alert('El monto a prestar es requerido');
+            return;
+        }
+        if (!valores.plazo?.cantidad || valores.plazo.cantidad <= 0) {
+            alert('El plazo es requerido');
+            return;
+        }
+        if (!valores.prestatario?.nombre) {
+            alert('El nombre del prestatario es requerido');
+            return;
+        }
+
+        formularioPrestamoOtorgado.setIsSubmitting(true);
+
+        try {
+            const datosPrestamo = formularioPrestamoOtorgado.transformToBackend();
+
+            // Asegurar que tipoPrestatario NO sea 'interno' para préstamos otorgados
+            if (!datosPrestamo.tipoPrestatario || datosPrestamo.tipoPrestatario === 'interno') {
+                datosPrestamo.tipoPrestatario = 'particular';
+            }
+
+            // Configurar entidad financiera como "Caja Propia" para préstamos otorgados
+            datosPrestamo.entidadFinanciera = {
+                nombre: 'Caja Propia',
+                codigo: 'CAJA',
+                tipo: 'caja'
+            };
+
+            // Configurar tipo de crédito como "personal" si no está definido
+            if (!datosPrestamo.tipo) {
+                datosPrestamo.tipo = 'personal';
+            }
+
+            console.log('📤 Enviando préstamo otorgado:', datosPrestamo);
+
+            if (prestamoEditando) {
+                const resultado = await actualizarPrestamo(prestamoEditando._id, datosPrestamo);
+                if (resultado.success) {
+                    cerrarModalPrestamoOtorgado();
+                    formularioPrestamoOtorgado.resetForm();
+                }
+            } else {
+                const resultado = await crearPrestamo(datosPrestamo);
+                if (resultado.success) {
+                    cerrarModalPrestamoOtorgado();
+                    formularioPrestamoOtorgado.resetForm();
+                }
+            }
+        } finally {
+            formularioPrestamoOtorgado.setIsSubmitting(false);
+        }
+    }, [
+        formularioPrestamoOtorgado,
+        prestamoEditando,
+        actualizarPrestamo,
+        crearPrestamo,
+        cerrarModalPrestamoOtorgado
     ]);
     
     // RENDERIZADO CONDICIONAL DE ERRORES
@@ -157,31 +232,70 @@ const PrestamosOptimizado = React.memo(() => {
         <div className="space-y-6">
             
             {/* ENCABEZADO */}
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center flex-wrap gap-4">
                 <h1 className="text-2xl font-bold text-gray-900">
                     Gestión de Préstamos
                 </h1>
-                
-                <div className="flex space-x-3">
+
+                <div className="flex flex-wrap gap-3">
+                    {/* Botón Calculadora */}
                     <button
                         onClick={abrirModalCalculadora}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2 transition-colors"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
                         <span>Calculadora</span>
                     </button>
-                    
+
+                    {/* Botón Préstamo Recibido (de banco/financiera) */}
                     <button
                         onClick={abrirModalNuevo}
-                        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center space-x-2"
+                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center space-x-2 transition-colors"
+                        title="Registrar un préstamo que TÚ RECIBES de un banco o financiera"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                         </svg>
-                        <span>Nuevo Préstamo</span>
+                        <span>💰 Préstamo Recibido</span>
                     </button>
+
+                    {/* Botón Préstamo Otorgado (a trabajadores/externos) */}
+                    <button
+                        onClick={abrirModalPrestamoOtorgado}
+                        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center space-x-2 transition-colors"
+                        title="Registrar un préstamo que TÚ OTORGAS a un trabajador, cliente o tercero"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        <span>💸 Préstamo Otorgado</span>
+                    </button>
+                </div>
+            </div>
+
+            {/* Información sobre los tipos de préstamos */}
+            <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-4 border border-gray-200">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-start gap-3">
+                        <span className="text-2xl">💰</span>
+                        <div>
+                            <h4 className="font-semibold text-indigo-800">Préstamo Recibido</h4>
+                            <p className="text-sm text-gray-600">
+                                Dinero que recibes de un banco o financiera. Se registra como <strong>INGRESO</strong> a tu caja.
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                        <span className="text-2xl">💸</span>
+                        <div>
+                            <h4 className="font-semibold text-green-800">Préstamo Otorgado</h4>
+                            <p className="text-sm text-gray-600">
+                                Dinero que prestas a un trabajador, cliente o tercero. Se registra como <strong>EGRESO</strong> de tu caja.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -212,6 +326,7 @@ const PrestamosOptimizado = React.memo(() => {
             />
             
             {/* MODALES */}
+            {/* Modal Préstamo Recibido (de banco/financiera) */}
             {modalAbierto && (
                 <ModalPrestamo
                     isOpen={modalAbierto}
@@ -226,36 +341,48 @@ const PrestamosOptimizado = React.memo(() => {
                     loadingTrabajadores={loadingTrabajadores}
                 />
             )}
+
+            {/* Modal Préstamo Otorgado (a trabajadores/externos) - NUEVO */}
+            {modalPrestamoOtorgado && (
+                <ModalPrestamoOtorgado
+                    isOpen={modalPrestamoOtorgado}
+                    onClose={cerrarModalPrestamoOtorgado}
+                    onSubmit={handleSubmitPrestamoOtorgado}
+                    formulario={formularioPrestamoOtorgado}
+                    prestamoEditando={prestamoEditando}
+                    loading={formularioPrestamoOtorgado.isSubmitting}
+                    trabajadores={trabajadores}
+                    onBuscarTrabajador={buscarTrabajadores}
+                    onSeleccionarTrabajador={seleccionarTrabajador}
+                    loadingTrabajadores={loadingTrabajadores}
+                />
+            )}
             
             {modalCalculadora && (
-                <ModalCalculadora
-                    open={modalCalculadora}
+                <ModalCalculadoraCuota
+                    isOpen={modalCalculadora}
                     onClose={cerrarModalCalculadora}
                     onCalcular={handleCalcularCuota}
                     formulario={formularioCalculadora}
-                    resultado={calculoCuota}
-                    loading={loadingCalculos}
+                    calculoCuota={calculoCuota}
                 />
             )}
-            
+
             {modalTablaAmortizacion && (
                 <ModalTablaAmortizacion
-                    open={modalTablaAmortizacion}
+                    isOpen={modalTablaAmortizacion}
                     onClose={cerrarModalTablaAmortizacion}
-                    tabla={tablaAmortizacion}
+                    tablaAmortizacion={tablaAmortizacion}
                     prestamo={prestamoViendoDetalles}
-                    loading={loadingCalculos}
                 />
             )}
-            
+
             {modalDetallesPrestamo && (
                 <ModalDetallesPrestamo
-                    open={modalDetallesPrestamo}
+                    isOpen={modalDetallesPrestamo}
                     onClose={cerrarModalDetalles}
                     prestamo={prestamoViendoDetalles}
-                    onEditar={handleEditarPrestamo}
-                    onCancelar={handleCancelarPrestamo}
-                    onVerTablaAmortizacion={abrirModalTablaAmortizacion}
+                    loading={loadingCalculos}
                 />
             )}
             

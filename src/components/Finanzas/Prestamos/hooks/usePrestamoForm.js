@@ -7,8 +7,22 @@ import { useState, useCallback, useMemo } from 'react';
  */
 export const usePrestamoForm = (initialData = null, validationSchema = {}) => {
     
-    // Estado inicial del formulario
+    // Estado inicial del formulario (compatible con préstamos recibidos y otorgados)
     const initialFormState = useMemo(() => ({
+        // Tipo de prestatario (para préstamos otorgados)
+        tipoPrestatario: 'particular',
+        prestatarioRef: null,
+        prestatarioInfo: null,
+        // Información del prestatario
+        prestatario: {
+            nombre: '',
+            tipoDocumento: 'DNI',
+            documento: '',
+            telefono: '',
+            email: '',
+            direccion: ''
+        },
+        // Entidad financiera (para préstamos recibidos)
         entidadFinanciera: {
             nombre: '',
             codigo: '',
@@ -27,6 +41,14 @@ export const usePrestamoForm = (initialData = null, validationSchema = {}) => {
         },
         proposito: '',
         observaciones: '',
+        // Descuento de nómina (para trabajadores)
+        descuentoNomina: {
+            aplicable: false,
+            tipoDescuento: 'cuota_completa',
+            porcentaje: 100,
+            montoFijo: 0,
+            periodoDescuento: 'mensual'
+        },
         ...initialData
     }), [initialData]);
     
@@ -109,6 +131,20 @@ export const usePrestamoForm = (initialData = null, validationSchema = {}) => {
     // Función para transformar datos del backend al formulario
     const transformFromBackend = useCallback((prestamoData) => {
         const transformedData = {
+            // Tipo de prestatario
+            tipoPrestatario: prestamoData.tipoPrestatario || 'particular',
+            prestatarioRef: prestamoData.prestatarioRef || null,
+            prestatarioInfo: prestamoData.prestatarioInfo || null,
+            // Prestatario
+            prestatario: {
+                nombre: prestamoData.prestatario?.nombre || '',
+                tipoDocumento: prestamoData.prestatario?.documento?.tipo || 'DNI',
+                documento: prestamoData.prestatario?.documento?.numero || prestamoData.prestatario?.documento || '',
+                telefono: prestamoData.prestatario?.telefono || '',
+                email: prestamoData.prestatario?.email || '',
+                direccion: prestamoData.prestatario?.direccion || ''
+            },
+            // Entidad financiera
             entidadFinanciera: {
                 nombre: prestamoData.entidadFinanciera?.nombre || '',
                 codigo: prestamoData.entidadFinanciera?.codigo || '',
@@ -117,18 +153,26 @@ export const usePrestamoForm = (initialData = null, validationSchema = {}) => {
             tipoCredito: prestamoData.tipo || prestamoData.tipoCredito || '',
             montoSolicitado: prestamoData.montoSolicitado || '',
             tasaInteres: {
-                porcentaje: prestamoData.tasaInteres || '',
-                tipo: prestamoData.tipoTasa || 'fija',
-                periodo: 'anual'
+                porcentaje: prestamoData.tasaInteres?.porcentaje || prestamoData.tasaInteres || '',
+                tipo: prestamoData.tipoTasa || prestamoData.tasaInteres?.tipo || 'fija',
+                periodo: prestamoData.tasaInteres?.periodo || 'anual'
             },
             plazo: {
-                cantidad: prestamoData.plazoMeses || '',
-                unidad: 'meses'
+                cantidad: prestamoData.plazoMeses || prestamoData.plazo?.cantidad || '',
+                unidad: prestamoData.plazo?.unidad || 'meses'
             },
             proposito: prestamoData.proposito || prestamoData.descripcion || '',
-            observaciones: prestamoData.observaciones || ''
+            observaciones: prestamoData.observaciones || '',
+            // Descuento de nómina
+            descuentoNomina: {
+                aplicable: prestamoData.descuentoNomina?.aplicable || false,
+                tipoDescuento: prestamoData.descuentoNomina?.tipoDescuento || 'cuota_completa',
+                porcentaje: prestamoData.descuentoNomina?.porcentaje || 100,
+                montoFijo: prestamoData.descuentoNomina?.montoFijo || 0,
+                periodoDescuento: prestamoData.descuentoNomina?.periodoDescuento || 'mensual'
+            }
         };
-        
+
         setFormData(transformedData);
         setErrors({});
     }, []);
@@ -136,18 +180,42 @@ export const usePrestamoForm = (initialData = null, validationSchema = {}) => {
     // Función para transformar datos del formulario al backend
     const transformToBackend = useCallback(() => {
         const backendData = { ...formData };
-        
+
+        // Preservar tipoPrestatario
+        backendData.tipoPrestatario = formData.tipoPrestatario || 'particular';
+
+        // Preservar prestatarioRef si existe
+        if (formData.prestatarioRef) {
+            backendData.prestatarioRef = formData.prestatarioRef;
+        }
+
+        // Transformar prestatario
+        if (formData.prestatario) {
+            backendData.prestatario = {
+                nombre: formData.prestatario.nombre || '',
+                tipoDocumento: formData.prestatario.tipoDocumento || 'DNI',
+                documento: formData.prestatario.documento || '',
+                telefono: formData.prestatario.telefono || '',
+                email: formData.prestatario.email || '',
+                direccion: formData.prestatario.direccion || ''
+            };
+        }
+
+        // Limpiar prestatarioInfo ya que solo es para mostrar en el form
+        delete backendData.prestatarioInfo;
+
         // Transformar estructura de tasa de interés
         if (backendData.tasaInteres && typeof backendData.tasaInteres === 'object') {
-            backendData.tasaInteres = parseFloat(backendData.tasaInteres.porcentaje) || 0;
+            const tasaPorcentaje = parseFloat(backendData.tasaInteres.porcentaje) || 0;
             backendData.tipoTasa = backendData.tasaInteres.tipo || 'fija';
+            backendData.tasaInteres = tasaPorcentaje;
         }
-        
+
         // Transformar plazo a plazoMeses
         if (backendData.plazo && typeof backendData.plazo === 'object') {
             const cantidad = parseInt(backendData.plazo.cantidad) || 0;
             const unidad = backendData.plazo.unidad || 'meses';
-            
+
             // Convertir todo a meses
             switch (unidad) {
                 case 'años':
@@ -163,21 +231,32 @@ export const usePrestamoForm = (initialData = null, validationSchema = {}) => {
                     backendData.plazoMeses = cantidad;
                     break;
             }
-            
+
             delete backendData.plazo;
         }
-        
+
         // Asignar tipo de crédito
         if (backendData.tipoCredito) {
             backendData.tipo = backendData.tipoCredito;
             delete backendData.tipoCredito;
         }
-        
+
         // Transformar monto a número
         if (backendData.montoSolicitado) {
             backendData.montoSolicitado = parseFloat(backendData.montoSolicitado) || 0;
         }
-        
+
+        // Preservar descuentoNomina si aplica
+        if (formData.descuentoNomina) {
+            backendData.descuentoNomina = {
+                aplicable: formData.descuentoNomina.aplicable || false,
+                tipoDescuento: formData.descuentoNomina.tipoDescuento || 'cuota_completa',
+                porcentaje: parseFloat(formData.descuentoNomina.porcentaje) || 0,
+                montoFijo: parseFloat(formData.descuentoNomina.montoFijo) || 0,
+                periodoDescuento: formData.descuentoNomina.periodoDescuento || 'mensual'
+            };
+        }
+
         return backendData;
     }, [formData]);
     
@@ -194,17 +273,34 @@ export const usePrestamoForm = (initialData = null, validationSchema = {}) => {
         return Object.keys(validationErrors).length === 0;
     }, [validationErrors]);
     
+    // Función manejarCambio compatible con los modales existentes
+    const manejarCambio = useCallback((e) => {
+        const { name, value, type, checked } = e.target;
+        const actualValue = type === 'checkbox' ? checked : value;
+        updateField(name, actualValue);
+    }, [updateField]);
+
     return {
+        // Datos del formulario
         formData,
+        valores: formData, // Alias para compatibilidad con modales
+        // Errores
         errors,
+        errores: errors, // Alias para compatibilidad con modales
+        // Validación
         isValid,
         isSubmitting,
         setIsSubmitting,
+        // Funciones de actualización
         updateField,
+        manejarCambio, // Función compatible con modales existentes
+        // Transformaciones
         transformFromBackend,
         transformToBackend,
+        // Utilidades
         resetForm,
         validateForm,
+        validarFormulario: validateForm, // Alias para compatibilidad
         validationErrors
     };
 };

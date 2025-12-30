@@ -62,59 +62,80 @@ const PrestamosTable = React.memo(({
         return new Date(fecha).toLocaleDateString('es-PE');
     }, []);
     
+    // Determinar si es préstamo otorgado o recibido
+    const esPrestamoOtorgado = useCallback((prestamo) => {
+        const tipoPrestatario = prestamo.tipoPrestatario || 'particular';
+        return ['trabajador', 'proveedor', 'cliente', 'particular', 'otro'].includes(tipoPrestatario);
+    }, []);
+
     // Componente de fila memoizado
-    const FilaPrestamo = React.memo(({ prestamo }) => (
-        <tr className="hover:bg-gray-50">
-            <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm font-medium text-gray-900">
-                    {prestamo.entidadFinanciera?.nombre || 'N/A'}
-                </div>
-                <div className="text-sm text-gray-500">
-                    {prestamo.tipoCredito || prestamo.tipo || 'N/A'}
-                </div>
-            </td>
-            
-            <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm font-medium text-gray-900">
-                    {formatearMoneda(prestamo.montoSolicitado)}
-                </div>
-                {prestamo.montoAprobado && prestamo.montoAprobado !== prestamo.montoSolicitado && (
-                    <div className="text-sm text-green-600">
-                        Aprobado: {formatearMoneda(prestamo.montoAprobado)}
+    const FilaPrestamo = React.memo(({ prestamo }) => {
+        const esOtorgado = esPrestamoOtorgado(prestamo);
+
+        return (
+            <tr className="hover:bg-gray-50">
+                {/* Tipo de préstamo + Entidad/Prestatario */}
+                <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            esOtorgado
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-indigo-100 text-indigo-800'
+                        }`}>
+                            {esOtorgado ? '💸 Otorgado' : '💰 Recibido'}
+                        </span>
                     </div>
-                )}
-            </td>
-            
-            <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900">
-                    {prestamo.tasaInteres?.porcentaje || prestamo.tasaInteres || 0}%
-                </div>
-                <div className="text-sm text-gray-500">
-                    {prestamo.plazo?.cantidad || prestamo.plazoMeses || 0} meses
-                </div>
-            </td>
-            
-            <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${obtenerClaseEstado(prestamo.estado)}`}>
-                    {prestamo.estado?.replace('_', ' ').toUpperCase() || 'N/A'}
-                </span>
-            </td>
-            
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {formatearFecha(prestamo.fechaSolicitud || prestamo.createdAt)}
-            </td>
-            
-            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <div className="flex space-x-2">
-                    <button
-                        onClick={() => handleVerDetalles(prestamo)}
-                        className="text-blue-600 hover:text-blue-900"
-                        title="Ver detalles"
-                    >
-                        👁️
-                    </button>
-                    
-                    {['vigente', 'desembolsado'].includes(prestamo.estado) && (
+                    <div className="text-sm font-medium text-gray-900 mt-1">
+                        {esOtorgado
+                            ? prestamo.prestatario?.nombre || 'Sin nombre'
+                            : prestamo.entidadFinanciera?.nombre || 'N/A'
+                        }
+                    </div>
+                    <div className="text-xs text-gray-500">
+                        {prestamo.tipoCredito || prestamo.tipo || 'N/A'}
+                    </div>
+                </td>
+
+                <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">
+                        {formatearMoneda(prestamo.montoAprobado || prestamo.montoSolicitado)}
+                    </div>
+                    {prestamo.montoAprobado && prestamo.montoAprobado !== prestamo.montoSolicitado && (
+                        <div className="text-xs text-gray-500">
+                            Solicitado: {formatearMoneda(prestamo.montoSolicitado)}
+                        </div>
+                    )}
+                </td>
+
+                <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                        {prestamo.tasaInteres?.porcentaje || prestamo.tasaInteres || 0}%
+                    </div>
+                    <div className="text-sm text-gray-500">
+                        {prestamo.plazo?.cantidad || prestamo.plazoMeses || 0} meses
+                    </div>
+                </td>
+
+                <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${obtenerClaseEstado(prestamo.estado)}`}>
+                        {prestamo.estado?.replace('_', ' ').toUpperCase() || 'N/A'}
+                    </span>
+                </td>
+
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {formatearFecha(prestamo.fechaSolicitud || prestamo.createdAt)}
+                </td>
+
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div className="flex space-x-2 justify-end">
+                        <button
+                            onClick={() => handleVerDetalles(prestamo)}
+                            className="text-blue-600 hover:text-blue-900"
+                            title="Ver detalles"
+                        >
+                            👁️
+                        </button>
+
                         <button
                             onClick={() => handleVerAmortizacion(prestamo)}
                             className="text-green-600 hover:text-green-900"
@@ -122,31 +143,31 @@ const PrestamosTable = React.memo(({
                         >
                             📊
                         </button>
-                    )}
-                    
-                    {!['completado', 'cancelado', 'rechazado'].includes(prestamo.estado) && (
-                        <>
-                            <button
-                                onClick={() => handleEditar(prestamo)}
-                                className="text-indigo-600 hover:text-indigo-900"
-                                title="Editar"
-                            >
-                                ✏️
-                            </button>
-                            
-                            <button
-                                onClick={() => handleCancelar(prestamo)}
-                                className="text-red-600 hover:text-red-900"
-                                title="Cancelar"
-                            >
-                                ❌
-                            </button>
-                        </>
-                    )}
-                </div>
-            </td>
-        </tr>
-    ));
+
+                        {!['completado', 'cancelado', 'rechazado'].includes(prestamo.estado) && (
+                            <>
+                                <button
+                                    onClick={() => handleEditar(prestamo)}
+                                    className="text-indigo-600 hover:text-indigo-900"
+                                    title="Editar"
+                                >
+                                    ✏️
+                                </button>
+
+                                <button
+                                    onClick={() => handleCancelar(prestamo)}
+                                    className="text-red-600 hover:text-red-900"
+                                    title="Cancelar"
+                                >
+                                    ❌
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </td>
+            </tr>
+        );
+    });
     
     FilaPrestamo.displayName = 'FilaPrestamo';
     
@@ -192,7 +213,7 @@ const PrestamosTable = React.memo(({
                     <thead className="bg-gray-50">
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Entidad / Tipo
+                                Tipo / Entidad o Prestatario
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Monto

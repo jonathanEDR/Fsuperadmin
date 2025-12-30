@@ -19,6 +19,13 @@ const PrestamosFilters = React.memo(({
         onLimpiarFiltros();
     }, [onLimpiarFiltros]);
     
+    // NUEVO: Tipos de préstamo (Recibido vs Otorgado)
+    const tiposPrestamo = [
+        { value: '', label: 'Todos los préstamos' },
+        { value: 'recibido', label: '💰 Préstamos Recibidos' },
+        { value: 'otorgado', label: '💸 Préstamos Otorgados' }
+    ];
+
     const tiposCredito = [
         { value: '', label: 'Todos los tipos' },
         { value: 'personal', label: 'Personal' },
@@ -27,17 +34,10 @@ const PrestamosFilters = React.memo(({
         { value: 'comercial', label: 'Comercial' },
         { value: 'microempresa', label: 'Microempresa' }
     ];
-    
+
     const estados = [
         { value: '', label: 'Todos los estados' },
-        { value: 'solicitado', label: 'Solicitado' },
-        { value: 'en_evaluacion', label: 'En Evaluación' },
         { value: 'aprobado', label: 'Aprobado' },
-        { value: 'rechazado', label: 'Rechazado' },
-        { value: 'desembolsado', label: 'Desembolsado' },
-        { value: 'vigente', label: 'Vigente' },
-        { value: 'vencido', label: 'Vencido' },
-        { value: 'completado', label: 'Completado' },
         { value: 'cancelado', label: 'Cancelado' }
     ];
     
@@ -54,8 +54,36 @@ const PrestamosFilters = React.memo(({
                 </button>
             </div>
             
+            {/* NUEVO: Filtro principal por Tipo de Préstamo */}
+            <div className="mb-4 p-3 bg-gray-50 rounded-lg border">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tipo de Préstamo
+                </label>
+                <div className="flex flex-wrap gap-2">
+                    {tiposPrestamo.map(tipo => (
+                        <button
+                            key={tipo.value}
+                            type="button"
+                            onClick={() => handleInputChange('tipoPrestamo', tipo.value)}
+                            disabled={loading}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                (filtros.tipoPrestamo || '') === tipo.value
+                                    ? tipo.value === 'recibido'
+                                        ? 'bg-indigo-600 text-white'
+                                        : tipo.value === 'otorgado'
+                                        ? 'bg-green-600 text-white'
+                                        : 'bg-gray-700 text-white'
+                                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                            }`}
+                        >
+                            {tipo.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                
+
                 {/* Estado */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -74,7 +102,7 @@ const PrestamosFilters = React.memo(({
                         ))}
                     </select>
                 </div>
-                
+
                 {/* Tipo de Crédito */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -93,22 +121,22 @@ const PrestamosFilters = React.memo(({
                         ))}
                     </select>
                 </div>
-                
-                {/* Entidad Financiera */}
+
+                {/* Entidad/Prestatario */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Entidad Financiera
+                        {filtros.tipoPrestamo === 'otorgado' ? 'Prestatario' : 'Entidad Financiera'}
                     </label>
                     <input
                         type="text"
                         value={filtros.entidadFinanciera}
                         onChange={(e) => handleInputChange('entidadFinanciera', e.target.value)}
-                        placeholder="Nombre de la entidad..."
+                        placeholder={filtros.tipoPrestamo === 'otorgado' ? 'Nombre del prestatario...' : 'Nombre de la entidad...'}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         disabled={loading}
                     />
                 </div>
-                
+
                 {/* Búsqueda General */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -123,7 +151,7 @@ const PrestamosFilters = React.memo(({
                         disabled={loading}
                     />
                 </div>
-                
+
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
