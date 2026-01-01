@@ -184,14 +184,14 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
                                     {modulo.icon}
                                 </span>
                                 
-                                {/* Label */}
-                                <span className="whitespace-nowrap">
+                                {/* Label - oculto en móviles pequeños, visible en sm+ */}
+                                <span className="hidden sm:inline ml-1.5 sm:ml-2 whitespace-nowrap">
                                     {modulo.label}
                                 </span>
                                 
-                                {/* Indicador de activo */}
+                                {/* Indicador de activo - solo en pantallas sm+ */}
                                 {activo && (
-                                    <span className="ml-2 h-2 w-2 bg-blue-500 rounded-full"></span>
+                                    <span className="hidden sm:block ml-1.5 sm:ml-2 h-1.5 w-1.5 sm:h-2 sm:w-2 bg-blue-500 rounded-full"></span>
                                 )}
                             </Link>
                         );

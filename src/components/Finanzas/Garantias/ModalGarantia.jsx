@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useGarantiaForm } from './hooks';
 import {
     opcionesTipoGarantia,
@@ -23,6 +23,7 @@ const ModalGarantia = ({
 }) => {
     const [activeTab, setActiveTab] = useState('basico');
     const [guardando, setGuardando] = useState(false);
+    const tabsContainerRef = useRef(null);
 
     const {
         valores,
@@ -73,13 +74,34 @@ const ModalGarantia = ({
 
     // Tabs de navegación
     const tabs = [
-        { id: 'basico', label: 'Información Básica', icono: '📋' },
-        { id: 'bien', label: 'Datos del Bien', icono: '🏠' },
-        { id: 'propietario', label: 'Propietario', icono: '👤' },
-        { id: 'valores', label: 'Valores', icono: '💰' },
-        { id: 'ubicacion', label: 'Ubicación', icono: '📍' },
-        { id: 'legal', label: 'Info. Legal', icono: '⚖️' }
+        { id: 'basico', label: 'Información Básica', labelCorto: 'Básica', icono: '📋' },
+        { id: 'bien', label: 'Datos del Bien', labelCorto: 'Bien', icono: '🏠' },
+        { id: 'propietario', label: 'Propietario', labelCorto: 'Dueño', icono: '👤' },
+        { id: 'valores', label: 'Valores', labelCorto: 'Valores', icono: '💰' },
+        { id: 'ubicacion', label: 'Ubicación', labelCorto: 'Ubicación', icono: '📍' },
+        { id: 'legal', label: 'Info. Legal', labelCorto: 'Legal', icono: '⚖️' }
     ];
+
+    // Obtener índice del tab activo
+    const activeTabIndex = tabs.findIndex(tab => tab.id === activeTab);
+
+    // Navegación entre tabs
+    const irAlTab = (direccion) => {
+        const nuevoIndice = activeTabIndex + direccion;
+        if (nuevoIndice >= 0 && nuevoIndice < tabs.length) {
+            setActiveTab(tabs[nuevoIndice].id);
+        }
+    };
+
+    // Scroll al tab activo en móvil
+    useEffect(() => {
+        if (tabsContainerRef.current) {
+            const activeButton = tabsContainerRef.current.querySelector(`[data-tab="${activeTab}"]`);
+            if (activeButton) {
+                activeButton.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+        }
+    }, [activeTab]);
 
     if (!isOpen) return null;
 
