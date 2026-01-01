@@ -22,6 +22,7 @@ const MovimientosCajaFinanzas = () => {
     const [resumenDia, setResumenDia] = useState(null);
     const [movimientos, setMovimientos] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [filtrosAbiertos, setFiltrosAbiertos] = useState(false); // Filtros colapsables - inicia cerrado
     const [filtros, setFiltros] = useState({
         fechaInicio: '', // Dejar vacío para test
         fechaFin: '', // Dejar vacío para test
@@ -133,31 +134,34 @@ const MovimientosCajaFinanzas = () => {
         );
     }
     
-    // Acciones específicas para la toolbar
+    // Acciones específicas para la toolbar - solo iconos en móvil
     const actions = (
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+        <div className="flex flex-row gap-2">
             <button
                 onClick={() => setModalIngreso(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base"
+                className="inline-flex items-center justify-center px-2 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                title="Registrar Ingreso"
             >
-                <PlusCircle className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Registrar </span>Ingreso
+                <PlusCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline ml-2">Ingreso</span>
             </button>
             
             <button
                 onClick={() => setModalEgreso(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm sm:text-base"
+                className="inline-flex items-center justify-center px-2 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                title="Registrar Egreso"
             >
-                <MinusCircle className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Registrar </span>Egreso
+                <MinusCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline ml-2">Egreso</span>
             </button>
             
             <button
                 onClick={() => setModalArqueo(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+                className="inline-flex items-center justify-center px-2 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                title="Arqueo de Caja"
             >
-                <Calculator className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Arqueo de </span>Caja
+                <Calculator className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline ml-2">Arqueo</span>
             </button>
         </div>
     );
@@ -169,201 +173,225 @@ const MovimientosCajaFinanzas = () => {
             loading={loading}
             actions={actions}
         >
-            {/* Resumen del Día */}
-            {resumenDia && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                    {/* Ingresos del Día */}
-                    <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 sm:p-6 rounded-xl border border-green-200">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs sm:text-sm text-green-700 font-medium">Ingresos del Día</p>
-                                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-800">
-                                    S/ {resumenDia.resumenGeneral.ingresos.monto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}
-                                </p>
-                                <p className="text-xs sm:text-sm text-green-600">
-                                    {resumenDia.resumenGeneral.ingresos.cantidad} movimientos
-                                </p>
+            <div className="space-y-4 sm:space-y-6">
+                {/* Resumen del Día */}
+                {resumenDia && (
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+                        {/* Ingresos del Día */}
+                        <div className="bg-gradient-to-br from-green-50 to-green-100 p-3 sm:p-4 lg:p-6 rounded-xl border border-green-200">
+                            <div className="flex items-center justify-between">
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-[10px] sm:text-xs lg:text-sm text-green-700 font-medium">Ingresos del Día</p>
+                                    <p className="text-sm sm:text-lg lg:text-2xl font-bold text-green-800 truncate">
+                                        S/ {resumenDia.resumenGeneral.ingresos.monto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}
+                                    </p>
+                                    <p className="text-[10px] sm:text-xs lg:text-sm text-green-600">
+                                        {resumenDia.resumenGeneral.ingresos.cantidad} mov.
+                                    </p>
+                                </div>
+                                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-green-600 flex-shrink-0 ml-1" />
                             </div>
-                            <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
                         </div>
-                    </div>
-                    
-                    {/* Egresos del Día */}
-                    <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl border border-red-200">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-red-700 font-medium">Egresos del Día</p>
-                                <p className="text-2xl font-bold text-red-800">
-                                    S/ {resumenDia.resumenGeneral.egresos.monto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}
-                                </p>
-                                <p className="text-sm text-red-600">
-                                    {resumenDia.resumenGeneral.egresos.cantidad} movimientos
-                                </p>
+                        
+                        {/* Egresos del Día */}
+                        <div className="bg-gradient-to-br from-red-50 to-red-100 p-3 sm:p-4 lg:p-6 rounded-xl border border-red-200">
+                            <div className="flex items-center justify-between">
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-[10px] sm:text-xs lg:text-sm text-red-700 font-medium">Egresos del Día</p>
+                                    <p className="text-sm sm:text-lg lg:text-2xl font-bold text-red-800 truncate">
+                                        S/ {resumenDia.resumenGeneral.egresos.monto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}
+                                    </p>
+                                    <p className="text-[10px] sm:text-xs lg:text-sm text-red-600">
+                                        {resumenDia.resumenGeneral.egresos.cantidad} mov.
+                                    </p>
+                                </div>
+                                <TrendingDown className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-red-600 flex-shrink-0 ml-1" />
                             </div>
-                            <TrendingDown className="w-8 h-8 text-red-600" />
                         </div>
-                    </div>
-                    
-                    {/* Saldo Neto */}
-                    <div className={`bg-gradient-to-br p-6 rounded-xl border ${
-                        resumenDia.resumenGeneral.saldoNeto >= 0
-                            ? 'from-blue-50 to-blue-100 border-blue-200'
-                            : 'from-orange-50 to-orange-100 border-orange-200'
-                    }`}>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className={`font-medium ${
-                                    resumenDia.resumenGeneral.saldoNeto >= 0 ? 'text-blue-700' : 'text-orange-700'
-                                }`}>
-                                    Saldo Neto
-                                </p>
-                                <p className={`text-2xl font-bold ${
-                                    resumenDia.resumenGeneral.saldoNeto >= 0 ? 'text-blue-800' : 'text-orange-800'
-                                }`}>
-                                    S/ {resumenDia.resumenGeneral.saldoNeto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}
-                                </p>
-                                <p className={`text-sm ${
+                        
+                        {/* Saldo Neto */}
+                        <div className={`bg-gradient-to-br p-3 sm:p-4 lg:p-6 rounded-xl border ${
+                            resumenDia.resumenGeneral.saldoNeto >= 0
+                                ? 'from-blue-50 to-blue-100 border-blue-200'
+                                : 'from-orange-50 to-orange-100 border-orange-200'
+                        }`}>
+                            <div className="flex items-center justify-between">
+                                <div className="min-w-0 flex-1">
+                                    <p className={`text-[10px] sm:text-xs lg:text-sm font-medium ${
+                                        resumenDia.resumenGeneral.saldoNeto >= 0 ? 'text-blue-700' : 'text-orange-700'
+                                    }`}>
+                                        Saldo Neto
+                                    </p>
+                                    <p className={`text-sm sm:text-lg lg:text-2xl font-bold truncate ${
+                                        resumenDia.resumenGeneral.saldoNeto >= 0 ? 'text-blue-800' : 'text-orange-800'
+                                    }`}>
+                                        S/ {resumenDia.resumenGeneral.saldoNeto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}
+                                    </p>
+                                    <p className={`text-[10px] sm:text-xs lg:text-sm ${
+                                        resumenDia.resumenGeneral.saldoNeto >= 0 ? 'text-blue-600' : 'text-orange-600'
+                                    }`}>
+                                        {resumenDia.fecha}
+                                    </p>
+                                </div>
+                                <Wallet className={`w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 flex-shrink-0 ml-1 ${
                                     resumenDia.resumenGeneral.saldoNeto >= 0 ? 'text-blue-600' : 'text-orange-600'
-                                }`}>
-                                    {resumenDia.fecha}
-                                </p>
+                                }`} />
                             </div>
-                            <Wallet className={`w-8 h-8 ${
-                                resumenDia.resumenGeneral.saldoNeto >= 0 ? 'text-blue-600' : 'text-orange-600'
-                            }`} />
+                        </div>
+                        
+                        {/* Efectivo en Caja */}
+                        <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-3 sm:p-4 lg:p-6 rounded-xl border border-purple-200">
+                            <div className="flex items-center justify-between">
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-[10px] sm:text-xs lg:text-sm text-purple-700 font-medium">Efectivo en Caja</p>
+                                    <p className="text-sm sm:text-lg lg:text-2xl font-bold text-purple-800 truncate">
+                                        S/ {resumenDia.efectivo.saldoEfectivo.toLocaleString('es-PE', { minimumFractionDigits: 2 })}
+                                    </p>
+                                    <p className="text-[10px] sm:text-xs lg:text-sm text-purple-600">
+                                        Solo efectivo
+                                    </p>
+                                </div>
+                                <Wallet className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-purple-600 flex-shrink-0 ml-1" />
+                            </div>
                         </div>
                     </div>
-                    
-                    {/* Efectivo en Caja */}
-                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-purple-700 font-medium">Efectivo en Caja</p>
-                                <p className="text-2xl font-bold text-purple-800">
-                                    S/ {resumenDia.efectivo.saldoEfectivo.toLocaleString('es-PE', { minimumFractionDigits: 2 })}
-                                </p>
-                                <p className="text-sm text-purple-600">
-                                    Solo efectivo
-                                </p>
-                            </div>
-                            <Wallet className="w-8 h-8 text-purple-600" />
-                        </div>
-                    </div>
-                </div>
-            )}
+                )}
             
-            {/* Filtros */}
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-gray-900 flex items-center">
-                        <Filter className="w-4 h-4 mr-2" />
-                        Filtros
-                    </h3>
-                    <div className="flex space-x-2">
-                        <button
-                            onClick={aplicarFiltros}
-                            className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-                        >
-                            Aplicar
-                        </button>
-                        <button
-                            onClick={limpiarFiltros}
-                            className="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600"
-                        >
-                            Limpiar
-                        </button>
+            {/* Filtros Colapsables */}
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                {/* Header colapsable */}
+                <button
+                    type="button"
+                    onClick={() => setFiltrosAbiertos(!filtrosAbiertos)}
+                    className="w-full flex items-center justify-between p-3 sm:p-4 hover:bg-gray-50 transition-colors"
+                >
+                    <div className="flex items-center gap-2">
+                        <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+                        <span className="text-sm sm:text-base font-semibold text-gray-900">Filtros</span>
+                        {Object.values(filtros).some(v => v !== '') && (
+                            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
+                                {Object.values(filtros).filter(v => v !== '').length} activo(s)
+                            </span>
+                        )}
                     </div>
-                </div>
+                    <div className="flex items-center gap-2">
+                        {Object.values(filtros).some(v => v !== '') && (
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    limpiarFiltros();
+                                }}
+                                className="text-xs sm:text-sm text-gray-500 hover:text-red-600 cursor-pointer"
+                            >
+                                Limpiar
+                            </span>
+                        )}
+                        <svg 
+                            className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${filtrosAbiertos ? 'rotate-180' : ''}`} 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </button>
                 
-                <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Fecha Inicio
-                        </label>
-                        <input
-                            type="date"
-                            value={filtros.fechaInicio}
-                            onChange={(e) => handleFiltroChange('fechaInicio', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-                    
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Fecha Fin
-                        </label>
-                        <input
-                            type="date"
-                            value={filtros.fechaFin}
-                            onChange={(e) => handleFiltroChange('fechaFin', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-                    
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Tipo
-                        </label>
-                        <select
-                            value={filtros.tipo}
-                            onChange={(e) => handleFiltroChange('tipo', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            <option value="">Todos</option>
-                            <option value="ingreso">Ingresos</option>
-                            <option value="egreso">Egresos</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Tipo Movimiento
-                        </label>
-                        <select
-                            value={filtros.tipoMovimiento}
-                            onChange={(e) => handleFiltroChange('tipoMovimiento', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            <option value="">Todos</option>
-                            <option value="efectivo">Efectivo</option>
-                            <option value="bancario">Bancario</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Estado
-                        </label>
-                        <select
-                            value={filtros.estado}
-                            onChange={(e) => handleFiltroChange('estado', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            <option value="">Todos</option>
-                            <option value="pendiente">Pendiente</option>
-                            <option value="validado">Validado</option>
-                            <option value="aplicado">Aplicado</option>
-                            <option value="anulado">Anulado</option>
-                        </select>
-                    </div>
-                    
-                    <div className="flex items-end">
-                        <button
-                            onClick={cargarDatos}
-                            className="w-full px-3 py-2 bg-gray-600 text-white rounded-md text-sm hover:bg-gray-700 flex items-center justify-center"
-                        >
-                            <RefreshCw className="w-4 h-4 mr-1" />
-                            Actualizar
-                        </button>
+                {/* Contenido colapsable */}
+                <div className={`transition-all duration-300 ease-in-out ${filtrosAbiertos ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+                    <div className="p-3 sm:p-4 pt-0 border-t border-gray-200">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 pt-3 sm:pt-4">
+                            <div>
+                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                                    <span className="hidden sm:inline">Fecha </span>Inicio
+                                </label>
+                                <input
+                                    type="date"
+                                    value={filtros.fechaInicio}
+                                    onChange={(e) => handleFiltroChange('fechaInicio', e.target.value)}
+                                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                                    <span className="hidden sm:inline">Fecha </span>Fin
+                                </label>
+                                <input
+                                    type="date"
+                                    value={filtros.fechaFin}
+                                    onChange={(e) => handleFiltroChange('fechaFin', e.target.value)}
+                                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                                    Tipo
+                                </label>
+                                <select
+                                    value={filtros.tipo}
+                                    onChange={(e) => handleFiltroChange('tipo', e.target.value)}
+                                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value="">Todos</option>
+                                    <option value="ingreso">Ingresos</option>
+                                    <option value="egreso">Egresos</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                                    <span className="hidden sm:inline">Tipo </span>Mov.
+                                </label>
+                                <select
+                                    value={filtros.tipoMovimiento}
+                                    onChange={(e) => handleFiltroChange('tipoMovimiento', e.target.value)}
+                                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value="">Todos</option>
+                                    <option value="efectivo">Efectivo</option>
+                                    <option value="bancario">Bancario</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                                    Estado
+                                </label>
+                                <select
+                                    value={filtros.estado}
+                                    onChange={(e) => handleFiltroChange('estado', e.target.value)}
+                                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value="">Todos</option>
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="validado">Validado</option>
+                                    <option value="aplicado">Aplicado</option>
+                                    <option value="anulado">Anulado</option>
+                                </select>
+                            </div>
+                            
+                            <div className="flex items-end col-span-2 sm:col-span-1">
+                                <button
+                                    onClick={aplicarFiltros}
+                                    className="w-full px-3 py-1.5 sm:py-2 bg-blue-600 text-white rounded-md text-xs sm:text-sm hover:bg-blue-700 flex items-center justify-center"
+                                >
+                                    <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                                    Aplicar
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            {/* Tabla de Movimientos */}
-            <TablaMovimientosFinanzas 
-                movimientos={movimientos}
-                onRefresh={cargarDatos}
-            />
+                {/* Tabla de Movimientos */}
+                <TablaMovimientosFinanzas 
+                    movimientos={movimientos}
+                    onRefresh={cargarDatos}
+                />
+            </div>
             
             {/* Modales */}
             {modalIngreso && (

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useGarantiasData, useGarantiasModals } from './hooks';
 import GarantiasTable from './components/GarantiasTable';
 import GarantiasFilters from './components/GarantiasFilters';
@@ -7,6 +8,7 @@ import ModalGarantia from './ModalGarantia';
 import ModalDetallesGarantia from './ModalDetallesGarantia';
 import { mensajes } from './garantiasConfig';
 import prestamosService from '../../../services/finanzas/prestamosService';
+import FinanzasNavigation from '../common/FinanzasNavigation';
 
 /**
  * Componente principal del módulo de Garantías
@@ -17,6 +19,15 @@ const GarantiasCore = () => {
     const [prestamos, setPrestamos] = useState([]);
     const [cargandoPrestamos, setCargandoPrestamos] = useState(false);
     const [notificacion, setNotificacion] = useState(null);
+    
+    // Navegación
+    const location = useLocation();
+    const currentPath = location.pathname;
+    const baseRoute = currentPath.includes('/super-admin') 
+        ? '/super-admin/finanzas' 
+        : currentPath.includes('/admin')
+        ? '/admin/finanzas'
+        : '/finanzas';
 
     // Hook de datos de garantías
     const {
@@ -232,38 +243,44 @@ const GarantiasCore = () => {
 
     return (
         <div className="min-h-screen bg-gray-100">
+            {/* Navegación de Finanzas */}
+            <FinanzasNavigation currentModule="garantias" baseRoute={baseRoute} />
+            
             {/* Header */}
             <div className="bg-white shadow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex items-center justify-between">
+                <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                                <span className="text-3xl">🔒</span>
-                                <span>Gestión de Garantías</span>
+                            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3">
+                                <span className="text-xl sm:text-2xl lg:text-3xl">🔒</span>
+                                <span className="hidden xs:inline">Gestión de Garantías</span>
+                                <span className="xs:hidden">Garantías</span>
                             </h1>
-                            <p className="mt-1 text-sm text-gray-500">
+                            <p className="mt-1 text-xs sm:text-sm text-gray-500 hidden sm:block">
                                 Administra las garantías asociadas a préstamos financieros
                             </p>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
                             <button
                                 onClick={cargarGarantias}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors flex items-center gap-2"
+                                className="px-2 sm:px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors flex items-center gap-1 sm:gap-2"
                                 disabled={loading}
+                                title="Actualizar lista"
                             >
                                 <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
-                                <span>Actualizar</span>
+                                <span className="hidden sm:inline">Actualizar</span>
                             </button>
                             <button
                                 onClick={abrirModalCrear}
-                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+                                className="px-2 sm:px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors flex items-center gap-1 sm:gap-2"
+                                title="Crear nueva garantía"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                 </svg>
-                                <span>Nueva Garantía</span>
+                                <span className="hidden sm:inline">Nueva Garantía</span>
                             </button>
                         </div>
                     </div>

@@ -177,32 +177,32 @@ const ModalPrestamo = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                {/* Header */}
-                <div className="bg-blue-600 text-white px-6 py-4 rounded-t-lg">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
+                {/* Header - responsive */}
+                <div className="bg-blue-600 text-white px-3 sm:px-6 py-3 sm:py-4 rounded-t-lg">
                     <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-bold">
+                        <h2 className="text-base sm:text-xl font-bold">
                             {prestamoEditando ? 'Editar Préstamo' : 'Nuevo Préstamo'}
                         </h2>
                         <button
                             onClick={onClose}
-                            className="text-white hover:text-gray-200 transition-colors"
+                            className="text-white hover:text-gray-200 transition-colors p-1"
                         >
-                            <span className="text-2xl">&times;</span>
+                            <span className="text-xl sm:text-2xl">&times;</span>
                         </button>
                     </div>
                 </div>
 
-                {/* Body */}
-                <form onSubmit={onSubmit} className="p-6">
+                {/* Body - scrollable */}
+                <form onSubmit={onSubmit} className="p-3 sm:p-6 overflow-y-auto max-h-[calc(95vh-100px)] sm:max-h-[calc(90vh-120px)]">
                     {/* Tipo de Prestatario */}
-                    <div className="mb-8">
-                        <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-6">
+                    <div className="mb-4 sm:mb-8">
+                        <h3 className="text-sm sm:text-lg font-semibold text-gray-800 border-b pb-2 mb-3 sm:mb-6">
                             👤 Tipo de Prestatario
                         </h3>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-3 sm:gap-4">
                             <CampoPrestamos
                                 name="tipoPrestatario"
                                 label="Tipo de Prestatario"
@@ -215,32 +215,32 @@ const ModalPrestamo = ({
                             />
                         </div>
 
-                        {/* Buscador de Trabajadores */}
+                        {/* Buscador de Trabajadores - responsive */}
                         {esTrabajador && (
-                            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                <h4 className="text-md font-medium text-blue-800 mb-3">
+                            <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                <h4 className="text-sm sm:text-md font-medium text-blue-800 mb-2 sm:mb-3">
                                     Seleccionar Trabajador
                                 </h4>
 
                                 {trabajadorSeleccionado ? (
-                                    <div className="flex items-center justify-between bg-white p-3 rounded-md border border-blue-300">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">
+                                    <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 bg-white p-2 sm:p-3 rounded-md border border-blue-300">
+                                        <div className="flex items-center gap-2 sm:gap-3">
+                                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
                                                 {(trabajadorSeleccionado.nombre || '?')[0].toUpperCase()}
                                             </div>
                                             <div>
-                                                <p className="font-medium text-gray-800">
+                                                <p className="font-medium text-gray-800 text-sm sm:text-base">
                                                     {trabajadorSeleccionado.nombreCompleto || `${trabajadorSeleccionado.nombre} ${trabajadorSeleccionado.apellido}`}
                                                 </p>
-                                                <p className="text-sm text-gray-500">
-                                                    {trabajadorSeleccionado.cargo || 'Sin cargo'} - {trabajadorSeleccionado.documento || 'Sin documento'}
+                                                <p className="text-xs sm:text-sm text-gray-500">
+                                                    {trabajadorSeleccionado.cargo || 'Sin cargo'}
                                                 </p>
                                             </div>
                                         </div>
                                         <button
                                             type="button"
                                             onClick={handleLimpiarTrabajador}
-                                            className="text-red-500 hover:text-red-700 px-3 py-1 rounded border border-red-300 hover:bg-red-50"
+                                            className="text-red-500 hover:text-red-700 px-2 py-1 rounded border border-red-300 hover:bg-red-50 text-xs sm:text-sm"
                                         >
                                             Cambiar
                                         </button>
@@ -304,9 +304,9 @@ const ModalPrestamo = ({
                             </div>
                         )}
 
-                        {/* Información del Prestatario (para particulares u otros) */}
+                        {/* Información del Prestatario (para particulares u otros) - responsive */}
                         {!esTrabajador && (
-                            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="mt-3 sm:mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                 <CampoPrestamos
                                     name="prestatario.nombre"
                                     label="Nombre del Prestatario"
@@ -367,13 +367,13 @@ const ModalPrestamo = ({
                         )}
                     </div>
 
-                    {/* Información de la Entidad Financiera */}
-                    <div className="mb-8">
-                        <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-6">
+                    {/* Información de la Entidad Financiera - responsive */}
+                    <div className="mb-4 sm:mb-8">
+                        <h3 className="text-sm sm:text-lg font-semibold text-gray-800 border-b pb-2 mb-3 sm:mb-6">
                             🏦 Entidad Financiera
                         </h3>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                             <CampoPrestamos
                                 name="entidadFinanciera.nombre"
                                 label="Nombre de la Entidad"
@@ -405,13 +405,13 @@ const ModalPrestamo = ({
                         </div>
                     </div>
 
-                    {/* Información del Préstamo */}
-                    <div className="mt-6 space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
+                    {/* Información del Préstamo - responsive */}
+                    <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
+                        <h3 className="text-sm sm:text-lg font-semibold text-gray-800 border-b pb-2">
                             💰 Detalles del Préstamo
                         </h3>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                             <CampoPrestamos
                                 name="tipoCredito"
                                 label="Tipo de Crédito"
@@ -451,7 +451,7 @@ const ModalPrestamo = ({
                             />
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
                             <CampoPrestamos
                                 name="tasaInteres.tipo"
                                 label="Tipo de Tasa"
@@ -496,24 +496,23 @@ const ModalPrestamo = ({
                         </div>
                     </div>
 
-                    {/* Descuento de Nómina (solo para trabajadores) */}
+                    {/* Descuento de Nómina (solo para trabajadores) - responsive */}
                     {mostrarDescuentoNomina && (
-                        <div className="mt-6 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
+                        <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
+                            <h3 className="text-sm sm:text-lg font-semibold text-gray-800 border-b pb-2">
                                 💼 Descuento de Nómina
                             </h3>
 
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
                                 <div className="flex items-start gap-2">
                                     <span className="text-yellow-600">⚠️</span>
-                                    <p className="text-sm text-yellow-800">
-                                        Al habilitar el descuento de nómina, las cuotas del préstamo se descontarán
-                                        automáticamente del sueldo del trabajador según la configuración establecida.
+                                    <p className="text-xs sm:text-sm text-yellow-800">
+                                        Al habilitar, las cuotas se descontarán automáticamente del sueldo.
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-3 mb-4">
+                            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                                 <input
                                     type="checkbox"
                                     id="descuentoNomina.aplicable"
@@ -525,15 +524,15 @@ const ModalPrestamo = ({
                                             value: e.target.checked
                                         }
                                     })}
-                                    className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                    className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                 />
-                                <label htmlFor="descuentoNomina.aplicable" className="text-gray-700 font-medium">
+                                <label htmlFor="descuentoNomina.aplicable" className="text-gray-700 font-medium text-sm sm:text-base">
                                     Aplicar descuento de nómina
                                 </label>
                             </div>
 
                             {formulario.valores.descuentoNomina?.aplicable && (
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                                     <CampoPrestamos
                                         name="descuentoNomina.tipoDescuento"
                                         label="Tipo de Descuento"
@@ -586,54 +585,53 @@ const ModalPrestamo = ({
                         </div>
                     )}
 
-                    {/* === NUEVO: Método de Recepción del Dinero === */}
-                    <div className="mt-6 space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
-                            💰 Método de Recepción del Dinero
+                    {/* === Método de Recepción del Dinero - responsive === */}
+                    <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
+                        <h3 className="text-sm sm:text-lg font-semibold text-gray-800 border-b pb-2">
+                            💰 Método de Recepción
                         </h3>
 
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
                             <div className="flex items-start gap-2">
                                 <span className="text-blue-600">ℹ️</span>
-                                <p className="text-sm text-blue-800">
-                                    Indica cómo recibirás el dinero del préstamo. Si es en efectivo, registra el desglose 
-                                    de billetes y monedas para mantener la trazabilidad en caja.
+                                <p className="text-xs sm:text-sm text-blue-800">
+                                    Indica cómo recibirás el dinero del préstamo.
                                 </p>
                             </div>
                         </div>
 
-                        {/* Selector de tipo de movimiento */}
-                        <div className="grid grid-cols-2 gap-3 mb-4">
+                        {/* Selector de tipo de movimiento - responsive */}
+                        <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
                             <button
                                 type="button"
                                 onClick={() => formulario.manejarCambio({ target: { name: 'tipoMovimiento', value: 'efectivo' } })}
-                                className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center ${
+                                className={`p-2 sm:p-4 rounded-xl border-2 transition-all flex flex-col items-center ${
                                     tipoMovimiento === 'efectivo'
                                         ? 'border-blue-500 bg-blue-50 shadow-md'
                                         : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
                                 }`}
                             >
-                                <span className="text-3xl mb-2">💵</span>
-                                <span className={`font-semibold ${tipoMovimiento === 'efectivo' ? 'text-blue-700' : 'text-gray-700'}`}>
+                                <span className="text-xl sm:text-3xl mb-1 sm:mb-2">💵</span>
+                                <span className={`text-xs sm:text-base font-semibold ${tipoMovimiento === 'efectivo' ? 'text-blue-700' : 'text-gray-700'}`}>
                                     Efectivo
                                 </span>
-                                <span className="text-xs text-gray-500 mt-1">Con desglose por denominación</span>
+                                <span className="text-[10px] sm:text-xs text-gray-500 mt-1 hidden sm:block">Con desglose</span>
                             </button>
 
                             <button
                                 type="button"
                                 onClick={() => formulario.manejarCambio({ target: { name: 'tipoMovimiento', value: 'bancario' } })}
-                                className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center ${
+                                className={`p-2 sm:p-4 rounded-xl border-2 transition-all flex flex-col items-center ${
                                     tipoMovimiento === 'bancario'
                                         ? 'border-blue-500 bg-blue-50 shadow-md'
                                         : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
                                 }`}
                             >
-                                <span className="text-3xl mb-2">🏦</span>
-                                <span className={`font-semibold ${tipoMovimiento === 'bancario' ? 'text-blue-700' : 'text-gray-700'}`}>
-                                    Transferencia Bancaria
+                                <span className="text-xl sm:text-3xl mb-1 sm:mb-2">🏦</span>
+                                <span className={`text-xs sm:text-base font-semibold ${tipoMovimiento === 'bancario' ? 'text-blue-700' : 'text-gray-700'}`}>
+                                    <span className="hidden sm:inline">Transferencia </span>Bancaria
                                 </span>
-                                <span className="text-xs text-gray-500 mt-1">Depósito a cuenta bancaria</span>
+                                <span className="text-[10px] sm:text-xs text-gray-500 mt-1 hidden sm:block">Depósito a cuenta</span>
                             </button>
                         </div>
 
@@ -649,43 +647,42 @@ const ModalPrestamo = ({
                             />
                         )}
 
-                        {/* Selección de cuenta bancaria para transferencia */}
+                        {/* Selección de cuenta bancaria para transferencia - responsive */}
                         {tipoMovimiento === 'bancario' && (
-                            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
-                                <h4 className="font-medium text-indigo-800 mb-3 flex items-center gap-2">
-                                    🏦 Cuenta Bancaria de Destino
+                            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 sm:p-4">
+                                <h4 className="font-medium text-indigo-800 mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
+                                    🏦 Cuenta Destino
                                 </h4>
                                 
                                 {loadingCuentas ? (
-                                    <div className="flex items-center justify-center py-4">
-                                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
-                                        <span className="ml-2 text-gray-600">Cargando cuentas...</span>
+                                    <div className="flex items-center justify-center py-3 sm:py-4">
+                                        <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-b-2 border-indigo-600"></div>
+                                        <span className="ml-2 text-gray-600 text-sm">Cargando...</span>
                                     </div>
                                 ) : cuentasBancarias.length === 0 ? (
-                                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                                        <p className="text-sm text-yellow-800">
-                                            ⚠️ No hay cuentas bancarias registradas. El préstamo se registrará sin asociar a una cuenta específica.
+                                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2 sm:p-3">
+                                        <p className="text-xs sm:text-sm text-yellow-800">
+                                            ⚠️ No hay cuentas bancarias registradas.
                                         </p>
                                     </div>
                                 ) : (
-                                    <div className="space-y-3">
+                                    <div className="space-y-2 sm:space-y-3">
                                         <select
                                             value={formulario.valores?.datosBancarios?.cuentaBancariaId || ''}
                                             onChange={(e) => formulario.manejarCambio({
                                                 target: { name: 'datosBancarios.cuentaBancariaId', value: e.target.value }
                                             })}
-                                            className="w-full px-3 py-2.5 border border-indigo-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white font-medium"
+                                            className="w-full px-2 sm:px-3 py-2 sm:py-2.5 border border-indigo-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white font-medium text-xs sm:text-sm"
                                         >
-                                            <option value="">-- Seleccionar cuenta destino --</option>
+                                            <option value="">-- Seleccionar cuenta --</option>
                                             {cuentasBancarias.map(cuenta => (
                                                 <option key={cuenta._id} value={cuenta._id}>
-                                                    {cuenta.nombre || cuenta.banco} - {cuenta.tipoCuenta} - ****{cuenta.numeroCuenta?.slice(-4)} 
-                                                    ({cuenta.moneda || 'PEN'} {(cuenta.saldoActual || cuenta.saldo || 0).toFixed(2)})
+                                                    {cuenta.nombre || cuenta.banco} - ****{cuenta.numeroCuenta?.slice(-4)} - {cuenta.moneda || 'PEN'} {(cuenta.saldoActual || cuenta.saldo || 0).toFixed(0)}
                                                 </option>
                                             ))}
                                         </select>
                                         
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                                             <CampoPrestamos
                                                 name="datosBancarios.numeroOperacion"
                                                 label="N° de Operación / Referencia"
@@ -724,10 +721,10 @@ const ModalPrestamo = ({
                         )}
                     </div>
 
-                    {/* Información Adicional */}
-                    <div className="mt-6 space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
-                            📝 Información Adicional
+                    {/* Información Adicional - responsive */}
+                    <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
+                        <h3 className="text-sm sm:text-lg font-semibold text-gray-800 border-b pb-2">
+                            📝 Info Adicional
                         </h3>
 
                         <CampoPrestamos
@@ -753,12 +750,12 @@ const ModalPrestamo = ({
                         />
                     </div>
 
-                    {/* Footer */}
-                    <div className="flex justify-end space-x-4 mt-8 pt-6 border-t">
+                    {/* Footer - responsive */}
+                    <div className="flex justify-end gap-2 sm:gap-4 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                            className="px-3 sm:px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-sm sm:text-base"
                             disabled={loading}
                         >
                             Cancelar
@@ -766,9 +763,9 @@ const ModalPrestamo = ({
                         <button
                             type="submit"
                             disabled={loading}
-                            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                            className="px-3 sm:px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
                         >
-                            {loading ? 'Guardando...' : (prestamoEditando ? 'Actualizar' : 'Crear')} Préstamo
+                            {loading ? 'Guardando...' : (prestamoEditando ? 'Actualizar' : 'Crear')}
                         </button>
                     </div>
                 </form>

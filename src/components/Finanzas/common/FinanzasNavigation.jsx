@@ -98,32 +98,33 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
     const isActive = (moduloId) => moduloActivo === moduloId;
 
     return (
-        <div className="bg-white border-b border-gray-200 shadow-sm mb-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white border-b border-gray-200 shadow-sm mb-4 sm:mb-6">
+            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
                 {/* Header de navegación */}
-                <div className="flex items-center justify-between py-4">
-                    <div className="flex items-center space-x-4">
-                        <h1 className="text-2xl font-bold text-gray-900">
-                            <i className="fas fa-chart-line mr-2 text-blue-600"></i>
-                            Finanzas
+                <div className="flex items-center justify-between py-3 sm:py-4">
+                    <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+                        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 flex items-center flex-shrink-0">
+                            <i className="fas fa-chart-line mr-1.5 sm:mr-2 text-blue-600"></i>
+                            <span className="hidden xs:inline">Finanzas</span>
                         </h1>
                         
-                        {/* Breadcrumb del módulo actual */}
+                        {/* Breadcrumb del módulo actual - responsive */}
                         {moduloActivo !== 'dashboard' && (
-                            <nav className="flex" aria-label="Breadcrumb">
-                                <ol className="flex items-center space-x-2">
-                                    <li>
+                            <nav className="flex min-w-0 flex-1" aria-label="Breadcrumb">
+                                <ol className="flex items-center gap-1 sm:gap-2 min-w-0">
+                                    <li className="flex-shrink-0">
                                         <Link 
                                             to={baseRoute} 
-                                            className="text-gray-500 hover:text-gray-700 transition-colors"
+                                            className="text-xs sm:text-sm text-gray-500 hover:text-gray-700 transition-colors"
                                         >
-                                            Dashboard
+                                            <span className="hidden sm:inline">Dashboard</span>
+                                            <span className="sm:hidden">🏠</span>
                                         </Link>
                                     </li>
-                                    <li className="text-gray-500">
-                                        <i className="fas fa-chevron-right"></i>
+                                    <li className="text-gray-400 flex-shrink-0">
+                                        <span className="text-xs">›</span>
                                     </li>
-                                    <li className="text-gray-900 font-medium">
+                                    <li className="text-xs sm:text-sm text-gray-900 font-medium truncate">
                                         {modulosFinanzas.find(m => m.id === moduloActivo)?.label || 'Módulo'}
                                     </li>
                                 </ol>

@@ -229,70 +229,61 @@ const PrestamosOptimizado = React.memo(() => {
     }
     
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             
-            {/* ENCABEZADO */}
-            <div className="flex justify-between items-center flex-wrap gap-4">
-                <h1 className="text-2xl font-bold text-gray-900">
-                    Gestión de Préstamos
-                </h1>
+            {/* ENCABEZADO - Solo botones, el título viene de FinanzasLayout */}
+            <div className="flex flex-wrap justify-end gap-2 sm:gap-3">
+                {/* Botón Calculadora - solo icono en móvil */}
+                <button
+                    onClick={abrirModalCalculadora}
+                    className="bg-blue-600 text-white px-2 sm:px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-1 sm:space-x-2 transition-colors text-sm"
+                    title="Calculadora de cuotas"
+                >
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <span className="hidden sm:inline">Calculadora</span>
+                </button>
 
-                <div className="flex flex-wrap gap-3">
-                    {/* Botón Calculadora */}
-                    <button
-                        onClick={abrirModalCalculadora}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2 transition-colors"
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                        <span>Calculadora</span>
-                    </button>
+                {/* Botón Préstamo Recibido - solo icono en móvil */}
+                <button
+                    onClick={abrirModalNuevo}
+                    className="bg-indigo-600 text-white px-2 sm:px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center justify-center space-x-1 sm:space-x-2 transition-colors text-sm"
+                    title="Registrar un préstamo que TÚ RECIBES de un banco o financiera"
+                >
+                    <span className="text-base sm:text-lg">💰</span>
+                    <span className="hidden sm:inline">Préstamo Recibido</span>
+                </button>
 
-                    {/* Botón Préstamo Recibido (de banco/financiera) */}
-                    <button
-                        onClick={abrirModalNuevo}
-                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center space-x-2 transition-colors"
-                        title="Registrar un préstamo que TÚ RECIBES de un banco o financiera"
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        <span>💰 Préstamo Recibido</span>
-                    </button>
-
-                    {/* Botón Préstamo Otorgado (a trabajadores/externos) */}
-                    <button
-                        onClick={abrirModalPrestamoOtorgado}
-                        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center space-x-2 transition-colors"
-                        title="Registrar un préstamo que TÚ OTORGAS a un trabajador, cliente o tercero"
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        <span>💸 Préstamo Otorgado</span>
-                    </button>
-                </div>
+                {/* Botón Préstamo Otorgado - solo icono en móvil */}
+                <button
+                    onClick={abrirModalPrestamoOtorgado}
+                    className="bg-green-600 text-white px-2 sm:px-4 py-2 rounded-lg hover:bg-green-700 flex items-center justify-center space-x-1 sm:space-x-2 transition-colors text-sm"
+                    title="Registrar un préstamo que TÚ OTORGAS a un trabajador, cliente o tercero"
+                >
+                    <span className="text-base sm:text-lg">💸</span>
+                    <span className="hidden sm:inline">Préstamo Otorgado</span>
+                </button>
             </div>
 
-            {/* Información sobre los tipos de préstamos */}
-            <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-4 border border-gray-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-start gap-3">
-                        <span className="text-2xl">💰</span>
+            {/* Información sobre los tipos de préstamos - responsive */}
+            <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                        <span className="text-xl sm:text-2xl">💰</span>
                         <div>
-                            <h4 className="font-semibold text-indigo-800">Préstamo Recibido</h4>
-                            <p className="text-sm text-gray-600">
-                                Dinero que recibes de un banco o financiera. Se registra como <strong>INGRESO</strong> a tu caja.
+                            <h4 className="font-semibold text-indigo-800 text-sm sm:text-base">Préstamo Recibido</h4>
+                            <p className="text-xs sm:text-sm text-gray-600">
+                                Dinero que recibes de un banco o financiera. <span className="hidden xs:inline">Se registra como</span> <strong>INGRESO</strong><span className="hidden xs:inline"> a tu caja</span>.
                             </p>
                         </div>
                     </div>
-                    <div className="flex items-start gap-3">
-                        <span className="text-2xl">💸</span>
+                    <div className="flex items-start gap-2 sm:gap-3">
+                        <span className="text-xl sm:text-2xl">💸</span>
                         <div>
-                            <h4 className="font-semibold text-green-800">Préstamo Otorgado</h4>
-                            <p className="text-sm text-gray-600">
-                                Dinero que prestas a un trabajador, cliente o tercero. Se registra como <strong>EGRESO</strong> de tu caja.
+                            <h4 className="font-semibold text-green-800 text-sm sm:text-base">Préstamo Otorgado</h4>
+                            <p className="text-xs sm:text-sm text-gray-600">
+                                Dinero que prestas a un trabajador, cliente o tercero. <span className="hidden xs:inline">Se registra como</span> <strong>EGRESO</strong><span className="hidden xs:inline"> de tu caja</span>.
                             </p>
                         </div>
                     </div>

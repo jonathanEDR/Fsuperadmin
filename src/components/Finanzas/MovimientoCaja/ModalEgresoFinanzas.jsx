@@ -498,58 +498,58 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
     ];
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-5xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-2xl">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white">
-                    <h2 className="text-xl font-bold flex items-center">
-                        <MinusCircle className="w-6 h-6 mr-2" />
-                        Registrar Egreso
+                <div className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-red-500 to-red-600 text-white">
+                    <h2 className="text-base sm:text-xl font-bold flex items-center">
+                        <MinusCircle className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+                        <span className="hidden xs:inline">Registrar </span>Egreso
                     </h2>
                     <button onClick={onClose} className="p-1 hover:bg-white/20 rounded-full transition-colors">
-                        <X className="w-6 h-6" />
+                        <X className="w-5 h-5 sm:w-6 sm:h-6" />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[calc(90vh-140px)]">
-                    <div className="p-6 grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[calc(95vh-120px)] sm:max-h-[calc(90vh-140px)]">
+                    <div className="p-3 sm:p-6 grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
                         {/* Columna Principal - 3/5 */}
-                        <div className="lg:col-span-3 space-y-5">
+                        <div className="lg:col-span-3 space-y-4 sm:space-y-5">
                             {/* Información Principal */}
-                            <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-                                <h3 className="font-semibold text-gray-800 flex items-center">
-                                    <span className="mr-2">📝</span> Información Principal
+                            <div className="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-3 sm:space-y-4">
+                                <h3 className="text-sm sm:text-base font-semibold text-gray-800 flex items-center">
+                                    <span className="mr-2">📝</span> <span className="hidden sm:inline">Información </span>Principal
                                 </h3>
 
-                                {/* Monto y Concepto */}
-                                <div className="grid grid-cols-2 gap-4">
+                                {/* Monto y Concepto - responsive */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                                             Monto <span className="text-red-500">*</span>
                                         </label>
                                         <div className="relative">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">S/</span>
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium text-sm">S/</span>
                                             <input
                                                 type="number"
                                                 step="0.01"
                                                 min="0.01"
                                                 value={formData.monto}
                                                 onChange={(e) => handleInputChange('monto', e.target.value)}
-                                                className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-lg font-semibold"
+                                                className="w-full pl-10 pr-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-base sm:text-lg font-semibold"
                                                 placeholder="0.00"
                                                 required
                                             />
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                                             Concepto <span className="text-red-500">*</span>
                                         </label>
                                         <input
                                             type="text"
                                             value={formData.concepto}
                                             onChange={(e) => handleInputChange('concepto', e.target.value)}
-                                            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                            className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm sm:text-base"
                                             placeholder="Ej: Compra de insumos"
                                             required
                                         />
@@ -558,36 +558,36 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
 
                                 {/* Descripción */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Descripción</label>
                                     <textarea
                                         value={formData.descripcion}
                                         onChange={(e) => handleInputChange('descripcion', e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none text-sm"
                                         rows="2"
                                         placeholder="Descripción detallada (opcional)"
                                     />
                                 </div>
                             </div>
 
-                            {/* Método de Pago */}
-                            <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-                                <h3 className="font-semibold text-gray-800 flex items-center">
+                            {/* Método de Pago - responsive */}
+                            <div className="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-3 sm:space-y-4">
+                                <h3 className="text-sm sm:text-base font-semibold text-gray-800 flex items-center">
                                     <span className="mr-2">💰</span> Método de Pago
                                 </h3>
 
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                                     {/* Efectivo */}
                                     <button
                                         type="button"
                                         onClick={() => handleInputChange('metodoPago', 'efectivo')}
-                                        className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center ${
+                                        className={`p-2 sm:p-4 rounded-xl border-2 transition-all flex flex-col items-center ${
                                             formData.metodoPago === 'efectivo'
                                                 ? 'border-red-500 bg-red-50 shadow-md'
                                                 : 'border-gray-200 hover:border-red-300 hover:bg-gray-50'
                                         }`}
                                     >
-                                        <span className="text-3xl mb-2">💵</span>
-                                        <span className={`font-semibold ${formData.metodoPago === 'efectivo' ? 'text-red-700' : 'text-gray-700'}`}>
+                                        <span className="text-xl sm:text-3xl mb-1 sm:mb-2">💵</span>
+                                        <span className={`text-xs sm:text-base font-semibold ${formData.metodoPago === 'efectivo' ? 'text-red-700' : 'text-gray-700'}`}>
                                             Efectivo
                                         </span>
                                     </button>
@@ -596,68 +596,69 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                     <button
                                         type="button"
                                         onClick={() => handleInputChange('metodoPago', 'cuenta_bancaria')}
-                                        className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center ${
+                                        className={`p-2 sm:p-4 rounded-xl border-2 transition-all flex flex-col items-center ${
                                             formData.metodoPago === 'cuenta_bancaria'
                                                 ? 'border-red-500 bg-red-50 shadow-md'
                                                 : 'border-gray-200 hover:border-red-300 hover:bg-gray-50'
                                         }`}
                                     >
-                                        <span className="text-3xl mb-2">🏦</span>
-                                        <span className={`font-semibold ${formData.metodoPago === 'cuenta_bancaria' ? 'text-red-700' : 'text-gray-700'}`}>
-                                            Cuenta Bancaria
+                                        <span className="text-xl sm:text-3xl mb-1 sm:mb-2">🏦</span>
+                                        <span className={`text-xs sm:text-base font-semibold ${formData.metodoPago === 'cuenta_bancaria' ? 'text-red-700' : 'text-gray-700'}`}>
+                                            <span className="hidden sm:inline">Cuenta </span>Bancaria
                                         </span>
                                     </button>
                                 </div>
 
-                                {/* Selector de Cuenta Bancaria */}
+                                {/* Selector de Cuenta Bancaria - responsive */}
                                 {formData.metodoPago === 'cuenta_bancaria' && (
-                                    <div className="mt-3">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Seleccionar Cuenta <span className="text-red-500">*</span>
+                                    <div className="mt-2 sm:mt-3">
+                                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                                            <span className="hidden xs:inline">Seleccionar </span>Cuenta <span className="text-red-500">*</span>
                                         </label>
                                         <select
                                             value={formData.cuentaBancariaId}
                                             onChange={(e) => handleInputChange('cuentaBancariaId', e.target.value)}
-                                            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 font-medium"
+                                            className="w-full px-2 sm:px-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 font-medium text-xs sm:text-sm"
                                             required={formData.metodoPago === 'cuenta_bancaria'}
                                         >
-                                            <option value="">-- Seleccionar cuenta --</option>
+                                            <option value="">-- Seleccionar --</option>
                                             {cuentasBancarias.map(cuenta => (
                                                 <option key={cuenta._id} value={cuenta._id}>
-                                                    {cuenta.nombre || cuenta.banco} - {cuenta.tipoCuenta} - ****{cuenta.numeroCuenta?.slice(-4)} ({cuenta.moneda || 'PEN'} {(cuenta.saldoActual || cuenta.saldo || 0).toFixed(2)})
+                                                    {cuenta.nombre || cuenta.banco} - ****{cuenta.numeroCuenta?.slice(-4)} - {cuenta.moneda || 'PEN'} {(cuenta.saldoActual || cuenta.saldo || 0).toFixed(0)}
                                                 </option>
                                             ))}
                                         </select>
                                         {cuentasBancarias.length === 0 && (
-                                            <p className="text-sm text-amber-600 mt-1 flex items-center">
+                                            <p className="text-xs sm:text-sm text-amber-600 mt-1 flex items-center">
                                                 <span className="mr-1">⚠️</span>
-                                                No hay cuentas bancarias registradas
+                                                No hay cuentas registradas
                                             </p>
                                         )}
                                     </div>
                                 )}
                             </div>
 
-                            {/* Categoría */}
-                            <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                                <h3 className="font-semibold text-gray-800 flex items-center">
+                            {/* Categoría - responsive */}
+                            <div className="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-3">
+                                <h3 className="text-sm sm:text-base font-semibold text-gray-800 flex items-center">
                                     <span className="mr-2">📂</span> Categoría
                                 </h3>
 
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5 sm:gap-2">
                                     {categoriasEgresos.map(cat => (
                                         <button
                                             key={cat.value}
                                             type="button"
                                             onClick={() => handleInputChange('categoria', cat.value)}
-                                            className={`p-2.5 rounded-lg border-2 transition-all text-sm ${
+                                            className={`p-1.5 sm:p-2.5 rounded-lg border-2 transition-all text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-0.5 sm:gap-1 ${
                                                 formData.categoria === cat.value
                                                     ? 'border-red-500 bg-red-50 text-red-700 font-semibold'
                                                     : 'border-gray-200 hover:border-red-300 text-gray-600'
                                             }`}
+                                            title={cat.label}
                                         >
-                                            <span className="mr-1">{cat.icon}</span>
-                                            {cat.label}
+                                            <span className="text-sm sm:text-base">{cat.icon}</span>
+                                            <span className="hidden sm:inline truncate">{cat.label}</span>
                                         </button>
                                     ))}
                                 </div>
@@ -665,24 +666,24 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
 
                             {/* Sección de Préstamos y Cuotas - Solo visible cuando se selecciona pago_prestamo */}
                             {formData.categoria === 'pago_prestamo' && (
-                                <div className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-4 border-2 border-yellow-200 space-y-4">
-                                    <h3 className="font-bold text-gray-800 flex items-center">
-                                        <CreditCard className="w-5 h-5 mr-2 text-yellow-600" />
-                                        Seleccionar Préstamo y Cuota
+                                <div className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-3 sm:p-4 border-2 border-yellow-200 space-y-3 sm:space-y-4">
+                                    <h3 className="text-sm sm:text-base font-bold text-gray-800 flex items-center">
+                                        <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-yellow-600" />
+                                        <span className="hidden xs:inline">Seleccionar </span>Préstamo y Cuota
                                     </h3>
 
                                     {loadingPrestamos ? (
-                                        <div className="flex items-center justify-center py-6">
-                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600"></div>
-                                            <span className="ml-3 text-gray-600">Cargando préstamos...</span>
+                                        <div className="flex items-center justify-center py-4 sm:py-6">
+                                            <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-yellow-600"></div>
+                                            <span className="ml-2 sm:ml-3 text-sm text-gray-600">Cargando...</span>
                                         </div>
                                     ) : prestamosConCuotas.length === 0 ? (
-                                        <div className="bg-amber-100 border border-amber-300 rounded-lg p-4 flex items-start">
-                                            <AlertCircle className="w-5 h-5 text-amber-600 mr-2 flex-shrink-0 mt-0.5" />
+                                        <div className="bg-amber-100 border border-amber-300 rounded-lg p-3 sm:p-4 flex items-start">
+                                            <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 mr-2 flex-shrink-0 mt-0.5" />
                                             <div>
-                                                <p className="text-amber-800 font-medium">No hay préstamos con cuotas pendientes</p>
-                                                <p className="text-amber-700 text-sm mt-1">
-                                                    No tienes préstamos activos con cuotas por pagar en este momento.
+                                                <p className="text-amber-800 font-medium text-sm sm:text-base">No hay préstamos pendientes</p>
+                                                <p className="text-amber-700 text-xs sm:text-sm mt-1 hidden sm:block">
+                                                    No tienes préstamos activos con cuotas por pagar.
                                                 </p>
                                             </div>
                                         </div>
@@ -690,42 +691,42 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                         <>
                                             {/* Selector de Préstamo */}
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                                                     Préstamo <span className="text-red-500">*</span>
                                                 </label>
                                                 <select
                                                     value={prestamoSeleccionado?._id || ''}
                                                     onChange={(e) => handlePrestamoChange(e.target.value)}
-                                                    className="w-full px-3 py-2.5 border-2 border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 bg-white font-medium"
+                                                    className="w-full px-2 sm:px-3 py-2 sm:py-2.5 border-2 border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 bg-white font-medium text-xs sm:text-sm"
                                                 >
-                                                    <option value="">-- Seleccionar préstamo --</option>
+                                                    <option value="">-- Seleccionar --</option>
                                                     {prestamosConCuotas.map(prestamo => (
                                                         <option key={prestamo._id} value={prestamo._id}>
-                                                            {prestamo.codigo} - {prestamo.entidadFinanciera} - {prestamo.totalCuotasPendientes} cuota(s) pendiente(s) - S/ {prestamo.saldoPendiente?.toFixed(2)}
+                                                            {prestamo.codigo} - {prestamo.entidadFinanciera} - {prestamo.totalCuotasPendientes} cuota(s) - S/{prestamo.saldoPendiente?.toFixed(2)}
                                                         </option>
                                                     ))}
                                                 </select>
                                             </div>
 
-                                            {/* Info del Préstamo Seleccionado */}
+                                            {/* Info del Préstamo Seleccionado - responsive */}
                                             {prestamoSeleccionado && (
-                                                <div className="bg-white rounded-lg p-3 border border-yellow-200">
-                                                    <div className="grid grid-cols-2 gap-3 text-sm">
-                                                        <div>
+                                                <div className="bg-white rounded-lg p-2 sm:p-3 border border-yellow-200">
+                                                    <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
+                                                        <div className="flex flex-col xs:flex-row xs:items-center">
                                                             <span className="text-gray-500">Entidad:</span>
-                                                            <span className="ml-2 font-medium">{prestamoSeleccionado.entidadFinanciera}</span>
+                                                            <span className="xs:ml-1 font-medium truncate">{prestamoSeleccionado.entidadFinanciera}</span>
                                                         </div>
-                                                        <div>
+                                                        <div className="flex flex-col xs:flex-row xs:items-center">
                                                             <span className="text-gray-500">Tipo:</span>
-                                                            <span className="ml-2 font-medium capitalize">{prestamoSeleccionado.tipoPrestatario}</span>
+                                                            <span className="xs:ml-1 font-medium capitalize">{prestamoSeleccionado.tipoPrestatario}</span>
                                                         </div>
-                                                        <div>
-                                                            <span className="text-gray-500">Monto Total:</span>
-                                                            <span className="ml-2 font-medium">S/ {prestamoSeleccionado.montoTotal?.toFixed(2)}</span>
+                                                        <div className="flex flex-col xs:flex-row xs:items-center">
+                                                            <span className="text-gray-500">Total:</span>
+                                                            <span className="xs:ml-1 font-medium">S/{prestamoSeleccionado.montoTotal?.toFixed(2)}</span>
                                                         </div>
-                                                        <div>
-                                                            <span className="text-gray-500">Saldo Pendiente:</span>
-                                                            <span className="ml-2 font-medium text-red-600">S/ {prestamoSeleccionado.saldoPendiente?.toFixed(2)}</span>
+                                                        <div className="flex flex-col xs:flex-row xs:items-center">
+                                                            <span className="text-gray-500">Saldo:</span>
+                                                            <span className="xs:ml-1 font-medium text-red-600">S/{prestamoSeleccionado.saldoPendiente?.toFixed(2)}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -734,10 +735,10 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                             {/* Selector de Cuota */}
                                             {prestamoSeleccionado && (
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                                                         Cuota a Pagar <span className="text-red-500">*</span>
                                                     </label>
-                                                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                                                    <div className="space-y-1.5 sm:space-y-2 max-h-40 sm:max-h-48 overflow-y-auto">
                                                         {prestamoSeleccionado.cuotasPendientes.map(cuota => {
                                                             const isSelected = cuotaSeleccionada?._id === cuota._id;
                                                             const fechaVenc = cuota.fechaVencimiento ? new Date(cuota.fechaVencimiento) : null;
@@ -748,7 +749,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                                     key={cuota._id}
                                                                     type="button"
                                                                     onClick={() => handleCuotaChange(cuota._id)}
-                                                                    className={`w-full p-3 rounded-lg border-2 transition-all text-left ${
+                                                                    className={`w-full p-2 sm:p-3 rounded-lg border-2 transition-all text-left ${
                                                                         isSelected
                                                                             ? 'border-yellow-500 bg-yellow-100 shadow-md'
                                                                             : isVencida
@@ -758,32 +759,32 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                                 >
                                                                     <div className="flex items-center justify-between">
                                                                         <div className="flex items-center">
-                                                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
+                                                                            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center mr-2 sm:mr-3 text-xs sm:text-sm ${
                                                                                 isSelected ? 'bg-yellow-500 text-white' : 'bg-gray-200 text-gray-600'
                                                                             }`}>
                                                                                 {cuota.numeroCuota}
                                                                             </div>
                                                                             <div>
-                                                                                <p className="font-semibold text-gray-800">
+                                                                                <p className="font-semibold text-gray-800 text-xs sm:text-sm">
                                                                                     Cuota {cuota.numeroCuota}
                                                                                     {isVencida && (
-                                                                                        <span className="ml-2 text-xs bg-red-500 text-white px-2 py-0.5 rounded">
-                                                                                            VENCIDA
+                                                                                        <span className="ml-1 sm:ml-2 text-[10px] sm:text-xs bg-red-500 text-white px-1 sm:px-2 py-0.5 rounded">
+                                                                                            VENC
                                                                                         </span>
                                                                                     )}
                                                                                 </p>
-                                                                                <p className="text-xs text-gray-500 flex items-center">
-                                                                                    <Calendar className="w-3 h-3 mr-1" />
-                                                                                    Vence: {fechaVenc ? fechaVenc.toLocaleDateString('es-PE') : 'No definida'}
+                                                                                <p className="text-[10px] sm:text-xs text-gray-500 flex items-center">
+                                                                                    <Calendar className="w-3 h-3 mr-1 hidden xs:inline" />
+                                                                                    {fechaVenc ? fechaVenc.toLocaleDateString('es-PE') : '-'}
                                                                                 </p>
                                                                             </div>
                                                                         </div>
                                                                         <div className="text-right">
-                                                                            <p className="font-bold text-lg text-gray-800">
-                                                                                S/ {cuota.montoTotal?.toFixed(2)}
+                                                                            <p className="font-bold text-sm sm:text-lg text-gray-800">
+                                                                                S/{cuota.montoTotal?.toFixed(2)}
                                                                             </p>
-                                                                            <p className="text-xs text-gray-500">
-                                                                                Capital: S/ {(cuota.montoCapital || 0).toFixed(2)} + Int: S/ {(cuota.montoInteres || 0).toFixed(2)}
+                                                                            <p className="text-[10px] sm:text-xs text-gray-500 hidden xs:block">
+                                                                                C: S/{(cuota.montoCapital || 0).toFixed(0)} + I: S/{(cuota.montoInteres || 0).toFixed(0)}
                                                                             </p>
                                                                         </div>
                                                                     </div>
@@ -794,15 +795,15 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                 </div>
                                             )}
 
-                                            {/* Resumen de Cuota Seleccionada */}
+                                            {/* Resumen de Cuota Seleccionada - responsive */}
                                             {cuotaSeleccionada && (
-                                                <div className="bg-green-50 border-2 border-green-300 rounded-lg p-3">
-                                                    <p className="text-sm text-green-800 font-medium flex items-center">
-                                                        <span className="mr-2">✅</span>
-                                                        Cuota {cuotaSeleccionada.numeroCuota} seleccionada - Monto: S/ {cuotaSeleccionada.montoTotal?.toFixed(2)}
+                                                <div className="bg-green-50 border-2 border-green-300 rounded-lg p-2 sm:p-3">
+                                                    <p className="text-xs sm:text-sm text-green-800 font-medium flex items-center">
+                                                        <span className="mr-1 sm:mr-2">✅</span>
+                                                        Cuota {cuotaSeleccionada.numeroCuota} - S/{cuotaSeleccionada.montoTotal?.toFixed(2)}
                                                     </p>
-                                                    <p className="text-xs text-green-700 mt-1">
-                                                        El monto se ha auto-completado en el campo correspondiente
+                                                    <p className="text-[10px] sm:text-xs text-green-700 mt-1 hidden sm:block">
+                                                        El monto se ha auto-completado
                                                     </p>
                                                 </div>
                                             )}
@@ -816,10 +817,10 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                 <button
                                     type="button"
                                     onClick={() => setMostrarInfoAdicional(!mostrarInfoAdicional)}
-                                    className="w-full px-4 py-3 flex items-center justify-between text-gray-700 hover:bg-gray-100 transition-colors"
+                                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between text-gray-700 hover:bg-gray-100 transition-colors"
                                 >
-                                    <span className="font-semibold flex items-center">
-                                        <span className="mr-2">📋</span> Información Adicional (Opcional)
+                                    <span className="font-semibold flex items-center text-sm sm:text-base">
+                                        <span className="mr-2">📋</span> <span className="hidden xs:inline">Información Adicional </span><span className="xs:hidden">Info </span>(Opcional)
                                     </span>
                                     <span className={`transform transition-transform ${mostrarInfoAdicional ? 'rotate-180' : ''}`}>
                                         ▼
@@ -827,36 +828,36 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                 </button>
 
                                 {mostrarInfoAdicional && (
-                                    <div className="p-4 border-t border-gray-200 space-y-4">
+                                    <div className="p-3 sm:p-4 border-t border-gray-200 space-y-3 sm:space-y-4">
                                         {/* Proveedor */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
+                                            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Proveedor</label>
                                             <input
                                                 type="text"
                                                 value={formData.proveedor.nombre}
                                                 onChange={(e) => handleNestedChange('proveedor.nombre', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-sm"
                                                 placeholder="Nombre del proveedor"
                                             />
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 sm:gap-3">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">RUC</label>
+                                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">RUC</label>
                                                 <input
                                                     type="text"
                                                     value={formData.proveedor.ruc}
                                                     onChange={(e) => handleNestedChange('proveedor.ruc', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-sm"
                                                     placeholder="RUC"
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo Documento</label>
+                                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Tipo Documento</label>
                                                 <select
                                                     value={formData.documento.tipo}
                                                     onChange={(e) => handleNestedChange('documento.tipo', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-sm"
                                                 >
                                                     <option value="recibo">Recibo</option>
                                                     <option value="factura">Factura</option>
@@ -865,24 +866,24 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 sm:gap-3">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">N° Documento</label>
+                                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">N° Documento</label>
                                                 <input
                                                     type="text"
                                                     value={formData.documento.numero}
                                                     onChange={(e) => handleNestedChange('documento.numero', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-sm"
                                                     placeholder="Número"
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Serie</label>
+                                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Serie</label>
                                                 <input
                                                     type="text"
                                                     value={formData.documento.serie}
                                                     onChange={(e) => handleNestedChange('documento.serie', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-sm"
                                                     placeholder="Serie"
                                                 />
                                             </div>
@@ -893,61 +894,61 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
 
                             {/* Observaciones */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
+                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Observaciones</label>
                                 <textarea
                                     value={formData.observaciones}
                                     onChange={(e) => handleInputChange('observaciones', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 resize-none"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 resize-none text-sm"
                                     rows="2"
                                     placeholder="Observaciones adicionales (opcional)"
                                 />
                             </div>
                         </div>
 
-                        {/* Columna Desglose - 2/5 (Solo si es efectivo) */}
+                        {/* Columna Desglose - 2/5 (Solo si es efectivo) - responsive */}
                         {formData.metodoPago === 'efectivo' && (
                             <div className="lg:col-span-2">
-                                <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-4 sticky top-0 border-2 border-red-200">
+                                <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-3 sm:p-4 sticky top-0 border-2 border-red-200">
                                     {/* Header con totales */}
-                                    <div className="flex items-center justify-between mb-3">
-                                        <h3 className="font-bold text-gray-800 flex items-center">
-                                            <span className="mr-2">💸</span> Retiro de Efectivo
+                                    <div className="flex items-center justify-between mb-2 sm:mb-3">
+                                        <h3 className="text-sm sm:text-base font-bold text-gray-800 flex items-center">
+                                            <span className="mr-1 sm:mr-2">💸</span> <span className="hidden xs:inline">Retiro de </span>Efectivo
                                         </h3>
                                         {loadingArqueo ? (
-                                            <span className="text-xs text-gray-500">Cargando...</span>
+                                            <span className="text-xs text-gray-500">...</span>
                                         ) : (
-                                            <div className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-bold shadow">
-                                                Retirar: S/ {totalDesglose.toFixed(2)}
+                                            <div className="bg-red-600 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-bold shadow">
+                                                S/ {totalDesglose.toFixed(2)}
                                             </div>
                                         )}
                                     </div>
 
-                                    {/* Resumen de caja */}
-                                    <div className="grid grid-cols-3 gap-2 mb-4 text-center">
-                                        <div className="bg-blue-100 rounded-lg p-2">
-                                            <span className="text-xs text-blue-600 font-medium">Disponible</span>
-                                            <p className="text-sm font-bold text-blue-800">S/ {totalDisponibleCaja.toFixed(2)}</p>
+                                    {/* Resumen de caja - responsive */}
+                                    <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-3 sm:mb-4 text-center">
+                                        <div className="bg-blue-100 rounded-lg p-1.5 sm:p-2">
+                                            <span className="text-[10px] sm:text-xs text-blue-600 font-medium">Disp.</span>
+                                            <p className="text-xs sm:text-sm font-bold text-blue-800">S/{totalDisponibleCaja.toFixed(0)}</p>
                                         </div>
-                                        <div className="bg-red-100 rounded-lg p-2">
-                                            <span className="text-xs text-red-600 font-medium">A Retirar</span>
-                                            <p className="text-sm font-bold text-red-800">S/ {totalDesglose.toFixed(2)}</p>
+                                        <div className="bg-red-100 rounded-lg p-1.5 sm:p-2">
+                                            <span className="text-[10px] sm:text-xs text-red-600 font-medium">Ret.</span>
+                                            <p className="text-xs sm:text-sm font-bold text-red-800">S/{totalDesglose.toFixed(0)}</p>
                                         </div>
-                                        <div className="bg-green-100 rounded-lg p-2">
-                                            <span className="text-xs text-green-600 font-medium">Quedará</span>
-                                            <p className="text-sm font-bold text-green-800">S/ {(totalDisponibleCaja - totalDesglose).toFixed(2)}</p>
+                                        <div className="bg-green-100 rounded-lg p-1.5 sm:p-2">
+                                            <span className="text-[10px] sm:text-xs text-green-600 font-medium">Qued.</span>
+                                            <p className="text-xs sm:text-sm font-bold text-green-800">S/{(totalDisponibleCaja - totalDesglose).toFixed(0)}</p>
                                         </div>
                                     </div>
 
-                                    {/* Billetes */}
-                                    <div className="mb-4">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="text-sm font-medium text-gray-600">📄 Billetes</span>
-                                            <div className="flex gap-2 text-xs">
-                                                <span className="text-blue-600">Disp: {Object.values(saldoCaja.billetes).reduce((a, b) => a + b, 0)}</span>
-                                                <span className="text-red-600">Ret: {Object.values(formData.desglose.billetes).reduce((a, b) => a + b, 0)}</span>
+                                    {/* Billetes - responsive */}
+                                    <div className="mb-3 sm:mb-4">
+                                        <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                                            <span className="text-xs sm:text-sm font-medium text-gray-600">📄 Billetes</span>
+                                            <div className="flex gap-1 sm:gap-2 text-[10px] sm:text-xs">
+                                                <span className="text-blue-600">D:{Object.values(saldoCaja.billetes).reduce((a, b) => a + b, 0)}</span>
+                                                <span className="text-red-600">R:{Object.values(formData.desglose.billetes).reduce((a, b) => a + b, 0)}</span>
                                             </div>
                                         </div>
-                                        <div className="space-y-1.5">
+                                        <div className="space-y-1 sm:space-y-1.5">
                                             {billetes.map(billete => {
                                                 const disponible = saldoCaja.billetes[billete.key] || 0;
                                                 const aRetirar = formData.desglose.billetes[billete.key] || 0;
@@ -999,13 +1000,13 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                         </div>
                                     </div>
 
-                                    {/* Monedas */}
-                                    <div className="mb-4">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="text-sm font-medium text-gray-600">🪙 Monedas</span>
-                                            <div className="flex gap-2 text-xs">
-                                                <span className="text-blue-600">Disp: {Object.values(saldoCaja.monedas).reduce((a, b) => a + b, 0)}</span>
-                                                <span className="text-red-600">Ret: {Object.values(formData.desglose.monedas).reduce((a, b) => a + b, 0)}</span>
+                                    {/* Monedas - responsive */}
+                                    <div className="mb-3 sm:mb-4">
+                                        <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                                            <span className="text-xs sm:text-sm font-medium text-gray-600">🪙 Monedas</span>
+                                            <div className="flex gap-1 sm:gap-2 text-[10px] sm:text-xs">
+                                                <span className="text-blue-600">D:{Object.values(saldoCaja.monedas).reduce((a, b) => a + b, 0)}</span>
+                                                <span className="text-red-600">R:{Object.values(formData.desglose.monedas).reduce((a, b) => a + b, 0)}</span>
                                             </div>
                                         </div>
                                         <div className="space-y-1">
@@ -1103,33 +1104,34 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                     </div>
                 </form>
 
-                {/* Footer con botones */}
-                <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+                {/* Footer con botones - responsive */}
+                <div className="px-3 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-2 sm:gap-3">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+                        className="px-3 sm:px-5 py-2 sm:py-2.5 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center text-sm sm:text-base"
                         disabled={loading}
                     >
-                        Cancelar
+                        <X className="w-4 h-4 sm:mr-1" />
+                        <span className="hidden sm:inline">Cancelar</span>
                     </button>
                     <button
                         onClick={handleSubmit}
-                        className="px-5 py-2.5 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center"
+                        className="px-3 sm:px-5 py-2 sm:py-2.5 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center text-sm sm:text-base"
                         disabled={loading}
                     >
                         {loading ? (
                             <>
-                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                <svg className="animate-spin h-4 w-4 sm:mr-2 text-white" fill="none" viewBox="0 0 24 24">
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                Registrando...
+                                <span className="hidden sm:inline">Registrando...</span>
                             </>
                         ) : (
                             <>
-                                <MinusCircle className="w-4 h-4 mr-2" />
-                                Registrar Egreso
+                                <MinusCircle className="w-4 h-4 sm:mr-2" />
+                                <span className="hidden sm:inline">Registrar Egreso</span>
                             </>
                         )}
                     </button>

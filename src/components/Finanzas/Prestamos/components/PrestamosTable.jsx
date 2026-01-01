@@ -192,79 +192,173 @@ const PrestamosTable = React.memo(({
     // Empty state
     if (isEmpty) {
         return (
-            <div className="bg-white shadow rounded-lg p-6">
-                <div className="text-center py-12">
-                    <div className="text-6xl mb-4">📋</div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+                <div className="text-center py-8 sm:py-12">
+                    <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">📋</div>
+                    <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
                         No hay préstamos
                     </h3>
-                    <p className="text-gray-500">
+                    <p className="text-sm sm:text-base text-gray-500">
                         No se encontraron préstamos con los filtros aplicados.
                     </p>
                 </div>
             </div>
         );
     }
+
+    // Renderizar tarjeta móvil para un préstamo
+    const TarjetaPrestamoMovil = React.memo(({ prestamo }) => {
+        const esOtorgado = esPrestamoOtorgado(prestamo);
+        
+        return (
+            <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm">
+                {/* Header con tipo y estado */}
+                <div className="flex items-start justify-between mb-2 sm:mb-3">
+                    <div className="flex-1 min-w-0">
+                        <span className={`inline-flex px-2 py-0.5 text-[10px] sm:text-xs font-semibold rounded-full ${
+                            esOtorgado
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-indigo-100 text-indigo-800'
+                        }`}>
+                            {esOtorgado ? '💸 Otorgado' : '💰 Recibido'}
+                        </span>
+                        <p className="font-semibold text-gray-900 text-sm mt-1 truncate">
+                            {esOtorgado
+                                ? prestamo.prestatario?.nombre || 'Sin nombre'
+                                : prestamo.entidadFinanciera?.nombre || 'N/A'
+                            }
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                            {prestamo.tipoCredito || prestamo.tipo || 'N/A'}
+                        </p>
+                    </div>
+                    <span className={`ml-2 px-2 py-0.5 text-[10px] sm:text-xs font-semibold rounded-full whitespace-nowrap ${obtenerClaseEstado(prestamo.estado)}`}>
+                        {prestamo.estado?.replace('_', ' ').toUpperCase() || 'N/A'}
+                    </span>
+                </div>
+
+                {/* Info principal en grid */}
+                <div className="grid grid-cols-2 gap-2 mb-3 text-xs">
+                    <div>
+                        <span className="text-gray-500">Monto:</span>
+                        <span className="ml-1 font-semibold text-green-600">
+                            {formatearMoneda(prestamo.montoAprobado || prestamo.montoSolicitado)}
+                        </span>
+                    </div>
+                    <div className="text-right">
+                        <span className="text-gray-500">Tasa:</span>
+                        <span className="ml-1 font-medium text-gray-900">
+                            {prestamo.tasaInteres?.porcentaje || prestamo.tasaInteres || 0}%
+                        </span>
+                    </div>
+                    <div>
+                        <span className="text-gray-500">Plazo:</span>
+                        <span className="ml-1 text-gray-900">
+                            {prestamo.plazo?.cantidad || prestamo.plazoMeses || 0} meses
+                        </span>
+                    </div>
+                    <div className="text-right">
+                        <span className="text-gray-500">Fecha:</span>
+                        <span className="ml-1 text-gray-900">
+                            {formatearFecha(prestamo.fechaSolicitud || prestamo.createdAt)}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Acciones */}
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+                    <button
+                        onClick={() => handleVerDetalles(prestamo)}
+                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        title="Ver detalles"
+                    >
+                        👁️
+                    </button>
+                    <button
+                        onClick={() => handleVerAmortizacion(prestamo)}
+                        className="p-1.5 text-green-600 hover:bg-green-50 rounded transition-colors"
+                        title="Ver tabla de amortización"
+                    >
+                        📊
+                    </button>
+                    {!['completado', 'cancelado', 'rechazado'].includes(prestamo.estado) && (
+                        <>
+                            <button
+                                onClick={() => handleEditar(prestamo)}
+                                className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                                title="Editar"
+                            >
+                                ✏️
+                            </button>
+                            <button
+                                onClick={() => handleCancelar(prestamo)}
+                                className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
+                                title="Cancelar"
+                            >
+                                ❌
+                            </button>
+                        </>
+                    )}
+                </div>
+            </div>
+        );
+    });
+    
+    TarjetaPrestamoMovil.displayName = 'TarjetaPrestamoMovil';
     
     return (
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Tipo / Entidad o Prestatario
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Monto
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Tasa / Plazo
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Estado
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Fecha
-                            </th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Acciones
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                        {prestamos.map((prestamo) => (
-                            <FilaPrestamo 
-                                key={prestamo._id || prestamo.id} 
-                                prestamo={prestamo} 
-                            />
-                        ))}
-                    </tbody>
-                </table>
+        <>
+            {/* Vista móvil: Tarjetas */}
+            <div className="block lg:hidden space-y-2 sm:space-y-3">
+                {prestamos.map((prestamo) => (
+                    <TarjetaPrestamoMovil 
+                        key={prestamo._id || prestamo.id} 
+                        prestamo={prestamo} 
+                    />
+                ))}
             </div>
-            
-            {/* PAGINACIÓN */}
-            {paginacion.totalPaginas > 1 && (
-                <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex-1 flex justify-between sm:hidden">
-                            <button
-                                onClick={() => onCambiarPagina(paginacion.paginaActual - 1)}
-                                disabled={!paginacion.hayAnterior}
-                                className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-                            >
-                                Anterior
-                            </button>
-                            <button
-                                onClick={() => onCambiarPagina(paginacion.paginaActual + 1)}
-                                disabled={!paginacion.haySiguiente}
-                                className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-                            >
-                                Siguiente
-                            </button>
-                        </div>
-                        
-                        <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+
+            {/* Vista desktop: Tabla */}
+            <div className="hidden lg:block bg-white shadow rounded-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Tipo / Entidad o Prestatario
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Monto
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Tasa / Plazo
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Estado
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Fecha
+                                </th>
+                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Acciones
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {prestamos.map((prestamo) => (
+                                <FilaPrestamo 
+                                    key={prestamo._id || prestamo.id} 
+                                    prestamo={prestamo} 
+                                />
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+                
+                {/* PAGINACIÓN Desktop */}
+                {paginacion.totalPaginas > 1 && (
+                    <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+                        <div className="flex items-center justify-between">
                             <p className="text-sm text-gray-700">
                                 {paginacion.mensaje}
                             </p>
@@ -289,9 +383,34 @@ const PrestamosTable = React.memo(({
                             </nav>
                         </div>
                     </div>
+                )}
+            </div>
+
+            {/* PAGINACIÓN Móvil - fuera de la tabla */}
+            {paginacion.totalPaginas > 1 && (
+                <div className="block lg:hidden bg-white rounded-lg shadow px-3 py-3 mt-3">
+                    <div className="flex items-center justify-between">
+                        <button
+                            onClick={() => onCambiarPagina(paginacion.paginaActual - 1)}
+                            disabled={!paginacion.hayAnterior}
+                            className="px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            ← Anterior
+                        </button>
+                        <span className="text-xs text-gray-600">
+                            {paginacion.paginaActual} / {paginacion.totalPaginas}
+                        </span>
+                        <button
+                            onClick={() => onCambiarPagina(paginacion.paginaActual + 1)}
+                            disabled={!paginacion.haySiguiente}
+                            className="px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Siguiente →
+                        </button>
+                    </div>
                 </div>
             )}
-        </div>
+        </>
     );
 });
 

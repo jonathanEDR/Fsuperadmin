@@ -71,21 +71,22 @@ const CuentasBancariasPage = () => {
         eliminarCuenta
     });
 
-    // Acciones para la toolbar
+    // Acciones para la toolbar - responsive: iconos solo en móvil
     const actions = (
         <div className="flex gap-2">
             <button
                 onClick={() => navigate(`${baseRoute}/movimientos-caja`)}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1"
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 sm:px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1"
                 title="Ir a Movimientos de Caja para gestionar ingresos y egresos bancarios"
             >
-                💰 Movimientos
+                💰 <span className="hidden sm:inline">Movimientos</span>
             </button>
             <button 
                 onClick={abrirModalNuevaCuenta}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors w-full sm:w-auto"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-1"
+                title="Crear nueva cuenta bancaria"
             >
-                + Nueva Cuenta
+                <span className="text-lg">+</span> <span className="hidden sm:inline">Nueva Cuenta</span>
             </button>
         </div>
     );

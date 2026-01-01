@@ -8,12 +8,12 @@ const PrestamosResumen = React.memo(({ resumen, loading }) => {
     
     if (loading) {
         return (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
                 {[...Array(4)].map((_, i) => (
-                    <div key={i} className="bg-white p-6 rounded-lg shadow border">
+                    <div key={i} className="bg-white p-3 sm:p-6 rounded-lg shadow border">
                         <div className="animate-pulse">
-                            <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                            <div className="h-8 bg-gray-200 rounded"></div>
+                            <div className="h-3 sm:h-4 bg-gray-200 rounded mb-2"></div>
+                            <div className="h-6 sm:h-8 bg-gray-200 rounded"></div>
                         </div>
                     </div>
                 ))}
@@ -79,23 +79,32 @@ const PrestamosResumen = React.memo(({ resumen, loading }) => {
         return colores[color] || colores.blue;
     }, []);
     
+    // Títulos cortos para móvil
+    const titulosCortos = {
+        'Total Préstamos': 'Total',
+        'Préstamos Activos': 'Activos',
+        'Préstamos Vencidos': 'Vencidos',
+        'Monto Total': 'Monto'
+    };
+
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
             {tarjetas.map((tarjeta, index) => (
                 <div 
                     key={index}
-                    className={`p-6 rounded-lg shadow border-2 ${obtenerColores(tarjeta.color)}`}
+                    className={`p-3 sm:p-4 lg:p-6 rounded-lg shadow border-2 ${obtenerColores(tarjeta.color)}`}
                 >
                     <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium opacity-80">
-                                {tarjeta.titulo}
+                        <div className="min-w-0 flex-1">
+                            <p className="text-[10px] sm:text-xs lg:text-sm font-medium opacity-80 truncate">
+                                <span className="sm:hidden">{titulosCortos[tarjeta.titulo] || tarjeta.titulo}</span>
+                                <span className="hidden sm:inline">{tarjeta.titulo}</span>
                             </p>
-                            <p className="text-2xl font-bold mt-1">
+                            <p className="text-sm sm:text-lg lg:text-2xl font-bold mt-0.5 sm:mt-1 truncate">
                                 {formatearValor(tarjeta.valor, tarjeta.formato)}
                             </p>
                         </div>
-                        <div className="text-3xl opacity-60">
+                        <div className="text-xl sm:text-2xl lg:text-3xl opacity-60 ml-1 sm:ml-2 flex-shrink-0">
                             {tarjeta.icono}
                         </div>
                     </div>
