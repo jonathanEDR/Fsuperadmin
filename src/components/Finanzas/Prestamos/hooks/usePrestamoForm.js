@@ -58,7 +58,9 @@ export const usePrestamoForm = (initialData = null, validationSchema = {}) => {
         datosBancarios: {
             banco: '',
             numeroCuenta: '',
-            numeroOperacion: ''
+            numeroOperacion: '',
+            cuentaBancariaId: '',
+            fechaTransferencia: ''
         },
         ...initialData
     }), [initialData]);
@@ -271,16 +273,32 @@ export const usePrestamoForm = (initialData = null, validationSchema = {}) => {
         // === NUEVO: Incluir tipo de movimiento y desglose de efectivo ===
         backendData.tipoMovimiento = formData.tipoMovimiento || 'efectivo';
         
-        if (formData.tipoMovimiento === 'efectivo' && formData.desgloseEfectivo) {
+        // SIEMPRE incluir desgloseEfectivo si es efectivo (incluso si está vacío)
+        if (formData.tipoMovimiento === 'efectivo') {
             backendData.desgloseEfectivo = {
-                billetes: { ...formData.desgloseEfectivo.billetes },
-                monedas: { ...formData.desgloseEfectivo.monedas }
+                billetes: { 
+                    b200: formData.desgloseEfectivo?.billetes?.b200 || 0,
+                    b100: formData.desgloseEfectivo?.billetes?.b100 || 0,
+                    b50: formData.desgloseEfectivo?.billetes?.b50 || 0,
+                    b20: formData.desgloseEfectivo?.billetes?.b20 || 0,
+                    b10: formData.desgloseEfectivo?.billetes?.b10 || 0
+                },
+                monedas: { 
+                    m5: formData.desgloseEfectivo?.monedas?.m5 || 0,
+                    m2: formData.desgloseEfectivo?.monedas?.m2 || 0,
+                    m1: formData.desgloseEfectivo?.monedas?.m1 || 0,
+                    c50: formData.desgloseEfectivo?.monedas?.c50 || 0,
+                    c20: formData.desgloseEfectivo?.monedas?.c20 || 0,
+                    c10: formData.desgloseEfectivo?.monedas?.c10 || 0
+                }
             };
         } else if (formData.tipoMovimiento === 'bancario' && formData.datosBancarios) {
             backendData.datosBancarios = {
                 banco: formData.datosBancarios.banco || '',
                 numeroCuenta: formData.datosBancarios.numeroCuenta || '',
-                numeroOperacion: formData.datosBancarios.numeroOperacion || ''
+                numeroOperacion: formData.datosBancarios.numeroOperacion || '',
+                cuentaBancariaId: formData.datosBancarios.cuentaBancariaId || null,
+                fechaTransferencia: formData.datosBancarios.fechaTransferencia || null
             };
         }
 

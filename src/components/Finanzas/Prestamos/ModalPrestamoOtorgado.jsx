@@ -133,7 +133,7 @@ const ModalPrestamoOtorgado = ({
         { value: 'otro', label: 'Otro' }
     ];
 
-    // === NUEVO: Manejar cambios en el desglose de efectivo ===
+    // Manejar cambios en el desglose de efectivo
     const handleDesgloseChange = (tipo, key, valor) => {
         const currentDesglose = formulario.valores?.desgloseEfectivo || {
             billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0 },
@@ -148,6 +148,13 @@ const ModalPrestamoOtorgado = ({
             }
         };
         
+        formulario.manejarCambio({
+            target: { name: 'desgloseEfectivo', value: nuevoDesglose }
+        });
+    };
+
+    // === Actualizar todo el desglose de una vez (para auto-distribuir) ===
+    const handleDesgloseCompleto = (nuevoDesglose) => {
         formulario.manejarCambio({
             target: { name: 'desgloseEfectivo', value: nuevoDesglose }
         });
@@ -570,6 +577,7 @@ const ModalPrestamoOtorgado = ({
                                 }}
                                 saldoCaja={saldoCaja}
                                 onDesgloseChange={handleDesgloseChange}
+                                onDesgloseCompleto={handleDesgloseCompleto}
                                 loading={loadingArqueo}
                                 totalDisponible={totalDisponibleCaja}
                                 montoAPagar={parseFloat(formulario.valores?.montoSolicitado) || 0}

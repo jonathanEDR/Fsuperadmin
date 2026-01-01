@@ -10,6 +10,7 @@ const DesgloseEfectivoPrestamo = ({
     desglose,
     saldoCaja,
     onDesgloseChange,
+    onDesgloseCompleto, // Nuevo: para actualizar todo el desglose de una vez
     loading = false,
     totalDisponible = 0,
     montoAPagar = 0
@@ -51,30 +52,60 @@ const DesgloseEfectivoPrestamo = ({
         { key: 'c10', valor: 0.1, label: '0.10 ctv', color: 'bg-gray-400' }
     ];
 
-    // Función para manejar cambios en el desglose
-    const handleDesgloseChange = (tipo, key, accion) => {
+    // Función para manejar cambios en el desglose - ahora acepta valor directo
+    const handleDesgloseChange = (tipo, key, valorOAccion) => {
         const disponible = saldoCaja?.[tipo]?.[key] || 0;
         const actual = desglose?.[tipo]?.[key] || 0;
         
         let nuevoValor;
-        if (accion === 'add') {
+        
+        // Si es un número, es un valor directo del input
+        if (typeof valorOAccion === 'number') {
+            // Limitar al máximo disponible
+            nuevoValor = Math.min(Math.max(0, Math.floor(valorOAccion)), disponible);
+        } else if (valorOAccion === 'add') {
             // Incrementar (retirar más)
             if (actual < disponible) {
                 nuevoValor = actual + 1;
             } else {
                 return; // No se puede retirar más de lo disponible
             }
-        } else {
+        } else if (valorOAccion === 'subtract') {
             // Decrementar (retirar menos)
             nuevoValor = Math.max(0, actual - 1);
+        } else {
+            // Si es string (del input), convertir a número y limitar al disponible
+            const parsed = parseInt(valorOAccion, 10) || 0;
+            nuevoValor = Math.min(Math.max(0, parsed), disponible);
         }
 
         onDesgloseChange(tipo, key, nuevoValor);
     };
 
+    // Manejar cambio directo desde input
+    const handleInputChange = (tipo, key, e) => {
+        const valor = e.target.value;
+        const disponible = saldoCaja?.[tipo]?.[key] || 0;
+        
+        // Permitir campo vacío temporalmente (se tratará como 0)
+        if (valor === '') {
+            onDesgloseChange(tipo, key, 0);
+        } else {
+            const num = parseInt(valor, 10);
+            if (!isNaN(num) && num >= 0) {
+                // Limitar al máximo disponible
+                const valorFinal = Math.min(num, disponible);
+                onDesgloseChange(tipo, key, valorFinal);
+            }
+        }
+    };
+
     // Auto-distribuir el monto
     const autoDistribuir = () => {
-        if (!montoAPagar || montoAPagar <= 0) return;
+        if (!montoAPagar || montoAPagar <= 0) {
+            alert('⚠️ Ingresa primero el monto del préstamo para auto-distribuir');
+            return;
+        }
 
         let restante = parseFloat(montoAPagar);
         const nuevoDesglose = {
@@ -106,13 +137,18 @@ const DesgloseEfectivoPrestamo = ({
             }
         }
 
-        // Notificar cambios
-        Object.entries(nuevoDesglose.billetes).forEach(([key, valor]) => {
-            onDesgloseChange('billetes', key, valor);
-        });
-        Object.entries(nuevoDesglose.monedas).forEach(([key, valor]) => {
-            onDesgloseChange('monedas', key, valor);
-        });
+        // Usar onDesgloseCompleto para actualización batch (más eficiente)
+        if (onDesgloseCompleto) {
+            onDesgloseCompleto(nuevoDesglose);
+        } else {
+            // Fallback: actualizar uno por uno
+            Object.entries(nuevoDesglose.billetes).forEach(([key, valor]) => {
+                onDesgloseChange('billetes', key, valor);
+            });
+            Object.entries(nuevoDesglose.monedas).forEach(([key, valor]) => {
+                onDesgloseChange('monedas', key, valor);
+            });
+        }
 
         if (restante > 0.01) {
             alert(`⚠️ No hay suficiente efectivo en caja. Faltan S/ ${restante.toFixed(2)} para completar el monto.`);
@@ -232,21 +268,27 @@ const DesgloseEfectivoPrestamo = ({
                                     <button
                                         type="button"
                                         onClick={() => handleDesgloseChange('billetes', billete.key, 'subtract')}
-                                        className="w-6 h-6 bg-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors disabled:opacity-40"
+                                        className="w-7 h-7 bg-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors disabled:opacity-40"
                                         disabled={aRetirar === 0}
                                     >
-                                        <Minus size={12} />
+                                        <Minus size={14} />
                                     </button>
-                                    <span className={`w-8 text-center font-bold text-sm ${aRetirar > 0 ? 'text-green-600' : 'text-gray-400'}`}>
-                                        {aRetirar}
-                                    </span>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max={disponible}
+                                        value={aRetirar}
+                                        onChange={(e) => handleInputChange('billetes', billete.key, e)}
+                                        className={`w-14 text-center font-bold text-sm border rounded-lg py-1 focus:ring-2 focus:ring-green-500 focus:border-green-500 ${aRetirar > 0 ? 'text-green-600 bg-green-50 border-green-300' : 'text-gray-400 border-gray-200'}`}
+                                        disabled={sinStock}
+                                    />
                                     <button
                                         type="button"
                                         onClick={() => handleDesgloseChange('billetes', billete.key, 'add')}
-                                        className="w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center hover:bg-green-200 transition-colors disabled:opacity-40"
+                                        className="w-7 h-7 bg-green-100 text-green-600 rounded-full flex items-center justify-center hover:bg-green-200 transition-colors disabled:opacity-40"
                                         disabled={sinStock || aRetirar >= disponible}
                                     >
-                                        <Plus size={12} />
+                                        <Plus size={14} />
                                     </button>
                                 </div>
                                 <div className="flex items-center gap-2 min-w-[70px] justify-end">
@@ -293,18 +335,24 @@ const DesgloseEfectivoPrestamo = ({
                                     <button
                                         type="button"
                                         onClick={() => handleDesgloseChange('monedas', moneda.key, 'subtract')}
-                                        className="w-5 h-5 bg-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors disabled:opacity-40"
+                                        className="w-6 h-6 bg-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors disabled:opacity-40"
                                         disabled={aRetirar === 0}
                                     >
                                         <Minus size={10} />
                                     </button>
-                                    <span className={`w-5 text-center font-bold text-xs ${aRetirar > 0 ? 'text-green-600' : 'text-gray-400'}`}>
-                                        {aRetirar}
-                                    </span>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max={disponible}
+                                        value={aRetirar}
+                                        onChange={(e) => handleInputChange('monedas', moneda.key, e)}
+                                        className={`w-10 text-center font-bold text-xs border rounded-lg py-0.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 ${aRetirar > 0 ? 'text-green-600 bg-green-50 border-green-300' : 'text-gray-400 border-gray-200'}`}
+                                        disabled={sinStock}
+                                    />
                                     <button
                                         type="button"
                                         onClick={() => handleDesgloseChange('monedas', moneda.key, 'add')}
-                                        className="w-5 h-5 bg-green-100 text-green-600 rounded-full flex items-center justify-center hover:bg-green-200 transition-colors disabled:opacity-40"
+                                        className="w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center hover:bg-green-200 transition-colors disabled:opacity-40"
                                         disabled={sinStock || aRetirar >= disponible}
                                     >
                                         <Plus size={10} />

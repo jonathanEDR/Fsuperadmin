@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import CampoPrestamos from './CampoPrestamos';
+import DesgloseEfectivoIngreso from './components/DesgloseEfectivoIngreso';
+import { movimientosCajaService } from '../../../services/movimientosCajaService';
 import {
     opcionesTipoEntidad,
     opcionesTipoInteres,
@@ -27,6 +29,10 @@ const ModalPrestamo = ({
     const [mostrarBuscadorTrabajador, setMostrarBuscadorTrabajador] = useState(false);
     const [busquedaTrabajador, setBusquedaTrabajador] = useState('');
     const [trabajadorSeleccionado, setTrabajadorSeleccionado] = useState(null);
+    
+    // === NUEVO: Estados para cuentas bancarias ===
+    const [cuentasBancarias, setCuentasBancarias] = useState([]);
+    const [loadingCuentas, setLoadingCuentas] = useState(false);
 
     // Resetear estado cuando se cierra el modal
     useEffect(() => {
@@ -34,8 +40,26 @@ const ModalPrestamo = ({
             setMostrarBuscadorTrabajador(false);
             setBusquedaTrabajador('');
             setTrabajadorSeleccionado(null);
+        } else {
+            // Cargar cuentas bancarias al abrir
+            cargarCuentasBancarias();
         }
     }, [isOpen]);
+
+    // === NUEVO: Cargar cuentas bancarias ===
+    const cargarCuentasBancarias = async () => {
+        try {
+            setLoadingCuentas(true);
+            const response = await movimientosCajaService.obtenerCuentasDisponibles();
+            if (response.success && Array.isArray(response.data)) {
+                setCuentasBancarias(response.data);
+            }
+        } catch (error) {
+            console.error('Error cargando cuentas bancarias:', error);
+        } finally {
+            setLoadingCuentas(false);
+        }
+    };
 
     // Manejar cambio de tipo de prestatario
     useEffect(() => {
@@ -106,6 +130,49 @@ const ModalPrestamo = ({
         });
         formulario.manejarCambio({
             target: { name: 'prestatario.email', value: '' }
+        });
+    };
+
+    // === NUEVO: Tipo de movimiento y cálculos ===
+    const tipoMovimiento = formulario.valores?.tipoMovimiento || 'bancario';
+
+    // Calcular total del desglose
+    const totalDesglose = useMemo(() => {
+        const desglose = formulario.valores?.desgloseEfectivo || { billetes: {}, monedas: {} };
+        const { billetes, monedas } = desglose;
+        const totalBilletes =
+            (billetes?.b200 || 0) * 200 +
+            (billetes?.b100 || 0) * 100 +
+            (billetes?.b50 || 0) * 50 +
+            (billetes?.b20 || 0) * 20 +
+            (billetes?.b10 || 0) * 10;
+        const totalMonedas =
+            (monedas?.m5 || 0) * 5 +
+            (monedas?.m2 || 0) * 2 +
+            (monedas?.m1 || 0) * 1 +
+            (monedas?.c50 || 0) * 0.5 +
+            (monedas?.c20 || 0) * 0.2 +
+            (monedas?.c10 || 0) * 0.1;
+        return totalBilletes + totalMonedas;
+    }, [formulario.valores?.desgloseEfectivo]);
+
+    // Manejar cambios en el desglose de efectivo
+    const handleDesgloseChange = (tipo, key, valor) => {
+        const currentDesglose = formulario.valores?.desgloseEfectivo || {
+            billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0 },
+            monedas: { m5: 0, m2: 0, m1: 0, c50: 0, c20: 0, c10: 0 }
+        };
+        
+        const nuevoDesglose = {
+            ...currentDesglose,
+            [tipo]: {
+                ...currentDesglose[tipo],
+                [key]: valor
+            }
+        };
+        
+        formulario.manejarCambio({
+            target: { name: 'desgloseEfectivo', value: nuevoDesglose }
         });
     };
 
@@ -518,6 +585,144 @@ const ModalPrestamo = ({
                             )}
                         </div>
                     )}
+
+                    {/* === NUEVO: Método de Recepción del Dinero === */}
+                    <div className="mt-6 space-y-4">
+                        <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
+                            💰 Método de Recepción del Dinero
+                        </h3>
+
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                            <div className="flex items-start gap-2">
+                                <span className="text-blue-600">ℹ️</span>
+                                <p className="text-sm text-blue-800">
+                                    Indica cómo recibirás el dinero del préstamo. Si es en efectivo, registra el desglose 
+                                    de billetes y monedas para mantener la trazabilidad en caja.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Selector de tipo de movimiento */}
+                        <div className="grid grid-cols-2 gap-3 mb-4">
+                            <button
+                                type="button"
+                                onClick={() => formulario.manejarCambio({ target: { name: 'tipoMovimiento', value: 'efectivo' } })}
+                                className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center ${
+                                    tipoMovimiento === 'efectivo'
+                                        ? 'border-blue-500 bg-blue-50 shadow-md'
+                                        : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                                }`}
+                            >
+                                <span className="text-3xl mb-2">💵</span>
+                                <span className={`font-semibold ${tipoMovimiento === 'efectivo' ? 'text-blue-700' : 'text-gray-700'}`}>
+                                    Efectivo
+                                </span>
+                                <span className="text-xs text-gray-500 mt-1">Con desglose por denominación</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => formulario.manejarCambio({ target: { name: 'tipoMovimiento', value: 'bancario' } })}
+                                className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center ${
+                                    tipoMovimiento === 'bancario'
+                                        ? 'border-blue-500 bg-blue-50 shadow-md'
+                                        : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                                }`}
+                            >
+                                <span className="text-3xl mb-2">🏦</span>
+                                <span className={`font-semibold ${tipoMovimiento === 'bancario' ? 'text-blue-700' : 'text-gray-700'}`}>
+                                    Transferencia Bancaria
+                                </span>
+                                <span className="text-xs text-gray-500 mt-1">Depósito a cuenta bancaria</span>
+                            </button>
+                        </div>
+
+                        {/* Desglose de efectivo para INGRESO */}
+                        {tipoMovimiento === 'efectivo' && (
+                            <DesgloseEfectivoIngreso
+                                desglose={formulario.valores?.desgloseEfectivo || {
+                                    billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0 },
+                                    monedas: { m5: 0, m2: 0, m1: 0, c50: 0, c20: 0, c10: 0 }
+                                }}
+                                onDesgloseChange={handleDesgloseChange}
+                                montoARecibir={parseFloat(formulario.valores?.montoSolicitado) || 0}
+                            />
+                        )}
+
+                        {/* Selección de cuenta bancaria para transferencia */}
+                        {tipoMovimiento === 'bancario' && (
+                            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                                <h4 className="font-medium text-indigo-800 mb-3 flex items-center gap-2">
+                                    🏦 Cuenta Bancaria de Destino
+                                </h4>
+                                
+                                {loadingCuentas ? (
+                                    <div className="flex items-center justify-center py-4">
+                                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+                                        <span className="ml-2 text-gray-600">Cargando cuentas...</span>
+                                    </div>
+                                ) : cuentasBancarias.length === 0 ? (
+                                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                                        <p className="text-sm text-yellow-800">
+                                            ⚠️ No hay cuentas bancarias registradas. El préstamo se registrará sin asociar a una cuenta específica.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        <select
+                                            value={formulario.valores?.datosBancarios?.cuentaBancariaId || ''}
+                                            onChange={(e) => formulario.manejarCambio({
+                                                target: { name: 'datosBancarios.cuentaBancariaId', value: e.target.value }
+                                            })}
+                                            className="w-full px-3 py-2.5 border border-indigo-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white font-medium"
+                                        >
+                                            <option value="">-- Seleccionar cuenta destino --</option>
+                                            {cuentasBancarias.map(cuenta => (
+                                                <option key={cuenta._id} value={cuenta._id}>
+                                                    {cuenta.nombre || cuenta.banco} - {cuenta.tipoCuenta} - ****{cuenta.numeroCuenta?.slice(-4)} 
+                                                    ({cuenta.moneda || 'PEN'} {(cuenta.saldoActual || cuenta.saldo || 0).toFixed(2)})
+                                                </option>
+                                            ))}
+                                        </select>
+                                        
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <CampoPrestamos
+                                                name="datosBancarios.numeroOperacion"
+                                                label="N° de Operación / Referencia"
+                                                value={formulario.valores?.datosBancarios?.numeroOperacion || ''}
+                                                onChange={formulario.manejarCambio}
+                                                placeholder="Número de transacción"
+                                            />
+                                            <CampoPrestamos
+                                                name="datosBancarios.fechaTransferencia"
+                                                label="Fecha de Transferencia"
+                                                type="date"
+                                                value={formulario.valores?.datosBancarios?.fechaTransferencia || ''}
+                                                onChange={formulario.manejarCambio}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Advertencia si hay diferencia en el desglose de efectivo */}
+                        {tipoMovimiento === 'efectivo' && formulario.valores?.montoSolicitado > 0 && (
+                            <div className="mt-3">
+                                {Math.abs(totalDesglose - parseFloat(formulario.valores.montoSolicitado)) > 0.01 ? (
+                                    <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-3 py-2 rounded-lg text-sm flex items-center gap-2">
+                                        <span>⚠️</span>
+                                        El desglose (S/ {totalDesglose.toFixed(2)}) no coincide con el monto del préstamo (S/ {parseFloat(formulario.valores.montoSolicitado).toFixed(2)})
+                                    </div>
+                                ) : totalDesglose > 0 && (
+                                    <div className="bg-green-100 border border-green-300 text-green-800 px-3 py-2 rounded-lg text-sm flex items-center gap-2">
+                                        <span>✅</span>
+                                        Desglose correcto: S/ {totalDesglose.toFixed(2)}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
 
                     {/* Información Adicional */}
                     <div className="mt-6 space-y-4">
