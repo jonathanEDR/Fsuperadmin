@@ -57,26 +57,43 @@ const TablaMovimientosFinanzas = ({ movimientos, onRefresh }) => {
         );
     };
     
-    const obtenerMetodoPagoInfo = (metodoPago) => {
+    const obtenerMetodoPagoInfo = (movimiento) => {
+        // Nuevo esquema: usa tipoMovimiento
+        const tipoMovimiento = movimiento?.tipoMovimiento;
+        
+        if (tipoMovimiento) {
+            const info = {
+                efectivo: { icono: '💵', texto: 'EFECTIVO' },
+                bancario: { icono: '🏦', texto: 'BANCARIO' }
+            };
+            return info[tipoMovimiento] || { icono: '❓', texto: tipoMovimiento?.toUpperCase() || 'DESCONOCIDO' };
+        }
+        
+        // Compatibilidad con esquema antiguo (metodoPago)
+        const metodoPago = movimiento?.metodoPago;
         if (typeof metodoPago === 'string') {
             return {
                 icono: '💳',
-                texto: metodoPago
+                texto: metodoPago.toUpperCase()
             };
         }
         
-        const iconos = {
-            efectivo: '💵',
-            yape: '📱',
-            plin: '📲',
-            transferencia: '🏦',
-            tarjeta: '💳'
-        };
+        if (metodoPago?.tipo) {
+            const iconos = {
+                efectivo: '💵',
+                yape: '📱',
+                plin: '📲',
+                transferencia: '🏦',
+                tarjeta: '💳'
+            };
+            
+            return {
+                icono: iconos[metodoPago.tipo] || '❓',
+                texto: metodoPago.tipo.toUpperCase()
+            };
+        }
         
-        return {
-            icono: iconos[metodoPago.tipo] || '❓',
-            texto: `${metodoPago.tipo}${metodoPago.detalles ? ` - ${metodoPago.detalles}` : ''}`.toUpperCase()
-        };
+        return { icono: '❓', texto: 'N/A' };
     };
     
     const manejarValidarMovimiento = async (id) => {
@@ -183,7 +200,7 @@ const TablaMovimientosFinanzas = ({ movimientos, onRefresh }) => {
                                 
                                 <div className="flex items-center justify-between text-xs text-gray-500">
                                     <span>
-                                        {obtenerMetodoPagoInfo(movimiento.metodoPago).icono} {obtenerMetodoPagoInfo(movimiento.metodoPago).texto}
+                                        {obtenerMetodoPagoInfo(movimiento).icono} {obtenerMetodoPagoInfo(movimiento).texto}
                                     </span>
                                     <span>{movimiento.categoria}</span>
                                 </div>
@@ -295,8 +312,8 @@ const TablaMovimientosFinanzas = ({ movimientos, onRefresh }) => {
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div>
                                         <div className="text-sm text-gray-900 flex items-center">
-                                            <span className="mr-2">{obtenerMetodoPagoInfo(movimiento.metodoPago).icono}</span>
-                                            {obtenerMetodoPagoInfo(movimiento.metodoPago).texto}
+                                            <span className="mr-2">{obtenerMetodoPagoInfo(movimiento).icono}</span>
+                                            {obtenerMetodoPagoInfo(movimiento).texto}
                                         </div>
                                         <div className="text-sm text-gray-500">
                                             {movimiento.categoria}

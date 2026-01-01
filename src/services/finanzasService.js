@@ -338,115 +338,86 @@ class FinanzasService {
             throw error;
         }
     }
-    
-    // ==================== PAGOS DE FINANCIAMIENTO ====================
-    
+
     /**
-     * Obtener pagos de financiamiento
+     * Obtener préstamos con cuotas pendientes (para modal de egreso/ingreso)
+     * @param {string} tipoFlujo - 'egreso' para préstamos RECIBIDOS (pagas al banco), 'ingreso' para préstamos OTORGADOS (te pagan)
      */
-    static async obtenerPagosFinanciamiento(filtros = {}) {
+    static async obtenerPrestamosConCuotasPendientes(tipoFlujo = 'egreso') {
         try {
-            const params = new URLSearchParams(filtros);
-            const response = await api.get(`/finanzas/pagos-financiamiento?${params}`);
+            const response = await api.get(`/api/prestamos/cuotas-pendientes?tipoFlujo=${tipoFlujo}`);
             return response.data;
         } catch (error) {
-            console.error('Error obteniendo pagos:', error);
+            console.error('Error obteniendo préstamos con cuotas pendientes:', error);
+            // Si falla, intentar obtener los préstamos normales y filtrar
+            try {
+                const prestamosResponse = await api.get('/api/prestamos');
+                if (prestamosResponse.data?.success && Array.isArray(prestamosResponse.data?.data)) {
+                    // Filtrar según el tipo de flujo
+                    const prestamosActivos = prestamosResponse.data.data.filter(p => {
+                        const esActivo = ['aprobado', 'desembolsado', 'activo', 'vigente'].includes(p.estado);
+                        if (tipoFlujo === 'egreso') {
+                            // Para egreso: solo préstamos RECIBIDOS (interno)
+                            return esActivo && p.tipoPrestatario === 'interno';
+                        } else if (tipoFlujo === 'ingreso') {
+                            // Para ingreso: solo préstamos OTORGADOS (no interno)
+                            return esActivo && p.tipoPrestatario !== 'interno';
+                        }
+                        return esActivo;
+                    });
+                    return {
+                        success: true,
+                        data: prestamosActivos.map(p => ({
+                            _id: p._id,
+                            codigo: p.codigo,
+                            entidadFinanciera: p.entidadFinanciera?.nombre || 'No especificada',
+                            prestatario: p.prestatario?.nombre || 'No especificado',
+                            tipoPrestatario: p.tipoPrestatario,
+                            tipo: p.tipo,
+                            montoTotal: p.montoAprobado || p.montoSolicitado,
+                            saldoPendiente: p.montoAprobado || p.montoSolicitado,
+                            estado: p.estado,
+                            cuotasPendientes: [],
+                            totalCuotasPendientes: 0
+                        }))
+                    };
+                }
+            } catch (fallbackError) {
+                console.error('Error en fallback:', fallbackError);
+            }
             throw error;
         }
     }
-    
+
     /**
-     * Registrar pago
-     */
-    static async registrarPago(datos) {
-        try {
-            const response = await api.post('/finanzas/pagos-financiamiento', datos);
-            return response.data;
-        } catch (error) {
-            console.error('Error registrando pago:', error);
-            throw error;
-        }
-    }
-    
-    /**
-     * Obtener pagos de un préstamo
+     * Obtener pagos/cuotas de un préstamo específico
+     * @param {string} prestamoId - ID del préstamo
+     * @param {object} filtros - Filtros opcionales (estado, limite, pagina)
      */
     static async obtenerPagosPrestamo(prestamoId, filtros = {}) {
         try {
             const params = new URLSearchParams(filtros);
-            const response = await api.get(`/finanzas/pagos-financiamiento/prestamo/${prestamoId}?${params}`);
+            const response = await api.get(`/api/prestamos/${prestamoId}/pagos?${params}`);
             return response.data;
         } catch (error) {
             console.error('Error obteniendo pagos del préstamo:', error);
             throw error;
         }
     }
-    
+
     /**
-     * Obtener pagos vencidos
+     * Registrar pago de cuota de préstamo
      */
-    static async obtenerPagosVencidos() {
+    static async registrarPagoCuota(cuotaId, datosPago) {
         try {
-            const response = await api.get('/finanzas/pagos-financiamiento/vencidos');
+            const response = await api.post(`/api/prestamos/pagar-cuota/${cuotaId}`, datosPago);
             return response.data;
         } catch (error) {
-            console.error('Error obteniendo pagos vencidos:', error);
+            console.error('Error registrando pago de cuota:', error);
             throw error;
         }
     }
 
-    /**
-     * Crear pago de financiamiento
-     */
-    static async crearPagoFinanciamiento(datos) {
-        try {
-            const response = await api.post('/finanzas/pagos-financiamiento', datos);
-            return response.data;
-        } catch (error) {
-            console.error('Error creando pago de financiamiento:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Actualizar pago de financiamiento
-     */
-    static async actualizarPagoFinanciamiento(id, datos) {
-        try {
-            const response = await api.put(`/finanzas/pagos-financiamiento/${id}`, datos);
-            return response.data;
-        } catch (error) {
-            console.error('Error actualizando pago de financiamiento:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Eliminar pago de financiamiento
-     */
-    static async eliminarPagoFinanciamiento(id) {
-        try {
-            const response = await api.delete(`/finanzas/pagos-financiamiento/${id}`);
-            return response.data;
-        } catch (error) {
-            console.error('Error eliminando pago de financiamiento:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Obtener pago de financiamiento por ID
-     */
-    static async obtenerPagoFinanciamientoPorId(id) {
-        try {
-            const response = await api.get(`/finanzas/pagos-financiamiento/${id}`);
-            return response.data;
-        } catch (error) {
-            console.error('Error obteniendo pago de financiamiento por ID:', error);
-            throw error;
-        }
-    }
-    
     // ==================== GARANTÍAS ====================
     // NOTA: Se recomienda usar el nuevo garantiasService de services/finanzas/garantiasService.js
     // Estas rutas están corregidas para compatibilidad
@@ -653,14 +624,6 @@ export const prestamosService = {
     actualizar: FinanzasService.actualizarPrestamo,
     eliminar: FinanzasService.eliminarPrestamo,
     obtenerPorId: FinanzasService.obtenerPrestamoPorId
-};
-
-export const pagosFinanciamientoService = {
-    obtenerTodos: FinanzasService.obtenerPagosFinanciamiento,
-    crear: FinanzasService.crearPagoFinanciamiento,
-    actualizar: FinanzasService.actualizarPagoFinanciamiento,
-    eliminar: FinanzasService.eliminarPagoFinanciamiento,
-    obtenerPorId: FinanzasService.obtenerPagoFinanciamientoPorId
 };
 
 export const garantiasService = {

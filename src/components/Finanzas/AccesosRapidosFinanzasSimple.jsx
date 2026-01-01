@@ -41,13 +41,6 @@ const AccesosRapidosFinanzasSimple = () => {
             icon: '🛡️',
             color: 'bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 text-purple-800 border-purple-200',
             description: 'Gestionar garantías'
-        },
-        {
-            label: 'Pagos Financiamiento',
-            to: 'pagos-financiamiento',
-            icon: '💳',
-            color: 'bg-gradient-to-br from-indigo-50 to-indigo-100 hover:from-indigo-100 hover:to-indigo-200 text-indigo-800 border-indigo-200',
-            description: 'Pagos y financiamiento'
         }
     ];
 

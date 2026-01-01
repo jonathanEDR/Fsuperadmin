@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DollarSign, X } from 'lucide-react';
 import { movimientosCajaService } from '../../../services/movimientosCajaService';
+import FinanzasService from '../../../services/finanzasService';
 
 const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
     const [formData, setFormData] = useState({
@@ -8,15 +9,13 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
         concepto: '',
         descripcion: '',
         categoria: 'venta_producto',
-        metodoPago: {
-            tipo: 'efectivo',
-            detalles: {
-                billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0 },
-                monedas: { m5: 0, m2: 0, m1: 0, c50: 0, c20: 0, c10: 0 },
-                numeroOperacion: '',
-                cuentaOrigen: '',
-                banco: ''
-            }
+        tipoMovimiento: 'efectivo',
+        detallesAdicionales: {
+            billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0 },
+            monedas: { m5: 0, m2: 0, m1: 0, c50: 0, c20: 0, c10: 0 },
+            numeroOperacion: '',
+            cuentaOrigen: '',
+            banco: ''
         },
         cliente: {
             nombre: '',
@@ -29,209 +28,165 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
             serie: ''
         },
         observaciones: '',
-        // Nuevos campos para integración bancaria
-        tipoMovimiento: 'efectivo', // 'efectivo' o 'bancario'
         afectaCuentaBancaria: false,
-        cuentaBancariaId: ''
+        cuentaBancariaId: '',
+        // Campos para cobro de préstamo
+        prestamoId: '',
+        cuotaId: ''
     });
-    
+
     const [loading, setLoading] = useState(false);
-    const [categorias, setCategorias] = useState({
+    const [categorias] = useState({
         ingresos: [
-            { value: 'venta_producto', label: 'Venta de Productos' },
-            { value: 'venta_servicio', label: 'Venta de Servicios' },
-            { value: 'cobro_cliente', label: 'Cobro a Cliente' },
-            { value: 'prestamo_recibido', label: 'Préstamo Recibido' },
-            { value: 'devolucion', label: 'Devolución' },
-            { value: 'otros_ingresos', label: 'Otros Ingresos' }
+            { value: 'venta_producto', label: 'Venta de Productos', icon: '🛒' },
+            { value: 'venta_servicio', label: 'Venta de Servicios', icon: '🔧' },
+            { value: 'cobro_cliente', label: 'Cobro a Cliente', icon: '💰' },
+            { value: 'cobro_prestamo', label: 'Cobro de Préstamo', icon: '📋' },
+            { value: 'prestamo_recibido', label: 'Préstamo Recibido', icon: '🏦' },
+            { value: 'devolucion', label: 'Devolución', icon: '↩️' },
+            { value: 'otros_ingresos', label: 'Otros Ingresos', icon: '📥' }
         ]
     });
-    const [metodosPago, setMetodosPago] = useState([
-        { value: 'efectivo', label: 'Efectivo', icon: '💵' },
-        { value: 'yape', label: 'Yape', icon: '📱' },
-        { value: 'plin', label: 'Plin', icon: '📲' },
-        { value: 'transferencia', label: 'Transferencia', icon: '🏦' },
-        { value: 'tarjeta', label: 'Tarjeta', icon: '💳' }
-    ]);
     const [cuentasDisponibles, setCuentasDisponibles] = useState([]);
     const [totalCalculado, setTotalCalculado] = useState(0);
     const [mostrarInfoAdicional, setMostrarInfoAdicional] = useState(false);
-    
-    // Cargar opciones
+
+    // Estados para préstamos otorgados
+    const [prestamosConCuotas, setPrestamosConCuotas] = useState([]);
+    const [loadingPrestamos, setLoadingPrestamos] = useState(false);
+    const [prestamoSeleccionado, setPrestamoSeleccionado] = useState(null);
+    const [cuotaSeleccionada, setCuotaSeleccionada] = useState(null);
+
+    // Cargar opciones cuando se abre el modal
     useEffect(() => {
         if (isOpen) {
-            // Cargar opciones del servidor de manera asíncrona (opcional - no bloquea)
-            cargarOpciones().catch(() => {
-                // Usar opciones por defecto
-            });
-            
-            // Reset form when modal opens
-            setFormData({
-                monto: '',
-                concepto: '',
-                descripcion: '',
-                categoria: 'venta_producto',
-                metodoPago: {
-                    tipo: 'efectivo',
-                    detalles: {
-                        billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0 },
-                        monedas: { m5: 0, m2: 0, m1: 0, c50: 0, c20: 0, c10: 0 },
-                        numeroOperacion: '',
-                        cuentaOrigen: '',
-                        banco: ''
-                    }
-                },
-                cliente: {
-                    nombre: '',
-                    documento: '',
-                    telefono: ''
-                },
-                documento: {
-                    tipo: 'boleta',
-                    numero: '',
-                    serie: ''
-                },
-                observaciones: ''
-            });
+            cargarCuentasBancarias();
+            resetForm();
         }
     }, [isOpen]);
-    
+
+    // Cargar préstamos cuando se selecciona la categoría "cobro_prestamo"
+    useEffect(() => {
+        if (formData.categoria === 'cobro_prestamo') {
+            cargarPrestamosConCuotas();
+        }
+    }, [formData.categoria]);
+
     // Calcular total de efectivo automáticamente
     useEffect(() => {
-        if (formData.metodoPago.tipo === 'efectivo') {
-            const billetes = formData.metodoPago.detalles.billetes || {};
-            const monedas = formData.metodoPago.detalles.monedas || {};
-            
-            const totalBilletes = 
+        if (formData.tipoMovimiento === 'efectivo') {
+            const billetes = formData.detallesAdicionales.billetes || {};
+            const monedas = formData.detallesAdicionales.monedas || {};
+
+            const totalBilletes =
                 (billetes.b200 || 0) * 200 +
                 (billetes.b100 || 0) * 100 +
                 (billetes.b50 || 0) * 50 +
                 (billetes.b20 || 0) * 20 +
                 (billetes.b10 || 0) * 10;
-            
-            const totalMonedas = 
+
+            const totalMonedas =
                 (monedas.m5 || 0) * 5 +
                 (monedas.m2 || 0) * 2 +
                 (monedas.m1 || 0) * 1 +
                 (monedas.c50 || 0) * 0.5 +
                 (monedas.c20 || 0) * 0.2 +
                 (monedas.c10 || 0) * 0.1;
-            
+
             setTotalCalculado(totalBilletes + totalMonedas);
         }
-    }, [formData.metodoPago.detalles, formData.metodoPago.tipo]);
-    
-    const cargarOpciones = async () => {
-        try {
-            const [categoriasRes, metodosPagoRes, cuentasRes] = await Promise.all([
-                movimientosCajaService.obtenerCategorias(),
-                movimientosCajaService.obtenerMetodosPago(),
-                movimientosCajaService.obtenerCuentasDisponibles()
-            ]);
-            
-            // Procesar categorías
-            if (categoriasRes.success && categoriasRes.data && categoriasRes.data.ingresos) {
-                const categoriasFormateadas = {
-                    ingresos: categoriasRes.data.ingresos.map(cat => ({
-                        value: cat,
-                        label: formatearLabelCategoria(cat)
-                    }))
-                };
-                setCategorias(categoriasFormateadas);
-                console.log('✅ Categorías configuradas desde servidor');
-            }
-            
-            // Procesar métodos de pago
-            if (metodosPagoRes.success && metodosPagoRes.data && Array.isArray(metodosPagoRes.data)) {
-                const metodosPagoFormateados = metodosPagoRes.data.map(metodo => ({
-                    value: metodo,
-                    label: formatearLabelMetodoPago(metodo),
-                    icon: obtenerIconoMetodoPago(metodo)
-                }));
-                setMetodosPago(metodosPagoFormateados);
-                console.log('✅ Métodos de pago configurados desde servidor');
-            }
+    }, [formData.detallesAdicionales, formData.tipoMovimiento]);
 
-            // Procesar cuentas bancarias
-            if (cuentasRes.success && cuentasRes.data && Array.isArray(cuentasRes.data)) {
-                setCuentasDisponibles(cuentasRes.data);
-                console.log('✅ Cuentas bancarias configuradas desde servidor');
+    const resetForm = () => {
+        setFormData({
+            monto: '',
+            concepto: '',
+            descripcion: '',
+            categoria: 'venta_producto',
+            tipoMovimiento: 'efectivo',
+            detallesAdicionales: {
+                billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0 },
+                monedas: { m5: 0, m2: 0, m1: 0, c50: 0, c20: 0, c10: 0 },
+                numeroOperacion: '',
+                cuentaOrigen: '',
+                banco: ''
+            },
+            cliente: { nombre: '', documento: '', telefono: '' },
+            documento: { tipo: 'boleta', numero: '', serie: '' },
+            observaciones: '',
+            afectaCuentaBancaria: false,
+            cuentaBancariaId: '',
+            prestamoId: '',
+            cuotaId: ''
+        });
+        setPrestamoSeleccionado(null);
+        setCuotaSeleccionada(null);
+        setPrestamosConCuotas([]);
+    };
+
+    const cargarCuentasBancarias = async () => {
+        try {
+            const response = await movimientosCajaService.obtenerCuentasDisponibles();
+            if (response.success && response.data) {
+                setCuentasDisponibles(response.data);
             }
-            
         } catch (error) {
-            console.log('⚠️ Error al cargar del servidor, usando opciones por defecto:', error.message);
-            // No hacer nada - mantener las opciones por defecto que ya están configuradas
+            console.error('Error cargando cuentas bancarias:', error);
+            setCuentasDisponibles([]);
         }
     };
-    
-    // Funciones auxiliares para formatear datos del servidor
-    const formatearLabelCategoria = (categoria) => {
-        const labels = {
-            'venta_producto': 'Venta de Producto',
-            'venta_servicio': 'Venta de Servicio',
-            'cobro_cliente': 'Cobro a Cliente',
-            'prestamo_recibido': 'Préstamo Recibido',
-            'devolucion': 'Devolución',
-            'otros_ingresos': 'Otros Ingresos'
-        };
-        return labels[categoria] || categoria;
+
+    // Cargar préstamos OTORGADOS con cuotas pendientes de cobro
+    const cargarPrestamosConCuotas = async () => {
+        try {
+            setLoadingPrestamos(true);
+            // Para modal de INGRESO: solo préstamos OTORGADOS (tipoPrestatario != 'interno')
+            // Son los préstamos donde ELLOS te deben pagar
+            const response = await FinanzasService.obtenerPrestamosConCuotasPendientes('ingreso');
+            if (response.success && Array.isArray(response.data)) {
+                setPrestamosConCuotas(response.data);
+            } else {
+                setPrestamosConCuotas([]);
+            }
+        } catch (error) {
+            console.error('Error cargando préstamos con cuotas:', error);
+            setPrestamosConCuotas([]);
+        } finally {
+            setLoadingPrestamos(false);
+        }
     };
-    
-    const formatearLabelMetodoPago = (metodo) => {
-        const labels = {
-            'efectivo': 'Efectivo',
-            'yape': 'Yape',
-            'plin': 'Plin',
-            'transferencia': 'Transferencia',
-            'tarjeta': 'Tarjeta'
-        };
-        return labels[metodo] || metodo;
-    };
-    
-    const obtenerIconoMetodoPago = (metodo) => {
-        const iconos = {
-            'efectivo': '💵',
-            'yape': '📱',
-            'plin': '📲',
-            'transferencia': '🏦',
-            'tarjeta': '💳'
-        };
-        return iconos[metodo] || '💰';
-    };
-    
+
     const handleInputChange = (field, value) => {
-        // Manejar cambio de tipo de movimiento
         if (field === 'tipoMovimiento') {
             setFormData(prev => ({
                 ...prev,
                 tipoMovimiento: value,
                 afectaCuentaBancaria: value === 'bancario',
-                // Limpiar campos específicos según el tipo
-                ...(value === 'bancario' ? {
-                    metodoPago: {
-                        tipo: 'transferencia',
-                        detalles: {
-                            billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0 },
-                            monedas: { m5: 0, m2: 0, m1: 0, c50: 0, c20: 0, c10: 0 },
-                            numeroOperacion: '',
-                            cuentaOrigen: '',
-                            banco: ''
-                        }
-                    }
-                } : {
+                ...(value === 'efectivo' ? {
                     cuentaBancariaId: '',
-                    metodoPago: {
-                        tipo: 'efectivo',
-                        detalles: {
-                            billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0 },
-                            monedas: { m5: 0, m2: 0, m1: 0, c50: 0, c20: 0, c10: 0 },
-                            numeroOperacion: '',
-                            cuentaOrigen: '',
-                            banco: ''
-                        }
+                    detallesAdicionales: {
+                        billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0 },
+                        monedas: { m5: 0, m2: 0, m1: 0, c50: 0, c20: 0, c10: 0 },
+                        numeroOperacion: '',
+                        cuentaOrigen: '',
+                        banco: ''
                     }
-                })
+                } : {})
             }));
+        } else if (field === 'categoria') {
+            setFormData(prev => ({
+                ...prev,
+                categoria: value,
+                // Limpiar datos de préstamo si cambia de categoría
+                ...(value !== 'cobro_prestamo' ? {
+                    prestamoId: '',
+                    cuotaId: ''
+                } : {})
+            }));
+            if (value !== 'cobro_prestamo') {
+                setPrestamoSeleccionado(null);
+                setCuotaSeleccionada(null);
+            }
         } else {
             setFormData(prev => ({
                 ...prev,
@@ -239,81 +194,127 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
             }));
         }
     };
-    
+
     const handleNestedChange = (path, value) => {
         setFormData(prev => {
             const keys = path.split('.');
             const newData = { ...prev };
             let current = newData;
-            
+
             for (let i = 0; i < keys.length - 1; i++) {
                 current[keys[i]] = { ...current[keys[i]] };
                 current = current[keys[i]];
             }
-            
+
             current[keys[keys.length - 1]] = value;
             return newData;
         });
     };
-    
+
     const handleBilleteMonedaChange = (tipo, denominacion, operation) => {
-        const path = `metodoPago.detalles.${tipo}.${denominacion}`;
-        const currentValue = formData.metodoPago.detalles[tipo][denominacion] || 0;
+        const path = `detallesAdicionales.${tipo}.${denominacion}`;
+        const currentValue = formData.detallesAdicionales[tipo][denominacion] || 0;
         const newValue = operation === 'add' ? currentValue + 1 : Math.max(0, currentValue - 1);
         handleNestedChange(path, newValue);
     };
-    
+
+    // Manejar selección de préstamo
+    const handlePrestamoChange = (prestamoId) => {
+        const prestamo = prestamosConCuotas.find(p => p._id === prestamoId);
+        setPrestamoSeleccionado(prestamo);
+        setCuotaSeleccionada(null);
+        setFormData(prev => ({
+            ...prev,
+            prestamoId: prestamoId,
+            cuotaId: '',
+            monto: '',
+            concepto: prestamo ? `Cobro cuota - ${prestamo.codigo} - ${prestamo.prestatario}` : ''
+        }));
+    };
+
+    // Manejar selección de cuota
+    const handleCuotaChange = (cuotaId) => {
+        if (!prestamoSeleccionado) return;
+
+        const cuota = prestamoSeleccionado.cuotasPendientes.find(c => c._id === cuotaId);
+        setCuotaSeleccionada(cuota);
+
+        if (cuota) {
+            setFormData(prev => ({
+                ...prev,
+                cuotaId: cuotaId,
+                monto: cuota.montoTotal.toString(),
+                concepto: `Cobro cuota ${cuota.numeroCuota} - ${prestamoSeleccionado.codigo} - ${prestamoSeleccionado.prestatario}`
+            }));
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         // Validaciones
         if (!formData.monto || parseFloat(formData.monto) <= 0) {
             alert('Por favor ingresa un monto válido');
             return;
         }
-        
+
         if (!formData.concepto.trim()) {
             alert('Por favor ingresa un concepto');
             return;
         }
-        
-        // Validar efectivo si aplica
-        if (formData.tipoMovimiento === 'efectivo' && formData.incluirDesglose) {
-            if (totalCalculado !== parseFloat(formData.monto)) {
-                const confirmar = window.confirm(
-                    `El desglose de efectivo (S/ ${totalCalculado.toFixed(2)}) no coincide con el monto ingresado (S/ ${parseFloat(formData.monto).toFixed(2)}). ¿Deseas continuar?`
-                );
-                if (!confirmar) return;
+
+        // Validación específica para cobro de préstamo
+        if (formData.categoria === 'cobro_prestamo') {
+            if (!formData.prestamoId || !formData.cuotaId) {
+                alert('Por favor selecciona un préstamo y una cuota a cobrar');
+                return;
             }
         }
-        
+
         setLoading(true);
-        
+
         try {
+            // Si es cobro de préstamo, registrar el pago de la cuota
+            if (formData.categoria === 'cobro_prestamo' && formData.cuotaId) {
+                const datosPagoCuota = {
+                    monto: parseFloat(formData.monto),
+                    metodoPago: formData.tipoMovimiento,
+                    observaciones: formData.observaciones || `Cobro registrado desde modal de ingreso`
+                };
+
+                const responsePago = await FinanzasService.registrarPagoCuota(formData.cuotaId, datosPagoCuota);
+
+                if (!responsePago.success) {
+                    throw new Error(responsePago.message || 'Error al registrar el cobro de la cuota');
+                }
+
+                console.log('✅ Cobro de cuota registrado:', responsePago);
+            }
+
+            // Registrar el movimiento de ingreso
             const dataToSend = {
                 ...formData,
                 monto: parseFloat(formData.monto),
                 tipo: 'ingreso'
             };
 
-            // Si es movimiento bancario, incluir campos bancarios
             if (formData.tipoMovimiento === 'bancario') {
                 dataToSend.afectaCuentaBancaria = true;
                 dataToSend.cuentaBancariaId = formData.cuentaBancariaId;
             } else {
                 dataToSend.afectaCuentaBancaria = false;
             }
-            
+
             const response = await movimientosCajaService.registrarIngreso(dataToSend);
-            
+
             if (response.success) {
                 alert('✅ Ingreso registrado exitosamente');
                 onSuccess && onSuccess();
-                onClose(); // Cerrar modal después del éxito
+                onClose();
             } else {
                 alert(`❌ Error: ${response.message}`);
             }
-            
+
         } catch (error) {
             console.error('Error registrando ingreso:', error);
             alert(`❌ Error: ${error.message || 'Error desconocido'}`);
@@ -321,44 +322,192 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
             setLoading(false);
         }
     };
-    
+
+    // Formatear fecha
+    const formatearFecha = (fecha) => {
+        if (!fecha) return '-';
+        return new Date(fecha).toLocaleDateString('es-PE', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    };
+
     if (!isOpen) return null;
-    
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                    <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                        <DollarSign className="w-5 h-5 mr-2 text-green-600" />
+                <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-green-500 to-green-600">
+                    <h2 className="text-xl font-semibold text-white flex items-center">
+                        <DollarSign className="w-5 h-5 mr-2" />
                         Registrar Ingreso
                     </h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600"
+                        className="text-white hover:text-green-200 bg-green-700 rounded-full p-1"
                     >
                         <X className="w-6 h-6" />
                     </button>
                 </div>
-                
+
                 <form onSubmit={handleSubmit} className="p-6">
+                    {/* Tabs de categorías principales */}
+                    <div className="mb-6">
+                        <div className="flex flex-wrap gap-2 p-2 bg-gray-100 rounded-lg">
+                            {categorias.ingresos.map(cat => (
+                                <button
+                                    key={cat.value}
+                                    type="button"
+                                    onClick={() => handleInputChange('categoria', cat.value)}
+                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                                        formData.categoria === cat.value
+                                            ? 'bg-green-600 text-white shadow-md'
+                                            : 'bg-white text-gray-700 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    {cat.icon} {cat.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Columna 1: Información Principal */}
                         <div className="space-y-4">
                             <h3 className="font-semibold text-lg text-gray-900 border-b pb-2">
                                 📝 Información Principal
                             </h3>
-                            
+
+                            {/* Sección especial para Cobro de Préstamo */}
+                            {formData.categoria === 'cobro_prestamo' && (
+                                <div className="bg-green-50 p-4 rounded-lg border border-green-200 space-y-4">
+                                    <h4 className="font-semibold text-green-800 flex items-center">
+                                        📋 Seleccionar Préstamo y Cuota
+                                    </h4>
+
+                                    {loadingPrestamos ? (
+                                        <div className="flex items-center justify-center py-4">
+                                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500"></div>
+                                            <span className="ml-2 text-gray-600">Cargando préstamos...</span>
+                                        </div>
+                                    ) : prestamosConCuotas.length === 0 ? (
+                                        <div className="text-center py-4 text-gray-500">
+                                            <span className="text-4xl mb-2 block">📭</span>
+                                            <p>No hay préstamos otorgados con cuotas pendientes de cobro</p>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {/* Selector de Préstamo */}
+                                            <div>
+                                                <label className="block text-sm font-semibold text-gray-800 mb-2">
+                                                    Préstamo *
+                                                </label>
+                                                <select
+                                                    value={formData.prestamoId}
+                                                    onChange={(e) => handlePrestamoChange(e.target.value)}
+                                                    className="w-full px-3 py-2 border border-green-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                                    required
+                                                >
+                                                    <option value="">Seleccione un préstamo...</option>
+                                                    {prestamosConCuotas.map(prestamo => (
+                                                        <option key={prestamo._id} value={prestamo._id}>
+                                                            {prestamo.codigo} - {prestamo.prestatario} - {prestamo.totalCuotasPendientes} cuota(s) pendiente(s) - S/ {prestamo.saldoPendiente}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            {/* Info del Préstamo Seleccionado */}
+                                            {prestamoSeleccionado && (
+                                                <div className="bg-white p-3 rounded-lg border">
+                                                    <div className="grid grid-cols-2 gap-2 text-sm">
+                                                        <div>
+                                                            <span className="text-gray-500">Prestatario:</span>
+                                                            <span className="font-medium ml-1">{prestamoSeleccionado.prestatario}</span>
+                                                        </div>
+                                                        <div>
+                                                            <span className="text-gray-500">Tipo:</span>
+                                                            <span className="font-medium ml-1 capitalize">{prestamoSeleccionado.tipoPrestatario}</span>
+                                                        </div>
+                                                        <div>
+                                                            <span className="text-gray-500">Monto Total:</span>
+                                                            <span className="font-medium ml-1">S/ {prestamoSeleccionado.montoTotal}</span>
+                                                        </div>
+                                                        <div>
+                                                            <span className="text-gray-500">Saldo Pendiente:</span>
+                                                            <span className="font-medium ml-1 text-orange-600">S/ {prestamoSeleccionado.saldoPendiente}</span>
+                                                        </div>
+                                                        {prestamoSeleccionado.cuotasPagadasCount > 0 && (
+                                                            <div className="col-span-2">
+                                                                <span className="text-green-600">✅ {prestamoSeleccionado.cuotasPagadasCount} cuota(s) ya cobrada(s)</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Lista de Cuotas Pendientes */}
+                                            {prestamoSeleccionado && prestamoSeleccionado.cuotasPendientes.length > 0 && (
+                                                <div>
+                                                    <label className="block text-sm font-semibold text-gray-800 mb-2">
+                                                        Cuota a Cobrar *
+                                                    </label>
+                                                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                                                        {prestamoSeleccionado.cuotasPendientes.map(cuota => (
+                                                            <div
+                                                                key={cuota._id}
+                                                                onClick={() => handleCuotaChange(cuota._id)}
+                                                                className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                                                                    cuotaSeleccionada?._id === cuota._id
+                                                                        ? 'bg-green-100 border-green-500 shadow-md'
+                                                                        : 'bg-white border-gray-200 hover:border-green-300 hover:bg-green-50'
+                                                                }`}
+                                                            >
+                                                                <div className="flex justify-between items-center">
+                                                                    <div className="flex items-center">
+                                                                        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mr-3 ${
+                                                                            cuotaSeleccionada?._id === cuota._id
+                                                                                ? 'bg-green-600 text-white'
+                                                                                : 'bg-gray-200 text-gray-700'
+                                                                        }`}>
+                                                                            {cuota.numeroCuota}
+                                                                        </span>
+                                                                        <div>
+                                                                            <div className="font-medium">Cuota {cuota.numeroCuota}</div>
+                                                                            <div className="text-xs text-gray-500">
+                                                                                📅 Vence: {formatearFecha(cuota.fechaVencimiento)}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="text-right">
+                                                                        <div className="font-bold text-green-700">S/ {cuota.montoTotal}</div>
+                                                                        <div className="text-xs text-gray-500">
+                                                                            Capital: S/ {cuota.montoCapital} + Int: S/ {cuota.montoInteres}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
                             {/* Selector de Tipo de Movimiento */}
                             <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                                 <label className="block text-sm font-semibold text-gray-800 mb-3">
                                     🎯 Tipo de Movimiento *
                                 </label>
                                 <div className="grid grid-cols-2 gap-3">
-                                    <div 
+                                    <div
                                         className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                                            formData.tipoMovimiento === 'efectivo' 
-                                                ? 'border-green-500 bg-green-50 text-green-800' 
+                                            formData.tipoMovimiento === 'efectivo'
+                                                ? 'border-green-500 bg-green-50 text-green-800'
                                                 : 'border-gray-300 bg-white hover:border-gray-400'
                                         }`}
                                         onClick={() => handleInputChange('tipoMovimiento', 'efectivo')}
@@ -369,10 +518,10 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                             <div className="text-xs text-gray-600">Yape, Plin, Efectivo</div>
                                         </div>
                                     </div>
-                                    <div 
+                                    <div
                                         className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                                            formData.tipoMovimiento === 'bancario' 
-                                                ? 'border-blue-500 bg-blue-50 text-blue-800' 
+                                            formData.tipoMovimiento === 'bancario'
+                                                ? 'border-blue-500 bg-blue-50 text-blue-800'
                                                 : 'border-gray-300 bg-white hover:border-gray-400'
                                         }`}
                                         onClick={() => handleInputChange('tipoMovimiento', 'bancario')}
@@ -385,8 +534,8 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                     </div>
                                 </div>
                             </div>
-                            
-                            {/* Monto y Concepto en 2 columnas */}
+
+                            {/* Monto y Concepto */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-800 mb-2">
@@ -394,16 +543,17 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                     </label>
                                     <input
                                         type="number"
-                                        step="0.01"
-                                        min="0.01"
+                                        step="0.1"
+                                        min="0.1"
                                         value={formData.monto}
                                         onChange={(e) => handleInputChange('monto', e.target.value)}
                                         className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 font-medium"
                                         placeholder="0.00"
                                         required
+                                        readOnly={formData.categoria === 'cobro_prestamo' && cuotaSeleccionada}
                                     />
                                 </div>
-                                
+
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-800 mb-2">
                                         Concepto *
@@ -418,8 +568,8 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                     />
                                 </div>
                             </div>
-                            
-                            {/* Descripción a ancho completo */}
+
+                            {/* Descripción */}
                             <div>
                                 <label className="block text-sm font-semibold text-gray-800 mb-2">
                                     Descripción
@@ -432,142 +582,44 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                     placeholder="Descripción detallada"
                                 />
                             </div>
-                            
-                            {/* Campos de método de pago y categoría/cuenta bancaria */}
-                            <div className="grid grid-cols-2 gap-4">
-                                {formData.tipoMovimiento === 'efectivo' ? (
-                                    // PARA MOVIMIENTOS EN EFECTIVO/DIGITAL
-                                    <>
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-800 mb-2">
-                                                Tipo de Pago *
-                                            </label>
-                                            <select
-                                                value={formData.metodoPago.tipo}
-                                                onChange={(e) => handleNestedChange('metodoPago.tipo', e.target.value)}
-                                                className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 font-medium"
-                                                required
-                                            >
-                                                {metodosPago.map(metodo => (
-                                                    <option key={metodo.value} value={metodo.value}>
-                                                        {metodo.icon} {metodo.label}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-800 mb-2">
-                                                Categoría *
-                                            </label>
-                                            <select
-                                                value={formData.categoria}
-                                                onChange={(e) => handleInputChange('categoria', e.target.value)}
-                                                className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 font-medium"
-                                                required
-                                            >
-                                                {categorias.ingresos?.map(cat => (
-                                                    <option key={cat.value} value={cat.value}>
-                                                        {cat.label}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </>
-                                ) : (
-                                    // PARA MOVIMIENTOS BANCARIOS
-                                    <>
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-800 mb-2">
-                                                🏦 Cuenta Bancaria * 
-                                            </label>
-                                            <select
-                                                value={formData.cuentaBancariaId}
-                                                onChange={(e) => handleInputChange('cuentaBancariaId', e.target.value)}
-                                                className="w-full px-3 py-2 text-base border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
-                                                required
-                                            >
-                                                <option value="">Seleccione una cuenta...</option>
-                                                {cuentasDisponibles.map(cuenta => (
-                                                    <option key={cuenta.value} value={cuenta.value}>
-                                                        {cuenta.label}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            {cuentasDisponibles.length === 0 && (
-                                                <p className="text-sm text-orange-600 mt-1">
-                                                    ⚠️ No hay cuentas bancarias disponibles
-                                                </p>
-                                            )}
-                                        </div>
-                                        
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-800 mb-2">
-                                                Categoría *
-                                            </label>
-                                            <select
-                                                value={formData.categoria}
-                                                onChange={(e) => handleInputChange('categoria', e.target.value)}
-                                                className="w-full px-3 py-2 text-base border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
-                                                required
-                                            >
-                                                {categorias.ingresos?.map(cat => (
-                                                    <option key={cat.value} value={cat.value}>
-                                                        {cat.label}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                            
-                            {/* Detalles según método de pago */}
-                            {(formData.metodoPago.tipo === 'yape' || formData.metodoPago.tipo === 'plin') && (
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-800 mb-2">
-                                        Número de Operación
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.metodoPago.detalles.numeroOperacion}
-                                        onChange={(e) => handleNestedChange('metodoPago.detalles.numeroOperacion', e.target.value)}
-                                        className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                        placeholder="Número de operación"
-                                    />
-                                </div>
-                            )}
-                            
-                            {formData.metodoPago.tipo === 'transferencia' && (
-                                <div className="space-y-3">
+
+                            {/* Selector de Cuenta Bancaria o Número de Operación */}
+                            {formData.tipoMovimiento === 'bancario' && (
+                                <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-800 mb-2">
-                                            Número de Operación
+                                            🏦 Cuenta Bancaria *
+                                        </label>
+                                        <select
+                                            value={formData.cuentaBancariaId}
+                                            onChange={(e) => handleInputChange('cuentaBancariaId', e.target.value)}
+                                            className="w-full px-3 py-2 text-base border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
+                                            required
+                                        >
+                                            <option value="">Seleccione una cuenta...</option>
+                                            {cuentasDisponibles.map(cuenta => (
+                                                <option key={cuenta.value} value={cuenta.value}>
+                                                    {cuenta.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-800 mb-2">
+                                            N° Operación
                                         </label>
                                         <input
                                             type="text"
-                                            value={formData.metodoPago.detalles.numeroOperacion}
-                                            onChange={(e) => handleNestedChange('metodoPago.detalles.numeroOperacion', e.target.value)}
-                                            className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                            value={formData.detallesAdicionales.numeroOperacion}
+                                            onChange={(e) => handleNestedChange('detallesAdicionales.numeroOperacion', e.target.value)}
+                                            className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                             placeholder="Número de operación"
                                         />
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-800 mb-2">
-                                            Banco
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={formData.metodoPago.detalles.banco}
-                                            onChange={(e) => handleNestedChange('metodoPago.detalles.banco', e.target.value)}
-                                            className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                            placeholder="Nombre del banco"
-                                        />
-                                    </div>
                                 </div>
                             )}
-                            
-                            {/* Botón para mostrar/ocultar información adicional */}
+                            {/* Información Adicional Colapsable */}
                             <div className="pt-2">
                                 <button
                                     type="button"
@@ -582,8 +634,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                     </span>
                                 </button>
                             </div>
-                            
-                            {/* Información Adicional Colapsable */}
+
                             {mostrarInfoAdicional && (
                                 <div className="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
                                     <div>
@@ -598,7 +649,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                             placeholder="Nombre del cliente"
                                         />
                                     </div>
-                                    
+
                                     <div className="grid grid-cols-2 gap-3">
                                         <div>
                                             <label className="block text-sm font-semibold text-gray-800 mb-2">
@@ -612,7 +663,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                 placeholder="DNI/RUC"
                                             />
                                         </div>
-                                        
+
                                         <div>
                                             <label className="block text-sm font-semibold text-gray-800 mb-2">
                                                 Teléfono
@@ -626,53 +677,9 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                             />
                                         </div>
                                     </div>
-                                    
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-800 mb-2">
-                                                Tipo de Documento
-                                            </label>
-                                            <select
-                                                value={formData.documento.tipo}
-                                                onChange={(e) => handleNestedChange('documento.tipo', e.target.value)}
-                                                className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 font-medium"
-                                            >
-                                                <option value="boleta">Boleta</option>
-                                                <option value="factura">Factura</option>
-                                                <option value="recibo">Recibo</option>
-                                                <option value="nota_venta">Nota de Venta</option>
-                                            </select>
-                                        </div>
-                                        
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-800 mb-2">
-                                                N° Documento
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={formData.documento.numero}
-                                                onChange={(e) => handleNestedChange('documento.numero', e.target.value)}
-                                                className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                                placeholder="Número"
-                                            />
-                                        </div>
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-800 mb-2">
-                                            Serie del Documento
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={formData.documento.serie}
-                                            onChange={(e) => handleNestedChange('documento.serie', e.target.value)}
-                                            className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                            placeholder="Serie del documento"
-                                        />
-                                    </div>
                                 </div>
                             )}
-                            
+
                             {/* Observaciones */}
                             <div className="pt-2">
                                 <label className="block text-sm font-semibold text-gray-800 mb-2">
@@ -686,7 +693,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                     placeholder="Observaciones adicionales"
                                 />
                             </div>
-                            
+
                             {/* Botones */}
                             <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 mt-4">
                                 <button
@@ -699,16 +706,23 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 text-base font-semibold bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+                                    className="px-4 py-2 text-base font-semibold bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center"
                                     disabled={loading}
                                 >
-                                    {loading ? 'Registrando...' : 'Registrar Ingreso'}
+                                    {loading ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                            Registrando...
+                                        </>
+                                    ) : (
+                                        '💰 Registrar Ingreso'
+                                    )}
                                 </button>
                             </div>
                         </div>
-                        
-                        {/* Columna 2: Desglose de Efectivo (Solo cuando es efectivo) */}
-                        {formData.tipoMovimiento === 'efectivo' && formData.metodoPago.tipo === 'efectivo' && (
+
+                        {/* Columna 2: Desglose de Efectivo */}
+                        {formData.tipoMovimiento === 'efectivo' && (
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
                                     <h3 className="font-semibold text-base text-gray-900">💵 Desglose de Efectivo</h3>
@@ -716,12 +730,12 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                         S/ {totalCalculado.toFixed(2)}
                                     </div>
                                 </div>
-                                
-                                {/* Billetes Ultra Compactos */}
+
+                                {/* Billetes */}
                                 <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-3 rounded-lg border">
                                     <div className="flex items-center justify-between mb-2">
                                         <h4 className="text-sm font-semibold text-gray-800 flex items-center">
-                                            � Billetes
+                                            💴 Billetes
                                         </h4>
                                         <span className="text-xs text-green-700 font-bold bg-green-100 px-2 py-1 rounded">
                                             S/ {[
@@ -730,38 +744,38 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                 { key: 'b50', valor: 50 },
                                                 { key: 'b20', valor: 20 },
                                                 { key: 'b10', valor: 10 }
-                                            ].reduce((sum, b) => sum + ((formData.metodoPago.detalles.billetes[b.key] || 0) * b.valor), 0).toFixed(2)}
+                                            ].reduce((sum, b) => sum + ((formData.detallesAdicionales.billetes[b.key] || 0) * b.valor), 0).toFixed(2)}
                                         </span>
                                     </div>
                                     <div className="grid grid-cols-1 gap-1">
                                         {[
-                                            { key: 'b200', valor: 200, label: 'S/ 200', color: 'bg-purple-500', textColor: 'text-purple-900' },
-                                            { key: 'b100', valor: 100, label: 'S/ 100', color: 'bg-blue-500', textColor: 'text-blue-900' },
-                                            { key: 'b50', valor: 50, label: 'S/ 50', color: 'bg-orange-500', textColor: 'text-orange-900' },
-                                            { key: 'b20', valor: 20, label: 'S/ 20', color: 'bg-green-500', textColor: 'text-green-900' },
-                                            { key: 'b10', valor: 10, label: 'S/ 10', color: 'bg-red-500', textColor: 'text-red-900' }
+                                            { key: 'b200', valor: 200, label: 'S/ 200', color: 'bg-purple-500' },
+                                            { key: 'b100', valor: 100, label: 'S/ 100', color: 'bg-blue-500' },
+                                            { key: 'b50', valor: 50, label: 'S/ 50', color: 'bg-orange-500' },
+                                            { key: 'b20', valor: 20, label: 'S/ 20', color: 'bg-green-500' },
+                                            { key: 'b10', valor: 10, label: 'S/ 10', color: 'bg-red-500' }
                                         ].map(billete => {
-                                            const cantidad = formData.metodoPago.detalles.billetes[billete.key] || 0;
+                                            const cantidad = formData.detallesAdicionales.billetes[billete.key] || 0;
                                             const subtotal = cantidad * billete.valor;
                                             return (
                                                 <div key={billete.key} className="flex items-center justify-between bg-white p-1.5 rounded border shadow-sm">
                                                     <div className="flex items-center space-x-2">
                                                         <div className={`w-4 h-3 rounded ${billete.color} border`}></div>
-                                                        <span className={`text-sm font-bold ${billete.textColor}`}>{billete.label}</span>
+                                                        <span className="text-sm font-bold">{billete.label}</span>
                                                     </div>
                                                     <div className="flex items-center space-x-1">
                                                         <button
                                                             type="button"
                                                             onClick={() => handleBilleteMonedaChange('billetes', billete.key, 'subtract')}
-                                                            className="w-5 h-5 bg-red-100 text-red-700 rounded-full flex items-center justify-center text-xs font-bold hover:bg-red-200 transition-colors"
+                                                            className="w-5 h-5 bg-red-100 text-red-700 rounded-full flex items-center justify-center text-xs font-bold hover:bg-red-200"
                                                         >
                                                             −
                                                         </button>
-                                                        <span className="w-8 text-center text-sm font-bold text-gray-800">{cantidad}</span>
+                                                        <span className="w-8 text-center text-sm font-bold">{cantidad}</span>
                                                         <button
                                                             type="button"
                                                             onClick={() => handleBilleteMonedaChange('billetes', billete.key, 'add')}
-                                                            className="w-5 h-5 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold hover:bg-green-200 transition-colors"
+                                                            className="w-5 h-5 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold hover:bg-green-200"
                                                         >
                                                             +
                                                         </button>
@@ -774,8 +788,8 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                         })}
                                     </div>
                                 </div>
-                                
-                                {/* Monedas Ultra Compactas */}
+
+                                {/* Monedas */}
                                 <div className="bg-gradient-to-r from-yellow-50 to-amber-50 p-3 rounded-lg border">
                                     <div className="flex items-center justify-between mb-2">
                                         <h4 className="text-sm font-semibold text-gray-800 flex items-center">
@@ -789,39 +803,39 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                 { key: 'c50', valor: 0.5 },
                                                 { key: 'c20', valor: 0.2 },
                                                 { key: 'c10', valor: 0.1 }
-                                            ].reduce((sum, m) => sum + ((formData.metodoPago.detalles.monedas[m.key] || 0) * m.valor), 0).toFixed(2)}
+                                            ].reduce((sum, m) => sum + ((formData.detallesAdicionales.monedas[m.key] || 0) * m.valor), 0).toFixed(2)}
                                         </span>
                                     </div>
                                     <div className="grid grid-cols-1 gap-1">
                                         {[
-                                            { key: 'm5', valor: 5, label: '5 soles', color: 'bg-yellow-500', textColor: 'text-yellow-900' },
-                                            { key: 'm2', valor: 2, label: '2 soles', color: 'bg-gray-500', textColor: 'text-gray-900' },
-                                            { key: 'm1', valor: 1, label: '1 sol', color: 'bg-yellow-400', textColor: 'text-yellow-900' },
-                                            { key: 'c50', valor: 0.5, label: '50 ctv', color: 'bg-gray-400', textColor: 'text-gray-900' },
-                                            { key: 'c20', valor: 0.2, label: '20 ctv', color: 'bg-gray-400', textColor: 'text-gray-900' },
-                                            { key: 'c10', valor: 0.1, label: '10 ctv', color: 'bg-gray-400', textColor: 'text-gray-900' }
+                                            { key: 'm5', valor: 5, label: '5 soles', color: 'bg-yellow-500' },
+                                            { key: 'm2', valor: 2, label: '2 soles', color: 'bg-gray-500' },
+                                            { key: 'm1', valor: 1, label: '1 sol', color: 'bg-yellow-400' },
+                                            { key: 'c50', valor: 0.5, label: '50 ctv', color: 'bg-gray-400' },
+                                            { key: 'c20', valor: 0.2, label: '20 ctv', color: 'bg-gray-400' },
+                                            { key: 'c10', valor: 0.1, label: '10 ctv', color: 'bg-gray-400' }
                                         ].map(moneda => {
-                                            const cantidad = formData.metodoPago.detalles.monedas[moneda.key] || 0;
+                                            const cantidad = formData.detallesAdicionales.monedas[moneda.key] || 0;
                                             const subtotal = cantidad * moneda.valor;
                                             return (
                                                 <div key={moneda.key} className="flex items-center justify-between bg-white p-1.5 rounded border shadow-sm">
                                                     <div className="flex items-center space-x-2">
                                                         <div className={`w-4 h-4 rounded-full ${moneda.color} border`}></div>
-                                                        <span className={`text-sm font-bold ${moneda.textColor}`}>{moneda.label}</span>
+                                                        <span className="text-sm font-bold">{moneda.label}</span>
                                                     </div>
                                                     <div className="flex items-center space-x-1">
                                                         <button
                                                             type="button"
                                                             onClick={() => handleBilleteMonedaChange('monedas', moneda.key, 'subtract')}
-                                                            className="w-5 h-5 bg-red-100 text-red-700 rounded-full flex items-center justify-center text-xs font-bold hover:bg-red-200 transition-colors"
+                                                            className="w-5 h-5 bg-red-100 text-red-700 rounded-full flex items-center justify-center text-xs font-bold hover:bg-red-200"
                                                         >
                                                             −
                                                         </button>
-                                                        <span className="w-8 text-center text-sm font-bold text-gray-800">{cantidad}</span>
+                                                        <span className="w-8 text-center text-sm font-bold">{cantidad}</span>
                                                         <button
                                                             type="button"
                                                             onClick={() => handleBilleteMonedaChange('monedas', moneda.key, 'add')}
-                                                            className="w-5 h-5 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold hover:bg-green-200 transition-colors"
+                                                            className="w-5 h-5 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold hover:bg-green-200"
                                                         >
                                                             +
                                                         </button>
@@ -834,21 +848,18 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                         })}
                                     </div>
                                 </div>
-                                
-                                {/* Botones de Acción Compactos */}
+
+                                {/* Botones de Acción */}
                                 <div className="grid grid-cols-2 gap-2">
                                     <button
                                         type="button"
                                         onClick={() => {
                                             setFormData(prev => ({
                                                 ...prev,
-                                                metodoPago: {
-                                                    ...prev.metodoPago,
-                                                    detalles: {
-                                                        ...prev.metodoPago.detalles,
-                                                        billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0 },
-                                                        monedas: { m5: 0, m2: 0, m1: 0, c50: 0, c20: 0, c10: 0 }
-                                                    }
+                                                detallesAdicionales: {
+                                                    ...prev.detallesAdicionales,
+                                                    billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0 },
+                                                    monedas: { m5: 0, m2: 0, m1: 0, c50: 0, c20: 0, c10: 0 }
                                                 }
                                             }));
                                         }}
@@ -862,8 +873,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                             const monto = parseFloat(formData.monto) || 0;
                                             let restante = monto;
                                             const nuevos = { billetes: {}, monedas: {} };
-                                            
-                                            // Calcular distribución automática
+
                                             [
                                                 { key: 'b200', valor: 200, tipo: 'billetes' },
                                                 { key: 'b100', valor: 100, tipo: 'billetes' },
@@ -883,16 +893,13 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                     restante = Math.round((restante - (cantidad * denominacion.valor)) * 100) / 100;
                                                 }
                                             });
-                                            
+
                                             setFormData(prev => ({
                                                 ...prev,
-                                                metodoPago: {
-                                                    ...prev.metodoPago,
-                                                    detalles: {
-                                                        ...prev.metodoPago.detalles,
-                                                        billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0, ...nuevos.billetes },
-                                                        monedas: { m5: 0, m2: 0, m1: 0, c50: 0, c20: 0, c10: 0, ...nuevos.monedas }
-                                                    }
+                                                detallesAdicionales: {
+                                                    ...prev.detallesAdicionales,
+                                                    billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0, ...nuevos.billetes },
+                                                    monedas: { m5: 0, m2: 0, m1: 0, c50: 0, c20: 0, c10: 0, ...nuevos.monedas }
                                                 }
                                             }));
                                         }}
@@ -901,21 +908,6 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                         🎯 Auto
                                     </button>
                                 </div>
-                                
-                                {/* Alerta de Diferencia Compacta */}
-                                {formData.tipoMovimiento === 'efectivo' && formData.incluirDesglose && parseFloat(formData.monto) > 0 && totalCalculado !== parseFloat(formData.monto) && (
-                                    <div className="p-2 bg-gradient-to-r from-yellow-100 to-orange-100 border-l-4 border-yellow-500 rounded text-xs">
-                                        <div className="flex items-center justify-between text-yellow-800">
-                                            <span className="flex items-center font-semibold">
-                                                <span className="mr-1">⚠️</span>
-                                                Diferencia:
-                                            </span>
-                                            <span className="font-bold text-orange-700">
-                                                S/ {Math.abs(totalCalculado - parseFloat(formData.monto)).toFixed(2)}
-                                            </span>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         )}
                     </div>

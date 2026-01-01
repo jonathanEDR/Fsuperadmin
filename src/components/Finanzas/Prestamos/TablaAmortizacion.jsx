@@ -1,6 +1,34 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+import FinanzasService from '../../../services/finanzasService';
 
 const TablaAmortizacion = ({ prestamo }) => {
+    const [pagosReales, setPagosReales] = useState([]);
+    const [loadingPagos, setLoadingPagos] = useState(false);
+
+    // Cargar los pagos reales del préstamo desde la BD
+    useEffect(() => {
+        const cargarPagosReales = async () => {
+            if (!prestamo?._id) return;
+
+            try {
+                setLoadingPagos(true);
+                const response = await FinanzasService.obtenerPagosPrestamo(prestamo._id);
+                if (response.success && Array.isArray(response.data)) {
+                    setPagosReales(response.data);
+                } else {
+                    setPagosReales([]);
+                }
+            } catch (error) {
+                console.error('Error cargando pagos reales:', error);
+                setPagosReales([]);
+            } finally {
+                setLoadingPagos(false);
+            }
+        };
+
+        cargarPagosReales();
+    }, [prestamo?._id]);
+
     const tablaAmortizacion = useMemo(() => {
         if (!prestamo) return [];
 
@@ -8,13 +36,13 @@ const TablaAmortizacion = ({ prestamo }) => {
         const tasaAnual = parseFloat(prestamo.tasaInteres?.porcentaje || prestamo.tasaInteres || 0) / 100;
         const tasaMensual = tasaAnual / 12;
         const plazoMeses = parseInt(prestamo.plazoMeses || prestamo.plazo?.cantidad || prestamo.plazo || 0);
-        
+
         if (monto === 0 || tasaAnual === 0 || plazoMeses === 0) {
             return [];
         }
 
         // Calcular cuota mensual usando fórmula de amortización francesa
-        const cuotaMensual = monto * (tasaMensual * Math.pow(1 + tasaMensual, plazoMeses)) / 
+        const cuotaMensual = monto * (tasaMensual * Math.pow(1 + tasaMensual, plazoMeses)) /
                            (Math.pow(1 + tasaMensual, plazoMeses) - 1);
 
         const tabla = [];
@@ -30,13 +58,34 @@ const TablaAmortizacion = ({ prestamo }) => {
             const fechaPago = new Date(fechaInicio);
             fechaPago.setMonth(fechaPago.getMonth() + i);
 
-            // Determinar estado del pago
+            // Buscar si existe un pago real para esta cuota
+            const pagoReal = pagosReales.find(p => p.numeroCuota === i);
+
+            // Determinar estado del pago basado en pagos reales
             const hoy = new Date();
             let estadoPago = 'pendiente';
-            if (fechaPago < hoy) {
-                estadoPago = 'vencido';
-            } else if (fechaPago.getTime() - hoy.getTime() <= 7 * 24 * 60 * 60 * 1000) {
-                estadoPago = 'proximo';
+            let fechaPagoReal = null;
+            let montoPagado = 0;
+
+            if (pagoReal) {
+                if (pagoReal.estado === 'procesado') {
+                    estadoPago = 'pagado';
+                    fechaPagoReal = pagoReal.fechaPago;
+                    montoPagado = pagoReal.montoPagado || pagoReal.montoTotal;
+                } else if (pagoReal.estado === 'pendiente' || pagoReal.estado === 'programado') {
+                    if (fechaPago < hoy) {
+                        estadoPago = 'vencido';
+                    } else if (fechaPago.getTime() - hoy.getTime() <= 7 * 24 * 60 * 60 * 1000) {
+                        estadoPago = 'proximo';
+                    }
+                }
+            } else {
+                // Sin registro de pago - verificar por fecha
+                if (fechaPago < hoy) {
+                    estadoPago = 'vencido';
+                } else if (fechaPago.getTime() - hoy.getTime() <= 7 * 24 * 60 * 60 * 1000) {
+                    estadoPago = 'proximo';
+                }
             }
 
             tabla.push({
@@ -46,22 +95,27 @@ const TablaAmortizacion = ({ prestamo }) => {
                 interes: interes,
                 cuotaMensual: cuotaMensual,
                 saldoPendiente: saldoPendiente,
-                estadoPago: estadoPago
+                estadoPago: estadoPago,
+                fechaPagoReal: fechaPagoReal,
+                montoPagado: montoPagado,
+                pagoId: pagoReal?._id || null
             });
         }
 
         return tabla;
-    }, [prestamo]);
+    }, [prestamo, pagosReales]);
 
     const formatearMoneda = (valor) => {
-        return `S/ ${parseFloat(valor || 0).toLocaleString('es-PE', { 
+        return `S/ ${parseFloat(valor || 0).toLocaleString('es-PE', {
             minimumFractionDigits: 2,
-            maximumFractionDigits: 2 
+            maximumFractionDigits: 2
         })}`;
     };
 
     const formatearFecha = (fecha) => {
-        return fecha.toLocaleDateString('es-PE', {
+        if (!fecha) return '-';
+        const fechaObj = fecha instanceof Date ? fecha : new Date(fecha);
+        return fechaObj.toLocaleDateString('es-PE', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'
@@ -70,6 +124,8 @@ const TablaAmortizacion = ({ prestamo }) => {
 
     const obtenerEstiloEstado = (estado) => {
         switch (estado) {
+            case 'pagado':
+                return 'bg-green-50 text-green-700 border-green-200';
             case 'vencido':
                 return 'bg-red-50 text-red-700 border-red-200';
             case 'proximo':
@@ -81,6 +137,8 @@ const TablaAmortizacion = ({ prestamo }) => {
 
     const obtenerIconoEstado = (estado) => {
         switch (estado) {
+            case 'pagado':
+                return '✅';
             case 'vencido':
                 return '⚠️';
             case 'proximo':
@@ -90,15 +148,36 @@ const TablaAmortizacion = ({ prestamo }) => {
         }
     };
 
+    const obtenerTextoEstado = (estado) => {
+        switch (estado) {
+            case 'pagado':
+                return 'Pagado';
+            case 'vencido':
+                return 'Vencido';
+            case 'proximo':
+                return 'Próximo';
+            default:
+                return 'Pendiente';
+        }
+    };
+
     const calcularTotales = () => {
         const totalCapital = tablaAmortizacion.reduce((sum, fila) => sum + fila.capital, 0);
         const totalIntereses = tablaAmortizacion.reduce((sum, fila) => sum + fila.interes, 0);
         const totalPagar = totalCapital + totalIntereses;
+        const cuotasPagadas = tablaAmortizacion.filter(f => f.estadoPago === 'pagado').length;
+        const cuotasPendientes = tablaAmortizacion.filter(f => f.estadoPago !== 'pagado').length;
+        const cuotasVencidas = tablaAmortizacion.filter(f => f.estadoPago === 'vencido').length;
+        const totalPagado = tablaAmortizacion.reduce((sum, fila) => sum + (fila.montoPagado || 0), 0);
 
         return {
             totalCapital,
             totalIntereses,
-            totalPagar
+            totalPagar,
+            cuotasPagadas,
+            cuotasPendientes,
+            cuotasVencidas,
+            totalPagado
         };
     };
 
@@ -139,6 +218,37 @@ const TablaAmortizacion = ({ prestamo }) => {
                 </div>
             </div>
 
+            {/* Resumen de Estado de Pagos */}
+            <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg border">
+                <h4 className="font-semibold text-gray-800 mb-3">📊 Estado de Pagos</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="bg-green-100 p-3 rounded-lg text-center">
+                        <p className="text-2xl font-bold text-green-700">{totales.cuotasPagadas}</p>
+                        <p className="text-xs text-green-600">Cuotas Pagadas</p>
+                    </div>
+                    <div className="bg-gray-100 p-3 rounded-lg text-center">
+                        <p className="text-2xl font-bold text-gray-700">{totales.cuotasPendientes}</p>
+                        <p className="text-xs text-gray-600">Cuotas Pendientes</p>
+                    </div>
+                    <div className="bg-red-100 p-3 rounded-lg text-center">
+                        <p className="text-2xl font-bold text-red-700">{totales.cuotasVencidas}</p>
+                        <p className="text-xs text-red-600">Cuotas Vencidas</p>
+                    </div>
+                    <div className="bg-blue-100 p-3 rounded-lg text-center">
+                        <p className="text-lg font-bold text-blue-700">{formatearMoneda(totales.totalPagado)}</p>
+                        <p className="text-xs text-blue-600">Total Pagado</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Loading indicator */}
+            {loadingPagos && (
+                <div className="flex justify-center items-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-2"></div>
+                    <span className="text-gray-600 text-sm">Actualizando estado de pagos...</span>
+                </div>
+            )}
+
             {/* Tabla de Amortización */}
             <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -169,14 +279,23 @@ const TablaAmortizacion = ({ prestamo }) => {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {tablaAmortizacion.map((fila, index) => (
-                            <tr key={index} className={`hover:bg-gray-50 ${obtenerEstiloEstado(fila.estadoPago)}`}>
+                            <tr key={index} className={`hover:bg-gray-50 ${fila.estadoPago === 'pagado' ? 'bg-green-50' : ''}`}>
                                 <td className="px-4 py-3 whitespace-nowrap">
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                        fila.estadoPago === 'pagado' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                                    }`}>
                                         #{fila.cuota}
                                     </span>
                                 </td>
                                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                                    {formatearFecha(fila.fechaPago)}
+                                    <div>
+                                        {formatearFecha(fila.fechaPago)}
+                                        {fila.fechaPagoReal && (
+                                            <div className="text-xs text-green-600">
+                                                Pagado: {formatearFecha(fila.fechaPagoReal)}
+                                            </div>
+                                        )}
+                                    </div>
                                 </td>
                                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right font-medium">
                                     {formatearMoneda(fila.capital)}
@@ -188,13 +307,17 @@ const TablaAmortizacion = ({ prestamo }) => {
                                     {formatearMoneda(fila.cuotaMensual)}
                                 </td>
                                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
-                                    {formatearMoneda(fila.saldoPendiente)}
+                                    {fila.estadoPago === 'pagado' ? (
+                                        <span className="text-green-600">-</span>
+                                    ) : (
+                                        formatearMoneda(fila.saldoPendiente)
+                                    )}
                                 </td>
                                 <td className="px-4 py-3 whitespace-nowrap text-center">
                                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${obtenerEstiloEstado(fila.estadoPago)}`}>
                                         {obtenerIconoEstado(fila.estadoPago)}
-                                        <span className="ml-1 capitalize">
-                                            {fila.estadoPago === 'proximo' ? 'Próximo' : fila.estadoPago}
+                                        <span className="ml-1">
+                                            {obtenerTextoEstado(fila.estadoPago)}
                                         </span>
                                     </span>
                                 </td>
@@ -234,8 +357,9 @@ const TablaAmortizacion = ({ prestamo }) => {
                     <p>• <strong>Frecuencia de Pago:</strong> Mensual</p>
                     <p>• <strong>Tasa de Interés:</strong> {parseFloat(prestamo.tasaInteres || 0).toFixed(2)}% anual</p>
                     <p>• <strong>Método de Cálculo:</strong> Interés sobre saldo pendiente</p>
-                    <p>• Los pagos marcados como "vencidos" requieren atención inmediata</p>
-                    <p>• Los pagos "próximos" vencen en los próximos 7 días</p>
+                    <p>• Los pagos con ✅ han sido registrados correctamente en el sistema</p>
+                    <p>• Los pagos marcados como "vencidos" ⚠️ requieren atención inmediata</p>
+                    <p>• Los pagos "próximos" ⏰ vencen en los próximos 7 días</p>
                 </div>
             </div>
         </div>

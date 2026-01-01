@@ -37,7 +37,6 @@ import { MovimientosCajaFinanzas } from './components/Finanzas/MovimientoCaja';
 import CuentasBancariasPage from './Pages/CuentasBancariasPage';
 import PrestamosPage from './Pages/PrestamosPage';
 import GarantiasPage from './Pages/GarantiasPage';
-import PagosFinanciamientoPage from './Pages/PagosFinanciamientoPage';
 
 // Componente para proteger rutas que requieren autenticación
 function ProtectedRoute({ children }) {
@@ -186,7 +185,6 @@ function App() {
               <Route path="finanzas/cuentas-bancarias" element={<CuentasBancariasPage />} />
               <Route path="finanzas/prestamos" element={<PrestamosPage />} />
               <Route path="finanzas/garantias" element={<GarantiasPage />} />
-              <Route path="finanzas/pagos-financiamiento" element={<PagosFinanciamientoPage />} />
             </Route>
             
             {/* UserDashboard como layout persistente */}

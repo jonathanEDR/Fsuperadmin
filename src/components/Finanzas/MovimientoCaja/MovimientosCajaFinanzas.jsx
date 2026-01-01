@@ -27,7 +27,7 @@ const MovimientosCajaFinanzas = () => {
         fechaFin: '', // Dejar vacío para test
         tipo: '',
         categoria: '',
-        metodoPago: '',
+        tipoMovimiento: '',
         estado: ''
     });
     
@@ -111,7 +111,7 @@ const MovimientosCajaFinanzas = () => {
             fechaFin: '',
             tipo: '',
             categoria: '',
-            metodoPago: '',
+            tipoMovimiento: '',
             estado: ''
         });
     };
@@ -317,19 +317,16 @@ const MovimientosCajaFinanzas = () => {
                     
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Método de Pago
+                            Tipo Movimiento
                         </label>
                         <select
-                            value={filtros.metodoPago}
-                            onChange={(e) => handleFiltroChange('metodoPago', e.target.value)}
+                            value={filtros.tipoMovimiento}
+                            onChange={(e) => handleFiltroChange('tipoMovimiento', e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         >
                             <option value="">Todos</option>
                             <option value="efectivo">Efectivo</option>
-                            <option value="yape">Yape</option>
-                            <option value="plin">Plin</option>
-                            <option value="transferencia">Transferencia</option>
-                            <option value="tarjeta">Tarjeta</option>
+                            <option value="bancario">Bancario</option>
                         </select>
                     </div>
                     

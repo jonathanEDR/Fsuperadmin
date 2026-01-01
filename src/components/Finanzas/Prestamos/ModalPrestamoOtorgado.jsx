@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import CampoPrestamos from './CampoPrestamos';
+import DesgloseEfectivoPrestamo from './components/DesgloseEfectivoPrestamo';
+import { movimientosCajaService } from '../../../services/movimientosCajaService';
 import {
     opcionesTipoPrestatario,
     opcionesTipoDocumento,
@@ -28,6 +30,14 @@ const ModalPrestamoOtorgado = ({
     const [mostrarBuscadorTrabajador, setMostrarBuscadorTrabajador] = useState(false);
     const [busquedaTrabajador, setBusquedaTrabajador] = useState('');
     const [trabajadorSeleccionado, setTrabajadorSeleccionado] = useState(null);
+    
+    // === NUEVO: Estados para arqueo de caja ===
+    const [saldoCaja, setSaldoCaja] = useState({
+        billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0 },
+        monedas: { m5: 0, m2: 0, m1: 0, c50: 0, c20: 0, c10: 0 }
+    });
+    const [loadingArqueo, setLoadingArqueo] = useState(false);
+    const [totalDisponibleCaja, setTotalDisponibleCaja] = useState(0);
 
     // Resetear estado cuando se cierra el modal
     useEffect(() => {
@@ -35,8 +45,44 @@ const ModalPrestamoOtorgado = ({
             setMostrarBuscadorTrabajador(false);
             setBusquedaTrabajador('');
             setTrabajadorSeleccionado(null);
+        } else {
+            // Cargar arqueo cuando se abre el modal
+            cargarArqueoCaja();
         }
     }, [isOpen]);
+
+    // === NUEVO: Función para cargar arqueo de caja ===
+    const cargarArqueoCaja = async () => {
+        try {
+            setLoadingArqueo(true);
+            const response = await movimientosCajaService.obtenerArqueo();
+            if (response.success && response.data?.desglose) {
+                const { billetes, monedas } = response.data.desglose;
+                setSaldoCaja({
+                    billetes: {
+                        b200: Math.max(0, billetes?.b200 || 0),
+                        b100: Math.max(0, billetes?.b100 || 0),
+                        b50: Math.max(0, billetes?.b50 || 0),
+                        b20: Math.max(0, billetes?.b20 || 0),
+                        b10: Math.max(0, billetes?.b10 || 0)
+                    },
+                    monedas: {
+                        m5: Math.max(0, monedas?.m5 || 0),
+                        m2: Math.max(0, monedas?.m2 || 0),
+                        m1: Math.max(0, monedas?.m1 || 0),
+                        c50: Math.max(0, monedas?.c50 || 0),
+                        c20: Math.max(0, monedas?.c20 || 0),
+                        c10: Math.max(0, monedas?.c10 || 0)
+                    }
+                });
+                setTotalDisponibleCaja(response.data.valorCalculado || 0);
+            }
+        } catch (error) {
+            console.error('Error cargando arqueo de caja:', error);
+        } finally {
+            setLoadingArqueo(false);
+        }
+    };
 
     // Manejar cambio de tipo de prestatario
     useEffect(() => {
@@ -55,6 +101,29 @@ const ModalPrestamoOtorgado = ({
     const esTrabajador = tipoPrestatario === 'trabajador';
     const mostrarDescuentoNomina = esTrabajador && formulario.valores?.prestatarioRef;
 
+    // Tipo de movimiento seleccionado
+    const tipoMovimiento = formulario.valores?.tipoMovimiento || 'efectivo';
+
+    // Calcular total del desglose
+    const totalDesglose = useMemo(() => {
+        const desglose = formulario.valores?.desgloseEfectivo || { billetes: {}, monedas: {} };
+        const { billetes, monedas } = desglose;
+        const totalBilletes =
+            (billetes?.b200 || 0) * 200 +
+            (billetes?.b100 || 0) * 100 +
+            (billetes?.b50 || 0) * 50 +
+            (billetes?.b20 || 0) * 20 +
+            (billetes?.b10 || 0) * 10;
+        const totalMonedas =
+            (monedas?.m5 || 0) * 5 +
+            (monedas?.m2 || 0) * 2 +
+            (monedas?.m1 || 0) * 1 +
+            (monedas?.c50 || 0) * 0.5 +
+            (monedas?.c20 || 0) * 0.2 +
+            (monedas?.c10 || 0) * 0.1;
+        return totalBilletes + totalMonedas;
+    }, [formulario.valores?.desgloseEfectivo]);
+
     // Tipos de prestatario disponibles para préstamos otorgados (excluye 'interno')
     const tiposPrestatarioOtorgado = [
         { value: 'particular', label: 'Particular' },
@@ -63,6 +132,26 @@ const ModalPrestamoOtorgado = ({
         { value: 'cliente', label: 'Cliente' },
         { value: 'otro', label: 'Otro' }
     ];
+
+    // === NUEVO: Manejar cambios en el desglose de efectivo ===
+    const handleDesgloseChange = (tipo, key, valor) => {
+        const currentDesglose = formulario.valores?.desgloseEfectivo || {
+            billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0 },
+            monedas: { m5: 0, m2: 0, m1: 0, c50: 0, c20: 0, c10: 0 }
+        };
+        
+        const nuevoDesglose = {
+            ...currentDesglose,
+            [tipo]: {
+                ...currentDesglose[tipo],
+                [key]: valor
+            }
+        };
+        
+        formulario.manejarCambio({
+            target: { name: 'desgloseEfectivo', value: nuevoDesglose }
+        });
+    };
 
     // Manejar búsqueda de trabajadores
     const handleBuscarTrabajador = (e) => {
@@ -427,6 +516,109 @@ const ModalPrestamoOtorgado = ({
                                         </p>
                                     </div>
                                 </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* === NUEVO: Método de Entrega del Dinero === */}
+                    <div className="mb-6">
+                        <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">
+                            💰 Método de Entrega del Dinero
+                        </h3>
+
+                        {/* Selector de tipo de movimiento */}
+                        <div className="grid grid-cols-2 gap-3 mb-4">
+                            <button
+                                type="button"
+                                onClick={() => formulario.manejarCambio({ target: { name: 'tipoMovimiento', value: 'efectivo' } })}
+                                className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center ${
+                                    tipoMovimiento === 'efectivo'
+                                        ? 'border-green-500 bg-green-50 shadow-md'
+                                        : 'border-gray-200 hover:border-green-300 hover:bg-gray-50'
+                                }`}
+                            >
+                                <span className="text-3xl mb-2">💵</span>
+                                <span className={`font-semibold ${tipoMovimiento === 'efectivo' ? 'text-green-700' : 'text-gray-700'}`}>
+                                    Efectivo
+                                </span>
+                                <span className="text-xs text-gray-500 mt-1">Con desglose por denominación</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => formulario.manejarCambio({ target: { name: 'tipoMovimiento', value: 'bancario' } })}
+                                className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center ${
+                                    tipoMovimiento === 'bancario'
+                                        ? 'border-green-500 bg-green-50 shadow-md'
+                                        : 'border-gray-200 hover:border-green-300 hover:bg-gray-50'
+                                }`}
+                            >
+                                <span className="text-3xl mb-2">🏦</span>
+                                <span className={`font-semibold ${tipoMovimiento === 'bancario' ? 'text-green-700' : 'text-gray-700'}`}>
+                                    Transferencia Bancaria
+                                </span>
+                                <span className="text-xs text-gray-500 mt-1">Depósito o transferencia</span>
+                            </button>
+                        </div>
+
+                        {/* Desglose de efectivo */}
+                        {tipoMovimiento === 'efectivo' && (
+                            <DesgloseEfectivoPrestamo
+                                desglose={formulario.valores?.desgloseEfectivo || {
+                                    billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0 },
+                                    monedas: { m5: 0, m2: 0, m1: 0, c50: 0, c20: 0, c10: 0 }
+                                }}
+                                saldoCaja={saldoCaja}
+                                onDesgloseChange={handleDesgloseChange}
+                                loading={loadingArqueo}
+                                totalDisponible={totalDisponibleCaja}
+                                montoAPagar={parseFloat(formulario.valores?.montoSolicitado) || 0}
+                            />
+                        )}
+
+                        {/* Datos bancarios */}
+                        {tipoMovimiento === 'bancario' && (
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <CampoPrestamos
+                                        name="datosBancarios.banco"
+                                        label="Banco"
+                                        value={formulario.valores?.datosBancarios?.banco || ''}
+                                        onChange={formulario.manejarCambio}
+                                        placeholder="Ej: BCP, BBVA, Interbank"
+                                    />
+                                    <CampoPrestamos
+                                        name="datosBancarios.numeroCuenta"
+                                        label="N° de Cuenta Destino"
+                                        value={formulario.valores?.datosBancarios?.numeroCuenta || ''}
+                                        onChange={formulario.manejarCambio}
+                                        placeholder="Cuenta del prestatario"
+                                    />
+                                    <CampoPrestamos
+                                        name="datosBancarios.numeroOperacion"
+                                        label="N° de Operación"
+                                        value={formulario.valores?.datosBancarios?.numeroOperacion || ''}
+                                        onChange={formulario.manejarCambio}
+                                        placeholder="Número de transacción"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Advertencia si hay diferencia en el desglose */}
+                        {tipoMovimiento === 'efectivo' && formulario.valores?.montoSolicitado > 0 && (
+                            <div className="mt-3">
+                                {Math.abs(totalDesglose - parseFloat(formulario.valores.montoSolicitado)) > 0.01 ? (
+                                    <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-3 py-2 rounded-lg text-sm flex items-center gap-2">
+                                        <span>⚠️</span>
+                                        El desglose (S/ {totalDesglose.toFixed(2)}) no coincide con el monto a prestar (S/ {parseFloat(formulario.valores.montoSolicitado).toFixed(2)})
+                                    </div>
+                                ) : totalDesglose > 0 && (
+                                    <div className="bg-green-100 border border-green-300 text-green-800 px-3 py-2 rounded-lg text-sm flex items-center gap-2">
+                                        <span>✅</span>
+                                        Desglose correcto: S/ {totalDesglose.toFixed(2)}
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>

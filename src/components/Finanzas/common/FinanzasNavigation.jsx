@@ -67,15 +67,6 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
             color: 'bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 text-purple-800 border-purple-200',
             description: 'Gestión de garantías',
             badge: estadisticas?.garantias?.revision || null
-        },
-        {
-            id: 'pagos-financiamiento',
-            label: 'Pagos',
-            to: `${baseRoute}/pagos-financiamiento`,
-            icon: '💳',
-            color: 'bg-gradient-to-br from-indigo-50 to-indigo-100 hover:from-indigo-100 hover:to-indigo-200 text-indigo-800 border-indigo-200',
-            description: 'Pagos y financiamiento',
-            badge: estadisticas?.pagos?.pendientes || null
         }
     ], [estadisticas, baseRoute]);
 
@@ -87,7 +78,6 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
         if (path.includes('cuentas-bancarias')) return 'cuentas-bancarias';
         if (path.includes('prestamos')) return 'prestamos';
         if (path.includes('garantias')) return 'garantias';
-        if (path.includes('pagos-financiamiento')) return 'pagos-financiamiento';
         if (path.endsWith('/finanzas')) return 'dashboard';
         
         return currentModule;

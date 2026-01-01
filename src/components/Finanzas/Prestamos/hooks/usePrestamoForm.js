@@ -49,6 +49,17 @@ export const usePrestamoForm = (initialData = null, validationSchema = {}) => {
             montoFijo: 0,
             periodoDescuento: 'mensual'
         },
+        // === NUEVO: Tipo de movimiento y desglose de efectivo ===
+        tipoMovimiento: 'efectivo', // 'efectivo' o 'bancario'
+        desgloseEfectivo: {
+            billetes: { b200: 0, b100: 0, b50: 0, b20: 0, b10: 0 },
+            monedas: { m5: 0, m2: 0, m1: 0, c50: 0, c20: 0, c10: 0 }
+        },
+        datosBancarios: {
+            banco: '',
+            numeroCuenta: '',
+            numeroOperacion: ''
+        },
         ...initialData
     }), [initialData]);
     
@@ -254,6 +265,22 @@ export const usePrestamoForm = (initialData = null, validationSchema = {}) => {
                 porcentaje: parseFloat(formData.descuentoNomina.porcentaje) || 0,
                 montoFijo: parseFloat(formData.descuentoNomina.montoFijo) || 0,
                 periodoDescuento: formData.descuentoNomina.periodoDescuento || 'mensual'
+            };
+        }
+
+        // === NUEVO: Incluir tipo de movimiento y desglose de efectivo ===
+        backendData.tipoMovimiento = formData.tipoMovimiento || 'efectivo';
+        
+        if (formData.tipoMovimiento === 'efectivo' && formData.desgloseEfectivo) {
+            backendData.desgloseEfectivo = {
+                billetes: { ...formData.desgloseEfectivo.billetes },
+                monedas: { ...formData.desgloseEfectivo.monedas }
+            };
+        } else if (formData.tipoMovimiento === 'bancario' && formData.datosBancarios) {
+            backendData.datosBancarios = {
+                banco: formData.datosBancarios.banco || '',
+                numeroCuenta: formData.datosBancarios.numeroCuenta || '',
+                numeroOperacion: formData.datosBancarios.numeroOperacion || ''
             };
         }
 
