@@ -1,6 +1,7 @@
 /**
- * Modal para crear registros de gestión personal
- * Componente optimizado y reutilizable
+ * Modal para registrar Pago Diario Manual
+ * Usado como respaldo cuando el pago automático no funciona
+ * Diseño limpio y profesional
  */
 
 import React, { useState, useEffect } from 'react';
@@ -24,10 +25,7 @@ const RegistroModal = React.memo(({
 
   const [formData, setFormData] = useState({
     fechaDeGestion: getFechaActual(),
-    descripcion: '',
-    adelanto: 0,
-    bonificacion: 0,
-    descripcionBonificacion: ''
+    descripcion: ''
   });
 
   // Calcular pago diario basado en el sueldo del colaborador (sueldo / 30 días)
@@ -39,10 +37,7 @@ const RegistroModal = React.memo(({
     if (colaborador && isOpen) {
       setFormData({
         fechaDeGestion: getFechaActual(),
-        descripcion: `Registro de pago diario - ${colaborador.nombre_negocio}`,
-        adelanto: 0,
-        bonificacion: 0,
-        descripcionBonificacion: ''
+        descripcion: `Pago diario manual - ${colaborador.nombre_negocio}`
       });
     }
   }, [colaborador, isOpen]);
@@ -59,10 +54,10 @@ const RegistroModal = React.memo(({
       colaboradorUserId: colaborador?.clerk_id,
       fechaDeGestion: new Date(formData.fechaDeGestion).toISOString(),
       descripcion: formData.descripcion.trim(),
-      adelanto: parseFloat(formData.adelanto) || 0,
-      bonificacion: parseFloat(formData.bonificacion) || 0,
-      descripcionBonificacion: formData.descripcionBonificacion.trim(),
-      incluirDatosCobros: true
+      adelanto: 0,
+      bonificacion: 0,
+      descripcionBonificacion: '',
+      incluirDatosCobros: false
     };
 
     onSubmit(dataToSubmit);
@@ -71,10 +66,7 @@ const RegistroModal = React.memo(({
   const handleClose = () => {
     setFormData({
       fechaDeGestion: getFechaActual(),
-      descripcion: '',
-      adelanto: 0,
-      bonificacion: 0,
-      descripcionBonificacion: ''
+      descripcion: ''
     });
     onClose();
   };
@@ -82,137 +74,93 @@ const RegistroModal = React.memo(({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-3 sm:p-6 w-full max-w-md max-h-[90vh] mx-2 overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">
-            Nuevo Registro - {colaborador?.nombre_negocio || 'Colaborador'}
-          </h3>
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl shadow-xl p-5 sm:p-6 w-full max-w-md mx-3 transform transition-all">
+        {/* Header */}
+        <div className="flex justify-between items-start mb-5">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-2xl">💵</span>
+              <h3 className="text-lg font-semibold text-gray-800">
+                Pago Diario Manual
+              </h3>
+            </div>
+            <p className="text-sm text-gray-500">
+              Registrar pago diario para {colaborador?.nombre_negocio || 'colaborador'}
+            </p>
+          </div>
           <button
             onClick={handleClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
           >
-            ✕
+            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
+        {/* Info del colaborador */}
+        <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4 mb-5 border border-emerald-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-emerald-600 font-medium uppercase tracking-wide">Colaborador</p>
+              <p className="font-semibold text-gray-800">{colaborador?.nombre_negocio}</p>
+              <p className="text-xs text-gray-500">{colaborador?.email}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-emerald-600 font-medium uppercase tracking-wide">Pago Diario</p>
+              <p className="text-2xl font-bold text-emerald-600">S/ {pagoDiarioCalculado}</p>
+              <p className="text-xs text-gray-500">Sueldo: S/ {colaborador?.sueldo?.toFixed(2) || '0.00'}</p>
+            </div>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Fecha */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Fecha y Hora
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Fecha y Hora del Registro
             </label>
             <input
               type="datetime-local"
               value={formData.fechaDeGestion}
               onChange={(e) => setFormData(prev => ({ ...prev, fechaDeGestion: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors bg-gray-50/50"
               required
             />
           </div>
 
+          {/* Descripción */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Descripción
             </label>
             <textarea
               value={formData.descripcion}
               onChange={(e) => setFormData(prev => ({ ...prev, descripcion: e.target.value }))}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              rows={2}
+              className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors bg-gray-50/50 resize-none"
+              placeholder="Ej: Pago diario manual por asistencia..."
               required
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Adelanto
-                <span className="text-xs text-green-600 ml-1">(Manual)</span>
-              </label>
-              <div className="relative">
-                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">S/</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.adelanto}
-                  onChange={(e) => setFormData(prev => ({ ...prev, adelanto: e.target.value }))}
-                  className="w-full pl-8 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="0.00"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Pago Diario 
-                <span className="text-xs text-blue-600 ml-1">(Calculado)</span>
-              </label>
-              <div className="relative">
-                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">S/</span>
-                <input
-                  type="text"
-                  value={pagoDiarioCalculado}
-                  readOnly
-                  className="w-full pl-8 px-3 py-2 border border-gray-300 rounded-md bg-blue-50 text-blue-700 font-semibold"
-                  placeholder="0.00"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Sección de Bonificación */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
-              <span className="text-lg">🎁</span>
-              Bonificación (Opcional)
-            </label>
-            
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs text-gray-600 mb-1">Monto</label>
-                <div className="relative">
-                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">S/</span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.bonificacion}
-                    onChange={(e) => setFormData(prev => ({ ...prev, bonificacion: e.target.value }))}
-                    className="w-full pl-8 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-xs text-gray-600 mb-1">Concepto</label>
-                <input
-                  type="text"
-                  maxLength="200"
-                  value={formData.descripcionBonificacion}
-                  onChange={(e) => setFormData(prev => ({ ...prev, descripcionBonificacion: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                  placeholder="Ej: Bono por puntualidad"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Máx. 200 caracteres
-                </p>
-              </div>
-            </div>
-          </div>
-
           {/* Nota informativa */}
-          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-            <p className="text-sm text-blue-800">
-              <span className="font-medium">ℹ️ Información:</span> Los faltantes y gastos imprevistos se agregarán automáticamente desde los cobros del día.
+          <div className="bg-amber-50/70 p-3.5 rounded-xl border border-amber-200/50">
+            <p className="text-sm text-amber-700 flex items-start gap-2">
+              <span className="text-base">⚠️</span>
+              <span>
+                <strong>Nota:</strong> Use esta opción solo cuando el registro automático no haya funcionado correctamente.
+              </span>
             </p>
           </div>
 
-          <div className="flex justify-end space-x-3 pt-4">
+          {/* Botones */}
+          <div className="flex gap-3 pt-2">
             <button
               type="button"
               onClick={handleClose}
-              className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+              className="flex-1 px-4 py-2.5 text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors font-medium"
               disabled={loading}
             >
               Cancelar
@@ -220,9 +168,19 @@ const RegistroModal = React.memo(({
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl hover:from-emerald-600 hover:to-teal-600 transition-all font-medium shadow-lg shadow-emerald-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Creando...' : 'Crear Registro'}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Registrando...
+                </span>
+              ) : (
+                'Registrar Pago'
+              )}
             </button>
           </div>
         </form>

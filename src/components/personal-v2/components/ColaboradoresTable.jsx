@@ -11,6 +11,7 @@ const ColaboradoresTable = React.memo(({
   estadisticasBulk,
   pagosRealizados,
   onAbrirModal,
+  onAbrirModalBonificacion, // 🆕 Nuevo prop para bonificaciones/adelantos
   onMostrarDetalle,
   formatearMoneda,
   loading
@@ -30,11 +31,12 @@ const ColaboradoresTable = React.memo(({
       // Obtener totales de estadísticas
       const adelantos = estadisticas.totalAdelantos || 0;
       const pagosDiarios = estadisticas.totalPagosDiarios || 0;
+      const bonificaciones = estadisticas.totalBonificaciones || 0; // 🆕 Bonificaciones
       const faltantesPendientes = estadisticas.cobrosAutomaticos?.faltantesPendientes || 0;
       const gastosPendientes = estadisticas.cobrosAutomaticos?.gastosPendientes || 0;
       const totalAPagar = estadisticas.totalAPagarConCobros !== undefined 
         ? estadisticas.totalAPagarConCobros 
-        : (pagosDiarios - (estadisticas.totalFaltantes || 0) - adelantos);
+        : (pagosDiarios + bonificaciones - (estadisticas.totalFaltantes || 0) - adelantos);
       
       // Total final descontando pagos realizados
       const totalFinal = totalAPagar - totalPagos;
@@ -43,6 +45,7 @@ const ColaboradoresTable = React.memo(({
         ...colaborador,
         adelantos,
         pagosDiarios,
+        bonificaciones, // 🆕
         faltantesPendientes,
         gastosPendientes,
         pendientesTotal: faltantesPendientes + gastosPendientes,
@@ -81,133 +84,120 @@ const ColaboradoresTable = React.memo(({
   }
   
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
-      <div className="px-4 sm:px-6 py-4 bg-gray-50 border-b">
-        <h3 className="text-base sm:text-lg font-medium">Colaboradores</h3>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="px-5 sm:px-6 py-4 bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-100">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-800">Colaboradores</h3>
       </div>
       
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-gray-100">
+          <thead className="bg-gray-50/50">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Colaborador
               </th>
-              <th className="hidden sm:table-cell px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Pendientes Cobros
+              <th className="px-4 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Bonificación
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Adelantos
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Pagos Diarios
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Total a Pagar
               </th>
-              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Acciones
               </th>
             </tr>
           </thead>
           
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white divide-y divide-gray-50">
             {datosColaboradores.map((colaborador) => (
-              <tr key={colaborador._id} className="hover:bg-gray-50 transition-colors">
+              <tr key={colaborador._id} className="hover:bg-slate-50/50 transition-colors">
                 {/* Columna: Colaborador */}
                 <td className="px-4 py-4">
-                  <div className="flex flex-col">
-                    <div className="text-sm font-medium text-gray-900">
-                      {colaborador.nombre_negocio}
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center text-sm font-semibold text-blue-600">
+                      {colaborador.nombre_negocio?.charAt(0)?.toUpperCase() || 'C'}
                     </div>
-                    <div className="hidden sm:block text-xs text-gray-500">
-                      {colaborador.email}
-                    </div>
-                    <div className="text-xs text-gray-400 capitalize">
-                      {colaborador.role}
-                    </div>
-                    
-                    {/* Mostrar pendientes en móvil */}
-                    <div className="sm:hidden mt-2">
-                      {colaborador.pendientesTotal > 0 ? (
-                        <div className="text-xs">
-                          <span className="text-orange-700">Pendientes: </span>
-                          <span className="font-medium text-purple-600">
-                            {formatearMoneda(colaborador.pendientesTotal)}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-gray-500">Sin pendientes</span>
-                      )}
+                    <div className="flex flex-col">
+                      <div className="text-sm font-medium text-gray-800">
+                        {colaborador.nombre_negocio}
+                      </div>
+                      <div className="hidden sm:block text-xs text-gray-400">
+                        {colaborador.email}
+                      </div>
+                      <div className="text-xs text-gray-400 capitalize">
+                        {colaborador.role}
+                      </div>
                     </div>
                   </div>
                 </td>
                 
-                {/* Columna: Pendientes de Cobros (solo desktop) */}
-                <td className="hidden sm:table-cell px-4 py-4 text-right">
-                  {colaborador.pendientesTotal > 0 ? (
-                    <div className="flex flex-col items-end">
-                      {colaborador.faltantesPendientes > 0 && (
-                        <span className="text-xs text-orange-700">
-                          Faltantes: {formatearMoneda(colaborador.faltantesPendientes)}
-                        </span>
-                      )}
-                      {colaborador.gastosPendientes > 0 && (
-                        <span className="text-xs text-red-700">
-                          Gastos: {formatearMoneda(colaborador.gastosPendientes)}
-                        </span>
-                      )}
-                      <span className="text-sm font-bold text-purple-600 mt-1 pt-1 border-t border-gray-200">
-                        Total: {formatearMoneda(colaborador.pendientesTotal)}
-                      </span>
-                      {(colaborador.ventasRelacionadas > 0 || colaborador.cobrosRelacionados > 0) && (
-                        <span className="text-xs text-blue-600 mt-1">
-                          {colaborador.ventasRelacionadas} ventas → {colaborador.cobrosRelacionados} cobros
-                        </span>
-                      )}
-                    </div>
-                  ) : (
-                    <span className="text-xs text-gray-500">Sin pendientes</span>
-                  )}
+                {/* Columna: Bonificación */}
+                <td className="px-4 py-4 text-right">
+                  <span className={`text-sm font-semibold ${
+                    colaborador.bonificaciones > 0 ? 'text-amber-500' : 'text-gray-300'
+                  }`}>
+                    {formatearMoneda(colaborador.bonificaciones)}
+                  </span>
                 </td>
                 
                 {/* Columna: Adelantos */}
                 <td className="px-4 py-4 text-right">
-                  <span className="text-sm font-bold text-blue-600">
+                  <span className={`text-sm font-semibold ${
+                    colaborador.adelantos > 0 ? 'text-orange-500' : 'text-gray-300'
+                  }`}>
                     {formatearMoneda(colaborador.adelantos)}
                   </span>
                 </td>
                 
                 {/* Columna: Pagos Diarios */}
                 <td className="px-4 py-4 text-right">
-                  <span className="text-sm font-bold text-green-600">
+                  <span className="text-sm font-semibold text-emerald-500">
                     {formatearMoneda(colaborador.pagosDiarios)}
                   </span>
                 </td>
                 
                 {/* Columna: Total a Pagar */}
                 <td className="px-4 py-4 text-right">
-                  <span className={`text-sm font-bold ${
-                    colaborador.totalAPagar >= 0 ? 'text-green-600' : 'text-red-600'
+                  <span className={`text-sm font-bold px-2.5 py-1 rounded-lg ${
+                    colaborador.totalAPagar >= 0 
+                      ? 'text-emerald-600 bg-emerald-50' 
+                      : 'text-red-600 bg-red-50'
                   }`}>
                     {formatearMoneda(colaborador.totalAPagar)}
                   </span>
                 </td>
                 
                 {/* Columna: Acciones */}
-                <td className="px-4 py-4 text-center">
-                  <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                <td className="px-4 py-4">
+                  <div className="flex flex-col sm:flex-row gap-1.5 justify-center">
+                    {/* Botón Pago Diario Manual */}
                     <button
-                      onClick={() => onAbrirModal(colaborador)}
-                      className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors"
+                      onClick={() => onAbrirModal && onAbrirModal(colaborador)}
+                      className="px-2.5 py-1.5 bg-gradient-to-r from-emerald-400 to-teal-400 text-white rounded-lg text-xs font-medium hover:from-emerald-500 hover:to-teal-500 transition-all shadow-sm"
+                      title="Registrar pago diario manual"
                     >
-                      Nuevo Registro
+                      💵 Pago Diario
                     </button>
+                    {/* Botón Bonificación/Adelanto */}
+                    <button
+                      onClick={() => onAbrirModalBonificacion && onAbrirModalBonificacion(colaborador)}
+                      className="px-2.5 py-1.5 bg-gradient-to-r from-amber-400 to-yellow-400 text-white rounded-lg text-xs font-medium hover:from-amber-500 hover:to-yellow-500 transition-all shadow-sm"
+                      title="Registrar bonificación o adelanto"
+                    >
+                      🎁 Bono/Adelanto
+                    </button>
+                    {/* Botón Ver Detalle */}
                     <button
                       onClick={() => onMostrarDetalle(colaborador)}
-                      className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 transition-colors"
+                      className="px-2.5 py-1.5 bg-gradient-to-r from-blue-400 to-indigo-400 text-white rounded-lg text-xs font-medium hover:from-blue-500 hover:to-indigo-500 transition-all shadow-sm"
                     >
-                      Ver Detalle
+                      📋 Detalle
                     </button>
                   </div>
                 </td>

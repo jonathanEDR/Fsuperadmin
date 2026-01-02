@@ -12,6 +12,7 @@ import ColaboradorDetalle from './components/ColaboradorDetalle';
 import PagosRealizados from './components/PagosRealizados';
 import ProfileManagement from '../../Pages/ProfileManagement';
 import RegistroModal from './components/RegistroModal';
+import BonificacionAdelantoModal from './components/BonificacionAdelantoModal';
 import CalendarioAsistencias from './components/CalendarioAsistencias';
 import ListaAsistencias from './components/ListaAsistencias';
 import ReporteAsistencias from './components/ReporteAsistencias';
@@ -62,6 +63,39 @@ function GestionPersonalV2() {
   
   // Estado para rol del usuario
   const [userRole, setUserRole] = useState(null);
+  
+  // 🆕 Estado para modal de bonificación/adelanto
+  const [modalBonificacion, setModalBonificacion] = useState({
+    isOpen: false,
+    colaborador: null
+  });
+  
+  // 🆕 Handlers para modal de bonificación/adelanto
+  const abrirModalBonificacion = (colaborador) => {
+    setModalBonificacion({ isOpen: true, colaborador });
+  };
+  
+  const cerrarModalBonificacion = () => {
+    setModalBonificacion({ isOpen: false, colaborador: null });
+  };
+  
+  const crearBonificacionAdelanto = async (data) => {
+    try {
+      // Usar el servicio existente para crear registro
+      await crearRegistro({
+        colaboradorUserId: data.colaboradorUserId,
+        fechaDeGestion: data.fechaDeGestion,
+        descripcion: data.descripcion,
+        adelanto: data.tipo === 'adelanto' ? data.monto : 0,
+        bonificacion: data.tipo === 'bonificacion' ? data.monto : 0,
+        descripcionBonificacion: data.tipo === 'bonificacion' ? data.descripcion : '',
+        incluirDatosCobros: false // No incluir cobros automáticos para este tipo de registro
+      });
+      cerrarModalBonificacion();
+    } catch (error) {
+      console.error('Error al crear bonificación/adelanto:', error);
+    }
+  };
   
   // Obtener rol del usuario
   useEffect(() => {
@@ -171,6 +205,7 @@ function GestionPersonalV2() {
               estadisticasBulk={estadisticasBulk}
               pagosRealizados={pagosRealizados}
               onAbrirModal={abrirModal}
+              onAbrirModalBonificacion={abrirModalBonificacion}
               onMostrarDetalle={mostrarDetalle}
               formatearMoneda={formatearMoneda}
               loading={selectors.isLoading}
@@ -278,6 +313,15 @@ function GestionPersonalV2() {
         onClose={cerrarModal}
         onSubmit={crearRegistro}
         colaborador={modalState.selectedColaborador}
+        loading={selectors.isLoading}
+      />
+
+      {/* 🆕 Modal para bonificación/adelanto */}
+      <BonificacionAdelantoModal
+        isOpen={modalBonificacion.isOpen}
+        onClose={cerrarModalBonificacion}
+        onSubmit={crearBonificacionAdelanto}
+        colaborador={modalBonificacion.colaborador}
         loading={selectors.isLoading}
       />
 

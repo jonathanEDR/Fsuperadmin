@@ -99,7 +99,9 @@ const EscanerQR = () => {
           // Nuevos campos para múltiples registros
           esRolPrivilegiado: response.data.esRolPrivilegiado || false,
           totalRegistrosHoy: response.data.totalRegistrosHoy || 0,
-          tiempoTrabajadoMinutos: response.data.tiempoTrabajadoMinutos || null
+          tiempoTrabajadoMinutos: response.data.tiempoTrabajadoMinutos || null,
+          // 🆕 Información del pago diario
+          pagoDiario: response.data.pagoDiario || null
         });
       } else {
         throw new Error(response.message || 'Error al registrar asistencia');
@@ -324,6 +326,33 @@ const EscanerQR = () => {
                     <p className="text-green-800 text-sm">
                       ✅ Tu jornada laboral ha sido registrada completamente.
                     </p>
+                  </div>
+                )}
+
+                {/* 🆕 Información del Pago Diario */}
+                {registroResult.tipo === 'salida' && registroResult.pagoDiario && (
+                  <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-lg">💰</span>
+                      <h3 className="font-semibold text-emerald-900">Pago Diario</h3>
+                    </div>
+                    {registroResult.pagoDiario.registrado ? (
+                      <div className="space-y-2">
+                        <p className="text-emerald-800 text-sm">
+                          ✅ Se ha registrado automáticamente tu pago del día.
+                        </p>
+                        <div className="bg-white rounded p-2 flex items-center justify-between">
+                          <span className="text-sm text-gray-600">Monto del día:</span>
+                          <span className="font-bold text-emerald-700 text-lg">
+                            S/ {registroResult.pagoDiario.montoDiario?.toFixed(2) || '0.00'}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-amber-700 text-sm">
+                        ⚠️ No se configuró sueldo para este colaborador. El pago diario no fue registrado.
+                      </p>
+                    )}
                   </div>
                 )}
 
