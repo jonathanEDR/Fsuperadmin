@@ -14,7 +14,8 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
-  Search
+  Search,
+  Edit3
 } from 'lucide-react';
 
 const TablaQRs = ({ 
@@ -22,6 +23,7 @@ const TablaQRs = ({
   onActivar, 
   onDesactivar, 
   onEliminar,
+  onEditar,
   onVerDetalles,
   loading = false,
   paginaActual = 1,
@@ -247,6 +249,13 @@ const TablaQRs = ({
                         </button>
                       )}
                       <button
+                        onClick={() => onEditar(qr)}
+                        className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                        title="Editar"
+                      >
+                        <Edit3 size={18} />
+                      </button>
+                      <button
                         onClick={() => onVerDetalles(qr)}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         title="Ver detalles"
@@ -344,6 +353,13 @@ const TablaQRs = ({
                     <span>Activar</span>
                   </button>
                 )}
+                <button
+                  onClick={() => onEditar(qr)}
+                  className="flex items-center justify-center gap-2 px-3 py-2 text-amber-600 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors text-sm"
+                  title="Editar"
+                >
+                  <Edit3 size={16} />
+                </button>
                 <button
                   onClick={() => onVerDetalles(qr)}
                   className="flex items-center justify-center gap-2 px-3 py-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-sm"

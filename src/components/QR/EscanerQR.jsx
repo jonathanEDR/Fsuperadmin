@@ -95,7 +95,11 @@ const EscanerQR = () => {
           mensaje: response.data.mensaje,
           hora: response.data.hora || new Date().toISOString(), // Usar hora del servidor o actual
           colaborador: response.data.colaborador,
-          success: true
+          success: true,
+          // Nuevos campos para múltiples registros
+          esRolPrivilegiado: response.data.esRolPrivilegiado || false,
+          totalRegistrosHoy: response.data.totalRegistrosHoy || 0,
+          tiempoTrabajadoMinutos: response.data.tiempoTrabajadoMinutos || null
         });
       } else {
         throw new Error(response.message || 'Error al registrar asistencia');
@@ -320,6 +324,53 @@ const EscanerQR = () => {
                     <p className="text-green-800 text-sm">
                       ✅ Tu jornada laboral ha sido registrada completamente.
                     </p>
+                  </div>
+                )}
+
+                {/* Información adicional para roles privilegiados */}
+                {registroResult.esRolPrivilegiado && (
+                  <div className="mt-4 space-y-3">
+                    {/* Badge de rol privilegiado */}
+                    <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                      <p className="text-purple-800 text-sm font-medium flex items-center gap-2">
+                        <span>👑</span>
+                        <span>Modo Administrador: Puedes registrar múltiples entradas/salidas</span>
+                      </p>
+                    </div>
+                    
+                    {/* Estadísticas del día */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 bg-gray-50 rounded-lg text-center">
+                        <p className="text-2xl font-bold text-gray-900">{registroResult.totalRegistrosHoy}</p>
+                        <p className="text-xs text-gray-600">Registros hoy</p>
+                      </div>
+                      
+                      {registroResult.tiempoTrabajadoMinutos !== null && (
+                        <div className="p-3 bg-gray-50 rounded-lg text-center">
+                          <p className="text-2xl font-bold text-gray-900">
+                            {Math.floor(registroResult.tiempoTrabajadoMinutos / 60)}h {registroResult.tiempoTrabajadoMinutos % 60}m
+                          </p>
+                          <p className="text-xs text-gray-600">Tiempo trabajado</p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Mensaje de siguiente acción */}
+                    {registroResult.tipo === 'entrada' && (
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <p className="text-blue-800 text-sm">
+                          📌 Escanea nuevamente cuando te retires para registrar tu salida.
+                        </p>
+                      </div>
+                    )}
+                    
+                    {registroResult.tipo === 'salida' && (
+                      <div className="p-3 bg-amber-50 rounded-lg">
+                        <p className="text-amber-800 text-sm">
+                          🔄 Si regresas más tarde, puedes escanear para registrar una nueva entrada.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

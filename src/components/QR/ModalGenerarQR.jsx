@@ -3,10 +3,20 @@
  * Modal con formulario para generar nuevos códigos QR
  */
 
-import React, { useState } from 'react';
-import { X, QrCode, MapPin, Clock, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, QrCode, MapPin, Clock, AlertCircle, Edit3 } from 'lucide-react';
 
-const ModalGenerarQR = ({ isOpen, onClose, onGenerar, loading = false }) => {
+const ModalGenerarQR = ({ 
+  isOpen, 
+  onClose, 
+  onGenerar, 
+  onActualizar,
+  qrEditar = null, // QR a editar (null = modo crear)
+  loading = false 
+}) => {
+  
+  // Determinar si estamos en modo edición
+  const modoEdicion = !!qrEditar;
   
   const [formData, setFormData] = useState({
     nombre: '',
@@ -23,6 +33,46 @@ const ModalGenerarQR = ({ isOpen, onClose, onGenerar, loading = false }) => {
   });
 
   const [errores, setErrores] = useState({});
+
+  // Efecto para cargar datos cuando se edita un QR
+  useEffect(() => {
+    if (qrEditar && isOpen) {
+      // Formatear la fecha para el input date
+      let fechaValidoHasta = '';
+      if (qrEditar.validoHasta) {
+        const fecha = new Date(qrEditar.validoHasta);
+        fechaValidoHasta = fecha.toISOString().split('T')[0];
+      }
+
+      setFormData({
+        nombre: qrEditar.nombre || '',
+        sucursal: qrEditar.sucursalNombre || '',
+        validoHasta: fechaValidoHasta,
+        notas: qrEditar.notas || '',
+        requiereGeolocalizacion: qrEditar.configuracion?.requiereGeolocalizacion ?? true,
+        horaInicio: qrEditar.configuracion?.horariosPermitidos?.horaInicio || '06:00',
+        horaFin: qrEditar.configuracion?.horariosPermitidos?.horaFin || '23:00',
+        horarioEntradaEsperado: qrEditar.configuracion?.horarioEntradaEsperado || '08:00',
+        toleranciaTardanza: qrEditar.configuracion?.toleranciaTardanza || 10,
+        aplicarDeteccionTardanza: qrEditar.configuracion?.aplicarDeteccionTardanza ?? true
+      });
+    } else if (!qrEditar && isOpen) {
+      // Resetear a valores por defecto cuando se abre en modo crear
+      setFormData({
+        nombre: '',
+        sucursal: '',
+        validoHasta: '',
+        notas: '',
+        requiereGeolocalizacion: true,
+        horaInicio: '06:00',
+        horaFin: '23:00',
+        horarioEntradaEsperado: '08:00',
+        toleranciaTardanza: 10,
+        aplicarDeteccionTardanza: true
+      });
+      setErrores({});
+    }
+  }, [qrEditar, isOpen]);
 
   // Cerrar modal y resetear formulario
   const handleCerrar = () => {
@@ -85,7 +135,7 @@ const ModalGenerarQR = ({ isOpen, onClose, onGenerar, loading = false }) => {
     // Preparar datos para enviar
     const datosQR = {
       nombre: formData.nombre.trim(),
-      sucursal: formData.sucursal.trim(),
+      sucursalNombre: formData.sucursal.trim(),
       notas: formData.notas.trim(),
       configuracion: {
         requiereGeolocalizacion: formData.requiereGeolocalizacion,
@@ -103,9 +153,18 @@ const ModalGenerarQR = ({ isOpen, onClose, onGenerar, loading = false }) => {
     // Solo incluir validoHasta si tiene valor
     if (formData.validoHasta) {
       datosQR.validoHasta = formData.validoHasta;
+    } else {
+      datosQR.validoHasta = null; // Permitir eliminar fecha de expiración
     }
 
-    await onGenerar(datosQR);
+    // Diferenciar entre crear y actualizar
+    if (modoEdicion) {
+      await onActualizar(qrEditar._id, datosQR);
+    } else {
+      // Mantener compatibilidad con onGenerar que espera 'sucursal' en lugar de 'sucursalNombre'
+      datosQR.sucursal = datosQR.sucursalNombre;
+      await onGenerar(datosQR);
+    }
   };
 
   // Manejar cambios en inputs
@@ -139,10 +198,12 @@ const ModalGenerarQR = ({ isOpen, onClose, onGenerar, loading = false }) => {
       <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 flex items-center justify-between sticky top-0">
+        <div className={`${modoEdicion ? 'bg-gradient-to-r from-amber-500 to-orange-600' : 'bg-gradient-to-r from-blue-600 to-purple-600'} text-white p-6 flex items-center justify-between sticky top-0`}>
           <div className="flex items-center gap-3">
-            <QrCode size={32} />
-            <h2 className="text-2xl font-bold">Generar Código QR</h2>
+            {modoEdicion ? <Edit3 size={32} /> : <QrCode size={32} />}
+            <h2 className="text-2xl font-bold">
+              {modoEdicion ? 'Editar Código QR' : 'Generar Código QR'}
+            </h2>
           </div>
           <button
             onClick={handleCerrar}
@@ -466,17 +527,17 @@ const ModalGenerarQR = ({ isOpen, onClose, onGenerar, loading = false }) => {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className={`flex-1 px-6 py-3 ${modoEdicion ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700' : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'} text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
             >
               {loading ? (
                 <>
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <span>Generando...</span>
+                  <span>{modoEdicion ? 'Actualizando...' : 'Generando...'}</span>
                 </>
               ) : (
                 <>
-                  <QrCode size={20} />
-                  <span>Generar Código QR</span>
+                  {modoEdicion ? <Edit3 size={20} /> : <QrCode size={20} />}
+                  <span>{modoEdicion ? 'Guardar Cambios' : 'Generar Código QR'}</span>
                 </>
               )}
             </button>

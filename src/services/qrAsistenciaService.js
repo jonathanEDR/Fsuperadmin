@@ -117,6 +117,18 @@ export const eliminarQR = async (id) => {
 };
 
 /**
+ * Actualizar un código QR
+ */
+export const actualizarQR = async (id, data) => {
+  try {
+    const response = await api.put(`/api/qr-asistencia/${id}`, data);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+/**
  * Escanear código QR (Colaborador)
  */
 export const escanearQR = async (data) => {
@@ -212,6 +224,7 @@ export default {
   obtenerEstadisticasGenerales,
   desactivarQR,
   activarQR,
+  actualizarQR,
   eliminarQR,
   escanearQR,
   descargarQRComoImagen,

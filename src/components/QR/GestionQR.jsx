@@ -29,6 +29,7 @@ const GestionQR = () => {
   const [qrActivo, setQrActivo] = useState(null);
   const [qrImageUrl, setQrImageUrl] = useState(null);
   const [modalGenerarAbierto, setModalGenerarAbierto] = useState(false);
+  const [qrEditar, setQrEditar] = useState(null); // QR que se está editando
   const [estadisticasGenerales, setEstadisticasGenerales] = useState(null);
   const [qrs, setQrs] = useState([]);
   const [error, setError] = useState(null);
@@ -250,6 +251,52 @@ const GestionQR = () => {
   };
 
   /**
+   * Abrir modal para editar QR
+   */
+  const handleEditarQR = (qr) => {
+    setQrEditar(qr);
+    setModalGenerarAbierto(true);
+  };
+
+  /**
+   * Actualizar QR existente
+   */
+  const handleActualizarQR = async (id, datos) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await qrAsistenciaService.actualizarQR(id, datos);
+      
+      if (response.success) {
+        setMensaje('Código QR actualizado exitosamente');
+        setModalGenerarAbierto(false);
+        setQrEditar(null);
+        
+        // Recargar datos
+        await cargarDatos();
+        
+        // Limpiar mensaje después de 3 segundos
+        setTimeout(() => setMensaje(null), 3000);
+      }
+      
+    } catch (err) {
+      console.error('Error al actualizar QR:', err);
+      setError(err.message || 'Error al actualizar código QR');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Cerrar modal y limpiar estado de edición
+   */
+  const handleCerrarModal = () => {
+    setModalGenerarAbierto(false);
+    setQrEditar(null);
+  };
+
+  /**
    * Ver detalles de un QR
    */
   const handleVerDetalles = async (qr) => {
@@ -462,6 +509,7 @@ ${qr.notas ? `📝 Notas:\n${qr.notas}` : ''}
           onActivar={handleActivarQR}
           onDesactivar={handleDesactivarQR}
           onEliminar={handleEliminarQR}
+          onEditar={handleEditarQR}
           onRecargar={cargarHistorialQRs}
           onVerDetalles={handleVerDetalles}
           loading={loading}
@@ -475,11 +523,13 @@ ${qr.notas ? `📝 Notas:\n${qr.notas}` : ''}
         />
       )}
 
-      {/* Modal para generar QR */}
+      {/* Modal para generar/editar QR */}
       <ModalGenerarQR
         isOpen={modalGenerarAbierto}
-        onClose={() => setModalGenerarAbierto(false)}
+        onClose={handleCerrarModal}
         onGenerar={handleGenerarQR}
+        onActualizar={handleActualizarQR}
+        qrEditar={qrEditar}
         loading={loading}
       />
     </div>
