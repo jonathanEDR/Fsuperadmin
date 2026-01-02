@@ -325,131 +325,190 @@ function Caja({ userRole }) {
             <p className="text-sm">Los movimientos aparecerán aquí una vez que los registres</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-2 sm:px-3 lg:px-4 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Fecha
-                  </th>
-                  <th className="px-2 sm:px-3 lg:px-4 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                    Tipo
-                  </th>
-                  <th className="px-2 sm:px-3 lg:px-4 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Categoría
-                  </th>
-                  <th className="px-2 sm:px-3 lg:px-4 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Descripción
-                  </th>
-                  <th className="px-2 sm:px-3 lg:px-4 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Monto
-                  </th>
-                  <th className="px-2 sm:px-3 lg:px-4 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                    Saldo
-                  </th>
-                  {/* Solo mostrar columna Origen para super_admin */}
-                  {userRole === 'super_admin' && (
-                    <th className="px-2 sm:px-3 lg:px-4 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Origen
-                    </th>
+          <>
+            {/* Vista de Tarjetas Móviles */}
+            <div className="block lg:hidden divide-y divide-gray-200">
+              {movimientos.map((mov) => (
+                <div key={mov._id} className="p-4 hover:bg-gray-50 transition-colors">
+                  {/* Encabezado: Tipo + Fecha + Acciones */}
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        mov.tipo === 'ingreso' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {mov.tipo === 'ingreso' ? '⬆️ Ingreso' : '⬇️ Egreso'}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {formatearFecha(mov.fecha)}
+                      </span>
+                    </div>
+                    {/* Botón eliminar según rol */}
+                    {(userRole === 'super_admin' || userRole === 'admin') && (
+                      <div className="flex items-center gap-1">
+                        {userRole === 'super_admin' && (
+                          <span className="text-xs" title={mov.esAutomatico ? 'Automático' : 'Manual'}>
+                            {mov.esAutomatico ? '🤖' : '✋'}
+                          </span>
+                        )}
+                        <button
+                          onClick={() => handleEliminarMovimiento(mov._id)}
+                          className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1.5 rounded-md transition-colors duration-200"
+                          title="Eliminar movimiento"
+                          disabled={loading}
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Categoría */}
+                  <div className="mb-1">
+                    <span className="text-xs text-gray-500">Categoría:</span>
+                    <span className="ml-1 text-sm font-medium text-gray-900">
+                      {categoriasDisponibles[mov.tipo + 's']?.find(c => c.value === mov.categoria)?.label || mov.categoria}
+                    </span>
+                  </div>
+
+                  {/* Descripción */}
+                  {mov.descripcion && (
+                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                      {mov.descripcion}
+                    </p>
                   )}
-                  {/* Para admin, mostrar columna de acciones sin información de origen */}
-                  {userRole === 'admin' && (
-                    <th className="px-2 sm:px-3 lg:px-4 py-2 lg:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Acciones
+
+                  {/* Monto y Saldo */}
+                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
+                    <div>
+                      <span className="text-xs text-gray-500">Monto:</span>
+                      <span className={`ml-1 text-base font-bold ${
+                        mov.tipo === 'ingreso' ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {mov.tipo === 'ingreso' ? '+' : '-'}{formatearMonto(mov.monto)}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs text-gray-500">Saldo:</span>
+                      <span className={`ml-1 text-sm font-semibold ${
+                        mov.saldoActual >= 0 ? 'text-blue-600' : 'text-red-600'
+                      }`}>
+                        {formatearMonto(mov.saldoActual)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Vista de Tabla Desktop */}
+            <div className="hidden lg:block overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Fecha
                     </th>
-                  )}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {movimientos.map((mov, index) => (
-                  <tr key={mov._id} className={`hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                    <td className="px-2 sm:px-3 lg:px-4 py-1.5 lg:py-2 whitespace-nowrap text-xs sm:text-sm text-gray-900">
-                      <div className="font-medium">{formatearFecha(mov.fecha)}</div>
-                      {/* Mostrar tipo en móvil como parte de la fecha */}
-                      <div className="md:hidden">
-                        <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full mt-1 ${
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Tipo
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Categoría
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Descripción
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Monto
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Saldo
+                    </th>
+                    {/* Solo mostrar columna Origen para super_admin */}
+                    {userRole === 'super_admin' && (
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Origen
+                      </th>
+                    )}
+                    {/* Para admin, mostrar columna de acciones */}
+                    {userRole === 'admin' && (
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Acciones
+                      </th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {movimientos.map((mov, index) => (
+                    <tr key={mov._id} className={`hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                        <div className="font-medium">{formatearFecha(mov.fecha)}</div>
+                      </td>
+                      <td className="px-4 py-2 whitespace-nowrap">
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                           mov.tipo === 'ingreso' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
                           {mov.tipo === 'ingreso' ? '⬆️ Ingreso' : '⬇️ Egreso'}
                         </span>
-                      </div>
-                    </td>
-                    <td className="px-2 sm:px-3 lg:px-4 py-1.5 lg:py-2 whitespace-nowrap hidden md:table-cell">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        mov.tipo === 'ingreso' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      </td>
+                      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                        <div className="font-medium">
+                          {categoriasDisponibles[mov.tipo + 's']?.find(c => c.value === mov.categoria)?.label || mov.categoria}
+                        </div>
+                      </td>
+                      <td className="px-4 py-2 text-sm text-gray-900 max-w-xs">
+                        <div className="truncate font-medium" title={mov.descripcion}>
+                          {mov.descripcion}
+                        </div>
+                      </td>
+                      <td className={`px-4 py-2 whitespace-nowrap text-sm font-bold ${
+                        mov.tipo === 'ingreso' ? 'text-green-600' : 'text-red-600'
                       }`}>
-                        {mov.tipo === 'ingreso' ? '⬆️ Ingreso' : '⬇️ Egreso'}
-                      </span>
-                    </td>
-                    <td className="px-2 sm:px-3 lg:px-4 py-1.5 lg:py-2 whitespace-nowrap text-xs sm:text-sm text-gray-900">
-                      <div className="font-medium">
-                        {categoriasDisponibles[mov.tipo + 's']?.find(c => c.value === mov.categoria)?.label || mov.categoria}
-                      </div>
-                    </td>
-                    <td className="px-2 sm:px-3 lg:px-4 py-1.5 lg:py-2 text-xs sm:text-sm text-gray-900 max-w-xs">
-                      <div className="truncate font-medium" title={mov.descripcion}>
-                        {mov.descripcion}
-                      </div>
-                      {/* Mostrar saldo en móvil como parte de la descripción */}
-                      <div className="lg:hidden mt-1">
-                        <span className={`text-xs font-medium ${
-                          mov.saldoActual >= 0 ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          Saldo: {formatearMonto(mov.saldoActual)}
-                        </span>
-                      </div>
-                    </td>
-                    <td className={`px-2 sm:px-3 lg:px-4 py-1.5 lg:py-2 whitespace-nowrap text-xs sm:text-sm font-bold ${
-                      mov.tipo === 'ingreso' ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      <div className="font-bold">
                         {mov.tipo === 'ingreso' ? '+' : '-'}{formatearMonto(mov.monto)}
-                      </div>
-                    </td>
-                    <td className={`px-2 sm:px-3 lg:px-4 py-1.5 lg:py-2 whitespace-nowrap text-xs sm:text-sm font-medium hidden lg:table-cell ${
-                      mov.saldoActual >= 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      <div className="font-bold">
+                      </td>
+                      <td className={`px-4 py-2 whitespace-nowrap text-sm font-bold ${
+                        mov.saldoActual >= 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
                         {formatearMonto(mov.saldoActual)}
-                      </div>
-                    </td>
-                    {/* Solo mostrar columna Origen para super_admin */}
-                    {userRole === 'super_admin' && (
-                      <td className="px-2 sm:px-3 lg:px-4 py-1.5 lg:py-2 whitespace-nowrap text-xs sm:text-sm text-gray-500">
-                        <div className="flex items-center space-x-1 sm:space-x-2">
-                          <span className="text-xs font-medium">{mov.esAutomatico ? '🤖' : '✋'}</span>
-                          <button
-                            onClick={() => handleEliminarMovimiento(mov._id)}
-                            className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded-md transition-colors duration-200"
-                            title="Eliminar movimiento"
-                            disabled={loading}
-                          >
-                            <span className="text-xs">🗑️</span>
-                          </button>
-                        </div>
                       </td>
-                    )}
-                    {/* Para admin, mostrar botón de eliminar en una columna separada sin mostrar origen */}
-                    {userRole === 'admin' && (
-                      <td className="px-2 sm:px-3 lg:px-4 py-1.5 lg:py-2 whitespace-nowrap text-xs sm:text-sm text-gray-500">
-                        <div className="flex items-center justify-center">
-                          <button
-                            onClick={() => handleEliminarMovimiento(mov._id)}
-                            className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded-md transition-colors duration-200"
-                            title="Eliminar movimiento"
-                            disabled={loading}
-                          >
-                            <span className="text-xs">🗑️</span>
-                          </button>
-                        </div>
-                      </td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      {/* Solo mostrar columna Origen para super_admin */}
+                      {userRole === 'super_admin' && (
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs font-medium">{mov.esAutomatico ? '🤖' : '✋'}</span>
+                            <button
+                              onClick={() => handleEliminarMovimiento(mov._id)}
+                              className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded-md transition-colors duration-200"
+                              title="Eliminar movimiento"
+                              disabled={loading}
+                            >
+                              <span className="text-xs">🗑️</span>
+                            </button>
+                          </div>
+                        </td>
+                      )}
+                      {/* Para admin, mostrar botón de eliminar */}
+                      {userRole === 'admin' && (
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                          <div className="flex items-center justify-center">
+                            <button
+                              onClick={() => handleEliminarMovimiento(mov._id)}
+                              className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded-md transition-colors duration-200"
+                              title="Eliminar movimiento"
+                              disabled={loading}
+                            >
+                              <span className="text-xs">🗑️</span>
+                            </button>
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
         
         {/* Botón Ver más - Solo visible para super_admin */}
