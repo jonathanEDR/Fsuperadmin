@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useMovimiento } from '../../hooks/useMovimiento';
 import useCatalogoGastosModal from './hooks/useCatalogoGastosModal';
 import CatalogoGastoSelector from './components/CatalogoGastoSelector';
+import { getLocalDateString } from '../../utils/dateUtils';
 import styles from './Modal.module.css';
 
 /**
@@ -28,7 +29,7 @@ const ModalEgreso = ({ isOpen, onClose, onSuccess }) => {
     monto: '',
     cantidad: '1',
     unidadMedida: 'unidad',
-    fecha: new Date().toISOString().split('T')[0],
+    fecha: getLocalDateString(),
     metodoPago: 'efectivo',
     proveedor: '',
     numeroComprobante: '',
@@ -177,7 +178,7 @@ const ModalEgreso = ({ isOpen, onClose, onSuccess }) => {
       monto: '',
       cantidad: '1',
       unidadMedida: 'unidad',
-      fecha: new Date().toISOString().split('T')[0],
+      fecha: getLocalDateString(),
       metodoPago: 'efectivo',
       proveedor: '',
       numeroComprobante: '',

@@ -5,6 +5,7 @@ import ModalIngreso from './ModalIngreso';
 import ModalEgreso from './ModalEgreso';
 import EstadisticasRapidas from './EstadisticasRapidas';
 import DateRangePicker from '../common/DateRangePicker';
+import { getLocalDateString } from '../../utils/dateUtils';
 
 function Caja({ userRole }) {
   const { getToken } = useAuth();
@@ -15,19 +16,19 @@ function Caja({ userRole }) {
   const [error, setError] = useState(null);
   const [isModalIngresoOpen, setIsModalIngresoOpen] = useState(false);
   const [isModalEgresoOpen, setIsModalEgresoOpen] = useState(false);
+  const [isFilterExpanded, setIsFilterExpanded] = useState(false);
   
-  // Estados para rango de fechas personalizado
+  // Estados para rango de fechas personalizado usando dateUtils centralizado
   const [fechaInicio, setFechaInicio] = useState(() => {
-    // Por defecto: primer día del mes actual
-    const now = new Date();
-    const primerDiaMes = new Date(now.getFullYear(), now.getMonth(), 1);
-    return primerDiaMes.toISOString().split('T')[0];
+    // Por defecto: primer día del mes actual (usando fecha local de Perú)
+    const today = getLocalDateString(); // YYYY-MM-DD en zona horaria local
+    const [year, month] = today.split('-');
+    return `${year}-${month}-01`;
   });
   
   const [fechaFin, setFechaFin] = useState(() => {
-    // Por defecto: día actual
-    const now = new Date();
-    return now.toISOString().split('T')[0];
+    // Por defecto: día actual (usando fecha local de Perú)
+    return getLocalDateString();
   });
   
   // Estados para paginación
@@ -234,16 +235,35 @@ function Caja({ userRole }) {
             <h2 className="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-800">💰 Control de Caja</h2>
           </div>
           
-          {/* Filtro de Rango de Fechas */}
+          {/* Filtro de Rango de Fechas - Colapsable */}
           <div className="mb-4">
-            <DateRangePicker
-              fechaInicio={fechaInicio}
-              fechaFin={fechaFin}
-              onFechaInicioChange={setFechaInicio}
-              onFechaFinChange={setFechaFin}
-              label="Período"
-              className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm"
-            />
+            <button
+              onClick={() => setIsFilterExpanded(!isFilterExpanded)}
+              className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors mb-2"
+            >
+              <span className={`transform transition-transform duration-200 ${isFilterExpanded ? 'rotate-90' : ''}`}>
+                ▶
+              </span>
+              <span>📅 Filtrar por fechas</span>
+              {!isFilterExpanded && (
+                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                  {fechaInicio} → {fechaFin}
+                </span>
+              )}
+            </button>
+            
+            {isFilterExpanded && (
+              <div className="animate-fadeIn">
+                <DateRangePicker
+                  fechaInicio={fechaInicio}
+                  fechaFin={fechaFin}
+                  onFechaInicioChange={setFechaInicio}
+                  onFechaFinChange={setFechaFin}
+                  label="Período"
+                  className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm"
+                />
+              </div>
+            )}
           </div>
           
           <div className="flex flex-col gap-0.5">
@@ -278,15 +298,19 @@ function Caja({ userRole }) {
             <div className="flex justify-center gap-2 sm:gap-4">
               <button
                 onClick={() => setIsModalIngresoOpen(true)}
-                className="bg-green-500 hover:bg-green-600 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg text-sm sm:text-base"
+                className="bg-green-500 hover:bg-green-600 text-white px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg text-sm sm:text-base flex items-center gap-1 sm:gap-2"
+                title="Registrar Ingreso"
               >
-                ➕ Registrar Ingreso
+                <span className="text-lg">➕</span>
+                <span className="hidden sm:inline">Registrar Ingreso</span>
               </button>
               <button
                 onClick={() => setIsModalEgresoOpen(true)}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg text-sm sm:text-base"
+                className="bg-red-500 hover:bg-red-600 text-white px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg text-sm sm:text-base flex items-center gap-1 sm:gap-2"
+                title="Registrar Egreso"
               >
-                ➖ Registrar Egreso
+                <span className="text-lg">➖</span>
+                <span className="hidden sm:inline">Registrar Egreso</span>
               </button>
             </div>
           </div>
