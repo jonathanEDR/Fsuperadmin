@@ -9,10 +9,13 @@ import {
     MoreVertical
 } from 'lucide-react';
 import { movimientosCajaService } from '../../../services/movimientosCajaService';
+import ModalDetalleMovimiento from './ModalDetalleMovimiento';
 
 const TablaMovimientosFinanzas = ({ movimientos, onRefresh }) => {
     const [menuAbierto, setMenuAbierto] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [modalDetalleAbierto, setModalDetalleAbierto] = useState(false);
+    const [movimientoSeleccionado, setMovimientoSeleccionado] = useState(null);
     
     const formatearFecha = (fecha) => {
         return new Date(fecha).toLocaleDateString('es-PE', {
@@ -94,6 +97,18 @@ const TablaMovimientosFinanzas = ({ movimientos, onRefresh }) => {
         }
         
         return { icono: '❓', texto: 'N/A' };
+    };
+
+    // Funciones para el modal de detalle
+    const abrirModalDetalle = (movimiento) => {
+        setMovimientoSeleccionado(movimiento);
+        setModalDetalleAbierto(true);
+        setMenuAbierto(null);
+    };
+
+    const cerrarModalDetalle = () => {
+        setModalDetalleAbierto(false);
+        setMovimientoSeleccionado(null);
     };
     
     const manejarValidarMovimiento = async (id) => {
@@ -221,10 +236,7 @@ const TablaMovimientosFinanzas = ({ movimientos, onRefresh }) => {
                                     {menuAbierto === movimiento._id && (
                                         <div className="absolute right-0 top-8 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                                             <button
-                                                onClick={() => {
-                                                    setMenuAbierto(null);
-                                                    alert('Vista detallada - Por implementar');
-                                                }}
+                                                onClick={() => abrirModalDetalle(movimiento)}
                                                 className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center"
                                             >
                                                 <Eye className="w-3 h-3 mr-2" />
@@ -338,10 +350,7 @@ const TablaMovimientosFinanzas = ({ movimientos, onRefresh }) => {
                                         {menuAbierto === movimiento._id && (
                                             <div className="absolute right-0 top-8 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                                                 <button
-                                                    onClick={() => {
-                                                        setMenuAbierto(null);
-                                                        alert('Vista detallada - Por implementar');
-                                                    }}
+                                                    onClick={() => abrirModalDetalle(movimiento)}
                                                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center"
                                                 >
                                                     <Eye className="w-4 h-4 mr-3" />
@@ -366,6 +375,13 @@ const TablaMovimientosFinanzas = ({ movimientos, onRefresh }) => {
                     </tbody>
                 </table>
             </div>
+
+            {/* Modal de detalle del movimiento */}
+            <ModalDetalleMovimiento
+                isOpen={modalDetalleAbierto}
+                onClose={cerrarModalDetalle}
+                movimiento={movimientoSeleccionado}
+            />
         </div>
     );
 };
