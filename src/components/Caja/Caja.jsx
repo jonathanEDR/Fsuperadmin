@@ -6,6 +6,7 @@ import ModalEgreso from './ModalEgreso';
 import EstadisticasRapidas from './EstadisticasRapidas';
 import DateRangePicker from '../common/DateRangePicker';
 import { getLocalDateString } from '../../utils/dateUtils';
+import CatalogoGastoList from '../gasto/CatalogoGastoList';
 
 function Caja({ userRole }) {
   const { getToken } = useAuth();
@@ -17,6 +18,7 @@ function Caja({ userRole }) {
   const [isModalIngresoOpen, setIsModalIngresoOpen] = useState(false);
   const [isModalEgresoOpen, setIsModalEgresoOpen] = useState(false);
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
+  const [vistaActual, setVistaActual] = useState('caja'); // 'caja' | 'catalogo'
   
   // Estados para rango de fechas personalizado usando dateUtils centralizado
   const [fechaInicio, setFechaInicio] = useState(() => {
@@ -228,66 +230,106 @@ function Caja({ userRole }) {
 
   return (
     <div className="max-w-7xl mx-auto p-4 lg:p-6">
-      {/* Header */}
+      {/* Header con Navegación */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 lg:mb-6 gap-3 lg:gap-4">
         <div className="flex-1">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-1 lg:mb-2">
-            <h2 className="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-800">💰 Control de Caja</h2>
+            <h2 className="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-800">
+              {vistaActual === 'caja' ? '💰 Control de Caja' : '📋 Catálogo de Gastos'}
+            </h2>
           </div>
-          
-          {/* Filtro de Rango de Fechas - Colapsable */}
-          <div className="mb-4">
+
+          {/* Pestañas de Navegación */}
+          <div className="flex gap-2 mb-4">
             <button
-              onClick={() => setIsFilterExpanded(!isFilterExpanded)}
-              className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors mb-2"
+              onClick={() => setVistaActual('caja')}
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
+                vistaActual === 'caja'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
             >
-              <span className={`transform transition-transform duration-200 ${isFilterExpanded ? 'rotate-90' : ''}`}>
-                ▶
-              </span>
-              <span>📅 Filtrar por fechas</span>
-              {!isFilterExpanded && (
-                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                  {fechaInicio} → {fechaFin}
-                </span>
-              )}
+              <span>💰</span>
+              <span>Caja</span>
             </button>
-            
-            {isFilterExpanded && (
-              <div className="animate-fadeIn">
-                <DateRangePicker
-                  fechaInicio={fechaInicio}
-                  fechaFin={fechaFin}
-                  onFechaInicioChange={setFechaInicio}
-                  onFechaFinChange={setFechaFin}
-                  label="Período"
-                  className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm"
-                />
-              </div>
-            )}
+            <button
+              onClick={() => setVistaActual('catalogo')}
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
+                vistaActual === 'catalogo'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              <span>📋</span>
+              <span>Catálogo de Gastos</span>
+            </button>
           </div>
           
-          <div className="flex flex-col gap-0.5">
-            <p className="text-gray-600 text-sm">Gestión centralizada de ingresos y egresos</p>
-          </div>
+          {/* Filtro de Rango de Fechas - Colapsable (solo en vista caja) */}
+          {vistaActual === 'caja' && (
+            <div className="mb-4">
+              <button
+                onClick={() => setIsFilterExpanded(!isFilterExpanded)}
+                className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors mb-2"
+              >
+                <span className={`transform transition-transform duration-200 ${isFilterExpanded ? 'rotate-90' : ''}`}>
+                  ▶
+                </span>
+                <span>📅 Filtrar por fechas</span>
+                {!isFilterExpanded && (
+                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                    {fechaInicio} → {fechaFin}
+                  </span>
+                )}
+              </button>
+              
+              {isFilterExpanded && (
+                <div className="animate-fadeIn">
+                  <DateRangePicker
+                    fechaInicio={fechaInicio}
+                    fechaFin={fechaFin}
+                    onFechaInicioChange={setFechaInicio}
+                    onFechaFinChange={setFechaFin}
+                    label="Período"
+                    className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+          
+          {vistaActual === 'caja' && (
+            <div className="flex flex-col gap-0.5">
+              <p className="text-gray-600 text-sm">Gestión centralizada de ingresos y egresos</p>
+            </div>
+          )}
         </div>
       </div>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-          {error}
-        </div>
+      {/* Vista del Catálogo de Gastos */}
+      {vistaActual === 'catalogo' && (
+        <CatalogoGastoList />
       )}
 
-      {/* Layout responsivo: Saldo Principal y Métricas */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 mb-6 lg:mb-8">
-        {/* Saldo Principal y Botones de Acción */}
-        <div className="lg:col-span-7">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-4 lg:p-6 text-white h-full">
-            <div className="text-center mb-4 lg:mb-6">
-              <h3 className="text-base lg:text-lg font-medium opacity-90">Saldo Actual</h3>
-              <p className={`text-3xl lg:text-4xl font-bold mb-2 ${
-                resumen?.saldoActual >= 0 ? 'text-green-200' : 'text-red-200'
-              }`}>
+      {/* Vista de Caja */}
+      {vistaActual === 'caja' && (
+        <>
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+              {error}
+            </div>
+          )}
+
+          {/* Layout responsivo: Saldo Principal y Métricas */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 mb-6 lg:mb-8">
+            {/* Saldo Principal y Botones de Acción */}
+            <div className="lg:col-span-7">
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-4 lg:p-6 text-white h-full">
+                <div className="text-center mb-4 lg:mb-6">
+                  <h3 className="text-base lg:text-lg font-medium opacity-90">Saldo Actual</h3>
+                  <p className={`text-3xl lg:text-4xl font-bold mb-2 ${
+                    resumen?.saldoActual >= 0 ? 'text-green-200' : 'text-red-200'
+                  }`}>
                 {resumen ? formatearMonto(resumen.saldoActual) : 'S/. 0.00'}
               </p>
               <p className="text-sm opacity-75">
@@ -568,6 +610,8 @@ function Caja({ userRole }) {
           </div>
         )}
       </div>
+        </>
+      )}
 
       {/* Modales */}
       <ModalIngreso 
