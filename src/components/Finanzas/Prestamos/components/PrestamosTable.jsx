@@ -157,7 +157,7 @@ const PrestamosTable = React.memo(({
                                 <button
                                     onClick={() => handleCancelar(prestamo)}
                                     className="text-red-600 hover:text-red-900"
-                                    title="Cancelar"
+                                    title="Cancelar o Eliminar préstamo"
                                 >
                                     ❌
                                 </button>

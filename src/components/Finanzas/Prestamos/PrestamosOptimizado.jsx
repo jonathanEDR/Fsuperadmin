@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { usePrestamoForm } from './hooks/usePrestamoForm';
 import { usePrestamosData } from './hooks/usePrestamosData';
 import { usePrestamosModals } from './hooks/usePrestamosModals';
@@ -10,6 +10,7 @@ import ModalPrestamoOtorgado from './ModalPrestamoOtorgado';
 import ModalCalculadoraCuota from './ModalCalculadoraCuota';
 import ModalTablaAmortizacion from './ModalTablaAmortizacion';
 import ModalDetallesPrestamo from './ModalDetallesPrestamo';
+import ModalConfirmarAccionPrestamo from './ModalConfirmarAccionPrestamo';
 
 /**
  * Componente principal optimizado para gestión de préstamos
@@ -34,6 +35,7 @@ const PrestamosOptimizado = React.memo(() => {
         crearPrestamo,
         actualizarPrestamo,
         cancelarPrestamo,
+        eliminarPrestamo,
         actualizarFiltros,
         limpiarFiltros,
         cambiarPagina,
@@ -75,6 +77,11 @@ const PrestamosOptimizado = React.memo(() => {
     const formularioPrestamo = usePrestamoForm();
     const formularioPrestamoOtorgado = usePrestamoForm(); // NUEVO - formulario para préstamos otorgados
     const formularioCalculadora = usePrestamoForm();
+
+    // Estado para el modal de confirmación de acción (cancelar/eliminar)
+    const [modalConfirmarAccion, setModalConfirmarAccion] = useState(false);
+    const [prestamoAccion, setPrestamoAccion] = useState(null);
+    const [loadingAccion, setLoadingAccion] = useState(false);
     
     // CALLBACKS MEMOIZADOS
     const handleCrearPrestamo = useCallback(async (datosPrestamo) => {
@@ -100,14 +107,56 @@ const PrestamosOptimizado = React.memo(() => {
         abrirModalEditar(prestamo);
     }, [formularioPrestamo, abrirModalEditar]);
     
-    const handleCancelarPrestamo = useCallback(async (prestamo) => {
-        if (!window.confirm('¿Está seguro de cancelar este préstamo?')) {
+    // Abrir modal de confirmación para cancelar/eliminar
+    const handleAbrirModalAccion = useCallback((prestamo) => {
+        setPrestamoAccion(prestamo);
+        setModalConfirmarAccion(true);
+    }, []);
+
+    // Cerrar modal de confirmación
+    const handleCerrarModalAccion = useCallback(() => {
+        setModalConfirmarAccion(false);
+        setPrestamoAccion(null);
+    }, []);
+
+    // Cancelar préstamo (cambiar estado a cancelado)
+    const handleCancelarPrestamo = useCallback(async () => {
+        if (!prestamoAccion) return;
+        
+        setLoadingAccion(true);
+        try {
+            const resultado = await cancelarPrestamo(prestamoAccion);
+            if (resultado.success) {
+                handleCerrarModalAccion();
+            } else {
+                alert('Error al cancelar el préstamo: ' + (resultado.error || 'Error desconocido'));
+            }
+        } finally {
+            setLoadingAccion(false);
+        }
+    }, [prestamoAccion, cancelarPrestamo, handleCerrarModalAccion]);
+
+    // Eliminar préstamo definitivamente
+    const handleEliminarPrestamo = useCallback(async () => {
+        if (!prestamoAccion) return;
+
+        // Confirmación adicional para eliminar
+        if (!window.confirm('⚠️ ¿Está COMPLETAMENTE seguro de eliminar este préstamo?\n\nEsta acción NO se puede deshacer.')) {
             return;
         }
         
-        const resultado = await cancelarPrestamo(prestamo);
-        return resultado;
-    }, [cancelarPrestamo]);
+        setLoadingAccion(true);
+        try {
+            const resultado = await eliminarPrestamo(prestamoAccion);
+            if (resultado.success) {
+                handleCerrarModalAccion();
+            } else {
+                alert('Error al eliminar el préstamo: ' + (resultado.error || 'Error desconocido'));
+            }
+        } finally {
+            setLoadingAccion(false);
+        }
+    }, [prestamoAccion, eliminarPrestamo, handleCerrarModalAccion]);
     
     const handleCalcularCuota = useCallback(async () => {
         if (!formularioCalculadora.isValid) {
@@ -309,7 +358,7 @@ const PrestamosOptimizado = React.memo(() => {
                 prestamosData={prestamosData}
                 paginacion={paginacionInfo}
                 onEditarPrestamo={handleEditarPrestamo}
-                onCancelarPrestamo={handleCancelarPrestamo}
+                onCancelarPrestamo={handleAbrirModalAccion}
                 onVerDetalles={abrirModalDetalles}
                 onVerTablaAmortizacion={abrirModalTablaAmortizacion}
                 onCambiarPagina={cambiarPagina}
@@ -376,6 +425,16 @@ const PrestamosOptimizado = React.memo(() => {
                     loading={loadingCalculos}
                 />
             )}
+
+            {/* Modal de confirmación para Cancelar/Eliminar préstamo */}
+            <ModalConfirmarAccionPrestamo
+                isOpen={modalConfirmarAccion}
+                onClose={handleCerrarModalAccion}
+                onCancelar={handleCancelarPrestamo}
+                onEliminar={handleEliminarPrestamo}
+                prestamo={prestamoAccion}
+                loading={loadingAccion}
+            />
             
         </div>
     );

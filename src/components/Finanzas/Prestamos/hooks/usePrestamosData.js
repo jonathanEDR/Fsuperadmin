@@ -164,6 +164,24 @@ export const usePrestamosData = () => {
             setLoading(false);
         }
     }, [cargarPrestamos]);
+
+    /**
+     * Eliminar préstamo definitivamente
+     * Elimina el registro del sistema de forma permanente
+     */
+    const eliminarPrestamo = useCallback(async (prestamo) => {
+        try {
+            setLoading(true);
+            await prestamosService.eliminar(prestamo._id);
+            await cargarPrestamos();
+            return { success: true };
+        } catch (err) {
+            console.error('Error eliminando préstamo:', err);
+            return { success: false, error: err.message };
+        } finally {
+            setLoading(false);
+        }
+    }, [cargarPrestamos]);
     
     // Funciones de filtros memoizadas
     const actualizarFiltros = useCallback((nuevosFiltros) => {
@@ -355,6 +373,7 @@ export const usePrestamosData = () => {
         crearPrestamo,
         actualizarPrestamo,
         cancelarPrestamo,
+        eliminarPrestamo,
 
         // Funciones de filtros
         actualizarFiltros,
