@@ -18,7 +18,9 @@ import {
     MessageSquare,
     TrendingUp,
     TrendingDown,
-    Zap
+    Zap,
+    Banknote,
+    Coins
 } from 'lucide-react';
 
 /**
@@ -139,9 +141,72 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
         return categorias[categoria] || categoria.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     };
 
+    // Función para obtener el desglose de efectivo
+    const obtenerDesgloseEfectivo = () => {
+        const detalles = movimiento?.detallesAdicionales;
+        if (!detalles) return null;
+
+        const billetes = detalles.billetes || {};
+        const monedas = detalles.monedas || {};
+
+        // Definir denominaciones
+        const denominacionesBilletes = [
+            { key: 'b200', valor: 200, label: 'S/ 200' },
+            { key: 'b100', valor: 100, label: 'S/ 100' },
+            { key: 'b50', valor: 50, label: 'S/ 50' },
+            { key: 'b20', valor: 20, label: 'S/ 20' },
+            { key: 'b10', valor: 10, label: 'S/ 10' }
+        ];
+
+        const denominacionesMonedas = [
+            { key: 'm5', valor: 5, label: 'S/ 5' },
+            { key: 'm2', valor: 2, label: 'S/ 2' },
+            { key: 'm1', valor: 1, label: 'S/ 1' },
+            { key: 'c50', valor: 0.50, label: 'S/ 0.50' },
+            { key: 'c20', valor: 0.20, label: 'S/ 0.20' },
+            { key: 'c10', valor: 0.10, label: 'S/ 0.10' }
+        ];
+
+        // Calcular totales
+        let totalBilletes = 0;
+        let totalMonedas = 0;
+        let cantidadItems = 0;
+
+        const billetesConValor = denominacionesBilletes.map(d => {
+            const cantidad = parseInt(billetes[d.key]) || 0;
+            const subtotal = cantidad * d.valor;
+            totalBilletes += subtotal;
+            if (cantidad > 0) cantidadItems += cantidad;
+            return { ...d, cantidad, subtotal };
+        }).filter(b => b.cantidad > 0);
+
+        const monedasConValor = denominacionesMonedas.map(d => {
+            const cantidad = parseInt(monedas[d.key]) || 0;
+            const subtotal = cantidad * d.valor;
+            totalMonedas += subtotal;
+            if (cantidad > 0) cantidadItems += cantidad;
+            return { ...d, cantidad, subtotal };
+        }).filter(m => m.cantidad > 0);
+
+        const totalGeneral = totalBilletes + totalMonedas;
+
+        // Si no hay desglose, retornar null
+        if (cantidadItems === 0) return null;
+
+        return {
+            billetes: billetesConValor,
+            monedas: monedasConValor,
+            totalBilletes,
+            totalMonedas,
+            totalGeneral,
+            cantidadItems
+        };
+    };
+
     const esIngreso = movimiento.tipo === 'ingreso';
     const estadoConfig = obtenerConfigEstado(movimiento.estado);
     const metodoPagoInfo = obtenerMetodoPagoInfo();
+    const desgloseEfectivo = obtenerDesgloseEfectivo();
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -286,6 +351,145 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
                                             {formatearMonto(movimiento.saldoActual)}
                                         </p>
                                     </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* === DESGLOSE DE EFECTIVO === */}
+                        {desgloseEfectivo && movimiento.tipoMovimiento === 'efectivo' && (
+                            <div className="mt-4 bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-2 text-emerald-700">
+                                        <Banknote className="w-5 h-5" />
+                                        <span className="text-sm font-semibold uppercase">Desglose de Efectivo</span>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-xs text-gray-500">Total Desglosado</p>
+                                        <p className="text-lg font-bold text-emerald-600">
+                                            {formatearMonto(desgloseEfectivo.totalGeneral)}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Billetes */}
+                                    {desgloseEfectivo.billetes.length > 0 && (
+                                        <div className="bg-white rounded-lg p-3 border border-emerald-100">
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <span className="text-lg">📄</span>
+                                                <span className="font-medium text-gray-700">Billetes</span>
+                                                <span className="ml-auto text-sm font-semibold text-green-600">
+                                                    {formatearMonto(desgloseEfectivo.totalBilletes)}
+                                                </span>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {desgloseEfectivo.billetes.map((billete) => (
+                                                    <div key={billete.key} className="flex items-center justify-between text-sm">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-medium">
+                                                                {billete.label}
+                                                            </span>
+                                                            <span className="text-gray-500">×</span>
+                                                            <span className="font-medium text-gray-700">{billete.cantidad}</span>
+                                                        </div>
+                                                        <span className="font-medium text-gray-900">
+                                                            {formatearMonto(billete.subtotal)}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Monedas */}
+                                    {desgloseEfectivo.monedas.length > 0 && (
+                                        <div className="bg-white rounded-lg p-3 border border-emerald-100">
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <Coins className="w-4 h-4 text-amber-600" />
+                                                <span className="font-medium text-gray-700">Monedas</span>
+                                                <span className="ml-auto text-sm font-semibold text-amber-600">
+                                                    {formatearMonto(desgloseEfectivo.totalMonedas)}
+                                                </span>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {desgloseEfectivo.monedas.map((moneda) => (
+                                                    <div key={moneda.key} className="flex items-center justify-between text-sm">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-xs font-medium">
+                                                                {moneda.label}
+                                                            </span>
+                                                            <span className="text-gray-500">×</span>
+                                                            <span className="font-medium text-gray-700">{moneda.cantidad}</span>
+                                                        </div>
+                                                        <span className="font-medium text-gray-900">
+                                                            {formatearMonto(moneda.subtotal)}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Resumen del desglose */}
+                                <div className="mt-3 pt-3 border-t border-emerald-200 flex items-center justify-between text-sm">
+                                    <span className="text-gray-600">
+                                        Total de piezas: <strong>{desgloseEfectivo.cantidadItems}</strong>
+                                    </span>
+                                    {Math.abs(desgloseEfectivo.totalGeneral - movimiento.monto) > 0.01 && (
+                                        <span className="text-amber-600 flex items-center gap-1">
+                                            <AlertCircle className="w-4 h-4" />
+                                            Diferencia: {formatearMonto(Math.abs(desgloseEfectivo.totalGeneral - movimiento.monto))}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* === DATOS BANCARIOS (cuando es transferencia) === */}
+                        {movimiento.tipoMovimiento === 'bancario' && movimiento.detallesAdicionales && (
+                            <div className="mt-4 bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                <div className="flex items-center gap-2 text-blue-700 mb-3">
+                                    <Building className="w-5 h-5" />
+                                    <span className="text-sm font-semibold uppercase">Datos de Transferencia</span>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {movimiento.detallesAdicionales.banco && (
+                                        <div className="bg-white rounded-lg p-3 border border-blue-100">
+                                            <p className="text-xs text-gray-500 mb-1">Banco</p>
+                                            <p className="text-sm font-medium text-gray-900">
+                                                🏦 {movimiento.detallesAdicionales.banco}
+                                            </p>
+                                        </div>
+                                    )}
+                                    
+                                    {movimiento.detallesAdicionales.numeroOperacion && (
+                                        <div className="bg-white rounded-lg p-3 border border-blue-100">
+                                            <p className="text-xs text-gray-500 mb-1">Nº Operación</p>
+                                            <p className="text-sm font-medium text-gray-900 font-mono">
+                                                {movimiento.detallesAdicionales.numeroOperacion}
+                                            </p>
+                                        </div>
+                                    )}
+                                    
+                                    {movimiento.detallesAdicionales.cuentaOrigen && (
+                                        <div className="bg-white rounded-lg p-3 border border-blue-100">
+                                            <p className="text-xs text-gray-500 mb-1">Cuenta Origen</p>
+                                            <p className="text-sm font-medium text-gray-900">
+                                                {movimiento.detallesAdicionales.cuentaOrigen}
+                                            </p>
+                                        </div>
+                                    )}
+                                    
+                                    {movimiento.detallesAdicionales.cuentaDestino && (
+                                        <div className="bg-white rounded-lg p-3 border border-blue-100">
+                                            <p className="text-xs text-gray-500 mb-1">Cuenta Destino</p>
+                                            <p className="text-sm font-medium text-gray-900">
+                                                {movimiento.detallesAdicionales.cuentaDestino}
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
