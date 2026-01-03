@@ -63,14 +63,15 @@ const BotonesAccion = React.memo(({
         <button
           onClick={onCancelar}
           disabled={guardando}
-          className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 flex items-center gap-1.5 sm:gap-2 ${
+          className={`px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 min-w-[40px] sm:min-w-0 ${
             guardando
               ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
               : 'bg-gray-200 hover:bg-gray-300 text-gray-700 hover:shadow-md'
           }`}
+          title="Cancelar"
         >
           <X size={16} className="sm:w-[18px] sm:h-[18px]" />
-          Cancelar
+          <span className="hidden xs:inline">Cancelar</span>
         </button>
 
         {/* Botón Guardar */}
@@ -93,13 +94,12 @@ const BotonesAccion = React.memo(({
           {guardando ? (
             <>
               <Loader2 size={16} className="sm:w-[18px] sm:h-[18px] animate-spin" />
-              <span className="hidden sm:inline">Guardando...</span>
-              <span className="sm:hidden">...</span>
+              <span className="hidden xs:inline">Guardando...</span>
             </>
           ) : (
             <>
               <Save size={16} className="sm:w-[18px] sm:h-[18px]" />
-              Guardar
+              <span className="hidden xs:inline">Guardar</span>
             </>
           )}
         </button>

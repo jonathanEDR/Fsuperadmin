@@ -35,20 +35,20 @@ const BusquedaProductos = React.memo(({
   };
 
   return (
-    <div className="grid grid-cols-2 gap-2 sm:gap-3">
+    <div className="flex flex-col xs:grid xs:grid-cols-2 gap-2 sm:gap-3">
       {/* Input de búsqueda */}
       <div className="relative">
         <Search 
-          className="absolute left-3 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400" 
-          size={20} 
+          className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400" 
+          size={16} 
         />
         <input
           type="text"
-          placeholder="Buscar producto o código..."
+          placeholder="Buscar..."
           value={searchTerm}
           onChange={handleSearchChange}
           disabled={disabled}
-          className="w-full pl-12 sm:pl-10 pr-4 sm:pr-3 py-4 sm:py-3 bg-white border border-gray-300 rounded-lg text-lg sm:text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+          className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-2.5 sm:py-3 bg-white border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors placeholder:text-gray-400"
           aria-label="Buscar productos"
         />
       </div>
@@ -56,23 +56,29 @@ const BusquedaProductos = React.memo(({
       {/* Selector de categoría */}
       <div className="relative">
         <Filter 
-          className="absolute left-3 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400" 
-          size={20} 
+          className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" 
+          size={16} 
         />
         <select
           value={selectedCategory}
           onChange={handleCategoryChange}
           disabled={disabled}
-          className="w-full pl-12 sm:pl-10 pr-4 sm:pr-3 py-4 sm:py-3 bg-white border border-gray-300 rounded-lg text-lg sm:text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:bg-gray-100 disabled:cursor-not-allowed appearance-none transition-colors"
+          className="w-full pl-8 sm:pl-10 pr-6 sm:pr-8 py-2.5 sm:py-3 bg-white border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:bg-gray-100 disabled:cursor-not-allowed appearance-none transition-colors cursor-pointer"
           aria-label="Filtrar por categoría"
         >
-          <option value="">Todas las categorías</option>
+          <option value="">Todas</option>
           {categorias.map(categoria => (
             <option key={categoria._id} value={categoria._id}>
               {categoria.nombre}
             </option>
           ))}
         </select>
+        {/* Flecha del select */}
+        <div className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
       </div>
     </div>
   );

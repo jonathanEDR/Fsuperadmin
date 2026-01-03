@@ -89,7 +89,99 @@ const ColaboradoresTable = React.memo(({
         <h3 className="text-base sm:text-lg font-semibold text-gray-800">Colaboradores</h3>
       </div>
       
-      <div className="overflow-x-auto">
+      {/* Vista Móvil: Tarjetas */}
+      <div className="md:hidden p-3 space-y-3">
+        {datosColaboradores.map((colaborador) => (
+          <div 
+            key={colaborador._id} 
+            className="bg-gradient-to-br from-white to-slate-50 rounded-xl p-4 border border-gray-100 shadow-sm"
+          >
+            {/* Header: Avatar + Nombre + Total */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center text-sm font-semibold text-blue-600">
+                  {colaborador.nombre_negocio?.charAt(0)?.toUpperCase() || 'C'}
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-800">
+                    {colaborador.nombre_negocio}
+                  </h4>
+                  <span className="text-xs text-gray-400 capitalize">{colaborador.role}</span>
+                </div>
+              </div>
+              <span className={`text-sm font-bold px-2.5 py-1 rounded-lg ${
+                colaborador.totalAPagar >= 0 
+                  ? 'text-emerald-600 bg-emerald-50' 
+                  : 'text-red-600 bg-red-50'
+              }`}>
+                {formatearMoneda(colaborador.totalAPagar)}
+              </span>
+            </div>
+            
+            {/* Stats Grid 2x2 */}
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <div className="bg-amber-50 rounded-lg px-3 py-2">
+                <span className="text-xs text-amber-600 block">Bonificación</span>
+                <span className={`text-sm font-semibold ${
+                  colaborador.bonificaciones > 0 ? 'text-amber-600' : 'text-gray-300'
+                }`}>
+                  {formatearMoneda(colaborador.bonificaciones)}
+                </span>
+              </div>
+              <div className="bg-orange-50 rounded-lg px-3 py-2">
+                <span className="text-xs text-orange-600 block">Adelantos</span>
+                <span className={`text-sm font-semibold ${
+                  colaborador.adelantos > 0 ? 'text-orange-600' : 'text-gray-300'
+                }`}>
+                  {formatearMoneda(colaborador.adelantos)}
+                </span>
+              </div>
+              <div className="bg-emerald-50 rounded-lg px-3 py-2">
+                <span className="text-xs text-emerald-600 block">Pagos Diarios</span>
+                <span className="text-sm font-semibold text-emerald-600">
+                  {formatearMoneda(colaborador.pagosDiarios)}
+                </span>
+              </div>
+              <div className="bg-blue-50 rounded-lg px-3 py-2">
+                <span className="text-xs text-blue-600 block">Total a Pagar</span>
+                <span className={`text-sm font-semibold ${
+                  colaborador.totalAPagar >= 0 ? 'text-blue-600' : 'text-red-600'
+                }`}>
+                  {formatearMoneda(colaborador.totalAPagar)}
+                </span>
+              </div>
+            </div>
+            
+            {/* Botones de Acción - Solo iconos en móvil */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => onAbrirModal && onAbrirModal(colaborador)}
+                className="flex-1 px-3 py-2 bg-gradient-to-r from-emerald-400 to-teal-400 text-white rounded-lg text-sm font-medium hover:from-emerald-500 hover:to-teal-500 transition-all shadow-sm flex items-center justify-center gap-1"
+                title="Registrar pago diario"
+              >
+                💵 <span className="hidden xs:inline">Pago Diario</span>
+              </button>
+              <button
+                onClick={() => onAbrirModalBonificacion && onAbrirModalBonificacion(colaborador)}
+                className="flex-1 px-3 py-2 bg-gradient-to-r from-amber-400 to-yellow-400 text-white rounded-lg text-sm font-medium hover:from-amber-500 hover:to-yellow-500 transition-all shadow-sm flex items-center justify-center gap-1"
+                title="Bonificación o adelanto"
+              >
+                🎁 <span className="hidden xs:inline">Bono</span>
+              </button>
+              <button
+                onClick={() => onMostrarDetalle(colaborador)}
+                className="flex-1 px-3 py-2 bg-gradient-to-r from-blue-400 to-indigo-400 text-white rounded-lg text-sm font-medium hover:from-blue-500 hover:to-indigo-500 transition-all shadow-sm flex items-center justify-center gap-1"
+                title="Ver detalle"
+              >
+                📋 <span className="hidden xs:inline">Detalle</span>
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      {/* Vista Desktop: Tabla */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-100">
           <thead className="bg-gray-50/50">
             <tr>

@@ -380,23 +380,26 @@ const PagosRealizados = React.memo(({
       {/* Calendario de Pagos */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
             {/* Header del calendario */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 border-b">
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 sm:p-4 border-b">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
                 <div className="flex items-center gap-2">
-                  <Calendar size={24} className="text-blue-600" />
-                  <h3 className="text-lg font-bold text-gray-800">Calendario de Pagos</h3>
+                  <Calendar size={20} className="text-blue-600 sm:w-6 sm:h-6" />
+                  <h3 className="text-base sm:text-lg font-bold text-gray-800">Calendario de Pagos</h3>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <button
                     onClick={() => navegarMes('anterior')}
-                    className="px-3 py-1.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                    className="px-2 sm:px-3 py-1.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-xs sm:text-sm"
                   >
-                    ← Anterior
+                    <span className="hidden sm:inline">← Anterior</span>
+                    <span className="sm:hidden">←</span>
                   </button>
                   
-                  <div className="text-center">
-                    <h4 className="text-base font-semibold text-gray-800">
-                      {obtenerNombreMes(mesActual)} {añoActual}
+                  <div className="text-center min-w-[100px] sm:min-w-[140px]">
+                    <h4 className="text-sm sm:text-base font-semibold text-gray-800">
+                      <span className="hidden sm:inline">{obtenerNombreMes(mesActual)}</span>
+                      <span className="sm:hidden">{obtenerNombreMes(mesActual).slice(0, 3)}</span>
+                      {' '}{añoActual}
                     </h4>
                     <button
                       onClick={irAMesActual}
@@ -408,35 +411,60 @@ const PagosRealizados = React.memo(({
                   
                   <button
                     onClick={() => navegarMes('siguiente')}
-                    className="px-3 py-1.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                    className="px-2 sm:px-3 py-1.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-xs sm:text-sm"
                   >
-                    Siguiente →
+                    <span className="hidden sm:inline">Siguiente →</span>
+                    <span className="sm:hidden">→</span>
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Tabla calendario */}
-            <div className="overflow-x-auto">
-              <table className="min-w-full">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-3 py-3 text-center text-sm font-medium text-gray-500 uppercase border-r w-20">
-                      Día
-                    </th>
-                    {colaboradores.map(colaborador => (
-                      <th 
-                        key={colaborador._id}
-                        className="px-3 py-3 text-center text-sm font-medium text-gray-500 uppercase border-r min-w-[150px]"
-                      >
-                        <div className="font-semibold">{colaborador.nombre_negocio}</div>
+            {/* Tabla calendario con scroll horizontal */}
+            <div className="relative">
+              {/* Indicador de scroll derecho */}
+              <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white to-transparent pointer-events-none z-10 sm:hidden" />
+              
+              <div className="overflow-x-auto scrollbar-hide">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      {/* Columna Día - Sticky */}
+                      <th className="px-2 sm:px-3 py-2 sm:py-3 text-center text-xs sm:text-sm font-medium text-gray-500 uppercase border-r bg-gray-50 sticky left-0 z-20 w-14 sm:w-20">
+                        Día
                       </th>
-                    ))}
-                    <th className="px-3 py-3 text-center text-sm font-medium text-gray-500 uppercase">
-                      Total
-                    </th>
-                  </tr>
-                </thead>
+                      {colaboradores.map(colaborador => {
+                        // Obtener 2 iniciales
+                        const nombre = colaborador.nombre_negocio || '';
+                        const palabras = nombre.trim().split(' ');
+                        const iniciales = palabras.length >= 2
+                          ? (palabras[0].charAt(0) + palabras[1].charAt(0)).toUpperCase()
+                          : nombre.slice(0, 2).toUpperCase();
+                        
+                        return (
+                          <th 
+                            key={colaborador._id}
+                            className="px-2 sm:px-3 py-2 sm:py-3 text-center text-xs sm:text-sm font-medium text-gray-500 uppercase border-r min-w-[50px] sm:min-w-[120px]"
+                          >
+                            {/* Desktop: nombre completo */}
+                            <div className="hidden sm:block font-semibold truncate" title={colaborador.nombre_negocio}>
+                              {colaborador.nombre_negocio}
+                            </div>
+                            {/* Móvil: 2 iniciales con tooltip */}
+                            <div 
+                              className="sm:hidden font-semibold w-8 h-8 mx-auto rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center text-blue-700"
+                              title={colaborador.nombre_negocio}
+                            >
+                              {iniciales}
+                            </div>
+                          </th>
+                        );
+                      })}
+                      <th className="px-2 sm:px-3 py-2 sm:py-3 text-center text-xs sm:text-sm font-medium text-gray-500 uppercase min-w-[60px] sm:min-w-[80px]">
+                        Total
+                      </th>
+                    </tr>
+                  </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {obtenerDiasDelMes(mesActual, añoActual).map(dia => {
                     const pagosHoy = agruparPagosPorDia[dia] || [];
@@ -444,9 +472,10 @@ const PagosRealizados = React.memo(({
 
                     return (
                       <tr key={dia} className="hover:bg-gray-50">
-                        <td className="px-3 py-2 text-center border-r bg-gray-50">
-                          <div className="font-bold text-gray-900">{dia}</div>
-                          <div className="text-xs text-gray-500">
+                        {/* Columna Día - Sticky */}
+                        <td className="px-2 sm:px-3 py-2 text-center border-r bg-gray-50 sticky left-0 z-10">
+                          <div className="font-bold text-gray-900 text-sm sm:text-base">{dia}</div>
+                          <div className="text-[10px] sm:text-xs text-gray-500">
                             {new Date(añoActual, mesActual, dia).toLocaleDateString('es-PE', { weekday: 'short' })}
                           </div>
                         </td>
@@ -455,7 +484,7 @@ const PagosRealizados = React.memo(({
                           const pagosColaborador = pagosHoy.filter(p => p.colaboradorUserId === colaborador.clerk_id);
 
                           return (
-                            <td key={`${dia}-${colaborador._id}`} className="px-3 py-2 border-r">
+                            <td key={`${dia}-${colaborador._id}`} className="px-1 sm:px-3 py-1 sm:py-2 border-r">
                               {pagosColaborador.length > 0 ? (
                                 <div className="space-y-1">
                                   {pagosColaborador.map(pago => {
@@ -467,46 +496,48 @@ const PagosRealizados = React.memo(({
                                     return (
                                       <div 
                                         key={pago._id}
-                                        className="flex justify-between items-start p-2 bg-green-50 rounded border-l-4 border-green-400 group relative"
+                                        className="flex justify-between items-start p-1.5 sm:p-2 bg-green-50 rounded border-l-2 sm:border-l-4 border-green-400 group relative"
                                         title={tooltipInfo}
                                       >
-                                        <div className="flex-1">
-                                          <div className="font-semibold text-green-800 text-sm">
+                                        <div className="flex-1 min-w-0">
+                                          {/* Monto - Siempre visible */}
+                                          <div className="font-semibold text-green-800 text-xs sm:text-sm truncate">
                                             {formatearMoneda(pago.montoTotal)}
                                           </div>
-                                          <div className="text-xs text-green-600">{pago.metodoPago}</div>
+                                          {/* Detalles - Solo desktop */}
+                                          <div className="hidden sm:block text-xs text-green-600">{pago.metodoPago}</div>
                                           {diasCubiertos > 0 && (
-                                            <div className="text-xs text-blue-600 font-medium">
+                                            <div className="hidden sm:block text-xs text-blue-600 font-medium">
                                               ✓ {diasCubiertos} día{diasCubiertos > 1 ? 's' : ''}
                                             </div>
                                           )}
                                           {pago.observaciones && (
-                                            <div className="text-xs text-gray-500 truncate" title={pago.observaciones}>
+                                            <div className="hidden sm:block text-xs text-gray-500 truncate" title={pago.observaciones}>
                                               {pago.observaciones}
                                             </div>
                                           )}
                                         </div>
                                         <button
                                           onClick={() => setConfirmacionEliminar(pago._id)}
-                                          className="ml-2 text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                                          className="ml-1 sm:ml-2 text-red-500 hover:text-red-700 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex-shrink-0"
                                           title="Eliminar"
                                         >
-                                          <Trash2 size={14} />
+                                          <Trash2 size={12} className="sm:w-[14px] sm:h-[14px]" />
                                         </button>
                                       </div>
                                     );
                                   })}
                                 </div>
                               ) : (
-                                <div className="text-center text-gray-400 text-xs">-</div>
+                                <div className="text-center text-gray-300 text-xs">-</div>
                               )}
                             </td>
                           );
                         })}
                         
-                        <td className="px-3 py-2 text-center">
+                        <td className="px-2 sm:px-3 py-2 text-center">
                           {totalDia > 0 && (
-                            <span className="font-bold text-green-700">
+                            <span className="font-bold text-green-700 text-xs sm:text-sm">
                               {formatearMoneda(totalDia)}
                             </span>
                           )}
@@ -517,6 +548,7 @@ const PagosRealizados = React.memo(({
                 </tbody>
               </table>
             </div>
+          </div>
       </div>
 
       {/* Modal de Creación de Pago - COMPACTO */}

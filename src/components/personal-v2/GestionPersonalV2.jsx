@@ -143,48 +143,56 @@ function GestionPersonalV2() {
           )}
         </div>
         
-        {/* Tabs Navigation */}
-        <div className="flex gap-2 border-b border-gray-200">
-          <button
-            onClick={() => setTabActual('personal')}
-            className={`px-4 py-2 font-medium text-sm transition-colors ${
-              tabActual === 'personal'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
-          >
-            Personal
-          </button>
-          <button
-            onClick={() => setTabActual('pagos')}
-            className={`px-4 py-2 font-medium text-sm transition-colors ${
-              tabActual === 'pagos'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
-          >
-            Pagos Realizados
-          </button>
-          <button
-            onClick={() => setTabActual('asistencias')}
-            className={`px-4 py-2 font-medium text-sm transition-colors ${
-              tabActual === 'asistencias'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
-          >
-            Control de Asistencias
-          </button>
-          <button
-            onClick={() => setTabActual('colaboradores')}
-            className={`px-4 py-2 font-medium text-sm transition-colors ${
-              tabActual === 'colaboradores'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
-          >
-            Colaboradores
-          </button>
+        {/* Tabs Navigation - Scroll horizontal en móvil */}
+        <div className="relative">
+          <div className="flex gap-1 sm:gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-px border-b border-gray-200">
+            <button
+              onClick={() => setTabActual('personal')}
+              className={`snap-start flex-shrink-0 px-3 sm:px-4 py-2 font-medium text-sm transition-colors whitespace-nowrap ${
+                tabActual === 'personal'
+                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50 rounded-t-lg'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-t-lg'
+              }`}
+            >
+              <span className="sm:hidden">👥</span>
+              <span className="hidden sm:inline">Personal</span>
+            </button>
+            <button
+              onClick={() => setTabActual('pagos')}
+              className={`snap-start flex-shrink-0 px-3 sm:px-4 py-2 font-medium text-sm transition-colors whitespace-nowrap ${
+                tabActual === 'pagos'
+                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50 rounded-t-lg'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-t-lg'
+              }`}
+            >
+              <span className="sm:hidden">💰</span>
+              <span className="hidden sm:inline">Pagos Realizados</span>
+            </button>
+            <button
+              onClick={() => setTabActual('asistencias')}
+              className={`snap-start flex-shrink-0 px-3 sm:px-4 py-2 font-medium text-sm transition-colors whitespace-nowrap ${
+                tabActual === 'asistencias'
+                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50 rounded-t-lg'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-t-lg'
+              }`}
+            >
+              <span className="sm:hidden">📅</span>
+              <span className="hidden sm:inline">Control de Asistencias</span>
+            </button>
+            <button
+              onClick={() => setTabActual('colaboradores')}
+              className={`snap-start flex-shrink-0 px-3 sm:px-4 py-2 font-medium text-sm transition-colors whitespace-nowrap ${
+                tabActual === 'colaboradores'
+                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50 rounded-t-lg'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-t-lg'
+              }`}
+            >
+              <span className="sm:hidden">🏢</span>
+              <span className="hidden sm:inline">Colaboradores</span>
+            </button>
+          </div>
+          {/* Indicador de gradiente para mostrar que hay más contenido */}
+          <div className="absolute right-0 top-0 bottom-px w-8 bg-gradient-to-l from-white to-transparent pointer-events-none sm:hidden" />
         </div>
       </div>
 

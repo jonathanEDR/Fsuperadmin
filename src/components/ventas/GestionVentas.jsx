@@ -133,9 +133,9 @@ function GestionVentas({ userRole }) {
     <div>
       {/* Solo mostrar tabs para super admin y admin */}
       {canViewTabs && (
-        <div className="flex gap-4 mb-6">
+        <div className="flex gap-2 sm:gap-4 mb-6 overflow-x-auto scrollbar-hide pb-1">
           <button
-            className={`px-4 py-2 rounded-t-lg font-semibold border-b-2 transition-colors ${
+            className={`flex-shrink-0 px-3 sm:px-4 py-2 rounded-t-lg font-semibold border-b-2 transition-colors text-sm sm:text-base whitespace-nowrap ${
               tab === 'ventas' 
                 ? 'border-purple-600 text-purple-700 bg-purple-50' 
                 : 'border-transparent text-gray-600 bg-gray-100 hover:bg-purple-50'
@@ -145,7 +145,7 @@ function GestionVentas({ userRole }) {
             Ventas
           </button>
           <button
-            className={`px-4 py-2 rounded-t-lg font-semibold border-b-2 transition-colors ${
+            className={`flex-shrink-0 px-3 sm:px-4 py-2 rounded-t-lg font-semibold border-b-2 transition-colors text-sm sm:text-base whitespace-nowrap ${
               tab === 'cobros' 
                 ? 'border-purple-600 text-purple-700 bg-purple-50' 
                 : 'border-transparent text-gray-600 bg-gray-100 hover:bg-purple-50'
@@ -155,7 +155,7 @@ function GestionVentas({ userRole }) {
             Cobros
           </button>
           <button
-            className={`px-4 py-2 rounded-t-lg font-semibold border-b-2 transition-colors ${
+            className={`flex-shrink-0 px-3 sm:px-4 py-2 rounded-t-lg font-semibold border-b-2 transition-colors text-sm sm:text-base whitespace-nowrap ${
               tab === 'devoluciones' 
                 ? 'border-purple-600 text-purple-700 bg-purple-50' 
                 : 'border-transparent text-gray-600 bg-gray-100 hover:bg-purple-50'

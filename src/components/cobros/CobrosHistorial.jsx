@@ -174,16 +174,17 @@ const CobrosHistorial = ({ userRole }) => {
 
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-      <div className="overflow-x-auto">
+      {/* Vista Desktop - Tabla */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Usuario</th>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Sucursal</th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipos de Cobro</th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto Total</th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Descripción</th>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Descripción</th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Información</th>
             </tr>
           </thead>
@@ -201,7 +202,7 @@ const CobrosHistorial = ({ userRole }) => {
                   </td>
                   
                   {/* Usuario */}
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 hidden sm:table-cell">
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                     <div className="flex flex-col">
                       <span className="font-medium">{payment.creatorName || 'Usuario no especificado'}</span>
                       <span className="text-xs text-gray-500">{payment.creatorEmail || ''}</span>
@@ -240,7 +241,7 @@ const CobrosHistorial = ({ userRole }) => {
                   </td>
                   
                   {/* Descripción */}
-                  <td className="px-4 py-4 text-sm text-gray-500 max-w-xs hidden md:table-cell">
+                  <td className="px-4 py-4 text-sm text-gray-500 max-w-xs hidden lg:table-cell">
                     <div className="truncate cursor-help" title={payment.descripcion || 'Sin descripción'}>
                       {payment.descripcion || '-'}
                     </div>
@@ -271,6 +272,84 @@ const CobrosHistorial = ({ userRole }) => {
             )}
           </tbody>
         </table>
+      </div>
+      
+      {/* Vista Móvil - Tarjetas */}
+      <div className="md:hidden">
+        {payments.length === 0 ? (
+          <div className="p-6 text-center text-gray-500">
+            No hay registros de cobros disponibles
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {payments.map((payment) => (
+              <div key={payment._id} className="p-4 hover:bg-gray-50 transition-colors">
+                {/* Header: Fecha y Monto */}
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {formatDate(payment.fechaCobro || payment.fechaPago || payment.createdAt)}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {payment.creatorName || 'Usuario no especificado'}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-bold text-green-600">
+                      {formatCurrency(payment.montoPagado || payment.montoTotal)}
+                    </p>
+                    {payment.sucursalNombre && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-indigo-100 text-indigo-800">
+                        {payment.sucursalNombre}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Tipos de Cobro */}
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  {formatPaymentTypes(payment).map((type, index) => (
+                    <span 
+                      key={index} 
+                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                    >
+                      {type}
+                    </span>
+                  ))}
+                </div>
+                
+                {/* Descripción (si existe) */}
+                {payment.descripcion && (
+                  <p className="text-xs text-gray-500 mb-3 line-clamp-2">
+                    {payment.descripcion}
+                  </p>
+                )}
+                
+                {/* Footer: Info y Acciones */}
+                <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                  <div className="flex items-center gap-2">
+                    {payment.ventasId?.length > 0 && (
+                      <span className="inline-flex items-center text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                        <Info className="h-3 w-3 mr-1" />
+                        {payment.ventasId.length} venta{payment.ventasId.length !== 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {userRole === 'super_admin' && (
+                    <button 
+                      onClick={() => handleDeleteClick(payment)} 
+                      className="inline-flex items-center text-xs bg-red-100 text-red-800 px-2.5 py-1.5 rounded-full hover:bg-red-200 transition-colors"
+                    >
+                      <Trash2 className="h-3.5 w-3.5 mr-1" />
+                      Eliminar
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       
       {/* Modal de confirmación de eliminación */}

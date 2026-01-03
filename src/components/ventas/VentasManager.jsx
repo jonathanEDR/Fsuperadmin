@@ -161,34 +161,36 @@ function VentasManager({ userRole: userRoleProp }) {
 
   return (
     <div className="space-y-8">
-      <div className="bg-white shadow-lg rounded-xl p-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-white shadow-lg rounded-xl p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-purple-100 rounded-lg">
-              <ShoppingCart className="text-purple-600" size={24} />
+            <div className="p-2 sm:p-3 bg-purple-100 rounded-lg">
+              <ShoppingCart className="text-purple-600" size={20} />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-800">Gestión de Ventas</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-800">Gestión de Ventas</h3>
+              <p className="text-xs sm:text-sm text-gray-600">
                 Administra las ventas del sistema {userRole && `(${userRole})`}
               </p>
             </div>
           </div>
           {canShowAddButton && (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <button
                 onClick={() => navigate(getCatalogoRoute())}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center gap-2 shadow-lg"
+                className="flex-1 sm:flex-none bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 sm:px-6 py-2.5 sm:py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg text-sm sm:text-base"
+                title="Ver Catálogo"
               >
-                <Grid3X3 size={20} />
-                Ver Catálogo
+                <Grid3X3 size={18} className="sm:w-5 sm:h-5" />
+                <span className="hidden xs:inline">Ver Catálogo</span>
               </button>
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
+                className="flex-1 sm:flex-none bg-purple-600 text-white px-3 sm:px-6 py-2.5 sm:py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
+                title="Nueva Venta"
               >
-                <Plus size={20} />
-                Nueva Venta
+                <Plus size={18} className="sm:w-5 sm:h-5" />
+                <span className="hidden xs:inline">Nueva Venta</span>
               </button>
             </div>
           )}
