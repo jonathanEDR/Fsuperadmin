@@ -87,6 +87,21 @@ class MovimientosCajaServiceOptimizado extends BaseFinanzasService {
     }
     
     /**
+     * Obtener saldo de efectivo ACUMULADO (todo el histórico)
+     * Usado por el modal de egresos para mostrar el efectivo disponible real
+     * NO filtra por fecha - obtiene el acumulado desde el inicio
+     */
+    async obtenerSaldoEfectivoAcumulado() {
+        try {
+            const response = await api.get('/api/movimientos-caja/saldo-efectivo-acumulado');
+            return response.data;
+        } catch (error) {
+            console.error('❌ Error obteniendo saldo de efectivo acumulado:', error);
+            throw this.handleError(error);
+        }
+    }
+    
+    /**
      * Obtener estadísticas de métodos de pago
      */
     async obtenerEstadisticasMetodosPago(fechaInicio = null, fechaFin = null) {

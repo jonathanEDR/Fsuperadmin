@@ -51,11 +51,12 @@ const ModalPrestamoOtorgado = ({
         }
     }, [isOpen]);
 
-    // === NUEVO: Función para cargar arqueo de caja ===
+    // === MODIFICADO: Función para cargar saldo de caja ACUMULADO (no solo del día) ===
     const cargarArqueoCaja = async () => {
         try {
             setLoadingArqueo(true);
-            const response = await movimientosCajaService.obtenerArqueo();
+            // Usar el nuevo endpoint que obtiene el saldo ACUMULADO de todo el histórico
+            const response = await movimientosCajaService.obtenerSaldoEfectivoAcumulado();
             if (response.success && response.data?.desglose) {
                 const { billetes, monedas } = response.data.desglose;
                 setSaldoCaja({
@@ -75,10 +76,12 @@ const ModalPrestamoOtorgado = ({
                         c10: Math.max(0, monedas?.c10 || 0)
                     }
                 });
-                setTotalDisponibleCaja(response.data.valorCalculado || 0);
+                // Usar efectivoDisponible o valorCalculado
+                setTotalDisponibleCaja(response.data.efectivoDisponible || response.data.valorCalculado || 0);
+                console.log('💰 Saldo de caja acumulado cargado:', response.data.efectivoDisponible || response.data.valorCalculado);
             }
         } catch (error) {
-            console.error('Error cargando arqueo de caja:', error);
+            console.error('Error cargando saldo de caja acumulado:', error);
         } finally {
             setLoadingArqueo(false);
         }
