@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import useGastos from './useGastos';
 import GastoForm from './GastoForm';
 import GastoDashboard from './GastoDashboard';
 import GastoCategoriaView from './GastoCategoriaView';
 import CatalogoGastoList from './CatalogoGastoList';
+import { getLocalDateString } from '../../utils/dateUtils';
 
 export default function GastoList() {
   const {
@@ -20,6 +21,33 @@ export default function GastoList() {
   // Estado para navegacion
   const [vistaActual, setVistaActual] = useState('dashboard'); // 'dashboard' | 'categoria' | 'catalogo'
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('');
+
+  // Estados para filtro de fechas
+  const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
+  const [fechaInicio, setFechaInicio] = useState(() => {
+    // Por defecto: primer día del mes actual
+    const today = getLocalDateString();
+    const [year, month] = today.split('-');
+    return `${year}-${month}-01`;
+  });
+  const [fechaFin, setFechaFin] = useState(() => {
+    return getLocalDateString();
+  });
+
+  // Filtrar gastos por rango de fechas
+  const gastosFiltrados = useMemo(() => {
+    if (!fechaInicio && !fechaFin) return gastos;
+    
+    return gastos.filter(gasto => {
+      const fechaGasto = new Date(gasto.fechaGasto);
+      const inicio = fechaInicio ? new Date(fechaInicio + 'T00:00:00') : null;
+      const fin = fechaFin ? new Date(fechaFin + 'T23:59:59') : null;
+      
+      if (inicio && fechaGasto < inicio) return false;
+      if (fin && fechaGasto > fin) return false;
+      return true;
+    });
+  }, [gastos, fechaInicio, fechaFin]);
 
   // Estado para el formulario
   const initialGasto = {
@@ -130,6 +158,94 @@ export default function GastoList() {
         </div>
       )}
 
+      {/* Filtro de Fechas - Solo visible en dashboard y categoria */}
+      {(vistaActual === 'dashboard' || vistaActual === 'categoria') && (
+        <div className="mb-6 bg-white rounded-xl border border-gray-200 overflow-hidden">
+          {/* Header colapsable */}
+          <button
+            type="button"
+            onClick={() => setFiltrosAbiertos(!filtrosAbiertos)}
+            className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                <i className="fas fa-filter text-blue-600"></i>
+              </div>
+              <div className="text-left">
+                <span className="font-semibold text-gray-800">Filtrar por Fechas</span>
+                <p className="text-xs text-gray-500">
+                  {fechaInicio} → {fechaFin} • {gastosFiltrados.length} de {gastos.length} gastos
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg 
+                className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${filtrosAbiertos ? 'rotate-180' : ''}`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </button>
+          
+          {/* Contenido colapsable */}
+          <div className={`transition-all duration-300 ease-in-out ${filtrosAbiertos ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+            <div className="p-4 pt-0 border-t border-gray-200">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Fecha Inicio
+                  </label>
+                  <input
+                    type="date"
+                    value={fechaInicio}
+                    onChange={(e) => setFechaInicio(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Fecha Fin
+                  </label>
+                  <input
+                    type="date"
+                    value={fechaFin}
+                    onChange={(e) => setFechaFin(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                
+                <div className="flex items-end gap-2">
+                  <button
+                    onClick={() => {
+                      const today = getLocalDateString();
+                      const [year, month] = today.split('-');
+                      setFechaInicio(`${year}-${month}-01`);
+                      setFechaFin(today);
+                    }}
+                    className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition-colors"
+                  >
+                    Este Mes
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFechaInicio('');
+                      setFechaFin('');
+                    }}
+                    className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                  >
+                    Ver Todo
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Vista de Catalogo */}
       {vistaActual === 'catalogo' && (
         <div>
@@ -149,7 +265,7 @@ export default function GastoList() {
       {/* Vista Dashboard */}
       {vistaActual === 'dashboard' && (
         <GastoDashboard
-          gastos={gastos}
+          gastos={gastosFiltrados}
           onSelectCategoria={handleSelectCategoria}
           onAgregarGasto={() => handleAgregarGasto()}
           onAdministrarCatalogo={handleAdministrarCatalogo}
@@ -160,7 +276,7 @@ export default function GastoList() {
       {vistaActual === 'categoria' && (
         <GastoCategoriaView
           categoria={categoriaSeleccionada}
-          gastos={gastos}
+          gastos={gastosFiltrados}
           onVolver={handleVolverDashboard}
           onAgregarGasto={handleAgregarGasto}
           onEditarGasto={handleEditarGasto}
