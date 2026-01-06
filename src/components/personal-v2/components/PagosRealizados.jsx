@@ -99,6 +99,21 @@ const PagosRealizados = React.memo(({
     setAñoActual(hoy.getFullYear());
   };
 
+  // Función para parsear fecha con zona horaria de Perú
+  const parsearFechaPeru = useCallback((fechaISO) => {
+    if (!fechaISO) return null;
+    const date = new Date(fechaISO);
+    // Obtener partes de fecha en zona horaria de Perú
+    const fechaStr = date.toLocaleDateString('es-PE', { 
+      timeZone: 'America/Lima',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }); // DD/MM/YYYY
+    const [dia, mes, año] = fechaStr.split('/').map(Number);
+    return { dia, mes: mes - 1, año }; // mes 0-indexed para consistencia con getMonth()
+  }, []);
+
   // Agrupar pagos por día
   const agruparPagosPorDia = useMemo(() => {
     const agrupados = {};
@@ -107,11 +122,18 @@ const PagosRealizados = React.memo(({
       // Distribuir pago entre los días de diasPagados
       if (pago.diasPagados && pago.diasPagados.length > 0) {
         pago.diasPagados.forEach(diaPagado => {
-          const fecha = new Date(diaPagado.fecha || diaPagado.fechaRegistro);
+          // ✅ MEJORADO: Usar fecha o fechaRegistro, con parsing seguro
+          const fechaRaw = diaPagado.fecha || diaPagado.fechaRegistro;
+          const partes = parsearFechaPeru(fechaRaw);
+          
+          if (!partes) {
+            console.warn('⚠️ Fecha inválida en diaPagado:', diaPagado);
+            return;
+          }
           
           // Solo incluir si es del mes actual
-          if (fecha.getMonth() === mesActual && fecha.getFullYear() === añoActual) {
-            const dia = fecha.getDate();
+          if (partes.mes === mesActual && partes.año === añoActual) {
+            const dia = partes.dia;
             if (!agrupados[dia]) {
               agrupados[dia] = [];
             }
@@ -127,9 +149,9 @@ const PagosRealizados = React.memo(({
         });
       } else {
         // Si no tiene diasPagados, usar fechaPago (comportamiento anterior)
-        const fechaPago = new Date(pago.fechaPago);
-        if (fechaPago.getMonth() === mesActual && fechaPago.getFullYear() === añoActual) {
-          const dia = fechaPago.getDate();
+        const partes = parsearFechaPeru(pago.fechaPago);
+        if (partes && partes.mes === mesActual && partes.año === añoActual) {
+          const dia = partes.dia;
           if (!agrupados[dia]) {
             agrupados[dia] = [];
           }
@@ -139,7 +161,7 @@ const PagosRealizados = React.memo(({
     });
 
     return agrupados;
-  }, [pagosRealizados, mesActual, añoActual]);
+  }, [pagosRealizados, mesActual, añoActual, parsearFechaPeru]);
 
   // Calcular monto automático según días seleccionados
   const montoCalculado = useMemo(() => {
