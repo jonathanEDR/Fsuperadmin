@@ -82,6 +82,7 @@ function GestionPersonalV2() {
   const crearBonificacionAdelanto = async (data) => {
     try {
       // Usar el servicio existente para crear registro
+      // 🆕 incluirPagoDiario: false para que NO se agregue el pago diario calculado
       await crearRegistro({
         colaboradorUserId: data.colaboradorUserId,
         fechaDeGestion: data.fechaDeGestion,
@@ -89,7 +90,8 @@ function GestionPersonalV2() {
         adelanto: data.tipo === 'adelanto' ? data.monto : 0,
         bonificacion: data.tipo === 'bonificacion' ? data.monto : 0,
         descripcionBonificacion: data.tipo === 'bonificacion' ? data.descripcion : '',
-        incluirDatosCobros: false // No incluir cobros automáticos para este tipo de registro
+        incluirDatosCobros: false, // No incluir cobros automáticos para este tipo de registro
+        incluirPagoDiario: false // 🆕 NO incluir el pago diario calculado (solo bonificación/adelanto)
       });
       cerrarModalBonificacion();
     } catch (error) {

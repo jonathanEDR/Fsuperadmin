@@ -194,8 +194,29 @@ export const filtrarPorTipo = (registros, tipo) => {
 
 /**
  * Obtener descripción amigable del tipo de registro
+ * 🆕 Ahora detecta si es solo bonificación/adelanto (sin pago diario)
  */
-export const obtenerDescripcionTipo = (tipo) => {
+export const obtenerDescripcionTipo = (tipo, registro = null) => {
+  // Si es pago_diario, verificar si es solo bonificación o adelanto
+  if (tipo === 'pago_diario' && registro) {
+    const pagoDiario = registro.pagodiario || 0;
+    const bonificacion = registro.bonificacion || 0;
+    const adelanto = registro.adelanto || 0;
+    
+    // Si NO tiene pago diario pero SÍ tiene bonificación
+    if (pagoDiario === 0 && bonificacion > 0) {
+      return 'Bonificación';
+    }
+    // Si NO tiene pago diario pero SÍ tiene adelanto
+    if (pagoDiario === 0 && adelanto > 0) {
+      return 'Adelanto';
+    }
+    // Si tiene pago diario Y bonificación
+    if (pagoDiario > 0 && bonificacion > 0) {
+      return 'Pago Diario + Bonificación';
+    }
+  }
+  
   const descripciones = {
     'pago_diario': 'Pago Diario',
     'faltante_cobro': 'Faltante de Cobro',
@@ -221,9 +242,65 @@ export const obtenerColorTipo = (tipo) => {
 };
 
 /**
- * Obtener icono según el tipo
+ * 🆕 Obtener color del texto del monto según el tipo de registro
+ * Detecta si es bonificación, adelanto, etc.
  */
-export const obtenerIconoTipo = (tipo) => {
+export const obtenerColorMontoTexto = (tipo, registro = null) => {
+  // Si es pago_diario, verificar si es solo bonificación o adelanto
+  if (tipo === 'pago_diario' && registro) {
+    const pagoDiario = registro.pagodiario || 0;
+    const bonificacion = registro.bonificacion || 0;
+    const adelanto = registro.adelanto || 0;
+    
+    // Si NO tiene pago diario pero SÍ tiene bonificación (solo bonificación)
+    if (pagoDiario === 0 && bonificacion > 0) {
+      return 'text-yellow-600'; // Amarillo/dorado para bonificaciones
+    }
+    // Si NO tiene pago diario pero SÍ tiene adelanto
+    if (pagoDiario === 0 && adelanto > 0) {
+      return 'text-orange-600'; // Naranja para adelantos
+    }
+    // Si tiene pago diario Y bonificación
+    if (pagoDiario > 0 && bonificacion > 0) {
+      return 'text-green-600'; // Verde (pago diario + bonificación)
+    }
+  }
+  
+  const colores = {
+    'pago_diario': 'text-green-600',
+    'faltante_cobro': 'text-orange-600',
+    'gasto_cobro': 'text-red-600',
+    'adelanto_manual': 'text-blue-600'
+  };
+
+  return colores[tipo] || 'text-gray-600';
+};
+
+/**
+ * Obtener icono según el tipo
+ * 🆕 Ahora detecta si es solo bonificación/adelanto
+ */
+export const obtenerIconoTipo = (tipo, registro = null) => {
+  // Si es pago_diario, verificar si es solo bonificación o adelanto
+  if (tipo === 'pago_diario' && registro) {
+    const pagoDiario = registro.pagodiario || 0;
+    const bonificacion = registro.bonificacion || 0;
+    const adelanto = registro.adelanto || 0;
+    
+    // Si NO tiene pago diario pero SÍ tiene bonificación
+    if (pagoDiario === 0 && bonificacion > 0) {
+      return '🎁';
+    }
+    // Si NO tiene pago diario pero SÍ tiene adelanto
+    if (pagoDiario === 0 && adelanto > 0) {
+      return '💸';
+    }
+    // Si tiene pago diario Y bonificación
+    if (pagoDiario > 0 && bonificacion > 0) {
+      return '🎁';
+    }
+  }
+  
   const iconos = {
     'pago_diario': '💵',
     'faltante_cobro': '⚠️',
@@ -236,6 +313,7 @@ export const obtenerIconoTipo = (tipo) => {
 
 /**
  * Formatear monto con signo según el tipo
+ * Ahora incluye bonificaciones en el cálculo
  */
 export const formatearMontoConSigno = (registro) => {
   const tipo = registro.tipo || 'pago_diario';
@@ -244,7 +322,10 @@ export const formatearMontoConSigno = (registro) => {
 
   switch (tipo) {
     case 'pago_diario':
-      monto = registro.pagodiario || 0;
+      // 🆕 Incluir tanto pagodiario como bonificación
+      const pagoDiario = registro.pagodiario || 0;
+      const bonificacion = registro.bonificacion || 0;
+      monto = pagoDiario + bonificacion;
       signo = '+';
       break;
     
@@ -264,7 +345,7 @@ export const formatearMontoConSigno = (registro) => {
       break;
     
     default:
-      monto = registro.pagodiario || 0;
+      monto = (registro.pagodiario || 0) + (registro.bonificacion || 0);
       signo = '+';
       break;
   }

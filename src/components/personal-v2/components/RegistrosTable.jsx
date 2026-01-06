@@ -10,11 +10,12 @@ import {
   obtenerDescripcionTipo,
   obtenerColorTipo,
   obtenerIconoTipo,
+  obtenerColorMontoTexto,
   formatearMontoConSigno,
   esRegistroAutomatico
 } from '../utils/registrosHelper';
 
-const RegistrosTable = React.memo(({ 
+const RegistrosTable = React.memo(({
   registros,
   onEliminar,
   formatearMoneda,
@@ -287,12 +288,12 @@ const RegistrosTable = React.memo(({
                                 >
                                   <div className="flex items-center gap-2 flex-1">
                                     <span className="text-sm">
-                                      {obtenerIconoTipo(tipo)}
+                                      {obtenerIconoTipo(tipo, registro)}
                                     </span>
                                     <div className="flex-1">
                                       <div className="flex items-center gap-2">
                                         <span className="text-xs font-medium text-gray-900">
-                                          {obtenerDescripcionTipo(tipo)}
+                                          {obtenerDescripcionTipo(tipo, registro)}
                                         </span>
                                         {esAuto && (
                                           <span className="px-1.5 py-0.5 text-xs bg-purple-100 text-purple-700 rounded">
@@ -307,12 +308,7 @@ const RegistrosTable = React.memo(({
                                   </div>
                                   
                                   <div className="flex items-center gap-3">
-                                    <span className={`text-sm font-semibold ${
-                                      tipo === 'pago_diario' ? 'text-green-600' :
-                                      tipo === 'faltante_cobro' ? 'text-orange-600' :
-                                      tipo === 'gasto_cobro' ? 'text-red-600' :
-                                      'text-blue-600'
-                                    }`}>
+                                    <span className={`text-sm font-semibold ${obtenerColorMontoTexto(tipo, registro)}`}>
                                       {formatearMontoConSigno(registro)}
                                     </span>
                                     
