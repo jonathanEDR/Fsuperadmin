@@ -313,17 +313,19 @@ const PagosRealizados = React.memo(({
       return;
     }
 
-    // ✅ Filtrar solo registros pago_diario para enviar al backend
-    // (Los faltantes/gastos/adelantos se marcarán automáticamente por fecha)
-    const registrosPagoDiario = registrosSeleccionados.filter(r => 
-      !r.tipo || r.tipo === 'pago_diario'
+    // ✅ CORREGIDO: Incluir TODOS los tipos de registros que afectan el pago
+    // Esto incluye: pago_diario, bonificacion_manual, adelanto_manual, ajuste_manual
+    // Solo excluimos faltante_cobro y gasto_cobro que se manejan por fecha
+    const tiposAPagar = ['pago_diario', 'bonificacion_manual', 'adelanto_manual', 'ajuste_manual'];
+    const registrosAPagar = registrosSeleccionados.filter(r => 
+      !r.tipo || tiposAPagar.includes(r.tipo)
     );
 
     const dataToSubmit = {
       colaboradorUserId: colaboradorSeleccionado.clerk_id,
       // Convertir fecha local de Perú a UTC/ISO para enviar al backend
       fechaPago: new Date(formData.fechaPago + 'T12:00:00-05:00').toISOString(),
-      registrosIds: registrosPagoDiario.map(r => r._id), // NUEVO: Solo IDs de pago_diario
+      registrosIds: registrosAPagar.map(r => r._id), // ✅ CORREGIDO: Todos los registros que afectan el pago
       metodoPago: formData.metodoPago,
       observaciones: formData.observaciones.trim(),
       estado: formData.estado
