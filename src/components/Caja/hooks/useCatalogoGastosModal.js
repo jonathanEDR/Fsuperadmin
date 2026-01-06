@@ -47,7 +47,7 @@ export default function useCatalogoGastosModal() {
       'finanzas': 'Finanzas',
       'produccion': 'Producción',
       'ventas': 'Ventas',
-      'administrativo': 'Administración'
+      'admin': 'Administración'
     };
 
     const categoriaFiltro = mapeoSecciones[categoria] || categoria;

@@ -45,7 +45,7 @@ const ModalEgreso = ({ isOpen, onClose, onSuccess }) => {
     { value: 'finanzas', label: 'Finanzas', icon: '💰', color: 'blue' },
     { value: 'produccion', label: 'Producción', icon: '⚙️', color: 'green' },
     { value: 'ventas', label: 'Ventas', icon: '📈', color: 'yellow' },
-    { value: 'administrativo', label: 'Administración', icon: '🏢', color: 'purple' }
+    { value: 'admin', label: 'Administración', icon: '🏢', color: 'purple' }
   ];
 
   // Métodos de pago
@@ -64,7 +64,7 @@ const ModalEgreso = ({ isOpen, onClose, onSuccess }) => {
     'finanzas': 'Finanzas',
     'produccion': 'Producción',
     'ventas': 'Ventas',
-    'administrativo': 'Administración'
+    'admin': 'Administración'
   };
 
   // Resetear cuando cambia la sección
