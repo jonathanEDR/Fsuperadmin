@@ -65,13 +65,15 @@ const ResumenSeleccion = React.memo(({
         sumaBonificaciones += registro.bonificacion || 0;
         sumaAdelantos += registro.adelanto || 0;
       } else if (tipo === 'adelanto_manual') {
-        // ✅ NUEVO: Manejar adelantos creados como registros independientes
+        // ✅ Manejar adelantos creados como registros independientes
         sumaAdelantos += registro.adelanto || 0;
-        // También puede tener bonificación si se agregó junto con el adelanto
-        sumaBonificaciones += registro.bonificacion || 0;
       } else if (tipo === 'bonificacion_manual') {
-        // ✅ NUEVO: Manejar bonificaciones creadas como registros independientes
+        // ✅ Manejar bonificaciones creadas como registros independientes
         sumaBonificaciones += registro.bonificacion || 0;
+      } else if (tipo === 'ajuste_manual') {
+        // ✅ Manejar ajustes que tienen tanto bonificación como adelanto
+        sumaBonificaciones += registro.bonificacion || 0;
+        sumaAdelantos += registro.adelanto || 0;
       } else if (tipo === 'faltante_cobro') {
         sumaFaltantes += registro.faltante || 0;
       } else if (tipo === 'gasto_cobro') {
