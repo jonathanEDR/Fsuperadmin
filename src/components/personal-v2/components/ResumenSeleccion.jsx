@@ -64,6 +64,14 @@ const ResumenSeleccion = React.memo(({
         sumaPagos += pagoDiarioReal;
         sumaBonificaciones += registro.bonificacion || 0;
         sumaAdelantos += registro.adelanto || 0;
+      } else if (tipo === 'adelanto_manual') {
+        // ✅ NUEVO: Manejar adelantos creados como registros independientes
+        sumaAdelantos += registro.adelanto || 0;
+        // También puede tener bonificación si se agregó junto con el adelanto
+        sumaBonificaciones += registro.bonificacion || 0;
+      } else if (tipo === 'bonificacion_manual') {
+        // ✅ NUEVO: Manejar bonificaciones creadas como registros independientes
+        sumaBonificaciones += registro.bonificacion || 0;
       } else if (tipo === 'faltante_cobro') {
         sumaFaltantes += registro.faltante || 0;
       } else if (tipo === 'gasto_cobro') {

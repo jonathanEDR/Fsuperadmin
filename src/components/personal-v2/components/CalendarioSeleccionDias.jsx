@@ -65,6 +65,12 @@ const CalendarioSeleccionDias = React.memo(({
         // ✅ NUEVA FÓRMULA: Pago + Bonificación - Adelanto
         // Faltantes y gastos vienen en registros separados
         montoRegistro = pagoDiarioReal + (registro.bonificacion || 0) - (registro.adelanto || 0);
+      } else if (tipo === 'adelanto_manual') {
+        // ✅ NUEVO: Adelantos independientes se restan
+        montoRegistro = -(registro.adelanto || 0);
+      } else if (tipo === 'bonificacion_manual') {
+        // ✅ NUEVO: Bonificaciones independientes se suman
+        montoRegistro = registro.bonificacion || 0;
       } else if (tipo === 'faltante_cobro') {
         // Faltantes se restan
         montoRegistro = -(registro.faltante || 0);
