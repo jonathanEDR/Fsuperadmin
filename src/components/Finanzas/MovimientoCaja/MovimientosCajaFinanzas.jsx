@@ -22,15 +22,25 @@ const MovimientosCajaFinanzas = () => {
     const [resumenDia, setResumenDia] = useState(null);
     const [movimientos, setMovimientos] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMas, setLoadingMas] = useState(false);
     const [filtrosAbiertos, setFiltrosAbiertos] = useState(false); // Filtros colapsables - inicia cerrado
     const [filtros, setFiltros] = useState({
-        fechaInicio: '', // Dejar vacío para test
-        fechaFin: '', // Dejar vacío para test
+        fechaInicio: '',
+        fechaFin: '',
         tipo: '',
         categoria: '',
-        tipoMovimiento: '',
+        metodoPago: '', // Cambiado de tipoMovimiento a metodoPago (nombre que espera el backend)
         estado: ''
     });
+    
+    // Estados de paginación
+    const [paginacion, setPaginacion] = useState({
+        limite: 10,
+        paginaActual: 1,
+        totalRegistros: 0,
+        totalPaginas: 0
+    });
+    const [mostrandoTodos, setMostrandoTodos] = useState(false);
     
     // Estados de modales
     const [modalIngreso, setModalIngreso] = useState(false);
@@ -72,25 +82,69 @@ const MovimientosCajaFinanzas = () => {
         }
     };
     
-    const cargarMovimientos = async () => {
+    const cargarMovimientos = async (acumular = false) => {
         try {
-            // Remover filtros vacíos
-            const filtrosLimpios = Object.fromEntries(
-                Object.entries(filtros).filter(([_, value]) => value !== '')
-            );
+            if (acumular) {
+                setLoadingMas(true);
+            }
             
-            const response = await movimientosCajaService.obtenerMovimientos(filtrosLimpios);
+            // Mapear los filtros correctamente al formato que espera el backend
+            const filtrosParaEnviar = {
+                ...(filtros.fechaInicio && { fechaInicio: filtros.fechaInicio }),
+                ...(filtros.fechaFin && { fechaFin: filtros.fechaFin }),
+                ...(filtros.tipo && { tipo: filtros.tipo }),
+                ...(filtros.categoria && { categoria: filtros.categoria }),
+                ...(filtros.metodoPago && { metodoPago: filtros.metodoPago }),
+                ...(filtros.estado && { estado: filtros.estado }),
+                limite: paginacion.limite,
+                pagina: acumular ? paginacion.paginaActual + 1 : 1
+            };
+            
+            const response = await movimientosCajaService.obtenerMovimientos(filtrosParaEnviar);
             
             if (response.success) {
-                const movimientos = response.data.movimientos || response.data || [];
-                setMovimientos(movimientos);
+                const nuevosMovimientos = response.data.movimientos || response.data || [];
+                const paginacionData = response.data.paginacion || {
+                    paginaActual: 1,
+                    totalPaginas: 1,
+                    totalRegistros: nuevosMovimientos.length,
+                    registrosPorPagina: paginacion.limite
+                };
+                
+                if (acumular) {
+                    // Acumular movimientos
+                    setMovimientos(prev => [...prev, ...nuevosMovimientos]);
+                } else {
+                    // Reemplazar movimientos
+                    setMovimientos(nuevosMovimientos);
+                }
+                
+                setPaginacion({
+                    limite: paginacionData.registrosPorPagina || paginacion.limite,
+                    paginaActual: paginacionData.paginaActual,
+                    totalRegistros: paginacionData.totalRegistros,
+                    totalPaginas: paginacionData.totalPaginas
+                });
+                
+                // Verificar si ya mostramos todos
+                const totalMostrados = acumular 
+                    ? movimientos.length + nuevosMovimientos.length 
+                    : nuevosMovimientos.length;
+                setMostrandoTodos(totalMostrados >= paginacionData.totalRegistros);
+                
             } else {
                 console.error('Error en la respuesta del servidor:', response.message);
-                setMovimientos([]);
+                if (!acumular) {
+                    setMovimientos([]);
+                }
             }
         } catch (error) {
             console.error('Error cargando movimientos:', error);
-            setMovimientos([]);
+            if (!acumular) {
+                setMovimientos([]);
+            }
+        } finally {
+            setLoadingMas(false);
         }
     };
     
@@ -103,7 +157,10 @@ const MovimientosCajaFinanzas = () => {
     };
     
     const aplicarFiltros = () => {
-        cargarMovimientos();
+        // Resetear paginación cuando se aplican filtros
+        setPaginacion(prev => ({ ...prev, paginaActual: 1 }));
+        setMostrandoTodos(false);
+        cargarMovimientos(false);
     };
     
     const limpiarFiltros = () => {
@@ -112,9 +169,16 @@ const MovimientosCajaFinanzas = () => {
             fechaFin: '',
             tipo: '',
             categoria: '',
-            tipoMovimiento: '',
+            metodoPago: '',
             estado: ''
         });
+        // Resetear paginación
+        setPaginacion(prev => ({ ...prev, paginaActual: 1 }));
+        setMostrandoTodos(false);
+    };
+    
+    const cargarMasMovimientos = () => {
+        cargarMovimientos(true);
     };
     
     const onMovimientoCreado = () => {
@@ -345,8 +409,8 @@ const MovimientosCajaFinanzas = () => {
                                     <span className="hidden sm:inline">Tipo </span>Mov.
                                 </label>
                                 <select
-                                    value={filtros.tipoMovimiento}
-                                    onChange={(e) => handleFiltroChange('tipoMovimiento', e.target.value)}
+                                    value={filtros.metodoPago}
+                                    onChange={(e) => handleFiltroChange('metodoPago', e.target.value)}
                                     className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 >
                                     <option value="">Todos</option>
@@ -390,6 +454,10 @@ const MovimientosCajaFinanzas = () => {
                 <TablaMovimientosFinanzas 
                     movimientos={movimientos}
                     onRefresh={cargarDatos}
+                    paginacion={paginacion}
+                    mostrandoTodos={mostrandoTodos}
+                    onCargarMas={cargarMasMovimientos}
+                    loadingMas={loadingMas}
                 />
             </div>
             

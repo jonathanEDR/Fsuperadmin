@@ -6,12 +6,21 @@ import {
     Clock, 
     ArrowUpCircle, 
     ArrowDownCircle,
-    MoreVertical
+    MoreVertical,
+    ChevronDown,
+    Loader2
 } from 'lucide-react';
 import { movimientosCajaService } from '../../../services/movimientosCajaService';
 import ModalDetalleMovimiento from './ModalDetalleMovimiento';
 
-const TablaMovimientosFinanzas = ({ movimientos, onRefresh }) => {
+const TablaMovimientosFinanzas = ({ 
+    movimientos, 
+    onRefresh,
+    paginacion = null,
+    mostrandoTodos = false,
+    onCargarMas = null,
+    loadingMas = false
+}) => {
     const [menuAbierto, setMenuAbierto] = useState(null);
     const [loading, setLoading] = useState(false);
     const [modalDetalleAbierto, setModalDetalleAbierto] = useState(false);
@@ -375,6 +384,44 @@ const TablaMovimientosFinanzas = ({ movimientos, onRefresh }) => {
                     </tbody>
                 </table>
             </div>
+
+            {/* Información de paginación y botón "Mostrar más" */}
+            {paginacion && (
+                <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <div className="text-sm text-gray-600">
+                            Mostrando <span className="font-semibold text-gray-900">{movimientos.length}</span> de{' '}
+                            <span className="font-semibold text-gray-900">{paginacion.totalRegistros}</span> movimientos
+                        </div>
+                        
+                        {!mostrandoTodos && onCargarMas && (
+                            <button
+                                onClick={onCargarMas}
+                                disabled={loadingMas}
+                                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
+                            >
+                                {loadingMas ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                        Cargando...
+                                    </>
+                                ) : (
+                                    <>
+                                        <ChevronDown className="w-4 h-4 mr-2" />
+                                        Mostrar más ({Math.min(paginacion.limite, paginacion.totalRegistros - movimientos.length)} más)
+                                    </>
+                                )}
+                            </button>
+                        )}
+                        
+                        {mostrandoTodos && movimientos.length > 0 && (
+                            <span className="text-sm text-green-600 font-medium">
+                                ✓ Todos los movimientos cargados
+                            </span>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Modal de detalle del movimiento */}
             <ModalDetalleMovimiento
