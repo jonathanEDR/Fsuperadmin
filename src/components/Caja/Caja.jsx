@@ -6,6 +6,7 @@ import ModalEgreso from './ModalEgreso';
 import EstadisticasRapidas from './EstadisticasRapidas';
 import DateRangePicker from '../common/DateRangePicker';
 import { getLocalDateString } from '../../utils/dateUtils';
+import { formatearFecha as formatearFechaUtil } from '../../utils/fechaHoraUtils';
 import CatalogoGastoList from '../gasto/CatalogoGastoList';
 
 function Caja({ userRole }) {
@@ -206,15 +207,9 @@ function Caja({ userRole }) {
     }).format(monto);
   };
 
-  // Formatear fecha
+  // Formatear fecha - Usando utilidad robusta con timezone de Perú
   const formatearFecha = (fecha) => {
-    return new Date(fecha).toLocaleDateString('es-PE', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return formatearFechaUtil(fecha);
   };
 
   if (loading && !resumen) {

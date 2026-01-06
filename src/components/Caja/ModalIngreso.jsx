@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useMovimiento } from '../../hooks/useMovimiento';
-import { getLocalDateString } from '../../utils/dateUtils';
+import { getLocalDateTimeString } from '../../utils/fechaHoraUtils';
 
 const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
   const { registrarMovimiento, loading, error, setError } = useMovimiento();
@@ -10,7 +10,7 @@ const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
     categoria: '',
     descripcion: '',
     monto: '',
-    fecha: getLocalDateString(),
+    fecha: getLocalDateTimeString(false), // Incluye hora actual
     metodoPago: 'efectivo',
     numeroComprobante: '',
     observaciones: ''
@@ -64,7 +64,7 @@ const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
       categoria: '',
       descripcion: '',
       monto: '',
-      fecha: getLocalDateString(),
+      fecha: getLocalDateTimeString(false), // Incluye hora actual
       metodoPago: 'efectivo',
       numeroComprobante: '',
       observaciones: ''
@@ -167,13 +167,13 @@ const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
                   </div>
                 </div>
 
-                {/* Fecha */}
+                {/* Fecha y Hora */}
                 <div>
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                    Fecha *
+                    Fecha y Hora *
                   </label>
                   <input
-                    type="date"
+                    type="datetime-local"
                     value={formData.fecha}
                     onChange={(e) => handleInputChange('fecha', e.target.value)}
                     className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-500/20"

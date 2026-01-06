@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useMovimiento } from '../../hooks/useMovimiento';
 import useCatalogoGastosModal from './hooks/useCatalogoGastosModal';
 import CatalogoGastoSelector from './components/CatalogoGastoSelector';
-import { getLocalDateString } from '../../utils/dateUtils';
+import { getLocalDateTimeString } from '../../utils/fechaHoraUtils';
 import styles from './Modal.module.css';
 
 /**
@@ -29,7 +29,7 @@ const ModalEgreso = ({ isOpen, onClose, onSuccess }) => {
     monto: '',
     cantidad: '1',
     unidadMedida: 'unidad',
-    fecha: getLocalDateString(),
+    fecha: getLocalDateTimeString(false), // Incluye hora actual
     metodoPago: 'efectivo',
     proveedor: '',
     numeroComprobante: '',
@@ -178,7 +178,7 @@ const ModalEgreso = ({ isOpen, onClose, onSuccess }) => {
       monto: '',
       cantidad: '1',
       unidadMedida: 'unidad',
-      fecha: getLocalDateString(),
+      fecha: getLocalDateTimeString(false), // Incluye hora actual
       metodoPago: 'efectivo',
       proveedor: '',
       numeroComprobante: '',
@@ -371,13 +371,13 @@ const ModalEgreso = ({ isOpen, onClose, onSuccess }) => {
                         </div>
                       </div>
 
-                      {/* Fecha */}
+                      {/* Fecha y Hora */}
                       <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-2">
-                          Fecha *
+                          Fecha y Hora *
                         </label>
                         <input
-                          type="date"
+                          type="datetime-local"
                           value={formData.fecha}
                           onChange={(e) => handleInputChange('fecha', e.target.value)}
                           className="w-full rounded-lg border-2 border-gray-200 bg-white px-3 py-2 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-500/20"

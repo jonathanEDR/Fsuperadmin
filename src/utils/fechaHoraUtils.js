@@ -38,8 +38,9 @@ export const formatearFecha = (fecha) => {
   if (!fecha) return '';
   
   try {
-    // Si ya viene formateada desde el backend, devolverla directamente
-    if (typeof fecha === 'string' && (fecha.includes('/') || fecha.includes(':'))) {
+    // Si ya viene formateada desde el backend en formato legible (dd/mm/yyyy), devolverla
+    // Nota: NO devolver si es formato ISO (contiene T o Z)
+    if (typeof fecha === 'string' && fecha.includes('/') && !fecha.includes('T') && !fecha.includes('Z')) {
       return fecha;
     }
     
