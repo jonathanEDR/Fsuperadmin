@@ -4,8 +4,8 @@
  * ACTUALIZADO: Soporte para selección de días específicos
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
-import { Trash2, Plus, Calendar, CreditCard } from 'lucide-react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { Trash2, Plus, Calendar, CreditCard, ChevronLeft, ChevronRight } from 'lucide-react';
 import CalendarioSeleccionDias from './CalendarioSeleccionDias';
 import ResumenSeleccion from './ResumenSeleccion';
 
@@ -27,6 +27,49 @@ const PagosRealizados = React.memo(({
   // Estados para calendario principal
   const [mesActual, setMesActual] = useState(new Date().getMonth());
   const [añoActual, setAñoActual] = useState(new Date().getFullYear());
+  
+  // 🆕 Estado y ref para el carrusel de usuarios
+  const calendarioScrollRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  
+  // 🆕 Verificar si se puede hacer scroll
+  const checkScrollButtons = useCallback(() => {
+    const container = calendarioScrollRef.current;
+    if (container) {
+      setCanScrollLeft(container.scrollLeft > 0);
+      setCanScrollRight(
+        container.scrollLeft < container.scrollWidth - container.clientWidth - 10
+      );
+    }
+  }, []);
+  
+  // 🆕 Función para hacer scroll horizontal
+  const scrollCalendario = useCallback((direction) => {
+    const container = calendarioScrollRef.current;
+    if (container) {
+      const scrollAmount = 200; // Pixeles a desplazar
+      const newScrollLeft = direction === 'left' 
+        ? container.scrollLeft - scrollAmount 
+        : container.scrollLeft + scrollAmount;
+      
+      container.scrollTo({
+        left: newScrollLeft,
+        behavior: 'smooth'
+      });
+      
+      // Actualizar estados después de scroll
+      setTimeout(checkScrollButtons, 300);
+    }
+  }, [checkScrollButtons]);
+  
+  // 🆕 Efecto para verificar scroll buttons al cargar y al cambiar colaboradores
+  useEffect(() => {
+    checkScrollButtons();
+    // También verificar cuando cambia el tamaño de la ventana
+    window.addEventListener('resize', checkScrollButtons);
+    return () => window.removeEventListener('resize', checkScrollButtons);
+  }, [colaboradores, checkScrollButtons]);
   
   // NUEVO: Estados para selección de días
   const [registrosSeleccionados, setRegistrosSeleccionados] = useState([]);
@@ -417,6 +460,10 @@ const PagosRealizados = React.memo(({
                 <div className="flex items-center gap-2">
                   <Calendar size={20} className="text-blue-600 sm:w-6 sm:h-6" />
                   <h3 className="text-base sm:text-lg font-bold text-gray-800">Calendario de Pagos</h3>
+                  {/* 🆕 Indicador de cantidad de usuarios */}
+                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                    {colaboradores.length} usuarios
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3">
                   <button
@@ -450,14 +497,55 @@ const PagosRealizados = React.memo(({
                   </button>
                 </div>
               </div>
+              
+              {/* 🆕 Botones de navegación horizontal para usuarios */}
+              {colaboradores.length > 3 && (
+                <div className="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-blue-200">
+                  <span className="text-xs text-gray-500 mr-2">Navegar usuarios:</span>
+                  <button
+                    onClick={() => scrollCalendario('left')}
+                    disabled={!canScrollLeft}
+                    className={`p-2 rounded-full transition-all ${
+                      canScrollLeft
+                        ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-md'
+                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    }`}
+                    title="Desplazar izquierda"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <button
+                    onClick={() => scrollCalendario('right')}
+                    disabled={!canScrollRight}
+                    className={`p-2 rounded-full transition-all ${
+                      canScrollRight
+                        ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-md'
+                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    }`}
+                    title="Desplazar derecha"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Tabla calendario con scroll horizontal */}
             <div className="relative">
+              {/* 🆕 Indicador de scroll izquierdo */}
+              {canScrollLeft && (
+                <div className="absolute left-14 sm:left-20 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent pointer-events-none z-10" />
+              )}
               {/* Indicador de scroll derecho */}
-              <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white to-transparent pointer-events-none z-10 sm:hidden" />
+              {canScrollRight && (
+                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none z-10" />
+              )}
               
-              <div className="overflow-x-auto scrollbar-hide">
+              <div 
+                ref={calendarioScrollRef}
+                className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
+                onScroll={checkScrollButtons}
+              >
                 <table className="min-w-full">
                   <thead>
                     <tr className="bg-gray-50">
