@@ -169,32 +169,36 @@ const AccesosRapidosProduccion = () => {
   // Si es vista de sistema solar, renderizar el componente nuevo
   if (vistaActual === 'sistemaSolar') {
     return (
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {/* Header con toggle */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
               Sistema de Producción
             </h1>
-            <p className="text-gray-600">
+            <p className="text-sm sm:text-base text-gray-600">
               Gestiona todos los aspectos de tu proceso de producción desde un solo lugar
             </p>
           </div>
           
-          {/* Toggle de vista */}
-          <div className="flex items-center space-x-3">
-            <span className="text-sm text-gray-600">Vista:</span>
+          {/* Toggle de vista - responsive */}
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline">Vista:</span>
             <button
               onClick={() => setVistaActual('tradicional')}
-              className="px-3 py-2 text-sm rounded-lg border transition-colors hover:bg-gray-50"
+              title="Vista Tradicional"
+              className="px-2 sm:px-3 py-2 text-sm rounded-lg border transition-colors hover:bg-gray-50"
             >
-              📋 Tradicional
+              <span className="sm:hidden text-lg">📋</span>
+              <span className="hidden sm:inline">📋 Tradicional</span>
             </button>
             <button
               onClick={() => setVistaActual('sistemaSolar')}
-              className="px-3 py-2 text-sm rounded-lg bg-blue-600 text-white transition-colors hover:bg-blue-700"
+              title="Vista Sistema Solar"
+              className="px-2 sm:px-3 py-2 text-sm rounded-lg bg-blue-600 text-white transition-colors hover:bg-blue-700"
             >
-              🌌 Sistema Solar
+              <span className="sm:hidden text-lg">🌌</span>
+              <span className="hidden sm:inline">🌌 Sistema Solar</span>
             </button>
           </div>
         </div>
@@ -212,38 +216,45 @@ const AccesosRapidosProduccion = () => {
   // Vista tradicional (código original)
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       {/* Header con toggle */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
             Sistema de Producción
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600">
             Gestiona todos los aspectos de tu proceso de producción desde un solo lugar
           </p>
         </div>
         
-        {/* Toggle de vista */}
-        <div className="flex items-center space-x-3">
-          <span className="text-sm text-gray-600">Vista:</span>
+        {/* Toggle de vista - responsive */}
+        <div className="flex items-center space-x-2 sm:space-x-3">
+          <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline">Vista:</span>
           <button
             onClick={() => setVistaActual('tradicional')}
-            className="px-3 py-2 text-sm rounded-lg bg-blue-600 text-white transition-colors hover:bg-blue-700"
+            title="Vista Tradicional"
+            className="px-2 sm:px-3 py-2 text-sm rounded-lg bg-blue-600 text-white transition-colors hover:bg-blue-700"
           >
-            📋 Tradicional
+            <span className="sm:hidden text-lg">📋</span>
+            <span className="hidden sm:inline">📋 Tradicional</span>
           </button>
           <button
             onClick={() => setVistaActual('sistemaSolar')}
-            className="px-3 py-2 text-sm rounded-lg border transition-colors hover:bg-gray-50"
+            title="Vista Sistema Solar"
+            className="px-2 sm:px-3 py-2 text-sm rounded-lg border transition-colors hover:bg-gray-50"
           >
-            🌌 Sistema Solar
+            <span className="sm:hidden text-lg">🌌</span>
+            <span className="hidden sm:inline">🌌 Sistema Solar</span>
           </button>
         </div>
       </div>
 
       {/* Grid de accesos rápidos */}
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
+      {/* Móvil pequeño (<640px): grid 4 cols con solo iconos */}
+      {/* Móvil grande/tablet (640px+): grid 2 cols con icono + texto */}
+      {/* Desktop (1024px+): grid 3 cols con icono + texto */}
+      <div className="grid grid-cols-4 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-6">
         {accesos.map((acceso) => {
           const to = basePath + '/' + acceso.to;
           const isActive = location.pathname.startsWith(to);
@@ -251,43 +262,57 @@ const AccesosRapidosProduccion = () => {
             <Link
               key={acceso.to}
               to={to}
-              className={`group relative overflow-hidden rounded-xl border-2 p-3 md:p-6 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] transform ${acceso.color} ${
+              title={acceso.label}
+              className={`group relative overflow-hidden rounded-xl border-2 p-2 sm:p-3 md:p-6 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] transform ${acceso.color} ${
                 isActive 
                   ? 'ring-4 ring-blue-400 ring-opacity-50 shadow-lg scale-[1.02]' 
                   : 'hover:ring-2 hover:ring-gray-300'
               }`}
             >
-              {/* Background decoration */}
-              <div className="absolute top-0 right-0 w-12 h-12 md:w-20 md:h-20 opacity-10 transform rotate-12 translate-x-3 md:translate-x-6 -translate-y-3 md:-translate-y-6">
+              {/* Background decoration - oculto en móvil pequeño */}
+              <div className="absolute top-0 right-0 w-12 h-12 md:w-20 md:h-20 opacity-10 transform rotate-12 translate-x-3 md:translate-x-6 -translate-y-3 md:-translate-y-6 hidden sm:block">
                 <span className="text-3xl md:text-6xl">{acceso.icon}</span>
               </div>
               
               {/* Content */}
               <div className="relative z-10">
-                <div className="flex items-center mb-2 md:mb-3">
-                  <div className="flex-shrink-0 w-8 h-8 md:w-12 md:h-12 rounded-lg bg-white bg-opacity-50 flex items-center justify-center mr-2 md:mr-4 group-hover:bg-opacity-70 transition-all">
-                    <span className="text-sm md:text-2xl">{acceso.icon}</span>
+                {/* Vista móvil pequeño: solo icono centrado */}
+                <div className="flex sm:hidden flex-col items-center justify-center py-1">
+                  <div className="w-10 h-10 rounded-lg bg-white bg-opacity-50 flex items-center justify-center group-hover:bg-opacity-70 transition-all">
+                    <span className="text-xl">{acceso.icon}</span>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-xs md:text-lg leading-tight text-left">
-                      {acceso.label}
-                    </h3>
-                  </div>
+                  <span className="text-[10px] font-medium mt-1 text-center leading-tight line-clamp-2">
+                    {acceso.label.split(' ').slice(-1)[0]}
+                  </span>
                 </div>
                 
-                <p className="text-xs md:text-sm opacity-75 group-hover:opacity-90 transition-opacity line-clamp-2">
-                  {acceso.description}
-                </p>
+                {/* Vista tablet/desktop: icono + texto */}
+                <div className="hidden sm:block">
+                  <div className="flex items-center mb-2 md:mb-3">
+                    <div className="flex-shrink-0 w-8 h-8 md:w-12 md:h-12 rounded-lg bg-white bg-opacity-50 flex items-center justify-center mr-2 md:mr-4 group-hover:bg-opacity-70 transition-all">
+                      <span className="text-sm md:text-2xl">{acceso.icon}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-xs md:text-lg leading-tight text-left">
+                        {acceso.label}
+                      </h3>
+                    </div>
+                  </div>
+                  
+                  <p className="text-xs md:text-sm opacity-75 group-hover:opacity-90 transition-opacity line-clamp-2">
+                    {acceso.description}
+                  </p>
+                </div>
                 
                 {/* Active indicator */}
                 {isActive && (
-                  <div className="absolute top-2 md:top-4 right-2 md:right-4">
+                  <div className="absolute top-1 sm:top-2 md:top-4 right-1 sm:right-2 md:right-4">
                     <div className="w-2 h-2 md:w-3 md:h-3 bg-blue-500 rounded-full shadow-sm"></div>
                   </div>
                 )}
                 
-                {/* Hover arrow */}
-                <div className="absolute bottom-2 md:bottom-4 right-2 md:right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                {/* Hover arrow - solo en tablet/desktop */}
+                <div className="absolute bottom-2 md:bottom-4 right-2 md:right-4 opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block">
                   <svg className="w-3 h-3 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>

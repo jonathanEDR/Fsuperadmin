@@ -49,6 +49,11 @@ const modulosInfo = {
     label: 'Movimientos de Inventario',
     icon: '📊',
     color: 'text-orange-600 bg-orange-50'
+  },
+  'graficos': {
+    label: 'Gráficos de Inventario',
+    icon: '📈',
+    color: 'text-cyan-600 bg-cyan-50'
   }
 };
 
@@ -84,6 +89,11 @@ const accesosRapidos = {
     { to: 'produccion', label: 'Producción', icon: '🏭' }
   ],
   'movimientos': [
+    { to: 'catalogo', label: 'Catálogo', icon: '📋' },
+    { to: 'ingredientes', label: 'Ingredientes', icon: '🥬' },
+    { to: 'produccion', label: 'Producción', icon: '🏭' }
+  ],
+  'graficos': [
     { to: 'catalogo', label: 'Catálogo', icon: '📋' },
     { to: 'ingredientes', label: 'Ingredientes', icon: '🥬' },
     { to: 'produccion', label: 'Producción', icon: '🏭' }

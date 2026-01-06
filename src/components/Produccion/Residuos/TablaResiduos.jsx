@@ -35,33 +35,133 @@ const TablaResiduos = ({
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
-      {/* Tabla */}
-      <div className="overflow-x-auto">
+      {/* ========== VISTA MÓVIL: Tarjetas ========== */}
+      <div className="md:hidden space-y-3 p-3">
+        {residuos.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">🗑️</div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No hay residuos registrados
+            </h3>
+            <p className="text-gray-500 mb-4">
+              No se encontraron residuos con los filtros seleccionados
+            </p>
+          </div>
+        ) : (
+          residuos.map((residuo) => (
+            <div 
+              key={residuo._id} 
+              className="bg-gray-50 rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow"
+            >
+              {/* Header de la tarjeta */}
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 text-base">
+                    {residuo.productoNombre}
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {residuoService.formatearFecha(residuo.fecha)}
+                  </p>
+                </div>
+                {/* Badge de tipo */}
+                <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${residuoService.obtenerColorTipo(residuo.tipoProducto)}`}>
+                  {residuoService.obtenerEtiquetaTipo(residuo.tipoProducto)}
+                </span>
+              </div>
+              
+              {/* Stats en grid */}
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="bg-white rounded-lg p-2 text-center border">
+                  <p className="text-xs text-gray-600 font-medium">Cantidad</p>
+                  <p className="text-sm font-bold text-gray-800">{residuo.cantidadPerdida} {residuo.unidadMedida}</p>
+                </div>
+                <div className="bg-white rounded-lg p-2 text-center border">
+                  <p className="text-xs text-gray-600 font-medium">Costo Est.</p>
+                  <p className="text-sm font-bold text-red-600">{residuoService.formatearMoneda(residuo.costoEstimado)}</p>
+                </div>
+              </div>
+              
+              {/* Motivo */}
+              <div className="mb-3">
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${residuoService.obtenerColorMotivo(residuo.motivo)}`}>
+                  {residuoService.obtenerEtiquetaMotivo(residuo.motivo)}
+                </span>
+              </div>
+              
+              {/* Info adicional */}
+              <div className="text-xs text-gray-500 mb-3 px-1">
+                <div className="flex items-center justify-between">
+                  <span>👤 {residuo.operador}</span>
+                </div>
+                {residuo.observaciones && (
+                  <p className="mt-1 text-gray-600 italic truncate">
+                    "{residuo.observaciones}"
+                  </p>
+                )}
+              </div>
+              
+              {/* Acciones */}
+              <div className="flex justify-between items-center pt-3 border-t border-gray-200">
+                <button
+                  onClick={() => {
+                    alert(`
+📋 DETALLE DEL RESIDUO
+
+🗓️ Fecha: ${residuoService.formatearFecha(residuo.fecha)}
+📦 Tipo: ${residuoService.obtenerEtiquetaTipo(residuo.tipoProducto)}
+🏷️ Producto: ${residuo.productoNombre}
+⚖️ Cantidad: ${residuo.cantidadPerdida} ${residuo.unidadMedida}
+❓ Motivo: ${residuoService.obtenerEtiquetaMotivo(residuo.motivo)}
+💰 Costo: ${residuoService.formatearMoneda(residuo.costoEstimado)}
+👤 Operador: ${residuo.operador}
+📝 Observaciones: ${residuo.observaciones || 'Sin observaciones'}
+                    `);
+                  }}
+                  className="flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors"
+                >
+                  👁️ Ver Detalle
+                </button>
+                {puedeEliminar(residuo.fecha) && (
+                  <button
+                    onClick={() => onEliminar(residuo._id)}
+                    className="flex items-center px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors"
+                  >
+                    🗑️ Eliminar
+                  </button>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* ========== VISTA DESKTOP: Tabla ========== */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Fecha
               </th>
-              <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Tipo
               </th>
-              <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Producto
               </th>
-              <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Cantidad
               </th>
-              <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Motivo
               </th>
-              <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Costo Estimado
               </th>
-              <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Operador
               </th>
-              <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Acciones
               </th>
             </tr>
@@ -69,17 +169,17 @@ const TablaResiduos = ({
           <tbody className="bg-white divide-y divide-gray-200">
             {residuos.map((residuo) => (
               <tr key={residuo._id} className="hover:bg-gray-50">
-                <td className="px-3 md:px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
                     {residuoService.formatearFecha(residuo.fecha)}
                   </div>
                 </td>
-                <td className="px-3 md:px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${residuoService.obtenerColorTipo(residuo.tipoProducto)}`}>
                     {residuoService.obtenerEtiquetaTipo(residuo.tipoProducto)}
                   </span>
                 </td>
-                <td className="px-3 md:px-6 py-4">
+                <td className="px-6 py-4">
                   <div className="text-sm font-medium text-gray-900">
                     {residuo.productoNombre}
                   </div>
@@ -89,23 +189,23 @@ const TablaResiduos = ({
                     </div>
                   )}
                 </td>
-                <td className="px-3 md:px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
                     {residuo.cantidadPerdida} {residuo.unidadMedida}
                   </div>
                 </td>
-                <td className="px-3 md:px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${residuoService.obtenerColorMotivo(residuo.motivo)}`}>
                     {residuoService.obtenerEtiquetaMotivo(residuo.motivo)}
                   </span>
                 </td>
-                <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {residuoService.formatearMoneda(residuo.costoEstimado)}
                 </td>
-                <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {residuo.operador}
                 </td>
-                <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex space-x-2">
                     {/* Botón Ver Detalle */}
                     <button
@@ -147,7 +247,18 @@ const TablaResiduos = ({
         </table>
       </div>
 
-      {/* Estado vacío */}
+      {/* Estado vacío - solo para desktop ya que móvil tiene su propio estado vacío */}
+      {residuos.length === 0 && !loading && (
+        <div className="hidden md:block text-center py-12">
+          <div className="text-6xl mb-4">🗑️</div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No hay residuos registrados
+          </h3>
+          <p className="text-gray-500 mb-4">
+            No se encontraron residuos con los filtros seleccionados
+          </p>
+        </div>
+      )}
       {residuos.length === 0 && !loading && (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">🗑️</div>

@@ -261,30 +261,151 @@ const GestionMateriales = () => {
           <span>Nuevo Material</span>
         </button>
       {/* Tabla de materiales optimizada para móvil */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      
+      {/* ========== VISTA MÓVIL: Tarjetas ========== */}
+      <div className="md:hidden space-y-3">
+        {materiales.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-xl">
+            <p className="text-gray-500">No se encontraron materiales</p>
+          </div>
+        ) : (
+          materiales.map((material) => {
+            const estadoStock = getEstadoStock(material);
+            const disponible = material.cantidad - (material.consumido || 0);
+            
+            return (
+              <div 
+                key={material._id} 
+                className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow"
+              >
+                {/* Header de la tarjeta */}
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 text-base">
+                      {material.nombre}
+                    </h3>
+                    <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full mt-1">
+                      {material.unidadMedida}
+                    </span>
+                  </div>
+                  {/* Badge de estado */}
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    estadoStock.color === 'text-red-600' 
+                      ? 'bg-red-100 text-red-700' 
+                      : estadoStock.color === 'text-yellow-600' 
+                        ? 'bg-yellow-100 text-yellow-700' 
+                        : 'bg-green-100 text-green-700'
+                  }`}>
+                    {estadoStock.texto}
+                  </span>
+                </div>
+                
+                {/* Referencia al producto */}
+                {material.productoReferencia && (
+                  <div className="bg-blue-50 rounded-lg p-2 mb-3 flex items-center text-xs">
+                    <span className="mr-1">📦</span>
+                    <span className="text-blue-700 truncate">
+                      {material.productoReferencia.nombre}
+                    </span>
+                  </div>
+                )}
+                
+                {/* Stats en grid */}
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  <div className="bg-blue-50 rounded-lg p-2 text-center">
+                    <p className="text-xs text-blue-600 font-medium">Disponible</p>
+                    <p className={`text-sm font-bold ${estadoStock.color}`}>{formatearNumero(disponible)}</p>
+                  </div>
+                  <div className="bg-orange-50 rounded-lg p-2 text-center">
+                    <p className="text-xs text-orange-600 font-medium">Stock Mín.</p>
+                    <p className="text-sm font-bold text-orange-800">{formatearNumero(material.stockMinimo)}</p>
+                  </div>
+                  <div className="bg-emerald-50 rounded-lg p-2 text-center">
+                    <p className="text-xs text-emerald-600 font-medium">Precio</p>
+                    <p className="text-sm font-bold text-emerald-800">${formatearNumero(material.precioUnitario)}</p>
+                  </div>
+                </div>
+                
+                {/* Info adicional */}
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-3 px-1">
+                  <span>Total: {formatearNumero(material.cantidad)}</span>
+                  {material.consumido > 0 && (
+                    <span>Consumido: {formatearNumero(material.consumido)}</span>
+                  )}
+                </div>
+                
+                {/* Acciones */}
+                <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+                  <div className="flex space-x-1">
+                    <button
+                      onClick={() => handleEditarMaterial(material)}
+                      className="flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors"
+                    >
+                      <span className="mr-1">✏️</span> Editar
+                    </button>
+                    <button
+                      onClick={() => {
+                        setMaterialSeleccionado(material);
+                        setMostrarAjuste(true);
+                      }}
+                      className="flex items-center px-3 py-1.5 bg-green-50 text-green-600 rounded-lg text-xs font-medium hover:bg-green-100 transition-colors"
+                    >
+                      <span className="mr-1">⚖️</span> Ajustar
+                    </button>
+                  </div>
+                  <div className="flex space-x-1">
+                    <button
+                      onClick={() => {
+                        setMaterialSeleccionado(material);
+                        setMostrarMovimientos(true);
+                      }}
+                      className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                      title="Movimientos"
+                    >
+                      📋
+                    </button>
+                    {material.activo && (
+                      <button
+                        onClick={() => handleDesactivarMaterial(material)}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Desactivar"
+                      >
+                        🗑️
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* ========== VISTA DESKTOP: Tabla ========== */}
+      <div className="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Material
                 </th>
-                <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Producto Referencia
                 </th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Stock Actual
                 </th>
-                <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Stock Mínimo
                 </th>
-                <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Precio Unit.
                 </th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
                 </th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
@@ -292,7 +413,7 @@ const GestionMateriales = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {materiales.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-3 md:px-6 py-4 text-center text-gray-500">
+                  <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
                     No se encontraron materiales
                   </td>
                 </tr>
@@ -300,11 +421,10 @@ const GestionMateriales = () => {
                 materiales.map((material) => {
                   const estadoStock = getEstadoStock(material);
                   const disponible = material.cantidad - (material.consumido || 0);
-                  const accionesVisible = accionesExpandidas[material._id];
 
                   return (
                     <tr key={material._id} className="hover:bg-gray-50">
-                      <td className="px-3 md:px-6 py-4">
+                      <td className="px-6 py-4">
                         <div>
                           <div className="text-sm font-medium text-gray-900">
                             {material.nombre}
@@ -314,7 +434,7 @@ const GestionMateriales = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="hidden md:table-cell px-6 py-4">
+                      <td className="px-6 py-4">
                         <div className="text-sm text-gray-900">
                           {material.productoReferencia?.nombre || 'Sin referencia'}
                         </div>
@@ -322,7 +442,7 @@ const GestionMateriales = () => {
                           {material.productoReferencia?.categoria || ''}
                         </div>
                       </td>
-                      <td className="px-3 md:px-6 py-4">
+                      <td className="px-6 py-4">
                         <div className="text-sm text-gray-900">
                           {formatearNumero(disponible)}
                         </div>
@@ -333,70 +453,23 @@ const GestionMateriales = () => {
                           )}
                         </div>
                       </td>
-                      <td className="hidden md:table-cell px-6 py-4">
+                      <td className="px-6 py-4">
                         <div className="text-sm text-gray-900">
                           {formatearNumero(material.stockMinimo)}
                         </div>
                       </td>
-                      <td className="hidden md:table-cell px-6 py-4">
+                      <td className="px-6 py-4">
                         <div className="text-sm text-gray-900">
                           ${formatearNumero(material.precioUnitario)}
                         </div>
                       </td>
-                      <td className="px-3 md:px-6 py-4">
+                      <td className="px-6 py-4">
                         <span className={`text-sm font-medium ${estadoStock.color}`}>
                           {estadoStock.texto}
                         </span>
                       </td>
-                      <td className="px-3 md:px-6 py-4">
-                        {/* Botón "Ver" para móvil */}
-                        <div className="md:hidden">
-                          <button
-                            onClick={() => toggleAcciones(material._id)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
-                          >
-                            {accionesVisible ? 'Ocultar' : 'Ver'}
-                          </button>
-                          {accionesVisible && (
-                            <div className="mt-2 space-y-1">
-                              <button
-                                onClick={() => handleEditarMaterial(material)}
-                                className="block w-full text-left text-blue-600 hover:text-blue-900 text-sm py-1"
-                              >
-                                Editar
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setMaterialSeleccionado(material);
-                                  setMostrarAjuste(true);
-                                }}
-                                className="block w-full text-left text-green-600 hover:text-green-900 text-sm py-1"
-                              >
-                                Ajustar
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setMaterialSeleccionado(material);
-                                  setMostrarMovimientos(true);
-                                }}
-                                className="block w-full text-left text-purple-600 hover:text-purple-900 text-sm py-1"
-                              >
-                                Movimientos
-                              </button>
-                              {material.activo && (
-                                <button
-                                  onClick={() => handleDesactivarMaterial(material)}
-                                  className="block w-full text-left text-red-600 hover:text-red-900 text-sm py-1"
-                                >
-                                  Desactivar
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* Acciones normales para desktop */}
-                        <div className="hidden md:flex space-x-2">
+                      <td className="px-6 py-4">
+                        <div className="flex space-x-2">
                           <button
                             onClick={() => handleEditarMaterial(material)}
                             className="text-blue-600 hover:text-blue-900 text-sm"

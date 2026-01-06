@@ -1,9 +1,9 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import IngredientesBarChart from './IngredientesBarChart';
 import RecetasStockBarChart from './RecetasStockBarChart';
 import MaterialesBarChart from './MaterialesBarChart';
 import ResiduosLineChart from './ResiduosLineChart';
+import BreadcrumbProduccion from '../BreadcrumbProduccion';
 
 /**
  * GraficosProduccionPage
@@ -13,34 +13,11 @@ import ResiduosLineChart from './ResiduosLineChart';
  * Utiliza la zona horaria de Perú (America/Lima) para todas las operaciones de fecha.
  */
 const GraficosProduccionPage = () => {
-  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => navigate('/sistema/produccion')}
-                className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <span className="text-xl">←</span>
-                <span className="text-sm font-medium">Volver</span>
-              </button>
-              <div className="h-6 w-px bg-gray-300"></div>
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">📈</span>
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900">Gráficos de Inventario</h1>
-                  <p className="text-sm text-gray-500">Control de stock de ingredientes, recetas y materiales</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Breadcrumb de navegación con accesos rápidos */}
+      <BreadcrumbProduccion />
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

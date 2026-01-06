@@ -269,31 +269,135 @@ const GestionProduccion = () => {
           ➕ Nueva Producción
         </button>
 
-      {/* 🎯 OPTIMIZADO: Lista de Producciones con columnas responsivas */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      {/* 🎯 OPTIMIZADO: Lista de Producciones con vista dual */}
+      
+      {/* ========== VISTA MÓVIL: Tarjetas ========== */}
+      <div className="md:hidden space-y-3">
+        {producciones.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-xl">
+            <div className="text-gray-400 text-6xl mb-4">🏭</div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No hay producciones
+            </h3>
+            <p className="text-gray-500 mb-4">
+              Comienza creando tu primera producción
+            </p>
+            <button
+              onClick={handleNuevaProduccion}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              Crear Primera Producción
+            </button>
+          </div>
+        ) : (
+          producciones.map((produccion) => (
+            <div 
+              key={produccion._id} 
+              className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow"
+            >
+              {/* Header de la tarjeta */}
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 text-base">
+                    {produccion.nombre}
+                  </h3>
+                  {produccion.receta && (
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Receta: {produccion.receta.nombre}
+                    </p>
+                  )}
+                </div>
+                {/* Badge de estado */}
+                <span className={`px-3 py-1 rounded-full text-xs font-bold ${getEstadoColor(produccion.estado)}`}>
+                  {getEstadoLabel(produccion.estado)}
+                </span>
+              </div>
+              
+              {/* Stats en grid */}
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                <div className="bg-blue-50 rounded-lg p-2 text-center">
+                  <p className="text-xs text-blue-600 font-medium">Cantidad</p>
+                  <p className="text-sm font-bold text-blue-800">{produccion.cantidadProducida}</p>
+                  <p className="text-[10px] text-blue-500">{produccion.unidadMedida}</p>
+                </div>
+                <div className="bg-green-50 rounded-lg p-2 text-center">
+                  <p className="text-xs text-green-600 font-medium">Costo</p>
+                  <p className="text-sm font-bold text-green-800">S/.{produccion.costoTotal?.toFixed(2) || '0.00'}</p>
+                </div>
+                <div className="bg-purple-50 rounded-lg p-2 text-center">
+                  <p className="text-xs text-purple-600 font-medium">Fecha</p>
+                  <p className="text-sm font-bold text-purple-800">
+                    {new Date(produccion.fechaProduccion).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Info adicional */}
+              <div className="flex items-center justify-between text-xs text-gray-500 mb-3 px-1">
+                <span>👤 {produccion.operador}</span>
+              </div>
+              
+              {/* Acciones */}
+              <div className="flex flex-wrap gap-2 pt-3 border-t border-gray-100">
+                <button
+                  onClick={() => handleVerDetalle(produccion)}
+                  className="flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors"
+                >
+                  👁️ Ver
+                </button>
+                {produccion.estado === 'planificada' && (
+                  <>
+                    <button
+                      onClick={() => handleEjecutarProduccion(produccion._id)}
+                      className="flex items-center px-3 py-1.5 bg-green-50 text-green-600 rounded-lg text-xs font-medium hover:bg-green-100 transition-colors"
+                    >
+                      ▶️ Ejecutar
+                    </button>
+                    <button
+                      onClick={() => handleCancelarProduccion(produccion._id)}
+                      className="flex items-center px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-medium hover:bg-orange-100 transition-colors"
+                    >
+                      ⏸️ Cancelar
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={() => handleEliminarProduccion(produccion._id)}
+                  className="flex items-center px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors"
+                >
+                  🗑️ Eliminar
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* ========== VISTA DESKTOP: Tabla ========== */}
+      <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Producto
                 </th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Cantidad
                 </th>
-                <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
                 </th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Costo
                 </th>
-                <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Operador
                 </th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Fecha
                 </th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
@@ -301,54 +405,37 @@ const GestionProduccion = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {producciones.map((produccion) => (
                 <tr key={produccion._id} className="hover:bg-gray-50">
-                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">
                         {produccion.nombre}
                       </div>
                       {produccion.receta && (
-                        <div className="text-xs sm:text-sm text-gray-500">
+                        <div className="text-sm text-gray-500">
                           Receta: {produccion.receta.nombre}
                         </div>
                       )}
-                      {/* 🎯 MÓVIL: Mostrar estado como badge en móvil */}
-                      <div className="sm:hidden mt-1">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getEstadoColor(produccion.estado)}`}>
-                          {getEstadoLabel(produccion.estado)}
-                        </span>
-                      </div>
                     </div>
                   </td>
-                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {produccion.cantidadProducida} {produccion.unidadMedida}
                   </td>
-                  <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getEstadoColor(produccion.estado)}`}>
                       {getEstadoLabel(produccion.estado)}
                     </span>
                   </td>
-                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     S/.{produccion.costoTotal?.toFixed(2) || '0.00'}
                   </td>
-                  <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {produccion.operador}
                   </td>
-                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
-                    <div className="sm:hidden">
-                      {/* Fecha corta para móvil */}
-                      {new Date(produccion.fechaProduccion).toLocaleDateString('es-ES')}
-                    </div>
-                    <div className="hidden sm:block">
-                      {/* Fecha completa para desktop */}
-                      {formatearFecha(produccion.fechaProduccion)}
-                    </div>
-                    {/* 🎯 MÓVIL: Mostrar operador debajo de la fecha en móvil */}
-                    <div className="sm:hidden text-xs text-gray-500 mt-1">
-                      👤 {produccion.operador}
-                    </div>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {formatearFecha(produccion.fechaProduccion)}
                   </td>
-                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium">
-                    <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-1 sm:space-y-0">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex space-x-2">
                       <button
                         onClick={() => handleVerDetalle(produccion)}
                         className="text-blue-600 hover:text-blue-900"
@@ -502,7 +589,7 @@ const GestionProduccion = () => {
           </div>
           
           <DetalleProduccion
-            produccion={produccionSeleccionada}
+            produccionId={produccionSeleccionada?._id}
             onClose={handleCerrarDetalle}
             onProduccionActualizada={() => {
               setMostrarDetalle(false);

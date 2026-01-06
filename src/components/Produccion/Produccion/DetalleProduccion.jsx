@@ -112,23 +112,30 @@ const DetalleProduccion = ({ produccionId, produccion: produccionProp, onClose, 
         console.log(`🍳 item.receta:`, item.receta);
         console.log(`🍳 Tipo de item.receta:`, typeof item.receta);
         
+        // Mejorar la obtención del nombre de la receta
         let nombreReceta = 'Receta no encontrada';
+        
         if (item.receta) {
-          if (typeof item.receta === 'string') {
-            // Si es un string (ID), intentar buscar en los datos poblados o usar un nombre genérico
-            nombreReceta = `Receta ${index + 1}`;
-          } else if (item.receta && item.receta.nombre) {
-            nombreReceta = item.receta.nombre;
-          } else if (item.receta && item.receta._id) {
-            nombreReceta = `Receta ${index + 1}`;
+          // Caso 1: item.receta es un objeto poblado con nombre
+          if (typeof item.receta === 'object' && item.receta !== null) {
+            nombreReceta = item.receta.nombre || item.receta.name || `Receta ID: ${item.receta._id || 'N/A'}`;
           }
+          // Caso 2: item.receta es solo un string (ID sin poblar)
+          else if (typeof item.receta === 'string') {
+            nombreReceta = `Receta (ID: ${item.receta.substring(0, 8)}...)`;
+          }
+        }
+        
+        // También verificar si hay un campo nombreReceta directo en item
+        if (item.nombreReceta) {
+          nombreReceta = item.nombreReceta;
         }
         
         datos.push({
           tipo: 'receta',
           categoria: '📋 Recetas Utilizadas',
           concepto: nombreReceta,
-          descripcion: `Preparado #${index + 1}`,
+          descripcion: item.receta?.descripcion || `Preparación #${index + 1}`,
           cantidad: `${item.cantidadUtilizada || 0} porciones`,
           costo: item.costoUnitario ? `S/.${item.costoUnitario.toFixed(2)}` : 'S/.0.00',
           total: item.cantidadUtilizada && item.costoUnitario ? 
@@ -148,24 +155,33 @@ const DetalleProduccion = ({ produccionId, produccion: produccionProp, onClose, 
         console.log(`🥬 item.ingrediente:`, item.ingrediente);
         console.log(`🥬 Tipo de item.ingrediente:`, typeof item.ingrediente);
 
+        // Mejorar la obtención del nombre del ingrediente
         let nombreIngrediente = 'Ingrediente no encontrado';
+        let unidadMedida = item.unidadMedida || 'unidades';
+        
         if (item.ingrediente) {
-          if (typeof item.ingrediente === 'string') {
-            // Si es un string (ID), usar un nombre genérico más amigable
-            nombreIngrediente = `Ingrediente ${index + 1}`;
-          } else if (item.ingrediente && item.ingrediente.nombre) {
-            nombreIngrediente = item.ingrediente.nombre;
-          } else if (item.ingrediente && item.ingrediente._id) {
-            nombreIngrediente = `Ingrediente ${index + 1}`;
+          // Caso 1: item.ingrediente es un objeto poblado con nombre
+          if (typeof item.ingrediente === 'object' && item.ingrediente !== null) {
+            nombreIngrediente = item.ingrediente.nombre || item.ingrediente.name || `Ingrediente ID: ${item.ingrediente._id || 'N/A'}`;
+            unidadMedida = item.ingrediente.unidadMedida || item.unidadMedida || 'unidades';
           }
+          // Caso 2: item.ingrediente es solo un string (ID sin poblar)
+          else if (typeof item.ingrediente === 'string') {
+            nombreIngrediente = `Ingrediente (ID: ${item.ingrediente.substring(0, 8)}...)`;
+          }
+        }
+        
+        // También verificar si hay un campo nombreIngrediente directo en item
+        if (item.nombreIngrediente) {
+          nombreIngrediente = item.nombreIngrediente;
         }
 
         datos.push({
           tipo: 'ingrediente',
           categoria: '🥬 Ingredientes Directos',
           concepto: nombreIngrediente,
-          descripcion: `Ingrediente #${index + 1}`,
-          cantidad: `${item.cantidadUtilizada || 0} ${item.unidadMedida || 'unidades'}`,
+          descripcion: `${unidadMedida}`,
+          cantidad: `${item.cantidadUtilizada || 0} ${unidadMedida}`,
           costo: item.costoUnitario ? `S/.${item.costoUnitario.toFixed(2)}` : 'S/.0.00',
           total: item.cantidadUtilizada && item.costoUnitario ? 
                  `S/.${(item.cantidadUtilizada * item.costoUnitario).toFixed(2)}` : 'S/.0.00',
@@ -289,78 +305,151 @@ const DetalleProduccion = ({ produccionId, produccion: produccionProp, onClose, 
 
   const contenidoDetalle = (
     <div className={`${esModal ? 'relative mx-auto border box-border w-full max-w-7xl h-[90vh] shadow-lg rounded-lg bg-white flex flex-col' : 'bg-white rounded-lg shadow-lg border mt-6'}`}>
-      {/* Header */}
-      <div className="flex justify-between items-center p-6 border-b border-gray-200">
-        <div className="flex items-center space-x-4">
-          <h2 className={`${esModal ? 'text-2xl' : 'text-xl'} font-bold text-gray-900`}>
-            Detalle de Producción
+      {/* Header - Responsive */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 sm:p-6 border-b border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+          <h2 className={`${esModal ? 'text-xl sm:text-2xl' : 'text-lg sm:text-xl'} font-bold text-gray-900`}>
+            📋 Detalle de: {produccion?.nombre || 'Producción'}
           </h2>
           {produccion && (
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${getEstadoColor(produccion.estado)}`}>
+            <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-medium self-start sm:self-auto ${getEstadoColor(produccion.estado)}`}>
               {getEstadoLabel(produccion.estado)}
             </span>
           )}
         </div>
         
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           {produccion && produccion.estado === 'planificada' && (
             <>
               <button
                 onClick={handleEjecutarProduccion}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                className="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors"
               >
-                🚀 Ejecutar
+                <span className="sm:hidden">🚀</span>
+                <span className="hidden sm:inline">🚀 Ejecutar</span>
               </button>
               <button
                 onClick={handleCancelarProduccion}
-                className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                className="flex-1 sm:flex-none bg-orange-600 hover:bg-orange-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors"
               >
-                ❌ Cancelar
+                <span className="sm:hidden">❌</span>
+                <span className="hidden sm:inline">❌ Cancelar</span>
               </button>
             </>
           )}
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors text-2xl"
+            className="text-gray-400 hover:text-gray-600 transition-colors text-2xl p-1"
           >
             ×
           </button>
         </div>
       </div>
 
-      {/* Resumen de Producción */}
+      {/* Resumen de Producción - Responsive */}
       {produccion && (
-        <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="text-sm font-medium text-gray-500">Producto</div>
-              <div className="text-xl font-bold text-gray-900">{produccion.nombre}</div>
+        <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
+            <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm">
+              <div className="text-xs sm:text-sm font-medium text-gray-500">Producto</div>
+              <div className="text-base sm:text-xl font-bold text-gray-900 truncate">{produccion.nombre}</div>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="text-sm font-medium text-gray-500">Cantidad Producida</div>
-              <div className="text-xl font-bold text-green-600">
-                {produccion.cantidadProducida} {produccion.unidadMedida}
+            <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm">
+              <div className="text-xs sm:text-sm font-medium text-gray-500">Cantidad</div>
+              <div className="text-base sm:text-xl font-bold text-green-600">
+                {produccion.cantidadProducida} <span className="text-xs sm:text-sm">{produccion.unidadMedida}</span>
               </div>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="text-sm font-medium text-gray-500">Costo Total</div>
-              <div className="text-xl font-bold text-blue-600">
+            <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm">
+              <div className="text-xs sm:text-sm font-medium text-gray-500">Costo Total</div>
+              <div className="text-base sm:text-xl font-bold text-blue-600">
                 S/.{(produccion.costoTotal || 0).toFixed(2)}
               </div>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="text-sm font-medium text-gray-500">Operador</div>
-              <div className="text-xl font-bold text-gray-900">{produccion.operador || 'N/A'}</div>
+            <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm">
+              <div className="text-xs sm:text-sm font-medium text-gray-500">Operador</div>
+              <div className="text-base sm:text-xl font-bold text-gray-900 truncate">{produccion.operador || 'N/A'}</div>
             </div>
           </div>
         </div>
       )}
 
       {/* Tabla Unificada de Detalles */}
-      <div className={`${esModal ? 'flex-1 overflow-auto' : ''} p-6`}>
-        <h3 className="text-lg font-semibold mb-4">Detalles Completos de Producción</h3>
+      <div className={`${esModal ? 'flex-1 overflow-auto' : ''} p-4 sm:p-6`}>
+        <h3 className="text-base sm:text-lg font-semibold mb-4">Detalles Completos de Producción</h3>
         
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        {/* ========== VISTA MÓVIL: Tarjetas ========== */}
+        <div className="md:hidden space-y-3">
+          {datosTabla.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-xl">
+              <div className="text-gray-400 text-6xl mb-4">📋</div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Sin detalles disponibles
+              </h3>
+              <p className="text-gray-500">
+                No se encontraron detalles para esta producción
+              </p>
+            </div>
+          ) : (
+            datosTabla.map((item, index) => {
+              const estilos = obtenerEstilosFila(item.tipo);
+              
+              return (
+                <div 
+                  key={index} 
+                  className={`${estilos.bg} ${estilos.border} rounded-xl p-4 hover:shadow-md transition-shadow`}
+                >
+                  {/* Header de la tarjeta */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <span className={`text-xs font-semibold ${estilos.text} block mb-1`}>
+                        {item.categoria}
+                      </span>
+                      <h4 className={`font-bold text-gray-900 text-base`}>
+                        {item.concepto}
+                      </h4>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {item.descripcion}
+                      </p>
+                    </div>
+                    {/* Badge de estado */}
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      item.estado === 'completada' || item.estado === 'Utilizada' || item.estado === 'Consumido' ? 
+                      'bg-green-100 text-green-800' : getEstadoColor(item.estado)
+                    }`}>
+                      {item.estado}
+                    </span>
+                  </div>
+                  
+                  {/* Stats en grid */}
+                  <div className="grid grid-cols-3 gap-2 mb-3">
+                    <div className="bg-white bg-opacity-60 rounded-lg p-2 text-center">
+                      <p className="text-xs text-gray-600 font-medium">Cantidad</p>
+                      <p className="text-sm font-bold text-gray-800">{item.cantidad}</p>
+                    </div>
+                    <div className="bg-white bg-opacity-60 rounded-lg p-2 text-center">
+                      <p className="text-xs text-gray-600 font-medium">Costo U.</p>
+                      <p className="text-sm font-bold text-gray-800">{item.costo}</p>
+                    </div>
+                    <div className="bg-white bg-opacity-60 rounded-lg p-2 text-center">
+                      <p className="text-xs text-gray-600 font-medium">Total</p>
+                      <p className="text-sm font-bold text-blue-600">{item.total || '-'}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Info adicional */}
+                  <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-200 border-opacity-50">
+                    <span>📅 {item.fecha}</span>
+                    <span>👤 {item.operador}</span>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* ========== VISTA DESKTOP: Tabla ========== */}
+        <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -370,9 +459,6 @@ const DetalleProduccion = ({ produccionId, produccion: produccionProp, onClose, 
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Concepto
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Descripción
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Cantidad

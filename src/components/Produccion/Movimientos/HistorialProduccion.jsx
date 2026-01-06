@@ -18,6 +18,12 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
   // Estados para modal de detalle
   const [detalleProduccionOpen, setDetalleProduccionOpen] = useState(false);
   const [produccionSeleccionada, setProduccionSeleccionada] = useState(null);
+  
+  // Estado para filtros colapsables en móvil
+  const [filtrosExpandidos, setFiltrosExpandidos] = useState(false);
+  
+  // Estado para paginación de tarjetas en móvil
+  const [itemsVisibles, setItemsVisibles] = useState(5);
 
   // Estadísticas del historial
   const [estadisticas, setEstadisticas] = useState({
@@ -216,151 +222,183 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-xl shadow-2xl w-full max-w-7xl max-h-[95vh] flex flex-col">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+        <div className="bg-white rounded-xl shadow-2xl w-full max-w-[98vw] sm:max-w-7xl max-h-[98vh] sm:max-h-[95vh] flex flex-col overflow-hidden">
           
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <div className="flex items-center space-x-3">
-              <span className="text-3xl">📊</span>
-              <div>
-                <h3 className="text-xl font-semibold text-gray-900">
+          <div className="flex items-center justify-between p-3 sm:p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
+            <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+              <span className="text-2xl sm:text-3xl flex-shrink-0">📊</span>
+              <div className="min-w-0">
+                <h3 className="text-base sm:text-xl font-semibold text-gray-900 truncate">
                   Historial de Cantidades (Producción)
                 </h3>
-                <p className="text-sm text-gray-500">
+                <p className="text-xs sm:text-sm text-gray-500 truncate">
                   {producto.nombre} - Registro completo de producciones
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1.5 sm:p-2 rounded-lg transition-colors flex-shrink-0"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
           {/* Estadísticas */}
-          <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-b">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-white p-4 rounded-lg shadow-sm text-center">
-                <div className="text-sm font-medium text-gray-500">Total Producciones</div>
-                <div className="text-2xl font-bold text-blue-600">
+          <div className="p-3 sm:p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-b">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+              <div className="bg-white p-2 sm:p-4 rounded-lg shadow-sm text-center">
+                <div className="text-xs sm:text-sm font-medium text-gray-500">Total Producciones</div>
+                <div className="text-lg sm:text-2xl font-bold text-blue-600">
                   {estadisticas.totalProducciones}
                 </div>
                 <div className="text-xs text-gray-400">registros</div>
               </div>
-              <div className="bg-white p-4 rounded-lg shadow-sm text-center">
-                <div className="text-sm font-medium text-gray-500">Cantidad Total Producida</div>
-                <div className="text-2xl font-bold text-green-600">
+              <div className="bg-white p-2 sm:p-4 rounded-lg shadow-sm text-center">
+                <div className="text-xs sm:text-sm font-medium text-gray-500">Cantidad Total Producida</div>
+                <div className="text-lg sm:text-2xl font-bold text-green-600">
                   {estadisticas.cantidadTotalProducida}
                 </div>
-                <div className="text-xs text-gray-400">{producto.unidadMedida || 'unidades'}</div>
+                <div className="text-xs text-gray-400">{producto.unidadMedida || 'unidad'}</div>
               </div>
-              <div className="bg-white p-4 rounded-lg shadow-sm text-center">
-                <div className="text-sm font-medium text-gray-500">Costo Total</div>
-                <div className="text-2xl font-bold text-purple-600">
+              <div className="bg-white p-2 sm:p-4 rounded-lg shadow-sm text-center">
+                <div className="text-xs sm:text-sm font-medium text-gray-500">Costo Total</div>
+                <div className="text-lg sm:text-2xl font-bold text-purple-600">
                   S/.{estadisticas.costoTotalProduccion.toFixed(2)}
                 </div>
                 <div className="text-xs text-gray-400">inversión total</div>
               </div>
-              <div className="bg-white p-4 rounded-lg shadow-sm text-center">
-                <div className="text-sm font-medium text-gray-500">Promedio Diario</div>
-                <div className="text-2xl font-bold text-orange-600">
+              <div className="bg-white p-2 sm:p-4 rounded-lg shadow-sm text-center">
+                <div className="text-xs sm:text-sm font-medium text-gray-500">Promedio Diario</div>
+                <div className="text-lg sm:text-2xl font-bold text-orange-600">
                   {estadisticas.promedioProduccionDiaria.toFixed(1)}
                 </div>
-                <div className="text-xs text-gray-400">{producto.unidadMedida || 'unidades'}/día</div>
+                <div className="text-xs text-gray-400">{producto.unidadMedida || 'unidad'}/día</div>
               </div>
             </div>
           </div>
 
-          {/* Filtros */}
-          <div className="p-6 border-b bg-gray-50">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Fecha Inicio
-                </label>
-                <input
-                  type="date"
-                  value={filtros.fechaInicio}
-                  onChange={(e) => handleFiltroChange('fechaInicio', e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Fecha Fin
-                </label>
-                <input
-                  type="date"
-                  value={filtros.fechaFin}
-                  onChange={(e) => handleFiltroChange('fechaFin', e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tipo
-                </label>
-                <select
-                  value={filtros.estado}
-                  onChange={(e) => handleFiltroChange('estado', e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="">Todos</option>
-                  <option value="completada">✅ Completados</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Operador
-                </label>
-                <input
-                  type="text"
-                  value={filtros.operador}
-                  onChange={(e) => handleFiltroChange('operador', e.target.value)}
-                  placeholder="Filtrar por operador..."
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm"
-                />
-              </div>
-              <div className="flex items-end">
-                <button
-                  onClick={limpiarFiltros}
-                  className="w-full px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
-                >
-                  🗑️ Limpiar
-                </button>
+          {/* Filtros - Colapsables en móvil */}
+          <div className="border-b bg-gray-50">
+            {/* Botón para expandir/colapsar filtros en móvil */}
+            <button
+              onClick={() => setFiltrosExpandidos(!filtrosExpandidos)}
+              className="w-full p-3 sm:hidden flex items-center justify-between text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Filtros
+                {(filtros.fechaInicio || filtros.fechaFin || filtros.operador || filtros.estado) && (
+                  <span className="bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                    Activos
+                  </span>
+                )}
+              </span>
+              <svg 
+                className={`w-4 h-4 transition-transform ${filtrosExpandidos ? 'rotate-180' : ''}`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            {/* Contenido de filtros */}
+            <div className={`
+              p-3 sm:p-6 
+              ${filtrosExpandidos ? 'block' : 'hidden'} sm:block
+            `}>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-4">
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                    Fecha Inicio
+                  </label>
+                  <input
+                    type="date"
+                    value={filtros.fechaInicio}
+                    onChange={(e) => handleFiltroChange('fechaInicio', e.target.value)}
+                    className="w-full p-1.5 sm:p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                    Fecha Fin
+                  </label>
+                  <input
+                    type="date"
+                    value={filtros.fechaFin}
+                    onChange={(e) => handleFiltroChange('fechaFin', e.target.value)}
+                    className="w-full p-1.5 sm:p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                    Tipo
+                  </label>
+                  <select
+                    value={filtros.estado}
+                    onChange={(e) => handleFiltroChange('estado', e.target.value)}
+                    className="w-full p-1.5 sm:p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm"
+                  >
+                    <option value="">Todos</option>
+                    <option value="completada">✅ Completados</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                    Operador
+                  </label>
+                  <input
+                    type="text"
+                    value={filtros.operador}
+                    onChange={(e) => handleFiltroChange('operador', e.target.value)}
+                    placeholder="Filtrar..."
+                    className="w-full p-1.5 sm:p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm"
+                  />
+                </div>
+                <div className="flex items-end col-span-2 sm:col-span-1">
+                  <button
+                    onClick={limpiarFiltros}
+                    className="w-full px-3 py-1.5 sm:py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-xs sm:text-sm"
+                  >
+                    🗑️ Limpiar
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Error */}
           {error && (
-            <div className="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="mx-3 sm:mx-6 mt-3 sm:mt-4 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-xs sm:text-sm text-red-600">{error}</p>
             </div>
           )}
 
           {/* Tabla de Historial */}
           <div className="flex-1 overflow-auto">
             {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <span className="ml-3 text-gray-600">Cargando historial...</span>
+              <div className="flex items-center justify-center py-8 sm:py-12">
+                <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-blue-600"></div>
+                <span className="ml-2 sm:ml-3 text-sm sm:text-base text-gray-600">Cargando historial...</span>
               </div>
             ) : movimientosFiltrados.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-gray-400 text-6xl mb-4">🏭</div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <div className="text-center py-8 sm:py-12 px-4">
+                <div className="text-gray-400 text-4xl sm:text-6xl mb-3 sm:mb-4">🏭</div>
+                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
                   Sin historial de producciones
                 </h3>
-                <p className="text-gray-500 mb-4">
+                <p className="text-sm text-gray-500 mb-4">
                   No se encontraron movimientos de producción para {producto.nombre}
                 </p>
-                <div className="text-sm text-gray-400 bg-gray-50 p-4 rounded-lg max-w-md mx-auto">
+                <div className="text-xs sm:text-sm text-gray-400 bg-gray-50 p-3 sm:p-4 rounded-lg max-w-md mx-auto">
                   <p>💡 Los movimientos de producción aparecerán aquí cuando:</p>
                   <ul className="list-disc text-left mt-2 space-y-1 ml-4">
                     <li>Uses la función "Incrementar Stock" del producto</li>
@@ -371,7 +409,93 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
               </div>
             ) : (
               <div className="bg-white">
-                <div className="overflow-x-auto">
+                {/* 🎯 VISTA MÓVIL: Tarjetas con "Ver más" */}
+                <div className="md:hidden p-3 space-y-3">
+                  {movimientosFiltrados.slice(0, itemsVisibles).map((movimiento, index) => (
+                    <div 
+                      key={movimiento._id || index}
+                      className="bg-gray-50 border border-gray-200 rounded-lg p-3 shadow-sm"
+                    >
+                      {/* Header: Fecha y badge */}
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <span className="text-xs text-gray-500">
+                            {formatearFecha(movimiento)}
+                          </span>
+                          <div className="text-xs text-gray-400 mt-0.5">
+                            ID: {(movimiento._id || '').slice(-6)}
+                          </div>
+                        </div>
+                        <span className="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full">
+                          🏭 Producción
+                        </span>
+                      </div>
+
+                      {/* Cantidad y Costo */}
+                      <div className="grid grid-cols-2 gap-2 mb-3">
+                        <div className="bg-green-50 p-2 rounded-lg text-center">
+                          <div className="text-xs text-gray-500">Cantidad</div>
+                          <div className="text-lg font-bold text-green-600">
+                            +{movimiento.cantidad || 0}
+                          </div>
+                          <div className="text-xs text-gray-400">{producto.unidadMedida || 'und'}</div>
+                        </div>
+                        <div className="bg-purple-50 p-2 rounded-lg text-center">
+                          <div className="text-xs text-gray-500">Costo Total</div>
+                          <div className="text-lg font-bold text-purple-600">
+                            S/.{(movimiento.costoTotal || movimiento.costo || 0).toFixed(2)}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            S/.{((movimiento.costoTotal || movimiento.costo || 0) / (movimiento.cantidad || 1)).toFixed(2)}/u
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Motivo */}
+                      {movimiento.motivo && (
+                        <div className="mb-2">
+                          <span className="text-xs text-gray-500">Motivo: </span>
+                          <span className="text-xs text-gray-700">{movimiento.motivo}</span>
+                        </div>
+                      )}
+
+                      {/* Footer: Usuario */}
+                      <div className="pt-2 border-t border-gray-200 flex justify-between items-center">
+                        <span className="text-xs text-gray-500">
+                          👤 {movimiento.operador || movimiento.usuario || 'N/A'}
+                        </span>
+                        {movimiento.precioVenta && (
+                          <span className="text-xs text-green-600 font-medium">
+                            Venta: S/.{movimiento.precioVenta.toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Botón "Ver más" para móvil */}
+                  {itemsVisibles < movimientosFiltrados.length && (
+                    <button
+                      onClick={() => setItemsVisibles(prev => prev + 10)}
+                      className="w-full py-3 bg-blue-50 text-blue-600 rounded-lg font-medium hover:bg-blue-100 transition-colors flex items-center justify-center gap-2 text-sm"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                      Ver más ({movimientosFiltrados.length - itemsVisibles} restantes)
+                    </button>
+                  )}
+
+                  {/* Indicador cuando se muestran todos */}
+                  {itemsVisibles >= movimientosFiltrados.length && movimientosFiltrados.length > 5 && (
+                    <p className="text-center text-xs text-gray-500 py-2">
+                      ✓ Mostrando todos los {movimientosFiltrados.length} movimientos
+                    </p>
+                  )}
+                </div>
+
+                {/* 🎯 VISTA DESKTOP: Tabla completa */}
+                <div className="hidden md:block overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
@@ -603,8 +727,8 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                   </table>
                 </div>
 
-                {/* Footer con estadísticas */}
-                <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                {/* Footer con estadísticas - Solo visible en desktop */}
+                <div className="hidden md:block bg-gray-50 px-6 py-4 border-t border-gray-200">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div className="text-sm text-gray-700">
                       <span className="font-medium">
@@ -627,6 +751,23 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                           S/.{estadisticas.costoTotalProduccion.toFixed(2)} invertidos
                         </span>
                       </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer móvil simplificado */}
+                <div className="md:hidden bg-gray-50 px-3 py-3 border-t border-gray-200">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-gray-600">
+                      {movimientosFiltrados.length} movimientos
+                    </span>
+                    <div className="flex gap-3">
+                      <span className="text-green-600 font-medium">
+                        +{estadisticas.cantidadTotalProducida} {producto.unidadMedida || 'und'}
+                      </span>
+                      <span className="text-purple-600 font-medium">
+                        S/.{estadisticas.costoTotalProduccion.toFixed(2)}
+                      </span>
                     </div>
                   </div>
                 </div>

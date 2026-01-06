@@ -133,17 +133,17 @@ const ModalAgregarCantidad = ({
   const icono = movimientoUnificadoService.obtenerIconoTipo(tipoProducto);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-[95vw] sm:max-w-md max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-gray-200">
+        <div className="flex justify-between items-center p-4 sm:p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
           <div className="flex items-center">
-            <span className="text-2xl mr-3">{icono}</span>
+            <span className="text-xl sm:text-2xl mr-2 sm:mr-3">{icono}</span>
             <div>
-              <h2 className="text-xl font-bold text-gray-800">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-800">
                 Agregar Cantidad
               </h2>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs sm:text-sm text-gray-600">
                 {movimientoUnificadoService.formatearTipoItem(`${tipoProducto.charAt(0).toUpperCase()}${tipoProducto.slice(1).slice(0, -1)}`)}
               </p>
             </div>
@@ -151,18 +151,18 @@ const ModalAgregarCantidad = ({
           <button
             onClick={onClose}
             disabled={enviando}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
           >
-            <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         {/* Información del producto */}
-        <div className="p-6 border-b border-gray-200 bg-gray-50">
-          <h3 className="font-semibold text-gray-800 mb-2">{infoProducto.nombre}</h3>
-          <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="p-4 sm:p-6 border-b border-gray-200 bg-gray-50">
+          <h3 className="font-semibold text-gray-800 mb-2 text-sm sm:text-base">{infoProducto.nombre}</h3>
+          <div className="grid grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
             <div>
               <span className="text-gray-500">Cantidad Actual:</span>
               <p className="font-medium text-gray-800">
@@ -171,13 +171,13 @@ const ModalAgregarCantidad = ({
             </div>
             <div>
               <span className="text-gray-500">Referencia:</span>
-              <p className="font-medium text-gray-800">{infoProducto.referencia}</p>
+              <p className="font-medium text-gray-800 truncate" title={infoProducto.referencia}>{infoProducto.referencia}</p>
             </div>
           </div>
         </div>
 
         {/* Formulario */}
-        <form onSubmit={handleSubmit} className="p-6">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6">
           {/* Error general */}
           {errores.general && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
@@ -186,8 +186,8 @@ const ModalAgregarCantidad = ({
           )}
 
           {/* Campo Cantidad */}
-          <div className="mb-4">
-            <label htmlFor="cantidad" className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="mb-3 sm:mb-4">
+            <label htmlFor="cantidad" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
               Cantidad a Agregar *
             </label>
             <div className="relative">
@@ -219,8 +219,8 @@ const ModalAgregarCantidad = ({
           </div>
 
           {/* Campo Fecha de Producción */}
-          <div className="mb-4">
-            <label htmlFor="fechaProduccion" className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="mb-3 sm:mb-4">
+            <label htmlFor="fechaProduccion" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
               📅 Fecha y Hora de Producción
             </label>
             <input
@@ -250,8 +250,8 @@ const ModalAgregarCantidad = ({
 
           {/* Campo Precio (para ingredientes y materiales) */}
           {(tipoProducto === 'ingredientes' || tipoProducto === 'materiales') && (
-            <div className="mb-4">
-              <label htmlFor="precio" className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="mb-3 sm:mb-4">
+              <label htmlFor="precio" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                 Precio Unitario (Referencial)
               </label>
               <div className="relative">
@@ -285,8 +285,8 @@ const ModalAgregarCantidad = ({
           )}
 
           {/* Campo Motivo */}
-          <div className="mb-6">
-            <label htmlFor="motivo" className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="mb-4 sm:mb-6">
+            <label htmlFor="motivo" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
               Motivo
             </label>
             <textarea
@@ -316,8 +316,8 @@ const ModalAgregarCantidad = ({
 
           {/* Preview del resultado */}
           {cantidad && !isNaN(cantidad) && parseFloat(cantidad) > 0 && (
-            <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-md">
-              <p className="text-sm text-blue-800">
+            <div className="mb-4 sm:mb-6 p-2 sm:p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <p className="text-xs sm:text-sm text-blue-800">
                 <span className="font-medium">Nueva cantidad total:</span> 
                 {' '}{(infoProducto.cantidadActual + parseFloat(cantidad)).toFixed(2)} {infoProducto.unidad}
               </p>
@@ -328,13 +328,13 @@ const ModalAgregarCantidad = ({
           )}
 
           {/* Botones */}
-          <div className="flex justify-end space-x-3">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3">
             <button
               type="button"
               onClick={onClose}
               disabled={enviando}
               className={`
-                px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md
+                w-full sm:w-auto px-4 py-2.5 sm:py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md
                 transition-colors
                 ${enviando 
                   ? 'bg-gray-100 cursor-not-allowed' 
@@ -348,7 +348,7 @@ const ModalAgregarCantidad = ({
               type="submit"
               disabled={enviando || !cantidad || parseFloat(cantidad) <= 0}
               className={`
-                px-4 py-2 text-sm font-medium text-white rounded-md
+                w-full sm:w-auto px-4 py-2.5 sm:py-2 text-sm font-medium text-white rounded-md
                 transition-colors
                 ${enviando || !cantidad || parseFloat(cantidad) <= 0
                   ? 'bg-gray-400 cursor-not-allowed'
@@ -357,7 +357,7 @@ const ModalAgregarCantidad = ({
               `}
             >
               {enviando ? (
-                <div className="flex items-center">
+                <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   Agregando...
                 </div>
