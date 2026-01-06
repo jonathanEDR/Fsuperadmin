@@ -82,10 +82,11 @@ const ResumenSeleccion = React.memo(({
     const fechaInicio = new Date(registrosOrdenados[0].fechaDeGestion);
     const fechaFin = new Date(registrosOrdenados[registrosOrdenados.length - 1].fechaDeGestion);
 
-    // ✅ NUEVA FÓRMULA: Total = Pagos + Bonificaciones - Faltantes - Adelantos
+    // ✅ CORREGIDO: Subtotal es SOLO pagos diarios (sin bonificaciones)
+    // Total = Pagos + Bonificaciones - Faltantes - Adelantos
     // Gastos NO se restan (solo referenciales)
-    const subtotalCalc = sumaPagos + sumaBonificaciones;
-    const montoTotalCalc = subtotalCalc - sumaFaltantes - sumaAdelantos;
+    const subtotalCalc = sumaPagos; // Solo pagos diarios puros
+    const montoTotalCalc = sumaPagos + sumaBonificaciones - sumaFaltantes - sumaAdelantos;
 
     return {
       subtotal: subtotalCalc,
