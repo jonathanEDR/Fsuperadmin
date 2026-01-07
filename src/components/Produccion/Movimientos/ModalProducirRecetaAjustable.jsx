@@ -11,11 +11,18 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useUser, useAuth } from '@clerk/clerk-react';
+import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
+import { getFullApiUrl, safeFetch } from '../../../config/api';
 import { recetaService } from '../../../services/recetaService';
 import { ingredienteService } from '../../../services/ingredienteService';
 import '../../../styles/modal-protection.css';
 
 const ModalProducirRecetaAjustable = ({ isOpen, onClose, receta, onSuccess }) => {
+  const { user } = useUser();
+  const { getToken } = useAuth();
+  const { isSuperAdmin, canViewPrices } = useQuickPermissions();
+  
   // ============= ESTADOS PRINCIPALES =============
   const [vistaActual, setVistaActual] = useState('calcular'); // 'calcular', 'ajustar', 'historial'
   const [escalaSeleccionada, setEscalaSeleccionada] = useState(1);
@@ -42,6 +49,8 @@ const ModalProducirRecetaAjustable = ({ isOpen, onClose, receta, onSuccess }) =>
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState('');
   const [loadingHistorial, setLoadingHistorial] = useState(false);
+  const [usuarios, setUsuarios] = useState([]);
+  const [loadingUsuarios, setLoadingUsuarios] = useState(false);
 
   // ============= ESCALAS PREDEFINIDAS =============
   const escalasPreset = [
@@ -58,6 +67,7 @@ const ModalProducirRecetaAjustable = ({ isOpen, onClose, receta, onSuccess }) =>
     if (isOpen && receta) {
       // Solo resetear cuando se abre por primera vez, no en cada cambio de vista
       if (!ingredientesDisponibles.length) {
+        cargarUsuarios();
         resetearFormulario();
       }
       cargarIngredientes();
@@ -74,6 +84,39 @@ const ModalProducirRecetaAjustable = ({ isOpen, onClose, receta, onSuccess }) =>
   }, [escalaSeleccionada, receta?._id, ingredientesDisponibles]);
 
   // ============= FUNCIONES DE CARGA =============
+  const cargarUsuarios = async () => {
+    if (!isSuperAdmin) {
+      // Admin/User: autocompletar con nombre del usuario actual
+      setFormData(prev => ({
+        ...prev,
+        operador: user.fullName || user.firstName || user.primaryEmailAddress?.emailAddress || ''
+      }));
+      return;
+    }
+
+    try {
+      setLoadingUsuarios(true);
+      const token = await getToken();
+      const url = `${getFullApiUrl('/admin/users')}`;
+      
+      const response = await safeFetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUsuarios(data.users || []);
+      }
+    } catch (error) {
+      console.error('Error al cargar usuarios:', error);
+    } finally {
+      setLoadingUsuarios(false);
+    }
+  };
+
   const resetearFormulario = () => {
     setVistaActual('calcular');
     setEscalaSeleccionada(1);
@@ -802,16 +845,33 @@ const ModalProducirRecetaAjustable = ({ isOpen, onClose, receta, onSuccess }) =>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Operador (opcional)
+                      Operador Responsable * {isSuperAdmin && <span className="text-gray-500 text-xs">(Selecciona quién realizó la producción)</span>}
                     </label>
-                    <input
-                      type="text"
-                      value={formData.operador}
-                      onChange={(e) => handleCambioFormData('operador', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                      placeholder="Nombre del operador..."
-                      disabled={enviando}
-                    />
+                    {isSuperAdmin ? (
+                      <select
+                        value={formData.operador}
+                        onChange={(e) => handleCambioFormData('operador', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                        disabled={enviando || loadingUsuarios}
+                        required
+                      >
+                        <option value="">
+                          {loadingUsuarios ? 'Cargando usuarios...' : 'Seleccionar operador...'}
+                        </option>
+                        {usuarios.map(u => (
+                          <option key={u._id} value={u.nombre_negocio || u.email}>
+                            {u.nombre_negocio || u.email} ({u.role})
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        value={formData.operador}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
+                        readOnly
+                      />
+                    )}
                   </div>
                 </div>
 
@@ -979,21 +1039,23 @@ const ModalProducirRecetaAjustable = ({ isOpen, onClose, receta, onSuccess }) =>
                             </div>
                           </div>
 
-                          {/* Costos */}
-                          <div className="border-t pt-3">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Costo Total:</span>
-                              <span className="font-medium text-gray-800">
-                                ${produccion.costoTotal.toFixed(2)}
-                              </span>
+                          {/* Costos - Solo para super_admin */}
+                          {canViewPrices && (
+                            <div className="border-t pt-3">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-gray-600">Costo Total:</span>
+                                <span className="font-medium text-gray-800">
+                                  ${produccion.costoTotal.toFixed(2)}
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-sm mt-1">
+                                <span className="text-gray-600">Costo Unitario:</span>
+                                <span className="font-medium text-gray-800">
+                                  ${produccion.costoUnitario.toFixed(2)}
+                                </span>
+                              </div>
                             </div>
-                            <div className="flex justify-between text-sm mt-1">
-                              <span className="text-gray-600">Costo Unitario:</span>
-                              <span className="font-medium text-gray-800">
-                                ${produccion.costoUnitario.toFixed(2)}
-                              </span>
-                            </div>
-                          </div>
+                          )}
 
                           {/* Observaciones */}
                           {produccion.observaciones && (

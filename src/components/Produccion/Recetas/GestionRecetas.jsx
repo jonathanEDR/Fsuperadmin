@@ -7,8 +7,16 @@ import FormularioBasicoReceta from './FormularioBasicoReceta';
 import VistaReceta from './VistaReceta';
 import ModalAvanzarFase from './ModalAvanzarFase';
 import TablaHistorialGeneral from './TablaHistorialGeneral';
+import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
 const GestionRecetas = () => {
+  // Hook de permisos para control de roles
+  const { 
+    canViewPrices, 
+    canManageRecetas, 
+    canDeleteProduccion 
+  } = useQuickPermissions();
+
   const [recetas, setRecetas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -467,12 +475,15 @@ const GestionRecetas = () => {
       {/* 🎯 OPTIMIZADO: Header responsivo */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Gestión de Recetas</h1>
-        <button
-          onClick={handleNuevaReceta}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-colors w-full sm:w-auto font-medium text-sm sm:text-base"
-        >
-          ➕ Nueva Receta
-        </button>
+        {/* Solo admin o superior puede crear recetas */}
+        {canManageRecetas && (
+          <button
+            onClick={handleNuevaReceta}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-colors w-full sm:w-auto font-medium text-sm sm:text-base"
+          >
+            ➕ Nueva Receta
+          </button>
+        )}
       </div>
 
       {error && (
@@ -686,16 +697,19 @@ const GestionRecetas = () => {
                     >
                       👁️ Ver
                     </button>
-                    <button
-                      onClick={() => handleEditarReceta(receta)}
-                      className="text-green-600 hover:text-green-800 text-xs sm:text-sm font-medium py-1 px-2 border border-green-200 rounded hover:bg-green-50 transition-colors"
-                    >
-                      ✏️ Editar
-                    </button>
+                    {/* Solo admin o superior puede editar recetas */}
+                    {canManageRecetas && (
+                      <button
+                        onClick={() => handleEditarReceta(receta)}
+                        className="text-green-600 hover:text-green-800 text-xs sm:text-sm font-medium py-1 px-2 border border-green-200 rounded hover:bg-green-50 transition-colors"
+                      >
+                        ✏️ Editar
+                      </button>
+                    )}
                   </div>
                   
-                  {/* Fila 2: Botones secundarios (solo si es necesario) */}
-                  {(receta.estadoProceso !== 'borrador' || true) && (
+                  {/* Fila 2: Botones secundarios (solo si tiene permisos) */}
+                  {canManageRecetas && (
                     <div className="grid grid-cols-2 gap-2">
                       {receta.estadoProceso !== 'borrador' && (
                         <button
@@ -707,12 +721,15 @@ const GestionRecetas = () => {
                           🔄 Reiniciar
                         </button>
                       )}
-                      <button
-                        onClick={() => handleEliminar(receta._id)}
-                        className="text-red-600 hover:text-red-800 text-xs sm:text-sm font-medium py-1 px-2 border border-red-200 rounded hover:bg-red-50 transition-colors"
-                      >
-                        🗑️ Eliminar
-                      </button>
+                      {/* Solo admin puede eliminar */}
+                      {canDeleteProduccion && (
+                        <button
+                          onClick={() => handleEliminar(receta._id)}
+                          className="text-red-600 hover:text-red-800 text-xs sm:text-sm font-medium py-1 px-2 border border-red-200 rounded hover:bg-red-50 transition-colors"
+                        >
+                          🗑️ Eliminar
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -729,14 +746,16 @@ const GestionRecetas = () => {
             No hay recetas
           </h3>
           <p className="text-gray-500 mb-4">
-            Comienza creando tu primera receta
+            {canManageRecetas ? 'Comienza creando tu primera receta' : 'No tienes permisos para crear recetas'}
           </p>
-          <button
-            onClick={handleNuevaReceta}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            Crear Primera Receta
-          </button>
+          {canManageRecetas && (
+            <button
+              onClick={handleNuevaReceta}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              Crear Primera Receta
+            </button>
+          )}
         </div>
       )}
 

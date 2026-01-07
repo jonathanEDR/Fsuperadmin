@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, UserCog, LogOut, Shield, Users, Package, ShoppingCart, Menu, X, ChevronLeft, ChevronRight, UserCheck, Factory, Grid3X3, Wallet, RotateCcw, DollarSign, QrCode, ScanLine, ArrowRightLeft } from 'lucide-react';
+import { Home, UserCog, LogOut, Shield, Users, Package, ShoppingCart, Menu, X, ChevronLeft, ChevronRight, UserCheck, Factory, Wallet, DollarSign, ScanLine, ArrowRightLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 
@@ -11,17 +11,18 @@ function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggle
     signOut();
     navigate('/login');
   };
+  // Menu simplificado para Admin:
+  // - Catálogo de Productos removido (ya está dentro de Gestión de Ventas)
+  // - Gestión de Devoluciones removido (accesible desde Ventas, tema de auditoría)
+  // - Código QR Asistencias removido (responsabilidad de super_admin)
   const menuItems = [
     { id: 'notas', icon: Home, label: 'Gestión de Notas', route: '/admin/notas' },
     { id: 'productos', icon: Package, label: 'Gestión de Productos', route: '/admin/productos' },
     { id: 'caja', icon: Wallet, label: 'Gestión de Caja', route: '/admin/caja' },
     { id: 'ventas', icon: ShoppingCart, label: 'Gestión de Ventas', route: '/admin/ventas' },
     { id: 'cobros', icon: DollarSign, label: 'Gestión de Cobros', route: '/admin/cobros' },
-    { id: 'devoluciones', icon: RotateCcw, label: 'Gestión de Devoluciones', route: '/admin/devoluciones' },
-    { id: 'catalogo', icon: Grid3X3, label: 'Catálogo de Productos', route: '/admin/catalogo' },
     { id: 'movimientos-produccion', icon: ArrowRightLeft, label: 'Movimientos Producción', route: '/admin/produccion/movimientos', badge: 'NUEVO', badgeColor: 'bg-purple-500' },
     { id: 'personal', icon: UserCheck, label: 'Gestión de Personal', route: '/admin/personal-v2' },
-    { id: 'qr-asistencias', icon: QrCode, label: 'Código QR Asistencias', route: '/admin/qr-asistencias' },
     { id: 'escaner-qr', icon: ScanLine, label: 'Marcar Asistencia', route: '/admin/escaner-qr', badge: 'NUEVO', badgeColor: 'bg-green-500' },
     { id: 'perfil', icon: UserCog, label: 'Mi Perfil', route: '/admin/perfil' }
   ];

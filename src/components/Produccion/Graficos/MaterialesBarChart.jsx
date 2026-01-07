@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import api from '../../../services/api';
+import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
 Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -13,6 +14,7 @@ Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
  * Zona horaria: America/Lima (UTC-5)
  */
 const MaterialesBarChart = React.memo(() => {
+  const { canViewPrices } = useQuickPermissions();
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -270,8 +272,12 @@ const MaterialesBarChart = React.memo(() => {
                           const material = materialesData[index];
                           const lines = [];
                           
-                          lines.push(`💰 Precio unit.: S/ ${material.precioUnitario.toFixed(2)}`);
-                          lines.push(`💵 Valor total: S/ ${material.costoTotal.toFixed(2)}`);
+                          if (canViewPrices && material.precioUnitario !== undefined) {
+                            lines.push(`💰 Precio unit.: S/ ${material.precioUnitario.toFixed(2)}`);
+                          }
+                          if (canViewPrices && material.costoTotal !== undefined) {
+                            lines.push(`💵 Valor total: S/ ${material.costoTotal.toFixed(2)}`);
+                          }
                           
                           if (material.stockMinimo > 0) {
                             lines.push(`⚠️ Stock mínimo: ${material.stockMinimo} ${material.unidadMedida}`);
@@ -362,6 +368,7 @@ const MaterialesBarChart = React.memo(() => {
           </div>
         </div>
         
+{canViewPrices && (
         <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-3 sm:p-4 border border-amber-200">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-lg sm:text-xl">💰</span>
@@ -371,6 +378,7 @@ const MaterialesBarChart = React.memo(() => {
             S/ {totals.costoTotalInventario.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
         </div>
+        )}
         
         <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-3 sm:p-4 border border-orange-200">
           <div className="flex items-center gap-2 mb-1">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserCircle, FileText, LogOut, ShoppingBag, ChevronLeft, ChevronRight, X, Grid3X3, QrCode } from 'lucide-react';
+import { UserCircle, FileText, LogOut, ShoppingBag, ChevronLeft, ChevronRight, X, QrCode, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 
@@ -12,10 +12,13 @@ function Sidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebarOpen }) {
     navigate('/login');
   };
   
+  // Menu simplificado para usuarios:
+  // - Catálogo de Productos removido (ya está dentro de Ventas)
+  // - Gráficos Producción removido (accesible desde Movimientos Producción)
   const menuItems = [
     { id: 'notes', icon: FileText, label: 'Mis Notas', route: '/user/notas' },
     { id: 'ventas', icon: ShoppingBag, label: 'Mis Ventas', route: '/user/ventas' },
-    { id: 'catalogo', icon: Grid3X3, label: 'Catálogo de Productos', route: '/user/catalogo' },
+    { id: 'movimientos-produccion', icon: RefreshCw, label: 'Movimientos Producción', route: '/user/produccion/movimientos', badge: 'NUEVO', badgeColor: 'bg-blue-500' },
     { id: 'escaner-qr', icon: QrCode, label: 'Registro de Asistencia', route: '/user/escaner-qr', badge: 'NUEVO', badgeColor: 'bg-green-500' },
     { id: 'profile', icon: UserCircle, label: 'Mi Perfil', route: '/user/perfil' },
   ];

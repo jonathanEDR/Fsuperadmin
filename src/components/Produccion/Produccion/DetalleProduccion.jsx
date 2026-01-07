@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { produccionService } from '../../../services/produccionService';
 import { formatearFecha } from '../../../utils/fechaHoraUtils';
+import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
 const DetalleProduccion = ({ produccionId, produccion: produccionProp, onClose, onProduccionActualizada, esModal = false }) => {
+  // Hook de permisos para control de roles
+  const { canViewPrices } = useQuickPermissions();
+  
   const [produccion, setProduccion] = useState(produccionProp || null);
   const [loading, setLoading] = useState(!produccionProp);
   const [error, setError] = useState(null);
@@ -360,12 +364,15 @@ const DetalleProduccion = ({ produccionId, produccion: produccionProp, onClose, 
                 {produccion.cantidadProducida} <span className="text-xs sm:text-sm">{produccion.unidadMedida}</span>
               </div>
             </div>
-            <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm">
-              <div className="text-xs sm:text-sm font-medium text-gray-500">Costo Total</div>
-              <div className="text-base sm:text-xl font-bold text-blue-600">
-                S/.{(produccion.costoTotal || 0).toFixed(2)}
+            {/* Solo super_admin ve el costo total */}
+            {canViewPrices && (
+              <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm">
+                <div className="text-xs sm:text-sm font-medium text-gray-500">Costo Total</div>
+                <div className="text-base sm:text-xl font-bold text-blue-600">
+                  S/.{(produccion.costoTotal || 0).toFixed(2)}
+                </div>
               </div>
-            </div>
+            )}
             <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm">
               <div className="text-xs sm:text-sm font-medium text-gray-500">Operador</div>
               <div className="text-base sm:text-xl font-bold text-gray-900 truncate">{produccion.operador || 'N/A'}</div>
@@ -422,19 +429,24 @@ const DetalleProduccion = ({ produccionId, produccion: produccionProp, onClose, 
                   </div>
                   
                   {/* Stats en grid */}
-                  <div className="grid grid-cols-3 gap-2 mb-3">
+                  <div className={`grid ${canViewPrices ? 'grid-cols-3' : 'grid-cols-1'} gap-2 mb-3`}>
                     <div className="bg-white bg-opacity-60 rounded-lg p-2 text-center">
                       <p className="text-xs text-gray-600 font-medium">Cantidad</p>
                       <p className="text-sm font-bold text-gray-800">{item.cantidad}</p>
                     </div>
-                    <div className="bg-white bg-opacity-60 rounded-lg p-2 text-center">
-                      <p className="text-xs text-gray-600 font-medium">Costo U.</p>
-                      <p className="text-sm font-bold text-gray-800">{item.costo}</p>
-                    </div>
-                    <div className="bg-white bg-opacity-60 rounded-lg p-2 text-center">
-                      <p className="text-xs text-gray-600 font-medium">Total</p>
-                      <p className="text-sm font-bold text-blue-600">{item.total || '-'}</p>
-                    </div>
+                    {/* Solo super_admin ve costos */}
+                    {canViewPrices && (
+                      <>
+                        <div className="bg-white bg-opacity-60 rounded-lg p-2 text-center">
+                          <p className="text-xs text-gray-600 font-medium">Costo U.</p>
+                          <p className="text-sm font-bold text-gray-800">{item.costo}</p>
+                        </div>
+                        <div className="bg-white bg-opacity-60 rounded-lg p-2 text-center">
+                          <p className="text-xs text-gray-600 font-medium">Total</p>
+                          <p className="text-sm font-bold text-blue-600">{item.total || '-'}</p>
+                        </div>
+                      </>
+                    )}
                   </div>
                   
                   {/* Info adicional */}
@@ -463,12 +475,17 @@ const DetalleProduccion = ({ produccionId, produccion: produccionProp, onClose, 
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Cantidad
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Costo Unit.
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total
-                  </th>
+                  {/* Solo super_admin ve columnas de costo */}
+                  {canViewPrices && (
+                    <>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Costo Unit.
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Total
+                      </th>
+                    </>
+                  )}
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Estado
                   </th>
@@ -504,14 +521,19 @@ const DetalleProduccion = ({ produccionId, produccion: produccionProp, onClose, 
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{item.cantidad}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{item.costo}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-bold text-gray-900">
-                          {item.total || '-'}
-                        </div>
-                      </td>
+                      {/* Solo super_admin ve celdas de costo */}
+                      {canViewPrices && (
+                        <>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">{item.costo}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-bold text-gray-900">
+                              {item.total || '-'}
+                            </div>
+                          </td>
+                        </>
+                      )}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           item.estado === 'completada' || item.estado === 'Utilizada' || item.estado === 'Consumido' ? 

@@ -5,8 +5,17 @@ import AjusteInventario from './AjusteInventario';
 import MovimientosIngrediente from './MovimientosIngrediente';
 // import TablaIngredientesFinalizados from './TablaIngredientesFinalizados';
 import BreadcrumbProduccion from '../BreadcrumbProduccion';
+import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
 const GestionIngredientes = () => {
+  // Hook de permisos para control de roles
+  const { 
+    canViewPrices, 
+    canManageIngredientes, 
+    canAdjustInventory,
+    isSuperAdmin 
+  } = useQuickPermissions();
+  
   const [ingredientes, setIngredientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -124,12 +133,15 @@ const GestionIngredientes = () => {
       {/* Filtros super compactos para móvil */}
       <div className="bg-white p-2 md:p-4 rounded-lg shadow mb-4 md:mb-6">
 
-         <button
-          onClick={handleNuevoIngrediente}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto"
-        >
-          Nuevo Ingrediente
-        </button>
+         {/* Solo super_admin puede crear nuevos ingredientes */}
+         {canManageIngredientes && (
+           <button
+            onClick={handleNuevoIngrediente}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto"
+          >
+            Nuevo Ingrediente
+          </button>
+         )}
         {/* Filtro de búsqueda principal en móvil */}
         <div className="block md:hidden mb-3">
           <input
@@ -265,11 +277,13 @@ const GestionIngredientes = () => {
                 </div>
               </div>
               
-              {/* Precio */}
-              <div className="flex items-center justify-between text-sm text-gray-500 mb-3 px-1">
-                <span>Precio unitario:</span>
-                <span className="font-medium text-gray-900">S/.{ingrediente.precioUnitario?.toFixed(2) || '0.00'}</span>
-              </div>
+              {/* Precio - Solo visible para super_admin */}
+              {canViewPrices && (
+                <div className="flex items-center justify-between text-sm text-gray-500 mb-3 px-1">
+                  <span>Precio unitario:</span>
+                  <span className="font-medium text-gray-900">S/.{ingrediente.precioUnitario?.toFixed(2) || '0.00'}</span>
+                </div>
+              )}
               
               {/* Referencia al catálogo */}
               {ingrediente.productoReferencia && (
@@ -284,18 +298,24 @@ const GestionIngredientes = () => {
               {/* Acciones */}
               <div className="flex justify-between items-center pt-3 border-t border-gray-100">
                 <div className="flex space-x-1">
-                  <button
-                    onClick={() => handleEditarIngrediente(ingrediente)}
-                    className="flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors"
-                  >
-                    <span className="mr-1">✏️</span> Editar
-                  </button>
-                  <button
-                    onClick={() => handleAjustarInventario(ingrediente)}
-                    className="flex items-center px-3 py-1.5 bg-green-50 text-green-600 rounded-lg text-xs font-medium hover:bg-green-100 transition-colors"
-                  >
-                    <span className="mr-1">⚖️</span> Ajustar
-                  </button>
+                  {/* Solo super_admin puede editar */}
+                  {canManageIngredientes && (
+                    <button
+                      onClick={() => handleEditarIngrediente(ingrediente)}
+                      className="flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors"
+                    >
+                      <span className="mr-1">✏️</span> Editar
+                    </button>
+                  )}
+                  {/* Admin o superior puede ajustar inventario */}
+                  {canAdjustInventory && (
+                    <button
+                      onClick={() => handleAjustarInventario(ingrediente)}
+                      className="flex items-center px-3 py-1.5 bg-green-50 text-green-600 rounded-lg text-xs font-medium hover:bg-green-100 transition-colors"
+                    >
+                      <span className="mr-1">⚖️</span> Ajustar
+                    </button>
+                  )}
                 </div>
                 <div className="flex space-x-1">
                   <button
@@ -305,13 +325,16 @@ const GestionIngredientes = () => {
                   >
                     📋
                   </button>
-                  <button
-                    onClick={() => handleDesactivar(ingrediente._id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Desactivar"
-                  >
-                    🗑️
-                  </button>
+                  {/* Solo super_admin puede desactivar */}
+                  {canManageIngredientes && (
+                    <button
+                      onClick={() => handleDesactivar(ingrediente._id)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Desactivar"
+                    >
+                      🗑️
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -346,9 +369,12 @@ const GestionIngredientes = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Disponible
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Precio Unitario
-                </th>
+                {/* Solo super_admin ve la columna de precios */}
+                {canViewPrices && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Precio Unitario
+                  </th>
+                )}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Acciones
                 </th>
@@ -398,25 +424,34 @@ const GestionIngredientes = () => {
                   <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${getStockColor(ingrediente)}`}> 
                     {ingrediente.cantidad - ingrediente.procesado}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    S/.{ingrediente.precioUnitario?.toFixed(2) || '0.00'}
-                  </td>
+                  {/* Solo super_admin ve el precio */}
+                  {canViewPrices && (
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      S/.{ingrediente.precioUnitario?.toFixed(2) || '0.00'}
+                    </td>
+                  )}
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-1">
-                      <button
-                        onClick={() => handleEditarIngrediente(ingrediente)}
-                        title="Editar"
-                        className="p-1 text-blue-600 hover:text-blue-900 rounded hover:bg-blue-50 transition-colors"
-                      >
-                        <span role="img" aria-label="Editar">✏️</span>
-                      </button>
-                      <button
-                        onClick={() => handleAjustarInventario(ingrediente)}
-                        title="Ajustar Inventario"
-                        className="p-1 text-green-600 hover:text-green-900 rounded hover:bg-green-50 transition-colors"
-                      >
-                        <span role="img" aria-label="Ajustar">⚖️</span>
-                      </button>
+                      {/* Solo super_admin puede editar */}
+                      {canManageIngredientes && (
+                        <button
+                          onClick={() => handleEditarIngrediente(ingrediente)}
+                          title="Editar"
+                          className="p-1 text-blue-600 hover:text-blue-900 rounded hover:bg-blue-50 transition-colors"
+                        >
+                          <span role="img" aria-label="Editar">✏️</span>
+                        </button>
+                      )}
+                      {/* Admin o superior puede ajustar */}
+                      {canAdjustInventory && (
+                        <button
+                          onClick={() => handleAjustarInventario(ingrediente)}
+                          title="Ajustar Inventario"
+                          className="p-1 text-green-600 hover:text-green-900 rounded hover:bg-green-50 transition-colors"
+                        >
+                          <span role="img" aria-label="Ajustar">⚖️</span>
+                        </button>
+                      )}
                       <button
                         onClick={() => handleVerMovimientos(ingrediente)}
                         title="Historial"
@@ -424,13 +459,16 @@ const GestionIngredientes = () => {
                       >
                         <span role="img" aria-label="Historial">📋</span>
                       </button>
-                      <button
-                        onClick={() => handleDesactivar(ingrediente._id)}
-                        title="Desactivar"
-                        className="p-1 text-red-600 hover:text-red-900 rounded hover:bg-red-50 transition-colors"
-                      >
-                        <span role="img" aria-label="Desactivar">🗑️</span>
-                      </button>
+                      {/* Solo super_admin puede desactivar */}
+                      {canManageIngredientes && (
+                        <button
+                          onClick={() => handleDesactivar(ingrediente._id)}
+                          title="Desactivar"
+                          className="p-1 text-red-600 hover:text-red-900 rounded hover:bg-red-50 transition-colors"
+                        >
+                          <span role="img" aria-label="Desactivar">🗑️</span>
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

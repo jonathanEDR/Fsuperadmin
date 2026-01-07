@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import api from '../../../services/api';
+import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -13,6 +14,7 @@ Chart.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Too
  * Zona horaria: America/Lima (UTC-5)
  */
 const ResiduosLineChart = React.memo(() => {
+  const { canViewPrices } = useQuickPermissions();
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -160,6 +162,43 @@ const ResiduosLineChart = React.memo(() => {
         }
       });
 
+      // Construir datasets base
+      const baseDatasets = [
+        {
+          label: 'Cantidad Perdida',
+          data: dataPoints.map(point => point.cantidadPerdida),
+          borderColor: '#EF4444',
+          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          tension: 0.3,
+          fill: false,
+          yAxisID: 'y',
+        },
+        {
+          label: 'N° Registros',
+          data: dataPoints.map(point => point.cantidadResiduos),
+          borderColor: '#8B5CF6',
+          backgroundColor: 'rgba(139, 92, 246, 0.1)',
+          tension: 0.3,
+          fill: false,
+          yAxisID: 'y',
+          borderWidth: 2,
+          borderDash: [5, 5],
+        },
+      ];
+
+      // Solo agregar dataset de costos si el usuario puede ver precios
+      if (canViewPrices) {
+        baseDatasets.splice(1, 0, {
+          label: 'Costo Pérdida (S/)',
+          data: dataPoints.map(point => point.costoPerdida),
+          borderColor: '#F59E0B',
+          backgroundColor: 'rgba(245, 158, 11, 0.1)',
+          tension: 0.3,
+          fill: false,
+          yAxisID: 'y1',
+        });
+      }
+
       const newChartData = {
         labels: labels.map(dateStr => {
           const date = new Date(dateStr + 'T00:00:00');
@@ -168,44 +207,14 @@ const ResiduosLineChart = React.memo(() => {
             month: '2-digit' 
           });
         }),
-        datasets: [
-          {
-            label: 'Cantidad Perdida',
-            data: dataPoints.map(point => point.cantidadPerdida),
-            borderColor: '#EF4444',
-            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-            tension: 0.3,
-            fill: false,
-            yAxisID: 'y',
-          },
-          {
-            label: 'Costo Pérdida (S/)',
-            data: dataPoints.map(point => point.costoPerdida),
-            borderColor: '#F59E0B',
-            backgroundColor: 'rgba(245, 158, 11, 0.1)',
-            tension: 0.3,
-            fill: false,
-            yAxisID: 'y1',
-          },
-          {
-            label: 'N° Registros',
-            data: dataPoints.map(point => point.cantidadResiduos),
-            borderColor: '#8B5CF6',
-            backgroundColor: 'rgba(139, 92, 246, 0.1)',
-            tension: 0.3,
-            fill: false,
-            yAxisID: 'y',
-            borderWidth: 2,
-            borderDash: [5, 5],
-          },
-        ],
+        datasets: baseDatasets,
       };
       
       setChartData(newChartData);
     } catch (err) {
       setError('No se pudo cargar el gráfico de residuos: ' + err.message);
     }
-  }, [fechaInicio, fechaFin, obtenerFechaSoloLocal]);
+  }, [fechaInicio, fechaFin, obtenerFechaSoloLocal, canViewPrices]);
 
   // Función para obtener la etiqueta del filtro
   const getTimeFilterLabel = useCallback(() => {
@@ -621,6 +630,7 @@ const ResiduosLineChart = React.memo(() => {
           </div>
         </div>
         
+        {canViewPrices && (
         <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-3 sm:p-4 border border-amber-200">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-lg sm:text-xl">💰</span>
@@ -630,6 +640,7 @@ const ResiduosLineChart = React.memo(() => {
             S/ {totals.costoTotalPerdida.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
         </div>
+        )}
         
         <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-3 sm:p-4 border border-purple-200">
           <div className="flex items-center gap-2 mb-1">

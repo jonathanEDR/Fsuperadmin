@@ -203,6 +203,8 @@ function App() {
               <Route path="catalogo" element={<CatalogoPage />} />
               <Route path="escaner-qr" element={<EscanerQR />} /> {/* NUEVO: Escáner QR Asistencias */}
               <Route path="perfil" element={<PerfilPage />} />
+              {/* Producción - acceso limitado para usuarios */}
+              <Route path="produccion/*" element={<ProduccionPage />} />
             </Route>
             
             {/* Ruta por defecto - redirige a home */}

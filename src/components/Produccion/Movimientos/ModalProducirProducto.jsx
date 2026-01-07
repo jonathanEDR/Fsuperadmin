@@ -1,17 +1,25 @@
 // Modal Producir Stock - Optimizado para móviles v3.0 - Layout Vertical Completo
 import React, { useState, useEffect } from 'react';
+import { useUser, useAuth } from '@clerk/clerk-react';
 import { movimientoUnificadoService } from '../../../services/movimientoUnificadoService';
 import { getLocalDateTimeString } from '../../../utils/fechaHoraUtils';
+import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
+import { getFullApiUrl, safeFetch } from '../../../config/api';
 
 const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
+  // Hook de permisos para control de visualización de costos
+  const { canViewPrices, isSuperAdmin } = useQuickPermissions();
+  const { user } = useUser();
+  const { getToken } = useAuth();
+  
   const [formData, setFormData] = useState({
     cantidadProducir: 1,
     operador: '',
     observaciones: '',
     fechaProduccion: '', // NUEVO: Campo para fecha de producción
     ingredientesUtilizados: [],
-    recetasUtilizadas: [],
-    consumirRecursos: true // Flag para decidir si consumir del inventario
+    recetasUtilizadas: []
+    // consumirRecursos eliminado - SIEMPRE se consume automáticamente
   });
   
   const [ingredientesDisponibles, setIngredientesDisponibles] = useState([]);
@@ -20,6 +28,8 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('ingredientes');
+  const [usuarios, setUsuarios] = useState([]);
+  const [loadingUsuarios, setLoadingUsuarios] = useState(false);
   
   // Estados para acordeones en móvil
   const [mostrarIngredientes, setMostrarIngredientes] = useState(true);
@@ -28,10 +38,44 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
 
   useEffect(() => {
     if (isOpen && producto) {
+      cargarUsuarios();
       resetearFormulario();
       cargarRecursos();
     }
   }, [isOpen, producto]);
+
+  const cargarUsuarios = async () => {
+    if (!isSuperAdmin) {
+      // Admin/User: autocompletar con nombre del usuario actual
+      setFormData(prev => ({
+        ...prev,
+        operador: user.fullName || user.firstName || user.primaryEmailAddress?.emailAddress || ''
+      }));
+      return;
+    }
+
+    try {
+      setLoadingUsuarios(true);
+      const token = await getToken();
+      const url = `${getFullApiUrl('/admin/users')}`;
+      
+      const response = await safeFetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUsuarios(data.users || []);
+      }
+    } catch (error) {
+      console.error('Error al cargar usuarios:', error);
+    } finally {
+      setLoadingUsuarios(false);
+    }
+  };
 
   const resetearFormulario = () => {
     setFormData({
@@ -40,8 +84,8 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
       observaciones: '',
       fechaProduccion: getLocalDateTimeString(), // Inicializar con fecha/hora actual
       ingredientesUtilizados: [],
-      recetasUtilizadas: [],
-      consumirRecursos: true
+      recetasUtilizadas: []
+      // consumirRecursos eliminado - SIEMPRE se consume automáticamente
     });
     setError('');
     setActiveTab('ingredientes');
@@ -55,15 +99,49 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
         movimientoUnificadoService.obtenerProductosPorTipo('recetas')
       ]);
       
+      // 🔍 DEBUG: Mostrar datos del backend
+      console.log('📦 ModalProducirProducto - Ingredientes del backend:', ingredientesResponse.data?.map(ing => ({
+        nombre: ing.nombre,
+        cantidad: ing.cantidad,
+        procesado: ing.procesado,
+        disponible: (ing.cantidad || 0) - (ing.procesado || 0)
+      })));
+      
       // Filtrar solo ingredientes con stock disponible
       const ingredientesConStock = (ingredientesResponse.data || []).filter(
         ing => (ing.cantidad - (ing.procesado || 0)) > 0
       );
       
-      // Filtrar solo recetas con stock disponible
+      console.log('✅ ModalProducirProducto - Ingredientes FILTRADOS con stock:', ingredientesConStock.map(ing => ({
+        nombre: ing.nombre,
+        cantidad: ing.cantidad,
+        procesado: ing.procesado,
+        disponible: (ing.cantidad || 0) - (ing.procesado || 0)
+      })));
+      
+      // Filtrar solo recetas con stock disponible (producida - utilizada > 0)
       const recetasConStock = (recetasResponse.data || []).filter(
-        rec => (rec.inventario?.cantidadProducida || 0) > 0
+        rec => ((rec.inventario?.cantidadProducida || 0) - (rec.inventario?.cantidadUtilizada || 0)) > 0
       );
+      
+      console.log('🍰 ModalProducirProducto - Recetas del backend:', recetasResponse.data?.map(rec => ({
+        nombre: rec.nombre,
+        producida: rec.inventario?.cantidadProducida,
+        utilizada: rec.inventario?.cantidadUtilizada,
+        disponible: (rec.inventario?.cantidadProducida || 0) - (rec.inventario?.cantidadUtilizada || 0),
+        ingredientes: rec.ingredientes?.map(ing => ({
+          nombre: ing.ingrediente?.nombre,
+          cantidad: ing.cantidad,
+          precioUnitario: ing.ingrediente?.precioUnitario
+        }))
+      })));
+      
+      console.log('✅ ModalProducirProducto - Recetas FILTRADAS con stock:', recetasConStock.map(rec => ({
+        nombre: rec.nombre,
+        producida: rec.inventario?.cantidadProducida,
+        utilizada: rec.inventario?.cantidadUtilizada,
+        disponible: (rec.inventario?.cantidadProducida || 0) - (rec.inventario?.cantidadUtilizada || 0)
+      })));
       
       setIngredientesDisponibles(ingredientesConStock);
       setRecetasDisponibles(recetasConStock);
@@ -155,8 +233,9 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
       let costoReceta = 0;
       if (receta?.ingredientes?.length > 0 && receta.rendimiento?.cantidad > 0) {
         const costoTotalIngredientes = receta.ingredientes.reduce((subtotal, ingredienteReceta) => {
-          const ingredienteInfo = ingredientesDisponibles.find(ing => ing._id === ingredienteReceta.ingrediente);
-          return subtotal + (ingredienteReceta.cantidad * (ingredienteInfo?.precioUnitario || 0));
+          // Usar el ingrediente poblado directamente (viene con precioUnitario del backend)
+          const precioUnitario = ingredienteReceta.ingrediente?.precioUnitario || 0;
+          return subtotal + (ingredienteReceta.cantidad * precioUnitario);
         }, 0);
         // Redondear a 2 decimales para evitar números largos
         costoReceta = Math.round((costoTotalIngredientes / receta.rendimiento.cantidad) * 100) / 100;
@@ -195,14 +274,12 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
         return false;
       }
       
-      // Validar stock disponible solo si se van a consumir recursos
-      if (formData.consumirRecursos) {
-        const ingredienteInfo = obtenerIngredienteInfo(item.ingrediente);
-        const disponible = (ingredienteInfo?.cantidad || 0) - (ingredienteInfo?.procesado || 0);
-        if (item.cantidadUtilizada > disponible) {
-          setError(`Stock insuficiente de ${ingredienteInfo?.nombre}. Disponible: ${disponible}`);
-          return false;
-        }
+      // Validar stock disponible (siempre se consume automáticamente)
+      const ingredienteInfo = obtenerIngredienteInfo(item.ingrediente);
+      const disponible = (ingredienteInfo?.cantidad || 0) - (ingredienteInfo?.procesado || 0);
+      if (item.cantidadUtilizada > disponible) {
+        setError(`Stock insuficiente de ${ingredienteInfo?.nombre}. Disponible: ${disponible}`);
+        return false;
       }
     }
 
@@ -218,14 +295,12 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
         return false;
       }
       
-      // Validar stock disponible solo si se van a consumir recursos
-      if (formData.consumirRecursos) {
-        const recetaInfo = obtenerRecetaInfo(item.receta);
-        const disponible = recetaInfo?.inventario?.cantidadProducida || 0;
-        if (item.cantidadUtilizada > disponible) {
-          setError(`Stock insuficiente de receta ${recetaInfo?.nombre}. Disponible: ${disponible}`);
-          return false;
-        }
+      // Validar stock disponible (siempre se consume automáticamente)
+      const recetaInfo = obtenerRecetaInfo(item.receta);
+      const disponible = (recetaInfo?.inventario?.cantidadProducida || 0) - (recetaInfo?.inventario?.cantidadUtilizada || 0);
+      if (item.cantidadUtilizada > disponible) {
+        setError(`Stock insuficiente de receta ${recetaInfo?.nombre}. Disponible: ${disponible}`);
+        return false;
       }
     }
 
@@ -253,11 +328,11 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
         fechaProduccion: formData.fechaProduccion, // NUEVO: Enviar fecha de producción
         costoTotal: calcularCostoTotal(),
         // Solo incluir ingredientes y recetas si se van a consumir
-        ingredientesUtilizados: formData.consumirRecursos ? formData.ingredientesUtilizados : [],
-        recetasUtilizadas: formData.consumirRecursos ? formData.recetasUtilizadas : []
+        ingredientesUtilizados: formData.ingredientesUtilizados,
+        recetasUtilizadas: formData.recetasUtilizadas,
+        consumirRecursos: true // SIEMPRE consumir automáticamente
       };
 
-      console.log('📅 ModalProducirProducto - Enviando fecha:', formData.fechaProduccion);
 
       await movimientoUnificadoService.agregarCantidad(datosProduccion);
 
@@ -321,7 +396,8 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
             <div className="flex-1 overflow-y-auto">
               <div className="p-2 sm:p-4 lg:p-6 space-y-3 sm:space-y-4">
               
-              {/* Costo Total - Sticky en móvil, arriba para visibilidad */}
+              {/* Costo Total - Solo visible para super_admin */}
+              {canViewPrices && (
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-2 sm:p-3 sticky top-0 z-10 shadow-sm">
                 <div className="flex items-center justify-between">
                   <div>
@@ -338,6 +414,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                   </div>
                 </div>
               </div>
+              )}
 
               {/* Tarjeta de Cantidades - Más visual y compacta */}
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-3 sm:p-4">
@@ -398,17 +475,33 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
 
                 <div>
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                    Operador Responsable *
+                    Operador Responsable * {isSuperAdmin && <span className="text-gray-500 text-xs">(Selecciona quién realizó la producción)</span>}
                   </label>
-                  <input
-                    type="text"
-                    value={formData.operador}
-                    onChange={(e) => setFormData(prev => ({ ...prev, operador: e.target.value }))}
-                    className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Nombre del operador"
-                    disabled={enviando}
-                    required
-                  />
+                  {isSuperAdmin ? (
+                    <select
+                      value={formData.operador}
+                      onChange={(e) => setFormData(prev => ({ ...prev, operador: e.target.value }))}
+                      className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      disabled={enviando || loadingUsuarios}
+                      required
+                    >
+                      <option value="">
+                        {loadingUsuarios ? 'Cargando usuarios...' : 'Seleccionar operador...'}
+                      </option>
+                      {usuarios.map(u => (
+                        <option key={u._id} value={u.nombre_negocio || u.email}>
+                          {u.nombre_negocio || u.email} ({u.role})
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={formData.operador}
+                      className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-300 rounded-lg bg-gray-100"
+                      readOnly
+                    />
+                  )}
                 </div>
 
                 {/* Fecha y Hora de Producción */}
@@ -444,25 +537,16 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                   />
                 </div>
 
-                {/* Checkbox para consumir recursos */}
-                <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-3">
+                {/* Mensaje informativo: consumo automático */}
+                <div className="bg-green-50 border-2 border-green-300 rounded-xl p-3">
                   <div className="flex items-start space-x-3">
-                    <input
-                      type="checkbox"
-                      id="consumirRecursos"
-                      checked={formData.consumirRecursos}
-                      onChange={(e) => setFormData(prev => ({ ...prev, consumirRecursos: e.target.checked }))}
-                      className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-0.5 flex-shrink-0"
-                      disabled={enviando}
-                    />
+                    <span className="text-2xl">✅</span>
                     <div className="flex-1">
-                      <label htmlFor="consumirRecursos" className="text-sm sm:text-base font-semibold text-gray-900 cursor-pointer block">
-                        🏭 Consumir ingredientes y recetas del inventario
-                      </label>
+                      <p className="text-sm sm:text-base font-semibold text-gray-900">
+                        🏭 Los recursos se descontarán automáticamente del inventario
+                      </p>
                       <p className="text-xs sm:text-sm text-gray-700 mt-1">
-                        {formData.consumirRecursos 
-                          ? '✅ Los recursos se descontarán automáticamente' 
-                          : '⚠️ No se modificará el inventario de recursos'}
+                        Al producir, los ingredientes y recetas seleccionados se consumirán de forma automática.
                       </p>
                     </div>
                   </div>
@@ -557,7 +641,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                                   </button>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-2">
+                                <div className={canViewPrices ? "grid grid-cols-2 gap-2" : ""}>
                                   <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Cantidad</label>
                                     <input
@@ -581,6 +665,8 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                                     )}
                                   </div>
 
+                                  {/* Costo del ingrediente - Solo visible para super_admin */}
+                                  {canViewPrices && (
                                   <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Costo</label>
                                     <div className="p-1.5 sm:p-2 bg-gray-100 border border-gray-200 rounded text-xs sm:text-sm">
@@ -592,6 +678,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                                       </div>
                                     </div>
                                   </div>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -646,15 +733,16 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                       <div className="space-y-2">
                         {formData.recetasUtilizadas.map((item, index) => {
                           const recetaInfo = obtenerRecetaInfo(item.receta);
-                          const disponible = recetaInfo?.inventario?.cantidadProducida || 0;
-                          const stockInsuficiente = formData.consumirRecursos && item.cantidadUtilizada > disponible;
+                          const disponible = (recetaInfo?.inventario?.cantidadProducida || 0) - (recetaInfo?.inventario?.cantidadUtilizada || 0);
+                          const stockInsuficiente = item.cantidadUtilizada > disponible;
                           
                           // Calcular costo de la receta - redondeado a 2 decimales
                           let costoReceta = 0;
                           if (recetaInfo?.ingredientes?.length > 0 && recetaInfo.rendimiento?.cantidad > 0) {
                             const costoTotalIngredientes = recetaInfo.ingredientes.reduce((subtotal, ingredienteReceta) => {
-                              const ingredienteInfo = ingredientesDisponibles.find(ing => ing._id === ingredienteReceta.ingrediente);
-                              return subtotal + (ingredienteReceta.cantidad * (ingredienteInfo?.precioUnitario || 0));
+                              // Usar el ingrediente poblado directamente (viene con precioUnitario del backend)
+                              const precioUnitario = ingredienteReceta.ingrediente?.precioUnitario || 0;
+                              return subtotal + (ingredienteReceta.cantidad * precioUnitario);
                             }, 0);
                             costoReceta = Math.round((costoTotalIngredientes / recetaInfo.rendimiento.cantidad) * 100) / 100;
                           }
@@ -674,11 +762,16 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                                       disabled={enviando}
                                     >
                                       <option value="">Seleccionar...</option>
-                                      {recetasDisponibles.map(receta => (
-                                        <option key={receta._id} value={receta._id}>
-                                          {receta.nombre}
-                                        </option>
-                                      ))}
+                                      {recetasDisponibles.map(receta => {
+                                        const producida = receta.inventario?.cantidadProducida || 0;
+                                        const utilizada = receta.inventario?.cantidadUtilizada || 0;
+                                        const dispRec = producida - utilizada;
+                                        return (
+                                          <option key={receta._id} value={receta._id}>
+                                            {receta.nombre} - Disp: {dispRec.toFixed(2)} {receta.rendimiento?.unidadMedida} (Prod: {producida}, Usado: {utilizada})
+                                          </option>
+                                        );
+                                      })}
                                     </select>
                                     {recetaInfo && (
                                       <div className={`text-xs mt-0.5 ${stockInsuficiente ? 'text-red-600' : 'text-gray-500'}`}>
@@ -697,7 +790,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                                   </button>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-2">
+                                <div className={canViewPrices ? "grid grid-cols-2 gap-2" : ""}>
                                   <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Cantidad</label>
                                     <input
@@ -721,17 +814,19 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                                     )}
                                   </div>
 
-                                  <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Costo</label>
-                                    <div className="p-1.5 sm:p-2 bg-gray-100 border border-gray-200 rounded text-xs sm:text-sm">
-                                      <div className="font-semibold text-gray-900">
-                                        S/.{(item.cantidadUtilizada * costoReceta).toFixed(2)}
-                                      </div>
-                                      <div className="text-xs text-gray-500">
-                                        @ S/.{costoReceta.toFixed(2)}
+                                  {canViewPrices && (
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-700 mb-1">Costo</label>
+                                      <div className="p-1.5 sm:p-2 bg-gray-100 border border-gray-200 rounded text-xs sm:text-sm">
+                                        <div className="font-semibold text-gray-900">
+                                          S/.{(item.cantidadUtilizada * costoReceta).toFixed(2)}
+                                        </div>
+                                        <div className="text-xs text-gray-500">
+                                          @ S/.{costoReceta.toFixed(2)}
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
+                                  )}
                                 </div>
                               </div>
                             </div>

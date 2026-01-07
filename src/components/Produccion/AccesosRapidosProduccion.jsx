@@ -10,68 +10,104 @@ import { produccionService } from '../../services/produccionService';
 // Importar el nuevo Sistema Solar
 import { SistemaSolarProduccion } from './SistemaSolarProduccion';
 
+// Importar hook de permisos
+import { useQuickPermissions } from '../../hooks/useProduccionPermissions';
 
-const accesos = [
+
+const accesosCompletos = [
   {
     label: 'Catálogo de Producción',
     to: 'catalogo',
     icon: '📋',
     color: 'bg-gradient-to-br from-indigo-50 to-indigo-100 hover:from-indigo-100 hover:to-indigo-200 text-indigo-800 border-indigo-200',
-    description: 'Ver productos del catálogo'
+    description: 'Ver productos del catálogo',
+    requiereAdmin: false, // Todos pueden ver
+    requiereSuperAdmin: false
   },
   {
     label: 'Gestión de Ingredientes',
     to: 'ingredientes',
     icon: '🥬',
     color: 'bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 text-green-800 border-green-200',
-    description: 'Administrar ingredientes'
+    description: 'Administrar ingredientes',
+    requiereAdmin: true,
+    requiereSuperAdmin: true // Solo super_admin (tiene precios)
   },
   {
     label: 'Gestión de Materiales',
     to: 'materiales',
     icon: '📦',
     color: 'bg-gradient-to-br from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 text-yellow-800 border-yellow-200',
-    description: 'Administrar materiales'
+    description: 'Administrar materiales',
+    requiereAdmin: true,
+    requiereSuperAdmin: true // Solo super_admin (tiene precios)
   },
   {
     label: 'Gestión de Recetas',
     to: 'recetas',
     icon: '📝',
     color: 'bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 text-blue-800 border-blue-200',
-    description: 'Crear y editar recetas'
+    description: 'Crear y editar recetas',
+    requiereAdmin: true, // Solo admin/super_admin
+    requiereSuperAdmin: false
   },
   {
     label: 'Gestión de Producción',
     to: 'produccion',
     icon: '🏭',
     color: 'bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 text-purple-800 border-purple-200',
-    description: 'Procesos de producción'
+    description: 'Procesos de producción',
+    requiereAdmin: true, // Solo admin/super_admin
+    requiereSuperAdmin: false
   },
   {
     label: 'Gráficos de Producción',
     to: 'graficos',
     icon: '📈',
     color: 'bg-gradient-to-br from-cyan-50 to-cyan-100 hover:from-cyan-100 hover:to-cyan-200 text-cyan-800 border-cyan-200',
-    description: 'Estadísticas y gráficos de producción'
+    description: 'Estadísticas y gráficos de producción',
+    requiereAdmin: false, // Todos pueden ver
+    requiereSuperAdmin: false
   },
   {
     label: 'Residuos y Malogrados',
     to: 'residuos',
     icon: '🗑️',
     color: 'bg-gradient-to-br from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 text-red-800 border-red-200',
-    description: 'Gestión de residuos y productos malogrados'
+    description: 'Gestión de residuos y productos malogrados',
+    requiereAdmin: true, // Solo admin/super_admin
+    requiereSuperAdmin: false
   },
   {
     label: 'Movimientos de Inventario',
     to: 'movimientos',
     icon: '📊',
     color: 'bg-gradient-to-br from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 text-orange-800 border-orange-200',
-    description: 'Historial de movimientos'
+    description: 'Historial de movimientos',
+    requiereAdmin: false, // Todos pueden ver
+    requiereSuperAdmin: false
   },
 ];
 
 const AccesosRapidosProduccion = () => {
   const location = useLocation();
+  
+  // Hook de permisos para filtrar accesos según rol
+  const { canManageRecetas, canViewPrices, isAdminOrAbove, isSuperAdmin } = useQuickPermissions();
+  
+  // Filtrar accesos según permisos del usuario
+  const accesos = accesosCompletos.filter(acceso => {
+    // Si requiere super_admin (ingredientes/materiales con precios)
+    if (acceso.requiereSuperAdmin) {
+      return isSuperAdmin; // Solo super_admin puede ver
+    }
+    // Si requiere admin (recetas, producción, residuos)
+    if (acceso.requiereAdmin) {
+      return isAdminOrAbove; // admin o super_admin pueden ver
+    }
+    // Acceso para todos (catálogo, gráficos, movimientos)
+    return true;
+  });
   
   // Estados para estadísticas
   const [estadisticas, setEstadisticas] = useState({

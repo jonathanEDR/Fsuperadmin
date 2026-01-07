@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import api from '../../../services/api';
+import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
 Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -12,6 +13,7 @@ Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
  * Muestra stock por fase (preparado, intermedio, terminado) y costo del inventario.
  */
 const RecetasStockBarChart = React.memo(() => {
+  const { canViewPrices } = useQuickPermissions();
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -218,7 +220,7 @@ const RecetasStockBarChart = React.memo(() => {
             lines.push(`📦 Producido: ${receta.cantidadProducida} ${receta.unidadMedida}`);
             lines.push(`📤 Utilizado: ${receta.cantidadUtilizada} ${receta.unidadMedida}`);
             
-            if (receta.costoTotal > 0) {
+            if (receta.costoTotal > 0 && canViewPrices) {
               lines.push(`💰 Costo/unidad: S/ ${receta.costoTotal.toFixed(2)}`);
               const valorInventario = receta.stockDisponible * receta.costoTotal;
               lines.push(`💵 Valor inventario: S/ ${valorInventario.toFixed(2)}`);

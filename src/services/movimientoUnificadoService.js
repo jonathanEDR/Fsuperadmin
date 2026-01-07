@@ -111,7 +111,8 @@ export const movimientoUnificadoService = {
     cantidad, 
     motivo = '', 
     precio = null, 
-    consumirIngredientes = false,
+    consumirIngredientes = false, // Nombre antiguo (compatibilidad)
+    consumirRecursos = false, // Nombre nuevo
     operador = '',
     observaciones = '',
     costoTotal = 0,
@@ -119,6 +120,9 @@ export const movimientoUnificadoService = {
     recetasUtilizadas = [],
     fechaProduccion = null // NUEVO: Campo para la fecha de producción
   }) {
+    // Determinar el valor correcto de consumir (priorizar consumirRecursos sobre consumirIngredientes)
+    const debeConsumirRecursos = consumirRecursos !== undefined && consumirRecursos !== false ? consumirRecursos : consumirIngredientes;
+    
     const data = {
       tipoProducto,
       productoId,
@@ -137,7 +141,8 @@ export const movimientoUnificadoService = {
 
     // Solo agregar consumirIngredientes para recetas
     if (tipoProducto === 'recetas') {
-      data.consumirIngredientes = consumirIngredientes;
+      data.consumirIngredientes = debeConsumirRecursos;
+      data.consumirRecursos = debeConsumirRecursos; // Enviar ambos para compatibilidad
     }
 
     // Para producción, agregar datos adicionales
@@ -147,7 +152,8 @@ export const movimientoUnificadoService = {
       data.costoTotal = costoTotal;
       data.ingredientesUtilizados = ingredientesUtilizados;
       data.recetasUtilizadas = recetasUtilizadas;
-      data.consumirIngredientes = consumirIngredientes; // 🔧 CRÍTICO: Faltaba esta línea
+      data.consumirIngredientes = debeConsumirRecursos; // Enviar consumirIngredientes para backend
+      data.consumirRecursos = debeConsumirRecursos; // Enviar también consumirRecursos
     }
     
     const response = await api.post('/movimientos-unificados/agregar-cantidad', data);

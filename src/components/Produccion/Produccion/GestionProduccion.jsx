@@ -5,8 +5,12 @@ import { produccionService } from '../../../services/produccionService';
 import NuevaProduccion from './NuevaProduccion';
 import DetalleProduccion from './DetalleProduccion';
 import { formatearFecha, getLocalDateTimeString } from '../../../utils/fechaHoraUtils';
+import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
 const GestionProduccion = () => {
+  // Hook de permisos para control de roles
+  const { canViewPrices, canDeleteProduccion, canCreateProduccion, isSuperAdmin } = useQuickPermissions();
+
   const [producciones, setProducciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -262,12 +266,15 @@ const GestionProduccion = () => {
         </div>
       </div>
 
-        <button
-          onClick={handleNuevaProduccion}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-colors w-full sm:w-auto font-medium text-sm sm:text-base"
-        >
-          ➕ Nueva Producción
-        </button>
+        {/* Botón Nueva Producción - Solo visible para super_admin */}
+        {canCreateProduccion && (
+          <button
+            onClick={handleNuevaProduccion}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-colors w-full sm:w-auto font-medium text-sm sm:text-base"
+          >
+            ➕ Nueva Producción
+          </button>
+        )}
 
       {/* 🎯 OPTIMIZADO: Lista de Producciones con vista dual */}
       
@@ -280,14 +287,18 @@ const GestionProduccion = () => {
               No hay producciones
             </h3>
             <p className="text-gray-500 mb-4">
-              Comienza creando tu primera producción
+              {canCreateProduccion 
+                ? 'Comienza creando tu primera producción' 
+                : 'Aún no hay producciones registradas'}
             </p>
-            <button
-              onClick={handleNuevaProduccion}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-            >
-              Crear Primera Producción
-            </button>
+            {canCreateProduccion && (
+              <button
+                onClick={handleNuevaProduccion}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                Crear Primera Producción
+              </button>
+            )}
           </div>
         ) : (
           producciones.map((produccion) => (
@@ -314,16 +325,19 @@ const GestionProduccion = () => {
               </div>
               
               {/* Stats en grid */}
-              <div className="grid grid-cols-3 gap-2 mb-3">
+              <div className={`grid ${canViewPrices ? 'grid-cols-3' : 'grid-cols-2'} gap-2 mb-3`}>
                 <div className="bg-blue-50 rounded-lg p-2 text-center">
                   <p className="text-xs text-blue-600 font-medium">Cantidad</p>
                   <p className="text-sm font-bold text-blue-800">{produccion.cantidadProducida}</p>
                   <p className="text-[10px] text-blue-500">{produccion.unidadMedida}</p>
                 </div>
-                <div className="bg-green-50 rounded-lg p-2 text-center">
-                  <p className="text-xs text-green-600 font-medium">Costo</p>
-                  <p className="text-sm font-bold text-green-800">S/.{produccion.costoTotal?.toFixed(2) || '0.00'}</p>
-                </div>
+                {/* Solo super_admin ve el costo */}
+                {canViewPrices && (
+                  <div className="bg-green-50 rounded-lg p-2 text-center">
+                    <p className="text-xs text-green-600 font-medium">Costo</p>
+                    <p className="text-sm font-bold text-green-800">S/.{produccion.costoTotal?.toFixed(2) || '0.00'}</p>
+                  </div>
+                )}
                 <div className="bg-purple-50 rounded-lg p-2 text-center">
                   <p className="text-xs text-purple-600 font-medium">Fecha</p>
                   <p className="text-sm font-bold text-purple-800">
@@ -388,9 +402,12 @@ const GestionProduccion = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Costo
-                </th>
+                {/* Solo super_admin ve la columna de costo */}
+                {canViewPrices && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Costo
+                  </th>
+                )}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Operador
                 </th>
@@ -425,9 +442,12 @@ const GestionProduccion = () => {
                       {getEstadoLabel(produccion.estado)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    S/.{produccion.costoTotal?.toFixed(2) || '0.00'}
-                  </td>
+                  {/* Solo super_admin ve el costo */}
+                  {canViewPrices && (
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      S/.{produccion.costoTotal?.toFixed(2) || '0.00'}
+                    </td>
+                  )}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {produccion.operador}
                   </td>
@@ -483,14 +503,18 @@ const GestionProduccion = () => {
               No hay producciones
             </h3>
             <p className="text-gray-500 mb-4">
-              Comienza creando tu primera producción
+              {canCreateProduccion 
+                ? 'Comienza creando tu primera producción' 
+                : 'Aún no hay producciones registradas'}
             </p>
-            <button
-              onClick={handleNuevaProduccion}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-            >
-              Crear Primera Producción
-            </button>
+            {canCreateProduccion && (
+              <button
+                onClick={handleNuevaProduccion}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                Crear Primera Producción
+              </button>
+            )}
           </div>
         )}
       </div>

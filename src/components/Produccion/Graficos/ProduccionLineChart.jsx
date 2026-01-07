@@ -4,10 +4,12 @@ import { Chart, CategoryScale, LinearScale, PointElement, LineElement, Title, To
 import api from '../../../services/api';
 import { formatearFecha } from '../../../utils/fechaHoraUtils';
 import { procesarFechaParaGrafico } from '../../../utils/graficosDateUtils';
+import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const ProduccionLineChart = React.memo(({ userRole }) => {
+  const { canViewPrices } = useQuickPermissions();
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -187,6 +189,43 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
       
       setTotals(periodTotals);
       
+      // Construir datasets base
+      const baseDatasets = [
+        {
+          label: 'Unidades Producidas',
+          data: dataPoints.map(point => point.unidadesProducidas),
+          borderColor: '#10B981',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          tension: 0.3,
+          fill: false,
+          yAxisID: 'y',
+        },
+        {
+          label: 'N° Producciones',
+          data: dataPoints.map(point => point.cantidadProducciones),
+          borderColor: '#3B82F6',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          tension: 0.3,
+          fill: false,
+          yAxisID: 'y',
+          borderWidth: 2,
+          borderDash: [5, 5],
+        },
+      ];
+
+      // Solo agregar dataset de costos si el usuario puede ver precios
+      if (canViewPrices) {
+        baseDatasets.splice(1, 0, {
+          label: 'Costo Producción (S/)',
+          data: dataPoints.map(point => point.costoProduccion),
+          borderColor: '#F59E0B',
+          backgroundColor: 'rgba(245, 158, 11, 0.1)',
+          tension: 0.3,
+          fill: false,
+          yAxisID: 'y1',
+        });
+      }
+
       const newChartData = {
         labels: labels.map(dateStr => {
           const date = new Date(dateStr + 'T00:00:00');
@@ -195,37 +234,7 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
             month: '2-digit' 
           });
         }),
-        datasets: [
-          {
-            label: 'Unidades Producidas',
-            data: dataPoints.map(point => point.unidadesProducidas),
-            borderColor: '#10B981',
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-            tension: 0.3,
-            fill: false,
-            yAxisID: 'y',
-          },
-          {
-            label: 'Costo Producción (S/)',
-            data: dataPoints.map(point => point.costoProduccion),
-            borderColor: '#F59E0B',
-            backgroundColor: 'rgba(245, 158, 11, 0.1)',
-            tension: 0.3,
-            fill: false,
-            yAxisID: 'y1',
-          },
-          {
-            label: 'N° Producciones',
-            data: dataPoints.map(point => point.cantidadProducciones),
-            borderColor: '#3B82F6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            tension: 0.3,
-            fill: false,
-            yAxisID: 'y',
-            borderWidth: 2,
-            borderDash: [5, 5],
-          },
-        ],
+        datasets: baseDatasets,
       };
       
       if (!newChartData.labels || newChartData.labels.length === 0) {
@@ -239,7 +248,7 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
       console.error('❌ ProduccionLineChart - Error:', err.message);
       setError('No se pudo cargar el gráfico de producción: ' + err.message);
     }
-  }, [fechaInicio, fechaFin, obtenerFechaSoloLocal]);
+  }, [fechaInicio, fechaFin, obtenerFechaSoloLocal, canViewPrices]);
 
   // Función para obtener la etiqueta del filtro
   const getTimeFilterLabel = useCallback(() => {
@@ -595,6 +604,7 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
           </div>
         </div>
 
+        {canViewPrices && (
         <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg p-3 sm:p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -606,6 +616,7 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
             <div className="text-amber-600 text-xl sm:text-2xl">💰</div>
           </div>
         </div>
+        )}
 
         <div className="bg-gradient-to-r from-blue-50 to-sky-50 border border-blue-200 rounded-lg p-3 sm:p-4">
           <div className="flex items-center justify-between">

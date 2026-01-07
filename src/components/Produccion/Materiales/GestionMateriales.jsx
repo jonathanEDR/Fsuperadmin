@@ -4,8 +4,16 @@ import FormularioMaterialMejorado from './FormularioMaterialMejorado';
 import AjusteMaterial from './AjusteMaterial';
 import MovimientosMaterial from './MovimientosMaterial';
 import BreadcrumbProduccion from '../BreadcrumbProduccion';
+import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
 const GestionMateriales = () => {
+  // Hook de permisos para control de roles
+  const { 
+    canViewPrices, 
+    canManageMateriales, 
+    canAdjustInventory 
+  } = useQuickPermissions();
+  
   const [materiales, setMateriales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -251,15 +259,18 @@ const GestionMateriales = () => {
           <div className="text-xs md:text-sm text-gray-600">Agotados</div>
         </div>
       </div>
-        <button
-          onClick={handleNuevoMaterial}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          <span>Nuevo Material</span>
-        </button>
+        {/* Solo super_admin puede crear nuevos materiales */}
+        {canManageMateriales && (
+          <button
+            onClick={handleNuevoMaterial}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Nuevo Material</span>
+          </button>
+        )}
       {/* Tabla de materiales optimizada para móvil */}
       
       {/* ========== VISTA MÓVIL: Tarjetas ========== */}
@@ -320,10 +331,18 @@ const GestionMateriales = () => {
                     <p className="text-xs text-orange-600 font-medium">Stock Mín.</p>
                     <p className="text-sm font-bold text-orange-800">{formatearNumero(material.stockMinimo)}</p>
                   </div>
-                  <div className="bg-emerald-50 rounded-lg p-2 text-center">
-                    <p className="text-xs text-emerald-600 font-medium">Precio</p>
-                    <p className="text-sm font-bold text-emerald-800">${formatearNumero(material.precioUnitario)}</p>
-                  </div>
+                  {/* Solo super_admin ve el precio */}
+                  {canViewPrices ? (
+                    <div className="bg-emerald-50 rounded-lg p-2 text-center">
+                      <p className="text-xs text-emerald-600 font-medium">Precio</p>
+                      <p className="text-sm font-bold text-emerald-800">${formatearNumero(material.precioUnitario)}</p>
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 rounded-lg p-2 text-center">
+                      <p className="text-xs text-gray-600 font-medium">Total</p>
+                      <p className="text-sm font-bold text-gray-800">{formatearNumero(material.cantidad)}</p>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Info adicional */}
@@ -337,21 +356,27 @@ const GestionMateriales = () => {
                 {/* Acciones */}
                 <div className="flex justify-between items-center pt-3 border-t border-gray-100">
                   <div className="flex space-x-1">
-                    <button
-                      onClick={() => handleEditarMaterial(material)}
-                      className="flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors"
-                    >
-                      <span className="mr-1">✏️</span> Editar
-                    </button>
-                    <button
-                      onClick={() => {
-                        setMaterialSeleccionado(material);
-                        setMostrarAjuste(true);
-                      }}
-                      className="flex items-center px-3 py-1.5 bg-green-50 text-green-600 rounded-lg text-xs font-medium hover:bg-green-100 transition-colors"
-                    >
-                      <span className="mr-1">⚖️</span> Ajustar
-                    </button>
+                    {/* Solo super_admin puede editar */}
+                    {canManageMateriales && (
+                      <button
+                        onClick={() => handleEditarMaterial(material)}
+                        className="flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors"
+                      >
+                        <span className="mr-1">✏️</span> Editar
+                      </button>
+                    )}
+                    {/* Admin o superior puede ajustar */}
+                    {canAdjustInventory && (
+                      <button
+                        onClick={() => {
+                          setMaterialSeleccionado(material);
+                          setMostrarAjuste(true);
+                        }}
+                        className="flex items-center px-3 py-1.5 bg-green-50 text-green-600 rounded-lg text-xs font-medium hover:bg-green-100 transition-colors"
+                      >
+                        <span className="mr-1">⚖️</span> Ajustar
+                      </button>
+                    )}
                   </div>
                   <div className="flex space-x-1">
                     <button
@@ -364,7 +389,8 @@ const GestionMateriales = () => {
                     >
                       📋
                     </button>
-                    {material.activo && (
+                    {/* Solo super_admin puede desactivar */}
+                    {material.activo && canManageMateriales && (
                       <button
                         onClick={() => handleDesactivarMaterial(material)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -399,9 +425,12 @@ const GestionMateriales = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Stock Mínimo
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Precio Unit.
-                </th>
+                {/* Solo super_admin ve la columna de precio */}
+                {canViewPrices && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Precio Unit.
+                  </th>
+                )}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
                 </th>
@@ -458,11 +487,14 @@ const GestionMateriales = () => {
                           {formatearNumero(material.stockMinimo)}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">
-                          ${formatearNumero(material.precioUnitario)}
-                        </div>
-                      </td>
+                      {/* Solo super_admin ve el precio */}
+                      {canViewPrices && (
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-900">
+                            ${formatearNumero(material.precioUnitario)}
+                          </div>
+                        </td>
+                      )}
                       <td className="px-6 py-4">
                         <span className={`text-sm font-medium ${estadoStock.color}`}>
                           {estadoStock.texto}
@@ -470,23 +502,29 @@ const GestionMateriales = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex space-x-2">
-                          <button
-                            onClick={() => handleEditarMaterial(material)}
-                            className="text-blue-600 hover:text-blue-900 text-sm"
-                            title="Editar material"
-                          >
-                            Editar
-                          </button>
-                          <button
-                            onClick={() => {
-                              setMaterialSeleccionado(material);
-                              setMostrarAjuste(true);
-                            }}
-                            className="text-green-600 hover:text-green-900 text-sm"
-                            title="Ajustar inventario"
-                          >
-                            Ajustar
-                          </button>
+                          {/* Solo super_admin puede editar */}
+                          {canManageMateriales && (
+                            <button
+                              onClick={() => handleEditarMaterial(material)}
+                              className="text-blue-600 hover:text-blue-900 text-sm"
+                              title="Editar material"
+                            >
+                              Editar
+                            </button>
+                          )}
+                          {/* Admin o superior puede ajustar */}
+                          {canAdjustInventory && (
+                            <button
+                              onClick={() => {
+                                setMaterialSeleccionado(material);
+                                setMostrarAjuste(true);
+                              }}
+                              className="text-green-600 hover:text-green-900 text-sm"
+                              title="Ajustar inventario"
+                            >
+                              Ajustar
+                            </button>
+                          )}
                           <button
                             onClick={() => {
                               setMaterialSeleccionado(material);
@@ -497,7 +535,8 @@ const GestionMateriales = () => {
                           >
                             Movimientos
                           </button>
-                          {material.activo && (
+                          {/* Solo super_admin puede desactivar */}
+                          {material.activo && canManageMateriales && (
                             <button
                               onClick={() => handleDesactivarMaterial(material)}
                               className="text-red-600 hover:text-red-900 text-sm"

@@ -8,10 +8,71 @@ import ModalAgregarCantidad from './ModalAgregarCantidad';
 import ModalProducirReceta from './ModalProducirReceta';
 import ModalProducirRecetaAjustable from './ModalProducirRecetaAjustable';
 import ModalProducirProducto from './ModalProducirProducto';
+import ModalProducirCantidadSimple from './ModalProducirCantidadSimple';
 import ModalIncrementarStock from './ModalIncrementarStock';
 import HistorialProduccion from './HistorialProduccion';
+import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
 const GestionMovimientosUnificada = ({ onVolver }) => {
+  // Hook de permisos para control de roles
+  const { 
+    canViewPrices, 
+    canAdjustInventory,
+    canDeleteProduccion,
+    isSuperAdmin
+  } = useQuickPermissions();
+
+  // Definir tipos de producto filtrados según rol
+  // Solo super_admin puede ver ingredientes y materiales (tienen precios directos)
+  const tiposProductoPermitidos = canViewPrices 
+    ? [
+        {
+          id: 'ingredientes',
+          nombre: 'Ingredientes',
+          descripcion: 'Materias primas para producción',
+          icono: '🥕',
+          color: 'bg-green-500'
+        },
+        {
+          id: 'materiales',
+          nombre: 'Materiales',
+          descripcion: 'Materiales de producción',
+          icono: '📦',
+          color: 'bg-blue-500'
+        },
+        {
+          id: 'recetas',
+          nombre: 'Recetas',
+          descripcion: 'Productos con recetas definidas',
+          icono: '📋',
+          color: 'bg-purple-500'
+        },
+        {
+          id: 'produccion',
+          nombre: 'Producción',
+          descripcion: 'Productos del catálogo de producción',
+          icono: '🏭',
+          color: 'bg-orange-500'
+        }
+      ]
+    : [
+        // Admin y User solo ven recetas y producción
+        {
+          id: 'recetas',
+          nombre: 'Recetas',
+          descripcion: 'Productos con recetas definidas',
+          icono: '📋',
+          color: 'bg-purple-500'
+        },
+        {
+          id: 'produccion',
+          nombre: 'Producción',
+          descripcion: 'Productos del catálogo de producción',
+          icono: '🏭',
+          color: 'bg-orange-500'
+        }
+      ];
+
   // Estados principales
   const [tipoSeleccionado, setTipoSeleccionado] = useState('');
   const [productos, setProductos] = useState([]);
@@ -46,8 +107,10 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
   // Estados de error
   const [error, setError] = useState('');
 
-  // Estados de paginación para historial móvil
-  const [itemsHistorialVisibles, setItemsHistorialVisibles] = useState(5);
+  // Estados de paginación para historial móvil basada en roles
+  const limiteInicial = isSuperAdmin ? 20 : 5;
+  const incrementoPagina = isSuperAdmin ? 20 : 5;
+  const [itemsHistorialVisibles, setItemsHistorialVisibles] = useState(limiteInicial);
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -178,9 +241,9 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
     if (tipoSeleccionado === 'recetas') {
       setMostrarSelectorModal(true);
     } 
-    // Si es producción, abrir el modal simple para incrementar stock
+    // Si es producción, abrir el modal de producción (el componente decidirá cuál modal renderizar según el rol)
     else if (tipoSeleccionado === 'produccion') {
-      setModalIncrementarOpen(true);
+      setModalProduccionOpen(true);
     } 
     else {
       setModalOpen(true);
@@ -346,9 +409,7 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
       if (esMovimientoDeReceta) {
         // 🍳 PRODUCCIÓN DE RECETA: Eliminar solo el movimiento
         // El backend detectará automáticamente que es una receta y usará revertirProduccionReceta
-        console.log('🍳 Eliminando movimiento de producción de receta:', movimientoId);
         const resultado = await movimientoUnificadoService.eliminarMovimiento(movimientoId);
-        console.log('✅ Movimiento de receta eliminado:', resultado);
         alert(`✅ Producción de receta eliminada exitosamente.\n🔄 Se revirtió correctamente el stock de la receta y los ingredientes utilizados.`);
         
       } else if (esMovimientoDeProduccion && !esMovimientoDeReceta) {
@@ -371,7 +432,6 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
           if (eliminarSoloMovimiento) {
             // Eliminar solo el movimiento como plan B
             const resultado = await movimientoUnificadoService.eliminarMovimiento(movimientoId);
-            console.log('✅ Movimiento eliminado (solo movimiento):', resultado);
             alert(`✅ Movimiento eliminado exitosamente.\n⚠️ NOTA: Se eliminó solo el movimiento, no la producción completa.\nSe revirtió ${resultado.data.cantidadRevertida} unidades del stock.`);
           } else {
             // Si no quiere eliminar solo el movimiento, relanzar el error
@@ -380,9 +440,7 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
         }
       } else {
         // 📝 MOVIMIENTO MANUAL: Eliminar solo el movimiento
-        console.log('📝 Eliminando movimiento manual:', movimientoId);
         const resultado = await movimientoUnificadoService.eliminarMovimiento(movimientoId);
-        console.log('✅ Movimiento manual eliminado:', resultado);
         alert(`✅ Movimiento eliminado exitosamente.\nSe revirtió ${resultado.data.cantidadRevertida} unidades del stock.`);
       }
       
@@ -471,7 +529,10 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                 🔄 Gestión de Movimientos Unificada
               </h1>
               <p className="text-gray-600">
-                Administra el inventario de ingredientes, materiales, recetas y producción desde un solo lugar
+                {canViewPrices 
+                  ? 'Administra el inventario de ingredientes, materiales, recetas y producción desde un solo lugar'
+                  : 'Administra el inventario de recetas y producción desde un solo lugar'
+                }
               </p>
             </div>
             
@@ -535,10 +596,11 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
           </div>
         )}
 
-        {/* Selector de tipo de producto */}
+        {/* Selector de tipo de producto - filtrado por rol */}
         <SelectorTipoProducto
           tipoSeleccionado={tipoSeleccionado}
           onTipoSeleccionado={handleTipoSeleccionado}
+          tipos={tiposProductoPermitidos}
           disabled={cargandoProductos}
         />
 
@@ -664,7 +726,8 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                                 <span className="font-medium">Utilizado:</span> {' '}
                                 <span className="text-orange-600">{producto.inventario?.cantidadUtilizada || 0}</span>
                               </div>
-                              {producto.costoEstimado && (
+                              {/* Solo super_admin ve costos */}
+                              {canViewPrices && producto.costoEstimado && (
                                 <div className="hidden sm:block">
                                   <span className="font-medium">Costo Unit.:</span> {' '}
                                   <span className="text-purple-600">
@@ -674,7 +737,8 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                               )}
                             </>
                           )}
-                          {producto.precio && (
+                          {/* Solo super_admin ve precio de referencia */}
+                          {canViewPrices && producto.precio && (
                             <div className="hidden sm:block">
                               <span className="font-medium">Precio Ref.:</span> {' '}
                               <span className="text-green-600">${producto.precio}</span>
@@ -757,7 +821,8 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                               <span className="text-xs text-gray-500">Cantidad: </span>
                               <span className="font-bold text-blue-600">{movimiento.cantidad} u</span>
                             </div>
-                            {(filtros.tipoProducto === 'ingredientes' || filtros.tipoProducto === 'materiales') && (
+                            {/* Solo super_admin ve precios */}
+                            {canViewPrices && (filtros.tipoProducto === 'ingredientes' || filtros.tipoProducto === 'materiales') && (
                               <div>
                                 <span className="text-xs text-gray-500">Precio: </span>
                                 <span className="font-medium text-gray-700">
@@ -786,7 +851,8 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                             <span className="text-xs text-gray-500">
                               👤 {movimiento.operador}
                             </span>
-                            {movimiento.tipo === 'entrada' ? (
+                            {/* Solo admin puede eliminar movimientos */}
+                            {movimiento.tipo === 'entrada' && canDeleteProduccion ? (
                               <button
                                 onClick={() => handleEliminarMovimiento(movimiento._id)}
                                 className="text-red-600 hover:text-red-900 hover:bg-red-50 p-1.5 rounded transition-colors flex items-center gap-1"
@@ -807,18 +873,18 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                       {/* Botón "Ver más" para móvil */}
                       {itemsHistorialVisibles < historial.length && (
                         <button
-                          onClick={() => setItemsHistorialVisibles(prev => prev + 10)}
+                          onClick={() => setItemsHistorialVisibles(prev => prev + incrementoPagina)}
                           className="w-full py-3 bg-blue-50 text-blue-600 rounded-lg font-medium hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                           </svg>
-                          Ver más ({historial.length - itemsHistorialVisibles} restantes)
+                          Ver más {incrementoPagina} ({historial.length - itemsHistorialVisibles} restantes)
                         </button>
                       )}
 
                       {/* Indicador cuando se muestran todos */}
-                      {itemsHistorialVisibles >= historial.length && historial.length > 5 && (
+                      {itemsHistorialVisibles >= historial.length && historial.length > limiteInicial && (
                         <p className="text-center text-xs text-gray-500 py-2">
                           ✓ Mostrando todos los {historial.length} movimientos
                         </p>
@@ -842,7 +908,8 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Cantidad
                             </th>
-                            {(filtros.tipoProducto === 'ingredientes' || filtros.tipoProducto === 'materiales') && (
+                            {/* Solo super_admin ve columna de precio */}
+                            {canViewPrices && (filtros.tipoProducto === 'ingredientes' || filtros.tipoProducto === 'materiales') && (
                               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Precio
                               </th>
@@ -859,7 +926,7 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          {historial.map((movimiento) => (
+                          {historial.slice(0, itemsHistorialVisibles).map((movimiento) => (
                             <tr key={movimiento._id} className="hover:bg-gray-50">
                               <td className="px-4 py-3 text-sm text-gray-900">
                                 {formatearFecha(movimiento.fecha)}
@@ -887,7 +954,8 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                                   {movimiento.cantidad} u
                                 </span>
                               </td>
-                              {(filtros.tipoProducto === 'ingredientes' || filtros.tipoProducto === 'materiales') && (
+                              {/* Solo super_admin ve celda de precio */}
+                              {canViewPrices && (filtros.tipoProducto === 'ingredientes' || filtros.tipoProducto === 'materiales') && (
                                 <td className="px-4 py-3 text-sm text-gray-900">
                                   {movimiento.precio 
                                     ? `S/. ${movimiento.precio.toFixed(2)}` 
@@ -907,7 +975,8 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                                 {movimiento.operador}
                               </td>
                               <td className="px-4 py-3 text-sm font-medium">
-                                {movimiento.tipo === 'entrada' && (
+                                {/* Solo admin puede eliminar movimientos */}
+                                {movimiento.tipo === 'entrada' && canDeleteProduccion && (
                                   <button
                                     onClick={() => handleEliminarMovimiento(movimiento._id)}
                                     className="text-red-600 hover:text-red-900 hover:bg-red-50 p-1 rounded transition-colors"
@@ -918,7 +987,7 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                                     </svg>
                                   </button>
                                 )}
-                                {movimiento.tipo !== 'entrada' && (
+                                {(movimiento.tipo !== 'entrada' || !canDeleteProduccion) && (
                                   <span className="text-gray-400 text-xs">No disponible</span>
                                 )}
                               </td>
@@ -926,6 +995,28 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                           ))}
                         </tbody>
                       </table>
+                      
+                      {/* Botón Ver más - Desktop */}
+                      {itemsHistorialVisibles < historial.length && (
+                        <div className="flex justify-center py-4 bg-gray-50 border-t border-gray-200">
+                          <button
+                            onClick={() => setItemsHistorialVisibles(prev => prev + incrementoPagina)}
+                            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium flex items-center gap-2"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                            Ver más {incrementoPagina}
+                          </button>
+                        </div>
+                      )}
+                      {historial.length > limiteInicial && itemsHistorialVisibles >= historial.length && (
+                        <div className="text-center py-3 bg-gray-50 border-t border-gray-200">
+                          <span className="text-sm text-gray-600">
+                            ✓ Mostrando todos los {historial.length} movimientos
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </>
                 ) : (
@@ -1040,21 +1131,36 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
         onSuccess={handleSuccessAgregar}
       />
 
-      {/* Modal para producir recetas (ajustable) */}
-      <ModalProducirRecetaAjustable
-        isOpen={modalRecetaAjustableOpen}
-        onClose={() => setModalRecetaAjustableOpen(false)}
-        receta={productoSeleccionado}
-        onSuccess={handleSuccessAgregar}
-      />
+      {/* Modal para producir recetas - TODOS usan el modal ajustable */}
+      {modalRecetaAjustableOpen && (
+        <ModalProducirRecetaAjustable
+          isOpen={modalRecetaAjustableOpen}
+          onClose={() => setModalRecetaAjustableOpen(false)}
+          receta={productoSeleccionado}
+          onSuccess={handleSuccessAgregar}
+        />
+      )}
 
-      {/* Modal para producir productos */}
-      <ModalProducirProducto
-        isOpen={modalProduccionOpen}
-        onClose={() => setModalProduccionOpen(false)}
-        producto={productoSeleccionado}
-        onSuccess={handleSuccessAgregar}
-      />
+      {/* Modal para producir productos - Renderizado según rol */}
+      {modalProduccionOpen && (
+        isSuperAdmin ? (
+          // Modal avanzado con costos y recursos para super_admin
+          <ModalProducirProducto
+            isOpen={modalProduccionOpen}
+            onClose={() => setModalProduccionOpen(false)}
+            producto={productoSeleccionado}
+            onSuccess={handleSuccessAgregar}
+          />
+        ) : (
+          // Modal simple solo con cantidades para admin/user
+          <ModalProducirCantidadSimple
+            isOpen={modalProduccionOpen}
+            onClose={() => setModalProduccionOpen(false)}
+            producto={productoSeleccionado}
+            onSuccess={handleSuccessAgregar}
+          />
+        )
+      )}
 
       {/* Modal para incrementar stock de productos */}
       <ModalIncrementarStock

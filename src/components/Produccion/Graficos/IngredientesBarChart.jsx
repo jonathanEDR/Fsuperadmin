@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import api from '../../../services/api';
+import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
 Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -13,6 +14,9 @@ Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
  * Zona horaria: America/Lima (UTC-5)
  */
 const IngredientesBarChart = React.memo(() => {
+  // Hook de permisos para control de visualización de precios
+  const { canViewPrices } = useQuickPermissions();
+  
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -278,8 +282,11 @@ const IngredientesBarChart = React.memo(() => {
                         if (ing) {
                           const lines = [];
                           lines.push(`Stock total: ${ing.cantidad} ${ing.unidadMedida}`);
-                          lines.push(`Precio unitario: ${formatCurrency(ing.precioUnitario)}`);
-                          lines.push(`Costo total: ${formatCurrency(ing.costoTotal)}`);
+                          // Solo mostrar precios si el usuario tiene permisos y los datos existen
+                          if (canViewPrices && ing.precioUnitario !== undefined) {
+                            lines.push(`Precio unitario: ${formatCurrency(ing.precioUnitario)}`);
+                            lines.push(`Costo total: ${formatCurrency(ing.costoTotal || 0)}`);
+                          }
                           return lines;
                         }
                         return [];
