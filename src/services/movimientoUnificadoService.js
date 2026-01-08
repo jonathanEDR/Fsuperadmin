@@ -317,7 +317,8 @@ export const movimientoUnificadoService = {
       'ingredientes': '🥕',
       'materiales': '📦',
       'recetas': '📋',
-      'produccion': '🏭'
+      'produccion': '🏭',
+      'sucursales': '🏪'
     };
     
     return iconos[tipoProducto] || '📦';

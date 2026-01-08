@@ -11,6 +11,7 @@ import ModalProducirProducto from './ModalProducirProducto';
 import ModalProducirCantidadSimple from './ModalProducirCantidadSimple';
 import ModalIncrementarStock from './ModalIncrementarStock';
 import HistorialProduccion from './HistorialProduccion';
+import TransferenciasSucursales from './TransferenciasSucursales';
 import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
 const GestionMovimientosUnificada = ({ onVolver }) => {
@@ -53,10 +54,17 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
           descripcion: 'Productos del catálogo de producción',
           icono: '🏭',
           color: 'bg-orange-500'
+        },
+        {
+          id: 'sucursales',
+          nombre: 'Sucursales',
+          descripcion: 'Transferir materiales a sucursales',
+          icono: '🏪',
+          color: 'bg-teal-500'
         }
       ]
     : [
-        // Admin y User solo ven recetas y producción
+        // Admin y User ven recetas, producción y sucursales
         {
           id: 'recetas',
           nombre: 'Recetas',
@@ -70,6 +78,13 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
           descripcion: 'Productos del catálogo de producción',
           icono: '🏭',
           color: 'bg-orange-500'
+        },
+        {
+          id: 'sucursales',
+          nombre: 'Sucursales',
+          descripcion: 'Transferir materiales a sucursales',
+          icono: '🏪',
+          color: 'bg-teal-500'
         }
       ];
 
@@ -120,7 +135,8 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
 
   // Cargar productos cuando cambia el tipo seleccionado
   useEffect(() => {
-    if (tipoSeleccionado) {
+    // No cargar productos si el tipo es 'sucursales' (tiene su propio componente)
+    if (tipoSeleccionado && tipoSeleccionado !== 'sucursales') {
       cargarProductos();
     }
   }, [tipoSeleccionado]);
@@ -134,7 +150,7 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
    * Cargar productos por tipo
    */
   const cargarProductos = async () => {
-    if (!tipoSeleccionado) {
+    if (!tipoSeleccionado || tipoSeleccionado === 'sucursales') {
       return;
     }
     
@@ -469,8 +485,10 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
           unidad: producto.unidadMedida || 'unidad'
         };
       case 'materiales':
+        // Calcular stock disponible: cantidad total - cantidad consumida/transferida
+        const stockDisponibleMaterial = (producto.cantidad || 0) - (producto.consumido || 0);
         return {
-          cantidad: producto.cantidad || 0,
+          cantidad: stockDisponibleMaterial,
           unidad: producto.unidadMedida || 'unidad'
         };
       case 'recetas':
@@ -530,7 +548,7 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
               </h1>
               <p className="text-gray-600">
                 {canViewPrices 
-                  ? 'Administra el inventario de ingredientes, materiales, recetas y producción desde un solo lugar'
+                  ? 'Administra el inventario de ingredientes, materiales, recetas, producción y transferencias a sucursales desde un solo lugar'
                   : 'Administra el inventario de recetas y producción desde un solo lugar'
                 }
               </p>
@@ -608,30 +626,37 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
         {tipoSeleccionado && (
           <div className="space-y-6">
             
-            {/* Panel de productos - Ancho completo */}
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-gray-800">
-                    {movimientoUnificadoService.obtenerIconoTipo(tipoSeleccionado)} 
-                    {' '}Catálogo de {tipoSeleccionado.charAt(0).toUpperCase() + tipoSeleccionado.slice(1)}
-                  </h2>
-                  <span className="text-sm text-gray-500">
-                    {productos.length} productos
-                  </span>
-                </div>
-                
-                {/* Buscador */}
-                <div className="mt-4">
-                  <input
-                    type="text"
-                    placeholder="Buscar producto..."
-                    value={filtros.buscar}
-                    onChange={(e) => handleBusqueda(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
+            {/* Mostrar componente especial para Sucursales */}
+            {tipoSeleccionado === 'sucursales' ? (
+              <div className="bg-white rounded-lg shadow p-6">
+                <TransferenciasSucursales />
               </div>
+            ) : (
+              <>
+                {/* Panel de productos - Ancho completo */}
+                <div className="bg-white rounded-lg shadow">
+                  <div className="p-6 border-b border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-xl font-semibold text-gray-800">
+                        {movimientoUnificadoService.obtenerIconoTipo(tipoSeleccionado)} 
+                        {' '}Catálogo de {tipoSeleccionado.charAt(0).toUpperCase() + tipoSeleccionado.slice(1)}
+                      </h2>
+                      <span className="text-sm text-gray-500">
+                        {productos.length} productos
+                      </span>
+                    </div>
+                    
+                    {/* Buscador */}
+                    <div className="mt-4">
+                      <input
+                        type="text"
+                        placeholder="Buscar producto..."
+                        value={filtros.buscar}
+                        onChange={(e) => handleBusqueda(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
               
               {/* Lista de productos en grid responsive */}
               <div className="p-6">
@@ -755,8 +780,6 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                 )}
               </div>
             </div>
-
-        
 
             {/* Panel de historial */}
             <div className="bg-white rounded-lg shadow">
@@ -1026,6 +1049,8 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                 )}
               </div>
             </div>
+              </>
+            )}
           </div>
         )}
 

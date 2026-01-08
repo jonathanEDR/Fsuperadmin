@@ -33,6 +33,22 @@ const GestionMateriales = () => {
     cargarMateriales();
   }, [filtros]);
 
+  // Recargar materiales cuando el componente se vuelve visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('📱 Página visible - recargando materiales...');
+        cargarMateriales();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [filtros]);
+
   const cargarMateriales = async () => {
     try {
       setLoading(true);
@@ -127,7 +143,17 @@ const GestionMateriales = () => {
           <h1 className="text-3xl font-bold text-gray-900">Gestión de Materiales</h1>
           <p className="text-gray-600 mt-1">Administra el inventario de materiales de producción</p>
         </div>
-
+        
+        {/* Botón de actualizar */}
+        <button
+          onClick={() => cargarMateriales()}
+          disabled={loading}
+          className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50"
+          title="Actualizar lista de materiales"
+        >
+          <span className={loading ? 'animate-spin' : ''}>{loading ? '⏳' : '🔄'}</span>
+          <span className="hidden sm:inline">Actualizar</span>
+        </button>
       </div>
 
       {/* Filtros optimizados para móvil */}
@@ -346,10 +372,16 @@ const GestionMateriales = () => {
                 </div>
                 
                 {/* Info adicional */}
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-3 px-1">
-                  <span>Total: {formatearNumero(material.cantidad)}</span>
+                <div className="bg-gray-50 rounded-lg p-2 mb-3">
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="text-gray-600">Total en almacén:</span>
+                    <span className="font-semibold text-gray-800">{formatearNumero(material.cantidad)}</span>
+                  </div>
                   {material.consumido > 0 && (
-                    <span>Consumido: {formatearNumero(material.consumido)}</span>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-600">Usado/Transferido:</span>
+                      <span className="font-semibold text-orange-600">{formatearNumero(material.consumido)}</span>
+                    </div>
                   )}
                 </div>
                 
@@ -472,13 +504,13 @@ const GestionMateriales = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">
+                        <div className={`text-sm font-semibold ${estadoStock.color}`}>
                           {formatearNumero(disponible)}
                         </div>
-                        <div className="text-xs text-gray-500">
-                          Total: {formatearNumero(material.cantidad)}
+                        <div className="text-xs text-gray-500 space-y-0.5">
+                          <div>Total: {formatearNumero(material.cantidad)}</div>
                           {material.consumido > 0 && (
-                            <span> | Consumido: {formatearNumero(material.consumido)}</span>
+                            <div className="text-orange-600">Usado: {formatearNumero(material.consumido)}</div>
                           )}
                         </div>
                       </td>
