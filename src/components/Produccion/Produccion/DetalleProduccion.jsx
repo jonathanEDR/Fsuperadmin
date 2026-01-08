@@ -90,9 +90,7 @@ const DetalleProduccion = ({ produccionId, produccion: produccionProp, onClose, 
   // Preparar datos para la tabla unificada
   const prepararDatosTabla = () => {
     if (!produccion) return [];
-    
-    console.log('🔍 Estructura completa de producción:', produccion);
-    
+
     const datos = [];
 
     // 1. INFORMACIÓN GENERAL
@@ -112,10 +110,6 @@ const DetalleProduccion = ({ produccionId, produccion: produccionProp, onClose, 
     // 2. RECETAS UTILIZADAS (si existen)
     if (produccion.recetasUtilizadas && produccion.recetasUtilizadas.length > 0) {
       produccion.recetasUtilizadas.forEach((item, index) => {
-        console.log(`🍳 Debug receta ${index + 1}:`, item);
-        console.log(`🍳 item.receta:`, item.receta);
-        console.log(`🍳 Tipo de item.receta:`, typeof item.receta);
-        
         // Mejorar la obtención del nombre de la receta
         let nombreReceta = 'Receta no encontrada';
         
@@ -153,12 +147,7 @@ const DetalleProduccion = ({ produccionId, produccion: produccionProp, onClose, 
 
     // 3. INGREDIENTES DIRECTOS (si existen)
     if (produccion.ingredientesUtilizados && produccion.ingredientesUtilizados.length > 0) {
-      console.log('🥬 Ingredientes directos encontrados:', produccion.ingredientesUtilizados);
       produccion.ingredientesUtilizados.forEach((item, index) => {
-        console.log(`🥬 Debug ingrediente ${index + 1}:`, item);
-        console.log(`🥬 item.ingrediente:`, item.ingrediente);
-        console.log(`🥬 Tipo de item.ingrediente:`, typeof item.ingrediente);
-
         // Mejorar la obtención del nombre del ingrediente
         let nombreIngrediente = 'Ingrediente no encontrado';
         let unidadMedida = item.unidadMedida || 'unidades';
@@ -198,12 +187,7 @@ const DetalleProduccion = ({ produccionId, produccion: produccionProp, onClose, 
 
     // 4. INGREDIENTES DEL SISTEMA ANTERIOR (si existen)
     if (produccion.items && produccion.items.length > 0) {
-      console.log('🔄 Items del sistema anterior encontrados:', produccion.items);
       produccion.items.forEach((item, index) => {
-        console.log(`🔄 Debug item ${index + 1}:`, item);
-        console.log(`🔄 item.ingrediente:`, item.ingrediente);
-        console.log(`🔄 Tipo de item.ingrediente:`, typeof item.ingrediente);
-
         let nombreItem = 'Item no encontrado';
         if (item.ingrediente) {
           if (typeof item.ingrediente === 'string') {
@@ -231,7 +215,6 @@ const DetalleProduccion = ({ produccionId, produccion: produccionProp, onClose, 
       });
     }
 
-    console.log('📋 Datos preparados para tabla:', datos);
     return datos;
   };
 

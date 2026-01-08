@@ -4,6 +4,7 @@ import BreadcrumbProduccion from '../BreadcrumbProduccion';
 import { produccionService } from '../../../services/produccionService';
 import NuevaProduccion from './NuevaProduccion';
 import DetalleProduccion from './DetalleProduccion';
+import HistorialProduccion from '../Movimientos/HistorialProduccion';
 import { formatearFecha, getLocalDateTimeString } from '../../../utils/fechaHoraUtils';
 import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
@@ -27,6 +28,10 @@ const GestionProduccion = () => {
   const [mostrarNueva, setMostrarNueva] = useState(false);
   const [mostrarDetalle, setMostrarDetalle] = useState(false);
   const [produccionSeleccionada, setProduccionSeleccionada] = useState(null);
+
+  // Estado para historial de cantidades
+  const [mostrarHistorial, setMostrarHistorial] = useState(false);
+  const [productoParaHistorial, setProductoParaHistorial] = useState(null);
 
   useEffect(() => {
     cargarProducciones();
@@ -90,6 +95,23 @@ const GestionProduccion = () => {
   const handleCerrarDetalle = () => {
     setMostrarDetalle(false);
     setProduccionSeleccionada(null);
+  };
+
+  // Función para abrir historial de cantidades
+  const handleVerHistorial = (produccion) => {
+    // Crear objeto producto compatible con HistorialProduccion
+    const productoParaHistorial = {
+      _id: produccion.productoId || produccion._id,
+      nombre: produccion.nombre,
+      unidadMedida: produccion.unidadMedida
+    };
+    setProductoParaHistorial(productoParaHistorial);
+    setMostrarHistorial(true);
+  };
+
+  const handleCerrarHistorial = () => {
+    setMostrarHistorial(false);
+    setProductoParaHistorial(null);
   };
 
   const handleEliminarProduccion = async (id) => {
@@ -359,6 +381,13 @@ const GestionProduccion = () => {
                 >
                   👁️ Ver
                 </button>
+                <button
+                  onClick={() => handleVerHistorial(produccion)}
+                  className="flex items-center px-3 py-1.5 bg-purple-50 text-purple-600 rounded-lg text-xs font-medium hover:bg-purple-100 transition-colors"
+                  title="Ver historial de cantidades producidas"
+                >
+                  📊 Historial
+                </button>
                 {produccion.estado === 'planificada' && (
                   <>
                     <button
@@ -462,6 +491,13 @@ const GestionProduccion = () => {
                         title="Ver detalles"
                       >
                         👁️ Ver
+                      </button>
+                      <button
+                        onClick={() => handleVerHistorial(produccion)}
+                        className="text-purple-600 hover:text-purple-900"
+                        title="Ver historial de cantidades producidas"
+                      >
+                        📊 Historial
                       </button>
                       {produccion.estado === 'planificada' && (
                         <>
@@ -633,6 +669,15 @@ const GestionProduccion = () => {
             cargarProducciones();
           }}
           onCancelar={() => setMostrarNueva(false)}
+        />
+      )}
+
+      {/* Modal de Historial de Cantidades */}
+      {mostrarHistorial && productoParaHistorial && (
+        <HistorialProduccion
+          producto={productoParaHistorial}
+          isOpen={mostrarHistorial}
+          onClose={handleCerrarHistorial}
         />
       )}
     </div>

@@ -30,6 +30,7 @@ import ProduccionPage from './Pages/ProduccionPage';
 import CatalogoPage from './Pages/CatalogoPage';
 import GestionQR from './components/QR/GestionQR'; // NUEVO: Sistema de QR para Asistencias
 import EscanerQR from './components/QR/EscanerQR'; // NUEVO: Escáner QR para Usuarios
+import UserHomePage from './Pages/UserHomePage'; // NUEVO: Página principal del dashboard de usuario
 
 // Importar páginas del módulo de finanzas
 import FinanzasPage from './Pages/FinanzasPage';
@@ -196,7 +197,7 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route path="dashboard" element={<NotasPage />} />
+              <Route path="dashboard" element={<UserHomePage />} />
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="notas" element={<NotasPage />} />
               <Route path="ventas" element={<VentasPage />} />

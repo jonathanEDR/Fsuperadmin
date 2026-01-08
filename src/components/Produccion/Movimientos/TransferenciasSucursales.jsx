@@ -37,6 +37,11 @@ const TransferenciasSucursales = () => {
   const [movimientoARevertir, setMovimientoARevertir] = useState(null);
   const [motivoReversion, setMotivoReversion] = useState('');
 
+  // Estados para tarjetas expandibles de estadísticas
+  const [sucursalExpandida, setSucursalExpandida] = useState(null);
+  const [detalleSucursal, setDetalleSucursal] = useState({});
+  const [loadingDetalle, setLoadingDetalle] = useState({});
+
   useEffect(() => {
     cargarDatos();
   }, []);
@@ -109,6 +114,40 @@ const TransferenciasSucursales = () => {
     setFechaFin('');
     // Recargar estadísticas sin filtros
     setTimeout(() => cargarEstadisticas(), 100);
+  };
+
+  // Función para expandir/colapsar tarjeta y cargar detalle de sucursal
+  const toggleDetalleSucursal = async (sucursalId) => {
+    // Si ya está expandida, la colapsamos
+    if (sucursalExpandida === sucursalId) {
+      setSucursalExpandida(null);
+      return;
+    }
+
+    // Expandir la tarjeta
+    setSucursalExpandida(sucursalId);
+
+    // Si ya tenemos el detalle cacheado, no lo volvemos a cargar
+    if (detalleSucursal[sucursalId]) {
+      return;
+    }
+
+    // Cargar el detalle de la sucursal
+    try {
+      setLoadingDetalle(prev => ({ ...prev, [sucursalId]: true }));
+      const response = await sucursalInventarioService.obtenerInventarioSucursal(sucursalId);
+      // La respuesta tiene estructura: { sucursal, items, totalItems, valorTotal }
+      // Los items pueden venir en response.data.items o response.items dependiendo del formato
+      const items = response.data?.items || response.items || [];
+      setDetalleSucursal(prev => ({
+        ...prev,
+        [sucursalId]: items
+      }));
+    } catch (error) {
+      mostrarMensaje('error', 'Error al cargar detalle: ' + error.message);
+    } finally {
+      setLoadingDetalle(prev => ({ ...prev, [sucursalId]: false }));
+    }
   };
 
   const abrirModalRevertir = (movimiento) => {
@@ -358,87 +397,180 @@ const TransferenciasSucursales = () => {
               <p className="text-gray-500">No hay transferencias registradas</p>
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Fecha</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Material</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Sucursal</th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700">Cantidad</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Operador</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Motivo</th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {historial.map((mov) => {
-                      const esRevertido = mov.observaciones?.includes('[REVERTIDO');
-                      const esReversion = mov.cantidad < 0;
-                      
-                      return (
-                        <tr key={mov._id} className={`hover:bg-gray-50 ${esRevertido ? 'bg-red-50' : ''}`}>
-                          <td className="px-4 py-3 text-sm text-gray-900">
+            <>
+              {/* Vista de Tarjetas para móviles */}
+              <div className="block md:hidden space-y-3">
+                {historial.map((mov) => {
+                  const esRevertido = mov.observaciones?.includes('[REVERTIDO');
+                  const esReversion = mov.cantidad < 0;
+
+                  return (
+                    <div
+                      key={mov._id}
+                      className={`bg-white rounded-lg shadow-md p-4 border-l-4 ${
+                        esRevertido ? 'border-red-400 bg-red-50' :
+                        esReversion ? 'border-orange-400' : 'border-teal-400'
+                      }`}
+                    >
+                      {/* Header de la tarjeta */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900">
+                            {mov.item?.nombre || 'Material eliminado'}
+                          </h4>
+                          <p className="text-xs text-gray-500">{mov.item?.unidadMedida}</p>
+                        </div>
+                        <span className={`text-lg font-bold ${
+                          esReversion ? 'text-red-600' : 'text-green-600'
+                        }`}>
+                          {esReversion ? '' : '+'}{mov.cantidad}
+                        </span>
+                      </div>
+
+                      {/* Información de la tarjeta */}
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center text-gray-600">
+                          <span className="w-5 text-center mr-2">🏪</span>
+                          <span className="font-medium">Sucursal:</span>
+                          <span className="ml-1">{mov.sucursalDestino?.nombre || 'Sin sucursal'}</span>
+                        </div>
+
+                        <div className="flex items-center text-gray-600">
+                          <span className="w-5 text-center mr-2">📅</span>
+                          <span className="font-medium">Fecha:</span>
+                          <span className="ml-1">
                             {new Date(mov.fecha).toLocaleString('es-PE', {
-                              year: 'numeric',
+                              day: '2-digit',
                               month: 'short',
-                              day: 'numeric',
+                              year: 'numeric',
                               hour: '2-digit',
                               minute: '2-digit'
                             })}
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="text-sm font-medium text-gray-900">
-                              {mov.item?.nombre || 'Material eliminado'}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {mov.item?.unidadMedida}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="text-sm text-gray-900">
-                              {mov.sucursalDestino?.nombre || 'Sin sucursal'}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {mov.sucursalDestino?.ubicacion}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            <span className={`font-semibold ${
-                              esReversion ? 'text-red-600' : 'text-green-600'
+                          </span>
+                        </div>
+
+                        <div className="flex items-center text-gray-600">
+                          <span className="w-5 text-center mr-2">👤</span>
+                          <span className="font-medium">Operador:</span>
+                          <span className="ml-1 truncate">{mov.operadorEmail || mov.operador}</span>
+                        </div>
+
+                        {mov.motivo && (
+                          <div className="flex items-start text-gray-600">
+                            <span className="w-5 text-center mr-2">📝</span>
+                            <span className="font-medium">Motivo:</span>
+                            <span className="ml-1 break-words">{mov.motivo}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Acción de la tarjeta */}
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        {!esRevertido && !esReversion ? (
+                          <button
+                            onClick={() => abrirModalRevertir(mov)}
+                            className="w-full px-3 py-2 text-sm bg-red-100 text-red-700 hover:bg-red-200 rounded-lg transition-colors flex items-center justify-center"
+                          >
+                            ↩️ Revertir Transferencia
+                          </button>
+                        ) : (
+                          <div className="text-center">
+                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                              esRevertido ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600'
                             }`}>
-                              {esReversion ? '' : '+'}{mov.cantidad}
+                              {esRevertido ? '🚫 Revertido' : '↩️ Reversión'}
                             </span>
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-600">
-                            {mov.operadorEmail || mov.operador}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-600 max-w-xs truncate">
-                            {mov.motivo}
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            {!esRevertido && !esReversion ? (
-                              <button
-                                onClick={() => abrirModalRevertir(mov)}
-                                className="px-3 py-1 text-xs bg-red-100 text-red-700 hover:bg-red-200 rounded transition-colors"
-                                title="Revertir transferencia"
-                              >
-                                ↩️ Revertir
-                              </button>
-                            ) : (
-                              <span className="text-xs text-gray-400">
-                                {esRevertido ? 'Revertido' : 'Reversión'}
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
+
+              {/* Vista de Tabla para pantallas medianas y grandes */}
+              <div className="hidden md:block bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Fecha</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Material</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Sucursal</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-700">Cantidad</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Operador</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Motivo</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-700">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {historial.map((mov) => {
+                        const esRevertido = mov.observaciones?.includes('[REVERTIDO');
+                        const esReversion = mov.cantidad < 0;
+
+                        return (
+                          <tr key={mov._id} className={`hover:bg-gray-50 ${esRevertido ? 'bg-red-50' : ''}`}>
+                            <td className="px-4 py-3 text-sm text-gray-900">
+                              {new Date(mov.fecha).toLocaleString('es-PE', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="text-sm font-medium text-gray-900">
+                                {mov.item?.nombre || 'Material eliminado'}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {mov.item?.unidadMedida}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="text-sm text-gray-900">
+                                {mov.sucursalDestino?.nombre || 'Sin sucursal'}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {mov.sucursalDestino?.ubicacion}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <span className={`font-semibold ${
+                                esReversion ? 'text-red-600' : 'text-green-600'
+                              }`}>
+                                {esReversion ? '' : '+'}{mov.cantidad}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-600">
+                              {mov.operadorEmail || mov.operador}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-600 max-w-xs truncate">
+                              {mov.motivo}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              {!esRevertido && !esReversion ? (
+                                <button
+                                  onClick={() => abrirModalRevertir(mov)}
+                                  className="px-3 py-1 text-xs bg-red-100 text-red-700 hover:bg-red-200 rounded transition-colors"
+                                  title="Revertir transferencia"
+                                >
+                                  ↩️ Revertir
+                                </button>
+                              ) : (
+                                <span className="text-xs text-gray-400">
+                                  {esRevertido ? 'Revertido' : 'Reversión'}
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
           )}
         </div>
       )}
@@ -523,35 +655,123 @@ const TransferenciasSucursales = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {estadisticas.map(stat => (
-                <div key={stat._id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h4 className="font-semibold text-gray-900">{stat.nombreSucursal}</h4>
-                      <p className="text-sm text-gray-500">{stat.ubicacion}</p>
-                    </div>
-                    <span className="text-2xl">🏪</span>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Materiales:</span>
-                      <span className="font-semibold">{stat.totalMateriales}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Cantidad Total:</span>
-                      <span className="font-semibold">{stat.cantidadTotal.toFixed(2)}</span>
-                    </div>
-                    {canViewPrices && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Valor Total:</span>
-                        <span className="font-semibold text-green-600">
-                          S/ {stat.valorTotal.toFixed(2)}
+              {estadisticas.map(stat => {
+                const estaExpandida = sucursalExpandida === stat._id;
+                const materialesSucursal = detalleSucursal[stat._id] || [];
+                const cargandoDetalle = loadingDetalle[stat._id];
+
+                return (
+                  <div
+                    key={stat._id}
+                    className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ${
+                      estaExpandida ? 'ring-2 ring-teal-500' : 'hover:shadow-lg'
+                    }`}
+                  >
+                    {/* Cabecera clickeable */}
+                    <div
+                      className="p-6 cursor-pointer"
+                      onClick={() => toggleDetalleSucursal(stat._id)}
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <h4 className="font-semibold text-gray-900">{stat.nombreSucursal}</h4>
+                          <p className="text-sm text-gray-500">{stat.ubicacion}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">🏪</span>
+                          <span className={`text-gray-400 transition-transform duration-300 ${
+                            estaExpandida ? 'rotate-180' : ''
+                          }`}>
+                            ▼
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Materiales:</span>
+                          <span className="font-semibold">{stat.totalMateriales}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Cantidad Total:</span>
+                          <span className="font-semibold">{stat.cantidadTotal.toFixed(2)}</span>
+                        </div>
+                        {canViewPrices && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Valor Total:</span>
+                            <span className="font-semibold text-green-600">
+                              S/ {stat.valorTotal.toFixed(2)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      {/* Indicador de click */}
+                      <div className="mt-3 text-center">
+                        <span className="text-xs text-teal-600">
+                          {estaExpandida ? 'Click para ocultar detalle' : 'Click para ver materiales'}
                         </span>
+                      </div>
+                    </div>
+
+                    {/* Sección expandible con detalle de materiales */}
+                    {estaExpandida && (
+                      <div className="border-t border-gray-200 bg-gray-50 p-4">
+                        <h5 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                          📦 Detalle de Materiales
+                        </h5>
+
+                        {cargandoDetalle ? (
+                          <div className="flex items-center justify-center py-4">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-500"></div>
+                            <span className="ml-2 text-sm text-gray-500">Cargando...</span>
+                          </div>
+                        ) : materialesSucursal.length === 0 ? (
+                          <p className="text-sm text-gray-500 text-center py-4">
+                            No hay materiales en esta sucursal
+                          </p>
+                        ) : (
+                          <div className="space-y-2 max-h-64 overflow-y-auto">
+                            {materialesSucursal.map((item, index) => {
+                              // El item puede tener estructura: { material: {...}, cantidad } o directa
+                              const materialInfo = item.material || item;
+                              const cantidad = item.cantidad ?? item.stock ?? 0;
+                              const precioUnitario = materialInfo.precioUnitario || 0;
+                              const valorTotal = cantidad * precioUnitario;
+
+                              return (
+                                <div
+                                  key={item._id || materialInfo._id || index}
+                                  className="bg-white rounded-lg p-3 shadow-sm border border-gray-100"
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex-1 min-w-0">
+                                      <p className="font-medium text-gray-900 truncate">
+                                        {materialInfo.nombre || 'Sin nombre'}
+                                      </p>
+                                      <p className="text-xs text-gray-500">
+                                        {materialInfo.unidadMedida || ''}
+                                      </p>
+                                    </div>
+                                    <div className="text-right ml-3">
+                                      <span className="font-bold text-teal-600 text-lg">
+                                        {cantidad.toFixed(2)}
+                                      </span>
+                                      {canViewPrices && valorTotal > 0 && (
+                                        <p className="text-xs text-green-600">
+                                          S/ {valorTotal.toFixed(2)}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
