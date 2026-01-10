@@ -278,6 +278,7 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
                 loading={loadingProductos}
                 error={errorProductos}
                 onStockUpdated={incrementarStockProducto}
+                userRole={userRole}
               />
             </div>
 
