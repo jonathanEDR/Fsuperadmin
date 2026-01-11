@@ -213,8 +213,8 @@ const ListaProductosDisponibles = React.memo(({
                 </button>
               </div>
 
-              {/* Botón +Stock (solo visible para admin y super-admin) */}
-              {(userRole === 'admin' || userRole === 'super-admin') && (
+              {/* Botón +Stock (solo visible para admin y super_admin) */}
+              {(userRole === 'admin' || userRole === 'super_admin') && (
                 <button
                   onClick={() => handleAgregarStock(producto)}
                   className="flex-shrink-0 px-2 sm:px-2.5 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-all duration-200 flex items-center justify-center gap-1 hover:shadow-lg min-w-[36px] sm:min-w-0"
