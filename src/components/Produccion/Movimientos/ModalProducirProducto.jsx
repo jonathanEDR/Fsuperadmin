@@ -79,7 +79,8 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
     try {
       setLoadingUsuarios(true);
       const token = await getToken();
-      const url = `${getFullApiUrl('/admin/users')}`;
+      // Usar endpoint de colaboradores que trae TODOS los usuarios sin paginación
+      const url = `${getFullApiUrl('/gestion-personal/colaboradores')}`;
       
       const response = await safeFetch(url, {
         headers: {
@@ -90,7 +91,8 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
 
       if (response.ok) {
         const data = await response.json();
-        setUsuarios(data.users || []);
+        // El endpoint retorna array directo, no objeto con .users
+        setUsuarios(Array.isArray(data) ? data : data.users || []);
       }
     } catch (error) {
       console.error('Error al cargar usuarios:', error);
