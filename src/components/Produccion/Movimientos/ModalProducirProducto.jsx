@@ -488,7 +488,9 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                       <option value="">
                         {loadingUsuarios ? 'Cargando usuarios...' : 'Seleccionar operador...'}
                       </option>
-                      {usuarios.map(u => (
+                      {usuarios
+                        .filter(u => u.role !== 'de_baja')
+                        .map(u => (
                         <option key={u._id} value={u.nombre_negocio || u.email}>
                           {u.nombre_negocio || u.email} ({u.role})
                         </option>
