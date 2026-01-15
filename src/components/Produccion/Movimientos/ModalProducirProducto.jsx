@@ -114,7 +114,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
     setDropdownOperadorAbierto(false);
   };
 
-  // 🎯 Solo cargar recetas - ingredientes removidos
+  // Solo cargar recetas - ingredientes removidos
   const cargarRecursos = async () => {
     try {
       setLoading(true);
@@ -124,19 +124,6 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
       const recetasConStock = (recetasResponse.data || []).filter(
         rec => ((rec.inventario?.cantidadProducida || 0) - (rec.inventario?.cantidadUtilizada || 0)) > 0
       );
-      
-      console.log('🍰 ModalProducirProducto - Recetas del backend:', recetasResponse.data?.map(rec => ({
-        nombre: rec.nombre,
-        producida: rec.inventario?.cantidadProducida,
-        utilizada: rec.inventario?.cantidadUtilizada,
-        disponible: (rec.inventario?.cantidadProducida || 0) - (rec.inventario?.cantidadUtilizada || 0),
-        costoUnitario: rec.costoUnitario // 🎯 Debug: verificar que venga del backend
-      })));
-      
-      console.log('✅ ModalProducirProducto - Recetas FILTRADAS con stock:', recetasConStock.map(rec => ({
-        nombre: rec.nombre,
-        disponible: (rec.inventario?.cantidadProducida || 0) - (rec.inventario?.cantidadUtilizada || 0)
-      })));
       
       setRecetasDisponibles(recetasConStock);
       

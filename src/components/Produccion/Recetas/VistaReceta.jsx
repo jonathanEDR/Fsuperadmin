@@ -31,12 +31,10 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
 
   const recargarReceta = async () => {
     try {
-      console.log('🔄 Recargando receta:', receta._id);
       const response = await recetaService.obtenerRecetaPorId(receta._id);
       // Manejar respuesta del backend que puede venir en response.data o response.data.data
       const recetaActualizada = response.data || response;
       setRecetaActual(recetaActualizada);
-      console.log('✅ Receta recargada:', recetaActualizada);
     } catch (error) {
       console.error('Error al recargar receta:', error);
       // Si falla, usar la receta original
@@ -179,41 +177,30 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                       {datosReceta.ingredientes?.map((item, index) => {
-                        console.log(`🔍 Item ${index}:`, item);
-                        
-                        // 🎯 FIX: Detectar si es ingrediente o receta
-                        // Lógica robusta:
-                        // 1. Si tiene campo 'tipo', usarlo
-                        // 2. Si NO tiene 'tipo' pero SÍ tiene 'receta' poblado, es receta
-                        // 3. Si NO tiene 'tipo' pero SÍ tiene 'ingrediente' poblado, es ingrediente
-                        // 4. Default: ingrediente
+                        // Detectar si es ingrediente o receta
                         const esReceta = item.tipo === 'receta' || (!item.tipo && item.receta && !item.ingrediente);
                         const itemData = esReceta ? item.receta : item.ingrediente;
                         
-                        console.log(`  → Tipo: ${item.tipo || '(no especificado)'}, esReceta: ${esReceta}`);
-                        console.log(`  → tiene receta:`, !!item.receta, `tiene ingrediente:`, !!item.ingrediente);
-                        console.log(`  → itemData:`, itemData);
-                        
                         // Validar que el item exista (puede no estar poblado)
                         if (!itemData) {
-                          console.warn('⚠️ Item no poblado:', item);
                           return null;
                         }
 
-                        let disponible, subtotal, cantidadNecesaria, suficiente;
+                        let disponible, subtotal, cantidadNecesaria, suficiente, precioUnitarioItem;
 
                         if (esReceta) {
                           // Para recetas: disponible = producido - utilizado
                           disponible = (itemData.inventario?.cantidadProducida || 0) - (itemData.inventario?.cantidadUtilizada || 0);
-                          // Costo unitario de la receta (si tiene)
-                          const costoUnitarioReceta = costoCalculado?.costoUnitario || 0;
-                          subtotal = item.cantidad * costoUnitarioReceta;
+                          // 🎯 FIX: Usar costoUnitario de la sub-receta (viene del backend)
+                          precioUnitarioItem = itemData.costoUnitario || 0;
+                          subtotal = item.cantidad * precioUnitarioItem;
                           cantidadNecesaria = item.cantidad * cantidadConsulta;
                           suficiente = disponible >= cantidadNecesaria;
                         } else {
                           // Para ingredientes: disponible = cantidad - procesado
                           disponible = (itemData.cantidad || 0) - (itemData.procesado || 0);
-                          subtotal = item.cantidad * (itemData.precioUnitario || 0);
+                          precioUnitarioItem = itemData.precioUnitario || 0;
+                          subtotal = item.cantidad * precioUnitarioItem;
                           cantidadNecesaria = item.cantidad * cantidadConsulta;
                           suficiente = disponible >= cantidadNecesaria;
                         }
@@ -242,18 +229,14 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
                             {canViewPrices && (
                               <>
                                 <td className="px-3 py-2 text-xs sm:text-sm text-gray-900">
-                                  {esReceta ? (
-                                    <span className="text-purple-600">Por calcular</span>
-                                  ) : (
-                                    `S/.${itemData.precioUnitario?.toFixed(2) || '0.00'}`
-                                  )}
+                                  <span className={esReceta ? 'text-purple-600' : ''}>
+                                    S/.{precioUnitarioItem.toFixed(2)}
+                                  </span>
                                 </td>
                                 <td className="px-3 py-2 text-xs sm:text-sm text-gray-900">
-                                  {esReceta ? (
-                                    <span className="text-purple-600">-</span>
-                                  ) : (
-                                    `S/.${subtotal.toFixed(2)}`
-                                  )}
+                                  <span className={esReceta ? 'text-purple-600' : ''}>
+                                    S/.{subtotal.toFixed(2)}
+                                  </span>
                                 </td>
                               </>
                             )}
@@ -382,11 +365,11 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
                         {/* Costos de producción */}
                         <div className="border-t border-blue-200 pt-2 space-y-1">
                           <div className="flex justify-between text-xs text-blue-600">
-                            <span>Costo ingredientes por lote:</span>
+                            <span>Costo por lote ({receta.rendimiento?.cantidad || 1} {receta.rendimiento?.unidadMedida || 'unidades'}):</span>
                             <span>S/.{costoCalculado.costoIngredientes?.toFixed(2) || '0.00'}</span>
                           </div>
                           <div className="flex justify-between text-xs text-blue-600">
-                            <span>Total ingredientes necesarios:</span>
+                            <span>Costo total ({costoCalculado.cantidad} lotes):</span>
                             <span>S/.{costoCalculado.costoProduccion?.toFixed(2) || '0.00'}</span>
                           </div>
                         </div>
