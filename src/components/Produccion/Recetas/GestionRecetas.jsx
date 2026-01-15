@@ -43,14 +43,6 @@ const GestionRecetas = () => {
     try {
       setLoading(true);
       const response = await recetaService.obtenerRecetas(filtros);
-      
-      // 🔍 DEBUG: Ver qué datos llegan del backend
-      console.log('🔍 DEBUG - Datos del backend:', response.data);
-      if (response.data.length > 0) {
-        console.log('🔍 DEBUG - Primera receta ejemplo:', response.data[0]);
-        console.log('🔍 DEBUG - Categoría de primera receta:', response.data[0].categoria);
-      }
-      
       setRecetas(response.data);
       setError('');
     } catch (err) {
@@ -98,13 +90,20 @@ const GestionRecetas = () => {
         throw new Error('Debe agregar al menos un ingrediente');
       }
       
-      // Verificar que todos los ingredientes tienen IDs válidos
-      const ingredientesInvalidos = datos.ingredientes.filter(ing => 
-        !ing.ingrediente || ing.ingrediente.length !== 24
-      );
-      
-      if (ingredientesInvalidos.length > 0) {
-        throw new Error('Uno o más ingredientes seleccionados no son válidos. Por favor, seleccione ingredientes de la lista.');
+      // Verificar que todos los items (ingredientes o recetas) tienen IDs válidos
+      const itemsInvalidos = datos.ingredientes.filter(item => {
+        const tipoItem = item.tipo || 'ingrediente';
+        if (tipoItem === 'receta') {
+          // Para sub-recetas, validar el campo 'receta'
+          return !item.receta || item.receta.length !== 24;
+        } else {
+          // Para ingredientes, validar el campo 'ingrediente'
+          return !item.ingrediente || item.ingrediente.length !== 24;
+        }
+      });
+
+      if (itemsInvalidos.length > 0) {
+        throw new Error('Uno o más ingredientes o recetas seleccionados no son válidos. Por favor, verifique la selección.');
       }
       
       console.log('✅ Validaciones frontend completadas');
@@ -532,18 +531,7 @@ const GestionRecetas = () => {
           const estadoProceso = receta.estadoProceso || 'borrador';
           const siguienteFase = obtenerSiguienteFase(receta);
           const puedeAvanzar = puedeAvanzarFase(receta);
-          
-          // 🔍 DEBUG: Ver el mapeo de cada receta
-          console.log(`🔍 DEBUG receta "${receta.nombre}":`, {
-            'DB categoria': receta.categoria,
-            'DB faseActual': receta.faseActual,
-            categoriaOriginal,
-            faseNormalizada,
-            estadoProceso,
-            siguienteFase,
-            puedeAvanzar
-          });
-          
+
           return (
             <div key={receta._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
               

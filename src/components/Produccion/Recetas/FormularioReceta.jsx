@@ -187,6 +187,11 @@ const BuscadorIngredientesYRecetas = ({
                       ) : (
                         <p className="text-xs text-gray-500 mt-0.5">
                           Rinde: {item.rendimiento?.cantidad || 0} {item.rendimiento?.unidadMedida || 'un'}
+                          {item.costoEstimado > 0 && (
+                            <span className="ml-2 text-purple-600 font-medium">
+                              • Costo: S/.{item.costoEstimado.toFixed(2)}
+                            </span>
+                          )}
                         </p>
                       )}
                     </div>
@@ -288,9 +293,23 @@ const ListaItemsCompacta = ({
 
   const calcularCostoItem = (item) => {
     if (item.tipo === 'receta') {
-      // Estimación simple: el costo de la receta anidada se calculará en backend
-      // Aquí mostramos "Por calcular" o un valor aproximado si tenemos historial
-      return null; // Se calculará dinámicamente
+      // 🎯 FIX: Calcular costo de la sub-receta correctamente
+      const recetaInfo = obtenerRecetaInfo(item.receta);
+
+      console.log('💰 Calculando costo de sub-receta:', {
+        nombre: recetaInfo?.nombre,
+        costoEstimado: recetaInfo?.costoEstimado,
+        cantidad: item.cantidad,
+        costoTotal: recetaInfo?.costoEstimado ? item.cantidad * recetaInfo.costoEstimado : null
+      });
+
+      if (recetaInfo && recetaInfo.costoEstimado > 0) {
+        // costoEstimado ya es el costo POR UNIDAD (viene de costoUnitario del backend)
+        // Solo multiplicamos por la cantidad solicitada
+        const costoTotal = item.cantidad * recetaInfo.costoEstimado;
+        return costoTotal;
+      }
+      return null; // Si no hay datos, se calculará en backend
     } else {
       const info = obtenerIngredienteInfo(item.ingrediente);
       return item.cantidad * (info?.precioUnitario || 0);
@@ -299,12 +318,20 @@ const ListaItemsCompacta = ({
 
   const calcularCostoTotalIngredientes = () => {
     return items.reduce((total, item) => {
-      if (item.tipo !== 'receta') {
-        const info = obtenerIngredienteInfo(item.ingrediente);
-        return total + (item.cantidad * (info?.precioUnitario || 0));
-      }
-      return total;
+      const costoItem = calcularCostoItem(item);
+      return total + (costoItem || 0);
     }, 0);
+  };
+
+  // Contar sub-recetas sin costo calculable
+  const contarSubRecetasSinCosto = () => {
+    return items.filter(item => {
+      if (item.tipo === 'receta') {
+        const costoItem = calcularCostoItem(item);
+        return costoItem === null;
+      }
+      return false;
+    }).length;
   };
 
   const contarPorTipo = () => {
@@ -366,7 +393,7 @@ const ListaItemsCompacta = ({
               </p>
               <p className="text-xs text-gray-500">
                 {esReceta
-                  ? `Rinde: ${info?.rendimiento?.cantidad || 0} ${info?.rendimiento?.unidadMedida || 'un'}`
+                  ? `Disp: ${(info?.inventario?.cantidadProducida || 0) - (info?.inventario?.cantidadUtilizada || 0)} ${info?.rendimiento?.unidadMedida || 'un'}${info?.costoEstimado ? ` • Costo: S/.${info.costoEstimado.toFixed(2)}` : ''}`
                   : `Disponible: ${info?.cantidad || 0} ${info?.unidadMedida || ''}`}
               </p>
             </div>
@@ -390,7 +417,13 @@ const ListaItemsCompacta = ({
             {/* Costo */}
             <div className="text-right min-w-[60px]">
               {esReceta ? (
-                <p className="text-xs text-purple-600 italic">Sub-receta</p>
+                costo !== null ? (
+                  <p className="text-xs font-medium text-purple-600">
+                    S/.{costo.toFixed(2)}
+                  </p>
+                ) : (
+                  <p className="text-xs text-purple-400 italic">Por calcular</p>
+                )
               ) : (
                 <p className="text-xs font-medium text-green-600">
                   S/.{(costo || 0).toFixed(2)}
@@ -421,9 +454,9 @@ const ListaItemsCompacta = ({
             S/.{calcularCostoTotalIngredientes().toFixed(2)}
           </span>
         </div>
-        {conteo.recetas > 0 && (
+        {contarSubRecetasSinCosto() > 0 && (
           <p className="text-xs text-purple-600 mt-1">
-            + Costo de {conteo.recetas} sub-receta{conteo.recetas !== 1 ? 's' : ''} (calculado al guardar)
+            + Costo de {contarSubRecetasSinCosto()} sub-receta{contarSubRecetasSinCosto() !== 1 ? 's' : ''} (calculado al guardar)
           </p>
         )}
         <div className="flex justify-between items-center mt-1 pt-1 border-t border-green-200">
@@ -513,7 +546,7 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
     }
   };
 
-  // 🎯 NUEVO: Cargar recetas disponibles para anidar
+  // 🎯 MEJORADO: Cargar recetas disponibles para anidar CON sus costos
   const cargarRecetasDisponibles = async () => {
     try {
       setLoadingRecetas(true);
@@ -526,7 +559,48 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
         // Solo incluir recetas que tengan inventario o estén completadas
         return true;
       });
-      setRecetasDisponibles(recetasFiltradas);
+
+      // 🎯 Cargar costos de cada receta disponible USANDO EL COSTO POR UNIDAD
+      const recetasConCostos = await Promise.all(
+        recetasFiltradas.map(async (rec) => {
+          try {
+            // Solo calcular costo si la receta tiene ingredientes
+            if (rec.ingredientes && rec.ingredientes.length > 0) {
+              const costoResponse = await recetaService.calcularCosto(rec._id, 1);
+              // 🎯 FIX: Usar costoUnitario en lugar de costoTotal
+              // costoUnitario ya incluye el cálculo correcto (costo total / rendimiento)
+              // y además el backend usa calcularCostoTotal() que maneja recetas anidadas
+              return {
+                ...rec,
+                costoEstimado: costoResponse.data?.costoUnitario || costoResponse.costoUnitario || 0
+              };
+            }
+            return rec;
+          } catch (error) {
+            console.warn(`⚠️ Error calculando costo de receta ${rec.nombre}:`, error);
+            // Si falla el cálculo de costo, intentar calcular localmente desde ingredientes
+            let costoLocal = 0;
+            if (rec.ingredientes && rec.ingredientes.length > 0) {
+              rec.ingredientes.forEach(ing => {
+                if (ing.tipo === 'ingrediente' && ing.ingrediente?.precioUnitario && ing.cantidad) {
+                  costoLocal += ing.ingrediente.precioUnitario * ing.cantidad;
+                }
+                // Para sub-recetas anidadas, el costo local no es preciso
+                // mejor dejar en 0 para que se calcule en backend
+              });
+              // Dividir por rendimiento para obtener costo unitario
+              const rendimiento = rec.rendimiento?.cantidad || 1;
+              costoLocal = costoLocal / rendimiento;
+            }
+            return {
+              ...rec,
+              costoEstimado: costoLocal > 0 ? costoLocal : undefined
+            };
+          }
+        })
+      );
+
+      setRecetasDisponibles(recetasConCostos);
     } catch (error) {
       console.error('Error al cargar recetas disponibles:', error);
       setRecetasDisponibles([]);
@@ -573,8 +647,6 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
       return item.ingrediente || item.cantidad > 0;
     });
 
-    console.log('🧪 Items con datos para validar:', itemsConDatos);
-
     if (itemsConDatos.length === 0) {
       nuevosErrores.ingredientes = 'Debe agregar al menos un ingrediente o receta';
     }
@@ -599,7 +671,6 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
       }
     });
 
-    console.log('🔍 Errores encontrados en validación:', nuevosErrores);
     setErrores(nuevosErrores);
     return Object.keys(nuevosErrores).length === 0;
   };
@@ -672,11 +743,7 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log('🚀 Iniciando envío del formulario...');
-    console.log('📊 Datos del formulario:', formData);
-
     if (!validarFormulario()) {
-      console.log('❌ Validación falló');
       return;
     }
 
@@ -686,24 +753,15 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
       // Crear una copia de los datos del formulario
       const datosFormulario = { ...formData };
 
-      console.log('🔍 Procesando items (ingredientes y recetas)...');
-      console.log('📋 Items originales:', datosFormulario.ingredientes);
-
       // 🎯 MEJORADO: Filtrar items válidos (ingredientes O recetas)
       const itemsValidos = datosFormulario.ingredientes.filter(item => {
         const tipoItem = item.tipo || 'ingrediente';
         if (tipoItem === 'receta') {
-          const esValido = item.receta && item.cantidad > 0;
-          console.log(`📋 Receta ${item.receta || 'sin seleccionar'}: ${esValido ? 'VÁLIDO' : 'INVÁLIDO'} (cantidad: ${item.cantidad})`);
-          return esValido;
+          return item.receta && item.cantidad > 0;
         } else {
-          const esValido = item.ingrediente && item.cantidad > 0;
-          console.log(`🥬 Ingrediente ${item.ingrediente || 'sin seleccionar'}: ${esValido ? 'VÁLIDO' : 'INVÁLIDO'} (cantidad: ${item.cantidad})`);
-          return esValido;
+          return item.ingrediente && item.cantidad > 0;
         }
       });
-
-      console.log('✅ Items válidos filtrados:', itemsValidos);
 
       if (itemsValidos.length === 0) {
         throw new Error('No hay ingredientes o recetas válidas para procesar');
@@ -741,17 +799,11 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
         tiempoPreparacion: Number(datosFormulario.tiempoPreparacion)
       };
 
-      console.log('🚀 Enviando datos limpios al backend:', datosLimpios);
-      console.log('📞 Llamando a onGuardar...');
-
       await onGuardar(datosLimpios);
-      console.log('✅ onGuardar completado exitosamente');
 
     } catch (error) {
-      console.error('❌ Error en handleSubmit:', error);
       alert(`Error: ${error.message || error}`);
     } finally {
-      console.log('🏁 Finalizando envío...');
       setEnviando(false);
     }
   };
