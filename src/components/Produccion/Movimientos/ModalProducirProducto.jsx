@@ -1,5 +1,5 @@
 // Modal Producir Stock - Optimizado para móviles v3.0 - Layout Vertical Completo
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { movimientoUnificadoService } from '../../../services/movimientoUnificadoService';
 import { getLocalDateTimeString } from '../../../utils/fechaHoraUtils';
@@ -35,6 +35,28 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
   const [mostrarIngredientes, setMostrarIngredientes] = useState(true);
   const [mostrarRecetas, setMostrarRecetas] = useState(false);
   const [mostrarInfoProducto, setMostrarInfoProducto] = useState(true);
+  
+  // Estados para buscador de operador
+  const [busquedaOperador, setBusquedaOperador] = useState('');
+  const [dropdownOperadorAbierto, setDropdownOperadorAbierto] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Cerrar dropdown al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOperadorAbierto(false);
+      }
+    };
+    
+    if (dropdownOperadorAbierto) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dropdownOperadorAbierto]);
 
   useEffect(() => {
     if (isOpen && producto) {
@@ -57,7 +79,8 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
     try {
       setLoadingUsuarios(true);
       const token = await getToken();
-      const url = `${getFullApiUrl('/admin/users')}`;
+      // Usar endpoint de colaboradores que trae TODOS los usuarios sin paginación
+      const url = `${getFullApiUrl('/gestion-personal/colaboradores')}`;
       
       const response = await safeFetch(url, {
         headers: {
@@ -68,7 +91,8 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
 
       if (response.ok) {
         const data = await response.json();
-        setUsuarios(data.users || []);
+        // El endpoint retorna array directo, no objeto con .users
+        setUsuarios(Array.isArray(data) ? data : data.users || []);
       }
     } catch (error) {
       console.error('Error al cargar usuarios:', error);
@@ -89,6 +113,9 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
     });
     setError('');
     setActiveTab('ingredientes');
+    // Resetear buscador de operador
+    setBusquedaOperador('');
+    setDropdownOperadorAbierto(false);
   };
 
   const cargarRecursos = async () => {
@@ -478,22 +505,86 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                     Operador Responsable * {isSuperAdmin && <span className="text-gray-500 text-xs">(Selecciona quién realizó la producción)</span>}
                   </label>
                   {isSuperAdmin ? (
-                    <select
-                      value={formData.operador}
-                      onChange={(e) => setFormData(prev => ({ ...prev, operador: e.target.value }))}
-                      className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      disabled={enviando || loadingUsuarios}
-                      required
-                    >
-                      <option value="">
-                        {loadingUsuarios ? 'Cargando usuarios...' : 'Seleccionar operador...'}
-                      </option>
-                      {usuarios.map(u => (
-                        <option key={u._id} value={u.nombre_negocio || u.email}>
-                          {u.nombre_negocio || u.email} ({u.role})
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative" ref={dropdownRef}>
+                      {/* Input de búsqueda */}
+                      <input
+                        type="text"
+                        value={formData.operador || busquedaOperador}
+                        onChange={(e) => {
+                          setBusquedaOperador(e.target.value);
+                          setFormData(prev => ({ ...prev, operador: '' }));
+                          setDropdownOperadorAbierto(true);
+                        }}
+                        onFocus={() => setDropdownOperadorAbierto(true)}
+                        placeholder={loadingUsuarios ? 'Cargando usuarios...' : 'Buscar operador...'}
+                        className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
+                        disabled={enviando || loadingUsuarios}
+                      />
+                      
+                      {/* Botón para limpiar/abrir dropdown */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (formData.operador) {
+                            setFormData(prev => ({ ...prev, operador: '' }));
+                            setBusquedaOperador('');
+                          }
+                          setDropdownOperadorAbierto(!dropdownOperadorAbierto);
+                        }}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                      >
+                        {formData.operador ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        )}
+                      </button>
+                      
+                      {/* Dropdown de opciones */}
+                      {dropdownOperadorAbierto && (
+                        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                          {usuarios
+                            .filter(u => u.role !== 'de_baja')
+                            .filter(u => {
+                              const searchTerm = busquedaOperador.toLowerCase();
+                              const nombre = (u.nombre_negocio || u.email || '').toLowerCase();
+                              const role = (u.role || '').toLowerCase();
+                              return nombre.includes(searchTerm) || role.includes(searchTerm);
+                            })
+                            .map(u => (
+                              <div
+                                key={u._id}
+                                onClick={() => {
+                                  setFormData(prev => ({ ...prev, operador: u.nombre_negocio || u.email }));
+                                  setBusquedaOperador('');
+                                  setDropdownOperadorAbierto(false);
+                                }}
+                                className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm border-b border-gray-100 last:border-b-0"
+                              >
+                                <span className="font-medium">{u.nombre_negocio || u.email}</span>
+                                <span className="text-gray-500 ml-2">({u.role})</span>
+                              </div>
+                            ))
+                          }
+                          {usuarios
+                            .filter(u => u.role !== 'de_baja')
+                            .filter(u => {
+                              const searchTerm = busquedaOperador.toLowerCase();
+                              const nombre = (u.nombre_negocio || u.email || '').toLowerCase();
+                              const role = (u.role || '').toLowerCase();
+                              return nombre.includes(searchTerm) || role.includes(searchTerm);
+                            }).length === 0 && (
+                            <div className="px-3 py-2 text-gray-500 text-sm text-center">
+                              No se encontraron operadores
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <input
                       type="text"

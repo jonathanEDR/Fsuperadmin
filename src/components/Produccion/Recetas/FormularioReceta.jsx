@@ -1,21 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import '../../../styles/modal-protection.css';
 import { ingredienteService } from '../../../services/ingredienteService';
+import { recetaService } from '../../../services/recetaService';
 import catalogoProduccionService from '../../../services/catalogoProduccion';
 
-// 🎯 NUEVO: Componente de buscador de ingredientes
-const BuscadorIngredientes = ({ 
-  ingredientesDisponibles, 
-  onAgregar, 
+// 🎯 MEJORADO: Componente de buscador de ingredientes Y recetas
+const BuscadorIngredientesYRecetas = ({
+  ingredientesDisponibles,
+  recetasDisponibles = [],
+  onAgregar,
   loadingIngredientes,
-  ingredientesSeleccionados = [] 
+  loadingRecetas = false,
+  itemsSeleccionados = [],
+  recetaActualId = null // Para evitar agregar la receta que estamos editando
 }) => {
+  const [tipoItem, setTipoItem] = useState('ingrediente'); // 'ingrediente' o 'receta'
   const [termino, setTermino] = useState('');
-  const [ingredienteSeleccionado, setIngredienteSeleccionado] = useState('');
+  const [itemSeleccionado, setItemSeleccionado] = useState(null);
   const [cantidad, setCantidad] = useState('');
   const [unidad, setUnidad] = useState('gr');
   const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
-  
+
   const unidadesMedida = [
     { value: 'kg', label: 'kg' },
     { value: 'gr', label: 'gr' },
@@ -25,56 +30,119 @@ const BuscadorIngredientes = ({
     { value: 'pieza', label: 'pz' }
   ];
 
-  // Filtrar ingredientes disponibles que no están ya seleccionados
-  const ingredientesFiltrados = ingredientesDisponibles.filter(ing => {
-    const yaSeleccionado = ingredientesSeleccionados.some(selected => selected.ingrediente === ing._id);
-    const coincideTermino = ing.nombre.toLowerCase().includes(termino.toLowerCase());
-    return !yaSeleccionado && (termino === '' || coincideTermino);
-  }).slice(0, 5); // Solo mostrar 5 sugerencias
+  // Filtrar items según el tipo seleccionado
+  const itemsFiltrados = tipoItem === 'ingrediente'
+    ? ingredientesDisponibles.filter(ing => {
+        const yaSeleccionado = itemsSeleccionados.some(
+          selected => selected.tipo === 'ingrediente' && selected.ingrediente === ing._id
+        );
+        const coincideTermino = ing.nombre.toLowerCase().includes(termino.toLowerCase());
+        return !yaSeleccionado && (termino === '' || coincideTermino);
+      }).slice(0, 5)
+    : recetasDisponibles.filter(rec => {
+        // Excluir la receta actual para evitar ciclos
+        if (recetaActualId && rec._id === recetaActualId) return false;
+        const yaSeleccionado = itemsSeleccionados.some(
+          selected => selected.tipo === 'receta' && selected.receta === rec._id
+        );
+        const coincideTermino = rec.nombre.toLowerCase().includes(termino.toLowerCase());
+        return !yaSeleccionado && (termino === '' || coincideTermino);
+      }).slice(0, 5);
 
-  const seleccionarIngrediente = (ingrediente) => {
-    setIngredienteSeleccionado(ingrediente._id);
-    setTermino(ingrediente.nombre);
-    setMostrarSugerencias(false);
+  // Cambiar unidad por defecto según el tipo
+  const handleTipoChange = (nuevoTipo) => {
+    setTipoItem(nuevoTipo);
+    setTermino('');
+    setItemSeleccionado(null);
+    setCantidad('');
+    setUnidad(nuevoTipo === 'receta' ? 'unidad' : 'gr');
   };
 
-  const agregarIngrediente = () => {
-    if (ingredienteSeleccionado && cantidad && parseFloat(cantidad) > 0) {
-      onAgregar({
-        ingrediente: ingredienteSeleccionado,
-        cantidad: parseFloat(cantidad),
-        unidadMedida: unidad
-      });
-      
-      // Limpiar formulario
-      setTermino('');
-      setIngredienteSeleccionado('');
-      setCantidad('');
-      setUnidad('gr');
+  const seleccionarItem = (item) => {
+    setItemSeleccionado(item);
+    setTermino(item.nombre);
+    setMostrarSugerencias(false);
+    // Sugerir unidad de medida del item
+    if (tipoItem === 'ingrediente' && item.unidadMedida) {
+      setUnidad(item.unidadMedida);
+    } else if (tipoItem === 'receta' && item.rendimiento?.unidadMedida) {
+      setUnidad(item.rendimiento.unidadMedida);
     }
   };
 
-  const handleKeyPress = (e) => {
+  const agregarItem = () => {
+    if (itemSeleccionado && cantidad && parseFloat(cantidad) > 0) {
+      const nuevoItem = {
+        tipo: tipoItem,
+        cantidad: parseFloat(cantidad),
+        unidadMedida: unidad
+      };
+
+      if (tipoItem === 'ingrediente') {
+        nuevoItem.ingrediente = itemSeleccionado._id;
+      } else {
+        nuevoItem.receta = itemSeleccionado._id;
+      }
+
+      onAgregar(nuevoItem);
+
+      // Limpiar formulario
+      setTermino('');
+      setItemSeleccionado(null);
+      setCantidad('');
+      setUnidad(tipoItem === 'receta' ? 'unidad' : 'gr');
+    }
+  };
+
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (ingredientesFiltrados.length === 1 && !ingredienteSeleccionado) {
-        seleccionarIngrediente(ingredientesFiltrados[0]);
-      } else if (ingredienteSeleccionado && cantidad) {
-        agregarIngrediente();
+      if (itemsFiltrados.length === 1 && !itemSeleccionado) {
+        seleccionarItem(itemsFiltrados[0]);
+      } else if (itemSeleccionado && cantidad) {
+        agregarItem();
       }
     }
   };
 
+  const isLoading = tipoItem === 'ingrediente' ? loadingIngredientes : loadingRecetas;
+
   return (
     <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
       <h5 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-        🔍 Agregar Ingrediente
+        🔍 Agregar Ingrediente o Receta
       </h5>
-      
+
+      {/* Selector de tipo */}
+      <div className="flex gap-2 mb-3">
+        <button
+          type="button"
+          onClick={() => handleTipoChange('ingrediente')}
+          className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2
+            ${tipoItem === 'ingrediente'
+              ? 'bg-green-600 text-white'
+              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+        >
+          🥬 Ingrediente
+        </button>
+        <button
+          type="button"
+          onClick={() => handleTipoChange('receta')}
+          className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2
+            ${tipoItem === 'receta'
+              ? 'bg-purple-600 text-white'
+              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+        >
+          📋 Receta
+        </button>
+      </div>
+
       <div className="grid grid-cols-12 gap-3 items-end">
-        {/* Buscador de ingrediente */}
+        {/* Buscador */}
         <div className="col-span-6 relative">
-          <label className="block text-xs font-medium text-gray-600 mb-1">Ingrediente</label>
+          <label className="block text-xs font-medium text-gray-600 mb-1">
+            {tipoItem === 'ingrediente' ? 'Ingrediente' : 'Receta'}
+          </label>
           <input
             type="text"
             value={termino}
@@ -82,40 +150,64 @@ const BuscadorIngredientes = ({
               setTermino(e.target.value);
               setMostrarSugerencias(true);
               if (e.target.value === '') {
-                setIngredienteSeleccionado('');
+                setItemSeleccionado(null);
               }
             }}
             onFocus={() => setMostrarSugerencias(true)}
             onBlur={() => setTimeout(() => setMostrarSugerencias(false), 200)}
-            onKeyPress={handleKeyPress}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 bg-white"
-            placeholder={loadingIngredientes ? "Cargando..." : "Buscar ingrediente..."}
-            disabled={loadingIngredientes}
+            onKeyDown={handleKeyDown}
+            className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 bg-white
+              ${tipoItem === 'ingrediente'
+                ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
+                : 'border-purple-300 focus:ring-purple-500 focus:border-purple-500'}`}
+            placeholder={isLoading ? "Cargando..." : `Buscar ${tipoItem}...`}
+            disabled={isLoading}
           />
-          
-          {/* Sugerencias mejoradas */}
-          {mostrarSugerencias && ingredientesFiltrados.length > 0 && (
-            <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-40 overflow-y-auto">
-              {ingredientesFiltrados.map(ingrediente => (
+
+          {/* Sugerencias */}
+          {mostrarSugerencias && itemsFiltrados.length > 0 && (
+            <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+              {itemsFiltrados.map(item => (
                 <button
-                  key={ingrediente._id}
+                  key={item._id}
                   type="button"
-                  onClick={() => seleccionarIngrediente(ingrediente)}
-                  className="w-full px-3 py-2 text-left text-sm hover:bg-green-50 border-b border-gray-100 last:border-b-0 transition-colors"
+                  onClick={() => seleccionarItem(item)}
+                  className={`w-full px-3 py-2 text-left text-sm border-b border-gray-100 last:border-b-0 transition-colors
+                    ${tipoItem === 'ingrediente' ? 'hover:bg-green-50' : 'hover:bg-purple-50'}`}
                 >
                   <div className="flex justify-between items-center">
                     <div>
-                      <span className="font-medium text-gray-900">{ingrediente.nombre}</span>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        💰 S/.{ingrediente.precioUnitario || 0} por {ingrediente.unidadMedida}
-                      </p>
+                      <span className="font-medium text-gray-900 flex items-center gap-1">
+                        {tipoItem === 'ingrediente' ? '🥬' : '📋'} {item.nombre}
+                      </span>
+                      {tipoItem === 'ingrediente' ? (
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          S/.{item.precioUnitario || 0} por {item.unidadMedida}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          Rinde: {item.rendimiento?.cantidad || 0} {item.rendimiento?.unidadMedida || 'un'}
+                        </p>
+                      )}
                     </div>
-                    <span className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
-                      {ingrediente.cantidad} {ingrediente.unidadMedida}
+                    <span className={`text-xs px-2 py-1 rounded
+                      ${tipoItem === 'ingrediente' ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'}`}>
+                      {tipoItem === 'ingrediente'
+                        ? `${item.cantidad || 0} ${item.unidadMedida}`
+                        : `Disp: ${(item.inventario?.cantidadProducida || 0) - (item.inventario?.cantidadUtilizada || 0)}`}
                     </span>
                   </div>
                 </button>
               ))}
+            </div>
+          )}
+
+          {/* Mensaje si no hay items */}
+          {mostrarSugerencias && termino && itemsFiltrados.length === 0 && !isLoading && (
+            <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl p-3">
+              <p className="text-sm text-gray-500 text-center">
+                No se encontraron {tipoItem === 'ingrediente' ? 'ingredientes' : 'recetas'}
+              </p>
             </div>
           )}
         </div>
@@ -127,7 +219,7 @@ const BuscadorIngredientes = ({
             type="number"
             value={cantidad}
             onChange={(e) => setCantidad(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
             className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
             placeholder="0.00"
             step="0.01"
@@ -153,20 +245,22 @@ const BuscadorIngredientes = ({
         <div className="col-span-2">
           <button
             type="button"
-            onClick={agregarIngrediente}
-            disabled={!ingredienteSeleccionado || !cantidad || parseFloat(cantidad) <= 0}
-            className="w-full py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-1"
+            onClick={agregarItem}
+            disabled={!itemSeleccionado || !cantidad || parseFloat(cantidad) <= 0}
+            className={`w-full py-2 text-white rounded-lg text-sm font-medium transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-1
+              ${tipoItem === 'ingrediente' ? 'bg-green-600 hover:bg-green-700' : 'bg-purple-600 hover:bg-purple-700'}`}
           >
-            ➕ Agregar
+            + Agregar
           </button>
         </div>
       </div>
-      
-      {/* Ingrediente seleccionado preview */}
-      {ingredienteSeleccionado && termino && (
-        <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-xs text-green-700">
-            ✅ <strong>{termino}</strong> seleccionado
+
+      {/* Item seleccionado preview */}
+      {itemSeleccionado && termino && (
+        <div className={`mt-3 p-2 rounded-lg border
+          ${tipoItem === 'ingrediente' ? 'bg-green-50 border-green-200' : 'bg-purple-50 border-purple-200'}`}>
+          <p className={`text-xs ${tipoItem === 'ingrediente' ? 'text-green-700' : 'text-purple-700'}`}>
+            {tipoItem === 'ingrediente' ? '🥬' : '📋'} <strong>{termino}</strong> seleccionado
             {cantidad && ` - ${cantidad} ${unidad}`}
           </p>
         </div>
@@ -175,25 +269,51 @@ const BuscadorIngredientes = ({
   );
 };
 
-// 🎯 NUEVO: Lista compacta de ingredientes
-const ListaIngredientesCompacta = ({ 
-  ingredientes, 
-  ingredientesDisponibles, 
-  onEliminar, 
-  onActualizar 
+// 🎯 MEJORADO: Lista compacta de ingredientes Y recetas
+const ListaItemsCompacta = ({
+  items = [],
+  ingredientesDisponibles = [],
+  recetasDisponibles = [],
+  onEliminar,
+  onActualizar,
+  rendimientoCantidad = 1
 }) => {
   const obtenerIngredienteInfo = (ingredienteId) => {
     return ingredientesDisponibles.find(ing => ing._id === ingredienteId);
   };
 
-  const calcularCostoTotal = () => {
-    return ingredientes.reduce((total, ing) => {
-      const info = obtenerIngredienteInfo(ing.ingrediente);
-      return total + (ing.cantidad * (info?.precioUnitario || 0));
+  const obtenerRecetaInfo = (recetaId) => {
+    return recetasDisponibles.find(rec => rec._id === recetaId);
+  };
+
+  const calcularCostoItem = (item) => {
+    if (item.tipo === 'receta') {
+      // Estimación simple: el costo de la receta anidada se calculará en backend
+      // Aquí mostramos "Por calcular" o un valor aproximado si tenemos historial
+      return null; // Se calculará dinámicamente
+    } else {
+      const info = obtenerIngredienteInfo(item.ingrediente);
+      return item.cantidad * (info?.precioUnitario || 0);
+    }
+  };
+
+  const calcularCostoTotalIngredientes = () => {
+    return items.reduce((total, item) => {
+      if (item.tipo !== 'receta') {
+        const info = obtenerIngredienteInfo(item.ingrediente);
+        return total + (item.cantidad * (info?.precioUnitario || 0));
+      }
+      return total;
     }, 0);
   };
 
-  if (ingredientes.length === 0) {
+  const contarPorTipo = () => {
+    const ingredientes = items.filter(i => i.tipo !== 'receta').length;
+    const recetas = items.filter(i => i.tipo === 'receta').length;
+    return { ingredientes, recetas };
+  };
+
+  if (items.length === 0) {
     return (
       <div className="text-center py-6 text-gray-500 bg-gray-50 rounded-lg">
         <div className="text-3xl mb-2">🍳</div>
@@ -202,21 +322,52 @@ const ListaIngredientesCompacta = ({
     );
   }
 
+  const conteo = contarPorTipo();
+
   return (
     <div className="space-y-2">
-      {ingredientes.map((ingrediente, index) => {
-        const info = obtenerIngredienteInfo(ingrediente.ingrediente);
-        const costo = ingrediente.cantidad * (info?.precioUnitario || 0);
-        
+      {/* Contadores */}
+      <div className="flex gap-2 mb-2">
+        {conteo.ingredientes > 0 && (
+          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+            🥬 {conteo.ingredientes} ingrediente{conteo.ingredientes !== 1 ? 's' : ''}
+          </span>
+        )}
+        {conteo.recetas > 0 && (
+          <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+            📋 {conteo.recetas} receta{conteo.recetas !== 1 ? 's' : ''}
+          </span>
+        )}
+      </div>
+
+      {items.map((item, index) => {
+        const esReceta = item.tipo === 'receta';
+        const info = esReceta
+          ? obtenerRecetaInfo(item.receta)
+          : obtenerIngredienteInfo(item.ingrediente);
+        const costo = calcularCostoItem(item);
+
         return (
-          <div key={index} className="bg-white border border-gray-200 rounded-lg p-2 flex items-center gap-2">
-            {/* Nombre del ingrediente */}
+          <div
+            key={index}
+            className={`bg-white border rounded-lg p-2 flex items-center gap-2
+              ${esReceta ? 'border-purple-200' : 'border-gray-200'}`}
+          >
+            {/* Icono de tipo */}
+            <span className="text-lg" title={esReceta ? 'Receta' : 'Ingrediente'}>
+              {esReceta ? '📋' : '🥬'}
+            </span>
+
+            {/* Nombre del item */}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {info?.nombre || 'Ingrediente no encontrado'}
+              <p className={`text-sm font-medium truncate
+                ${esReceta ? 'text-purple-900' : 'text-gray-900'}`}>
+                {info?.nombre || (esReceta ? 'Receta no encontrada' : 'Ingrediente no encontrado')}
               </p>
               <p className="text-xs text-gray-500">
-                Disponible: {info?.cantidad || 0} {info?.unidadMedida}
+                {esReceta
+                  ? `Rinde: ${info?.rendimiento?.cantidad || 0} ${info?.rendimiento?.unidadMedida || 'un'}`
+                  : `Disponible: ${info?.cantidad || 0} ${info?.unidadMedida || ''}`}
               </p>
             </div>
 
@@ -224,27 +375,34 @@ const ListaIngredientesCompacta = ({
             <div className="flex items-center gap-1">
               <input
                 type="number"
-                value={ingrediente.cantidad}
+                value={item.cantidad}
                 onChange={(e) => onActualizar(index, 'cantidad', parseFloat(e.target.value) || 0)}
-                className="w-16 px-1 py-1 text-xs border border-gray-300 rounded focus:ring-green-500 focus:border-green-500"
+                className={`w-16 px-1 py-1 text-xs border rounded focus:ring-2
+                  ${esReceta
+                    ? 'border-purple-300 focus:ring-purple-500 focus:border-purple-500'
+                    : 'border-gray-300 focus:ring-green-500 focus:border-green-500'}`}
                 step="0.01"
                 min="0"
               />
-              <span className="text-xs text-gray-600 w-8">{ingrediente.unidadMedida}</span>
+              <span className="text-xs text-gray-600 w-8">{item.unidadMedida}</span>
             </div>
 
             {/* Costo */}
-            <div className="text-right">
-              <p className="text-xs font-medium text-green-600">
-                S/.{costo.toFixed(2)}
-              </p>
+            <div className="text-right min-w-[60px]">
+              {esReceta ? (
+                <p className="text-xs text-purple-600 italic">Sub-receta</p>
+              ) : (
+                <p className="text-xs font-medium text-green-600">
+                  S/.{(costo || 0).toFixed(2)}
+                </p>
+              )}
             </div>
 
             {/* Botón eliminar */}
             <button
               type="button"
               onClick={() => onEliminar(index)}
-              className="text-red-500 hover:text-red-700 p-1"
+              className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded"
               title="Eliminar"
             >
               ✕
@@ -252,20 +410,27 @@ const ListaIngredientesCompacta = ({
           </div>
         );
       })}
-      
+
       {/* Total */}
       <div className="bg-green-50 border border-green-200 rounded-lg p-2 mt-3">
         <div className="flex justify-between items-center">
           <span className="text-sm font-medium text-green-700">
-            Costo total estimado:
+            Costo ingredientes:
           </span>
           <span className="text-sm font-bold text-green-800">
-            S/.{calcularCostoTotal().toFixed(2)}
+            S/.{calcularCostoTotalIngredientes().toFixed(2)}
           </span>
         </div>
-        <div className="flex justify-between items-center mt-1">
-          <span className="text-xs text-green-600">Costo por unidad:</span>
-          <span className="text-xs text-green-700">S/.{(calcularCostoTotal() / Math.max(1, ingredientes.length)).toFixed(2)}</span>
+        {conteo.recetas > 0 && (
+          <p className="text-xs text-purple-600 mt-1">
+            + Costo de {conteo.recetas} sub-receta{conteo.recetas !== 1 ? 's' : ''} (calculado al guardar)
+          </p>
+        )}
+        <div className="flex justify-between items-center mt-1 pt-1 border-t border-green-200">
+          <span className="text-xs text-green-600">Costo por unidad (aprox):</span>
+          <span className="text-xs text-green-700">
+            S/.{(calcularCostoTotalIngredientes() / Math.max(1, rendimientoCantidad)).toFixed(2)}
+          </span>
         </div>
       </div>
     </div>
@@ -289,12 +454,14 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
   });
   
   const [ingredientesDisponibles, setIngredientesDisponibles] = useState([]);
+  const [recetasDisponibles, setRecetasDisponibles] = useState([]); // 🎯 NUEVO: Recetas para anidar
   const [productosCatalogo, setProductosCatalogo] = useState([]);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [cargandoProductos, setCargandoProductos] = useState(false);
   const [errores, setErrores] = useState({});
   const [enviando, setEnviando] = useState(false);
   const [loadingIngredientes, setLoadingIngredientes] = useState(true);
+  const [loadingRecetas, setLoadingRecetas] = useState(true); // 🎯 NUEVO
 
   const unidadesMedida = [
     { value: 'kg', label: 'Kilogramos' },
@@ -307,8 +474,9 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
 
   useEffect(() => {
     cargarIngredientes();
+    cargarRecetasDisponibles(); // 🎯 NUEVO: Cargar recetas para anidar
     cargarProductosCatalogo();
-    
+
     // 🎯 REMOVIDO: Ya no agregamos ingrediente vacío automáticamente
     // El usuario ahora usa el buscador para agregar ingredientes
   }, []);
@@ -345,6 +513,28 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
     }
   };
 
+  // 🎯 NUEVO: Cargar recetas disponibles para anidar
+  const cargarRecetasDisponibles = async () => {
+    try {
+      setLoadingRecetas(true);
+      // Obtener recetas activas que pueden ser usadas como sub-recetas
+      const response = await recetaService.obtenerRecetas({ activo: true });
+      // Filtrar la receta actual si estamos editando (para evitar ciclos)
+      const recetasFiltradas = (response.data || []).filter(r => {
+        // Si estamos editando, excluir la receta actual
+        if (receta?._id && r._id === receta._id) return false;
+        // Solo incluir recetas que tengan inventario o estén completadas
+        return true;
+      });
+      setRecetasDisponibles(recetasFiltradas);
+    } catch (error) {
+      console.error('Error al cargar recetas disponibles:', error);
+      setRecetasDisponibles([]);
+    } finally {
+      setLoadingRecetas(false);
+    }
+  };
+
   const cargarProductosCatalogo = async () => {
     try {
       setCargandoProductos(true);
@@ -357,10 +547,6 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
     } finally {
       setCargandoProductos(false);
     }
-  };
-
-  const obtenerIngredienteInfo = (ingredienteId) => {
-    return ingredientesDisponibles.find(ing => ing._id === ingredienteId);
   };
 
   const validarFormulario = () => {
@@ -378,26 +564,37 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
       nuevosErrores.rendimiento = 'El rendimiento debe ser mayor a 0';
     }
 
-    // FILTRAR SOLO INGREDIENTES QUE TIENEN DATOS
-    const ingredientesConDatos = formData.ingredientes.filter(ing => 
-      ing.ingrediente || ing.cantidad > 0
-    );
+    // 🎯 MEJORADO: Filtrar items (ingredientes o recetas) que tienen datos válidos
+    const itemsConDatos = formData.ingredientes.filter(item => {
+      const tipoItem = item.tipo || 'ingrediente';
+      if (tipoItem === 'receta') {
+        return item.receta || item.cantidad > 0;
+      }
+      return item.ingrediente || item.cantidad > 0;
+    });
 
-    console.log('🧪 Ingredientes con datos para validar:', ingredientesConDatos);
+    console.log('🧪 Items con datos para validar:', itemsConDatos);
 
-    if (ingredientesConDatos.length === 0) {
-      nuevosErrores.ingredientes = 'Debe agregar al menos un ingrediente a la receta';
+    if (itemsConDatos.length === 0) {
+      nuevosErrores.ingredientes = 'Debe agregar al menos un ingrediente o receta';
     }
 
-    // VALIDAR SOLO INGREDIENTES QUE TIENEN ALGÚN DATO
-    ingredientesConDatos.forEach((ingrediente, index) => {
-      // Encontrar el índice original en el array completo
-      const indiceOriginal = formData.ingredientes.findIndex(ing => ing === ingrediente);
-      
-      if (!ingrediente.ingrediente) {
-        nuevosErrores[`ingrediente_${indiceOriginal}`] = 'Debe seleccionar un ingrediente';
+    // 🎯 MEJORADO: Validar cada item según su tipo
+    itemsConDatos.forEach((item) => {
+      const indiceOriginal = formData.ingredientes.findIndex(ing => ing === item);
+      const tipoItem = item.tipo || 'ingrediente';
+
+      if (tipoItem === 'receta') {
+        if (!item.receta) {
+          nuevosErrores[`receta_${indiceOriginal}`] = 'Debe seleccionar una receta';
+        }
+      } else {
+        if (!item.ingrediente) {
+          nuevosErrores[`ingrediente_${indiceOriginal}`] = 'Debe seleccionar un ingrediente';
+        }
       }
-      if (ingrediente.cantidad <= 0) {
+
+      if (item.cantidad <= 0) {
         nuevosErrores[`cantidad_${indiceOriginal}`] = 'La cantidad debe ser mayor a 0';
       }
     });
@@ -433,25 +630,11 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
     }
   };
 
-  const agregarIngrediente = () => {
+  // 🎯 Función para agregar item (ingrediente o receta) desde el buscador
+  const agregarIngredienteDesdeBuscador = (nuevoItem) => {
     setFormData(prev => ({
       ...prev,
-      ingredientes: [
-        ...prev.ingredientes,
-        {
-          ingrediente: '',
-          cantidad: 0,
-          unidadMedida: 'gr'
-        }
-      ]
-    }));
-  };
-
-  // 🎯 NUEVO: Función para agregar ingrediente desde el buscador
-  const agregarIngredienteDesdeBuscador = (nuevoIngrediente) => {
-    setFormData(prev => ({
-      ...prev,
-      ingredientes: [...prev.ingredientes, nuevoIngrediente]
+      ingredientes: [...prev.ingredientes, nuevoItem]
     }));
   };
 
@@ -486,20 +669,12 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
     }));
   };
 
-  const calcularCostoTotal = () => {
-    return formData.ingredientes.reduce((total, ingrediente) => {
-      const info = obtenerIngredienteInfo(ingrediente.ingrediente);
-      const precioUnitario = info?.precioUnitario || 0;
-      return total + (ingrediente.cantidad * precioUnitario);
-    }, 0);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     console.log('🚀 Iniciando envío del formulario...');
     console.log('📊 Datos del formulario:', formData);
-    
+
     if (!validarFormulario()) {
       console.log('❌ Validación falló');
       return;
@@ -510,33 +685,53 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
     try {
       // Crear una copia de los datos del formulario
       const datosFormulario = { ...formData };
-      
-      console.log('🔍 Procesando ingredientes...');
-      console.log('📋 Ingredientes originales:', datosFormulario.ingredientes);
 
-      // FILTRAR SOLO INGREDIENTES QUE TIENEN DATOS VÁLIDOS
-      const ingredientesValidos = datosFormulario.ingredientes.filter(ing => {
-        const esValido = ing.ingrediente && ing.cantidad > 0;
-        console.log(`🧪 Ingrediente ${ing.ingrediente || 'sin seleccionar'}: ${esValido ? 'VÁLIDO' : 'INVÁLIDO'} (cantidad: ${ing.cantidad})`);
-        return esValido;
+      console.log('🔍 Procesando items (ingredientes y recetas)...');
+      console.log('📋 Items originales:', datosFormulario.ingredientes);
+
+      // 🎯 MEJORADO: Filtrar items válidos (ingredientes O recetas)
+      const itemsValidos = datosFormulario.ingredientes.filter(item => {
+        const tipoItem = item.tipo || 'ingrediente';
+        if (tipoItem === 'receta') {
+          const esValido = item.receta && item.cantidad > 0;
+          console.log(`📋 Receta ${item.receta || 'sin seleccionar'}: ${esValido ? 'VÁLIDO' : 'INVÁLIDO'} (cantidad: ${item.cantidad})`);
+          return esValido;
+        } else {
+          const esValido = item.ingrediente && item.cantidad > 0;
+          console.log(`🥬 Ingrediente ${item.ingrediente || 'sin seleccionar'}: ${esValido ? 'VÁLIDO' : 'INVÁLIDO'} (cantidad: ${item.cantidad})`);
+          return esValido;
+        }
       });
 
-      console.log('✅ Ingredientes válidos filtrados:', ingredientesValidos);
+      console.log('✅ Items válidos filtrados:', itemsValidos);
 
-      if (ingredientesValidos.length === 0) {
-        throw new Error('No hay ingredientes válidos para procesar');
+      if (itemsValidos.length === 0) {
+        throw new Error('No hay ingredientes o recetas válidas para procesar');
       }
 
+      // 🎯 MEJORADO: Mapear items con su tipo correspondiente
       const datosLimpios = {
         nombre: datosFormulario.nombre,
-        productoReferencia: datosFormulario.productoReferencia, // Incluir referencia del producto
+        productoReferencia: datosFormulario.productoReferencia,
         descripcion: datosFormulario.descripcion,
-        categoria: datosFormulario.categoria, // Campo requerido por el modelo
-        ingredientes: ingredientesValidos.map(ing => ({
-          ingrediente: ing.ingrediente,
-          cantidad: Number(ing.cantidad),
-          unidadMedida: ing.unidadMedida
-        })),
+        categoria: datosFormulario.categoria,
+        ingredientes: itemsValidos.map(item => {
+          const tipoItem = item.tipo || 'ingrediente';
+          const itemLimpio = {
+            tipo: tipoItem,
+            cantidad: Number(item.cantidad),
+            unidadMedida: item.unidadMedida,
+            notas: item.notas || ''
+          };
+
+          if (tipoItem === 'receta') {
+            itemLimpio.receta = item.receta;
+          } else {
+            itemLimpio.ingrediente = item.ingrediente;
+          }
+
+          return itemLimpio;
+        }),
         activo: datosFormulario.activo,
         consumirIngredientes: datosFormulario.consumirIngredientes,
         rendimiento: {
@@ -548,10 +743,10 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
 
       console.log('🚀 Enviando datos limpios al backend:', datosLimpios);
       console.log('📞 Llamando a onGuardar...');
-      
+
       await onGuardar(datosLimpios);
       console.log('✅ onGuardar completado exitosamente');
-      
+
     } catch (error) {
       console.error('❌ Error en handleSubmit:', error);
       alert(`Error: ${error.message || error}`);
@@ -736,15 +931,18 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
                 </div>
               </div>
 
-              {/* COLUMNA DERECHA - Ingredientes (1/2 del espacio) */}
+              {/* COLUMNA DERECHA - Ingredientes y Recetas (1/2 del espacio) */}
               <div className="space-y-4 overflow-y-auto pl-2">
                 <div className="bg-green-50 p-3 rounded-lg">
                   <div className="flex items-center gap-2 mb-3">
                     <h4 className="font-medium text-gray-700 flex items-center gap-2">
                       <span className="bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
-                        {formData.ingredientes.filter(ing => ing.ingrediente && ing.cantidad > 0).length}
+                        {formData.ingredientes.filter(item => {
+                          const tipo = item.tipo || 'ingrediente';
+                          return tipo === 'receta' ? (item.receta && item.cantidad > 0) : (item.ingrediente && item.cantidad > 0);
+                        }).length}
                       </span>
-                      Ingredientes
+                      Ingredientes y Recetas
                     </h4>
                   </div>
 
@@ -756,21 +954,26 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
                     </div>
                   )}
 
-                  {/* Nuevo buscador compacto */}
-                  <BuscadorIngredientes
+                  {/* 🎯 MEJORADO: Buscador de ingredientes Y recetas */}
+                  <BuscadorIngredientesYRecetas
                     ingredientesDisponibles={ingredientesDisponibles}
+                    recetasDisponibles={recetasDisponibles}
                     onAgregar={agregarIngredienteDesdeBuscador}
                     loadingIngredientes={loadingIngredientes}
-                    ingredientesSeleccionados={formData.ingredientes}
+                    loadingRecetas={loadingRecetas}
+                    itemsSeleccionados={formData.ingredientes}
+                    recetaActualId={receta?._id}
                   />
 
-                  {/* Lista compacta de ingredientes */}
+                  {/* 🎯 MEJORADO: Lista compacta de ingredientes Y recetas */}
                   <div className="max-h-64 overflow-y-auto">
-                    <ListaIngredientesCompacta
-                      ingredientes={formData.ingredientes}
+                    <ListaItemsCompacta
+                      items={formData.ingredientes}
                       ingredientesDisponibles={ingredientesDisponibles}
+                      recetasDisponibles={recetasDisponibles}
                       onEliminar={eliminarIngrediente}
                       onActualizar={actualizarIngrediente}
+                      rendimientoCantidad={formData.rendimiento.cantidad}
                     />
                   </div>
 

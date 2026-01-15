@@ -25,7 +25,8 @@ const ListaProductosDisponibles = React.memo(({
   onAgregarProducto,
   loading = false,
   error = null,
-  onStockUpdated // Nuevo prop para notificar cuando se actualiza stock
+  onStockUpdated, // Nuevo prop para notificar cuando se actualiza stock
+  userRole = 'user' // Rol del usuario para control de permisos
 }) => {
   // Estado para manejar las cantidades de cada producto
   const [cantidades, setCantidades] = useState({});
@@ -212,15 +213,17 @@ const ListaProductosDisponibles = React.memo(({
                 </button>
               </div>
 
-              {/* Botón +Stock (siempre visible) */}
-              <button
-                onClick={() => handleAgregarStock(producto)}
-                className="flex-shrink-0 px-2 sm:px-2.5 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-all duration-200 flex items-center justify-center gap-1 hover:shadow-lg min-w-[36px] sm:min-w-0"
-                title="Agregar stock rápido"
-              >
-                <Zap size={14} className="sm:w-4 sm:h-4" />
-                <span className="hidden xs:inline text-xs font-medium">+Stock</span>
-              </button>
+              {/* Botón +Stock (solo visible para admin y super_admin) */}
+              {(userRole === 'admin' || userRole === 'super_admin') && (
+                <button
+                  onClick={() => handleAgregarStock(producto)}
+                  className="flex-shrink-0 px-2 sm:px-2.5 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-all duration-200 flex items-center justify-center gap-1 hover:shadow-lg min-w-[36px] sm:min-w-0"
+                  title="Agregar stock rápido"
+                >
+                  <Zap size={14} className="sm:w-4 sm:h-4" />
+                  <span className="hidden xs:inline text-xs font-medium">+Stock</span>
+                </button>
+              )}
 
               {/* Botón agregar */}
               <button

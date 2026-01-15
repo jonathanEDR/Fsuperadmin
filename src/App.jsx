@@ -30,6 +30,7 @@ import ProduccionPage from './Pages/ProduccionPage';
 import CatalogoPage from './Pages/CatalogoPage';
 import GestionQR from './components/QR/GestionQR'; // NUEVO: Sistema de QR para Asistencias
 import EscanerQR from './components/QR/EscanerQR'; // NUEVO: Escáner QR para Usuarios
+import UserHomePage from './Pages/UserHomePage'; // NUEVO: Página principal del dashboard de usuario
 
 // Importar páginas del módulo de finanzas
 import FinanzasPage from './Pages/FinanzasPage';
@@ -55,22 +56,22 @@ function ProtectedRoute({ children }) {
 // Componente para rutas que solo usuarios no autenticados pueden ver
 function PublicRoute({ children }) {
   const { user, isLoaded } = useUser();
-  
+
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600 text-sm">Cargando...</p>
         </div>
       </div>
     );
   }
-  
+
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }
-  
+
   return children;
 }
 
@@ -196,7 +197,7 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route path="dashboard" element={<NotasPage />} />
+              <Route path="dashboard" element={<UserHomePage />} />
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="notas" element={<NotasPage />} />
               <Route path="ventas" element={<VentasPage />} />
