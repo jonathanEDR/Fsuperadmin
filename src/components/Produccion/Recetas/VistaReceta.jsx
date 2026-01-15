@@ -154,16 +154,17 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
                 </div>
               )}
 
-              {/* Ingredientes */}
+              {/* Ingredientes y Recetas */}
               <div className="bg-white border rounded-lg overflow-hidden">
                 <div className="bg-gray-50 px-2 sm:px-4 py-2 sm:py-3 border-b">
-                  <h4 className="font-medium text-gray-700">Ingredientes</h4>
+                  <h4 className="font-medium text-gray-700">Ingredientes y Sub-recetas</h4>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="min-w-[600px] text-xs sm:text-sm">
                     <thead className="bg-gray-100">
                       <tr>
-                        <th className="px-3 py-2 text-left font-semibold text-gray-600 uppercase sticky top-0 bg-gray-100 z-10">Ingrediente</th>
+                        <th className="px-3 py-2 text-left font-semibold text-gray-600 uppercase sticky top-0 bg-gray-100 z-10">Tipo</th>
+                        <th className="px-3 py-2 text-left font-semibold text-gray-600 uppercase sticky top-0 bg-gray-100 z-10">Nombre</th>
                         <th className="px-3 py-2 text-left font-semibold text-gray-600 uppercase sticky top-0 bg-gray-100 z-10">Cantidad</th>
                         <th className="px-3 py-2 text-left font-semibold text-gray-600 uppercase sticky top-0 bg-gray-100 z-10">Unidad</th>
                         <th className="px-3 py-2 text-left font-semibold text-gray-600 uppercase sticky top-0 bg-gray-100 z-10">Disponible</th>
@@ -178,15 +179,45 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                       {datosReceta.ingredientes?.map((item, index) => {
-                        const disponible = item.ingrediente.cantidad - item.ingrediente.procesado;
-                        const subtotal = item.cantidad * item.ingrediente.precioUnitario;
-                        const cantidadNecesaria = item.cantidad * cantidadConsulta;
-                        const suficiente = disponible >= cantidadNecesaria;
+                        // 🎯 FIX: Detectar si es ingrediente o receta
+                        const esReceta = item.tipo === 'receta';
+                        const itemData = esReceta ? item.receta : item.ingrediente;
+                        
+                        // Validar que el item exista (puede no estar poblado)
+                        if (!itemData) {
+                          console.warn('⚠️ Item no poblado:', item);
+                          return null;
+                        }
+
+                        let disponible, subtotal, cantidadNecesaria, suficiente;
+
+                        if (esReceta) {
+                          // Para recetas: disponible = producido - utilizado
+                          disponible = (itemData.inventario?.cantidadProducida || 0) - (itemData.inventario?.cantidadUtilizada || 0);
+                          // Costo unitario de la receta (si tiene)
+                          const costoUnitarioReceta = costoCalculado?.costoUnitario || 0;
+                          subtotal = item.cantidad * costoUnitarioReceta;
+                          cantidadNecesaria = item.cantidad * cantidadConsulta;
+                          suficiente = disponible >= cantidadNecesaria;
+                        } else {
+                          // Para ingredientes: disponible = cantidad - procesado
+                          disponible = (itemData.cantidad || 0) - (itemData.procesado || 0);
+                          subtotal = item.cantidad * (itemData.precioUnitario || 0);
+                          cantidadNecesaria = item.cantidad * cantidadConsulta;
+                          suficiente = disponible >= cantidadNecesaria;
+                        }
 
                         return (
-                          <tr key={index} className={!suficiente ? 'bg-red-50' : ''}>
+                          <tr key={index} className={!suficiente ? 'bg-red-50' : esReceta ? 'bg-purple-50' : ''}>
+                            <td className="px-3 py-2 text-xs sm:text-sm">
+                              <span className="text-lg" title={esReceta ? 'Receta' : 'Ingrediente'}>
+                                {esReceta ? '📋' : '🥬'}
+                              </span>
+                            </td>
                             <td className="px-3 py-2 text-xs sm:text-sm text-gray-900 whitespace-nowrap max-w-[180px] truncate">
-                              {item.ingrediente.nombre}
+                              <span className={esReceta ? 'text-purple-700 font-medium' : ''}>
+                                {itemData.nombre}
+                              </span>
                             </td>
                             <td className="px-3 py-2 text-xs sm:text-sm text-gray-900">
                               {item.cantidad}
@@ -199,8 +230,20 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
                             {/* Solo super_admin ve los precios */}
                             {canViewPrices && (
                               <>
-                                <td className="px-3 py-2 text-xs sm:text-sm text-gray-900">S/.{item.ingrediente.precioUnitario?.toFixed(2) || '0.00'}</td>
-                                <td className="px-3 py-2 text-xs sm:text-sm text-gray-900">S/.{subtotal.toFixed(2)}</td>
+                                <td className="px-3 py-2 text-xs sm:text-sm text-gray-900">
+                                  {esReceta ? (
+                                    <span className="text-purple-600">Por calcular</span>
+                                  ) : (
+                                    `S/.${itemData.precioUnitario?.toFixed(2) || '0.00'}`
+                                  )}
+                                </td>
+                                <td className="px-3 py-2 text-xs sm:text-sm text-gray-900">
+                                  {esReceta ? (
+                                    <span className="text-purple-600">-</span>
+                                  ) : (
+                                    `S/.${subtotal.toFixed(2)}`
+                                  )}
+                                </td>
                               </>
                             )}
                           </tr>
