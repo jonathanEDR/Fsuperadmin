@@ -281,7 +281,6 @@ const IngredientesBarChart = React.memo(() => {
                         const ing = ingredientesData[index];
                         if (ing) {
                           const lines = [];
-                          lines.push(`Stock total: ${ing.cantidad} ${ing.unidadMedida}`);
                           // Solo mostrar precios si el usuario tiene permisos y los datos existen
                           if (canViewPrices && ing.precioUnitario !== undefined) {
                             lines.push(`Precio unitario: ${formatCurrency(ing.precioUnitario)}`);

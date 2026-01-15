@@ -670,66 +670,68 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                     {productos.map((producto) => (
                       <div key={`${producto._id}-${producto.cantidad}-${producto._lastUpdated || Date.now()}`} className={`border rounded-lg p-2 sm:p-4 hover:shadow-md transition-shadow ${
-                        tipoSeleccionado === 'recetas' 
-                          ? 'border-green-200 bg-green-50' 
+                        tipoSeleccionado === 'recetas'
+                          ? 'border-green-200 bg-green-50'
                           : 'border-gray-200 bg-white'
                       }`}>
-                        <div className="flex justify-between items-start mb-2 sm:mb-3">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-medium text-gray-800 text-xs sm:text-sm leading-tight mb-1 truncate">
-                              {producto.nombre}
-                            </h3>
-                            {tipoSeleccionado === 'recetas' && (
-                              <span className="inline-block px-1.5 sm:px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
-                                Receta
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex flex-col sm:flex-row gap-1 ml-1 sm:ml-2">
-                            <button
-                              onClick={() => abrirModalAgregar(producto)}
-                              className={`px-1.5 sm:px-2 py-1 text-white text-xs rounded transition-colors flex-shrink-0 ${
-                                tipoSeleccionado === 'recetas' 
-                                  ? 'bg-green-600 hover:bg-green-700' 
-                                  : 'bg-blue-600 hover:bg-blue-700'
-                              }`}
-                            >
-                              {tipoSeleccionado === 'recetas' ? (
-                                <span className="hidden sm:inline">🧑‍🍳 Producir</span>
-                              ) : (
-                                <span className="hidden sm:inline">+ Agregar</span>
-                              )}
-                              <span className="sm:hidden">+</span>
-                            </button>
-                            
-                            {/* Botón de historial solo para productos de producción */}
-                            {tipoSeleccionado === 'produccion' && (
-                              <button
-                                onClick={() => abrirHistorialProduccion(producto)}
-                                className="px-1.5 sm:px-2 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded transition-colors flex-shrink-0"
-                                title="Ver historial de producciones"
-                              >
-                                <span className="hidden sm:inline">📊 Historial</span>
-                                <span className="sm:hidden">📊</span>
-                              </button>
-                            )}
-                          </div>
+                        {/* Nombre del producto */}
+                        <div className="mb-2 sm:mb-3">
+                          <h3 className="font-medium text-gray-800 text-xs sm:text-sm leading-tight truncate">
+                            {producto.nombre}
+                          </h3>
+                          {tipoSeleccionado === 'recetas' && (
+                            <span className="inline-block px-1.5 sm:px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full mt-1">
+                              Receta
+                            </span>
+                          )}
                         </div>
-                        
+
                         <div className="space-y-0.5 sm:space-y-1 text-xs text-gray-600">
                           <div className="hidden sm:block">
                             <span className="font-medium">Ref:</span> {' '}
                             {producto.productoReferencia?.nombre || producto.codigo || 'N/A'}
                           </div>
-                          <div>
-                            <span className="font-medium">Stock:</span> {' '}
-                            <span className={`font-semibold ${
-                              obtenerCantidadProducto(producto) > 0 
-                                ? 'text-green-600' 
-                                : 'text-red-600'
-                            }`}>
-                              {obtenerCantidadProducto(producto)} {producto.unidadMedida || 'u'}
-                            </span>
+                          {/* Stock con botón + al lado */}
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <span className="font-medium">Stock:</span> {' '}
+                              <span className={`font-semibold ${
+                                obtenerCantidadProducto(producto) > 0
+                                  ? 'text-green-600'
+                                  : 'text-red-600'
+                              }`}>
+                                {obtenerCantidadProducto(producto)} {producto.unidadMedida || 'u'}
+                              </span>
+                            </div>
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => abrirModalAgregar(producto)}
+                                className={`px-1.5 sm:px-2 py-1 text-white text-xs rounded transition-colors flex-shrink-0 ${
+                                  tipoSeleccionado === 'recetas'
+                                    ? 'bg-green-600 hover:bg-green-700'
+                                    : 'bg-blue-600 hover:bg-blue-700'
+                                }`}
+                              >
+                                {tipoSeleccionado === 'recetas' ? (
+                                  <span className="hidden sm:inline">🧑‍🍳 Producir</span>
+                                ) : (
+                                  <span className="hidden sm:inline">+ Agregar</span>
+                                )}
+                                <span className="sm:hidden">+</span>
+                              </button>
+
+                              {/* Botón de historial solo para productos de producción */}
+                              {tipoSeleccionado === 'produccion' && (
+                                <button
+                                  onClick={() => abrirHistorialProduccion(producto)}
+                                  className="px-1.5 sm:px-2 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded transition-colors flex-shrink-0"
+                                  title="Ver historial de producciones"
+                                >
+                                  <span className="hidden sm:inline">📊 Historial</span>
+                                  <span className="sm:hidden">📊</span>
+                                </button>
+                              )}
+                            </div>
                           </div>
                           {tipoSeleccionado === 'recetas' && (
                             <>

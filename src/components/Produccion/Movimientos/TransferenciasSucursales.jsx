@@ -237,97 +237,128 @@ const TransferenciasSucursales = () => {
         </div>
       )}
 
-      {/* Tabs de navegación */}
-      <div className="flex space-x-2 border-b border-gray-200">
+      {/* Tabs de navegación - Responsive: solo iconos en móvil */}
+      <div className="flex space-x-1 sm:space-x-2 border-b border-gray-200">
         <button
           onClick={() => setVistaActiva('transferencia')}
-          className={`px-4 py-2 font-medium transition-colors ${
+          className={`px-3 sm:px-4 py-2 font-medium transition-colors ${
             vistaActiva === 'transferencia'
               ? 'text-teal-600 border-b-2 border-teal-600'
               : 'text-gray-500 hover:text-gray-700'
           }`}
+          title="Transferencias"
         >
-          🚚 Transferencias
+          <span className="text-lg sm:text-base">🚚</span>
+          <span className="hidden sm:inline ml-1">Transferencias</span>
         </button>
         <button
           onClick={() => setVistaActiva('historial')}
-          className={`px-4 py-2 font-medium transition-colors ${
+          className={`px-3 sm:px-4 py-2 font-medium transition-colors ${
             vistaActiva === 'historial'
               ? 'text-teal-600 border-b-2 border-teal-600'
               : 'text-gray-500 hover:text-gray-700'
           }`}
+          title="Historial"
         >
-          📜 Historial
+          <span className="text-lg sm:text-base">📜</span>
+          <span className="hidden sm:inline ml-1">Historial</span>
         </button>
         <button
           onClick={() => setVistaActiva('estadisticas')}
-          className={`px-4 py-2 font-medium transition-colors ${
+          className={`px-3 sm:px-4 py-2 font-medium transition-colors ${
             vistaActiva === 'estadisticas'
               ? 'text-teal-600 border-b-2 border-teal-600'
               : 'text-gray-500 hover:text-gray-700'
           }`}
+          title="Estadísticas por Sucursal"
         >
-          📊 Estadísticas por Sucursal
+          <span className="text-lg sm:text-base">📊</span>
+          <span className="hidden sm:inline ml-1">Estadísticas</span>
         </button>
       </div>
 
       {/* Vista de Transferencias */}
       {vistaActiva === 'transferencia' && (
         <div className="space-y-6">
-          {/* Botones de acción */}
-          <div className="flex items-center justify-between">
+          {/* Botones de acción - Responsive: solo iconos en móvil */}
+          <div className="flex items-center justify-between gap-2">
             <button
               onClick={() => setMostrarFormulario(true)}
-              className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors shadow-md flex items-center space-x-2"
+              className="px-3 sm:px-6 py-2 sm:py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors shadow-md flex items-center gap-2"
+              title="Nueva Transferencia a Sucursal"
             >
-              <span>➕</span>
-              <span>Nueva Transferencia a Sucursal</span>
+              <span className="text-lg">➕</span>
+              <span className="hidden sm:inline">Nueva Transferencia a Sucursal</span>
             </button>
             <button
               onClick={() => cargarDatos()}
               disabled={loading}
-              className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center space-x-2"
+              className="px-3 sm:px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center gap-2"
               title="Actualizar lista de materiales"
             >
               <span>{loading ? '⏳' : '🔄'}</span>
-              <span>Actualizar</span>
+              <span className="hidden sm:inline">Actualizar</span>
             </button>
           </div>
 
           {/* Resumen de materiales disponibles */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              📦 Materiales Disponibles para Transferir
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">
+              📦 <span className="hidden sm:inline">Materiales Disponibles para Transferir</span>
+              <span className="sm:hidden">Materiales Disponibles</span>
             </h3>
             {materiales.length === 0 ? (
               <p className="text-gray-500 text-center py-4">
                 No hay materiales disponibles en el almacén central
               </p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Material</th>
-                      <th className="px-4 py-2 text-center text-sm font-medium text-gray-700">Disponible</th>
-                      <th className="px-4 py-2 text-center text-sm font-medium text-gray-700">Unidad</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {materiales.map(material => (
-                      <tr key={material._id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm text-gray-900">{material.nombre}</td>
-                        <td className="px-4 py-3 text-sm text-center font-semibold text-green-600">
-                          {material.disponible}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-center text-gray-600">
-                          {material.unidadMedida}
-                        </td>
+              <>
+                {/* Vista de tarjetas para móvil */}
+                <div className="grid grid-cols-1 gap-3 sm:hidden">
+                  {materiales.map(material => (
+                    <div
+                      key={material._id}
+                      className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                    >
+                      <div className="font-medium text-gray-900 mb-2">
+                        {material.nombre}
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-500">Disponible:</span>
+                        <span className="font-semibold text-green-600">
+                          {material.disponible} {material.unidadMedida}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Vista de tabla para desktop */}
+                <div className="hidden sm:block overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Material</th>
+                        <th className="px-4 py-2 text-center text-sm font-medium text-gray-700">Disponible</th>
+                        <th className="px-4 py-2 text-center text-sm font-medium text-gray-700">Unidad</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {materiales.map(material => (
+                        <tr key={material._id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 text-sm text-gray-900">{material.nombre}</td>
+                          <td className="px-4 py-3 text-sm text-center font-semibold text-green-600">
+                            {material.disponible}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-center text-gray-600">
+                            {material.unidadMedida}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -336,15 +367,18 @@ const TransferenciasSucursales = () => {
       {/* Vista de Historial */}
       {vistaActiva === 'historial' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-800">
-              📜 Historial de Transferencias
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800">
+              📜 <span className="hidden sm:inline">Historial de Transferencias</span>
+              <span className="sm:hidden">Historial</span>
             </h3>
             <button
               onClick={cargarHistorial}
-              className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              className="px-3 sm:px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-1"
+              title="Actualizar historial"
             >
-              🔄 Actualizar
+              <span>🔄</span>
+              <span className="hidden sm:inline">Actualizar</span>
             </button>
           </div>
 
@@ -358,87 +392,171 @@ const TransferenciasSucursales = () => {
               <p className="text-gray-500">No hay transferencias registradas</p>
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Fecha</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Material</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Sucursal</th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700">Cantidad</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Operador</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Motivo</th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {historial.map((mov) => {
-                      const esRevertido = mov.observaciones?.includes('[REVERTIDO');
-                      const esReversion = mov.cantidad < 0;
-                      
-                      return (
-                        <tr key={mov._id} className={`hover:bg-gray-50 ${esRevertido ? 'bg-red-50' : ''}`}>
-                          <td className="px-4 py-3 text-sm text-gray-900">
+            <>
+              {/* Vista de tarjetas para móvil - visible solo en pantallas < 640px */}
+              <div className="block sm:hidden space-y-3">
+                {historial.map((mov) => {
+                  const esRevertido = mov.observaciones?.includes('[REVERTIDO');
+                  const esReversion = mov.cantidad < 0;
+
+                  return (
+                    <div
+                      key={mov._id}
+                      className={`bg-white rounded-lg shadow-md p-4 border-l-4 ${
+                        esRevertido ? 'border-red-400 bg-red-50' :
+                        esReversion ? 'border-orange-400' : 'border-green-400'
+                      }`}
+                    >
+                      {/* Header: Material y Cantidad */}
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">
+                            {mov.item?.nombre || 'Material eliminado'}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {mov.item?.unidadMedida}
+                          </div>
+                        </div>
+                        <span className={`text-lg font-bold ${
+                          esReversion ? 'text-red-600' : 'text-green-600'
+                        }`}>
+                          {esReversion ? '' : '+'}{mov.cantidad}
+                        </span>
+                      </div>
+
+                      {/* Info: Sucursal y Fecha */}
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">📍 Sucursal:</span>
+                          <span className="text-gray-900 font-medium">
+                            {mov.sucursalDestino?.nombre || 'Sin sucursal'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">📅 Fecha:</span>
+                          <span className="text-gray-700">
                             {new Date(mov.fecha).toLocaleString('es-PE', {
-                              year: 'numeric',
-                              month: 'short',
                               day: 'numeric',
+                              month: 'short',
                               hour: '2-digit',
                               minute: '2-digit'
                             })}
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="text-sm font-medium text-gray-900">
-                              {mov.item?.nombre || 'Material eliminado'}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {mov.item?.unidadMedida}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="text-sm text-gray-900">
-                              {mov.sucursalDestino?.nombre || 'Sin sucursal'}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {mov.sucursalDestino?.ubicacion}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            <span className={`font-semibold ${
-                              esReversion ? 'text-red-600' : 'text-green-600'
-                            }`}>
-                              {esReversion ? '' : '+'}{mov.cantidad}
+                          </span>
+                        </div>
+                        {mov.motivo && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">📝 Motivo:</span>
+                            <span className="text-gray-700 text-right max-w-[60%] truncate">
+                              {mov.motivo}
                             </span>
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-600">
-                            {mov.operadorEmail || mov.operador}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-600 max-w-xs truncate">
-                            {mov.motivo}
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            {!esRevertido && !esReversion ? (
-                              <button
-                                onClick={() => abrirModalRevertir(mov)}
-                                className="px-3 py-1 text-xs bg-red-100 text-red-700 hover:bg-red-200 rounded transition-colors"
-                                title="Revertir transferencia"
-                              >
-                                ↩️ Revertir
-                              </button>
-                            ) : (
-                              <span className="text-xs text-gray-400">
-                                {esRevertido ? 'Revertido' : 'Reversión'}
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Acción: Botón Revertir */}
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        {!esRevertido && !esReversion ? (
+                          <button
+                            onClick={() => abrirModalRevertir(mov)}
+                            className="w-full px-3 py-2 text-sm bg-red-100 text-red-700 hover:bg-red-200 rounded-lg transition-colors flex items-center justify-center gap-1"
+                          >
+                            <span>↩️</span>
+                            <span>Revertir</span>
+                          </button>
+                        ) : (
+                          <div className="text-center text-sm text-gray-400">
+                            {esRevertido ? '✓ Revertido' : '↩️ Reversión'}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
+
+              {/* Vista de tabla para desktop - visible solo en pantallas >= 640px */}
+              <div className="hidden sm:block bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Fecha</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Material</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Sucursal</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-700">Cantidad</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Operador</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Motivo</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-700">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {historial.map((mov) => {
+                        const esRevertido = mov.observaciones?.includes('[REVERTIDO');
+                        const esReversion = mov.cantidad < 0;
+
+                        return (
+                          <tr key={mov._id} className={`hover:bg-gray-50 ${esRevertido ? 'bg-red-50' : ''}`}>
+                            <td className="px-4 py-3 text-sm text-gray-900">
+                              {new Date(mov.fecha).toLocaleString('es-PE', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="text-sm font-medium text-gray-900">
+                                {mov.item?.nombre || 'Material eliminado'}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {mov.item?.unidadMedida}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="text-sm text-gray-900">
+                                {mov.sucursalDestino?.nombre || 'Sin sucursal'}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {mov.sucursalDestino?.ubicacion}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <span className={`font-semibold ${
+                                esReversion ? 'text-red-600' : 'text-green-600'
+                              }`}>
+                                {esReversion ? '' : '+'}{mov.cantidad}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-600">
+                              {mov.operadorEmail || mov.operador}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-600 max-w-xs truncate">
+                              {mov.motivo}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              {!esRevertido && !esReversion ? (
+                                <button
+                                  onClick={() => abrirModalRevertir(mov)}
+                                  className="px-3 py-1 text-xs bg-red-100 text-red-700 hover:bg-red-200 rounded transition-colors"
+                                  title="Revertir transferencia"
+                                >
+                                  ↩️ Revertir
+                                </button>
+                              ) : (
+                                <span className="text-xs text-gray-400">
+                                  {esRevertido ? 'Revertido' : 'Reversión'}
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
           )}
         </div>
       )}
@@ -446,16 +564,19 @@ const TransferenciasSucursales = () => {
       {/* Vista de Estadísticas */}
       {vistaActiva === 'estadisticas' && (
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <h3 className="text-lg font-semibold text-gray-800">
-              📊 Inventario por Sucursal
+          <div className="flex flex-row items-center justify-between gap-2">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800">
+              📊 <span className="hidden sm:inline">Inventario por Sucursal</span>
+              <span className="sm:hidden">Inventario</span>
             </h3>
             <button
               onClick={cargarEstadisticas}
               disabled={loadingEstadisticas}
-              className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              className="px-3 sm:px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-1"
+              title="Actualizar estadísticas"
             >
-              {loadingEstadisticas ? '⏳ Cargando...' : '🔄 Actualizar'}
+              <span>{loadingEstadisticas ? '⏳' : '🔄'}</span>
+              <span className="hidden sm:inline">{loadingEstadisticas ? 'Cargando...' : 'Actualizar'}</span>
             </button>
           </div>
 
@@ -487,17 +608,21 @@ const TransferenciasSucursales = () => {
               <div className="flex items-end">
                 <button
                   onClick={aplicarFiltrosFecha}
-                  className="w-full px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+                  className="w-full px-3 sm:px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors flex items-center justify-center gap-1"
+                  title="Filtrar por fechas"
                 >
-                  🔍 Filtrar
+                  <span>🔍</span>
+                  <span className="hidden sm:inline">Filtrar</span>
                 </button>
               </div>
               <div className="flex items-end">
                 <button
                   onClick={limpiarFiltros}
-                  className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                  className="w-full px-3 sm:px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center gap-1"
+                  title="Limpiar filtros"
                 >
-                  ✕ Limpiar
+                  <span>✕</span>
+                  <span className="hidden sm:inline">Limpiar</span>
                 </button>
               </div>
             </div>
