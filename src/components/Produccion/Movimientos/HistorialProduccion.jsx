@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { movimientoUnificadoService } from '../../../services/movimientoUnificadoService';
-import DetalleProduccion from '../Produccion/DetalleProduccion';
 import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
 const HistorialProduccion = ({ producto, isOpen, onClose }) => {
@@ -21,10 +20,6 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
     limite: 10,
     pagina: 1
   });
-  
-  // Estados para modal de detalle
-  const [detalleProduccionOpen, setDetalleProduccionOpen] = useState(false);
-  const [produccionSeleccionada, setProduccionSeleccionada] = useState(null);
   
   // Estado para filtros colapsables en móvil
   const [filtrosExpandidos, setFiltrosExpandidos] = useState(false);
@@ -821,24 +816,6 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
           </div>
         </div>
       </div>
-
-      {/* Modal de Detalle de Producción - Temporalmente deshabilitado */}
-      {/* TODO: Implementar modal específico para detalles de movimientos de producción */}
-      {false && detalleProduccionOpen && produccionSeleccionada && (
-        <DetalleProduccion
-          produccionId={produccionSeleccionada._id}
-          produccion={produccionSeleccionada}
-          onClose={() => {
-            setDetalleProduccionOpen(false);
-            setProduccionSeleccionada(null);
-          }}
-          onProduccionActualizada={() => {
-            cargarHistorialProducciones();
-            calcularEstadisticas();
-          }}
-          esModal={true}
-        />
-      )}
     </>
   );
 };

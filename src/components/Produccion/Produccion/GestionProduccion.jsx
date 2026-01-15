@@ -3,7 +3,6 @@ import AccesosRapidosProduccion from '../AccesosRapidosProduccion';
 import BreadcrumbProduccion from '../BreadcrumbProduccion';
 import { produccionService } from '../../../services/produccionService';
 import NuevaProduccion from './NuevaProduccion';
-import DetalleProduccion from './DetalleProduccion';
 import HistorialProduccion from '../Movimientos/HistorialProduccion';
 import { formatearFecha, getLocalDateTimeString } from '../../../utils/fechaHoraUtils';
 import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
@@ -26,8 +25,6 @@ const GestionProduccion = () => {
   });
   const [totalPaginas, setTotalPaginas] = useState(1);
   const [mostrarNueva, setMostrarNueva] = useState(false);
-  const [mostrarDetalle, setMostrarDetalle] = useState(false);
-  const [produccionSeleccionada, setProduccionSeleccionada] = useState(null);
 
   // Estado para historial de cantidades
   const [mostrarHistorial, setMostrarHistorial] = useState(false);
@@ -64,11 +61,6 @@ const GestionProduccion = () => {
     setMostrarNueva(true);
   };
 
-  const handleVerDetalle = (produccion) => {
-    setProduccionSeleccionada(produccion);
-    setMostrarDetalle(true);
-  };
-
   const handleEjecutarProduccion = async (id) => {
     if (window.confirm('¿Está seguro de ejecutar esta producción? Esta acción consumirá los ingredientes.')) {
       try {
@@ -90,11 +82,6 @@ const GestionProduccion = () => {
         setError('Error al cancelar producción: ' + err.message);
       }
     }
-  };
-
-  const handleCerrarDetalle = () => {
-    setMostrarDetalle(false);
-    setProduccionSeleccionada(null);
   };
 
   // Función para abrir historial de cantidades
@@ -130,9 +117,6 @@ const GestionProduccion = () => {
         alert(mensaje);
         
         cargarProducciones();
-        // Cerrar el modal de detalle si está abierto
-        setMostrarDetalle(false);
-        setProduccionSeleccionada(null);
       } catch (err) {
         setError('Error al eliminar producción: ' + err.message);
         alert(`❌ Error al eliminar producción:\n\n${err.message}\n\n⚠️ Nota: Si el error persiste, puede que algunos ingredientes/recetas no hayan sido revertidos correctamente. Revise el inventario manualmente.`);
@@ -486,18 +470,11 @@ const GestionProduccion = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => handleVerDetalle(produccion)}
-                        className="text-blue-600 hover:text-blue-900"
-                        title="Ver detalles"
-                      >
-                        👁️ Ver
-                      </button>
-                      <button
                         onClick={() => handleVerHistorial(produccion)}
-                        className="text-purple-600 hover:text-purple-900"
+                        className="text-blue-600 hover:text-blue-900"
                         title="Ver historial de cantidades producidas"
                       >
-                        📊 Historial
+                        👁️ Ver
                       </button>
                       {produccion.estado === 'planificada' && (
                         <>
@@ -632,36 +609,7 @@ const GestionProduccion = () => {
         </div>
       )}
 
-      {mostrarDetalle && produccionSeleccionada && (
-        <>
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-blue-900">
-                📋 Detalle de: {produccionSeleccionada.nombre}
-              </h3>
-              <button
-                onClick={handleCerrarDetalle}
-                className="text-blue-600 hover:text-blue-800 font-medium"
-              >
-                ✕ Cerrar
-              </button>
-            </div>
-          </div>
-          
-          <DetalleProduccion
-            produccionId={produccionSeleccionada?._id}
-            onClose={handleCerrarDetalle}
-            onProduccionActualizada={() => {
-              setMostrarDetalle(false);
-              setProduccionSeleccionada(null);
-              cargarProducciones();
-            }}
-            esModal={false}
-          />
-        </>
-      )}
-
-      {/* Modales */}
+{/* Modales */}
       {mostrarNueva && (
         <NuevaProduccion
           onGuardar={() => {

@@ -18,7 +18,6 @@ import FormularioReceta from '../components/Produccion/Recetas/FormularioReceta'
 import VistaReceta from '../components/Produccion/Recetas/VistaReceta';
 import GestionProduccion from '../components/Produccion/Produccion/GestionProduccion';
 import NuevaProduccion from '../components/Produccion/Produccion/NuevaProduccion';
-import DetalleProduccion from '../components/Produccion/Produccion/DetalleProduccion';
 import GestionResiduos from '../components/Produccion/Residuos/GestionResiduos';
 import GestionMovimientos from '../components/Produccion/Movimientos/GestionMovimientos';
 import GraficosProduccionPage from '../components/Produccion/Graficos/GraficosProduccionPage';
@@ -148,7 +147,6 @@ const ProduccionPage = () => {
         {/* Rutas de Producción - acceso para todos */}
         <Route path="/produccion" element={<GestionProduccion />} />
         <Route path="/produccion/nueva" element={<NuevaProduccion />} />
-        <Route path="/produccion/detalle/:id" element={<DetalleProduccion />} />
         
         {/* Rutas de Gráficos - acceso para todos */}
         <Route path="/graficos" element={<GraficosProduccionPage />} />
