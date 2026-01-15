@@ -179,9 +179,20 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                       {datosReceta.ingredientes?.map((item, index) => {
+                        console.log(`🔍 Item ${index}:`, item);
+                        
                         // 🎯 FIX: Detectar si es ingrediente o receta
-                        const esReceta = item.tipo === 'receta';
+                        // Lógica robusta:
+                        // 1. Si tiene campo 'tipo', usarlo
+                        // 2. Si NO tiene 'tipo' pero SÍ tiene 'receta' poblado, es receta
+                        // 3. Si NO tiene 'tipo' pero SÍ tiene 'ingrediente' poblado, es ingrediente
+                        // 4. Default: ingrediente
+                        const esReceta = item.tipo === 'receta' || (!item.tipo && item.receta && !item.ingrediente);
                         const itemData = esReceta ? item.receta : item.ingrediente;
+                        
+                        console.log(`  → Tipo: ${item.tipo || '(no especificado)'}, esReceta: ${esReceta}`);
+                        console.log(`  → tiene receta:`, !!item.receta, `tiene ingrediente:`, !!item.ingrediente);
+                        console.log(`  → itemData:`, itemData);
                         
                         // Validar que el item exista (puede no estar poblado)
                         if (!itemData) {

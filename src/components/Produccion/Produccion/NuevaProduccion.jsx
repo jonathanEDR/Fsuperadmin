@@ -10,8 +10,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
     cantidadProducida: 1,
     unidadMedida: 'unidades',
     observaciones: '',
-    ingredientesUtilizados: [],
-    recetasUtilizadas: [],
+    recetasUtilizadas: [], // 🎯 Solo recetas - ingredientes removidos
     operador: '',
     productoDelCatalogo: null
   });
@@ -33,8 +32,8 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
   const cargarDatos = async () => {
     try {
       setLoading(true);
-      const [ingredientesResponse, recetasResponse, productosResponse] = await Promise.all([
-        ingredienteService.obtenerIngredientes({ activo: true }),
+      // 🎯 Solo cargar recetas y productos - ingredientes removidos
+      const [recetasResponse, productosResponse] = await Promise.all([
         recetaService.obtenerRecetas({ activo: true }),
         catalogoProduccionService.obtenerProductosPorModulo({ 
           moduloSistema: 'produccion', 
@@ -42,7 +41,6 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
         })
       ]);
 
-      setIngredientesDisponibles(ingredientesResponse.data);
       setRecetasDisponibles(recetasResponse.data);
       
       if (Array.isArray(productosResponse)) {
@@ -61,20 +59,8 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
     }
   };
 
-  const agregarIngrediente = () => {
-    setFormData(prev => ({
-      ...prev,
-      ingredientesUtilizados: [
-        ...prev.ingredientesUtilizados,
-        {
-          ingrediente: '',
-          cantidadUtilizada: 0,
-          costoUnitario: 0
-        }
-      ]
-    }));
-  };
-
+  // 🎯 REMOVIDO: agregarIngrediente - ya no se usa
+  
   const agregarRecetaPreparada = () => {
     setFormData(prev => ({
       ...prev,
@@ -89,13 +75,8 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
     }));
   };
 
-  const eliminarIngrediente = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      ingredientesUtilizados: prev.ingredientesUtilizados.filter((_, i) => i !== index)
-    }));
-  };
-
+  // 🎯 REMOVIDO: eliminarIngrediente - ya no se usa
+  
   const eliminarReceta = (index) => {
     setFormData(prev => ({
       ...prev,
@@ -103,14 +84,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
     }));
   };
 
-  const actualizarIngrediente = (index, campo, valor) => {
-    setFormData(prev => ({
-      ...prev,
-      ingredientesUtilizados: prev.ingredientesUtilizados.map((item, i) => 
-        i === index ? { ...item, [campo]: valor } : item
-      )
-    }));
-  };
+  // 🎯 REMOVIDO: actualizarIngrediente - ya no se usa
 
   const actualizarReceta = (index, campo, valor) => {
     setFormData(prev => ({
@@ -129,16 +103,11 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
     return recetasDisponibles.find(rec => rec._id === recetaId);
   };
 
+  // 🎯 Calcular costo solo con recetas - ingredientes removidos
   const calcularCostoTotal = () => {
-    const costoIngredientes = formData.ingredientesUtilizados.reduce((total, item) => {
+    return formData.recetasUtilizadas.reduce((total, item) => {
       return total + (item.cantidadUtilizada * item.costoUnitario);
     }, 0);
-
-    const costoRecetas = formData.recetasUtilizadas.reduce((total, item) => {
-      return total + (item.cantidadUtilizada * item.costoUnitario);
-    }, 0);
-
-    return costoIngredientes + costoRecetas;
   };
 
   const seleccionarProductoDelCatalogo = (producto) => {
@@ -214,21 +183,10 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
       return false;
     }
 
-    if (formData.ingredientesUtilizados.length === 0 && formData.recetasUtilizadas.length === 0) {
-      setError('Debe agregar al menos un ingrediente o receta preparada');
+    // 🎯 Solo validar recetas - ingredientes removidos
+    if (formData.recetasUtilizadas.length === 0) {
+      setError('Debe agregar al menos una receta preparada');
       return false;
-    }
-
-    for (let i = 0; i < formData.ingredientesUtilizados.length; i++) {
-      const item = formData.ingredientesUtilizados[i];
-      if (!item.ingrediente) {
-        setError(`Seleccione un ingrediente en la posición ${i + 1}`);
-        return false;
-      }
-      if (item.cantidadUtilizada <= 0) {
-        setError(`La cantidad del ingrediente ${i + 1} debe ser mayor a 0`);
-        return false;
-      }
     }
 
     for (let i = 0; i < formData.recetasUtilizadas.length; i++) {
@@ -438,92 +396,8 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
               
               {/* COLUMNA DERECHA - Ingredientes y Recetas */}
               <div className="space-y-2 sm:space-y-3 lg:overflow-y-auto lg:pl-2">
-                {/* Ingredientes Básicos */}
-                <div className="bg-green-50 p-2 sm:p-3 rounded-lg">
-                  <div className="flex items-center gap-2 mb-3">
-                    <h4 className="font-medium text-gray-700 flex items-center gap-2">
-                      <span className="bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
-                        {formData.ingredientesUtilizados.filter(ing => ing.ingrediente && ing.cantidadUtilizada > 0).length}
-                      </span>
-                      🥬 Ingredientes Básicos
-                    </h4>
-                  </div>
+                {/* 🎯 Sección de Ingredientes Básicos REMOVIDA - Solo se usan recetas */}
                   
-                  <div className="mb-2 sm:mb-3">
-                    <button 
-                      type="button" 
-                      onClick={agregarIngrediente} 
-                      className="w-full py-2 px-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-xs sm:text-sm font-medium"
-                    >
-                      ➕ Agregar Ingrediente
-                    </button>
-                  </div>
-
-                  {formData.ingredientesUtilizados.length === 0 ? (
-                    <div className="text-center py-3 text-gray-500 text-sm bg-white rounded-md border border-dashed border-gray-300">
-                      No hay ingredientes agregados
-                    </div>
-                  ) : (
-                    <div className="space-y-2 max-h-40 overflow-y-auto">
-                      {formData.ingredientesUtilizados.map((item, index) => {
-                        const ingredienteInfo = obtenerIngredienteInfo(item.ingrediente);
-                        return (
-                          <div key={index} className="bg-white p-2 rounded-md border text-xs">
-                            <div className="grid grid-cols-12 gap-2 items-center">
-                              <div className="col-span-5">
-                                <select 
-                                  value={item.ingrediente} 
-                                  onChange={(e) => {
-                                    actualizarIngrediente(index, 'ingrediente', e.target.value);
-                                    const ing = obtenerIngredienteInfo(e.target.value);
-                                    if (ing) {
-                                      actualizarIngrediente(index, 'costoUnitario', ing.precioUnitario || 0);
-                                    }
-                                  }} 
-                                  className="w-full p-1 text-xs border border-gray-300 rounded"
-                                >
-                                  <option value="">Seleccionar...</option>
-                                  {ingredientesDisponibles.filter(ingrediente => 
-                                    (ingrediente.cantidad - (ingrediente.procesado || 0)) > 0
-                                  ).map(ingrediente => (
-                                    <option key={ingrediente._id} value={ingrediente._id}>
-                                      {ingrediente.nombre.substring(0, 15)}{ingrediente.nombre.length > 15 ? '...' : ''} - {ingrediente.cantidad - (ingrediente.procesado || 0)}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-                              <div className="col-span-2">
-                                <input 
-                                  type="number" 
-                                  step="0.01" 
-                                  min="0" 
-                                  value={item.cantidadUtilizada} 
-                                  onChange={(e) => actualizarIngrediente(index, 'cantidadUtilizada', parseFloat(e.target.value) || 0)} 
-                                  className="w-full p-1 text-xs border border-gray-300 rounded" 
-                                />
-                              </div>
-                              <div className="col-span-2 text-center text-gray-600">
-                                {ingredienteInfo?.unidadMedida || 'unid'}
-                              </div>
-                              <div className="col-span-2 text-center font-medium text-green-700">
-                                S/.{(item.cantidadUtilizada * (ingredienteInfo?.precioUnitario || 0)).toFixed(2)}
-                              </div>
-                              <div className="col-span-1 text-center">
-                                <button 
-                                  type="button" 
-                                  onClick={() => eliminarIngrediente(index)} 
-                                  className="p-1 text-red-600 hover:bg-red-50 rounded"
-                                >
-                                  🗑️
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
 
                 {/* Recetas Preparadas */}
                 <div className="bg-blue-50 p-3 rounded-lg">
@@ -554,16 +428,10 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                     <div className="space-y-2 max-h-40 overflow-y-auto">
                       {formData.recetasUtilizadas.map((item, index) => {
                         const recetaInfo = obtenerRecetaInfo(item.receta);
-                        let precioUnitario = 0;
-                        if (recetaInfo && recetaInfo.ingredientes && recetaInfo.ingredientes.length > 0 && recetaInfo.rendimiento?.cantidad > 0) {
-                          let costoTotal = 0;
-                          for (const ing of recetaInfo.ingredientes) {
-                            if (ing.ingrediente && typeof ing.ingrediente.precioUnitario === 'number') {
-                              costoTotal += (Number(ing.cantidad) || 0) * (Number(ing.ingrediente.precioUnitario) || 0);
-                            }
-                          }
-                          precioUnitario = costoTotal / Number(recetaInfo.rendimiento.cantidad);
-                        }
+                        // 🎯 FIX: Usar el costoUnitario guardado en item o del backend
+                        // Ya no calculamos localmente porque el backend lo hace correctamente
+                        // incluyendo sub-recetas anidadas
+                        const precioUnitario = item.costoUnitario || recetaInfo?.costoUnitario || 0;
                         return (
                           <div key={index} className="bg-blue-50 p-2 rounded-md border text-xs">
                             <div className="grid grid-cols-12 gap-2 items-center">
@@ -573,15 +441,11 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                                   onChange={(e) => {
                                     actualizarReceta(index, 'receta', e.target.value);
                                     const rec = obtenerRecetaInfo(e.target.value);
+                                    // 🎯 FIX: Usar costoUnitario del backend (ya incluye sub-recetas)
                                     let precio = 0;
-                                    if (rec && rec.ingredientes && rec.ingredientes.length > 0 && rec.rendimiento?.cantidad > 0) {
-                                      let costoTotal = 0;
-                                      for (const ing of rec.ingredientes) {
-                                        if (ing.ingrediente && typeof ing.ingrediente.precioUnitario === 'number') {
-                                          costoTotal += (Number(ing.cantidad) || 0) * (Number(ing.ingrediente.precioUnitario) || 0);
-                                        }
-                                      }
-                                      precio = costoTotal / Number(rec.rendimiento.cantidad);
+                                    if (rec) {
+                                      // El backend ahora retorna costoUnitario pre-calculado
+                                      precio = rec.costoUnitario || 0;
                                     }
                                     actualizarReceta(index, 'costoUnitario', precio);
                                   }} 
@@ -641,11 +505,10 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                   <div className="mt-2 sm:mt-3 lg:mt-4 p-2 bg-white rounded-md border">
                     <div className="grid grid-cols-3 gap-1 sm:gap-2 text-xs text-center">
                       <div>
-                        <div className="font-bold text-green-600">
-                          S/.{formData.ingredientesUtilizados.reduce((total, item) => 
-                            total + (item.cantidadUtilizada * item.costoUnitario), 0).toFixed(2)}
+                        <div className="font-bold text-gray-400">
+                          S/.0.00
                         </div>
-                        <div className="text-gray-600">Ingredientes</div>
+                        <div className="text-gray-400">Ingredientes</div>
                       </div>
                       <div>
                         <div className="font-bold text-blue-600">
