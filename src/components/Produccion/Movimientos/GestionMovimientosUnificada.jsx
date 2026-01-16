@@ -448,7 +448,21 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
           if (eliminarSoloMovimiento) {
             // Eliminar solo el movimiento como plan B
             const resultado = await movimientoUnificadoService.eliminarMovimiento(movimientoId);
-            alert(`✅ Movimiento eliminado exitosamente.\n⚠️ NOTA: Se eliminó solo el movimiento, no la producción completa.\nSe revirtió ${resultado.data.cantidadRevertida} unidades del stock.`);
+            
+            // Mostrar mensaje detallado de reversión
+            let mensajeReversion = `✅ Movimiento eliminado exitosamente.\n\n`;
+            mensajeReversion += `📦 Stock del producto: -${resultado.data.cantidadRevertida || movimiento.cantidad} unidades\n`;
+            
+            if (resultado.data.recetasRevertidas > 0) {
+              mensajeReversion += `🍳 Recetas repuestas: ${resultado.data.recetasRevertidas}\n`;
+            }
+            if (resultado.data.ingredientesRevertidos > 0) {
+              mensajeReversion += `🥬 Ingredientes repuestos: ${resultado.data.ingredientesRevertidos}\n`;
+            }
+            
+            mensajeReversion += `\n✅ Todo el inventario ha sido revertido correctamente.`;
+            
+            alert(mensajeReversion);
           } else {
             // Si no quiere eliminar solo el movimiento, relanzar el error
             throw error;
