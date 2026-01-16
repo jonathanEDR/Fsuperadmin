@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { movimientoUnificadoService } from '../../../services/movimientoUnificadoService';
 import { ingredienteService } from '../../../services/ingredienteService';
+import { recetaService } from '../../../services/recetaService';
 import { getLocalDateTimeString } from '../../../utils/fechaHoraUtils';
 
 const ModalProducirReceta = ({ isOpen, onClose, receta, onSuccess }) => {
@@ -12,7 +13,8 @@ const ModalProducirReceta = ({ isOpen, onClose, receta, onSuccess }) => {
   });
   
   const [ingredientesDisponibles, setIngredientesDisponibles] = useState([]);
-  const [ingredientesNecesarios, setIngredientesNecesarios] = useState([]);
+  const [recetasDisponibles, setRecetasDisponibles] = useState([]); // 🎯 NUEVO: Estado para recetas disponibles
+  const [recursosNecesarios, setRecursosNecesarios] = useState([]); // 🎯 RENOMBRADO: ahora incluye ingredientes Y recetas
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,7 +22,7 @@ const ModalProducirReceta = ({ isOpen, onClose, receta, onSuccess }) => {
   useEffect(() => {
     if (isOpen && receta) {
       resetearFormulario();
-      cargarIngredientes();
+      cargarRecursos(); // 🎯 RENOMBRADO: cargar ingredientes Y recetas
     }
   }, [isOpen, receta]);
 
@@ -32,87 +34,136 @@ const ModalProducirReceta = ({ isOpen, onClose, receta, onSuccess }) => {
       consumirIngredientes: true
     });
     setError('');
-    setIngredientesNecesarios([]);
+    setRecursosNecesarios([]); // 🎯 RENOMBRADO
   };
 
-  const cargarIngredientes = async () => {
+  // 🎯 MEJORADO: Cargar ingredientes Y recetas disponibles
+  const cargarRecursos = async () => {
     try {
       setLoading(true);
-      const response = await ingredienteService.obtenerIngredientes({ activo: true });
-      const ingredientesData = response.data || [];
-      setIngredientesDisponibles(ingredientesData);
       
-      // Calcular ingredientes necesarios después de cargar los disponibles
-      if (receta && receta.ingredientes && ingredientesData.length > 0) {
-        calcularIngredientesNecesarios(ingredientesData, formData.cantidadProducir);
+      // Cargar ingredientes y recetas en paralelo
+      const [ingredientesResponse, recetasResponse] = await Promise.all([
+        ingredienteService.obtenerIngredientes({ activo: true }),
+        recetaService.obtenerRecetas({ activo: true })
+      ]);
+      
+      const ingredientesData = ingredientesResponse.data || [];
+      const recetasData = recetasResponse.data || [];
+      
+      setIngredientesDisponibles(ingredientesData);
+      setRecetasDisponibles(recetasData);
+      
+      // Calcular recursos necesarios después de cargar los disponibles
+      if (receta && receta.ingredientes) {
+        calcularRecursosNecesarios(ingredientesData, recetasData, formData.cantidadProducir);
       }
     } catch (error) {
-      console.error('Error al cargar ingredientes:', error);
+      console.error('Error al cargar recursos:', error);
       setIngredientesDisponibles([]);
-      setIngredientesNecesarios([]);
-      setError('Error al cargar ingredientes: ' + error.message);
+      setRecetasDisponibles([]);
+      setRecursosNecesarios([]);
+      setError('Error al cargar recursos: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const calcularIngredientesNecesarios = (ingredientesDisponiblesParam = null, cantidadParam = null) => {
+  // 🎯 MEJORADO: Calcular recursos necesarios (ingredientes Y recetas anidadas)
+  const calcularRecursosNecesarios = (ingredientesDisponiblesParam = null, recetasDisponiblesParam = null, cantidadParam = null) => {
     if (!receta || !receta.ingredientes) return;
 
     const ingredientesData = ingredientesDisponiblesParam || ingredientesDisponibles;
+    const recetasData = recetasDisponiblesParam || recetasDisponibles;
     const cantidad = cantidadParam || formData.cantidadProducir;
 
-    if (!ingredientesData || ingredientesData.length === 0) {
+    // Verificar que tenemos datos para al menos un tipo
+    if ((!ingredientesData || ingredientesData.length === 0) && (!recetasData || recetasData.length === 0)) {
       return;
     }
 
-    const ingredientesCalculados = receta.ingredientes.map((ingredienteReceta) => {
-      // Manejar tanto IDs como objetos poblados
-      let ingredienteId;
-      if (typeof ingredienteReceta.ingrediente === 'object' && ingredienteReceta.ingrediente !== null) {
-        // El ingrediente está poblado (viene como objeto)
-        ingredienteId = ingredienteReceta.ingrediente._id || ingredienteReceta.ingrediente.id;
+    const recursosCalculados = receta.ingredientes.map((itemReceta) => {
+      // 🎯 CLAVE: Determinar el tipo de item
+      const tipoItem = itemReceta.tipo || 'ingrediente';
+      const cantidadNecesaria = itemReceta.cantidad * cantidad;
+      
+      if (tipoItem === 'receta') {
+        // 🎯 NUEVO: Manejar receta anidada
+        let recetaId;
+        if (typeof itemReceta.receta === 'object' && itemReceta.receta !== null) {
+          recetaId = itemReceta.receta._id || itemReceta.receta.id;
+        } else {
+          recetaId = itemReceta.receta;
+        }
+        
+        // Buscar la receta en las recetas disponibles
+        const recetaInfo = recetasData.find(
+          rec => rec._id === recetaId || (recetaId && rec._id?.toString() === recetaId?.toString())
+        );
+        
+        // Calcular disponibilidad de la receta (producida - utilizada)
+        const cantidadProducida = recetaInfo?.inventario?.cantidadProducida || 0;
+        const cantidadUtilizada = recetaInfo?.inventario?.cantidadUtilizada || 0;
+        const cantidadDisponible = cantidadProducida - cantidadUtilizada;
+        
+        const suficiente = cantidadDisponible >= cantidadNecesaria;
+        const nombreReceta = itemReceta.receta?.nombre || recetaInfo?.nombre || 'Receta no encontrada';
+
+        return {
+          ...itemReceta,
+          tipo: 'receta',
+          nombre: `📋 ${nombreReceta}`,
+          cantidadNecesaria,
+          cantidadDisponible,
+          suficiente,
+          unidadMedida: recetaInfo?.rendimiento?.unidadMedida || itemReceta.unidadMedida || 'unidad',
+          encontrado: !!recetaInfo,
+          esReceta: true
+        };
       } else {
-        // El ingrediente es solo un ID
-        ingredienteId = ingredienteReceta.ingrediente;
+        // Manejar ingrediente tradicional
+        let ingredienteId;
+        if (typeof itemReceta.ingrediente === 'object' && itemReceta.ingrediente !== null) {
+          ingredienteId = itemReceta.ingrediente._id || itemReceta.ingrediente.id;
+        } else {
+          ingredienteId = itemReceta.ingrediente;
+        }
+        
+        // Buscar el ingrediente disponible
+        const ingredienteInfo = ingredientesData.find(
+          ing => ing._id === ingredienteId || (ingredienteId && ing._id?.toString() === ingredienteId?.toString())
+        );
+        
+        // Usar la cantidad disponible real (cantidad - procesado)
+        const cantidadTotal = ingredienteInfo?.cantidad ?? 0;
+        const cantidadProcesada = ingredienteInfo?.procesado ?? 0;
+        const cantidadDisponible = cantidadTotal - cantidadProcesada;
+        
+        const suficiente = cantidadDisponible >= cantidadNecesaria;
+        const nombreIngrediente = itemReceta.ingrediente?.nombre || ingredienteInfo?.nombre || 'Ingrediente no encontrado';
+
+        return {
+          ...itemReceta,
+          tipo: 'ingrediente',
+          nombre: `🥬 ${nombreIngrediente}`,
+          cantidadNecesaria,
+          cantidadDisponible,
+          suficiente,
+          unidadMedida: ingredienteInfo?.unidadMedida || itemReceta.unidadMedida,
+          encontrado: !!ingredienteInfo,
+          esReceta: false
+        };
       }
-      
-      // Buscar el ingrediente disponible
-      const ingredienteInfo = ingredientesData.find(
-        ing => ing._id === ingredienteId || ing._id.toString() === ingredienteId.toString()
-      );
-      
-      const cantidadNecesaria = ingredienteReceta.cantidad * cantidad;
-      
-      // SOLUCIÓN DEFINITIVA: Usar la cantidad disponible real (cantidad - procesado)
-      const cantidadTotal = ingredienteInfo?.cantidad ?? 0;
-      const cantidadProcesada = ingredienteInfo?.procesado ?? 0;
-      const cantidadDisponible = cantidadTotal - cantidadProcesada;
-      
-      const suficiente = cantidadDisponible >= cantidadNecesaria;
-
-      // Usar el nombre del ingrediente poblado o del ingrediente encontrado
-      const nombreIngrediente = ingredienteReceta.ingrediente?.nombre || ingredienteInfo?.nombre || 'Ingrediente no encontrado';
-
-      return {
-        ...ingredienteReceta,
-        nombre: nombreIngrediente,
-        cantidadNecesaria,
-        cantidadDisponible,
-        suficiente,
-        unidadMedida: ingredienteInfo?.unidadMedida || ingredienteReceta.unidadMedida,
-        encontrado: !!ingredienteInfo // Bandera para indicar si se encontró el ingrediente
-      };
     });
 
-    setIngredientesNecesarios(ingredientesCalculados);
+    setRecursosNecesarios(recursosCalculados);
   };
 
   useEffect(() => {
-    if (ingredientesDisponibles.length > 0 && receta && receta.ingredientes) {
-      calcularIngredientesNecesarios();
+    if ((ingredientesDisponibles.length > 0 || recetasDisponibles.length > 0) && receta && receta.ingredientes) {
+      calcularRecursosNecesarios();
     }
-  }, [formData.cantidadProducir, ingredientesDisponibles, receta]);
+  }, [formData.cantidadProducir, ingredientesDisponibles, recetasDisponibles, receta]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -129,11 +180,11 @@ const ModalProducirReceta = ({ isOpen, onClose, receta, onSuccess }) => {
     }
 
     // Validar stock si se van a consumir ingredientes
-    if (formData.consumirIngredientes && ingredientesNecesarios.length > 0) {
-      const ingredientesSinStock = ingredientesNecesarios.filter(ing => ing.cantidadDisponible < ing.cantidadNecesaria);
-      if (ingredientesSinStock.length > 0) {
-        const listaNombres = ingredientesSinStock.map(ing => 
-          `${ing.nombre} (necesario: ${ing.cantidadNecesaria}, disponible: ${ing.cantidadDisponible})`
+    if (formData.consumirIngredientes && recursosNecesarios.length > 0) {
+      const recursosSinStock = recursosNecesarios.filter(rec => rec.cantidadDisponible < rec.cantidadNecesaria);
+      if (recursosSinStock.length > 0) {
+        const listaNombres = recursosSinStock.map(rec => 
+          `${rec.nombre} (necesario: ${rec.cantidadNecesaria}, disponible: ${rec.cantidadDisponible})`
         ).join(', ');
         setError(`Sin stock suficiente: ${listaNombres}`);
         return;
@@ -175,9 +226,9 @@ const ModalProducirReceta = ({ isOpen, onClose, receta, onSuccess }) => {
 
   if (!isOpen || !receta) return null;
 
-  // Validaciones simples
-  const todosIngredientesSuficientes = ingredientesNecesarios.length > 0 && 
-    ingredientesNecesarios.every(ing => ing.cantidadDisponible >= ing.cantidadNecesaria);
+  // 🎯 MEJORADO: Validar todos los recursos (ingredientes Y recetas)
+  const todosRecursosSuficientes = recursosNecesarios.length > 0 && 
+    recursosNecesarios.every(rec => rec.cantidadDisponible >= rec.cantidadNecesaria);
   
   const cantidadTotal = (receta.inventario?.cantidadProducida || 0) + formData.cantidadProducir;
 
@@ -248,13 +299,13 @@ const ModalProducirReceta = ({ isOpen, onClose, receta, onSuccess }) => {
             </div>
           </div>
 
-          {/* Ingredientes necesarios */}
+          {/* 🎯 MEJORADO: Recursos Necesarios (Ingredientes Y Recetas) */}
           <div>
             <div className="flex justify-between items-center mb-2">
               <h4 className="font-medium text-gray-700">Ingredientes Necesarios</h4>
               <button
                 type="button"
-                onClick={() => cargarIngredientes()}
+                onClick={() => cargarRecursos()}
                 className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
                 disabled={loading}
               >
@@ -265,23 +316,25 @@ const ModalProducirReceta = ({ isOpen, onClose, receta, onSuccess }) => {
               {loading ? (
                 <div className="text-sm text-gray-500 flex items-center">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
-                  Cargando ingredientes...
+                  Cargando recursos...
                 </div>
-              ) : ingredientesNecesarios.length > 0 ? (
+              ) : recursosNecesarios.length > 0 ? (
                 <div className="space-y-2">
-                  {ingredientesNecesarios.map((ingrediente, index) => (
+                  {recursosNecesarios.map((recurso, index) => (
                     <div 
                       key={index} 
                       className={`flex justify-between items-center text-sm ${
-                        ingrediente.cantidadDisponible < ingrediente.cantidadNecesaria ? 'text-red-600' : 'text-gray-700'
+                        recurso.cantidadDisponible < recurso.cantidadNecesaria 
+                          ? 'text-red-600' 
+                          : recurso.esReceta ? 'text-purple-700' : 'text-gray-700'
                       }`}
                     >
-                      <span className="font-medium">{ingrediente.nombre}</span>
+                      <span className="font-medium">{recurso.nombre}</span>
                       <div className="flex items-center space-x-2">
                         <span>
-                          {ingrediente.cantidadNecesaria} / {ingrediente.cantidadDisponible} {ingrediente.unidadMedida}
+                          {recurso.cantidadNecesaria} / {recurso.cantidadDisponible} {recurso.unidadMedida}
                         </span>
-                        {ingrediente.cantidadDisponible >= ingrediente.cantidadNecesaria ? (
+                        {recurso.cantidadDisponible >= recurso.cantidadNecesaria ? (
                           <span className="text-green-500 text-base">✓</span>
                         ) : (
                           <span className="text-red-500 text-base">✗</span>
@@ -364,7 +417,7 @@ const ModalProducirReceta = ({ isOpen, onClose, receta, onSuccess }) => {
           )}
 
           {/* Advertencia simple */}
-          {formData.consumirIngredientes && !todosIngredientesSuficientes && (
+          {formData.consumirIngredientes && !todosRecursosSuficientes && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md">
               <div className="flex items-center">
                 <span className="text-red-500 mr-2">⚠️</span>
@@ -388,11 +441,11 @@ const ModalProducirReceta = ({ isOpen, onClose, receta, onSuccess }) => {
             <button
               type="submit"
               className={`flex-1 px-4 py-2 text-white rounded-md transition-colors ${
-                enviando || (formData.consumirIngredientes && !todosIngredientesSuficientes)
+                enviando || (formData.consumirIngredientes && !todosRecursosSuficientes)
                   ? 'bg-gray-400 cursor-not-allowed' 
                   : 'bg-blue-600 hover:bg-blue-700'
               }`}
-              disabled={enviando || (formData.consumirIngredientes && !todosIngredientesSuficientes)}
+              disabled={enviando || (formData.consumirIngredientes && !todosRecursosSuficientes)}
             >
               {enviando ? 'Produciendo...' : 'Producir Receta'}
             </button>

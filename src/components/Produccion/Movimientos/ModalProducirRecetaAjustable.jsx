@@ -179,19 +179,27 @@ const ModalProducirRecetaAjustable = ({ isOpen, onClose, receta, onSuccess }) =>
       
       setCalculoSugerido(response.data);
       
-      // Inicializar ingredientes ajustados con los valores sugeridos
+      // 🎯 MEJORADO: Inicializar recursos ajustados (ingredientes Y recetas)
       const ingredientesSugeridos = response.data.ingredientesSugeridos || [];
-      const ingredientesIniciales = ingredientesSugeridos.map(ing => ({
-        ingredienteId: ing.ingrediente?._id || ing.ingrediente?.id,
-        nombre: ing.ingrediente?.nombre || 'Sin nombre',
-        cantidadOriginal: ing.cantidadOriginal || 0,
-        cantidadPlaneada: ing.cantidadSugerida || 0,
-        cantidadReal: ing.cantidadSugerida || 0,
-        unidadMedida: ing.ingrediente?.unidadMedida || 'unidad',
-        disponible: ing.stockDisponible || 0,
-        suficiente: ing.suficiente !== undefined ? ing.suficiente : false,
-        motivo: ''
-      }));
+      const ingredientesIniciales = ingredientesSugeridos.map(ing => {
+        // 🎯 NUEVO: Detectar si es ingrediente o receta
+        const tipoRecurso = ing.tipo || 'ingrediente';
+        const recursoInfo = tipoRecurso === 'receta' ? ing.receta : ing.ingrediente;
+        
+        return {
+          tipo: tipoRecurso, // 🎯 NUEVO: Guardar tipo
+          ingredienteId: recursoInfo?._id || recursoInfo?.id,
+          nombre: `${tipoRecurso === 'receta' ? '📋' : '🥬'} ${recursoInfo?.nombre || 'Sin nombre'}`,
+          cantidadOriginal: ing.cantidadOriginal || 0,
+          cantidadPlaneada: ing.cantidadSugerida || 0,
+          cantidadReal: ing.cantidadSugerida || 0,
+          unidadMedida: recursoInfo?.unidadMedida || 'unidad',
+          disponible: ing.stockDisponible || 0,
+          suficiente: ing.suficiente !== undefined ? ing.suficiente : false,
+          motivo: '',
+          esReceta: tipoRecurso === 'receta'
+        };
+      });
       
       setIngredientesAjustados(ingredientesIniciales);
       
