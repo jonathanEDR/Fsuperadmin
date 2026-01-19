@@ -53,6 +53,7 @@ export const agruparRegistrosPorFecha = (registros) => {
         break;
       
       case 'faltante_cobro':
+      case 'faltante_manual': // 🆕 Incluir faltantes manuales
         grupo.faltantes += registro.faltante || 0;
         grupo.registrosPorTipo.faltante_cobro.push(registro);
         break;
@@ -67,9 +68,22 @@ export const agruparRegistrosPorFecha = (registros) => {
         grupo.registrosPorTipo.adelanto_manual.push(registro);
         break;
       
+      case 'bonificacion_manual': // 🆕 Bonificaciones manuales
+      case 'bonificacion_meta':   // 🆕 Bonificaciones por metas
+        grupo.bonificacion += registro.bonificacion || 0;
+        grupo.registrosPorTipo.pago_diario.push(registro); // Agrupa con pagos
+        break;
+      
+      case 'ajuste_manual': // 🆕 Ajustes manuales (puede tener bonificación o adelanto)
+        grupo.bonificacion += registro.bonificacion || 0;
+        grupo.adelantos += registro.adelanto || 0;
+        grupo.registrosPorTipo.pago_diario.push(registro);
+        break;
+      
       default:
         // Retrocompatibilidad: Registros antiguos sin tipo
         grupo.pagoDiario += registro.pagodiario || 0;
+        grupo.bonificacion += registro.bonificacion || 0;
         grupo.faltantes += registro.faltante || 0;
         grupo.gastos += registro.monto || 0;
         grupo.adelantos += registro.adelanto || 0;
@@ -135,6 +149,7 @@ export const calcularTotalesGenerales = (registros) => {
         break;
       
       case 'faltante_cobro':
+      case 'faltante_manual': // 🆕 Incluir faltantes manuales
         acc.totalFaltantes += registro.faltante || 0;
         break;
       
@@ -143,6 +158,16 @@ export const calcularTotalesGenerales = (registros) => {
         break;
       
       case 'adelanto_manual':
+        acc.totalAdelantos += registro.adelanto || 0;
+        break;
+      
+      case 'bonificacion_manual':
+      case 'bonificacion_meta':
+        acc.totalBonificaciones += registro.bonificacion || 0;
+        break;
+      
+      case 'ajuste_manual':
+        acc.totalBonificaciones += registro.bonificacion || 0;
         acc.totalAdelantos += registro.adelanto || 0;
         break;
       

@@ -157,8 +157,15 @@ function Signup() {
 
       {/* Contenedor principal centrado */}
       <div className="relative w-full max-w-md mx-auto">
-        {/* Header */}
+        {/* Header con Logo */}
         <div className="text-center mb-8">
+          <div className="w-48 md:w-64 h-20 md:h-24 mx-auto mb-6 flex items-center justify-center">
+            <img
+              src="/roxi3.png"
+              alt="Roxi Pizzas"
+              className="max-w-full max-h-full object-contain"
+            />
+          </div>
           <h1 className="text-3xl md:text-4xl font-light text-gray-800 mb-2">
             Crear Cuenta
           </h1>

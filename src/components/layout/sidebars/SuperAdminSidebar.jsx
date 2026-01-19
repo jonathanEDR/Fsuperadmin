@@ -85,21 +85,40 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
           {/* Header fijo */}
           <div className="flex-shrink-0 p-3 border-b border-gray-100">
             <div className="flex items-center justify-between">
-              {!isCollapsed && (
+              {!isCollapsed ? (
                 <button
                   onClick={() => {
                     navigate('/super-admin/dashboard');
                     if (isMobileView) toggleSidebar();
                   }}
-                  className="text-sm font-bold text-gray-800 flex items-center gap-2 hover:text-purple-600 transition-colors cursor-pointer"
+                  className="hover:opacity-80 transition-opacity cursor-pointer"
                   title="Ir al Dashboard Principal"
                 >
-                  <Shield className="text-purple-600 flex-shrink-0" size={20} />
-                  <span className="truncate">Super Admin</span>
+                  <div className="w-32 h-10 flex items-center justify-start">
+                    <img
+                      src="/roxi3.png"
+                      alt="Roxi Pizzas"
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  </div>
                 </button>
-              )}
-              {isCollapsed && (
-                <Shield className="text-purple-600 mx-auto" size={20} />
+              ) : (
+                <button
+                  onClick={() => {
+                    navigate('/super-admin/dashboard');
+                    if (isMobileView) toggleSidebar();
+                  }}
+                  className="mx-auto hover:opacity-80 transition-opacity cursor-pointer"
+                  title="Ir al Dashboard Principal"
+                >
+                  <div className="w-10 h-8 flex items-center justify-center">
+                    <img
+                      src="/roxi3.png"
+                      alt="Roxi Pizzas"
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  </div>
+                </button>
               )}
               {/* Botón de toggle */}
               {isMobileView ? (
@@ -123,18 +142,18 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
           </div>
           
           {/* Navegación con scroll */}
-          <nav className="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-1">
+          <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-1">
             {menuGroups.map((group, groupIndex) => (
               <div key={group.title}>
                 {/* Título del grupo */}
                 {!isCollapsed && (
-                  <div className="px-2 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                  <div className="px-2 py-1 text-[9px] font-semibold text-gray-400 uppercase tracking-wider">
                     {group.title}
                   </div>
                 )}
-                
+
                 {/* Items del grupo */}
-                <div className="space-y-0.5">
+                <div>
                   {group.items.map((item) => {
                     const Icon = item.icon;
                     const isActive = isActiveRoute(item.route);
@@ -146,22 +165,22 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
                           if (isMobileView) toggleSidebar();
                         }}
                         className={`
-                          w-full flex items-center gap-2 px-2.5 py-2 rounded-lg transition-all text-sm
-                          ${isActive 
-                            ? 'bg-purple-100 text-purple-700 font-medium' 
+                          w-full flex items-center gap-2 px-2 py-1.5 rounded-md transition-all text-xs
+                          ${isActive
+                            ? 'bg-purple-100 text-purple-700 font-medium'
                             : 'text-gray-600 hover:bg-purple-50 hover:text-purple-600'}
-                          ${isCollapsed ? 'justify-center px-2' : ''}
+                          ${isCollapsed ? 'justify-center px-1.5' : ''}
                         `}
                         title={isCollapsed ? item.label : ""}
                       >
-                        <Icon size={18} className="flex-shrink-0" />
+                        <Icon size={16} className="flex-shrink-0" />
                         {!isCollapsed && (
                           <div className="flex items-center justify-between flex-1 min-w-0 gap-1">
-                            <span className="truncate text-sm">
+                            <span className="truncate text-xs">
                               {item.label}
                             </span>
                             {item.badge && (
-                              <span className="bg-green-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0">
+                              <span className="bg-green-500 text-white text-[8px] px-1 py-0.5 rounded-full font-bold flex-shrink-0">
                                 {item.badge}
                               </span>
                             )}
@@ -171,13 +190,13 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
                     );
                   })}
                 </div>
-                
+
                 {/* Separador */}
                 {!isCollapsed && groupIndex < menuGroups.length - 1 && (
-                  <div className="my-2 border-t border-gray-100"></div>
+                  <div className="my-1 border-t border-gray-100"></div>
                 )}
                 {isCollapsed && groupIndex < menuGroups.length - 1 && (
-                  <div className="my-1 mx-2 border-t border-gray-100"></div>
+                  <div className="my-0.5 mx-2 border-t border-gray-100"></div>
                 )}
               </div>
             ))}

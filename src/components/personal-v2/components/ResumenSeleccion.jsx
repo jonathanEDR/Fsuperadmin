@@ -55,11 +55,9 @@ const ResumenSeleccion = React.memo(({
       const tipo = registro.tipo || 'pago_diario';
       
       if (tipo === 'pago_diario') {
-        // Si pagodiario es 0, calcular desde el sueldo del colaborador
-        let pagoDiarioReal = registro.pagodiario || 0;
-        if (pagoDiarioReal === 0 && colaboradorSeleccionado?.sueldo) {
-          pagoDiarioReal = colaboradorSeleccionado.sueldo / 30;
-        }
+        // ✅ CORREGIDO: Solo usar pagodiario del registro, NO calcular desde sueldo
+        // El pagodiario ya viene calculado correctamente al crear el registro
+        const pagoDiarioReal = registro.pagodiario || 0;
         
         sumaPagos += pagoDiarioReal;
         sumaBonificaciones += registro.bonificacion || 0;
@@ -75,7 +73,8 @@ const ResumenSeleccion = React.memo(({
         // ✅ Manejar ajustes que tienen tanto bonificación como adelanto
         sumaBonificaciones += registro.bonificacion || 0;
         sumaAdelantos += registro.adelanto || 0;
-      } else if (tipo === 'faltante_cobro') {
+      } else if (tipo === 'faltante_cobro' || tipo === 'faltante_manual') {
+        // ✅ Manejar faltantes automáticos (de cobros) y manuales (descuentos directos)
         sumaFaltantes += registro.faltante || 0;
       } else if (tipo === 'gasto_cobro') {
         sumaGastos += registro.gasto || 0; // ✅ CORREGIDO: usar registro.gasto

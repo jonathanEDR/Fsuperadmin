@@ -23,7 +23,16 @@ import DevolucionesPage from './Pages/DevolucionesPage';
 import PersonalPage from './Pages/PersonalPage';
 import NotasPage from './Pages/NotasPage';
 import PerfilPage from './Pages/PerfilPage';
-import { GestionPersonalV2 } from './components/personal-v2'; // NUEVO MÓDULO V2
+// Módulo Personal V2 con rutas anidadas
+import GestionPersonalLayout from './components/personal-v2/GestionPersonalLayout';
+import {
+  ColaboradoresPage,
+  ColaboradorDetallePage,
+  PagosPage,
+  AsistenciasPage,
+  PerfilesPage,
+  MetasPage
+} from './components/personal-v2/pages';
 import UserDashboardLayout from './components/layout/dashboards/UserDashboardLayout';
 import CajaPage from './Pages/CajaPage';
 import ProduccionPage from './Pages/ProduccionPage';
@@ -149,7 +158,15 @@ function App() {
               <Route path="catalogo" element={<CatalogoPage />} />
               <Route path="pagos-realizados" element={<PagosRealizadosPage />} />
               <Route path="personal" element={<PersonalPage />} />
-              <Route path="personal-v2" element={<GestionPersonalV2 />} /> {/* RUTA TEMPORAL PARA TESTING */}
+              {/* Módulo Personal V2 con rutas anidadas para navegación por URL */}
+              <Route path="personal-v2" element={<GestionPersonalLayout />}>
+                <Route index element={<ColaboradoresPage />} />
+                <Route path="colaborador/:colaboradorId" element={<ColaboradorDetallePage />} />
+                <Route path="pagos-realizados" element={<PagosPage />} />
+                <Route path="asistencias" element={<AsistenciasPage />} />
+                <Route path="perfiles" element={<PerfilesPage />} />
+                <Route path="metas" element={<MetasPage />} />
+              </Route>
               <Route path="qr-asistencias" element={<GestionQR />} /> {/* NUEVO: Gestión de Códigos QR */}
               <Route path="escaner-qr" element={<EscanerQR />} /> {/* NUEVO: Escáner QR Asistencias */}
               <Route path="perfil" element={<PerfilPage />} />
@@ -177,7 +194,15 @@ function App() {
               <Route path="catalogo" element={<CatalogoPage />} />
               <Route path="pagos-realizados" element={<PagosRealizadosPage />} />
               <Route path="personal" element={<PersonalPage />} />
-              <Route path="personal-v2" element={<GestionPersonalV2 />} /> {/* RUTA TEMPORAL PARA TESTING */}
+              {/* Módulo Personal V2 con rutas anidadas para navegación por URL */}
+              <Route path="personal-v2" element={<GestionPersonalLayout />}>
+                <Route index element={<ColaboradoresPage />} />
+                <Route path="colaborador/:colaboradorId" element={<ColaboradorDetallePage />} />
+                <Route path="pagos-realizados" element={<PagosPage />} />
+                <Route path="asistencias" element={<AsistenciasPage />} />
+                <Route path="perfiles" element={<PerfilesPage />} />
+                <Route path="metas" element={<MetasPage />} />
+              </Route>
               <Route path="qr-asistencias" element={<GestionQR />} /> {/* NUEVO: Gestión de Códigos QR */}
               <Route path="escaner-qr" element={<EscanerQR />} /> {/* NUEVO: Escáner QR Asistencias */}
               <Route path="notas" element={<NotasPage />} />

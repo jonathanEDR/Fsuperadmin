@@ -224,11 +224,9 @@ const PagosRealizados = React.memo(({
       const tipo = registro.tipo || 'pago_diario';
       
       if (tipo === 'pago_diario') {
-        // Si pagodiario es 0, calcular desde el sueldo del colaborador
-        let pagoDiarioReal = registro.pagodiario || 0;
-        if (pagoDiarioReal === 0 && colaboradorSeleccionado?.sueldo) {
-          pagoDiarioReal = colaboradorSeleccionado.sueldo / 30;
-        }
+        // ✅ CORREGIDO: Solo usar pagodiario del registro, NO calcular desde sueldo
+        // El pagodiario ya viene calculado correctamente al crear el registro
+        const pagoDiarioReal = registro.pagodiario || 0;
         
         sumaPagos += pagoDiarioReal;
         sumaBonificaciones += registro.bonificacion || 0;
@@ -244,7 +242,8 @@ const PagosRealizados = React.memo(({
         // ✅ Manejar ajustes que tienen tanto bonificación como adelanto
         sumaBonificaciones += registro.bonificacion || 0;
         sumaAdelantos += registro.adelanto || 0;
-      } else if (tipo === 'faltante_cobro') {
+      } else if (tipo === 'faltante_cobro' || tipo === 'faltante_manual') {
+        // ✅ Manejar faltantes automáticos (de cobros) y manuales (descuentos directos)
         sumaFaltantes += registro.faltante || 0;
       }
       // gastos NO se restan (solo referenciales)
@@ -317,9 +316,9 @@ const PagosRealizados = React.memo(({
     }
 
     // ✅ CORREGIDO: Incluir TODOS los tipos de registros que afectan el pago
-    // Esto incluye: pago_diario, bonificacion_manual, bonificacion_meta, adelanto_manual, ajuste_manual
-    // Solo excluimos faltante_cobro y gasto_cobro que se manejan por fecha
-    const tiposAPagar = ['pago_diario', 'bonificacion_manual', 'bonificacion_meta', 'adelanto_manual', 'ajuste_manual'];
+    // Esto incluye: pago_diario, bonificacion_manual, bonificacion_meta, adelanto_manual, ajuste_manual, faltante_manual
+    // Solo excluimos faltante_cobro y gasto_cobro que se manejan por fecha (ya están incluidos automáticamente)
+    const tiposAPagar = ['pago_diario', 'bonificacion_manual', 'bonificacion_meta', 'adelanto_manual', 'ajuste_manual', 'faltante_manual'];
     const registrosAPagar = registrosSeleccionados.filter(r => 
       !r.tipo || tiposAPagar.includes(r.tipo)
     );

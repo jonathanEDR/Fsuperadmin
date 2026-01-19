@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Shield, Users, Clock, Pizza, Lock, User, CheckCircle, TrendingUp, Activity, Timer } from 'lucide-react';
+import { ArrowRight, Shield, Users, Clock, Pizza, User, CheckCircle } from 'lucide-react';
 
 function Home() {
   const { user } = useUser();
@@ -34,39 +34,6 @@ function Home() {
       description: "Repartidores y coordinadores",
       role: "delivery",
       color: "from-green-500 to-green-600"
-    }
-  ];
-
-  const stats = [
-    { 
-      label: "Pedidos Hoy", 
-      value: "127", 
-      icon: TrendingUp,
-      color: "from-red-500 to-red-600",
-      bgColor: "bg-red-50",
-      textColor: "text-red-600",
-      change: "+12%",
-      changeColor: "text-green-600"
-    },
-    { 
-      label: "Personal Activo", 
-      value: "18", 
-      icon: Activity,
-      color: "from-green-500 to-green-600",
-      bgColor: "bg-green-50",
-      textColor: "text-green-600",
-      change: "+2",
-      changeColor: "text-green-600"
-    },
-    { 
-      label: "Tiempo Promedio", 
-      value: "12min", 
-      icon: Timer,
-      color: "from-blue-500 to-blue-600",
-      bgColor: "bg-blue-50",
-      textColor: "text-blue-600",
-      change: "-2min",
-      changeColor: "text-green-600"
     }
   ];
 
@@ -109,64 +76,27 @@ function Home() {
           {/* Header profesional */}
           <header className="px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
             <div className="max-w-7xl mx-auto">
-              {/* Branding mejorado */}
+              {/* Branding con Logo */}
               <div className="flex flex-col items-center mb-8 lg:mb-12">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="relative">
-                    <div className="w-16 h-16 lg:w-20 lg:h-20 bg-gradient-to-r from-red-500 to-orange-500 rounded-2xl lg:rounded-3xl flex items-center justify-center shadow-2xl">
-                      <Pizza className="w-8 h-8 lg:w-10 lg:h-10 text-white" />
-                    </div>
-                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white shadow-lg animate-pulse"></div>
+                <div className="relative mb-4">
+                  <div className="w-56 h-16 lg:w-72 lg:h-20 flex items-center justify-center">
+                    <img
+                      src="/roxi3.png"
+                      alt="Roxi Pizzas"
+                      className="max-w-full max-h-full object-contain drop-shadow-2xl"
+                    />
                   </div>
-                  <div className="text-center">
-                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
-                      Pizzas Roxi
-                    </h1>
-                    <p className="text-red-200 font-medium text-sm lg:text-base mt-1">
-                      Sistema de Gestión Interno
-                    </p>
-                  </div>
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white shadow-lg animate-pulse"></div>
                 </div>
+                <p className="text-red-200 font-medium text-sm lg:text-base">
+                  Sistema de Gestión Interno
+                </p>
 
                 {/* Badge de estado */}
                 <div className="inline-flex items-center gap-2 bg-green-500/20 border border-green-400/30 rounded-full px-4 py-2 backdrop-blur-sm">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                   <span className="text-green-200 text-sm font-medium">Sistema Operativo</span>
                 </div>
-              </div>
-
-              {/* Estadísticas mejoradas */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6">
-                {stats.map((stat, index) => (
-                  <div 
-                    key={index} 
-                    className="group relative bg-white/95 backdrop-blur-xl border border-white/20 rounded-2xl p-6 lg:p-8 hover:bg-white transition-all duration-300 hover:shadow-2xl hover:scale-105"
-                  >
-                    {/* Icono */}
-                    <div className={`w-12 h-12 lg:w-14 lg:h-14 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center mb-4 group-hover:shadow-xl transition-all duration-300`}>
-                      <stat.icon className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
-                    </div>
-                    
-                    {/* Contenido */}
-                    <div className="space-y-2">
-                      <div className="flex items-end justify-between">
-                        <div className={`text-2xl lg:text-3xl font-bold ${stat.textColor}`}>
-                          {stat.value}
-                        </div>
-                        <div className={`text-xs font-medium ${stat.changeColor} flex items-center gap-1`}>
-                          <TrendingUp className="w-3 h-3" />
-                          {stat.change}
-                        </div>
-                      </div>
-                      <div className="text-gray-600 text-sm lg:text-base font-medium">
-                        {stat.label}
-                      </div>
-                    </div>
-
-                    {/* Efecto hover */}
-                    <div className={`absolute inset-0 bg-gradient-to-r ${stat.color} opacity-0 group-hover:opacity-5 rounded-2xl transition-opacity duration-300`}></div>
-                  </div>
-                ))}
               </div>
             </div>
           </header>
@@ -183,8 +113,12 @@ function Home() {
                     {/* Header del panel */}
                     <div className="text-center mb-8 lg:mb-10">
                       <div className="relative inline-block mb-6">
-                        <div className="w-20 h-20 lg:w-24 lg:h-24 bg-gradient-to-r from-red-600 to-orange-600 rounded-3xl flex items-center justify-center shadow-2xl">
-                          <Lock className="w-10 h-10 lg:w-12 lg:h-12 text-white" />
+                        <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-3xl overflow-hidden shadow-2xl">
+                          <img
+                            src="/logocuadrado.png"
+                            alt="Roxi Pizzas"
+                            className="w-full h-full object-cover"
+                          />
                         </div>
                         <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-3 border-white shadow-lg flex items-center justify-center">
                           <CheckCircle className="w-4 h-4 text-white" />
@@ -256,6 +190,7 @@ function Home() {
                     {quickAccess.map((item, index) => (
                       <div
                         key={index}
+                        onClick={() => navigate('/login')}
                         className="group relative bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl lg:rounded-3xl p-6 lg:p-8 hover:bg-white/15 hover:border-white/30 transition-all duration-300 cursor-pointer overflow-hidden"
                       >
                         {/* Efecto de brillo */}
@@ -310,8 +245,12 @@ function Home() {
             <div className="max-w-7xl mx-auto">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-orange-500 rounded-lg flex items-center justify-center">
-                    <Pizza className="w-4 h-4 text-white" />
+                  <div className="w-8 h-8 rounded-lg overflow-hidden">
+                    <img
+                      src="/logocuadrado.png"
+                      alt="Roxi Pizzas"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div>
                     <p className="text-red-200 text-sm lg:text-base font-medium">

@@ -56,11 +56,22 @@ function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggle
         >
         <div className="p-4">
           <div className="flex items-center justify-between mb-6">
-            {!isCollapsed && (
-              <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <Shield className="text-blue-600" size={24} />
-                <span className="transition-opacity duration-200">Panel Admin</span>
-              </h2>
+            {!isCollapsed ? (
+              <div className="w-36 h-12 flex items-center justify-start">
+                <img
+                  src="/roxi3.png"
+                  alt="Roxi Pizzas"
+                  className="max-w-full max-h-full object-contain"
+                />
+              </div>
+            ) : (
+              <div className="w-12 h-10 flex items-center justify-center mx-auto">
+                <img
+                  src="/roxi3.png"
+                  alt="Roxi Pizzas"
+                  className="max-w-full max-h-full object-contain"
+                />
+              </div>
             )}
             {/* Botón de toggle para móviles */}
             {isMobileView ? (
@@ -83,7 +94,7 @@ function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggle
             )}
           </div>
 
-          <nav className="space-y-2">
+          <nav className="space-y-0.5">
             {menuItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -94,20 +105,20 @@ function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggle
                     if (isMobileView) toggleSidebar();
                   }}
                   className={`
-                    w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all
-                    hover:bg-blue-50 hover:text-blue-600
-                    ${isCollapsed ? 'justify-center' : ''}
+                    w-full flex items-center gap-2 px-3 py-2 rounded-md transition-all text-sm
+                    hover:bg-blue-50 hover:text-blue-600 text-gray-600
+                    ${isCollapsed ? 'justify-center px-2' : ''}
                   `}
                   title={isCollapsed ? item.label : ""}
                 >
-                  <Icon size={20} className="flex-shrink-0" />
+                  <Icon size={18} className="flex-shrink-0" />
                   {!isCollapsed && (
-                    <div className="flex items-center justify-between flex-1 gap-2">
-                      <span className="font-medium whitespace-nowrap truncate">
+                    <div className="flex items-center justify-between flex-1 gap-1">
+                      <span className="font-medium whitespace-nowrap truncate text-sm">
                         {item.label}
                       </span>
                       {item.badge && (
-                        <span className={`${item.badgeColor || 'bg-blue-500'} text-white text-xs px-2 py-0.5 rounded-full font-semibold`}>
+                        <span className={`${item.badgeColor || 'bg-blue-500'} text-white text-[9px] px-1.5 py-0.5 rounded-full font-semibold`}>
                           {item.badge}
                         </span>
                       )}

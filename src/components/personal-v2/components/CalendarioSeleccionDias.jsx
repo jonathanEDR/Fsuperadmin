@@ -56,13 +56,11 @@ const CalendarioSeleccionDias = React.memo(({
       let montoRegistro = 0;
 
       if (tipo === 'pago_diario') {
-        // Si pagodiario es 0, calcular desde el sueldo del colaborador
-        let pagoDiarioReal = registro.pagodiario || 0;
-        if (pagoDiarioReal === 0 && colaborador?.sueldo) {
-          pagoDiarioReal = colaborador.sueldo / 30;
-        }
+        // ✅ CORREGIDO: Solo usar pagodiario del registro, NO calcular desde sueldo
+        // El pagodiario ya viene calculado correctamente al crear el registro
+        const pagoDiarioReal = registro.pagodiario || 0;
         
-        // ✅ NUEVA FÓRMULA: Pago + Bonificación - Adelanto
+        // ✅ FÓRMULA: Pago + Bonificación - Adelanto
         // Faltantes y gastos vienen en registros separados
         montoRegistro = pagoDiarioReal + (registro.bonificacion || 0) - (registro.adelanto || 0);
       } else if (tipo === 'adelanto_manual') {
@@ -75,8 +73,8 @@ const CalendarioSeleccionDias = React.memo(({
       } else if (tipo === 'ajuste_manual') {
         // ✅ Ajustes con bonificación y adelanto combinados
         montoRegistro = (registro.bonificacion || 0) - (registro.adelanto || 0);
-      } else if (tipo === 'faltante_cobro') {
-        // Faltantes se restan
+      } else if (tipo === 'faltante_cobro' || tipo === 'faltante_manual') {
+        // ✅ Faltantes (automáticos y manuales) se restan
         montoRegistro = -(registro.faltante || 0);
       } else if (tipo === 'gasto_cobro') {
         // ⚠️ GASTOS NO se restan (son solo referenciales)

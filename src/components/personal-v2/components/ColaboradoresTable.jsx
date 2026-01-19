@@ -11,7 +11,8 @@ const ColaboradoresTable = React.memo(({
   estadisticasBulk,
   pagosRealizados,
   onAbrirModal,
-  onAbrirModalBonificacion, // 🆕 Nuevo prop para bonificaciones/adelantos
+  onAbrirModalBonificacion,
+  onAbrirModalDescuento, // 🆕 Nuevo prop para descuentos/faltantes
   onMostrarDetalle,
   formatearMoneda,
   loading
@@ -156,21 +157,28 @@ const ColaboradoresTable = React.memo(({
             <div className="flex gap-2">
               <button
                 onClick={() => onAbrirModal && onAbrirModal(colaborador)}
-                className="flex-1 px-3 py-2 bg-gradient-to-r from-emerald-400 to-teal-400 text-white rounded-lg text-sm font-medium hover:from-emerald-500 hover:to-teal-500 transition-all shadow-sm flex items-center justify-center gap-1"
+                className="flex-1 px-3 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors shadow-sm flex items-center justify-center gap-1"
                 title="Registrar pago diario"
               >
                 💵 <span className="hidden xs:inline">Pago Diario</span>
               </button>
               <button
                 onClick={() => onAbrirModalBonificacion && onAbrirModalBonificacion(colaborador)}
-                className="flex-1 px-3 py-2 bg-gradient-to-r from-amber-400 to-yellow-400 text-white rounded-lg text-sm font-medium hover:from-amber-500 hover:to-yellow-500 transition-all shadow-sm flex items-center justify-center gap-1"
+                className="flex-1 px-3 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors shadow-sm flex items-center justify-center gap-1"
                 title="Bonificación especial o adelanto (metas son automáticas)"
               >
-                🎁 <span className="hidden xs:inline">Bono Especial</span>
+                🎁 <span className="hidden xs:inline">Bono</span>
+              </button>
+              <button
+                onClick={() => onAbrirModalDescuento && onAbrirModalDescuento(colaborador)}
+                className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow-sm flex items-center justify-center gap-1"
+                title="Registrar descuento o faltante"
+              >
+                🔻 <span className="hidden xs:inline">Descuento</span>
               </button>
               <button
                 onClick={() => onMostrarDetalle(colaborador)}
-                className="flex-1 px-3 py-2 bg-gradient-to-r from-blue-400 to-indigo-400 text-white rounded-lg text-sm font-medium hover:from-blue-500 hover:to-indigo-500 transition-all shadow-sm flex items-center justify-center gap-1"
+                className="flex-1 px-3 py-2 bg-slate-700 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm flex items-center justify-center gap-1"
                 title="Ver detalle"
               >
                 📋 <span className="hidden xs:inline">Detalle</span>
@@ -271,7 +279,7 @@ const ColaboradoresTable = React.memo(({
                     {/* Botón Pago Diario Manual */}
                     <button
                       onClick={() => onAbrirModal && onAbrirModal(colaborador)}
-                      className="px-2.5 py-1.5 bg-gradient-to-r from-emerald-400 to-teal-400 text-white rounded-lg text-xs font-medium hover:from-emerald-500 hover:to-teal-500 transition-all shadow-sm"
+                      className="px-2.5 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors shadow-sm"
                       title="Registrar pago diario manual"
                     >
                       💵 Pago Diario
@@ -279,15 +287,23 @@ const ColaboradoresTable = React.memo(({
                     {/* Botón Bonificación Especial/Adelanto */}
                     <button
                       onClick={() => onAbrirModalBonificacion && onAbrirModalBonificacion(colaborador)}
-                      className="px-2.5 py-1.5 bg-gradient-to-r from-amber-400 to-yellow-400 text-white rounded-lg text-xs font-medium hover:from-amber-500 hover:to-yellow-500 transition-all shadow-sm"
-                      title="Bonificación especial o adelanto (metas son automáticas)"
+                      className="px-2.5 py-1.5 bg-amber-600 text-white rounded-lg text-xs font-medium hover:bg-amber-700 transition-colors shadow-sm"
+                      title="Bonificación especial o adelanto"
                     >
-                      🎁 Bono Especial
+                      🎁 Bono
+                    </button>
+                    {/* Botón Descuento/Faltante */}
+                    <button
+                      onClick={() => onAbrirModalDescuento && onAbrirModalDescuento(colaborador)}
+                      className="px-2.5 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700 transition-colors shadow-sm"
+                      title="Registrar descuento o faltante"
+                    >
+                      🔻 Descuento
                     </button>
                     {/* Botón Ver Detalle */}
                     <button
                       onClick={() => onMostrarDetalle(colaborador)}
-                      className="px-2.5 py-1.5 bg-gradient-to-r from-blue-400 to-indigo-400 text-white rounded-lg text-xs font-medium hover:from-blue-500 hover:to-indigo-500 transition-all shadow-sm"
+                      className="px-2.5 py-1.5 bg-slate-700 text-white rounded-lg text-xs font-medium hover:bg-slate-800 transition-colors shadow-sm"
                     >
                       📋 Detalle
                     </button>
