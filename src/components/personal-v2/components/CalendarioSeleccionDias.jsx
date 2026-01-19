@@ -68,8 +68,9 @@ const CalendarioSeleccionDias = React.memo(({
       } else if (tipo === 'adelanto_manual') {
         // ✅ Adelantos independientes se restan
         montoRegistro = -(registro.adelanto || 0);
-      } else if (tipo === 'bonificacion_manual') {
+      } else if (tipo === 'bonificacion_manual' || tipo === 'bonificacion_meta') {
         // ✅ Bonificaciones independientes se suman
+        // Incluye bonificaciones manuales y automáticas por metas
         montoRegistro = registro.bonificacion || 0;
       } else if (tipo === 'ajuste_manual') {
         // ✅ Ajustes con bonificación y adelanto combinados

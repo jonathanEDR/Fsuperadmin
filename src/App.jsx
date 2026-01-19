@@ -39,6 +39,9 @@ import CuentasBancariasPage from './Pages/CuentasBancariasPage';
 import PrestamosPage from './Pages/PrestamosPage';
 import GarantiasPage from './Pages/GarantiasPage';
 
+// Importar página de gestión de imágenes
+import ImagenesPage from './Pages/ImagenesPage';
+
 // Componente para proteger rutas que requieren autenticación
 function ProtectedRoute({ children }) {
   return (
@@ -151,7 +154,8 @@ function App() {
               <Route path="escaner-qr" element={<EscanerQR />} /> {/* NUEVO: Escáner QR Asistencias */}
               <Route path="perfil" element={<PerfilPage />} />
               <Route path="produccion/*" element={<ProduccionPage />} />
-              {/* Módulo de Finanzas - ELIMINADO del Admin */}
+              {/* Gestión de Imágenes */}
+              <Route path="imagenes" element={<ImagenesPage />} />
             </Route>
             
             {/* SuperAdminDashboard como layout persistente */}
@@ -186,6 +190,8 @@ function App() {
               <Route path="finanzas/cuentas-bancarias" element={<CuentasBancariasPage />} />
               <Route path="finanzas/prestamos" element={<PrestamosPage />} />
               <Route path="finanzas/garantias" element={<GarantiasPage />} />
+              {/* Gestión de Imágenes */}
+              <Route path="imagenes" element={<ImagenesPage />} />
             </Route>
             
             {/* UserDashboard como layout persistente */}

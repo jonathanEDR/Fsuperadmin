@@ -164,9 +164,9 @@ const ColaboradoresTable = React.memo(({
               <button
                 onClick={() => onAbrirModalBonificacion && onAbrirModalBonificacion(colaborador)}
                 className="flex-1 px-3 py-2 bg-gradient-to-r from-amber-400 to-yellow-400 text-white rounded-lg text-sm font-medium hover:from-amber-500 hover:to-yellow-500 transition-all shadow-sm flex items-center justify-center gap-1"
-                title="Bonificación o adelanto"
+                title="Bonificación especial o adelanto (metas son automáticas)"
               >
-                🎁 <span className="hidden xs:inline">Bono</span>
+                🎁 <span className="hidden xs:inline">Bono Especial</span>
               </button>
               <button
                 onClick={() => onMostrarDetalle(colaborador)}
@@ -276,13 +276,13 @@ const ColaboradoresTable = React.memo(({
                     >
                       💵 Pago Diario
                     </button>
-                    {/* Botón Bonificación/Adelanto */}
+                    {/* Botón Bonificación Especial/Adelanto */}
                     <button
                       onClick={() => onAbrirModalBonificacion && onAbrirModalBonificacion(colaborador)}
                       className="px-2.5 py-1.5 bg-gradient-to-r from-amber-400 to-yellow-400 text-white rounded-lg text-xs font-medium hover:from-amber-500 hover:to-yellow-500 transition-all shadow-sm"
-                      title="Registrar bonificación o adelanto"
+                      title="Bonificación especial o adelanto (metas son automáticas)"
                     >
-                      🎁 Bono/Adelanto
+                      🎁 Bono Especial
                     </button>
                     {/* Botón Ver Detalle */}
                     <button

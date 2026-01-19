@@ -1,5 +1,7 @@
 /**
- * Modal para registrar Bonificaciones y Adelantos
+ * Modal para registrar Bonificaciones Especiales y Adelantos
+ * Las bonificaciones POR METAS se registran AUTOMÁTICAMENTE
+ * Este modal es solo para casos especiales/extraordinarios
  * Diseño profesional y colores suaves
  */
 
@@ -87,12 +89,18 @@ const BonificacionAdelantoModal = React.memo(({
             <div className="flex items-center gap-2 mb-1">
               <span className="text-2xl">{isBonificacion ? '🎁' : '💸'}</span>
               <h3 className="text-lg font-semibold text-gray-800">
-                {isBonificacion ? 'Nueva Bonificación' : 'Nuevo Adelanto'}
+                {isBonificacion ? 'Bonificación Especial' : 'Nuevo Adelanto'}
               </h3>
             </div>
             <p className="text-sm text-gray-500">
               Para {colaborador?.nombre_negocio || 'colaborador'}
             </p>
+            {isBonificacion && (
+              <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                <span>⚡</span>
+                <span>Las bonificaciones por metas son automáticas</span>
+              </p>
+            )}
           </div>
           <button
             onClick={handleClose}
@@ -115,7 +123,7 @@ const BonificacionAdelantoModal = React.memo(({
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            🎁 Bonificación
+            🎁 Bonificación Especial
           </button>
           <button
             type="button"
@@ -205,7 +213,7 @@ const BonificacionAdelantoModal = React.memo(({
               onChange={(e) => setFormData(prev => ({ ...prev, descripcion: e.target.value }))}
               className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-300/50 focus:border-gray-300 transition-colors bg-gray-50/50"
               placeholder={isBonificacion 
-                ? 'Ej: Bono por puntualidad, Meta alcanzada...' 
+                ? 'Ej: Bono por desempeño excepcional, Incentivo especial...' 
                 : 'Ej: Adelanto quincenal, Emergencia...'}
             />
           </div>
@@ -219,10 +227,10 @@ const BonificacionAdelantoModal = React.memo(({
             <p className={`text-sm flex items-start gap-2 ${
               isBonificacion ? 'text-amber-700' : 'text-orange-700'
             }`}>
-              <span className="text-base mt-0.5">{isBonificacion ? '📈' : '📉'}</span>
+              <span className="text-base mt-0.5">{isBonificacion ? '⭐' : '📉'}</span>
               <span>
                 {isBonificacion 
-                  ? 'Las bonificaciones se SUMAN al total a pagar del colaborador.'
+                  ? 'Bonificaciones ESPECIALES para casos extraordinarios. Las bonificaciones por metas (diarias/mensuales) se registran automáticamente.'
                   : 'Los adelantos se RESTAN del total a pagar del colaborador.'}
               </span>
             </p>

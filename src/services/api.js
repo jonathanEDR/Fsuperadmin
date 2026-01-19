@@ -2,11 +2,8 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 const api = axios.create({
-  baseURL: API_URL, // Solo el URL base, sin '/api' aquí
-  headers: { 
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  },
+  baseURL: API_URL,
+  // No establecer Content-Type aquí - se maneja en el interceptor
   withCredentials: true   // Permite enviar cookies junto con cada petición
 });
 
@@ -34,9 +31,16 @@ api.interceptors.request.use(  async config => {
       config.headers['X-User-Email'] = user.primaryEmailAddress?.emailAddress;
       config.headers['X-User-Name'] = `${user.firstName} ${user.lastName}`.trim();
       config.headers['X-User-Id'] = user.id;
+
+      // ✅ IMPORTANTE: Solo establecer Content-Type si NO es FormData
+      // Para FormData, el navegador establece automáticamente multipart/form-data con boundary
+      if (!(config.data instanceof FormData)) {
+        config.headers['Content-Type'] = 'application/json';
+      } else {
+        // Si es FormData, eliminar Content-Type para que el navegador lo establezca
+        delete config.headers['Content-Type'];
+      }
       
-      // Headers estándar
-      config.headers['Content-Type'] = 'application/json';
       config.headers['Accept'] = 'application/json';
       
     } catch (error) {

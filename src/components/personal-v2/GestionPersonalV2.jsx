@@ -18,6 +18,7 @@ import ListaAsistencias from './components/ListaAsistencias';
 import ReporteAsistencias from './components/ReporteAsistencias';
 import ModalAsistencia from './components/ModalAsistencia';
 import FiltrosAsistencia from './components/FiltrosAsistencia';
+import MetasSucursal from './components/MetasSucursal';
 import api from '../../services/api';
 
 function GestionPersonalV2() {
@@ -192,6 +193,17 @@ function GestionPersonalV2() {
               <span className="sm:hidden">🏢</span>
               <span className="hidden sm:inline">Colaboradores</span>
             </button>
+            <button
+              onClick={() => setTabActual('metas')}
+              className={`snap-start flex-shrink-0 px-3 sm:px-4 py-2 font-medium text-sm transition-colors whitespace-nowrap ${
+                tabActual === 'metas'
+                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50 rounded-t-lg'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-t-lg'
+              }`}
+            >
+              <span className="sm:hidden">🎯</span>
+              <span className="hidden sm:inline">Metas y Bonificaciones</span>
+            </button>
           </div>
           {/* Indicador de gradiente para mostrar que hay más contenido */}
           <div className="absolute right-0 top-0 bottom-px w-8 bg-gradient-to-l from-white to-transparent pointer-events-none sm:hidden" />
@@ -315,6 +327,10 @@ function GestionPersonalV2() {
       
       {tabActual === 'colaboradores' && (
         <ProfileManagement userRole={userRole || "super_admin"} />
+      )}
+
+      {tabActual === 'metas' && (
+        <MetasSucursal />
       )}
 
       {/* Modal para crear registro */}

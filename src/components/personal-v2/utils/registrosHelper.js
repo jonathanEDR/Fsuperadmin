@@ -221,7 +221,9 @@ export const obtenerDescripcionTipo = (tipo, registro = null) => {
     'pago_diario': 'Pago Diario',
     'faltante_cobro': 'Faltante de Cobro',
     'gasto_cobro': 'Gasto Imprevisto',
-    'adelanto_manual': 'Adelanto Manual'
+    'adelanto_manual': 'Adelanto Manual',
+    'bonificacion_manual': 'Bonificación Especial',
+    'bonificacion_meta': 'Bonificación por Meta' // 🆕 Bonificación automática
   };
 
   return descripciones[tipo] || 'Registro';
@@ -235,7 +237,9 @@ export const obtenerColorTipo = (tipo) => {
     'pago_diario': 'bg-green-100 text-green-800',
     'faltante_cobro': 'bg-orange-100 text-orange-800',
     'gasto_cobro': 'bg-red-100 text-red-800',
-    'adelanto_manual': 'bg-blue-100 text-blue-800'
+    'adelanto_manual': 'bg-blue-100 text-blue-800',
+    'bonificacion_manual': 'bg-yellow-100 text-yellow-800',
+    'bonificacion_meta': 'bg-purple-100 text-purple-800' // 🆕 Morado para metas
   };
 
   return colores[tipo] || 'bg-gray-100 text-gray-800';
@@ -270,7 +274,9 @@ export const obtenerColorMontoTexto = (tipo, registro = null) => {
     'pago_diario': 'text-green-600',
     'faltante_cobro': 'text-orange-600',
     'gasto_cobro': 'text-red-600',
-    'adelanto_manual': 'text-blue-600'
+    'adelanto_manual': 'text-blue-600',
+    'bonificacion_manual': 'text-yellow-600',
+    'bonificacion_meta': 'text-purple-600' // 🆕 Morado para metas
   };
 
   return colores[tipo] || 'text-gray-600';
@@ -305,7 +311,9 @@ export const obtenerIconoTipo = (tipo, registro = null) => {
     'pago_diario': '💵',
     'faltante_cobro': '⚠️',
     'gasto_cobro': '💸',
-    'adelanto_manual': '🔵'
+    'adelanto_manual': '🔵',
+    'bonificacion_manual': '🎁',
+    'bonificacion_meta': '🎯' // 🆕 Bonificación automática por meta
   };
 
   return iconos[tipo] || '📋';
@@ -326,6 +334,13 @@ export const formatearMontoConSigno = (registro) => {
       const pagoDiario = registro.pagodiario || 0;
       const bonificacion = registro.bonificacion || 0;
       monto = pagoDiario + bonificacion;
+      signo = '+';
+      break;
+    
+    case 'bonificacion_manual':
+    case 'bonificacion_meta':
+      // 🆕 Bonificaciones independientes (manuales y por metas)
+      monto = registro.bonificacion || 0;
       signo = '+';
       break;
     
@@ -354,10 +369,12 @@ export const formatearMontoConSigno = (registro) => {
 };
 
 /**
- * Verificar si un registro es automático (de cobros)
+ * Verificar si un registro es automático (de cobros o metas)
  */
 export const esRegistroAutomatico = (registro) => {
-  return registro.origenDatos === 'cobro_automatico';
+  return registro.origenDatos === 'cobro_automatico' || 
+         registro.origenDatos === 'automatico_metas' ||
+         registro.tipo === 'bonificacion_meta';
 };
 
 /**

@@ -182,11 +182,13 @@ const PagosRealizados = React.memo(({
             }
             
             // Agregar pago parcial con el monto específico de ese día
+            // ✅ FIX: Usar uniqueKey para evitar duplicados de React key
             agrupados[dia].push({
               ...pago,
               montoTotal: diaPagado.montoPagadoDia || 0,
               esPagoParcial: true,
-              conceptos: diaPagado.conceptos || {}
+              conceptos: diaPagado.conceptos || {},
+              uniqueKey: `${pago._id}-${fechaRaw}` // Key única por día
             });
           }
         });
@@ -234,8 +236,9 @@ const PagosRealizados = React.memo(({
       } else if (tipo === 'adelanto_manual') {
         // ✅ Manejar adelantos creados como registros independientes
         sumaAdelantos += registro.adelanto || 0;
-      } else if (tipo === 'bonificacion_manual') {
+      } else if (tipo === 'bonificacion_manual' || tipo === 'bonificacion_meta') {
         // ✅ Manejar bonificaciones creadas como registros independientes
+        // Incluye bonificaciones manuales y automáticas por metas
         sumaBonificaciones += registro.bonificacion || 0;
       } else if (tipo === 'ajuste_manual') {
         // ✅ Manejar ajustes que tienen tanto bonificación como adelanto
@@ -314,9 +317,9 @@ const PagosRealizados = React.memo(({
     }
 
     // ✅ CORREGIDO: Incluir TODOS los tipos de registros que afectan el pago
-    // Esto incluye: pago_diario, bonificacion_manual, adelanto_manual, ajuste_manual
+    // Esto incluye: pago_diario, bonificacion_manual, bonificacion_meta, adelanto_manual, ajuste_manual
     // Solo excluimos faltante_cobro y gasto_cobro que se manejan por fecha
-    const tiposAPagar = ['pago_diario', 'bonificacion_manual', 'adelanto_manual', 'ajuste_manual'];
+    const tiposAPagar = ['pago_diario', 'bonificacion_manual', 'bonificacion_meta', 'adelanto_manual', 'ajuste_manual'];
     const registrosAPagar = registrosSeleccionados.filter(r => 
       !r.tipo || tiposAPagar.includes(r.tipo)
     );
@@ -609,7 +612,7 @@ const PagosRealizados = React.memo(({
                             <td key={`${dia}-${colaborador._id}`} className="px-1 sm:px-3 py-1 sm:py-2 border-r">
                               {pagosColaborador.length > 0 ? (
                                 <div className="space-y-1">
-                                  {pagosColaborador.map(pago => {
+                                  {pagosColaborador.map((pago, pagoIndex) => {
                                     const diasCubiertos = pago.diasPagados?.length || 0;
                                     const tooltipInfo = diasCubiertos > 0 
                                       ? `${diasCubiertos} día${diasCubiertos > 1 ? 's' : ''} cubierto${diasCubiertos > 1 ? 's' : ''}`
@@ -617,7 +620,7 @@ const PagosRealizados = React.memo(({
                                     
                                     return (
                                       <div 
-                                        key={pago._id}
+                                        key={pago.uniqueKey || `${pago._id}-${pagoIndex}`}
                                         className="flex justify-between items-start p-1.5 sm:p-2 bg-green-50 rounded border-l-2 sm:border-l-4 border-green-400 group relative"
                                         title={tooltipInfo}
                                       >

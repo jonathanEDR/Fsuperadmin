@@ -67,8 +67,9 @@ const ResumenSeleccion = React.memo(({
       } else if (tipo === 'adelanto_manual') {
         // ✅ Manejar adelantos creados como registros independientes
         sumaAdelantos += registro.adelanto || 0;
-      } else if (tipo === 'bonificacion_manual') {
+      } else if (tipo === 'bonificacion_manual' || tipo === 'bonificacion_meta') {
         // ✅ Manejar bonificaciones creadas como registros independientes
+        // Incluye bonificaciones manuales y automáticas por metas
         sumaBonificaciones += registro.bonificacion || 0;
       } else if (tipo === 'ajuste_manual') {
         // ✅ Manejar ajustes que tienen tanto bonificación como adelanto

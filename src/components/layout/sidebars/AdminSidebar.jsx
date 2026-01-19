@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, UserCog, LogOut, Shield, Users, Package, ShoppingCart, Menu, X, ChevronLeft, ChevronRight, UserCheck, Factory, Wallet, DollarSign, ScanLine, ArrowRightLeft } from 'lucide-react';
+import { Home, UserCog, LogOut, Shield, Users, Package, ShoppingCart, Menu, X, ChevronLeft, ChevronRight, UserCheck, Factory, Wallet, DollarSign, ScanLine, ArrowRightLeft, Image } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 
@@ -24,6 +24,7 @@ function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggle
     { id: 'movimientos-produccion', icon: ArrowRightLeft, label: 'Movimientos Producción', route: '/admin/produccion/movimientos', badge: 'NUEVO', badgeColor: 'bg-purple-500' },
     { id: 'personal', icon: UserCheck, label: 'Gestión de Personal', route: '/admin/personal-v2' },
     { id: 'escaner-qr', icon: ScanLine, label: 'Marcar Asistencia', route: '/admin/escaner-qr', badge: 'NUEVO', badgeColor: 'bg-green-500' },
+    { id: 'imagenes', icon: Image, label: 'Gestión de Imágenes', route: '/admin/imagenes' },
     { id: 'perfil', icon: UserCog, label: 'Mi Perfil', route: '/admin/perfil' }
   ];
 
