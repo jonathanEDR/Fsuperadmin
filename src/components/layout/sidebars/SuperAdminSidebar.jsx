@@ -2,6 +2,7 @@ import React from 'react';
 import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, UserCheck, X, ChevronLeft, ChevronRight, CreditCard, Factory, Grid3X3, RotateCcw, DollarSign, QrCode, Wallet, ScanLine, Image } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
+import { NotificationBell } from '../../../components/notifications';
 
 function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebarOpen, onLogout }) {
   const navigate = useNavigate();
@@ -120,24 +121,31 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
                   </div>
                 </button>
               )}
-              {/* Botón de toggle */}
-              {isMobileView ? (
-                <button
-                  onClick={toggleSidebar}
-                  className="p-1.5 rounded-lg hover:bg-purple-50 text-purple-600"
-                  aria-label="Cerrar menú"
-                >
-                  <X size={20} />
-                </button>
-              ) : (
-                <button
-                  onClick={toggleSidebar}
-                  className="hidden lg:flex p-1.5 rounded-lg hover:bg-purple-50 text-purple-600"
-                  title={isCollapsed ? "Expandir" : "Colapsar"}
-                >
-                  {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-                </button>
-              )}
+              
+              {/* Notificaciones y Toggle */}
+              <div className="flex items-center gap-1">
+                {/* Campana de Notificaciones */}
+                {!isCollapsed && <NotificationBell />}
+                
+                {/* Botón de toggle */}
+                {isMobileView ? (
+                  <button
+                    onClick={toggleSidebar}
+                    className="p-1.5 rounded-lg hover:bg-purple-50 text-purple-600"
+                    aria-label="Cerrar menú"
+                  >
+                    <X size={20} />
+                  </button>
+                ) : (
+                  <button
+                    onClick={toggleSidebar}
+                    className="hidden lg:flex p-1.5 rounded-lg hover:bg-purple-50 text-purple-600"
+                    title={isCollapsed ? "Expandir" : "Colapsar"}
+                  >
+                    {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
           

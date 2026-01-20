@@ -2,6 +2,7 @@ import React from 'react';
 import { Home, UserCog, LogOut, Shield, Users, Package, ShoppingCart, Menu, X, ChevronLeft, ChevronRight, UserCheck, Factory, Wallet, DollarSign, ScanLine, ArrowRightLeft, Image } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
+import { NotificationBell } from '../../../components/notifications';
 
 function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggleSidebar, isMobileView, isSidebarOpen }) {
   const navigate = useNavigate();
@@ -73,25 +74,31 @@ function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggle
                 />
               </div>
             )}
-            {/* Botón de toggle para móviles */}
-            {isMobileView ? (
-              <button
-                onClick={toggleSidebar}
-                className="lg:hidden p-2 rounded-lg hover:bg-blue-50 text-blue-600"
-                aria-label="Cerrar menú"
-              >
-                <X size={24} />
-              </button>
-            ) : (
-              /* Botón de toggle para escritorio */
-              <button
-                onClick={toggleSidebar}
-                className="hidden lg:flex p-2 rounded-lg hover:bg-blue-50 text-blue-600"
-                title={isCollapsed ? "Expandir menú" : "Colapsar menú"}
-              >
-                {isCollapsed ? <ChevronRight size={24} /> : <ChevronLeft size={24} />}
-              </button>
-            )}
+            {/* Área de acciones: notificaciones y toggle */}
+            <div className="flex items-center gap-2">
+              {/* Campana de notificaciones */}
+              {!isCollapsed && <NotificationBell />}
+              
+              {/* Botón de toggle para móviles */}
+              {isMobileView ? (
+                <button
+                  onClick={toggleSidebar}
+                  className="lg:hidden p-2 rounded-lg hover:bg-blue-50 text-blue-600"
+                  aria-label="Cerrar menú"
+                >
+                  <X size={24} />
+                </button>
+              ) : (
+                /* Botón de toggle para escritorio */
+                <button
+                  onClick={toggleSidebar}
+                  className="hidden lg:flex p-2 rounded-lg hover:bg-blue-50 text-blue-600"
+                  title={isCollapsed ? "Expandir menú" : "Colapsar menú"}
+                >
+                  {isCollapsed ? <ChevronRight size={24} /> : <ChevronLeft size={24} />}
+                </button>
+              )}
+            </div>
           </div>
 
           <nav className="space-y-0.5">
