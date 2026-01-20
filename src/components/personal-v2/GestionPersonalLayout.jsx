@@ -4,9 +4,9 @@
  * Permite historial de navegador y URLs compartibles
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import api from '../../services/api';
+import { useUserRole } from '../../hooks/useUserRole';
 import ConfiguracionTardanzaModal from './components/ConfiguracionTardanzaModal';
 
 // Contexto para compartir datos entre páginas del módulo
@@ -16,25 +16,11 @@ function GestionPersonalLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Estado para rol del usuario
-  const [userRole, setUserRole] = useState(null);
+  // 🆕 Usar el hook centralizado para obtener el rol
+  const { userRole, isLoading: roleLoading } = useUserRole();
   
   // Estado para modal de configuración de tardanzas
   const [modalConfigTardanza, setModalConfigTardanza] = useState(false);
-  
-  // Obtener rol del usuario
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const res = await api.get('/api/auth/my-profile');
-        const role = res.data.role?.trim().toLowerCase() || null;
-        setUserRole(role);
-      } catch (err) {
-        setUserRole(null);
-      }
-    };
-    fetchUserRole();
-  }, []);
 
   // Determinar la ruta base según el pathname actual
   const getBasePath = () => {
@@ -142,7 +128,7 @@ function GestionPersonalLayout() {
             </div>
             
             {/* Botón de configuración de tardanzas - Solo para super_admin */}
-            {userRole === 'super_admin' && (
+            {userRole && userRole.toLowerCase().replace(/[-_\s]/g, '') === 'superadmin' && (
               <button
                 onClick={() => setModalConfigTardanza(true)}
                 className="flex-shrink-0 px-3 py-2 font-medium text-sm transition-colors whitespace-nowrap bg-amber-100 text-amber-700 hover:bg-amber-200 rounded-lg flex items-center gap-1 border border-amber-300"
