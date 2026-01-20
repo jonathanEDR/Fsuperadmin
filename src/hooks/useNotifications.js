@@ -7,8 +7,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import * as notificationService from '../services/notificationService';
 
-// Intervalo de polling en milisegundos (30 segundos)
-const POLLING_INTERVAL = 30000;
+// Intervalo de polling en milisegundos (5 segundos para mayor responsividad)
+const POLLING_INTERVAL = 5000;
 
 export function useNotifications() {
   const { getToken, isSignedIn, isLoaded } = useAuth();

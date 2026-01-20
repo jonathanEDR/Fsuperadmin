@@ -6,6 +6,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Bell, CheckCheck, RefreshCw, Loader2, X } from 'lucide-react';
 import NotificationItem from './NotificationItem';
+import PushNotificationToggle from './PushNotificationToggle';
 import useNotifications from '../../hooks/useNotifications';
 
 function NotificationPanel({ isOpen, onClose, isMobile = false }) {
@@ -86,6 +87,9 @@ function NotificationPanel({ isOpen, onClose, isMobile = false }) {
           
           {/* Acciones del header */}
           <div className="flex items-center gap-1">
+            {/* Toggle de Push Notifications */}
+            <PushNotificationToggle compact />
+            
             <button
               onClick={handleRefresh}
               className="p-1.5 hover:bg-white/20 rounded-full transition-colors"
