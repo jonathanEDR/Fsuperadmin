@@ -11,14 +11,15 @@ import * as notificationService from '../services/notificationService';
 const POLLING_INTERVAL = 30000;
 
 export function useNotifications() {
-  const { getToken, isSignedIn } = useAuth();
+  const { getToken, isSignedIn, isLoaded } = useAuth();
   
   // Estados
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [hasMore, setHasMore] = useState(false);
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
   
   // Ref para el polling interval
   const pollingRef = useRef(null);
@@ -27,7 +28,10 @@ export function useNotifications() {
    * Cargar notificaciones
    */
   const fetchNotifications = useCallback(async (options = {}) => {
-    if (!isSignedIn) return;
+    if (!isSignedIn || !isLoaded) {
+      setLoading(false);
+      return;
+    }
     
     try {
       setLoading(true);
@@ -36,39 +40,46 @@ export function useNotifications() {
       const result = await notificationService.fetchNotifications(getToken, options);
       
       if (result.success) {
-        setNotifications(result.data);
-        setUnreadCount(result.unreadCount);
+        setNotifications(result.data || []);
+        setUnreadCount(result.unreadCount || 0);
         setHasMore(result.pagination?.hasMore || false);
+      } else {
+        // API respondió pero sin success
+        setNotifications([]);
+        setUnreadCount(0);
       }
     } catch (err) {
       console.error('Error cargando notificaciones:', err);
-      setError(err.message);
+      setError(err.message || 'Error de conexión');
+      // No limpiar notificaciones existentes en caso de error de red
     } finally {
       setLoading(false);
+      setInitialLoadDone(true);
     }
-  }, [getToken, isSignedIn]);
+  }, [getToken, isSignedIn, isLoaded]);
   
   /**
    * Actualizar solo el conteo de no leídas (más ligero)
    */
   const refreshUnreadCount = useCallback(async () => {
-    if (!isSignedIn) return;
+    if (!isSignedIn || !isLoaded) return;
     
     try {
       const result = await notificationService.fetchUnreadCount(getToken);
       if (result.success) {
-        setUnreadCount(result.count);
+        setUnreadCount(result.count || 0);
       }
     } catch (err) {
-      console.error('Error actualizando conteo:', err);
+      // Silenciar errores de polling para no molestar al usuario
+      console.warn('Error actualizando conteo:', err);
     }
-  }, [getToken, isSignedIn]);
+  }, [getToken, isSignedIn, isLoaded]);
   
   /**
    * Marcar una notificación como leída
    */
   const markAsRead = useCallback(async (notificationId) => {
-    if (!isSignedIn) return;
+    if (!isSignedIn || !isLoaded) return;
     
     try {
       await notificationService.markAsRead(getToken, notificationId);
@@ -89,13 +100,13 @@ export function useNotifications() {
       console.error('Error marcando como leída:', err);
       throw err;
     }
-  }, [getToken, isSignedIn]);
+  }, [getToken, isSignedIn, isLoaded]);
   
   /**
    * Marcar todas como leídas
    */
   const markAllAsRead = useCallback(async () => {
-    if (!isSignedIn) return;
+    if (!isSignedIn || !isLoaded) return;
     
     try {
       await notificationService.markAllAsRead(getToken);
@@ -112,13 +123,13 @@ export function useNotifications() {
       console.error('Error marcando todas como leídas:', err);
       throw err;
     }
-  }, [getToken, isSignedIn]);
+  }, [getToken, isSignedIn, isLoaded]);
   
   /**
    * Eliminar una notificación
    */
   const deleteNotification = useCallback(async (notificationId) => {
-    if (!isSignedIn) return;
+    if (!isSignedIn || !isLoaded) return;
     
     try {
       await notificationService.deleteNotification(getToken, notificationId);
@@ -137,7 +148,7 @@ export function useNotifications() {
       console.error('Error eliminando notificación:', err);
       throw err;
     }
-  }, [getToken, isSignedIn, notifications]);
+  }, [getToken, isSignedIn, isLoaded, notifications]);
   
   /**
    * Refrescar todas las notificaciones
@@ -148,14 +159,14 @@ export function useNotifications() {
   
   // Efecto para cargar notificaciones iniciales
   useEffect(() => {
-    if (isSignedIn) {
+    if (isLoaded && isSignedIn && !initialLoadDone) {
       fetchNotifications({ limit: 20, skip: 0 });
     }
-  }, [isSignedIn, fetchNotifications]);
+  }, [isLoaded, isSignedIn, initialLoadDone, fetchNotifications]);
   
   // Efecto para polling (actualización periódica)
   useEffect(() => {
-    if (!isSignedIn) return;
+    if (!isLoaded || !isSignedIn) return;
     
     // Iniciar polling
     pollingRef.current = setInterval(() => {
@@ -168,13 +179,13 @@ export function useNotifications() {
         clearInterval(pollingRef.current);
       }
     };
-  }, [isSignedIn, refreshUnreadCount]);
+  }, [isLoaded, isSignedIn, refreshUnreadCount]);
   
   return {
     // Estado
     notifications,
     unreadCount,
-    loading,
+    loading: loading || (!isLoaded),
     error,
     hasMore,
     
