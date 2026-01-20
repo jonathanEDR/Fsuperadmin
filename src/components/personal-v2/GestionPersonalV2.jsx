@@ -13,6 +13,7 @@ import PagosRealizados from './components/PagosRealizados';
 import ProfileManagement from '../../Pages/ProfileManagement';
 import RegistroModal from './components/RegistroModal';
 import BonificacionAdelantoModal from './components/BonificacionAdelantoModal';
+import ConfiguracionTardanzaModal from './components/ConfiguracionTardanzaModal';
 import CalendarioAsistencias from './components/CalendarioAsistencias';
 import ListaAsistencias from './components/ListaAsistencias';
 import ReporteAsistencias from './components/ReporteAsistencias';
@@ -70,6 +71,9 @@ function GestionPersonalV2() {
     isOpen: false,
     colaborador: null
   });
+  
+  // 🆕 Estado para modal de configuración de tardanzas
+  const [modalConfigTardanza, setModalConfigTardanza] = useState(false);
   
   // 🆕 Handlers para modal de bonificación/adelanto
   const abrirModalBonificacion = (colaborador) => {
@@ -147,8 +151,8 @@ function GestionPersonalV2() {
         </div>
         
         {/* Tabs Navigation - Scroll horizontal en móvil */}
-        <div className="relative">
-          <div className="flex gap-1 sm:gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-px border-b border-gray-200">
+        <div className="relative flex items-end gap-2">
+          <div className="flex-1 flex gap-1 sm:gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-px border-b border-gray-200">
             <button
               onClick={() => setTabActual('personal')}
               className={`snap-start flex-shrink-0 px-3 sm:px-4 py-2 font-medium text-sm transition-colors whitespace-nowrap ${
@@ -205,8 +209,16 @@ function GestionPersonalV2() {
               <span className="hidden sm:inline">Metas y Bonificaciones</span>
             </button>
           </div>
-          {/* Indicador de gradiente para mostrar que hay más contenido */}
-          <div className="absolute right-0 top-0 bottom-px w-8 bg-gradient-to-l from-white to-transparent pointer-events-none sm:hidden" />
+          
+          {/* 🆕 Botón de configuración de tardanzas - Siempre visible */}
+          <button
+            onClick={() => setModalConfigTardanza(true)}
+            className="flex-shrink-0 px-3 py-2 font-medium text-sm transition-colors whitespace-nowrap bg-amber-100 text-amber-700 hover:bg-amber-200 rounded-lg flex items-center gap-1 border border-amber-300"
+            title="Configurar descuentos por tardanza"
+          >
+            <span>⚙️</span>
+            <span className="hidden sm:inline">Configuración</span>
+          </button>
         </div>
       </div>
 
@@ -349,6 +361,15 @@ function GestionPersonalV2() {
         onSubmit={crearBonificacionAdelanto}
         colaborador={modalBonificacion.colaborador}
         loading={selectors.isLoading}
+      />
+
+      {/* 🆕 Modal de configuración de tardanzas */}
+      <ConfiguracionTardanzaModal
+        isOpen={modalConfigTardanza}
+        onClose={() => setModalConfigTardanza(false)}
+        onSave={(config) => {
+          console.log('✅ Configuración de tardanzas guardada:', config);
+        }}
       />
 
       {/* Modal de confirmación para eliminar */}

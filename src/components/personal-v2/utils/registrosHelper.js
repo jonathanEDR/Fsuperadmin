@@ -54,6 +54,7 @@ export const agruparRegistrosPorFecha = (registros) => {
       
       case 'faltante_cobro':
       case 'faltante_manual': // 🆕 Incluir faltantes manuales
+      case 'descuento_tardanza': // 🆕 Incluir descuentos por tardanza
         grupo.faltantes += registro.faltante || 0;
         grupo.registrosPorTipo.faltante_cobro.push(registro);
         break;
@@ -150,6 +151,7 @@ export const calcularTotalesGenerales = (registros) => {
       
       case 'faltante_cobro':
       case 'faltante_manual': // 🆕 Incluir faltantes manuales
+      case 'descuento_tardanza': // 🆕 Incluir descuentos por tardanza
         acc.totalFaltantes += registro.faltante || 0;
         break;
       
@@ -245,6 +247,8 @@ export const obtenerDescripcionTipo = (tipo, registro = null) => {
   const descripciones = {
     'pago_diario': 'Pago Diario',
     'faltante_cobro': 'Faltante de Cobro',
+    'faltante_manual': 'Descuento Manual',
+    'descuento_tardanza': 'Descuento por Tardanza', // 🆕 Descuento automático por tardanza
     'gasto_cobro': 'Gasto Imprevisto',
     'adelanto_manual': 'Adelanto Manual',
     'bonificacion_manual': 'Bonificación Especial',
@@ -261,6 +265,8 @@ export const obtenerColorTipo = (tipo) => {
   const colores = {
     'pago_diario': 'bg-green-100 text-green-800',
     'faltante_cobro': 'bg-orange-100 text-orange-800',
+    'faltante_manual': 'bg-red-100 text-red-800',
+    'descuento_tardanza': 'bg-amber-100 text-amber-800', // 🆕 Ámbar para tardanzas
     'gasto_cobro': 'bg-red-100 text-red-800',
     'adelanto_manual': 'bg-blue-100 text-blue-800',
     'bonificacion_manual': 'bg-yellow-100 text-yellow-800',
@@ -298,6 +304,8 @@ export const obtenerColorMontoTexto = (tipo, registro = null) => {
   const colores = {
     'pago_diario': 'text-green-600',
     'faltante_cobro': 'text-orange-600',
+    'faltante_manual': 'text-orange-600',
+    'descuento_tardanza': 'text-orange-600',
     'gasto_cobro': 'text-red-600',
     'adelanto_manual': 'text-blue-600',
     'bonificacion_manual': 'text-yellow-600',
@@ -335,6 +343,8 @@ export const obtenerIconoTipo = (tipo, registro = null) => {
   const iconos = {
     'pago_diario': '💵',
     'faltante_cobro': '⚠️',
+    'faltante_manual': '⚠️',
+    'descuento_tardanza': '⏰',
     'gasto_cobro': '💸',
     'adelanto_manual': '🔵',
     'bonificacion_manual': '🎁',
@@ -370,6 +380,9 @@ export const formatearMontoConSigno = (registro) => {
       break;
     
     case 'faltante_cobro':
+    case 'faltante_manual':
+    case 'descuento_tardanza':
+      // 🆕 Todos los tipos de faltantes/descuentos
       monto = registro.faltante || 0;
       signo = '-';
       break;
@@ -394,12 +407,14 @@ export const formatearMontoConSigno = (registro) => {
 };
 
 /**
- * Verificar si un registro es automático (de cobros o metas)
+ * Verificar si un registro es automático (de cobros, metas o tardanza)
  */
 export const esRegistroAutomatico = (registro) => {
   return registro.origenDatos === 'cobro_automatico' || 
          registro.origenDatos === 'automatico_metas' ||
-         registro.tipo === 'bonificacion_meta';
+         registro.origenDatos === 'asistencia_tardanza' ||
+         registro.tipo === 'bonificacion_meta' ||
+         registro.tipo === 'descuento_tardanza';
 };
 
 /**

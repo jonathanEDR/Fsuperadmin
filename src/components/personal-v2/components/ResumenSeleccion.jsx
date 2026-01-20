@@ -73,8 +73,8 @@ const ResumenSeleccion = React.memo(({
         // ✅ Manejar ajustes que tienen tanto bonificación como adelanto
         sumaBonificaciones += registro.bonificacion || 0;
         sumaAdelantos += registro.adelanto || 0;
-      } else if (tipo === 'faltante_cobro' || tipo === 'faltante_manual') {
-        // ✅ Manejar faltantes automáticos (de cobros) y manuales (descuentos directos)
+      } else if (tipo === 'faltante_cobro' || tipo === 'faltante_manual' || tipo === 'descuento_tardanza') {
+        // ✅ Manejar faltantes automáticos (de cobros), manuales (descuentos directos) y por tardanza
         sumaFaltantes += registro.faltante || 0;
       } else if (tipo === 'gasto_cobro') {
         sumaGastos += registro.gasto || 0; // ✅ CORREGIDO: usar registro.gasto

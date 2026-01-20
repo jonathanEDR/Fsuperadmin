@@ -7,6 +7,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import ConfiguracionTardanzaModal from './components/ConfiguracionTardanzaModal';
 
 // Contexto para compartir datos entre páginas del módulo
 export const PersonalContext = React.createContext(null);
@@ -17,6 +18,9 @@ function GestionPersonalLayout() {
   
   // Estado para rol del usuario
   const [userRole, setUserRole] = useState(null);
+  
+  // Estado para modal de configuración de tardanzas
+  const [modalConfigTardanza, setModalConfigTardanza] = useState(false);
   
   // Obtener rol del usuario
   useEffect(() => {
@@ -114,8 +118,8 @@ function GestionPersonalLayout() {
           </div>
           
           {/* Tabs Navigation - Scroll horizontal en móvil */}
-          <div className="relative">
-            <div className="flex gap-1 sm:gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-px border-b border-gray-200">
+          <div className="relative flex items-end gap-2">
+            <div className="flex-1 flex gap-1 sm:gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-px border-b border-gray-200">
               {tabs.map((tab) => (
                 <NavLink
                   key={tab.id}
@@ -136,13 +140,32 @@ function GestionPersonalLayout() {
                 </NavLink>
               ))}
             </div>
-            {/* Indicador de gradiente para mostrar que hay más contenido */}
-            <div className="absolute right-0 top-0 bottom-px w-8 bg-gradient-to-l from-white to-transparent pointer-events-none sm:hidden" />
+            
+            {/* Botón de configuración de tardanzas - Solo para super_admin */}
+            {userRole === 'super_admin' && (
+              <button
+                onClick={() => setModalConfigTardanza(true)}
+                className="flex-shrink-0 px-3 py-2 font-medium text-sm transition-colors whitespace-nowrap bg-amber-100 text-amber-700 hover:bg-amber-200 rounded-lg flex items-center gap-1 border border-amber-300"
+                title="Configurar descuentos por tardanza"
+              >
+                <span>⚙️</span>
+                <span className="hidden sm:inline">Configuración</span>
+              </button>
+            )}
           </div>
         </div>
 
         {/* Contenido de la ruta activa */}
         <Outlet context={contextValue} />
+        
+        {/* Modal de configuración de tardanzas */}
+        <ConfiguracionTardanzaModal
+          isOpen={modalConfigTardanza}
+          onClose={() => setModalConfigTardanza(false)}
+          onSave={(config) => {
+            console.log('✅ Configuración de tardanzas guardada:', config);
+          }}
+        />
       </div>
     </PersonalContext.Provider>
   );

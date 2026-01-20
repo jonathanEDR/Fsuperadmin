@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import AdminSidebar from '../sidebars/AdminSidebar';
-import { Menu, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { RoleContext } from '../../../context/RoleContext';
 import { useUserRole } from '../../../hooks/useUserRole';
 
@@ -70,18 +70,6 @@ function AdminDashboardLayout({ children, onLogout }) {
         isSidebarOpen={isSidebarOpen}
         onLogout={onLogout}
       />
-
-      {/* Botón de colapso/expandir solo en escritorio */}
-      {!isMobileView && (
-        <button
-          className="absolute top-4 z-35 hidden lg:block bg-white rounded-full p-2 shadow-lg transition-all"
-          style={{ left: isSidebarCollapsed ? '80px' : '280px' }}
-          onClick={toggleSidebar}
-          aria-label={isSidebarCollapsed ? 'Expandir menú' : 'Colapsar menú'}
-        >
-          {isSidebarCollapsed ? <ChevronRight size={24} /> : <ChevronLeft size={24} />}
-        </button>
-      )}
 
       <main
         className={`flex-1 p-4 lg:p-8 transition-all duration-300 ${

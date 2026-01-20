@@ -242,8 +242,8 @@ const PagosRealizados = React.memo(({
         // ✅ Manejar ajustes que tienen tanto bonificación como adelanto
         sumaBonificaciones += registro.bonificacion || 0;
         sumaAdelantos += registro.adelanto || 0;
-      } else if (tipo === 'faltante_cobro' || tipo === 'faltante_manual') {
-        // ✅ Manejar faltantes automáticos (de cobros) y manuales (descuentos directos)
+      } else if (tipo === 'faltante_cobro' || tipo === 'faltante_manual' || tipo === 'descuento_tardanza') {
+        // ✅ Manejar faltantes automáticos (de cobros), manuales y por tardanza
         sumaFaltantes += registro.faltante || 0;
       }
       // gastos NO se restan (solo referenciales)
@@ -316,9 +316,9 @@ const PagosRealizados = React.memo(({
     }
 
     // ✅ CORREGIDO: Incluir TODOS los tipos de registros que afectan el pago
-    // Esto incluye: pago_diario, bonificacion_manual, bonificacion_meta, adelanto_manual, ajuste_manual, faltante_manual
+    // Esto incluye: pago_diario, bonificacion_manual, bonificacion_meta, adelanto_manual, ajuste_manual, faltante_manual, descuento_tardanza
     // Solo excluimos faltante_cobro y gasto_cobro que se manejan por fecha (ya están incluidos automáticamente)
-    const tiposAPagar = ['pago_diario', 'bonificacion_manual', 'bonificacion_meta', 'adelanto_manual', 'ajuste_manual', 'faltante_manual'];
+    const tiposAPagar = ['pago_diario', 'bonificacion_manual', 'bonificacion_meta', 'adelanto_manual', 'ajuste_manual', 'faltante_manual', 'descuento_tardanza'];
     const registrosAPagar = registrosSeleccionados.filter(r => 
       !r.tipo || tiposAPagar.includes(r.tipo)
     );

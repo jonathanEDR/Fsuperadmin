@@ -73,8 +73,8 @@ const CalendarioSeleccionDias = React.memo(({
       } else if (tipo === 'ajuste_manual') {
         // ✅ Ajustes con bonificación y adelanto combinados
         montoRegistro = (registro.bonificacion || 0) - (registro.adelanto || 0);
-      } else if (tipo === 'faltante_cobro' || tipo === 'faltante_manual') {
-        // ✅ Faltantes (automáticos y manuales) se restan
+      } else if (tipo === 'faltante_cobro' || tipo === 'faltante_manual' || tipo === 'descuento_tardanza') {
+        // ✅ Faltantes (automáticos, manuales y por tardanza) se restan
         montoRegistro = -(registro.faltante || 0);
       } else if (tipo === 'gasto_cobro') {
         // ⚠️ GASTOS NO se restan (son solo referenciales)
