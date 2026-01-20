@@ -69,22 +69,36 @@ const EstadisticasRapidas = ({ resumen, fechaInicio, fechaFin, formatearMonto })
     return colors[color]?.[tipo] || '';
   };
 
+  // Formatear monto de forma compacta para móvil
+  const formatearMontoCompacto = (valor) => {
+    const absValor = Math.abs(valor);
+    if (absValor >= 1000) {
+      return `S/ ${(absValor / 1000).toFixed(1)}k`;
+    }
+    return formatearMonto(absValor);
+  };
+
   return (
-    <div className="grid grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-2 sm:gap-4">
+    <div className="grid grid-cols-3 gap-1 sm:gap-2 lg:gap-4">
       {estadisticas.map((stat, index) => (
-        <div key={index} className={`bg-white p-2 sm:p-3 lg:p-4 rounded-xl shadow-lg border-l-4 ${getColorClass(stat.color, 'border')}`}>
-          {/* Layout móvil: vertical con icono centrado */}
+        <div key={index} className={`bg-white p-1.5 sm:p-2 lg:p-4 rounded-lg sm:rounded-xl shadow-md sm:shadow-lg border-l-2 sm:border-l-4 ${getColorClass(stat.color, 'border')}`}>
+          {/* Layout móvil: vertical compacto */}
           <div className="flex flex-col lg:hidden">
             <div className="text-center">
-              <div className={`w-8 h-8 sm:w-10 sm:h-10 ${getColorClass(stat.color, 'bg')} rounded-full flex items-center justify-center mx-auto mb-2`}>
-                <span className={`${getColorClass(stat.color, 'text')} text-sm sm:text-lg`}>
+              <div className={`w-6 h-6 sm:w-8 sm:h-8 ${getColorClass(stat.color, 'bg')} rounded-full flex items-center justify-center mx-auto mb-1`}>
+                <span className={`${getColorClass(stat.color, 'text')} text-xs sm:text-sm`}>
                   {stat.icono}
                 </span>
               </div>
-              <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1" title={stat.labelCompleto}>
+              <p className="text-[10px] sm:text-xs font-medium text-gray-600 mb-0.5 truncate" title={stat.labelCompleto}>
                 {stat.label}
               </p>
-              <p className={`text-sm sm:text-lg font-bold ${getColorClass(stat.color, 'text')}`}>
+              {/* Monto compacto en móvil pequeño, normal en sm+ */}
+              <p className={`text-xs sm:hidden font-bold ${getColorClass(stat.color, 'text')}`}>
+                {stat.tipo === 'flujo' && stat.valor > 0 ? '+' : ''}
+                {formatearMontoCompacto(stat.valor)}
+              </p>
+              <p className={`hidden sm:block text-sm font-bold ${getColorClass(stat.color, 'text')}`}>
                 {stat.tipo === 'flujo' && stat.valor > 0 ? '+' : ''}
                 {formatearMonto(Math.abs(stat.valor))}
               </p>

@@ -229,16 +229,16 @@ function Caja({ userRole }) {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 lg:mb-6 gap-3 lg:gap-4">
         <div className="flex-1">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-1 lg:mb-2">
-            <h2 className="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-800">
+            <h2 className="text-base sm:text-lg lg:text-2xl xl:text-3xl font-bold text-gray-800">
               {vistaActual === 'caja' ? '💰 Control de Caja' : '📋 Catálogo de Gastos'}
             </h2>
           </div>
 
           {/* Pestañas de Navegación */}
-          <div className="flex gap-2 mb-4">
+          <div className="flex gap-1 sm:gap-2 mb-4">
             <button
               onClick={() => setVistaActual('caja')}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
+              className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 flex items-center gap-1 sm:gap-2 ${
                 vistaActual === 'caja'
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -249,14 +249,15 @@ function Caja({ userRole }) {
             </button>
             <button
               onClick={() => setVistaActual('catalogo')}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
+              className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 flex items-center gap-1 sm:gap-2 ${
                 vistaActual === 'catalogo'
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
               <span>📋</span>
-              <span>Catálogo de Gastos</span>
+              <span className="hidden xs:inline">Catálogo de</span>
+              <span>Gastos</span>
             </button>
           </div>
           
@@ -272,7 +273,7 @@ function Caja({ userRole }) {
                 </span>
                 <span>📅 Filtrar por fechas</span>
                 {!isFilterExpanded && (
-                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                  <span className="hidden sm:inline text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full truncate max-w-[180px]">
                     {fechaInicio} → {fechaFin}
                   </span>
                 )}
@@ -319,15 +320,15 @@ function Caja({ userRole }) {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 mb-6 lg:mb-8">
             {/* Saldo Principal y Botones de Acción */}
             <div className="lg:col-span-7">
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-4 lg:p-6 text-white h-full">
-                <div className="text-center mb-4 lg:mb-6">
-                  <h3 className="text-base lg:text-lg font-medium opacity-90">Saldo Actual</h3>
-                  <p className={`text-3xl lg:text-4xl font-bold mb-2 ${
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-3 sm:p-4 lg:p-6 text-white h-full">
+                <div className="text-center mb-3 sm:mb-4 lg:mb-6">
+                  <h3 className="text-sm sm:text-base lg:text-lg font-medium opacity-90">Saldo Actual</h3>
+                  <p className={`text-xl sm:text-2xl lg:text-4xl font-bold mb-1 sm:mb-2 ${
                     resumen?.saldoActual >= 0 ? 'text-green-200' : 'text-red-200'
                   }`}>
                 {resumen ? formatearMonto(resumen.saldoActual) : 'S/. 0.00'}
               </p>
-              <p className="text-sm opacity-75">
+              <p className="text-xs sm:text-sm opacity-75">
                 Actualizado en tiempo real
               </p>
             </div>
@@ -335,19 +336,19 @@ function Caja({ userRole }) {
             <div className="flex justify-center gap-2 sm:gap-4">
               <button
                 onClick={() => setIsModalIngresoOpen(true)}
-                className="bg-green-500 hover:bg-green-600 text-white px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg text-sm sm:text-base flex items-center gap-1 sm:gap-2"
+                className="bg-green-500 hover:bg-green-600 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg text-sm sm:text-base flex items-center justify-center"
                 title="Registrar Ingreso"
               >
-                <span className="text-lg">➕</span>
-                <span className="hidden sm:inline">Registrar Ingreso</span>
+                <span className="text-base sm:text-lg">➕</span>
+                <span className="hidden sm:inline ml-2">Registrar Ingreso</span>
               </button>
               <button
                 onClick={() => setIsModalEgresoOpen(true)}
-                className="bg-red-500 hover:bg-red-600 text-white px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg text-sm sm:text-base flex items-center gap-1 sm:gap-2"
+                className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg text-sm sm:text-base flex items-center justify-center"
                 title="Registrar Egreso"
               >
-                <span className="text-lg">➖</span>
-                <span className="hidden sm:inline">Registrar Egreso</span>
+                <span className="text-base sm:text-lg">➖</span>
+                <span className="hidden sm:inline ml-2">Registrar Egreso</span>
               </button>
             </div>
           </div>

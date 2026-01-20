@@ -751,51 +751,55 @@ function VentaList({
       )}
 
       {/* Selector de Vista */}
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-700">Vista:</span>
-          <div className="flex bg-gray-100 rounded-lg p-1">
+      <div className="flex flex-wrap justify-between items-center gap-2 mb-4 sm:mb-6">
+        <div className="flex items-center gap-1 sm:gap-2">
+          <span className="hidden sm:inline text-sm font-medium text-gray-700">Vista:</span>
+          <div className="flex bg-gray-100 rounded-lg p-0.5 sm:p-1">
             <button
               onClick={() => setViewMode('cards')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+              className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm transition-colors ${
                 viewMode === 'cards'
                   ? 'bg-white text-blue-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-800'
               }`}
+              title="Vista de Tarjetas"
             >
               <Grid3X3 size={16} />
-              Tarjetas
+              <span className="hidden sm:inline">Tarjetas</span>
             </button>
             <button
               onClick={() => setViewMode('table')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+              className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm transition-colors ${
                 viewMode === 'table'
                   ? 'bg-white text-blue-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-800'
               }`}
+              title="Vista de Tabla"
             >
               <TableProperties size={16} />
-              Tabla
+              <span className="hidden sm:inline">Tabla</span>
             </button>
             <button
               onClick={() => setViewMode('lista')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+              className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm transition-colors ${
                 viewMode === 'lista'
                   ? 'bg-white text-blue-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-800'
               }`}
+              title="Vista Por Cliente"
             >
               <List size={16} />
-              Por Cliente
+              <span className="hidden sm:inline">Por Cliente</span>
             </button>
           </div>
         </div>
-        
+
         {viewMode === 'lista' && (
-          <div className="text-sm text-gray-600 bg-blue-50 px-3 py-2 rounded-lg">
+          <div className="text-xs sm:text-sm text-gray-600 bg-blue-50 px-2 sm:px-3 py-1 sm:py-2 rounded-lg">
             <span className="flex items-center gap-1">
               <Package size={14} />
-              Vista agrupada por cliente
+              <span className="hidden xs:inline">Vista agrupada por cliente</span>
+              <span className="xs:hidden">Por cliente</span>
             </span>
           </div>
         )}

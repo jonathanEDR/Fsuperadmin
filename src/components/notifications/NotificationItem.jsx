@@ -130,7 +130,8 @@ function NotificationItem({
             {title}
           </h4>
           <p className="text-xs text-gray-600 line-clamp-2 mt-0.5">
-            {message}
+            {/* Limpiar N/A residuales del mensaje */}
+            {message?.replace(/\.?\s*N\/A\.?/gi, '').replace(/\s+/g, ' ').trim()}
           </p>
           
           {/* Datos adicionales */}
