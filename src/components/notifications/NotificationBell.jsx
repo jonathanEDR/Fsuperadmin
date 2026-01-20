@@ -5,7 +5,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Bell, X, CheckCheck, RefreshCw, Loader2 } from 'lucide-react';
+import { Bell, X, CheckCheck, RefreshCw, Loader2, Trash2, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 import useNotifications from '../../hooks/useNotifications';
 
 function NotificationBell({ className = '' }) {
@@ -15,6 +17,9 @@ function NotificationBell({ className = '' }) {
   const buttonRef = useRef(null);
   const panelRef = useRef(null);
   
+  const { user } = useUser();
+  const isSuperAdmin = user?.publicMetadata?.role === 'super_admin';
+  
   const {
     notifications,
     unreadCount,
@@ -23,7 +28,8 @@ function NotificationBell({ className = '' }) {
     refresh,
     markAsRead,
     markAllAsRead,
-    deleteNotification
+    deleteNotification,
+    deleteAllNotifications
   } = useNotifications();
   
   // Detectar si es móvil
@@ -115,6 +121,18 @@ function NotificationBell({ className = '' }) {
       await markAllAsRead();
     } catch (err) {
       console.error('Error:', err);
+    }
+  };
+  
+  const handleDeleteAll = async () => {
+    if (!isSuperAdmin) return;
+    
+    if (window.confirm('¿Estás seguro de eliminar TODAS las notificaciones? Esta acción no se puede deshacer.')) {
+      try {
+        await deleteAllNotifications();
+      } catch (err) {
+        console.error('Error al eliminar todas:', err);
+      }
     }
   };
   
@@ -221,6 +239,17 @@ function NotificationBell({ className = '' }) {
                   </button>
                 )}
                 
+                {/* Botón eliminar todas - solo super_admin */}
+                {isSuperAdmin && notifications.length > 0 && (
+                  <button
+                    onClick={handleDeleteAll}
+                    className="p-2 hover:bg-red-100 rounded-lg transition-colors text-gray-500 hover:text-red-600"
+                    title="Eliminar todas las notificaciones"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+                
                 <button
                   onClick={closePanel}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
@@ -269,10 +298,10 @@ function NotificationBell({ className = '' }) {
               </div>
             )}
             
-            {/* Lista de notificaciones */}
+            {/* Lista de notificaciones - máximo 10 */}
             {notifications.length > 0 && (
               <div className="divide-y divide-gray-50">
-                {notifications.map((notification) => (
+                {notifications.slice(0, 10).map((notification) => (
                   <div
                     key={notification._id}
                     className={`
@@ -329,12 +358,22 @@ function NotificationBell({ className = '' }) {
           {/* Footer */}
           {notifications.length > 0 && (
             <div className="border-t border-gray-100 px-4 py-2.5 bg-gray-50/50 flex-shrink-0">
-              <button
-                onClick={closePanel}
-                className="w-full text-center text-xs text-gray-500 hover:text-blue-600 transition-colors font-medium py-1"
-              >
-                Cerrar panel
-              </button>
+              <div className="flex items-center justify-between">
+                <Link
+                  to="/super-admin/notificaciones"
+                  onClick={closePanel}
+                  className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 transition-colors font-medium"
+                >
+                  <ExternalLink size={12} />
+                  Ver todas {notifications.length > 10 && `(${notifications.length})`}
+                </Link>
+                <button
+                  onClick={closePanel}
+                  className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  Cerrar
+                </button>
+              </div>
             </div>
           )}
         </div>

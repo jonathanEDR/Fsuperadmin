@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, UserCheck, X, ChevronLeft, ChevronRight, CreditCard, Factory, Grid3X3, RotateCcw, DollarSign, QrCode, Wallet, ScanLine, Image } from 'lucide-react';
+import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, UserCheck, X, ChevronLeft, ChevronRight, CreditCard, Factory, Grid3X3, RotateCcw, DollarSign, QrCode, Wallet, ScanLine, Image, Bell } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 import { NotificationBell } from '../../../components/notifications';
@@ -51,6 +51,7 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
       title: "Sistema",
       items: [
         { id: 'notes', icon: FileText, label: 'Notas', route: '/super-admin/notas' },
+        { id: 'notificaciones', icon: Bell, label: 'Notificaciones', route: '/super-admin/notificaciones' },
         { id: 'imagenes', icon: Image, label: 'Imágenes', route: '/super-admin/imagenes' },
         { id: 'profile', icon: UserCog, label: 'Perfil', route: '/super-admin/perfil' },
       ]

@@ -22,6 +22,7 @@ import CobrosPage from './Pages/CobrosPage';
 import DevolucionesPage from './Pages/DevolucionesPage';
 import PersonalPage from './Pages/PersonalPage';
 import NotasPage from './Pages/NotasPage';
+import NotificacionesPage from './Pages/NotificacionesPage';
 import PerfilPage from './Pages/PerfilPage';
 // Módulo Personal V2 con rutas anidadas
 import GestionPersonalLayout from './components/personal-v2/GestionPersonalLayout';
@@ -212,6 +213,7 @@ function App() {
               <Route path="qr-asistencias" element={<GestionQR />} /> {/* NUEVO: Gestión de Códigos QR */}
               <Route path="escaner-qr" element={<EscanerQR />} /> {/* NUEVO: Escáner QR Asistencias */}
               <Route path="notas" element={<NotasPage />} />
+              <Route path="notificaciones" element={<NotificacionesPage />} />
               <Route path="perfil" element={<PerfilPage />} />
               <Route path="caja" element={<CajaPage />} />
               <Route path="produccion/*" element={<ProduccionPage />} />

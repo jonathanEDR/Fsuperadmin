@@ -151,10 +151,30 @@ export function useNotifications() {
   }, [getToken, isSignedIn, isLoaded, notifications]);
   
   /**
+   * Eliminar TODAS las notificaciones (solo super_admin)
+   */
+  const deleteAllNotifications = useCallback(async () => {
+    if (!isSignedIn || !isLoaded) return;
+    
+    try {
+      const result = await notificationService.deleteAllNotifications(getToken);
+      
+      // Limpiar estado local
+      setNotifications([]);
+      setUnreadCount(0);
+      
+      return result;
+    } catch (err) {
+      console.error('Error eliminando todas las notificaciones:', err);
+      throw err;
+    }
+  }, [getToken, isSignedIn, isLoaded]);
+  
+  /**
    * Refrescar todas las notificaciones
    */
-  const refresh = useCallback(() => {
-    return fetchNotifications({ limit: 20, skip: 0 });
+  const refresh = useCallback((limit = 20) => {
+    return fetchNotifications({ limit, skip: 0 });
   }, [fetchNotifications]);
   
   // Efecto para cargar notificaciones iniciales
@@ -215,6 +235,7 @@ export function useNotifications() {
     markAsRead,
     markAllAsRead,
     deleteNotification,
+    deleteAllNotifications,
     refreshUnreadCount
   };
 }

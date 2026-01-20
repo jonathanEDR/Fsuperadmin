@@ -145,11 +145,32 @@ export async function fetchNotificationStats(getToken) {
   return response.json();
 }
 
+/**
+ * Eliminar TODAS las notificaciones (solo super_admin)
+ * @param {Function} getToken - Función para obtener el token de Clerk
+ */
+export async function deleteAllNotifications(getToken) {
+  const headers = await getAuthHeaders(getToken);
+  
+  const response = await fetch(`${API_URL}/api/notifications/all`, {
+    method: 'DELETE',
+    headers
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Error eliminando notificaciones');
+  }
+  
+  return response.json();
+}
+
 export default {
   fetchNotifications,
   fetchUnreadCount,
   markAsRead,
   markAllAsRead,
   deleteNotification,
+  deleteAllNotifications,
   fetchNotificationStats
 };

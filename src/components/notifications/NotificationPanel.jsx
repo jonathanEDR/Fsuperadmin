@@ -4,13 +4,17 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { Bell, CheckCheck, RefreshCw, Loader2, X } from 'lucide-react';
+import { Bell, CheckCheck, RefreshCw, Loader2, X, Trash2, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 import NotificationItem from './NotificationItem';
 import PushNotificationToggle from './PushNotificationToggle';
 import useNotifications from '../../hooks/useNotifications';
 
 function NotificationPanel({ isOpen, onClose, isMobile = false }) {
   const panelRef = useRef(null);
+  const { user } = useUser();
+  const isSuperAdmin = user?.publicMetadata?.role === 'super_admin';
   
   const {
     notifications,
@@ -20,7 +24,8 @@ function NotificationPanel({ isOpen, onClose, isMobile = false }) {
     refresh,
     markAsRead,
     markAllAsRead,
-    deleteNotification
+    deleteNotification,
+    deleteAllNotifications
   } = useNotifications();
   
   // Cerrar al hacer click fuera (solo desktop)
@@ -46,6 +51,19 @@ function NotificationPanel({ isOpen, onClose, isMobile = false }) {
       await markAllAsRead();
     } catch (error) {
       console.error('Error:', error);
+    }
+  };
+  
+  // Manejar eliminar todas (solo super_admin)
+  const handleDeleteAll = async () => {
+    if (!isSuperAdmin) return;
+    
+    if (window.confirm('¿Estás seguro de eliminar TODAS las notificaciones? Esta acción no se puede deshacer.')) {
+      try {
+        await deleteAllNotifications();
+      } catch (error) {
+        console.error('Error al eliminar todas:', error);
+      }
     }
   };
   
@@ -109,6 +127,17 @@ function NotificationPanel({ isOpen, onClose, isMobile = false }) {
               </button>
             )}
             
+            {/* Botón eliminar todas - solo super_admin */}
+            {isSuperAdmin && notifications.length > 0 && (
+              <button
+                onClick={handleDeleteAll}
+                className="p-1.5 hover:bg-red-400/30 rounded-full transition-colors"
+                title="Eliminar todas las notificaciones"
+              >
+                <Trash2 size={16} />
+              </button>
+            )}
+            
             {/* Botón cerrar en móvil */}
             <button
               onClick={onClose}
@@ -158,10 +187,10 @@ function NotificationPanel({ isOpen, onClose, isMobile = false }) {
           </div>
         )}
         
-        {/* Lista de notificaciones */}
+        {/* Lista de notificaciones - máximo 10 en el panel */}
         {notifications.length > 0 && (
           <div className="divide-y divide-gray-100">
-            {notifications.map((notification) => (
+            {notifications.slice(0, 10).map((notification) => (
               <NotificationItem
                 key={notification._id}
                 notification={notification}
@@ -177,12 +206,22 @@ function NotificationPanel({ isOpen, onClose, isMobile = false }) {
       {/* Footer */}
       {notifications.length > 0 && (
         <div className="border-t border-gray-100 px-4 py-3 bg-gray-50 flex-shrink-0">
-          <button
-            onClick={onClose}
-            className="w-full text-center text-sm text-gray-600 hover:text-blue-600 transition-colors font-medium"
-          >
-            Cerrar
-          </button>
+          <div className="flex items-center justify-between gap-2">
+            <Link
+              to="/super-admin/notificaciones"
+              onClick={onClose}
+              className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 transition-colors font-medium"
+            >
+              <ExternalLink size={14} />
+              Ver todas {notifications.length > 10 && `(${notifications.length})`}
+            </Link>
+            <button
+              onClick={onClose}
+              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              Cerrar
+            </button>
+          </div>
         </div>
       )}
     </div>
