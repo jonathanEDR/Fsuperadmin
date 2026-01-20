@@ -168,9 +168,10 @@ export function useNotifications() {
   useEffect(() => {
     if (!isLoaded || !isSignedIn) return;
     
-    // Iniciar polling
+    // Iniciar polling - actualiza toda la lista de notificaciones
     pollingRef.current = setInterval(() => {
-      refreshUnreadCount();
+      // Actualizar notificaciones completas (silencioso, sin loading)
+      fetchNotificationsQuiet();
     }, POLLING_INTERVAL);
     
     // Cleanup
@@ -179,7 +180,27 @@ export function useNotifications() {
         clearInterval(pollingRef.current);
       }
     };
-  }, [isLoaded, isSignedIn, refreshUnreadCount]);
+  }, [isLoaded, isSignedIn]);
+  
+  /**
+   * Fetch silencioso para polling (no muestra loading)
+   */
+  const fetchNotificationsQuiet = useCallback(async () => {
+    if (!isSignedIn || !isLoaded) return;
+    
+    try {
+      const result = await notificationService.fetchNotifications(getToken, { limit: 20, skip: 0 });
+      
+      if (result.success) {
+        setNotifications(result.data || []);
+        setUnreadCount(result.unreadCount || 0);
+        setHasMore(result.pagination?.hasMore || false);
+      }
+    } catch (err) {
+      // Silenciar errores de polling
+      console.warn('Error en polling:', err);
+    }
+  }, [getToken, isSignedIn, isLoaded]);
   
   return {
     // Estado
