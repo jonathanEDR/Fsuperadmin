@@ -51,6 +51,9 @@ import GarantiasPage from './Pages/GarantiasPage';
 // Importar página de gestión de imágenes
 import ImagenesPage from './Pages/ImagenesPage';
 
+// Banner de notificaciones push
+import NotificationPermissionBanner from './components/notifications/NotificationPermissionBanner';
+
 // Componente para proteger rutas que requieren autenticación
 function ProtectedRoute({ children }) {
   return (
@@ -91,6 +94,9 @@ function App() {
   return (
     <Router>
       <div className="App">
+        {/* Banner global para solicitar permiso de notificaciones */}
+        <NotificationPermissionBanner />
+        
         <Routes>
             {/* Rutas públicas */}
             <Route 
