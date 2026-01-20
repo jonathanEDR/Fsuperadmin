@@ -135,13 +135,39 @@ function NotificationItem({
           
           {/* Datos adicionales */}
           {data?.monto && (
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-xs font-medium text-green-600">
-                S/ {data.monto.toFixed(2)}
-              </span>
-              {data.sucursal && (
-                <span className="text-xs text-gray-500">
-                  • {data.sucursal}
+            <div className="mt-1 space-y-1">
+              {/* Monto y método de pago */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-green-600">
+                  S/ {typeof data.monto === 'number' ? data.monto.toFixed(2) : data.monto}
+                </span>
+                {data.metadata?.metodoPago && (
+                  <span className="text-xs text-gray-500">
+                    • {data.metadata.metodoPago}
+                  </span>
+                )}
+              </div>
+              
+              {/* Productos asignados */}
+              {data.productos && data.productos.length > 0 && (
+                <div className="text-xs text-gray-600 bg-gray-100 rounded px-2 py-1">
+                  <span className="font-medium">Productos: </span>
+                  {data.productos.slice(0, 3).map((p, i) => (
+                    <span key={i}>
+                      {i > 0 && ', '}
+                      {p.cantidad}x {p.nombre}
+                    </span>
+                  ))}
+                  {data.productos.length > 3 && (
+                    <span className="text-gray-400"> +{data.productos.length - 3} más</span>
+                  )}
+                </div>
+              )}
+              
+              {/* Vendedor (quien asignó) */}
+              {data.vendedor && data.isAssignment && (
+                <span className="text-xs text-purple-600">
+                  Asignado por: {data.vendedor}
                 </span>
               )}
             </div>
