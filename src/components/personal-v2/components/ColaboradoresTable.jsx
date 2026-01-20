@@ -157,31 +157,35 @@ const ColaboradoresTable = React.memo(({
             <div className="flex gap-2">
               <button
                 onClick={() => onAbrirModal && onAbrirModal(colaborador)}
-                className="flex-1 px-3 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors shadow-sm flex items-center justify-center gap-1"
+                className="flex-1 px-2 sm:px-3 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors shadow-sm flex items-center justify-center gap-1"
                 title="Registrar pago diario"
               >
-                💵 <span className="hidden xs:inline">Pago Diario</span>
+                <span className="text-base">💵</span>
+                <span className="hidden sm:inline">Pago Diario</span>
               </button>
               <button
                 onClick={() => onAbrirModalBonificacion && onAbrirModalBonificacion(colaborador)}
-                className="flex-1 px-3 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors shadow-sm flex items-center justify-center gap-1"
+                className="flex-1 px-2 sm:px-3 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors shadow-sm flex items-center justify-center gap-1"
                 title="Bonificación especial o adelanto (metas son automáticas)"
               >
-                🎁 <span className="hidden xs:inline">Bono</span>
+                <span className="text-base">🎁</span>
+                <span className="hidden sm:inline">Bono</span>
               </button>
               <button
                 onClick={() => onAbrirModalDescuento && onAbrirModalDescuento(colaborador)}
-                className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow-sm flex items-center justify-center gap-1"
+                className="flex-1 px-2 sm:px-3 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow-sm flex items-center justify-center gap-1"
                 title="Registrar descuento o faltante"
               >
-                🔻 <span className="hidden xs:inline">Descuento</span>
+                <span className="text-base">🔻</span>
+                <span className="hidden sm:inline">Descuento</span>
               </button>
               <button
                 onClick={() => onMostrarDetalle(colaborador)}
-                className="flex-1 px-3 py-2 bg-slate-700 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm flex items-center justify-center gap-1"
+                className="flex-1 px-2 sm:px-3 py-2 bg-slate-700 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm flex items-center justify-center gap-1"
                 title="Ver detalle"
               >
-                📋 <span className="hidden xs:inline">Detalle</span>
+                <span className="text-base">📋</span>
+                <span className="hidden sm:inline">Detalle</span>
               </button>
             </div>
           </div>
