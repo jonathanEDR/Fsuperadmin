@@ -3,7 +3,10 @@
  * Cliente HTTP para interactuar con el backend de notificaciones
  */
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Usar VITE_BACKEND_URL (producción) o fallback a localhost
+const API_URL = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+console.log('🔔 NotificationService - API_URL:', API_URL);
 
 /**
  * Obtener token de autenticación
