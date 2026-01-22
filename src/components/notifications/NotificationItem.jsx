@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 import { X, Check, ExternalLink } from 'lucide-react';
 
 // Formatear tiempo relativo
@@ -43,18 +44,60 @@ function NotificationItem({
   onClose // Para cerrar el panel al navegar
 }) {
   const navigate = useNavigate();
+  const { user } = useUser();
+  const userRole = user?.publicMetadata?.role || 'user';
   
   const {
     _id,
     icon,
     title,
     message,
+    type,
     priority,
     read,
     createdAt,
     actionUrl,
     data
   } = notification;
+  
+  // Determinar la URL de navegación según el tipo y rol
+  const getNavigationUrl = () => {
+    if (!actionUrl) return null;
+
+    // TAREAS: Redirigir según el rol
+    if (type === 'tarea' || actionUrl.includes('/tareas')) {
+      if (userRole === 'super_admin') return '/super-admin/tareas';
+      if (userRole === 'admin') return '/admin/tareas';
+      return '/user/tareas';
+    }
+
+    // BONIFICACIONES/DESCUENTOS/PERSONAL: Redirigir según el rol
+    if (actionUrl.includes('/personal-v2/perfiles')) {
+      // Para usuarios normales, ir a su perfil
+      if (userRole === 'user') {
+        return '/user/perfil';
+      }
+      // Para admin/super_admin, mantener la URL original (ver perfil del colaborador)
+      if (userRole === 'super_admin') {
+        return actionUrl.replace('/personal-v2/', '/super-admin/personal/');
+      }
+      if (userRole === 'admin') {
+        return actionUrl.replace('/personal-v2/', '/admin/personal/');
+      }
+    }
+
+    // URL predeterminada: ajustar según el rol
+    if (actionUrl.startsWith('/')) {
+      // Si es una ruta relativa, agregar el prefijo del rol si no lo tiene
+      if (!actionUrl.startsWith('/super-admin') && !actionUrl.startsWith('/admin') && !actionUrl.startsWith('/user')) {
+        if (userRole === 'super_admin') return `/super-admin${actionUrl}`;
+        if (userRole === 'admin') return `/admin${actionUrl}`;
+        return `/user${actionUrl}`;
+      }
+    }
+
+    return actionUrl;
+  };
   
   // Manejar click en la notificación
   const handleClick = async () => {
@@ -67,14 +110,14 @@ function NotificationItem({
       }
     }
     
-    // Navegar a la URL de acción si existe
-    if (actionUrl) {
+    // Navegar a la URL de acción
+    const navigationUrl = getNavigationUrl();
+    if (navigationUrl) {
       // Cerrar el panel
       if (onClose) onClose();
       
-      // Navegar - determinar la ruta correcta según el contexto
-      const fullPath = actionUrl.startsWith('/') ? actionUrl : `/${actionUrl}`;
-      navigate(fullPath);
+      // Navegar
+      navigate(navigationUrl);
     }
   };
   
