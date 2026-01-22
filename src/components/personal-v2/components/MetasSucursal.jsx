@@ -471,7 +471,66 @@ const ProgresoSucursal = ({ sucursal, onVolver, onEvaluar }) => {
         </div>
       ) : (
         <>
-          {/* Resumen */}
+          {/* 🆕 RESUMEN GLOBAL DE LA SUCURSAL - Meta Mensual es GLOBAL */}
+          {progreso.resumenGlobal && (
+            <div className={`rounded-lg p-4 mb-4 border-2 ${
+              progreso.resumenGlobal.sucursalCumplioMetaMensual 
+                ? 'bg-green-50 border-green-400' 
+                : 'bg-blue-50 border-blue-300'
+            }`}>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h4 className="font-bold text-lg flex items-center gap-2">
+                    🏪 Progreso Global de la Sucursal
+                    {progreso.resumenGlobal.sucursalCumplioMetaMensual && (
+                      <span className="text-green-600">✅ ¡META CUMPLIDA!</span>
+                    )}
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    La meta mensual es para TODA la sucursal combinada
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold">
+                    {metasSucursalService.formatearMoneda(progreso.resumenGlobal.montoTotalSucursal)}
+                    <span className="text-gray-400 text-lg"> / </span>
+                    {metasSucursalService.formatearMoneda(progreso.resumenGlobal.metaMensual)}
+                  </p>
+                  <p className={`text-sm font-medium ${
+                    progreso.resumenGlobal.porcentajeCumplimientoGlobal >= 100 
+                      ? 'text-green-600' 
+                      : 'text-blue-600'
+                  }`}>
+                    {progreso.resumenGlobal.porcentajeCumplimientoGlobal}% completado
+                  </p>
+                </div>
+              </div>
+              {/* Barra de progreso global */}
+              <div className="mt-3">
+                <div className="w-full bg-gray-200 rounded-full h-4">
+                  <div
+                    className={`h-4 rounded-full transition-all ${
+                      progreso.resumenGlobal.sucursalCumplioMetaMensual 
+                        ? 'bg-green-500' 
+                        : 'bg-blue-500'
+                    }`}
+                    style={{ width: `${Math.min(progreso.resumenGlobal.porcentajeCumplimientoGlobal, 100)}%` }}
+                  />
+                </div>
+              </div>
+              {/* Nota sobre distribución manual */}
+              {progreso.resumenGlobal.sucursalCumplioMetaMensual && (
+                <div className="mt-3 p-2 bg-yellow-100 rounded text-sm text-yellow-800">
+                  💰 <strong>Bonificación disponible:</strong> {metasSucursalService.formatearMoneda(progreso.configuracion?.bonificacionMensual)}
+                  <br/>
+                  <span className="text-xs">La distribución de la bonificación mensual es <strong>MANUAL</strong>. 
+                  Registre las bonificaciones desde el perfil de cada colaborador en "Gestión Personal".</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Resumen de estadísticas */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {/* Metas Diarias */}
             {progreso.configuracion?.metaDiaria > 0 && (
@@ -481,27 +540,31 @@ const ProgresoSucursal = ({ sucursal, onVolver, onEvaluar }) => {
                   <p className="text-xl font-bold text-orange-700">
                     {metasSucursalService.formatearMoneda(progreso.configuracion?.metaDiaria)}
                   </p>
+                  <p className="text-xs text-gray-500">Por colaborador</p>
                 </div>
                 <div className="bg-yellow-50 rounded-lg p-4">
                   <p className="text-sm text-gray-600">Bonif. Diaria</p>
                   <p className="text-xl font-bold text-yellow-700">
                     {metasSucursalService.formatearMoneda(progreso.configuracion?.bonificacionDiaria)}
                   </p>
+                  <p className="text-xs text-gray-500">Automática</p>
                 </div>
               </>
             )}
-            {/* Metas Mensuales */}
+            {/* Metas Mensuales - Ahora es GLOBAL */}
             <div className="bg-blue-50 rounded-lg p-4">
               <p className="text-sm text-gray-600">📆 Meta Mensual</p>
               <p className="text-xl font-bold text-blue-700">
                 {metasSucursalService.formatearMoneda(progreso.configuracion?.metaMensual)}
               </p>
+              <p className="text-xs text-gray-500">Global (sucursal)</p>
             </div>
             <div className="bg-green-50 rounded-lg p-4">
               <p className="text-sm text-gray-600">Bonif. Mensual</p>
               <p className="text-xl font-bold text-green-700">
                 {metasSucursalService.formatearMoneda(progreso.configuracion?.bonificacionMensual || progreso.configuracion?.bonificacionPorCumplimiento)}
               </p>
+              <p className="text-xs text-gray-500">Manual</p>
             </div>
             {/* Estadísticas */}
             <div className="bg-purple-50 rounded-lg p-4">
@@ -511,9 +574,9 @@ const ProgresoSucursal = ({ sucursal, onVolver, onEvaluar }) => {
               </p>
             </div>
             <div className="bg-indigo-50 rounded-lg p-4">
-              <p className="text-sm text-gray-600">Cumplen Meta</p>
+              <p className="text-sm text-gray-600">Cumplen Diaria</p>
               <p className="text-xl font-bold text-indigo-700">
-                {progreso.resumen?.trabajadoresCumplen || 0}
+                {progreso.resumen?.trabajadoresCumplenDiaria || 0}
               </p>
             </div>
           </div>
@@ -592,44 +655,32 @@ const ProgresoSucursal = ({ sucursal, onVolver, onEvaluar }) => {
                       </td>
                       <td className="px-4 py-3 text-center">
                         <div className="flex flex-col gap-1">
-                          {/* Estado Meta Diaria */}
+                          {/* Estado Meta Diaria - INDIVIDUAL */}
                           {progreso.configuracion?.metaDiaria > 0 && (
                             <span className={`inline-flex items-center gap-1 text-xs ${trabajador.cumplioMetaDiaria ? 'text-green-600' : 'text-orange-500'}`}>
                               📅 {trabajador.cumplioMetaDiaria ? '✓' : '○'}
                             </span>
                           )}
-                          {/* Estado Meta Mensual */}
-                          {trabajador.cumplioMeta ? (
-                            <span className="inline-flex items-center gap-1 text-green-600">
-                              <CheckCircle size={16} />
-                              <span className="text-xs">Cumplió</span>
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-red-600">
-                              <XCircle size={16} />
-                              <span className="text-xs">Pendiente</span>
-                            </span>
-                          )}
+                          {/* 🆕 Estado Meta Mensual - GLOBAL (solo indicador de contribución) */}
+                          <span className="inline-flex items-center gap-1 text-gray-500">
+                            <XCircle size={16} className="opacity-50" />
+                            <span className="text-xs">Pendiente</span>
+                          </span>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex flex-col gap-1 text-right">
-                          {/* Bonificación Diaria */}
+                          {/* Bonificación Diaria - AUTOMÁTICA */}
                           {progreso.configuracion?.metaDiaria > 0 && trabajador.bonificacionDiariaPotencial > 0 && (
                             <span className="text-orange-600 text-xs">
                               📅 {metasSucursalService.formatearMoneda(trabajador.bonificacionDiariaPotencial)}
                             </span>
                           )}
-                          {/* Bonificación Mensual */}
-                          {trabajador.bonificacionMensualPotencial > 0 && (
-                            <span className="text-green-600 text-xs">
-                              📆 {metasSucursalService.formatearMoneda(trabajador.bonificacionMensualPotencial)}
-                            </span>
-                          )}
-                          {/* Total */}
+                          {/* 🆕 Bonificación Mensual - YA NO SE MUESTRA (es manual y global) */}
+                          {/* Total - Solo muestra bonificación diaria automática */}
                           {trabajador.bonificacionPotencial > 0 && (
                             <span className="text-blue-600 font-medium text-sm border-t pt-1">
-                              Total: {metasSucursalService.formatearMoneda(trabajador.bonificacionPotencial)}
+                              Auto: {metasSucursalService.formatearMoneda(trabajador.bonificacionPotencial)}
                             </span>
                           )}
                         </div>
