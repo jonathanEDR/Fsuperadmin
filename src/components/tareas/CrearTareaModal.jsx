@@ -123,9 +123,10 @@ export default function CrearTareaModal({
   const cargarUsuarios = async () => {
     setLoadingUsuarios(true);
     try {
+      // Usar límite alto para obtener todos los usuarios activos
       const endpoint = userRole === 'super_admin'
-        ? '/api/admin/users'
-        : '/api/notes/my-users';
+        ? '/api/admin/users?limit=500&role=all'
+        : '/api/notes/my-users?limit=500';
       const response = await api.get(endpoint);
       // Filtrar usuarios: excluir rol 'de_baja' y solo mostrar user, admin, super_admin
       const usuariosFiltrados = (response.data.users || response.data || [])
