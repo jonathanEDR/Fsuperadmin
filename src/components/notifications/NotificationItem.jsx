@@ -71,8 +71,15 @@ function NotificationItem({
       return '/user/tareas';
     }
 
+    // VENTAS: Redirigir a la página principal de ventas según el rol
+    if (type === 'venta' || actionUrl.includes('/ventas')) {
+      if (userRole === 'super_admin') return '/super-admin/ventas';
+      if (userRole === 'admin') return '/admin/ventas';
+      return '/user/mis-ventas';
+    }
+
     // BONIFICACIONES/DESCUENTOS/PERSONAL: Redirigir según el rol
-    if (actionUrl.includes('/personal-v2/perfiles')) {
+    if (actionUrl.includes('/personal-v2/perfiles') || type === 'sistema') {
       // Para usuarios normales, ir a su perfil
       if (userRole === 'user') {
         return '/user/perfil';

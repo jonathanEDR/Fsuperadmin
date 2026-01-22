@@ -13,19 +13,40 @@ const POLLING_INTERVAL = 5000;
 // AudioContext persistente para mejor compatibilidad
 let audioContextInstance = null;
 let userHasInteracted = false;
+let audioElement = null;
+
+// Crear elemento de audio como fallback (sonido de notificación)
+if (typeof window !== 'undefined') {
+  // Crear un audio element con un sonido base64 embebido (pequeño beep)
+  audioElement = new Audio();
+  audioElement.volume = 0.5;
+  
+  // Sonido de notificación corto en base64 (beep simple)
+  const beepSound = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleVIvbZzA0MCobEkzgbzQ0sCobEkzgbzQ0sCobEk7ia/H2Me1iFZIgrXL17iqZDpxlMDN0b2gaEhDa4m0x9K/qXNTZYCtwtPBoHJSZoKwyNe/p3FWaYSuyNa+p3FWaYSuyNa+p3FWaYSuyNa+p3FWaYSuyNa+p3FWaYSuyNa+p3FWaYSuyNa+p3JZbYexy9a+pW5Ua4WvytfApXFYa4WtydTCpXNabIety9XCpXNabIety9XCpXRcc4u00NXAonBXaIKsyNbDpnZedY641NbBn2xTZH6oxNfFqHhge5G51dTAmWdQYHuow9jJq31kf5W919TAmmhRYHynw9jJrH9mf5e819W/mGVOXXijwNnLr4JpgZq+2NW+lWFLWnWfvdnOsoVsg5291dO8kl5IVnGbvNvRtohtg5y71NK5jlpFU22Yu9zVuYtwg5u619K3ilZBT2mVut/Yu41xg5i41c+0hVI+TWaSuuDavJByhJW219CyhU47S2OQuuHcvpJyhZK019CvgEw4SWCOueHewJRyg4+y1MusfEk1RV2MueLfwpZzhI2v0cmnekc0Q1qJt+TixJlzhIqrzcaieEQyQFeGtebkyZx0gYaozMOfdkExP1SEteflzJ93f4OkysGcc0AwPVGBtefo0KF4fYCgyb6YcT4uOk5+s+fqz6R5fH2dx7uVbTwsN0t7sejr0qd6enqZxLiRajooNEh4r+jt1at7eHeVwLSNZzgmMUV1rejv2K59d3ORvLCIZDUkLkJyrOjx27F/dnCNuKyEYTIhK0Bvqujz3rSBdW2JtKiAXS8fKD1sp+n14LeDdGqFsaSAWiwdJTpppOn24riGc2eBr6B8ViocIjdmoer44byJcmV9q5x4UigaIDRjnur65L+LcWJ5qJh0TyUYHTFgl+r86MOOcF91pJRxSyMWGi5dler+6caQb1xxoZBtSCAUGCtakenA58qSblhtno1pRR4SGSlXh+nD6s2Ub1VqmodlQxsQFiZUhOnG7dCXb1JmloFhPxkOFCNQf+nK8NOabk9ilX1cPBcMEiBNe+nO89acbUxelXlYOhUKEB1JeOnS9tmgbEldknZUNxMJDhpGdOfW+dyjbEZZj3JQNBEHDBhCcebZ/N+nbEJVjW9MLw8FChU+buTc/+KqbD5RimtILA0ECxI6auHfAuWubDtOh2dEKQsCCRA3Zt/iBeixbTdKhGNAJgkBBw41Yt3lBeuzbjRGgWA9IwcABQwyXtroBeu2bjBCfVw5IAUAAwsvWdfqB+y5by49ellAHQMAAQosVdXsC+28cCo5dVU3GgEAAAgnUdLuD++/cSY1cVE0FwAAAAUjTc/wEvLCcyExbU0wFAAAAAMgScvyFPTFdR0taUktEQAAAAEdRcfzF/bId';
+  audioElement.src = beepSound;
+}
 
 // Detectar interacción del usuario para habilitar audio
 if (typeof window !== 'undefined') {
   const enableAudio = () => {
     userHasInteracted = true;
+    console.log('🎵 Audio habilitado por interacción del usuario');
+    
     // Crear o resumir el AudioContext cuando el usuario interactúa
     if (audioContextInstance && audioContextInstance.state === 'suspended') {
-      audioContextInstance.resume();
+      audioContextInstance.resume().then(() => {
+        console.log('🎵 AudioContext resumido');
+      });
+    }
+    
+    // Pre-cargar el audio element
+    if (audioElement) {
+      audioElement.load();
     }
   };
   
   // Escuchar eventos de interacción
-  ['click', 'touchstart', 'keydown'].forEach(event => {
+  ['click', 'touchstart', 'keydown', 'scroll'].forEach(event => {
     document.addEventListener(event, enableAudio, { once: false, passive: true });
   });
 }
@@ -33,27 +54,75 @@ if (typeof window !== 'undefined') {
 // Función para obtener o crear AudioContext
 const getAudioContext = () => {
   if (!audioContextInstance) {
-    audioContextInstance = new (window.AudioContext || window.webkitAudioContext)();
+    try {
+      audioContextInstance = new (window.AudioContext || window.webkitAudioContext)();
+      console.log('🎵 AudioContext creado, estado:', audioContextInstance.state);
+    } catch (e) {
+      console.warn('⚠️ No se pudo crear AudioContext:', e.message);
+      return null;
+    }
   }
   return audioContextInstance;
 };
 
 // Función para reproducir sonido de notificación
 const playNotificationSound = () => {
+  console.log('🔔 Intentando reproducir sonido...', { userHasInteracted });
+  
+  // Método 1: Usar Audio Element (más compatible con móviles)
+  if (audioElement && userHasInteracted) {
+    try {
+      audioElement.currentTime = 0;
+      const playPromise = audioElement.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log('🔔 Sonido reproducido con Audio Element');
+          })
+          .catch((e) => {
+            console.log('⚠️ Audio Element falló, intentando con AudioContext...', e.message);
+            playWithAudioContext();
+          });
+        return;
+      }
+    } catch (e) {
+      console.log('⚠️ Error con Audio Element:', e.message);
+    }
+  }
+  
+  // Método 2: Usar AudioContext como fallback
+  playWithAudioContext();
+};
+
+// Función auxiliar para reproducir con AudioContext
+const playWithAudioContext = () => {
   try {
-    // Verificar si el usuario ha interactuado con la página
     if (!userHasInteracted) {
       console.log('🔔 Notificación recibida (sonido pendiente de interacción del usuario)');
       return;
     }
 
     const audioContext = getAudioContext();
+    if (!audioContext) return;
     
     // Si el contexto está suspendido, intentar resumirlo
     if (audioContext.state === 'suspended') {
-      audioContext.resume();
+      audioContext.resume().then(() => {
+        generateBeep(audioContext);
+      });
+    } else {
+      generateBeep(audioContext);
     }
 
+  } catch (error) {
+    console.warn('⚠️ No se pudo reproducir sonido de notificación:', error.message);
+  }
+};
+
+// Generar el beep con oscilador
+const generateBeep = (audioContext) => {
+  try {
     // Crear un oscilador para generar el sonido
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
@@ -62,7 +131,7 @@ const playNotificationSound = () => {
     gainNode.connect(audioContext.destination);
 
     // Configurar el sonido (tipo campana suave)
-    oscillator.frequency.setValueAtTime(830, audioContext.currentTime); // Frecuencia inicial
+    oscillator.frequency.setValueAtTime(830, audioContext.currentTime);
     oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.1);
     oscillator.type = 'sine';
 
@@ -93,11 +162,12 @@ const playNotificationSound = () => {
       }
     }, 150);
 
-    console.log('🔔 Sonido de notificación reproducido');
+    console.log('🔔 Sonido reproducido con AudioContext');
 
   } catch (error) {
-    console.warn('⚠️ No se pudo reproducir sonido de notificación:', error.message);
+    console.warn('⚠️ Error generando beep:', error.message);
   }
+};
 };
 
 export function useNotifications() {
