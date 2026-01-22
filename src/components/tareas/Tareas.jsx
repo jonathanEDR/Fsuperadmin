@@ -325,16 +325,16 @@ export default function Tareas() {
             >
               <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
             </button>
-            {/* Botón Nueva Tarea - Ocupa toda la fila en móvil si no es admin */}
-            <button
-              onClick={() => setIsCrearModalOpen(true)}
-              className={`bg-blue-600 hover:bg-blue-700 text-white p-2.5 sm:px-4 sm:py-2 rounded-lg flex items-center justify-center sm:justify-start gap-2 shadow ${
-                !['admin', 'super_admin'].includes(userRole) ? 'col-span-2' : ''
-              }`}
-            >
-              <Plus size={20} />
-              <span className="hidden sm:inline">Nueva Tarea</span>
-            </button>
+            {/* Botón Nueva Tarea - Solo para admin y super_admin */}
+            {['admin', 'super_admin'].includes(userRole) && (
+              <button
+                onClick={() => setIsCrearModalOpen(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 sm:px-4 sm:py-2 rounded-lg flex items-center justify-center sm:justify-start gap-2 shadow"
+              >
+                <Plus size={20} />
+                <span className="hidden sm:inline">Nueva Tarea</span>
+              </button>
+            )}
           </div>
         </div>
 
