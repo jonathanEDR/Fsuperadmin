@@ -10,11 +10,49 @@ import * as notificationService from '../services/notificationService';
 // Intervalo de polling en milisegundos (5 segundos para mayor responsividad)
 const POLLING_INTERVAL = 5000;
 
+// AudioContext persistente para mejor compatibilidad
+let audioContextInstance = null;
+let userHasInteracted = false;
+
+// Detectar interacción del usuario para habilitar audio
+if (typeof window !== 'undefined') {
+  const enableAudio = () => {
+    userHasInteracted = true;
+    // Crear o resumir el AudioContext cuando el usuario interactúa
+    if (audioContextInstance && audioContextInstance.state === 'suspended') {
+      audioContextInstance.resume();
+    }
+  };
+  
+  // Escuchar eventos de interacción
+  ['click', 'touchstart', 'keydown'].forEach(event => {
+    document.addEventListener(event, enableAudio, { once: false, passive: true });
+  });
+}
+
+// Función para obtener o crear AudioContext
+const getAudioContext = () => {
+  if (!audioContextInstance) {
+    audioContextInstance = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return audioContextInstance;
+};
+
 // Función para reproducir sonido de notificación
 const playNotificationSound = () => {
   try {
-    // Crear contexto de audio
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    // Verificar si el usuario ha interactuado con la página
+    if (!userHasInteracted) {
+      console.log('🔔 Notificación recibida (sonido pendiente de interacción del usuario)');
+      return;
+    }
+
+    const audioContext = getAudioContext();
+    
+    // Si el contexto está suspendido, intentar resumirlo
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
 
     // Crear un oscilador para generar el sonido
     const oscillator = audioContext.createOscillator();
@@ -38,21 +76,27 @@ const playNotificationSound = () => {
 
     // Segundo tono (efecto de campana)
     setTimeout(() => {
-      const osc2 = audioContext.createOscillator();
-      const gain2 = audioContext.createGain();
-      osc2.connect(gain2);
-      gain2.connect(audioContext.destination);
-      osc2.frequency.setValueAtTime(1050, audioContext.currentTime);
-      osc2.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.15);
-      osc2.type = 'sine';
-      gain2.gain.setValueAtTime(0.2, audioContext.currentTime);
-      gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.25);
-      osc2.start(audioContext.currentTime);
-      osc2.stop(audioContext.currentTime + 0.25);
+      try {
+        const osc2 = audioContext.createOscillator();
+        const gain2 = audioContext.createGain();
+        osc2.connect(gain2);
+        gain2.connect(audioContext.destination);
+        osc2.frequency.setValueAtTime(1050, audioContext.currentTime);
+        osc2.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.15);
+        osc2.type = 'sine';
+        gain2.gain.setValueAtTime(0.2, audioContext.currentTime);
+        gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.25);
+        osc2.start(audioContext.currentTime);
+        osc2.stop(audioContext.currentTime + 0.25);
+      } catch (e) {
+        // Silenciar error del segundo tono
+      }
     }, 150);
 
+    console.log('🔔 Sonido de notificación reproducido');
+
   } catch (error) {
-    // Silenciar errores de audio (puede fallar si el usuario no ha interactuado con la página)
+    console.warn('⚠️ No se pudo reproducir sonido de notificación:', error.message);
   }
 };
 
@@ -272,6 +316,7 @@ export function useNotifications() {
 
         // Reproducir sonido si hay nuevas notificaciones no leídas
         if (newUnreadCount > prevUnreadCountRef.current && prevUnreadCountRef.current >= 0) {
+          console.log(`🔔 Nueva notificación detectada: ${prevUnreadCountRef.current} → ${newUnreadCount}`);
           playNotificationSound();
         }
 
