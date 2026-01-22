@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { gestionPersonalService } from '../../services';
 import { getPagosRealizados } from '../../services/api';
@@ -10,6 +10,30 @@ function UserGestionPersonal() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [registrosMostrados, setRegistrosMostrados] = useState(10);
+  
+  // Estado para el mes seleccionado (por defecto mes actual)
+  const [mesSeleccionado, setMesSeleccionado] = useState(() => {
+    const ahora = new Date();
+    return {
+      mes: ahora.getMonth(), // 0-11
+      año: ahora.getFullYear()
+    };
+  });
+
+  // Generar lista de los últimos 12 meses
+  const mesesDisponibles = useMemo(() => {
+    const meses = [];
+    const ahora = new Date();
+    for (let i = 0; i < 12; i++) {
+      const fecha = new Date(ahora.getFullYear(), ahora.getMonth() - i, 1);
+      meses.push({
+        mes: fecha.getMonth(),
+        año: fecha.getFullYear(),
+        label: fecha.toLocaleDateString('es-PE', { month: 'long', year: 'numeric' })
+      });
+    }
+    return meses;
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -41,13 +65,6 @@ function UserGestionPersonal() {
     }
   };
 
-  const calcularPagosRealizados = () => {
-    if (!user) return 0;
-    return pagosRealizados
-      .filter(p => p.colaboradorUserId === user.id)
-      .reduce((total, p) => total + (p.montoTotal || p.monto || 0), 0);
-  };
-
   const cargarMasRegistros = () => {
     setRegistrosMostrados(prev => prev + 10);
   };
@@ -73,8 +90,29 @@ function UserGestionPersonal() {
     return [...registros].sort((a, b) => new Date(b.fechaDeGestion) - new Date(a.fechaDeGestion));
   };
 
-  const calcularTotales = () => {
-    const registrosOrdenados = ordenarRegistros();
+  // Filtrar registros por mes seleccionado
+  const filtrarPorMes = (registrosArray) => {
+    return registrosArray.filter(registro => {
+      const fecha = new Date(registro.fechaDeGestion);
+      return fecha.getMonth() === mesSeleccionado.mes && 
+             fecha.getFullYear() === mesSeleccionado.año;
+    });
+  };
+
+  // Calcular pagos realizados filtrados por mes
+  const calcularPagosRealizadosMes = () => {
+    if (!user) return 0;
+    return pagosRealizados
+      .filter(p => {
+        if (p.colaboradorUserId !== user.id) return false;
+        const fecha = new Date(p.fecha || p.createdAt);
+        return fecha.getMonth() === mesSeleccionado.mes && 
+               fecha.getFullYear() === mesSeleccionado.año;
+      })
+      .reduce((total, p) => total + (p.montoTotal || p.monto || 0), 0);
+  };
+
+  const calcularTotales = (registrosFiltrados) => {
     const totales = {
       pagosDiarios: 0,
       bonificaciones: 0,
@@ -82,7 +120,7 @@ function UserGestionPersonal() {
       adelantos: 0
     };
 
-    registrosOrdenados.forEach(registro => {
+    registrosFiltrados.forEach(registro => {
       const tipo = registro.tipo || 'pago_diario';
       
       switch (tipo) {
@@ -200,12 +238,38 @@ function UserGestionPersonal() {
     }
   };
 
+  // Navegación de meses
+  const cambiarMes = (direccion) => {
+    const indiceActual = mesesDisponibles.findIndex(
+      m => m.mes === mesSeleccionado.mes && m.año === mesSeleccionado.año
+    );
+    const nuevoIndice = indiceActual + direccion;
+    if (nuevoIndice >= 0 && nuevoIndice < mesesDisponibles.length) {
+      setMesSeleccionado(mesesDisponibles[nuevoIndice]);
+      setRegistrosMostrados(10); // Reset pagination al cambiar mes
+    }
+  };
+
   const registrosOrdenados = ordenarRegistros();
-  const registrosPaginados = registrosOrdenados.slice(0, registrosMostrados);
-  const totales = calcularTotales();
-  const pagosRealizadosTotal = calcularPagosRealizados();
+  const registrosFiltrados = filtrarPorMes(registrosOrdenados);
+  const registrosPaginados = registrosFiltrados.slice(0, registrosMostrados);
+  const totales = calcularTotales(registrosFiltrados);
+  const pagosRealizadosTotal = calcularPagosRealizadosMes();
   const totalAPagar = (totales.pagosDiarios + totales.bonificaciones) - (totales.faltantes + totales.adelantos) - pagosRealizadosTotal;
-  const hayMasRegistros = registrosOrdenados.length > registrosMostrados;
+  const hayMasRegistros = registrosFiltrados.length > registrosMostrados;
+
+  // Obtener nombre del mes actual
+  const nombreMesActual = new Date(mesSeleccionado.año, mesSeleccionado.mes).toLocaleDateString('es-PE', { 
+    month: 'long', 
+    year: 'numeric' 
+  });
+
+  // Verificar si hay meses anteriores/siguientes disponibles
+  const indiceActual = mesesDisponibles.findIndex(
+    m => m.mes === mesSeleccionado.mes && m.año === mesSeleccionado.año
+  );
+  const puedeRetroceder = indiceActual < mesesDisponibles.length - 1;
+  const puedeAvanzar = indiceActual > 0;
 
   return (
     <div className="max-w-6xl mx-auto p-4">
@@ -221,10 +285,69 @@ function UserGestionPersonal() {
         </div>
       )}
 
+      {/* Selector de Mes */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 p-4">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => cambiarMes(1)}
+            disabled={!puedeRetroceder}
+            className={`p-2 rounded-lg transition-colors ${
+              puedeRetroceder 
+                ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          
+          <div className="text-center">
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Período</p>
+            <h3 className="text-xl font-bold text-gray-800 capitalize">{nombreMesActual}</h3>
+          </div>
+          
+          <button
+            onClick={() => cambiarMes(-1)}
+            disabled={!puedeAvanzar}
+            className={`p-2 rounded-lg transition-colors ${
+              puedeAvanzar 
+                ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+        
+        {/* Selector rápido de mes */}
+        <div className="mt-4 flex flex-wrap gap-2 justify-center">
+          {mesesDisponibles.slice(0, 6).map((m, idx) => (
+            <button
+              key={idx}
+              onClick={() => {
+                setMesSeleccionado(m);
+                setRegistrosMostrados(10);
+              }}
+              className={`px-3 py-1.5 text-xs rounded-full transition-colors ${
+                m.mes === mesSeleccionado.mes && m.año === mesSeleccionado.año
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {new Date(m.año, m.mes).toLocaleDateString('es-PE', { month: 'short' }).toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Resumen de totales - Diseño mejorado */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 overflow-hidden">
-        <div className="px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700">
-          <h3 className="text-lg font-semibold text-white">📊 Resumen Total</h3>
+        <div className="px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-white">📊 Resumen de {nombreMesActual}</h3>
+          <span className="text-sm text-blue-100">{registrosFiltrados.length} registros</span>
         </div>
         <div className="p-4">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -270,11 +393,11 @@ function UserGestionPersonal() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
           <h3 className="text-lg font-semibold text-gray-800">
-            📋 Mis Registros ({registrosOrdenados.length})
+            📋 Registros de {nombreMesActual} ({registrosFiltrados.length})
           </h3>
-          {registrosMostrados < registrosOrdenados.length && (
+          {registrosMostrados < registrosFiltrados.length && (
             <span className="text-sm text-gray-500">
-              Mostrando {registrosMostrados} de {registrosOrdenados.length}
+              Mostrando {registrosMostrados} de {registrosFiltrados.length}
             </span>
           )}
         </div>
@@ -287,7 +410,8 @@ function UserGestionPersonal() {
         ) : registrosPaginados.length === 0 ? (
           <div className="p-12 text-center">
             <div className="text-4xl mb-3">📭</div>
-            <p className="text-gray-500">No tienes registros en tu historial</p>
+            <p className="text-gray-500">No tienes registros en {nombreMesActual}</p>
+            <p className="text-sm text-gray-400 mt-2">Prueba navegando a otro mes</p>
           </div>
         ) : (
           <>
@@ -378,7 +502,7 @@ function UserGestionPersonal() {
                   </svg>
                 </button>
                 <p className="mt-2 text-xs text-gray-500">
-                  Mostrando {registrosMostrados} de {registrosOrdenados.length} registros
+                  Mostrando {registrosMostrados} de {registrosFiltrados.length} registros
                 </p>
               </div>
             )}
