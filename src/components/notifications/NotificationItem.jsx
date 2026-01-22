@@ -62,35 +62,57 @@ function NotificationItem({
   
   // Determinar la URL de navegación según el tipo y rol
   const getNavigationUrl = () => {
-    if (!actionUrl) return null;
-
+    console.log('🔍 getNavigationUrl - type:', type, 'actionUrl:', actionUrl);
+    
     // TAREAS: Redirigir según el rol
-    if (type === 'tarea' || actionUrl.includes('/tareas')) {
+    if (type === 'tarea' || actionUrl?.includes('/tareas')) {
       if (userRole === 'super_admin') return '/super-admin/tareas';
       if (userRole === 'admin') return '/admin/tareas';
       return '/user/tareas';
     }
 
     // VENTAS: Redirigir a la página principal de ventas según el rol
-    if (type === 'venta' || actionUrl.includes('/ventas')) {
+    if (type === 'venta' || actionUrl?.includes('/ventas')) {
       if (userRole === 'super_admin') return '/super-admin/ventas';
       if (userRole === 'admin') return '/admin/ventas';
       return '/user/mis-ventas';
     }
 
-    // BONIFICACIONES/DESCUENTOS/PERSONAL: Redirigir según el rol
-    if (actionUrl.includes('/personal-v2/perfiles') || type === 'sistema') {
+    // PERSONAL/BONIFICACIONES/DESCUENTOS: Redirigir según el rol
+    if (type === 'personal' || type === 'bonificacion' || type === 'descuento' || 
+        actionUrl?.includes('/personal') || actionUrl?.includes('/perfil')) {
       // Para usuarios normales, ir a su perfil
       if (userRole === 'user') {
         return '/user/perfil';
       }
       // Para admin/super_admin, mantener la URL original (ver perfil del colaborador)
-      if (userRole === 'super_admin') {
-        return actionUrl.replace('/personal-v2/', '/super-admin/personal/');
+      if (actionUrl) {
+        if (userRole === 'super_admin') {
+          return actionUrl.replace('/personal-v2/', '/super-admin/personal/');
+        }
+        if (userRole === 'admin') {
+          return actionUrl.replace('/personal-v2/', '/admin/personal/');
+        }
       }
-      if (userRole === 'admin') {
-        return actionUrl.replace('/personal-v2/', '/admin/personal/');
-      }
+      // Default si no hay actionUrl específica
+      if (userRole === 'super_admin') return '/super-admin/personal';
+      if (userRole === 'admin') return '/admin/personal';
+    }
+    
+    // SISTEMA: Redirigir a inicio o dashboard
+    if (type === 'sistema') {
+      if (userRole === 'super_admin') return '/super-admin';
+      if (userRole === 'admin') return '/admin';
+      return '/user';
+    }
+    
+    // Si no hay actionUrl, no navegar
+    if (!actionUrl) {
+      console.log('⚠️ No actionUrl, intentando default por tipo');
+      // Fallback por defecto basado en el rol
+      if (userRole === 'super_admin') return '/super-admin';
+      if (userRole === 'admin') return '/admin';
+      return '/user';
     }
 
     // URL predeterminada: ajustar según el rol
@@ -107,7 +129,17 @@ function NotificationItem({
   };
   
   // Manejar click en la notificación
-  const handleClick = async () => {
+  const handleClick = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('🔔 Click en notificación:', { 
+      type, 
+      actionUrl, 
+      userRole,
+      navigationUrl: getNavigationUrl() 
+    });
+    
     // Marcar como leída si no lo está
     if (!read && onMarkAsRead) {
       try {
@@ -119,12 +151,20 @@ function NotificationItem({
     
     // Navegar a la URL de acción
     const navigationUrl = getNavigationUrl();
+    console.log('🔔 Navegando a:', navigationUrl);
+    
     if (navigationUrl) {
-      // Cerrar el panel
-      if (onClose) onClose();
+      // Cerrar el panel primero
+      if (onClose) {
+        onClose();
+      }
       
-      // Navegar
-      navigate(navigationUrl);
+      // Pequeño delay para asegurar que el panel se cierre
+      setTimeout(() => {
+        navigate(navigationUrl);
+      }, 100);
+    } else {
+      console.log('⚠️ No hay URL de navegación');
     }
   };
   
@@ -155,12 +195,17 @@ function NotificationItem({
   return (
     <div
       onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && handleClick(e)}
       className={`
         relative p-3 border-l-4 rounded-r-lg cursor-pointer
-        transition-all duration-200 hover:shadow-md
+        transition-all duration-200 hover:shadow-md hover:scale-[1.01]
+        active:scale-[0.99] select-none
         ${priorityColors[priority] || priorityColors.normal}
         ${read ? 'opacity-70' : 'opacity-100'}
       `}
+      title="Click para ver detalles"
     >
       {/* Indicador de no leída */}
       {!read && (

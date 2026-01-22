@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Bell, X, CheckCheck, RefreshCw, Loader2, Trash2, ExternalLink } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import useNotifications from '../../hooks/useNotifications';
 
@@ -16,9 +16,11 @@ function NotificationBell({ className = '' }) {
   const [panelPosition, setPanelPosition] = useState({ top: 0, left: 0 });
   const buttonRef = useRef(null);
   const panelRef = useRef(null);
+  const navigate = useNavigate();
   
   const { user } = useUser();
   const isSuperAdmin = user?.publicMetadata?.role === 'super_admin';
+  const userRole = user?.publicMetadata?.role || 'user';
   
   const {
     notifications,
@@ -160,6 +162,66 @@ function NotificationBell({ className = '' }) {
     if (diffHours < 24) return `Hace ${diffHours}h`;
     if (diffDays < 7) return `Hace ${diffDays}d`;
     return date.toLocaleDateString('es-PE', { day: '2-digit', month: 'short' });
+  };
+
+  // Determinar URL de navegación según tipo y rol
+  const getNavigationUrl = (notification) => {
+    const { type, actionUrl } = notification;
+    
+    // TAREAS
+    if (type === 'tarea' || actionUrl?.includes('/tareas')) {
+      if (userRole === 'super_admin') return '/super-admin/tareas';
+      if (userRole === 'admin') return '/admin/tareas';
+      return '/user/tareas';
+    }
+
+    // VENTAS
+    if (type === 'venta' || actionUrl?.includes('/ventas')) {
+      if (userRole === 'super_admin') return '/super-admin/ventas';
+      if (userRole === 'admin') return '/admin/ventas';
+      return '/user/mis-ventas';
+    }
+
+    // PERSONAL/BONIFICACIONES/DESCUENTOS
+    if (type === 'personal' || type === 'bonificacion' || type === 'descuento' || 
+        actionUrl?.includes('/personal') || actionUrl?.includes('/perfil')) {
+      if (userRole === 'user') return '/user/perfil';
+      if (userRole === 'super_admin') return '/super-admin/personal';
+      if (userRole === 'admin') return '/admin/personal';
+    }
+    
+    // SISTEMA
+    if (type === 'sistema') {
+      if (userRole === 'super_admin') return '/super-admin';
+      if (userRole === 'admin') return '/admin';
+      return '/user';
+    }
+    
+    // Default por rol
+    if (userRole === 'super_admin') return '/super-admin';
+    if (userRole === 'admin') return '/admin';
+    return '/user';
+  };
+
+  // Manejar click en notificación
+  const handleNotificationClick = async (notification) => {
+    // Marcar como leída
+    if (!notification.read) {
+      try {
+        await markAsRead(notification._id);
+      } catch (err) {
+        console.error('Error marcando como leída:', err);
+      }
+    }
+    
+    // Cerrar panel
+    closePanel();
+    
+    // Navegar
+    const url = getNavigationUrl(notification);
+    setTimeout(() => {
+      navigate(url);
+    }, 100);
   };
 
   return (
@@ -314,15 +376,16 @@ function NotificationBell({ className = '' }) {
                 {notifications.slice(0, 10).map((notification) => (
                   <div
                     key={notification._id}
+                    role="button"
+                    tabIndex={0}
                     className={`
-                      px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer
+                      px-4 py-3 hover:bg-gray-50 transition-all cursor-pointer
+                      hover:scale-[1.01] active:scale-[0.99] select-none
                       ${!notification.read ? 'bg-blue-50/50' : ''}
                     `}
-                    onClick={() => {
-                      if (!notification.read) {
-                        markAsRead(notification._id);
-                      }
-                    }}
+                    onClick={() => handleNotificationClick(notification)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleNotificationClick(notification)}
+                    title="Click para ver detalles"
                   >
                     <div className="flex gap-3">
                       {/* Indicador de no leída */}
