@@ -168,7 +168,6 @@ const generateBeep = (audioContext) => {
     console.warn('⚠️ Error generando beep:', error.message);
   }
 };
-};
 
 export function useNotifications() {
   const { getToken, isSignedIn, isLoaded } = useAuth();
