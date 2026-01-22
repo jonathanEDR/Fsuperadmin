@@ -3,7 +3,7 @@ import { useSession, useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Users, BarChart3, Plus, Trash2, User, UserCog, UserCircle2 } from 'lucide-react';
 import { LogoutButton } from '../components/auth';
-import { CreateNote } from '../components/notas';
+// CreateNote removido - migrado a módulo de Tareas
 import { SuperAdminDashboard, AdminDashboard, UserDashboard } from '../components/layout';
 import { ProfileManagement } from '../components/auth';
 import { MyProfile } from '../components/auth';

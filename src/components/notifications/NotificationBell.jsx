@@ -100,8 +100,18 @@ function NotificationBell({ className = '' }) {
     };
   }, [isOpen, isMobile]);
   
-  const togglePanel = () => {
-    setIsOpen(!isOpen);
+  const togglePanel = async () => {
+    const newIsOpen = !isOpen;
+    setIsOpen(newIsOpen);
+
+    // Al abrir el panel, marcar todas como leídas
+    if (newIsOpen && unreadCount > 0) {
+      try {
+        await markAllAsRead();
+      } catch (err) {
+        console.error('Error al marcar como leídas:', err);
+      }
+    }
   };
   
   const closePanel = () => {

@@ -21,7 +21,8 @@ import VentasPage from './Pages/VentasPage';
 import CobrosPage from './Pages/CobrosPage';
 import DevolucionesPage from './Pages/DevolucionesPage';
 import PersonalPage from './Pages/PersonalPage';
-import NotasPage from './Pages/NotasPage';
+// NotasPage removido - migrado a Tareas
+import TareasPage from './Pages/TareasPage';
 import NotificacionesPage from './Pages/NotificacionesPage';
 import PerfilPage from './Pages/PerfilPage';
 // Módulo Personal V2 con rutas anidadas
@@ -155,7 +156,7 @@ function App() {
             >
               <Route path="dashboard" element={<BienvenidaPage />} />
               <Route index element={<Navigate to="dashboard" replace />} />
-              <Route path="notas" element={<NotasPage />} />
+              <Route path="tareas" element={<TareasPage />} />
               <Route path="productos" element={<ProductosPage />} />
               <Route path="caja" element={<CajaPage />} />
               <Route path="categorias" element={<CategoriasPage />} />
@@ -212,7 +213,7 @@ function App() {
               </Route>
               <Route path="qr-asistencias" element={<GestionQR />} /> {/* NUEVO: Gestión de Códigos QR */}
               <Route path="escaner-qr" element={<EscanerQR />} /> {/* NUEVO: Escáner QR Asistencias */}
-              <Route path="notas" element={<NotasPage />} />
+              <Route path="tareas" element={<TareasPage />} />
               <Route path="notificaciones" element={<NotificacionesPage />} />
               <Route path="perfil" element={<PerfilPage />} />
               <Route path="caja" element={<CajaPage />} />
@@ -238,7 +239,7 @@ function App() {
             >
               <Route path="dashboard" element={<UserHomePage />} />
               <Route index element={<Navigate to="dashboard" replace />} />
-              <Route path="notas" element={<NotasPage />} />
+              <Route path="tareas" element={<TareasPage />} />
               <Route path="ventas" element={<VentasPage />} />
               <Route path="catalogo" element={<CatalogoPage />} />
               <Route path="escaner-qr" element={<EscanerQR />} /> {/* NUEVO: Escáner QR Asistencias */}

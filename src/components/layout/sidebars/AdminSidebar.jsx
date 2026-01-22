@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, UserCog, LogOut, Shield, Users, Package, ShoppingCart, Menu, X, ChevronLeft, ChevronRight, UserCheck, Factory, Wallet, DollarSign, ScanLine, ArrowRightLeft, Image } from 'lucide-react';
+import { Home, UserCog, LogOut, Shield, Users, Package, ShoppingCart, Menu, X, ChevronLeft, ChevronRight, UserCheck, Factory, Wallet, DollarSign, ScanLine, ArrowRightLeft, Image, ListTodo } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 import { NotificationBell } from '../../../components/notifications';
@@ -17,7 +17,7 @@ function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggle
   // - Gestión de Devoluciones removido (accesible desde Ventas, tema de auditoría)
   // - Código QR Asistencias removido (responsabilidad de super_admin)
   const menuItems = [
-    { id: 'notas', icon: Home, label: 'Gestión de Notas', route: '/admin/notas' },
+    { id: 'tareas', icon: ListTodo, label: 'Gestión de Tareas', route: '/admin/tareas' },
     { id: 'productos', icon: Package, label: 'Gestión de Productos', route: '/admin/productos' },
     { id: 'caja', icon: Wallet, label: 'Gestión de Caja', route: '/admin/caja' },
     { id: 'ventas', icon: ShoppingCart, label: 'Gestión de Ventas', route: '/admin/ventas' },

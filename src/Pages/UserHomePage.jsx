@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import {
-  FileText,
+  ListChecks,
   ShoppingBag,
   RefreshCw,
   QrCode,
@@ -27,11 +27,11 @@ const UserHomePage = () => {
   // Módulos disponibles para el usuario
   const modulos = [
     {
-      id: 'notas',
-      titulo: 'Mis Notas',
-      descripcion: 'Gestiona tus notas y tareas pendientes',
-      icono: FileText,
-      ruta: '/user/notas',
+      id: 'tareas',
+      titulo: 'Mis Tareas',
+      descripcion: 'Gestiona tus tareas y actividades pendientes',
+      icono: ListChecks,
+      ruta: '/user/tareas',
       color: 'bg-blue-500',
       colorHover: 'hover:bg-blue-600',
       colorLight: 'bg-blue-50',

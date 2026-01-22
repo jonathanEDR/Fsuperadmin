@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserCircle, FileText, LogOut, ShoppingBag, ChevronLeft, ChevronRight, X, QrCode, RefreshCw } from 'lucide-react';
+import { UserCircle, FileText, LogOut, ShoppingBag, ChevronLeft, ChevronRight, X, QrCode, RefreshCw, ListTodo } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 import { NotificationBell } from '../../../components/notifications';
@@ -17,7 +17,7 @@ function Sidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebarOpen }) {
   // - Catálogo de Productos removido (ya está dentro de Ventas)
   // - Gráficos Producción removido (accesible desde Movimientos Producción)
   const menuItems = [
-    { id: 'notes', icon: FileText, label: 'Mis Notas', route: '/user/notas' },
+    { id: 'tareas', icon: ListTodo, label: 'Mis Tareas', route: '/user/tareas' },
     { id: 'ventas', icon: ShoppingBag, label: 'Mis Ventas', route: '/user/ventas' },
     { id: 'movimientos-produccion', icon: RefreshCw, label: 'Movimientos Producción', route: '/user/produccion/movimientos', badge: 'NUEVO', badgeColor: 'bg-blue-500' },
     { id: 'escaner-qr', icon: QrCode, label: 'Registro de Asistencia', route: '/user/escaner-qr', badge: 'NUEVO', badgeColor: 'bg-green-500' },
