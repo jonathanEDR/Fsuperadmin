@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
   Plus,
@@ -12,7 +12,8 @@ import {
   CheckSquare,
   Trash2,
   LayoutTemplate,
-  ChevronDown
+  ChevronDown,
+  Search
 } from 'lucide-react';
 import api from '../../services/api';
 import { getLocalDateTimeString } from '../../utils/fechaHoraUtils';
@@ -39,6 +40,11 @@ export default function CrearTareaModal({
   const [loading, setLoading] = useState(false);
   const [usuarios, setUsuarios] = useState([]);
   const [loadingUsuarios, setLoadingUsuarios] = useState(false);
+  
+  // Estados para el selector de usuarios con búsqueda
+  const [busquedaUsuario, setBusquedaUsuario] = useState('');
+  const [showUsuariosDropdown, setShowUsuariosDropdown] = useState(false);
+  const usuariosDropdownRef = useRef(null);
 
   // Estado del formulario
   const [formData, setFormData] = useState({
@@ -121,13 +127,44 @@ export default function CrearTareaModal({
         ? '/api/admin/users'
         : '/api/notes/my-users';
       const response = await api.get(endpoint);
-      setUsuarios(response.data.users || response.data || []);
+      // Filtrar usuarios: excluir rol 'de_baja' y solo mostrar user, admin, super_admin
+      const usuariosFiltrados = (response.data.users || response.data || [])
+        .filter(u => {
+          const role = u.role || u.publicMetadata?.role || 'user';
+          return role !== 'de_baja' && ['user', 'admin', 'super_admin'].includes(role);
+        });
+      setUsuarios(usuariosFiltrados);
     } catch (err) {
       console.error('Error cargando usuarios:', err);
     } finally {
       setLoadingUsuarios(false);
     }
   };
+
+  // Filtrar usuarios por búsqueda
+  const usuariosFiltrados = usuarios.filter(u => {
+    const nombre = (u.nombre_negocio || u.email || u.firstName || '').toLowerCase();
+    const email = (u.email || '').toLowerCase();
+    const busqueda = busquedaUsuario.toLowerCase();
+    return nombre.includes(busqueda) || email.includes(busqueda);
+  });
+
+  // Obtener nombre del usuario seleccionado
+  const getUsuarioSeleccionado = () => {
+    if (!formData.asignadoA) return null;
+    return usuarios.find(u => (u.clerk_id || u.id) === formData.asignadoA);
+  };
+
+  // Cerrar dropdown al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (usuariosDropdownRef.current && !usuariosDropdownRef.current.contains(event.target)) {
+        setShowUsuariosDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -367,27 +404,141 @@ export default function CrearTareaModal({
               </div>
             </div>
 
-            {/* Asignar a usuario (solo admin) */}
+            {/* Asignar a usuario (solo admin) - Selector con búsqueda */}
             {['admin', 'super_admin'].includes(userRole) && (
-              <div>
+              <div ref={usuariosDropdownRef} className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   <User size={16} className="inline mr-1" />
                   Asignar a
                 </label>
-                <select
-                  name="asignadoA"
-                  value={formData.asignadoA}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  disabled={loadingUsuarios}
+                
+                {/* Input de búsqueda / selector */}
+                <div 
+                  className="relative"
+                  onClick={() => !loadingUsuarios && setShowUsuariosDropdown(true)}
                 >
-                  <option value="">Sin asignar (para mí)</option>
-                  {usuarios.map(u => (
-                    <option key={u.clerk_id || u.id} value={u.clerk_id || u.id}>
-                      {u.nombre_negocio || u.email}
-                    </option>
-                  ))}
-                </select>
+                  <div className="w-full px-4 py-2 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent bg-white cursor-pointer flex items-center justify-between">
+                    {showUsuariosDropdown ? (
+                      <input
+                        type="text"
+                        value={busquedaUsuario}
+                        onChange={(e) => setBusquedaUsuario(e.target.value)}
+                        placeholder="Buscar usuario..."
+                        className="w-full outline-none bg-transparent"
+                        autoFocus
+                      />
+                    ) : (
+                      <span className={formData.asignadoA ? 'text-gray-900' : 'text-gray-500'}>
+                        {getUsuarioSeleccionado() 
+                          ? (getUsuarioSeleccionado().nombre_negocio || getUsuarioSeleccionado().email)
+                          : 'Sin asignar (para mí)'}
+                      </span>
+                    )}
+                    <div className="flex items-center gap-2">
+                      {loadingUsuarios ? (
+                        <Loader size={16} className="animate-spin text-gray-400" />
+                      ) : (
+                        <>
+                          {formData.asignadoA && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setFormData(prev => ({ ...prev, asignadoA: '' }));
+                                setBusquedaUsuario('');
+                              }}
+                              className="text-gray-400 hover:text-gray-600"
+                            >
+                              <X size={16} />
+                            </button>
+                          )}
+                          <ChevronDown size={16} className={`text-gray-400 transition-transform ${showUsuariosDropdown ? 'rotate-180' : ''}`} />
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dropdown de usuarios */}
+                {showUsuariosDropdown && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {/* Input de búsqueda fijo arriba */}
+                    <div className="sticky top-0 bg-white border-b border-gray-200 p-2">
+                      <div className="relative">
+                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="text"
+                          value={busquedaUsuario}
+                          onChange={(e) => setBusquedaUsuario(e.target.value)}
+                          placeholder="Buscar por nombre o email..."
+                          className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          autoFocus
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Opción: Sin asignar */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, asignadoA: '' }));
+                        setBusquedaUsuario('');
+                        setShowUsuariosDropdown(false);
+                      }}
+                      className={`w-full px-4 py-2.5 text-left hover:bg-blue-50 flex items-center gap-2 ${
+                        !formData.asignadoA ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                      }`}
+                    >
+                      <User size={16} className="text-gray-400" />
+                      <span>Sin asignar (para mí)</span>
+                    </button>
+
+                    {/* Lista de usuarios filtrados */}
+                    {usuariosFiltrados.length > 0 ? (
+                      usuariosFiltrados.map(u => {
+                        const userId = u.clerk_id || u.id;
+                        const isSelected = formData.asignadoA === userId;
+                        const role = u.role || u.publicMetadata?.role || 'user';
+                        
+                        return (
+                          <button
+                            key={userId}
+                            type="button"
+                            onClick={() => {
+                              setFormData(prev => ({ ...prev, asignadoA: userId }));
+                              setBusquedaUsuario('');
+                              setShowUsuariosDropdown(false);
+                            }}
+                            className={`w-full px-4 py-2.5 text-left hover:bg-blue-50 flex items-center justify-between ${
+                              isSelected ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600">
+                                {(u.nombre_negocio || u.email || '?')[0].toUpperCase()}
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-medium">{u.nombre_negocio || u.firstName || 'Sin nombre'}</span>
+                                <span className="text-xs text-gray-500">{u.email}</span>
+                              </div>
+                            </div>
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${
+                              role === 'super_admin' ? 'bg-purple-100 text-purple-700' :
+                              role === 'admin' ? 'bg-blue-100 text-blue-700' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              {role === 'super_admin' ? 'Super Admin' : role === 'admin' ? 'Admin' : 'Usuario'}
+                            </span>
+                          </button>
+                        );
+                      })
+                    ) : (
+                      <div className="px-4 py-3 text-center text-gray-500 text-sm">
+                        No se encontraron usuarios
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
