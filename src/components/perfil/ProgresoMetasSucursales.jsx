@@ -1,16 +1,24 @@
 import React, { useState, useEffect } from 'react';
+import { useUser } from '@clerk/clerk-react';
 import { Target, Building2, TrendingUp, Loader, RefreshCw, AlertCircle } from 'lucide-react';
 import { metasSucursalService } from '../../services/metasSucursalService';
 
 /**
  * Componente para mostrar el progreso de metas de todas las sucursales
  * Se muestra en el perfil para que el personal pueda dar seguimiento
+ * - Admin/Super_admin: Ve porcentaje Y montos
+ * - User: Solo ve porcentaje (sin montos)
  */
 export default function ProgresoMetasSucursales() {
+  const { user } = useUser();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [datos, setDatos] = useState(null);
   const [actualizando, setActualizando] = useState(false);
+
+  // Determinar si el usuario puede ver montos (solo admin y super_admin)
+  const userRole = user?.unsafeMetadata?.role || 'user';
+  const puedeVerMontos = ['admin', 'super_admin'].includes(userRole);
 
   const cargarDatos = async () => {
     try {
@@ -152,8 +160,8 @@ export default function ProgresoMetasSucursales() {
         </button>
       </div>
 
-      {/* Resumen Global */}
-      {datos.resumenGlobal && (
+      {/* Resumen Global - Solo visible para admin/super_admin */}
+      {datos.resumenGlobal && puedeVerMontos && (
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 mb-6">
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp size={18} className="text-blue-600" />
@@ -221,15 +229,17 @@ export default function ProgresoMetasSucursales() {
                   <div className="absolute top-0 right-0 h-full w-0.5 bg-gray-300" />
                 </div>
 
-                {/* Montos */}
-                <div className="flex justify-between text-xs text-gray-500">
-                  <span>
-                    Alcanzado: <span className="font-medium text-gray-700">{formatMoney(sucursal.totalAlcanzado)}</span>
-                  </span>
-                  <span>
-                    Meta: <span className="font-medium text-gray-700">{formatMoney(sucursal.metaMensual)}</span>
-                  </span>
-                </div>
+                {/* Montos - Solo visible para admin/super_admin */}
+                {puedeVerMontos && (
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>
+                      Alcanzado: <span className="font-medium text-gray-700">{formatMoney(sucursal.totalAlcanzado)}</span>
+                    </span>
+                    <span>
+                      Meta: <span className="font-medium text-gray-700">{formatMoney(sucursal.metaMensual)}</span>
+                    </span>
+                  </div>
+                )}
               </div>
             );
           })
