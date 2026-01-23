@@ -147,6 +147,16 @@ export default function Tareas() {
     }
   };
 
+  // Función para actualizar la tarea en el estado local (cuando ya viene actualizada del backend)
+  const handleActualizarTareaLocal = (id, tareaActualizada) => {
+    setTareas(prev => prev.map(t => t._id === id ? tareaActualizada : t));
+    // También actualizar la tarea seleccionada si es la misma
+    if (tareaSeleccionada && tareaSeleccionada._id === id) {
+      setTareaSeleccionada(tareaActualizada);
+    }
+  };
+
+  // Función para hacer PUT al backend y actualizar
   const handleActualizarTarea = async (id, datos) => {
     try {
       const response = await tareasService.actualizar(id, datos);
@@ -248,7 +258,7 @@ export default function Tareas() {
           setTareaSeleccionada(null);
         }}
         tarea={tareaSeleccionada}
-        onActualizar={handleActualizarTarea}
+        onActualizar={handleActualizarTareaLocal}
         onCambiarEstado={handleCambiarEstado}
         onRevisar={handleRevisar}
         userRole={userRole}

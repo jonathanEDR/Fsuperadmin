@@ -2,6 +2,7 @@ import React from 'react';
 import { useUser, useClerk } from '@clerk/clerk-react';
 import { User, Mail, Shield, CheckCircle } from 'lucide-react';
 import UserGestionPersonal from '../personal/UserGestionPersonal';
+import ProgresoMetasSucursales from '../perfil/ProgresoMetasSucursales';
 
 function MyProfileUnified() {
   const { user } = useUser();
@@ -128,6 +129,8 @@ function MyProfileUnified() {
         </div>
       </div>
 
+      {/* Progreso de Metas de Sucursales */}
+      <ProgresoMetasSucursales />
 
       {/* Gestión Personal Financiera */}
       <div className="bg-white rounded-lg shadow-lg">

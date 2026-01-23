@@ -78,6 +78,27 @@ export const metasSucursalService = {
       throw new Error(error.response?.data?.message || 'Error al obtener progreso');
     }
   },
+
+  /**
+   * Obtener progreso de TODAS las sucursales
+   * GET /api/metas-sucursal/progreso-global
+   * 
+   * @param {number} mes - Mes (1-12), opcional (default: mes actual)
+   * @param {number} anio - Año, opcional (default: año actual)
+   * @returns {Object} Progreso de todas las sucursales con resumen global
+   */
+  obtenerProgresoGlobal: async (mes = null, anio = null) => {
+    try {
+      const params = {};
+      if (mes) params.mes = mes;
+      if (anio) params.anio = anio;
+      
+      const response = await api.get('/api/metas-sucursal/progreso-global', { params });
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Error al obtener progreso global');
+    }
+  },
   
   /**
    * Evaluar meta de una sucursal para un periodo

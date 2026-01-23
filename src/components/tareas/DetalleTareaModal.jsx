@@ -52,6 +52,7 @@ export default function DetalleTareaModal({
   const [nuevoComentario, setNuevoComentario] = useState('');
   const [enviandoComentario, setEnviandoComentario] = useState(false);
   const [comentarioRevision, setComentarioRevision] = useState('');
+  const [accionEnProceso, setAccionEnProceso] = useState(null); // 'estado', 'revision'
 
   if (!isOpen || !tarea) return null;
 
@@ -66,6 +67,37 @@ export default function DetalleTareaModal({
   const estaVencida = tarea.fechaVencimiento &&
     new Date(tarea.fechaVencimiento) < new Date() &&
     tarea.estado !== 'completada';
+
+  // Manejar cambio de estado con loading y cierre de modal
+  const handleCambiarEstadoConCierre = async (id, nuevoEstado) => {
+    if (accionEnProceso) return; // Evitar doble clic
+    setAccionEnProceso('estado');
+    try {
+      await onCambiarEstado(id, nuevoEstado);
+      // Cerrar modal solo para acciones que cambian significativamente el estado
+      if (['en_revision', 'completada', 'cancelada'].includes(nuevoEstado)) {
+        onClose();
+      }
+    } catch (err) {
+      console.error('Error al cambiar estado:', err);
+    } finally {
+      setAccionEnProceso(null);
+    }
+  };
+
+  // Manejar revisión con loading y cierre de modal
+  const handleRevisarConCierre = async (id, resultado, comentario) => {
+    if (accionEnProceso) return; // Evitar doble clic
+    setAccionEnProceso('revision');
+    try {
+      await onRevisar(id, resultado, comentario);
+      onClose();
+    } catch (err) {
+      console.error('Error al revisar:', err);
+    } finally {
+      setAccionEnProceso(null);
+    }
+  };
 
   const handleAgregarComentario = async () => {
     if (!nuevoComentario.trim()) return;
@@ -392,20 +424,31 @@ export default function DetalleTareaModal({
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   rows={2}
                   placeholder="Comentario de revisión (opcional)..."
+                  disabled={accionEnProceso === 'revision'}
                 />
                 <div className="flex gap-3">
                   <button
-                    onClick={() => onRevisar(tarea._id, 'aprobada', comentarioRevision)}
-                    className="flex-1 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center gap-2 transition-colors"
+                    onClick={() => handleRevisarConCierre(tarea._id, 'aprobada', comentarioRevision)}
+                    disabled={accionEnProceso === 'revision'}
+                    className="flex-1 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Check size={18} />
+                    {accionEnProceso === 'revision' ? (
+                      <Loader size={18} className="animate-spin" />
+                    ) : (
+                      <Check size={18} />
+                    )}
                     Aprobar
                   </button>
                   <button
-                    onClick={() => onRevisar(tarea._id, 'rechazada', comentarioRevision)}
-                    className="flex-1 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center justify-center gap-2 transition-colors"
+                    onClick={() => handleRevisarConCierre(tarea._id, 'rechazada', comentarioRevision)}
+                    disabled={accionEnProceso === 'revision'}
+                    className="flex-1 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <X size={18} />
+                    {accionEnProceso === 'revision' ? (
+                      <Loader size={18} className="animate-spin" />
+                    ) : (
+                      <X size={18} />
+                    )}
                     Rechazar
                   </button>
                 </div>
@@ -417,36 +460,56 @@ export default function DetalleTareaModal({
               <div className="flex gap-3">
                 {tarea.estado === 'pendiente' && (
                   <button
-                    onClick={() => onCambiarEstado(tarea._id, 'en_progreso')}
-                    className="flex-1 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 transition-colors"
+                    onClick={() => handleCambiarEstadoConCierre(tarea._id, 'en_progreso')}
+                    disabled={accionEnProceso === 'estado'}
+                    className="flex-1 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Play size={18} />
+                    {accionEnProceso === 'estado' ? (
+                      <Loader size={18} className="animate-spin" />
+                    ) : (
+                      <Play size={18} />
+                    )}
                     Iniciar Tarea
                   </button>
                 )}
                 {tarea.estado === 'en_progreso' && (
                   <>
                     <button
-                      onClick={() => onCambiarEstado(tarea._id, 'pendiente')}
-                      className="flex-1 py-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center justify-center gap-2 transition-colors"
+                      onClick={() => handleCambiarEstadoConCierre(tarea._id, 'pendiente')}
+                      disabled={accionEnProceso === 'estado'}
+                      className="flex-1 py-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Pause size={18} />
+                      {accionEnProceso === 'estado' ? (
+                        <Loader size={18} className="animate-spin" />
+                      ) : (
+                        <Pause size={18} />
+                      )}
                       Pausar
                     </button>
                     {tarea.requiereRevision ? (
                       <button
-                        onClick={() => onCambiarEstado(tarea._id, 'en_revision')}
-                        className="flex-1 py-2.5 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 flex items-center justify-center gap-2 transition-colors"
+                        onClick={() => handleCambiarEstadoConCierre(tarea._id, 'en_revision')}
+                        disabled={accionEnProceso === 'estado'}
+                        className="flex-1 py-2.5 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <Send size={18} />
+                        {accionEnProceso === 'estado' ? (
+                          <Loader size={18} className="animate-spin" />
+                        ) : (
+                          <Send size={18} />
+                        )}
                         Enviar a Revisión
                       </button>
                     ) : (
                       <button
-                        onClick={() => onCambiarEstado(tarea._id, 'completada')}
-                        className="flex-1 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center gap-2 transition-colors"
+                        onClick={() => handleCambiarEstadoConCierre(tarea._id, 'completada')}
+                        disabled={accionEnProceso === 'estado'}
+                        className="flex-1 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <Check size={18} />
+                        {accionEnProceso === 'estado' ? (
+                          <Loader size={18} className="animate-spin" />
+                        ) : (
+                          <Check size={18} />
+                        )}
                         Completar
                       </button>
                     )}
