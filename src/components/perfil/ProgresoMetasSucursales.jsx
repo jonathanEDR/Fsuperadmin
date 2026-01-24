@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-react';
+import { useUserRole } from '../../hooks/useUserRole';
 import { Target, Building2, TrendingUp, Loader, RefreshCw, AlertCircle } from 'lucide-react';
 import { metasSucursalService } from '../../services/metasSucursalService';
 
@@ -10,14 +10,13 @@ import { metasSucursalService } from '../../services/metasSucursalService';
  * - User: Solo ve porcentaje (sin montos)
  */
 export default function ProgresoMetasSucursales() {
-  const { user } = useUser();
+  const { userRole } = useUserRole();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [datos, setDatos] = useState(null);
   const [actualizando, setActualizando] = useState(false);
 
   // Determinar si el usuario puede ver montos (solo admin y super_admin)
-  const userRole = user?.unsafeMetadata?.role || 'user';
   const puedeVerMontos = ['admin', 'super_admin'].includes(userRole);
 
   const cargarDatos = async () => {

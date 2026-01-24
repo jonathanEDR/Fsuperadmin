@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
+import { useUserRole } from '../../hooks/useUserRole';
 import useGestionPersonal from './hooks/useGestionPersonal';
 import useAsistencias from './hooks/useAsistencias';
 import ColaboradoresTable from './components/ColaboradoresTable';
@@ -23,6 +24,7 @@ import MetasSucursal from './components/MetasSucursal';
 import api from '../../services/api';
 
 function GestionPersonalV2() {
+  const { userRole } = useUserRole();
   const {
     state,
     actions,
@@ -63,9 +65,6 @@ function GestionPersonalV2() {
   // Estado para tabs
   const [tabActual, setTabActual] = useState('personal');
   
-  // Estado para rol del usuario
-  const [userRole, setUserRole] = useState(null);
-  
   // 🆕 Estado para modal de bonificación/adelanto
   const [modalBonificacion, setModalBonificacion] = useState({
     isOpen: false,
@@ -103,20 +102,6 @@ function GestionPersonalV2() {
       console.error('Error al crear bonificación/adelanto:', error);
     }
   };
-  
-  // Obtener rol del usuario
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const res = await api.get('/api/auth/my-profile');
-        const role = res.data.role?.trim().toLowerCase() || null;
-        setUserRole(role);
-      } catch (err) {
-        setUserRole(null);
-      }
-    };
-    fetchUserRole();
-  }, []);
   
   // Cargar asistencias cuando se selecciona el tab
   useEffect(() => {
@@ -258,6 +243,7 @@ function GestionPersonalV2() {
                 asistenciaActions.setFiltroColaborador(detalleColaborador.clerk_id);
                 setTabActual('asistencias');
               }}
+              userRole={userRole}
             />
           ) : null}
         </>

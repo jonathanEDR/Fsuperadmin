@@ -20,7 +20,8 @@ const ColaboradorDetalle = React.memo(({
   onEliminarRegistro,
   formatearMoneda,
   loading,
-  onCambiarTabAsistencias // Nueva prop para cambiar al tab de asistencias
+  onCambiarTabAsistencias, // Nueva prop para cambiar al tab de asistencias
+  userRole // Rol del usuario para permisos
 }) => {
   
   // Hook de asistencias para el colaborador
@@ -157,6 +158,7 @@ const ColaboradorDetalle = React.memo(({
         loading={loading}
         filtroFecha={filtroFecha}
         customRange={customRange}
+        userRole={userRole}
       />
     </div>
   );

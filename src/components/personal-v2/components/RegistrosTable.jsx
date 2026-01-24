@@ -21,7 +21,8 @@ const RegistrosTable = React.memo(({
   formatearMoneda,
   loading,
   filtroFecha,
-  customRange
+  customRange,
+  userRole
 }) => {
   
   // Filtrar registros según criterio de fecha
@@ -312,13 +313,15 @@ const RegistrosTable = React.memo(({
                                       {formatearMontoConSigno(registro)}
                                     </span>
                                     
-                                    <button
-                                      onClick={() => onEliminar(registro._id)}
-                                      className="inline-flex items-center gap-1 px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded transition-colors"
-                                      title="Eliminar registro"
-                                    >
-                                      <Trash2 size={12} />
-                                    </button>
+                                    {userRole === 'super_admin' && (
+                                      <button
+                                        onClick={() => onEliminar(registro._id)}
+                                        className="inline-flex items-center gap-1 px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded transition-colors"
+                                        title="Eliminar registro"
+                                      >
+                                        <Trash2 size={12} />
+                                      </button>
+                                    )}
                                   </div>
                                 </div>
                               );

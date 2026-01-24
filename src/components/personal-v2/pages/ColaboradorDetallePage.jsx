@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
+import { useUserRole } from '../../../hooks/useUserRole';
 import useGestionPersonal from '../hooks/useGestionPersonal';
 import useAsistencias from '../hooks/useAsistencias';
 import ColaboradorDetalle from '../components/ColaboradorDetalle';
@@ -14,6 +15,7 @@ function ColaboradorDetallePage() {
   const { colaboradorId } = useParams();
   const navigate = useNavigate();
   const { basePath } = useOutletContext();
+  const { userRole } = useUserRole();
   
   const {
     state,
@@ -114,6 +116,7 @@ function ColaboradorDetallePage() {
           formatearMoneda={formatearMoneda}
           loading={selectors.isLoading}
           onCambiarTabAsistencias={handleCambiarTabAsistencias}
+          userRole={userRole}
         />
       )}
 
