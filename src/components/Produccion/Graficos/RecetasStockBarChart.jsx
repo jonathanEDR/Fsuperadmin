@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import api from '../../../services/api';
@@ -162,8 +162,8 @@ const RecetasStockBarChart = React.memo(() => {
     fetchRecetasData();
   }, [fetchRecetasData]);
 
-  // Opciones del gráfico
-  const chartOptions = {
+  // Opciones del gráfico - useMemo para acceso reactivo a isMobile y chartData
+  const chartOptions = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     indexAxis: isMobile ? 'y' : 'x', // Barras horizontales en móvil
@@ -202,7 +202,9 @@ const RecetasStockBarChart = React.memo(() => {
           label: function(context) {
             const index = context.dataIndex;
             const receta = chartData?._recetasCompletas?.[index];
-            const value = context.parsed.y ?? context.parsed.x;
+            // FIX: Cuando indexAxis='y' (móvil), el valor está en parsed.x
+            // Cuando indexAxis='x' (desktop), el valor está en parsed.y
+            const value = isMobile ? context.parsed.x : context.parsed.y;
             
             if (mostrarPorFase) {
               return `${context.dataset.label}: ${value} ${receta?.unidadMedida || 'unid.'}`;
@@ -283,7 +285,7 @@ const RecetasStockBarChart = React.memo(() => {
         }
       }
     }
-  };
+  }), [isMobile, mostrarPorFase, chartData, canViewPrices]);
 
   if (error) {
     return (
