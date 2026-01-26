@@ -361,7 +361,7 @@ const GestionMateriales = () => {
                   {canViewPrices ? (
                     <div className="bg-emerald-50 rounded-lg p-2 text-center">
                       <p className="text-xs text-emerald-600 font-medium">Precio</p>
-                      <p className="text-sm font-bold text-emerald-800">${formatearNumero(material.precioUnitario)}</p>
+                      <p className="text-sm font-bold text-emerald-800">S/ {formatearNumero(material.precioUnitario)}</p>
                     </div>
                   ) : (
                     <div className="bg-gray-50 rounded-lg p-2 text-center">
@@ -523,7 +523,7 @@ const GestionMateriales = () => {
                       {canViewPrices && (
                         <td className="px-6 py-4">
                           <div className="text-sm text-gray-900">
-                            ${formatearNumero(material.precioUnitario)}
+                            S/ {formatearNumero(material.precioUnitario)}
                           </div>
                         </td>
                       )}

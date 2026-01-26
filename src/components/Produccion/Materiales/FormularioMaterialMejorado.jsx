@@ -320,7 +320,7 @@ const FormularioMaterialMejorado = ({ material, onGuardar, onCancelar }) => {
                 {/* Precio unitario */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                    Precio Unitario ($)
+                    Precio Unitario (S/)
                   </label>
                   <input
                     type="number"
