@@ -37,7 +37,7 @@ function GestionPersonalLayout() {
       
       if (soloVerificar) {
         // Solo diagnóstico
-        const response = await api.get('/api/debug/cobros/sincronizacion');
+        const response = await api.get('/api/gestion-personal/sincronizacion/cobros');
         setSincronizacion({
           loading: false,
           resultado: {
@@ -48,7 +48,7 @@ function GestionPersonalLayout() {
         });
       } else {
         // Ejecutar sincronización
-        const response = await api.post('/api/debug/cobros/sincronizacion', { 
+        const response = await api.post('/api/gestion-personal/sincronizacion/cobros', { 
           ejecutar: true 
         });
         setSincronizacion({
