@@ -62,7 +62,7 @@ export default function GestionCategoriasModal({ isOpen, onClose, onCategoriasCh
     setLoading(true);
     setError('');
     try {
-      const response = await categoriasService.listar(true); // incluir inactivas
+      const response = await categoriasService.listar();
       setCategorias(response.data || []);
     } catch (err) {
       setError('Error al cargar categorías');

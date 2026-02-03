@@ -7,6 +7,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import { X, Check, ExternalLink } from 'lucide-react';
+import { useRole } from '../../context/RoleContext';
 
 // Formatear tiempo relativo
 function getRelativeTime(dateString) {
@@ -45,7 +46,8 @@ function NotificationItem({
 }) {
   const navigate = useNavigate();
   const { user } = useUser();
-  const userRole = user?.publicMetadata?.role || 'user';
+  const roleFromContext = useRole();
+  const userRole = roleFromContext || user?.publicMetadata?.role || 'user';
   
   const {
     _id,
@@ -62,9 +64,34 @@ function NotificationItem({
   
   // Determinar la URL de navegación según el tipo y rol
   const getNavigationUrl = () => {
-    console.log('🔍 getNavigationUrl - type:', type, 'actionUrl:', actionUrl);
+    console.log('🔍 [FRONTEND-NAVIGATION] Procesando notificación:', {
+      type,
+      actionUrl,
+      userRole,
+      notificationId: _id,
+      title
+    });
     
-    // TAREAS: Redirigir según el rol
+    // Si el actionUrl ya tiene el prefijo del rol correcto, usarlo directamente
+    if (actionUrl && (
+      actionUrl.startsWith('/super-admin/') || 
+      actionUrl.startsWith('/admin/') || 
+      actionUrl.startsWith('/user/')
+    )) {
+      console.log('✅ Usando actionUrl con prefijo:', actionUrl);
+      return actionUrl;
+    }
+    
+    console.log('⚠️ ActionUrl sin prefijo de rol, aplicando lógica de fallback');
+    
+    // Si el actionUrl existe pero no tiene prefijo, agregar el prefijo según el rol actual
+    if (actionUrl && actionUrl.startsWith('/') && !actionUrl.startsWith('/super-admin') && !actionUrl.startsWith('/admin') && !actionUrl.startsWith('/user')) {
+      const routeWithPrefix = `${userRole === 'super_admin' ? '/super-admin' : userRole === 'admin' ? '/admin' : '/user'}${actionUrl}`;
+      console.log('🔧 Agregando prefijo de rol a actionUrl:', routeWithPrefix);
+      return routeWithPrefix;
+    }
+    
+    // TAREAS: Redirigir según el rol (fallback para notificaciones sin actionUrl)
     if (type === 'tarea' || actionUrl?.includes('/tareas')) {
       if (userRole === 'super_admin') return '/super-admin/tareas';
       if (userRole === 'admin') return '/admin/tareas';
@@ -106,18 +133,16 @@ function NotificationItem({
       return '/user';
     }
     
-    // Si no hay actionUrl, no navegar
+    // Si no hay actionUrl, usar default por rol
     if (!actionUrl) {
-      console.log('⚠️ No actionUrl, intentando default por tipo');
-      // Fallback por defecto basado en el rol
+      console.log('⚠️ No actionUrl, usando default por rol');
       if (userRole === 'super_admin') return '/super-admin';
       if (userRole === 'admin') return '/admin';
       return '/user';
     }
 
-    // URL predeterminada: ajustar según el rol
+    // URL predeterminada: ajustar según el rol si no tiene prefijo
     if (actionUrl.startsWith('/')) {
-      // Si es una ruta relativa, agregar el prefijo del rol si no lo tiene
       if (!actionUrl.startsWith('/super-admin') && !actionUrl.startsWith('/admin') && !actionUrl.startsWith('/user')) {
         if (userRole === 'super_admin') return `/super-admin${actionUrl}`;
         if (userRole === 'admin') return `/admin${actionUrl}`;
@@ -133,11 +158,14 @@ function NotificationItem({
     e.preventDefault();
     e.stopPropagation();
     
-    console.log('🔔 Click en notificación:', { 
+    const navigationUrl = getNavigationUrl();
+    
+    console.log('🔔 [CLICK-NOTIFICATION] Navegando:', { 
       type, 
       actionUrl, 
       userRole,
-      navigationUrl: getNavigationUrl() 
+      navigationUrl,
+      notificationData: data
     });
     
     // Marcar como leída si no lo está

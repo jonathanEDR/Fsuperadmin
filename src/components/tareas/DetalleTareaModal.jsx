@@ -129,9 +129,9 @@ export default function DetalleTareaModal({
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl transform transition-all max-h-[90vh] overflow-hidden flex flex-col">
           {/* Header */}
-          <div className="flex items-start justify-between p-6 border-b border-gray-200">
-            <div className="flex-1 pr-4">
-              <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-start justify-between p-4 sm:p-6 border-b border-gray-200">
+            <div className="flex-1 pr-3 min-w-0">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2">
                 {tarea.codigo && (
                   <span className="text-xs font-mono bg-gray-100 text-gray-600 px-2 py-1 rounded">
                     {tarea.codigo}
@@ -151,21 +151,21 @@ export default function DetalleTareaModal({
                   </span>
                 )}
               </div>
-              <h2 className="text-xl font-bold text-gray-800">{tarea.titulo}</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-800 break-words">{tarea.titulo}</h2>
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
             >
               <X size={24} />
             </button>
           </div>
 
           {/* Tabs */}
-          <div className="flex border-b border-gray-200 bg-gray-50">
+          <div className="flex overflow-x-auto border-b border-gray-200 bg-gray-50 scrollbar-hide">
             <button
               onClick={() => setActiveTab('detalle')}
-              className={`px-4 py-3 text-sm font-medium transition-colors ${
+              className={`flex-shrink-0 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'detalle'
                   ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
                   : 'text-gray-500 hover:text-gray-700'
@@ -175,7 +175,7 @@ export default function DetalleTareaModal({
             </button>
             <button
               onClick={() => setActiveTab('subtareas')}
-              className={`px-4 py-3 text-sm font-medium transition-colors flex items-center gap-1 ${
+              className={`flex-shrink-0 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium transition-colors flex items-center gap-1 whitespace-nowrap ${
                 activeTab === 'subtareas'
                   ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
                   : 'text-gray-500 hover:text-gray-700'
@@ -190,14 +190,16 @@ export default function DetalleTareaModal({
             </button>
             <button
               onClick={() => setActiveTab('comentarios')}
-              className={`px-4 py-3 text-sm font-medium transition-colors flex items-center gap-1 ${
+              className={`flex-shrink-0 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium transition-colors flex items-center gap-1 whitespace-nowrap ${
                 activeTab === 'comentarios'
                   ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              <MessageSquare size={16} />
-              Comentarios
+              <MessageSquare size={14} className="sm:hidden" />
+              <MessageSquare size={16} className="hidden sm:block" />
+              <span className="hidden sm:inline">Comentarios</span>
+              <span className="sm:hidden">Notas</span>
               {tarea.comentarios?.length > 0 && (
                 <span className="bg-gray-200 text-gray-700 text-xs px-1.5 rounded">
                   {tarea.comentarios.length}
@@ -206,19 +208,20 @@ export default function DetalleTareaModal({
             </button>
             <button
               onClick={() => setActiveTab('historial')}
-              className={`px-4 py-3 text-sm font-medium transition-colors flex items-center gap-1 ${
+              className={`flex-shrink-0 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium transition-colors flex items-center gap-1 whitespace-nowrap ${
                 activeTab === 'historial'
                   ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              <History size={16} />
+              <History size={14} className="sm:hidden" />
+              <History size={16} className="hidden sm:block" />
               Historial
             </button>
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
             {activeTab === 'detalle' && (
               <div className="space-y-6">
                 {/* Descripción */}
@@ -232,7 +235,7 @@ export default function DetalleTareaModal({
                 )}
 
                 {/* Info Grid */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {/* Categoría */}
                   {tarea.categoriaId && (
                     <div className="flex items-center gap-2 text-sm">
@@ -414,7 +417,7 @@ export default function DetalleTareaModal({
           </div>
 
           {/* Footer con acciones */}
-          <div className="p-6 border-t border-gray-200 bg-gray-50">
+          <div className="p-4 sm:p-6 border-t border-gray-200 bg-gray-50">
             {/* Acciones de revisión para admin */}
             {puedeRevisar && (
               <div className="space-y-3">

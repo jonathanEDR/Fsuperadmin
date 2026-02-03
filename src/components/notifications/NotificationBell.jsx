@@ -168,7 +168,21 @@ function NotificationBell({ className = '' }) {
   const getNavigationUrl = (notification) => {
     const { type, actionUrl } = notification;
     
-    // TAREAS
+    // Si el actionUrl ya tiene el prefijo del rol correcto, usarlo directamente
+    if (actionUrl && (
+      actionUrl.startsWith('/super-admin/') || 
+      actionUrl.startsWith('/admin/') || 
+      actionUrl.startsWith('/user/')
+    )) {
+      return actionUrl;
+    }
+    
+    // Si el actionUrl existe pero no tiene prefijo, agregar el prefijo según el rol actual
+    if (actionUrl && actionUrl.startsWith('/') && !actionUrl.startsWith('/super-admin') && !actionUrl.startsWith('/admin') && !actionUrl.startsWith('/user')) {
+      return `${userRole === 'super_admin' ? '/super-admin' : userRole === 'admin' ? '/admin' : '/user'}${actionUrl}`;
+    }
+    
+    // TAREAS (fallback para notificaciones sin actionUrl)
     if (type === 'tarea' || actionUrl?.includes('/tareas')) {
       if (userRole === 'super_admin') return '/super-admin/tareas';
       if (userRole === 'admin') return '/admin/tareas';
