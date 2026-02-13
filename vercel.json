@@ -8,7 +8,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://admincomercial.onrender.com/api/$1"
+      "destination": "https://roxi-75wi.onrender.com/api/$1"
     },
     {
       "source": "/((?!api|assets|_vercel).*)",
