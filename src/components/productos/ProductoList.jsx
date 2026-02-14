@@ -8,6 +8,7 @@ import { Dialog } from '@headlessui/react';
 import CatalogoModal from './CatalogoModal';
 import CategoryModal from './CategoryModal';
 import BulkUploadModal from './BulkUploadModal';
+import { movimientoUnificadoService } from '../../services/movimientoUnificadoService';
 import api from '../../services/api';
 import categoryService from '../../services/categoryService';
 import useInventarioProducto from '../../hooks/useInventarioProducto';
@@ -25,7 +26,9 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
     lote: '',
     observaciones: '',
     proveedor: '',
-    fechaVencimiento: ''
+    fechaVencimiento: '',
+    catalogoProduccionId: '',
+    cantidadProduccion: ''
   });
   const [catalogoProductos, setCatalogoProductos] = useState([]);
 
@@ -103,6 +106,35 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
 
       // Crear entrada usando el hook
       const response = await inventarioHook.createEntry(entradaData);
+
+      // === REGISTRAR TAMBIÉN EN PRODUCCIÓN SI ESTÁ ACTIVO ===
+      // Leer datos de producción del evento (pasados desde InventarioModal)
+      const datosProduccionEvento = e._datosProduccion;
+      
+      if (datosProduccionEvento) {
+        try {
+          const { catalogoProduccionId, cantidadProduccion, recetasCalculadas, tieneFormula } = datosProduccionEvento;
+          
+          const datosProduccion = {
+            tipoProducto: 'produccion',
+            productoId: catalogoProduccionId,
+            cantidad: cantidadProduccion,
+            operador: user?.fullName || user?.firstName || user?.primaryEmailAddress?.emailAddress || 'Usuario',
+            motivo: tieneFormula 
+              ? 'Entrada desde inventario de ventas (registro simultáneo con consumo de recetas)'
+              : 'Entrada desde inventario de ventas (registro simultáneo)',
+            observaciones: `Registrado junto con entrada de venta: ${inventarioForm.cantidad} unidades. ${inventarioForm.observaciones || ''}`.trim(),
+            costoTotal: 0,
+            ingredientesUtilizados: [],
+            recetasUtilizadas: recetasCalculadas,
+            consumirRecursos: tieneFormula // Solo consumir si hay fórmula
+          };
+          await movimientoUnificadoService.agregarCantidad(datosProduccion);
+        } catch (prodError) {
+          console.error('⚠️ Error al registrar en producción (la entrada de venta sí se guardó):', prodError);
+          // No lanzamos error aquí para no perder la entrada de venta que ya se guardó
+        }
+      }
       
       // Cerrar modal y limpiar formulario
       setIsInventarioModalOpen(false);
@@ -113,7 +145,9 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
         lote: '',
         observaciones: '',
         proveedor: '',
-        fechaVencimiento: ''
+        fechaVencimiento: '',
+        catalogoProduccionId: '',
+        cantidadProduccion: ''
       });
 
       // Refrescar datos
@@ -121,9 +155,6 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
         fetchProductos(),
         refrescarHistorial()
       ]);
-
-      // Mostrar mensaje de éxito (opcional)
-      console.log('Entrada registrada exitosamente:', response);
       
     } catch (err) {
       console.error('Error al registrar entrada:', err);
@@ -141,7 +172,9 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
       lote: '',
       observaciones: '',
       proveedor: '',
-      fechaVencimiento: ''
+      fechaVencimiento: '',
+      catalogoProduccionId: '',
+      cantidadProduccion: ''
     });
     inventarioHook.clearError();
   };

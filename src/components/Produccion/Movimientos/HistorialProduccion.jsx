@@ -679,12 +679,30 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                                    (!movimiento.detalles?.recetasConsumidas || movimiento.detalles.recetasConsumidas.length === 0) &&
                                    (!movimiento.recetasConsumidas || movimiento.recetasConsumidas.length === 0) &&
                                    (!movimiento.recetasUtilizadas || movimiento.recetasUtilizadas.length === 0) && (
-                                    <div className="bg-purple-50 p-2 rounded-lg border border-purple-200">
-                                      <div className="text-purple-700 font-medium">
-                                        🏭 Producción sin consumo específico
+                                    <div className={`p-2 rounded-lg border ${
+                                      (movimiento.motivo || '').includes('inventario de ventas')
+                                        ? 'bg-blue-50 border-blue-200'
+                                        : 'bg-purple-50 border-purple-200'
+                                    }`}>
+                                      <div className={`font-medium ${
+                                        (movimiento.motivo || '').includes('inventario de ventas')
+                                          ? 'text-blue-700'
+                                          : 'text-purple-700'
+                                      }`}>
+                                        {(movimiento.motivo || '').includes('inventario de ventas')
+                                          ? '🛒 Entrada desde inventario de ventas'
+                                          : '🏭 Producción sin consumo específico'
+                                        }
                                       </div>
-                                      <div className="text-purple-600 text-xs">
-                                        Incremento directo al inventario
+                                      <div className={`text-xs ${
+                                        (movimiento.motivo || '').includes('inventario de ventas')
+                                          ? 'text-blue-600'
+                                          : 'text-purple-600'
+                                      }`}>
+                                        {(movimiento.motivo || '').includes('inventario de ventas')
+                                          ? 'Registro simultáneo con entrada de productos'
+                                          : 'Incremento directo al inventario'
+                                        }
                                       </div>
                                     </div>
                                   )}

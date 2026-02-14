@@ -35,6 +35,12 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
   const [recetasDisponibles, setRecetasDisponibles] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // 🎯 Estados para fórmula estándar
+  const [formulaEstandar, setFormulaEstandar] = useState(null);
+  const [formulaCargada, setFormulaCargada] = useState(false);
+  const [guardarComoFormula, setGuardarComoFormula] = useState(false);
+  const [modoManual, setModoManual] = useState(false);
+
   // Reset form cuando se abre el modal
   useEffect(() => {
     if (isOpen && producto) {
@@ -53,6 +59,9 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
       
       // Cargar recursos disponibles
       cargarRecursos();
+      
+      // 🎯 Cargar fórmula estándar
+      cargarFormulaEstandar();
       
       // Si es super_admin, cargar lista de usuarios
       if (isSuperAdmin) {
@@ -86,6 +95,66 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
       console.error('Error al cargar recursos:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 🎯 Cargar fórmula estándar del producto
+  const cargarFormulaEstandar = async () => {
+    try {
+      const response = await movimientoUnificadoService.obtenerFormulaEstandar(producto._id);
+      const formula = response.data;
+      setFormulaEstandar(formula);
+      
+      if (formula && formula.activa && formula.recetas.length > 0) {
+        setFormulaCargada(true);
+        aplicarFormula(formula, 1);
+      } else {
+        setGuardarComoFormula(true);
+      }
+    } catch (error) {
+      console.error('Error al cargar fórmula:', error);
+      setGuardarComoFormula(true);
+    }
+  };
+
+  // 🎯 Aplicar fórmula: auto-calcular cantidades
+  const aplicarFormula = (formula, cantidadProducir) => {
+    if (!formula || !formula.recetas) return;
+    
+    const recetasAuto = formula.recetas.map(item => ({
+      receta: item.receta?._id || item.receta,
+      cantidadUtilizada: Math.round((item.cantidadPorUnidad * cantidadProducir) * 100) / 100
+    }));
+    
+    setFormData(prev => ({
+      ...prev,
+      recetasUtilizadas: recetasAuto
+    }));
+  };
+
+  // 🎯 Cuando cambia cantidad, auto-calcular si hay fórmula
+  const handleCantidadProducirChange = (valor) => {
+    setFormData(prev => ({ ...prev, cantidadProducir: valor }));
+    if (formulaCargada && formulaEstandar?.activa && !modoManual) {
+      aplicarFormula(formulaEstandar, valor);
+    }
+  };
+
+  // 🎯 Guardar fórmula estándar
+  const guardarFormulaDespuesDeProducir = async () => {
+    try {
+      if (!formData.recetasUtilizadas.length || formData.cantidadProducir <= 0) return;
+      const recetasParaFormula = formData.recetasUtilizadas
+        .filter(r => r.receta && r.cantidadUtilizada > 0)
+        .map(r => ({
+          receta: r.receta,
+          cantidadPorUnidad: Math.round((r.cantidadUtilizada / formData.cantidadProducir) * 10000) / 10000
+        }));
+      if (recetasParaFormula.length > 0) {
+        await movimientoUnificadoService.guardarFormulaEstandar(producto._id, recetasParaFormula);
+      }
+    } catch (error) {
+      console.error('Error al guardar fórmula:', error);
     }
   };
 
@@ -274,6 +343,11 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
 
       await movimientoUnificadoService.agregarCantidad(datosProduccion);
 
+      // 🎯 Guardar fórmula estándar si corresponde
+      if (guardarComoFormula && formData.recetasUtilizadas.length > 0) {
+        await guardarFormulaDespuesDeProducir();
+      }
+
       onSuccess?.();
       onClose();
     } catch (error) {
@@ -366,27 +440,69 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
                 step="1"
                 min="1"
                 value={formData.cantidadProducir}
-                onChange={(e) => handleInputChange('cantidadProducir', parseInt(e.target.value) || 0)}
+                onChange={(e) => handleCantidadProducirChange(parseInt(e.target.value) || 0)}
                 className="w-full p-3 border border-gray-300 rounded-lg text-lg font-semibold focus:ring-blue-500 focus:border-blue-500"
                 disabled={enviando}
                 required
               />
             </div>
 
-            {/* Mensaje informativo: consumo automático */}
-            <div className="bg-green-50 border-2 border-green-300 rounded-xl p-4">
-              <div className="flex items-center space-x-2">
-                <span className="text-xl">✅</span>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">
-                    🏭 Los recursos se descontarán automáticamente del inventario
-                  </p>
-                  <p className="text-xs text-gray-700 mt-1">
-                    Al producir, los ingredientes y recetas seleccionados se consumirán de forma automática.
-                  </p>
+            {/* 🎯 Indicador de Fórmula Estándar */}
+            {formulaCargada && formulaEstandar?.activa && !modoManual ? (
+              <div className="bg-gradient-to-r from-emerald-50 to-green-50 border-2 border-emerald-300 rounded-xl p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">⚡</span>
+                    <div>
+                      <p className="text-sm font-bold text-emerald-800">Fórmula Estándar Activa</p>
+                      <p className="text-xs text-emerald-700">Recetas auto-calculadas al cambiar cantidad</p>
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => setModoManual(true)} className="text-xs text-emerald-600 hover:text-emerald-800 underline">
+                    Editar manual
+                  </button>
                 </div>
               </div>
-            </div>
+            ) : modoManual && formulaCargada ? (
+              <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">✏️</span>
+                    <p className="text-sm font-bold text-amber-800">Modo Manual</p>
+                  </div>
+                  <button type="button" onClick={() => { setModoManual(false); aplicarFormula(formulaEstandar, formData.cantidadProducir); }} className="text-xs text-amber-600 hover:text-amber-800 underline">
+                    Volver a fórmula
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">💡</span>
+                  <div>
+                    <p className="text-sm font-semibold text-blue-800">Sin Fórmula Estándar</p>
+                    <p className="text-xs text-blue-700">Agrega recetas y marca "Guardar como fórmula" para auto-calcular.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Checkbox guardar fórmula */}
+            <label className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+              <input
+                type="checkbox"
+                checked={guardarComoFormula}
+                onChange={(e) => setGuardarComoFormula(e.target.checked)}
+                className="w-4 h-4 text-blue-600 rounded"
+                disabled={enviando}
+              />
+              <span className="text-xs text-gray-700">
+                {formulaCargada && formulaEstandar?.activa
+                  ? '🔄 Actualizar fórmula estándar'
+                  : '💾 Guardar como fórmula estándar'
+                }
+              </span>
+            </label>
 
             {/* Ingredientes Utilizados */}
             <div className="border border-gray-300 rounded-lg p-4">

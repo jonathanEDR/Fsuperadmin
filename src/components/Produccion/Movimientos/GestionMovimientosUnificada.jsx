@@ -5,10 +5,8 @@ import AccesosRapidosProduccion from '../AccesosRapidosProduccion';
 import BreadcrumbProduccion from '../BreadcrumbProduccion';
 import SelectorTipoProducto from './SelectorTipoProducto';
 import ModalAgregarCantidad from './ModalAgregarCantidad';
-import ModalProducirReceta from './ModalProducirReceta';
-import ModalProducirRecetaAjustable from './ModalProducirRecetaAjustable';
+import ModalProducirRecetaNuevo from './ModalProducirRecetaNuevo';
 import ModalProducirProducto from './ModalProducirProducto';
-import ModalProducirCantidadSimple from './ModalProducirCantidadSimple';
 import ModalIncrementarStock from './ModalIncrementarStock';
 import HistorialProduccion from './HistorialProduccion';
 import TransferenciasSucursales from './TransferenciasSucursales';
@@ -101,13 +99,11 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
   
   // Estados del modal
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalRecetaOpen, setModalRecetaOpen] = useState(false);
-  const [modalRecetaAjustableOpen, setModalRecetaAjustableOpen] = useState(false);
+  const [modalRecetaNuevoOpen, setModalRecetaNuevoOpen] = useState(false);
   const [modalProduccionOpen, setModalProduccionOpen] = useState(false);
   const [modalIncrementarOpen, setModalIncrementarOpen] = useState(false);
   const [historialProduccionOpen, setHistorialProduccionOpen] = useState(false);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
-  const [mostrarSelectorModal, setMostrarSelectorModal] = useState(false);
   
   // Estados de filtros
   const [filtros, setFiltros] = useState({
@@ -253,9 +249,9 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
   const abrirModalAgregar = (producto) => {
     setProductoSeleccionado(producto);
     
-    // Si es una receta, mostrar selector de tipo de modal
+    // Si es una receta, abrir directamente el nuevo modal flexible
     if (tipoSeleccionado === 'recetas') {
-      setMostrarSelectorModal(true);
+      setModalRecetaNuevoOpen(true);
     } 
     // Si es producción, abrir el modal de producción (el componente decidirá cuál modal renderizar según el rol)
     else if (tipoSeleccionado === 'produccion') {
@@ -264,22 +260,6 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
     else {
       setModalOpen(true);
     }
-  };
-
-  /**
-   * Abrir modal de receta (básico)
-   */
-  const abrirModalRecetaBasico = () => {
-    setMostrarSelectorModal(false);
-    setModalRecetaOpen(true);
-  };
-
-  /**
-   * Abrir modal de receta ajustable
-   */
-  const abrirModalRecetaAjustable = () => {
-    setMostrarSelectorModal(false);
-    setModalRecetaAjustableOpen(true);
   };
 
   /**
@@ -1093,114 +1073,24 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
         onSuccess={handleSuccessAgregar}
       />
 
-      {/* Modal selector de tipo de producción */}
-      {mostrarSelectorModal && productoSeleccionado && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">
-              🎯 Tipo de Producción
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Selecciona cómo deseas producir <strong>{productoSeleccionado.nombre}</strong>:
-            </p>
-            
-            <div className="space-y-3">
-              {/* Opción: Producción Rápida */}
-              <button
-                onClick={abrirModalRecetaBasico}
-                className="w-full p-4 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left group"
-              >
-                <div className="flex items-start">
-                  <span className="text-3xl mr-4">⚡</span>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-gray-800 group-hover:text-blue-700">
-                      Producción Rápida
-                    </h4>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Produce en lotes fijos según la receta original. <strong>Rápido y sencillo.</strong>
-                    </p>
-                    <ul className="text-xs text-gray-500 mt-2 space-y-1">
-                      <li>✓ Cantidades automáticas</li>
-                      <li>✓ Validación de stock</li>
-                      <li>✓ Proceso simplificado</li>
-                    </ul>
-                  </div>
-                </div>
-              </button>
-
-              {/* Opción: Producción Ajustable */}
-              <button
-                onClick={abrirModalRecetaAjustable}
-                className="w-full p-4 border-2 border-green-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all text-left group bg-green-50"
-              >
-                <div className="flex items-start">
-                  <span className="text-3xl mr-4">🔧</span>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-gray-800 group-hover:text-green-700">
-                      Producción Ajustable
-                      <span className="ml-2 px-2 py-0.5 bg-green-600 text-white text-xs rounded-full">NUEVO</span>
-                    </h4>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Control total: ajusta ingredientes, registra mermas, bonificaciones. <strong>Máxima flexibilidad.</strong>
-                    </p>
-                    <ul className="text-xs text-gray-500 mt-2 space-y-1">
-                      <li>✓ Ajuste de cantidades por ingrediente</li>
-                      <li>✓ Rendimiento real vs planeado</li>
-                      <li>✓ Registro de diferencias y motivos</li>
-                      <li>✓ Historial completo de producciones</li>
-                    </ul>
-                  </div>
-                </div>
-              </button>
-            </div>
-
-            <button
-              onClick={() => setMostrarSelectorModal(false)}
-              className="w-full mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-            >
-              Cancelar
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Modal para producir recetas (básico) */}
-      <ModalProducirReceta
-        isOpen={modalRecetaOpen}
-        onClose={() => setModalRecetaOpen(false)}
-        receta={productoSeleccionado}
-        onSuccess={handleSuccessAgregar}
-      />
-
-      {/* Modal para producir recetas - TODOS usan el modal ajustable */}
-      {modalRecetaAjustableOpen && (
-        <ModalProducirRecetaAjustable
-          isOpen={modalRecetaAjustableOpen}
-          onClose={() => setModalRecetaAjustableOpen(false)}
+      {/* Modal para producir recetas - Modal Flexible */}
+      {modalRecetaNuevoOpen && (
+        <ModalProducirRecetaNuevo
+          isOpen={modalRecetaNuevoOpen}
+          onClose={() => setModalRecetaNuevoOpen(false)}
           receta={productoSeleccionado}
           onSuccess={handleSuccessAgregar}
         />
       )}
 
-      {/* Modal para producir productos - Renderizado según rol */}
+      {/* Modal para producir productos - Roles manejados internamente */}
       {modalProduccionOpen && (
-        isSuperAdmin ? (
-          // Modal avanzado con costos y recursos para super_admin
-          <ModalProducirProducto
-            isOpen={modalProduccionOpen}
-            onClose={() => setModalProduccionOpen(false)}
-            producto={productoSeleccionado}
-            onSuccess={handleSuccessAgregar}
-          />
-        ) : (
-          // Modal simple solo con cantidades para admin/user
-          <ModalProducirCantidadSimple
-            isOpen={modalProduccionOpen}
-            onClose={() => setModalProduccionOpen(false)}
-            producto={productoSeleccionado}
-            onSuccess={handleSuccessAgregar}
-          />
-        )
+        <ModalProducirProducto
+          isOpen={modalProduccionOpen}
+          onClose={() => setModalProduccionOpen(false)}
+          producto={productoSeleccionado}
+          onSuccess={handleSuccessAgregar}
+        />
       )}
 
       {/* Modal para incrementar stock de productos */}

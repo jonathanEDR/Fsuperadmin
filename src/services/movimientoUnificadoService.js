@@ -346,5 +346,35 @@ export const movimientoUnificadoService = {
     const response = await api.delete(`/movimientos-unificados/movimiento/${movimientoId}`);
     
     return response.data;
+  },
+
+  // ======================================
+  // FÓRMULA ESTÁNDAR DE PRODUCCIÓN
+  // ======================================
+
+  /**
+   * Obtener la fórmula estándar de un producto
+   */
+  async obtenerFormulaEstandar(productoId) {
+    const response = await api.get(`/movimientos-unificados/producto/${productoId}/formula-estandar`);
+    return response.data;
+  },
+
+  /**
+   * Guardar o actualizar la fórmula estándar de un producto
+   */
+  async guardarFormulaEstandar(productoId, recetas) {
+    const response = await api.put(`/movimientos-unificados/producto/${productoId}/formula-estandar`, {
+      recetas
+    });
+    return response.data;
+  },
+
+  /**
+   * Eliminar la fórmula estándar de un producto
+   */
+  async eliminarFormulaEstandar(productoId) {
+    const response = await api.delete(`/movimientos-unificados/producto/${productoId}/formula-estandar`);
+    return response.data;
   }
 };

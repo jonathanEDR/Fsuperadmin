@@ -1,7 +1,8 @@
 
-import React, { useMemo } from 'react';
-import { X, Calendar, Package, User, FileText } from 'lucide-react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { X, Calendar, Package, User, FileText, Factory } from 'lucide-react';
 import SearchableSelect from '../common/SearchableSelect';
+import { movimientoUnificadoService } from '../../services/movimientoUnificadoService';
 
 // Componente especializado para selección de productos con búsqueda
 const ProductoSearchableSelect = ({ catalogoProductos, value, onChange, required }) => {
@@ -142,6 +143,94 @@ const InventarioModal = ({
   catalogoProductos,
   handleInventarioSubmit
 }) => {
+  // Estados para la sección de producción
+  const [produccionActiva, setProduccionActiva] = useState(false);
+  const [catalogoProduccion, setCatalogoProduccion] = useState([]);
+  const [loadingCatalogo, setLoadingCatalogo] = useState(false);
+  const [formulaEstandar, setFormulaEstandar] = useState(null);
+  const [loadingFormula, setLoadingFormula] = useState(false);
+
+  // Cargar catálogo de producción al activar
+  useEffect(() => {
+    if (isOpen && produccionActiva && catalogoProduccion.length === 0) {
+      cargarCatalogoProduccion();
+    }
+  }, [isOpen, produccionActiva]);
+
+  // Reset al cerrar
+  useEffect(() => {
+    if (!isOpen) {
+      setProduccionActiva(false);
+      setFormulaEstandar(null);
+    }
+  }, [isOpen]);
+
+  // Cargar fórmula cuando se selecciona producto de producción
+  const handleProductoProduccionChange = async (productoId) => {
+    setInventarioForm(f => ({ ...f, catalogoProduccionId: productoId }));
+    setFormulaEstandar(null);
+    
+    if (!productoId) return;
+    
+    setLoadingFormula(true);
+    try {
+      const response = await movimientoUnificadoService.obtenerFormulaEstandar(productoId);
+      const formula = response.data;
+      if (formula?.activa && formula.recetas?.length > 0) {
+        setFormulaEstandar(formula);
+      }
+    } catch (err) {
+      console.log('Producto sin fórmula estándar configurada');
+    } finally {
+      setLoadingFormula(false);
+    }
+  };
+
+  const cargarCatalogoProduccion = async () => {
+    setLoadingCatalogo(true);
+    try {
+      const response = await movimientoUnificadoService.obtenerProductosPorTipo('produccion');
+      setCatalogoProduccion(response.data || []);
+    } catch (error) {
+      console.error('Error al cargar catálogo de producción:', error);
+    } finally {
+      setLoadingCatalogo(false);
+    }
+  };
+
+  // Submit wrapper que incluye datos de producción
+  const handleSubmitConProduccion = async (e) => {
+    e.preventDefault();
+
+    // Calcular datos de producción ANTES de submit
+    let datosProduccion = null;
+    if (produccionActiva && inventarioForm.catalogoProduccionId && inventarioForm.cantidadProduccion) {
+      const cantidadProd = parseFloat(inventarioForm.cantidadProduccion) || 0;
+      let recetasCalculadas = [];
+      
+      if (formulaEstandar?.activa && formulaEstandar.recetas?.length > 0) {
+        recetasCalculadas = formulaEstandar.recetas.map(item => ({
+          receta: item.receta?._id || item.receta,
+          cantidadUtilizada: Math.round((item.cantidadPorUnidad * cantidadProd) * 100) / 100,
+          nombre: item.nombre || ''
+        }));
+      }
+      
+      datosProduccion = {
+        catalogoProduccionId: inventarioForm.catalogoProduccionId,
+        cantidadProduccion: cantidadProd,
+        recetasCalculadas,
+        tieneFormula: recetasCalculadas.length > 0
+      };
+    }
+
+    // Agregar datos de producción al evento para que ProductoList los use
+    e._datosProduccion = datosProduccion;
+
+    // Delegar al handler original
+    await handleInventarioSubmit(e);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -173,7 +262,7 @@ const InventarioModal = ({
             </div>
           )}
 
-          <form onSubmit={handleInventarioSubmit} className="space-y-4 sm:space-y-6">
+          <form id="inventario-form" onSubmit={handleSubmitConProduccion} className="space-y-4 sm:space-y-6">
             {/* Información del Producto */}
             <div className="bg-gray-50 p-3 sm:p-4 lg:p-6 rounded-lg">
               <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center">
@@ -302,16 +391,157 @@ const InventarioModal = ({
               </div>
             </div>
 
+            {/* Sección de Producción (Opcional) */}
+            <div className="border-2 border-dashed border-green-200 rounded-lg overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setProduccionActiva(!produccionActiva)}
+                className={`w-full flex items-center justify-between px-3 sm:px-4 lg:px-6 py-3 sm:py-4 transition-colors ${
+                  produccionActiva
+                    ? 'bg-green-50 border-b border-green-200'
+                    : 'bg-white hover:bg-green-50'
+                }`}
+              >
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Factory size={20} className={produccionActiva ? 'text-green-600' : 'text-gray-400'} />
+                  <div className="text-left">
+                    <span className={`text-sm sm:text-base font-semibold ${produccionActiva ? 'text-green-800' : 'text-gray-700'}`}>
+                      También registrar en Producción
+                    </span>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Agrega cantidad al inventario de producción simultáneamente
+                    </p>
+                  </div>
+                </div>
+                <div className={`w-10 h-6 rounded-full flex items-center transition-colors ${
+                  produccionActiva ? 'bg-green-500 justify-end' : 'bg-gray-300 justify-start'
+                }`}>
+                  <div className="w-5 h-5 bg-white rounded-full shadow-md mx-0.5"></div>
+                </div>
+              </button>
+
+              {produccionActiva && (
+                <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4 bg-green-50/50">
+                  <div>
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-1 sm:mb-2">
+                      Producto de Producción *
+                    </label>
+                    {loadingCatalogo ? (
+                      <div className="flex items-center gap-2 text-sm text-gray-500 py-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                        Cargando productos de producción...
+                      </div>
+                    ) : (
+                      <select
+                        value={inventarioForm.catalogoProduccionId || ''}
+                        onChange={(e) => handleProductoProduccionChange(e.target.value)}
+                        required={produccionActiva}
+                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-sm sm:text-base py-2 sm:py-3"
+                      >
+                        <option value="">Seleccionar producto de producción...</option>
+                        {catalogoProduccion.map(prod => (
+                          <option key={prod._id} value={prod._id}>
+                            {prod.nombre} (Stock: {prod.stock || prod.cantidad || 0} {prod.unidadMedida || 'unidad'})
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+
+                  {/* Indicador de fórmula estándar */}
+                  {loadingFormula && (
+                    <div className="flex items-center gap-2 text-sm text-amber-600 py-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-amber-600"></div>
+                      Cargando fórmula estándar...
+                    </div>
+                  )}
+                  {!loadingFormula && inventarioForm.catalogoProduccionId && (
+                    <div className={`p-3 rounded-lg border ${
+                      formulaEstandar?.activa 
+                        ? 'bg-emerald-50 border-emerald-300' 
+                        : 'bg-amber-50 border-amber-300'
+                    }`}>
+                      {formulaEstandar?.activa ? (
+                        <>
+                          <div className="flex items-center gap-2 text-emerald-700 font-medium mb-2">
+                            <span>✅</span>
+                            <span>Fórmula estándar configurada</span>
+                          </div>
+                          <div className="text-xs text-emerald-600 space-y-1">
+                            <p className="font-medium">Recetas que se consumirán (por unidad):</p>
+                            {formulaEstandar.recetas.map((r, i) => (
+                              <div key={i} className="flex justify-between">
+                                <span>• {r.nombre || `Receta ${i + 1}`}</span>
+                                <span className="font-mono">{r.cantidadPorUnidad} {r.unidadMedida || 'u'}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-2 text-amber-700">
+                          <span>⚠️</span>
+                          <span className="text-sm">Sin fórmula configurada - solo se agregará stock sin consumir recetas</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-1 sm:mb-2">
+                      Cantidad para Producción *
+                    </label>
+                    <input
+                      type="number"
+                      value={inventarioForm.cantidadProduccion || ''}
+                      onChange={(e) => setInventarioForm(f => ({
+                        ...f,
+                        cantidadProduccion: e.target.value
+                      }))}
+                      required={produccionActiva}
+                      min="0.01"
+                      step="0.01"
+                      className="w-full rounded-md border-green-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-sm sm:text-base py-2 sm:py-3 bg-white"
+                      placeholder="Ej: 50"
+                    />
+                    <p className="text-xs text-green-600 mt-1">
+                      Esta cantidad se agregará al inventario de producción
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Resumen */}
             {inventarioForm.cantidad && inventarioForm.precio && (
               <div className="bg-blue-50 p-3 sm:p-4 lg:p-6 rounded-lg">
                 <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-blue-900 mb-2 sm:mb-3">Resumen</h3>
                 <div className="text-sm sm:text-base text-blue-800 space-y-1 sm:space-y-2">
-                  <p>Cantidad: <span className="font-semibold">{inventarioForm.cantidad} unidades</span></p>
+                  <p>🛒 Cantidad para venta: <span className="font-semibold">{inventarioForm.cantidad} unidades</span></p>
                   <p>Precio unitario: <span className="font-semibold">S/ {parseFloat(inventarioForm.precio || 0).toFixed(2)}</span></p>
                   <p className="text-base sm:text-lg font-bold">
                     Costo total: S/ {(parseFloat(inventarioForm.cantidad || 0) * parseFloat(inventarioForm.precio || 0)).toFixed(2)}
                   </p>
+                  {produccionActiva && inventarioForm.cantidadProduccion && (
+                    <div className="mt-2 pt-2 border-t border-blue-200">
+                      <p className="text-green-700">
+                        🏭 Cantidad para producción: <span className="font-semibold">{inventarioForm.cantidadProduccion} unidades</span>
+                      </p>
+                      {formulaEstandar?.activa && (
+                        <div className="mt-2 text-xs text-green-600 bg-green-50 p-2 rounded">
+                          <p className="font-medium mb-1">📉 Recetas que se descontarán:</p>
+                          {formulaEstandar.recetas.map((r, i) => {
+                            const cantidadTotal = (r.cantidadPorUnidad * parseFloat(inventarioForm.cantidadProduccion)).toFixed(2);
+                            return (
+                              <div key={i} className="flex justify-between">
+                                <span>• {r.nombre || `Receta ${i + 1}`}</span>
+                                <span className="font-mono text-red-600">-{cantidadTotal} {r.unidadMedida || 'u'}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -331,7 +561,6 @@ const InventarioModal = ({
             <button
               type="submit"
               form="inventario-form"
-              onClick={handleInventarioSubmit}
               disabled={inventarioLoading}
               className={`w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
                 inventarioLoading 

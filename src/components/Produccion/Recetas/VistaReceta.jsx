@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { recetaService } from '../../../services/recetaService';
 import { formatearFecha as formatearFechaUtil } from '../../../utils/fechaHoraUtils';
 import HistorialFases from './HistorialFases';
+import HistorialProduccionReceta from './HistorialProduccionReceta';
 import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
 const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
@@ -152,99 +153,123 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
                 </div>
               )}
 
-              {/* Ingredientes y Recetas */}
+              {/* Ingredientes y Recetas - Vista de Lista */}
               <div className="bg-white border rounded-lg overflow-hidden">
-                <div className="bg-gray-50 px-2 sm:px-4 py-2 sm:py-3 border-b">
+                <div className="bg-gray-50 px-3 sm:px-4 py-2 sm:py-3 border-b">
                   <h4 className="font-medium text-gray-700">Ingredientes y Sub-recetas</h4>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {datosReceta.ingredientes?.length || 0} items en esta receta
+                  </p>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="min-w-[600px] text-xs sm:text-sm">
-                    <thead className="bg-gray-100">
-                      <tr>
-                        <th className="px-3 py-2 text-left font-semibold text-gray-600 uppercase sticky top-0 bg-gray-100 z-10">Tipo</th>
-                        <th className="px-3 py-2 text-left font-semibold text-gray-600 uppercase sticky top-0 bg-gray-100 z-10">Nombre</th>
-                        <th className="px-3 py-2 text-left font-semibold text-gray-600 uppercase sticky top-0 bg-gray-100 z-10">Cantidad</th>
-                        <th className="px-3 py-2 text-left font-semibold text-gray-600 uppercase sticky top-0 bg-gray-100 z-10">Unidad</th>
-                        <th className="px-3 py-2 text-left font-semibold text-gray-600 uppercase sticky top-0 bg-gray-100 z-10">Disponible</th>
-                        {/* Solo super_admin ve columnas de precio */}
-                        {canViewPrices && (
-                          <>
-                            <th className="px-3 py-2 text-left font-semibold text-gray-600 uppercase sticky top-0 bg-gray-100 z-10">Precio Unit. (S/)</th>
-                            <th className="px-3 py-2 text-left font-semibold text-gray-600 uppercase sticky top-0 bg-gray-100 z-10">Subtotal (S/)</th>
-                          </>
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {datosReceta.ingredientes?.map((item, index) => {
-                        // Detectar si es ingrediente o receta
-                        const esReceta = item.tipo === 'receta' || (!item.tipo && item.receta && !item.ingrediente);
-                        const itemData = esReceta ? item.receta : item.ingrediente;
-                        
-                        // Validar que el item exista (puede no estar poblado)
-                        if (!itemData) {
-                          return null;
-                        }
+                <div className="p-3 space-y-2 max-h-64 overflow-y-auto">
+                  {datosReceta.ingredientes?.map((item, index) => {
+                    // Detectar si es ingrediente o receta
+                    const esReceta = item.tipo === 'receta' || (!item.tipo && item.receta && !item.ingrediente);
+                    const itemData = esReceta ? item.receta : item.ingrediente;
+                    
+                    // Validar que el item exista (puede no estar poblado)
+                    if (!itemData) {
+                      return null;
+                    }
 
-                        let disponible, subtotal, cantidadNecesaria, suficiente, precioUnitarioItem;
+                    let disponible, subtotal, cantidadNecesaria, suficiente, precioUnitarioItem;
 
-                        if (esReceta) {
-                          // Para recetas: disponible = producido - utilizado
-                          disponible = (itemData.inventario?.cantidadProducida || 0) - (itemData.inventario?.cantidadUtilizada || 0);
-                          // 🎯 FIX: Usar costoUnitario de la sub-receta (viene del backend)
-                          precioUnitarioItem = itemData.costoUnitario || 0;
-                          subtotal = item.cantidad * precioUnitarioItem;
-                          cantidadNecesaria = item.cantidad * cantidadConsulta;
-                          suficiente = disponible >= cantidadNecesaria;
-                        } else {
-                          // Para ingredientes: disponible = cantidad - procesado
-                          disponible = (itemData.cantidad || 0) - (itemData.procesado || 0);
-                          precioUnitarioItem = itemData.precioUnitario || 0;
-                          subtotal = item.cantidad * precioUnitarioItem;
-                          cantidadNecesaria = item.cantidad * cantidadConsulta;
-                          suficiente = disponible >= cantidadNecesaria;
-                        }
+                    if (esReceta) {
+                      // Para recetas: disponible = producido - utilizado
+                      disponible = (itemData.inventario?.cantidadProducida || 0) - (itemData.inventario?.cantidadUtilizada || 0);
+                      precioUnitarioItem = itemData.costoUnitario || 0;
+                      subtotal = item.cantidad * precioUnitarioItem;
+                      cantidadNecesaria = item.cantidad * cantidadConsulta;
+                      suficiente = disponible >= cantidadNecesaria;
+                    } else {
+                      // Para ingredientes: disponible = cantidad - procesado
+                      disponible = (itemData.cantidad || 0) - (itemData.procesado || 0);
+                      precioUnitarioItem = itemData.precioUnitario || 0;
+                      subtotal = item.cantidad * precioUnitarioItem;
+                      cantidadNecesaria = item.cantidad * cantidadConsulta;
+                      suficiente = disponible >= cantidadNecesaria;
+                    }
 
-                        return (
-                          <tr key={index} className={!suficiente ? 'bg-red-50' : esReceta ? 'bg-purple-50' : ''}>
-                            <td className="px-3 py-2 text-xs sm:text-sm">
-                              <span className="text-lg" title={esReceta ? 'Receta' : 'Ingrediente'}>
-                                {esReceta ? '📋' : '🥬'}
-                              </span>
-                            </td>
-                            <td className="px-3 py-2 text-xs sm:text-sm text-gray-900 whitespace-nowrap max-w-[180px] truncate">
-                              <span className={esReceta ? 'text-purple-700 font-medium' : ''}>
+                    return (
+                      <div
+                        key={index}
+                        className={`rounded-lg border p-3 ${
+                          !suficiente 
+                            ? 'bg-red-50 border-red-300' 
+                            : esReceta 
+                              ? 'bg-purple-50 border-purple-200' 
+                              : 'bg-orange-50 border-orange-200'
+                        }`}
+                      >
+                        {/* Header: Icono + Nombre */}
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <span className="text-2xl flex-shrink-0" title={esReceta ? 'Receta' : 'Ingrediente'}>
+                              {esReceta ? '📋' : '🥬'}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <div className={`font-medium text-sm ${esReceta ? 'text-purple-700' : 'text-gray-900'} truncate`}>
                                 {itemData.nombre}
-                              </span>
-                            </td>
-                            <td className="px-3 py-2 text-xs sm:text-sm text-gray-900">
-                              {item.cantidad}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {esReceta ? 'Sub-receta' : 'Ingrediente'}
+                              </div>
+                            </div>
+                          </div>
+                          {/* Badge de estado */}
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${
+                            suficiente 
+                              ? 'bg-green-100 text-green-700' 
+                              : 'bg-red-100 text-red-700'
+                          }`}>
+                            {suficiente ? '✓ OK' : '⚠ Bajo'}
+                          </span>
+                        </div>
+
+                        {/* Detalles en grid */}
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          {/* Cantidad necesaria */}
+                          <div>
+                            <div className="text-gray-500 mb-1">Cantidad</div>
+                            <div className="font-semibold text-gray-900">
+                              {item.cantidad} {item.unidadMedida}
                               {cantidadConsulta > 1 && (
-                                <span className="text-gray-500 ml-1">({cantidadNecesaria} total)</span>
+                                <div className="text-xs text-gray-500 font-normal">
+                                  ({cantidadNecesaria} total)
+                                </div>
                               )}
-                            </td>
-                            <td className="px-3 py-2 text-xs sm:text-sm text-gray-900">{item.unidadMedida}</td>
-                            <td className={`px-3 py-2 text-xs sm:text-sm ${suficiente ? 'text-green-600' : 'text-red-600'}`}>{disponible}</td>
-                            {/* Solo super_admin ve los precios */}
-                            {canViewPrices && (
-                              <>
-                                <td className="px-3 py-2 text-xs sm:text-sm text-gray-900">
-                                  <span className={esReceta ? 'text-purple-600' : ''}>
-                                    S/.{precioUnitarioItem.toFixed(2)}
-                                  </span>
-                                </td>
-                                <td className="px-3 py-2 text-xs sm:text-sm text-gray-900">
-                                  <span className={esReceta ? 'text-purple-600' : ''}>
-                                    S/.{subtotal.toFixed(2)}
-                                  </span>
-                                </td>
-                              </>
-                            )}
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                            </div>
+                          </div>
+
+                          {/* Disponible */}
+                          <div>
+                            <div className="text-gray-500 mb-1">Disponible</div>
+                            <div className={`font-semibold ${suficiente ? 'text-green-600' : 'text-red-600'}`}>
+                              {disponible} {item.unidadMedida}
+                            </div>
+                          </div>
+
+                          {/* Precios - Solo super_admin */}
+                          {canViewPrices && (
+                            <>
+                              <div>
+                                <div className="text-gray-500 mb-1">Precio/Unidad</div>
+                                <div className={`font-semibold ${esReceta ? 'text-purple-600' : 'text-gray-900'}`}>
+                                  S/.{precioUnitarioItem.toFixed(2)}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-gray-500 mb-1">Subtotal</div>
+                                <div className={`font-semibold ${esReceta ? 'text-purple-600' : 'text-gray-900'}`}>
+                                  S/.{subtotal.toFixed(2)}
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -415,10 +440,17 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
             </div>
           </div>
 
-          {/* 🎯 NUEVO: Historial de Fases */}
+          {/* 🎯 Historial de Fases (flujo de trabajo) */}
           <HistorialFases 
             receta={datosReceta} 
             onReiniciar={handleReiniciarReceta}
+          />
+
+          {/* 🎯 NUEVO: Historial de Producción (producciones realizadas) */}
+          <HistorialProduccionReceta 
+            recetaId={datosReceta._id}
+            recetaNombre={datosReceta.nombre}
+            unidadMedida={datosReceta.rendimiento?.unidadMedida || 'unidad'}
           />
 
           {/* Botón Cerrar */}
