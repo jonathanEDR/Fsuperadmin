@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardCard from '../components/common/DashboardCard';
 import ProductosVendidosDashboard from '../components/Graphics/ProductosVendidosDashboardNew';
 import VentasLineChart from '../components/Graphics/VentasLineChart';
@@ -9,10 +10,41 @@ import ProduccionLineChart from '../components/Produccion/Graficos/ProduccionLin
 import { useProductosVendidosHoy } from '../hooks/useProductosVendidosHoy';
 import { useDashboardResumenHoy } from '../hooks/useDashboardResumenHoy';
 import { useRole } from '../context/RoleContext';
-import { Package, TrendingUp, BarChart3, DollarSign, Factory, ClipboardList, Wallet } from 'lucide-react';
+import { Package, TrendingUp, BarChart3, DollarSign, Factory, ClipboardList, Wallet, AlertTriangle } from 'lucide-react';
 
+/**
+ * Dashboard Principal - SOLO PARA SUPER_ADMIN
+ * Incluye gráficos avanzados, métricas y análisis detallados
+ */
 function BienvenidaPage() {
   const userRole = useRole();
+  const navigate = useNavigate();
+
+  // Protección: Solo super_admin puede acceder a esta página
+  useEffect(() => {
+    if (userRole && userRole !== 'super_admin') {
+      console.warn('⚠️ Acceso denegado: Solo super_admin puede ver esta página');
+      navigate('/dashboard', { replace: true });
+    }
+  }, [userRole, navigate]);
+
+  // Si no es super_admin, mostrar mensaje mientras redirige
+  if (userRole && userRole !== 'super_admin') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md text-center">
+          <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Acceso Restringido</h2>
+          <p className="text-gray-600 mb-4">
+            Esta página es exclusiva para Super Administradores.
+          </p>
+          <p className="text-sm text-gray-500">
+            Redirigiendo...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Estado para el período de visualización: 'hoy' | 'mes'
   const [periodo, setPeriodo] = useState('mes'); // Por defecto mostrar el mes

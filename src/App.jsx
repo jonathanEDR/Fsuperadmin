@@ -14,6 +14,7 @@ import { SuperAdminDashboard, AdminDashboardLayout } from './components/layout';
 import AdminDashboard from './components/layout/dashboards/AdminDashboard';
 import PagosRealizadosPage from './Pages/PagosRealizadosPage';
 import BienvenidaPage from './Pages/BienvenidaPage';
+import AdminDashboardHome from './Pages/AdminDashboardHome';
 import UsuariosPage from './Pages/UsuariosPage';
 import ProductosPage from './Pages/ProductosPage';
 import CategoriasPage from './Pages/CategoriasPage';
@@ -154,7 +155,7 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route path="dashboard" element={<BienvenidaPage />} />
+              <Route path="dashboard" element={<AdminDashboardHome />} />
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="tareas" element={<TareasPage />} />
               <Route path="productos" element={<ProductosPage />} />
