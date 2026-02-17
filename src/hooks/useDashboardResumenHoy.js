@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 
 /**
- * Hook para obtener resumen de datos del día actual para el Dashboard
+ * Hook para obtener resumen de datos para el Dashboard
  * Obtiene: Ventas netas, Total cobros, Costo producción, Pagos personal, Registros diarios
  * Zona horaria: America/Lima (UTC-5)
+ * @param {string} periodo - 'hoy' | 'mes' - Período a consultar
  */
-export const useDashboardResumenHoy = () => {
+export const useDashboardResumenHoy = (periodo = 'hoy') => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [resumen, setResumen] = useState({
@@ -18,36 +19,48 @@ export const useDashboardResumenHoy = () => {
     pagosPersonal: 0,
     cantidadPagosPersonal: 0,
     registrosDiarios: 0,
-    cantidadRegistrosDiarios: 0
+    cantidadRegistrosDiarios: 0,
+    totalEgresos: 0,
+    flujoNeto: 0
   });
 
-  // Obtener fecha de hoy en formato YYYY-MM-DD (zona horaria Perú)
-  const obtenerFechaHoy = useCallback(() => {
+  // Obtener rango de fechas según el período seleccionado
+  const obtenerRangoFechas = useCallback(() => {
     const ahora = new Date();
-    // Obtener fecha en zona horaria de Perú
-    const fechaPeru = ahora.toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
-    return fechaPeru;
-  }, []);
+    const fechaHoy = ahora.toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
+    
+    if (periodo === 'mes') {
+      // Obtener primer día del mes actual
+      const [year, month] = fechaHoy.split('-');
+      const fechaInicio = `${year}-${month}-01`;
+      return { fechaInicio, fechaFin: fechaHoy };
+    }
+    
+    // Por defecto: solo hoy
+    return { fechaInicio: fechaHoy, fechaFin: fechaHoy };
+  }, [periodo]);
 
   const fetchResumenDia = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const fechaHoy = obtenerFechaHoy();
+      const { fechaInicio, fechaFin } = obtenerRangoFechas();
       
       // Hacer todas las llamadas en paralelo
-      const [ventasRes, cobrosRes, produccionRes, pagosRes, registrosRes] = await Promise.allSettled([
-        // Obtener ventas del día (sin límite para obtener todas)
-        api.get(`/api/ventas?fechaInicio=${fechaHoy}&fechaFin=${fechaHoy}&limit=1000`),
-        // Obtener cobros del día
-        api.get(`/api/cobros?fechaInicio=${fechaHoy}&fechaFin=${fechaHoy}`),
-        // Obtener producción del día
-        api.get(`/api/produccion/estadisticas/graficos?fechaInicio=${fechaHoy}&fechaFin=${fechaHoy}`),
-        // Obtener pagos al personal del día
-        api.get(`/api/pagos-realizados/estadisticas/graficos?fechaInicio=${fechaHoy}&fechaFin=${fechaHoy}`),
-        // Obtener registros diarios de pago del día
-        api.get(`/api/gestion-personal/estadisticas/registros-diarios?fechaInicio=${fechaHoy}&fechaFin=${fechaHoy}`)
+      const [ventasRes, cobrosRes, produccionRes, pagosRes, registrosRes, cajaRes] = await Promise.allSettled([
+        // Obtener ventas del período
+        api.get(`/api/ventas?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}&limit=10000`),
+        // Obtener cobros del período
+        api.get(`/api/cobros?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`),
+        // Obtener producción del período
+        api.get(`/api/produccion/estadisticas/graficos?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`),
+        // Obtener pagos al personal del período
+        api.get(`/api/pagos-realizados/estadisticas/graficos?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`),
+        // Obtener registros diarios de pago del período
+        api.get(`/api/gestion-personal/estadisticas/registros-diarios?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`),
+        // Obtener resumen de caja del período
+        api.get(`/api/caja/resumen?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`)
       ]);
 
       // Procesar ventas
@@ -60,6 +73,8 @@ export const useDashboardResumenHoy = () => {
       let cantidadPagosPersonal = 0;
       let registrosDiarios = 0;
       let cantidadRegistrosDiarios = 0;
+      let totalEgresos = 0;
+      let totalIngresos = 0;
 
       // Procesar ventas
       if (ventasRes.status === 'fulfilled' && ventasRes.value?.data) {
@@ -143,6 +158,13 @@ export const useDashboardResumenHoy = () => {
         }
       }
 
+      // Procesar resumen de caja
+      if (cajaRes.status === 'fulfilled' && cajaRes.value?.data) {
+        const cajaData = cajaRes.value.data;
+        totalEgresos = cajaData.totalEgresos || 0;
+        totalIngresos = cajaData.totalIngresos || 0;
+      }
+
       setResumen({
         ventasNetas,
         totalCobros,
@@ -152,7 +174,9 @@ export const useDashboardResumenHoy = () => {
         pagosPersonal,
         cantidadPagosPersonal,
         registrosDiarios,
-        cantidadRegistrosDiarios
+        cantidadRegistrosDiarios,
+        totalEgresos,
+        flujoNeto: totalIngresos - totalEgresos
       });
 
     } catch (err) {
@@ -161,7 +185,7 @@ export const useDashboardResumenHoy = () => {
     } finally {
       setLoading(false);
     }
-  }, [obtenerFechaHoy]);
+  }, [obtenerRangoFechas]);
 
   useEffect(() => {
     fetchResumenDia();
@@ -170,7 +194,7 @@ export const useDashboardResumenHoy = () => {
     const interval = setInterval(fetchResumenDia, 5 * 60 * 1000);
     
     return () => clearInterval(interval);
-  }, [fetchResumenDia]);
+  }, [fetchResumenDia, periodo]);
 
   return {
     ...resumen,

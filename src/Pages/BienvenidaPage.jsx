@@ -2,21 +2,29 @@ import React, { useState } from 'react';
 import DashboardCard from '../components/common/DashboardCard';
 import ProductosVendidosDashboard from '../components/Graphics/ProductosVendidosDashboardNew';
 import VentasLineChart from '../components/Graphics/VentasLineChart';
+import CajaLineChart from '../components/Graphics/CajaLineChart';
 import CobrosLineChart from '../components/Graphics/CobrosLineChart';
 import RegistrosDiariosLineChart from '../components/Graphics/RegistrosDiariosLineChart';
 import ProduccionLineChart from '../components/Produccion/Graficos/ProduccionLineChart';
 import { useProductosVendidosHoy } from '../hooks/useProductosVendidosHoy';
 import { useDashboardResumenHoy } from '../hooks/useDashboardResumenHoy';
 import { useRole } from '../context/RoleContext';
-import { Package, TrendingUp, BarChart3, DollarSign, Factory, ClipboardList } from 'lucide-react';
+import { Package, TrendingUp, BarChart3, DollarSign, Factory, ClipboardList, Wallet } from 'lucide-react';
 
 function BienvenidaPage() {
   const userRole = useRole();
+
+  // Estado para el período de visualización: 'hoy' | 'mes'
+  const [periodo, setPeriodo] = useState('mes'); // Por defecto mostrar el mes
+
+  // Estado para controlar qué tarjeta está expandida
+  const [expandedCard, setExpandedCard] = useState(null);
+
   const { 
     totalProductosHoy, 
     loading: loadingProductos, 
     error: errorProductos 
-  } = useProductosVendidosHoy();
+  } = useProductosVendidosHoy(periodo);
 
   // Hook para obtener resumen del día (ventas, cobros, producción, registros)
   const {
@@ -24,12 +32,10 @@ function BienvenidaPage() {
     totalCobros,
     costoProduccion,
     registrosDiarios,
+    totalEgresos,
     loading: loadingResumen,
     error: errorResumen
-  } = useDashboardResumenHoy();
-
-  // Estado para controlar qué tarjeta está expandida
-  const [expandedCard, setExpandedCard] = useState(null);
+  } = useDashboardResumenHoy(periodo);
 
   // Función para manejar la expansión de tarjetas
   const handleCardExpand = (cardId) => {
@@ -41,28 +47,92 @@ function BienvenidaPage() {
     return `S/ ${monto.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
+  // Calcular Utilidad Bruta según el período
+  const calcularUtilidadBruta = () => {
+    if (periodo === 'hoy') {
+      // Fórmula para HOY: Cobros - Producción - Registros de pagos
+      return totalCobros - costoProduccion - registrosDiarios;
+    } else {
+      // Fórmula para MES: Cobros - Producción - Egresos totales
+      return totalCobros - costoProduccion - totalEgresos;
+    }
+  };
+
+  const utilidadBruta = calcularUtilidadBruta();
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Bienvenido al Panel Super Admin
-        </h1>
-        <p className="text-gray-600">
-          Resumen ejecutivo de tu negocio - Datos del día de hoy
-        </p>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Bienvenido al Panel Super Admin
+            </h1>
+            <p className="text-gray-600">
+              Resumen ejecutivo de tu negocio - {periodo === 'hoy' ? 'Datos del día de hoy' : 'Datos del mes actual'}
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            {/* Tarjeta de Utilidad Bruta */}
+            <div className={`px-6 py-3 rounded-lg shadow-md border-2 ${
+              utilidadBruta >= 0 
+                ? 'bg-green-50 border-green-500' 
+                : 'bg-red-50 border-red-500'
+            }`}>
+              <div className="text-xs font-semibold text-gray-600 mb-1">
+                {periodo === 'hoy' ? 'Utilidad Bruta del Día' : 'Utilidad Bruta del Mes'}
+              </div>
+              <div className={`text-2xl font-bold ${
+                utilidadBruta >= 0 ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {formatMonto(utilidadBruta)}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                {periodo === 'hoy' 
+                  ? 'Cobros - Producción - Pagos' 
+                  : 'Cobros - Producción - Egresos'}
+              </div>
+            </div>
+
+            {/* Selector de Período */}
+            <div className="flex items-center gap-2 bg-white rounded-lg shadow-sm border border-gray-200 p-1">
+              <button
+                onClick={() => setPeriodo('hoy')}
+                className={`px-4 py-2 rounded-md font-medium text-sm transition-all duration-200 ${
+                  periodo === 'hoy'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                📅 Hoy
+              </button>
+              <button
+                onClick={() => setPeriodo('mes')}
+                className={`px-4 py-2 rounded-md font-medium text-sm transition-all duration-200 ${
+                  periodo === 'mes'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                📆 Este Mes
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Dashboard Cards Grid */}
       <div className={`grid gap-6 transition-all duration-500 ${
-        expandedCard ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'
+        expandedCard ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6'
       }`}>
         
         {/* Card: Productos Vendidos Hoy */}
         <DashboardCard
-          title="Productos Vendidos Hoy"
+          title={periodo === 'hoy' ? 'Productos Vendidos Hoy' : 'Productos del Mes'}
           value={totalProductosHoy}
-          subtitle="unidades vendidas"
+          subtitle={periodo === 'hoy' ? 'unidades vendidas' : 'unidades este mes'}
           icon="📦"
           color="green"
           loading={loadingProductos}
@@ -79,9 +149,9 @@ function BienvenidaPage() {
 
         {/* Card: Ventas Netas del Día */}
         <DashboardCard
-          title="Ventas del Día"
+          title={periodo === 'hoy' ? 'Ventas del Día' : 'Ventas del Mes'}
           value={formatMonto(ventasNetas)}
-          subtitle="ventas netas hoy"
+          subtitle={periodo === 'hoy' ? 'ventas netas hoy' : 'ventas netas este mes'}
           icon={<TrendingUp size={32} />}
           color="blue"
           loading={loadingResumen}
@@ -98,9 +168,9 @@ function BienvenidaPage() {
 
         {/* Card: Cobros del Día */}
         <DashboardCard
-          title="Cobros del Día"
+          title={periodo === 'hoy' ? 'Cobros del Día' : 'Cobros del Mes'}
           value={formatMonto(totalCobros)}
-          subtitle="recaudación hoy"
+          subtitle={periodo === 'hoy' ? 'recaudación hoy' : 'recaudación este mes'}
           icon={<DollarSign size={32} />}
           color="emerald"
           loading={loadingResumen}
@@ -115,11 +185,30 @@ function BienvenidaPage() {
           </div>
         </DashboardCard>
 
+        {/* Card: Egresos de Caja del Día */}
+        <DashboardCard
+          title={periodo === 'hoy' ? 'Egresos del Día' : 'Egresos del Mes'}
+          value={formatMonto(totalEgresos)}
+          subtitle={periodo === 'hoy' ? 'salidas de caja hoy' : 'salidas de caja este mes'}
+          icon={<Wallet size={32} />}
+          color="red"
+          loading={loadingResumen}
+          error={errorResumen}
+          expandable={true}
+          isExpanded={expandedCard === 'evolucion-caja'}
+          onExpandToggle={() => handleCardExpand('evolucion-caja')}
+        >
+          {/* Contenido expandible con el gráfico de caja */}
+          <div className="min-h-[600px]">
+            <CajaLineChart userRole={userRole} />
+          </div>
+        </DashboardCard>
+
         {/* Card: Producción del Día */}
         <DashboardCard
-          title="Producción del Día"
+          title={periodo === 'hoy' ? 'Producción del Día' : 'Producción del Mes'}
           value={formatMonto(costoProduccion)}
-          subtitle="costo de producción hoy"
+          subtitle={periodo === 'hoy' ? 'costo de producción hoy' : 'costo de producción este mes'}
           icon={<Factory size={32} />}
           color="purple"
           loading={loadingResumen}
@@ -136,9 +225,9 @@ function BienvenidaPage() {
 
         {/* Card: Registros y Pagos del Personal */}
         <DashboardCard
-          title="Personal del Día"
+          title={periodo === 'hoy' ? 'Personal del Día' : 'Personal del Mes'}
           value={formatMonto(registrosDiarios)}
-          subtitle="devengado + pagos"
+          subtitle={periodo === 'hoy' ? 'devengado + pagos' : 'devengado + pagos este mes'}
           icon={<ClipboardList size={32} />}
           color="orange"
           loading={loadingResumen}

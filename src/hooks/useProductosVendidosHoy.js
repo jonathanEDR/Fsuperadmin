@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 
-export const useProductosVendidosHoy = () => {
+export const useProductosVendidosHoy = (periodo = 'hoy') => {
   const [data, setData] = useState({
     totalProductosHoy: 0,
     productoMasVendido: null,
@@ -11,11 +11,21 @@ export const useProductosVendidosHoy = () => {
 
   const { getToken } = useAuth();
 
-  // Función para obtener la fecha de hoy en formato YYYY-MM-DD (zona horaria Perú)
-  const obtenerFechaHoy = useCallback(() => {
+  // Función para obtener el rango de fechas según el período
+  const obtenerRangoFechas = useCallback(() => {
     const ahora = new Date();
-    return ahora.toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
-  }, []);
+    const fechaHoy = ahora.toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
+    
+    if (periodo === 'mes') {
+      // Obtener primer día del mes actual
+      const [year, month] = fechaHoy.split('-');
+      const fechaInicio = `${year}-${month}-01`;
+      return { fechaInicio, fechaFin: fechaHoy };
+    }
+    
+    // Por defecto: solo hoy
+    return { fechaInicio: fechaHoy, fechaFin: fechaHoy };
+  }, [periodo]);
 
   const fetchProductosHoy = async () => {
     try {
@@ -32,12 +42,12 @@ export const useProductosVendidosHoy = () => {
         'Content-Type': 'application/json'
       };
 
-      // Fecha de hoy en zona horaria Perú
-      const fechaHoy = obtenerFechaHoy();
+      // Rango de fechas según el período
+      const { fechaInicio, fechaFin } = obtenerRangoFechas();
 
-      // Fetch ventas de hoy con filtro de fecha y límite alto
+      // Fetch ventas del período con filtro de fecha y límite alto
       const ventasResponse = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/ventas?fechaInicio=${fechaHoy}&fechaFin=${fechaHoy}&limit=1000`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/ventas?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}&limit=10000`,
         { headers }
       );
 
@@ -103,7 +113,7 @@ export const useProductosVendidosHoy = () => {
 
   useEffect(() => {
     fetchProductosHoy();
-  }, []);
+  }, [periodo]); // Re-ejecutar cuando cambie el período
 
   return {
     ...data,
