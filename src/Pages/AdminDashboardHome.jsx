@@ -2,17 +2,11 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ShoppingCart, 
-  Package, 
   DollarSign, 
-  Users, 
-  ClipboardList, 
-  Factory, 
   Wallet,
-  TrendingUp,
-  BarChart3,
-  FileText,
-  Calendar,
-  Settings
+  Factory, 
+  ClipboardList, 
+  BarChart3
 } from 'lucide-react';
 
 /**
@@ -23,7 +17,7 @@ import {
 function AdminDashboardHome() {
   const navigate = useNavigate();
 
-  // Definir los accesos rápidos disponibles para admin
+  // Definir los accesos rápidos disponibles para admin (solo los módulos principales)
   const accesoRapido = [
     {
       id: 'ventas',
@@ -33,15 +27,6 @@ function AdminDashboardHome() {
       ruta: '/admin/ventas',
       color: 'bg-blue-500',
       hover: 'hover:bg-blue-600'
-    },
-    {
-      id: 'productos',
-      titulo: 'Productos',
-      descripcion: 'Gestión de inventario',
-      icono: Package,
-      ruta: '/admin/productos',
-      color: 'bg-green-500',
-      hover: 'hover:bg-green-600'
     },
     {
       id: 'cobros',
@@ -71,15 +56,6 @@ function AdminDashboardHome() {
       hover: 'hover:bg-purple-600'
     },
     {
-      id: 'personal',
-      titulo: 'Personal',
-      descripcion: 'Gestión de colaboradores',
-      icono: Users,
-      ruta: '/admin/personal-v2',
-      color: 'bg-indigo-500',
-      hover: 'hover:bg-indigo-600'
-    },
-    {
       id: 'tareas',
       titulo: 'Tareas',
       descripcion: 'Lista de tareas pendientes',
@@ -89,33 +65,6 @@ function AdminDashboardHome() {
       hover: 'hover:bg-pink-600'
     },
     {
-      id: 'catalogo',
-      titulo: 'Catálogo',
-      descripcion: 'Catálogo de productos',
-      icono: FileText,
-      ruta: '/admin/catalogo',
-      color: 'bg-teal-500',
-      hover: 'hover:bg-teal-600'
-    },
-    {
-      id: 'devoluciones',
-      titulo: 'Devoluciones',
-      descripcion: 'Gestión de devoluciones',
-      icono: TrendingUp,
-      ruta: '/admin/devoluciones',
-      color: 'bg-orange-500',
-      hover: 'hover:bg-orange-600'
-    },
-    {
-      id: 'qr',
-      titulo: 'QR Asistencias',
-      descripcion: 'Gestión de códigos QR',
-      icono: Calendar,
-      ruta: '/admin/qr-asistencias',
-      color: 'bg-cyan-500',
-      hover: 'hover:bg-cyan-600'
-    },
-    {
       id: 'escaner',
       titulo: 'Escáner QR',
       descripcion: 'Escanear asistencias',
@@ -123,15 +72,6 @@ function AdminDashboardHome() {
       ruta: '/admin/escaner-qr',
       color: 'bg-lime-500',
       hover: 'hover:bg-lime-600'
-    },
-    {
-      id: 'perfil',
-      titulo: 'Mi Perfil',
-      descripcion: 'Configuración de usuario',
-      icono: Settings,
-      ruta: '/admin/perfil',
-      color: 'bg-gray-500',
-      hover: 'hover:bg-gray-600'
     }
   ];
 
@@ -152,7 +92,7 @@ function AdminDashboardHome() {
       </div>
 
       {/* Grid de Accesos Rápidos */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {accesoRapido.map((acceso) => {
           const IconoComponente = acceso.icono;
           
