@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Plus, Minus, Trash2, ShoppingCart, CheckCircle } from 'lucide-react';
+import { X, Plus, Minus, Trash2, ShoppingCart, CheckCircle, PlusCircle, RefreshCw } from 'lucide-react';
 
 const CarritoFlotante = ({
   carrito = [],
@@ -8,7 +8,14 @@ const CarritoFlotante = ({
   onEliminarProducto,
   onLimpiarCarrito,
   onConfirmarVenta,
-  onCerrar
+  onCerrar,
+  // Modo de venta
+  modoVenta = 'nueva',
+  onModoChange,
+  ventasPendientes = [],
+  ventaSeleccionada = null,
+  onVentaSeleccionada,
+  loadingVentas = false
 }) => {
 
   const handleCantidadChange = (productoId, nuevaCantidad) => {
@@ -166,16 +173,93 @@ const CarritoFlotante = ({
               </div>
             </div>
 
+            {/* Toggle modo de venta */}
+            {onModoChange && (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Destino del carrito</p>
+                <div className="grid grid-cols-2 gap-1 bg-gray-100 p-1 rounded-lg">
+                  <button
+                    onClick={() => onModoChange('nueva')}
+                    className={`py-2 px-2 text-xs font-bold rounded-md transition-all ${
+                      modoVenta === 'nueva'
+                        ? 'bg-purple-600 text-white shadow-sm'
+                        : 'text-gray-500 hover:text-gray-800'
+                    }`}
+                  >
+                    ✨ Nueva Venta
+                  </button>
+                  <button
+                    onClick={() => onModoChange('existente')}
+                    className={`py-2 px-2 text-xs font-bold rounded-md transition-all ${
+                      modoVenta === 'existente'
+                        ? 'bg-orange-500 text-white shadow-sm'
+                        : 'text-gray-500 hover:text-gray-800'
+                    }`}
+                  >
+                    📋 Agregar a existente
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Selector de venta existente */}
+            {modoVenta === 'existente' && (
+              <div className="space-y-1.5">
+                <p className="text-xs font-semibold text-gray-500">Selecciona la venta destino</p>
+                {loadingVentas ? (
+                  <div className="flex items-center justify-center py-3 text-orange-500 text-sm gap-2">
+                    <RefreshCw size={14} className="animate-spin" />
+                    <span>Cargando ventas...</span>
+                  </div>
+                ) : ventasPendientes.length === 0 ? (
+                  <p className="text-xs text-gray-400 text-center py-3 bg-gray-50 rounded-lg border border-gray-200">
+                    No hay ventas pendientes disponibles
+                  </p>
+                ) : (
+                  <select
+                    value={ventaSeleccionada || ''}
+                    onChange={(e) => onVentaSeleccionada(e.target.value || null)}
+                    className="w-full text-sm border-2 border-orange-300 rounded-lg px-3 py-2.5 focus:outline-none focus:border-orange-500 bg-white text-gray-700 font-medium cursor-pointer"
+                  >
+                    <option value="">-- Elige una venta --</option>
+                    {ventasPendientes.map(venta => (
+                      <option key={venta._id} value={venta._id}>
+                        #{venta.numeroVenta || venta._id.slice(-6)}
+                        {' · '}{venta.user_info?.email || venta.user_info?.nombre_negocio || 'Sin cliente'}
+                        {' · S/ '}{(venta.montoTotal || 0).toFixed(2)}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            )}
+
             {/* Botones de acción */}
             <div className="space-y-2">
               <button
                 onClick={onConfirmarVenta}
-                className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 active:bg-purple-800 transition-all font-bold flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                disabled={modoVenta === 'existente' && !ventaSeleccionada}
+                className={`w-full py-3 px-4 rounded-lg transition-all font-bold flex items-center justify-center gap-2 shadow-lg ${
+                  modoVenta === 'existente' && !ventaSeleccionada
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : modoVenta === 'existente'
+                      ? 'bg-orange-500 text-white hover:bg-orange-600 active:bg-orange-700 hover:shadow-xl transform hover:-translate-y-0.5'
+                      : 'bg-purple-600 text-white hover:bg-purple-700 active:bg-purple-800 hover:shadow-xl transform hover:-translate-y-0.5'
+                }`}
               >
-                <CheckCircle size={20} />
-                Confirmar Venta
+                {modoVenta === 'existente' ? (
+                  <>
+                    <PlusCircle size={20} />
+                    {ventaSeleccionada ? 'Agregar a esta Venta' : 'Selecciona una venta'}
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle size={20} />
+                    Confirmar Nueva Venta
+                  </>
+                )}
               </button>
-              
+
               <button
                 onClick={onLimpiarCarrito}
                 className="w-full bg-white text-purple-600 py-2 px-4 rounded-lg hover:bg-purple-50 transition-all text-sm font-semibold border-2 border-purple-200 hover:border-purple-400"

@@ -44,6 +44,12 @@ const CatalogoVentasPageView = ({ userRole = 'user' }) => {
   const [vistaCarrito, setVistaCarrito] = useState(false);
   const [cargandoProducto, setCargandoProducto] = useState(null);
 
+  // Estados para modo de venta
+  const [modoVenta, setModoVenta] = useState('nueva');
+  const [ventasPendientes, setVentasPendientes] = useState([]);
+  const [ventaSeleccionada, setVentaSeleccionada] = useState(null);
+  const [loadingVentas, setLoadingVentas] = useState(false);
+
   // Responsive states
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
@@ -210,49 +216,117 @@ const CatalogoVentasPageView = ({ userRole = 'user' }) => {
     setCarrito([]);
   };
 
-  // Procesar venta
+  // Cargar ventas pendientes para modo "agregar a existente"
+  const cargarVentasPendientes = async () => {
+    setLoadingVentas(true);
+    try {
+      const token = await getToken();
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/ventas?page=1&limit=100`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!response.ok) throw new Error('Error al cargar ventas');
+      const data = await response.json();
+      const todasVentas = data.ventas || data;
+      // Solo ventas con estado de pago pendiente y no finalizadas
+      const pendientes = todasVentas.filter(v =>
+        v.estadoPago !== 'Pagado' && v.estadoVenta !== 'finalizada'
+      );
+      setVentasPendientes(pendientes);
+    } catch (err) {
+      console.error('Error al cargar ventas pendientes:', err);
+      setError('Error al cargar ventas pendientes');
+    } finally {
+      setLoadingVentas(false);
+    }
+  };
+
+  // Cambiar modo de venta
+  const handleModoChange = (modo) => {
+    setModoVenta(modo);
+    setVentaSeleccionada(null);
+    setError('');
+    // Cargar ventas pendientes solo la primera vez que se cambia al modo existente
+    if (modo === 'existente' && ventasPendientes.length === 0) {
+      cargarVentasPendientes();
+    }
+  };
   const handleConfirmarVenta = async () => {
+    if (carrito.length === 0) {
+      setError('Agrega al menos un producto al carrito');
+      return;
+    }
+    if (modoVenta === 'existente' && !ventaSeleccionada) {
+      setError('Selecciona una venta existente a la que agregar los productos');
+      return;
+    }
+
     try {
       setLoading(true);
+      setError('');
       const token = await getToken();
-      
-      // Crear la venta con los productos del carrito
-      const ventaData = {
-        productos: carrito.map(item => ({
-          productoId: item.productoId,
-          cantidad: item.cantidad,
-          precioUnitario: item.precioUnitario,
-          subtotal: item.subtotal
-        })),
-        fechadeVenta: new Date().toISOString(),
-        montoTotal: totalCarrito,
-        estadoPago: 'Pendiente',
-        cantidadPagada: 0
-      };
 
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/ventas`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(ventaData)
-      });
+      if (modoVenta === 'existente') {
+        // Agregar cada producto del carrito a la venta seleccionada
+        for (const item of carrito) {
+          const response = await fetch(
+            `${import.meta.env.VITE_BACKEND_URL}/api/ventas/${ventaSeleccionada}/productos`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                productoId: item.productoId,
+                cantidad: item.cantidad
+              })
+            }
+          );
+          if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.message || `Error al agregar "${item.nombre}"`);
+          }
+        }
+      } else {
+        // Crear una nueva venta con todos los productos
+        const ventaData = {
+          productos: carrito.map(item => ({
+            productoId: item.productoId,
+            cantidad: item.cantidad,
+            precioUnitario: item.precioUnitario,
+            subtotal: item.subtotal
+          })),
+          fechadeVenta: new Date().toISOString(),
+          montoTotal: totalCarrito,
+          estadoPago: 'Pendiente',
+          cantidadPagada: 0
+        };
 
-      if (!response.ok) {
-        throw new Error('Error al crear la venta');
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/ventas`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(ventaData)
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al crear la venta');
+        }
       }
 
-      // Limpiar carrito y mostrar éxito
+      // Limpiar estado y navegar
       limpiarCarrito();
       setVistaCarrito(false);
-      
-      // Navegar a ventas según el rol
+      setModoVenta('nueva');
+      setVentaSeleccionada(null);
       navigate(getVentasRoute());
-      
+
     } catch (err) {
       console.error('Error al confirmar venta:', err);
-      setError('Error al confirmar la venta');
+      setError(err.message || 'Error al confirmar la venta');
     } finally {
       setLoading(false);
     }
@@ -379,6 +453,12 @@ const CatalogoVentasPageView = ({ userRole = 'user' }) => {
                 onLimpiarCarrito={limpiarCarrito}
                 onConfirmarVenta={handleConfirmarVenta}
                 onCerrar={() => setVistaCarrito(false)}
+                modoVenta={modoVenta}
+                onModoChange={handleModoChange}
+                ventasPendientes={ventasPendientes}
+                ventaSeleccionada={ventaSeleccionada}
+                onVentaSeleccionada={setVentaSeleccionada}
+                loadingVentas={loadingVentas}
               />
             </div>
           )}
@@ -396,6 +476,12 @@ const CatalogoVentasPageView = ({ userRole = 'user' }) => {
                 onLimpiarCarrito={limpiarCarrito}
                 onConfirmarVenta={handleConfirmarVenta}
                 onCerrar={() => setVistaCarrito(false)}
+                modoVenta={modoVenta}
+                onModoChange={handleModoChange}
+                ventasPendientes={ventasPendientes}
+                ventaSeleccionada={ventaSeleccionada}
+                onVentaSeleccionada={setVentaSeleccionada}
+                loadingVentas={loadingVentas}
               />
             </div>
           </div>
