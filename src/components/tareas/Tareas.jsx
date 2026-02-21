@@ -280,6 +280,12 @@ export default function Tareas() {
           isOpen={isPlantillasModalOpen}
           onClose={() => setIsPlantillasModalOpen(false)}
           onPlantillasChange={cargarDatosIniciales}
+          onTareaCreada={(nuevaTarea) => {
+            setTareas(prev => [nuevaTarea, ...prev]);
+            setSuccess('Tarea creada y asignada exitosamente');
+            setTimeout(() => setSuccess(''), 3000);
+          }}
+          userRole={userRole}
         />
       )}
 

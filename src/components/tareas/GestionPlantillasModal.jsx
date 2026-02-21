@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
   Plus,
@@ -14,9 +14,15 @@ import {
   Tag,
   ChevronDown,
   ChevronUp,
-  ListChecks
+  ListChecks,
+  Zap,
+  Search,
+  UserPlus,
+  RefreshCw
 } from 'lucide-react';
 import { plantillasService, categoriasService } from '../../services/tareas';
+import { tareasService } from '../../services/tareas';
+import api from '../../services/api';
 
 // Prioridades disponibles
 const PRIORIDADES = [
@@ -29,13 +35,22 @@ const PRIORIDADES = [
 /**
  * Modal para gestionar plantillas de tareas
  */
-export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasChange }) {
+export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasChange, onTareaCreada, userRole }) {
   const [plantillas, setPlantillas] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // === Estados para asignación rápida ===
+  const [asignandoPlantillaId, setAsignandoPlantillaId] = useState(null);
+  const [usuarios, setUsuarios] = useState([]);
+  const [loadingUsuarios, setLoadingUsuarios] = useState(false);
+  const [busquedaUsuario, setBusquedaUsuario] = useState('');
+  const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
+  const [creandoTarea, setCreandoTarea] = useState(false);
+  const asignarRef = useRef(null);
 
   // Estado para nueva plantilla
   const [nuevaPlantilla, setNuevaPlantilla] = useState({
@@ -64,8 +79,132 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
   useEffect(() => {
     if (isOpen) {
       cargarDatos();
+      if (['admin', 'super_admin'].includes(userRole)) {
+        cargarUsuarios();
+      }
+    } else {
+      // Reset al cerrar
+      setAsignandoPlantillaId(null);
+      setUsuarioSeleccionado(null);
+      setBusquedaUsuario('');
     }
   }, [isOpen]);
+
+  // Cerrar panel de asignación al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (asignarRef.current && !asignarRef.current.contains(event.target)) {
+        setAsignandoPlantillaId(null);
+        setUsuarioSeleccionado(null);
+        setBusquedaUsuario('');
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const cargarUsuarios = async () => {
+    setLoadingUsuarios(true);
+    try {
+      const endpoint = userRole === 'super_admin'
+        ? '/api/admin/users?limit=500&role=all'
+        : '/api/notes/my-users?limit=500';
+      const response = await api.get(endpoint);
+      const usuariosFiltrados = (response.data.users || response.data || [])
+        .filter(u => {
+          const role = u.role || u.publicMetadata?.role || 'user';
+          return role !== 'de_baja' && ['user', 'admin', 'super_admin'].includes(role);
+        });
+      setUsuarios(usuariosFiltrados);
+    } catch (err) {
+      console.error('Error cargando usuarios:', err);
+    } finally {
+      setLoadingUsuarios(false);
+    }
+  };
+
+  const handleTogglePermanente = async (plantilla) => {
+    const nuevoValor = !plantilla.esPermanente;
+    // Optimistic update
+    setPlantillas(prev => prev.map(p =>
+      p._id === plantilla._id ? { ...p, esPermanente: nuevoValor } : p
+    ));
+    try {
+      await plantillasService.actualizar(plantilla._id, { esPermanente: nuevoValor });
+      setSuccess(nuevoValor ? 'Plantilla marcada como permanente' : 'Plantilla desactivada como permanente');
+      setTimeout(() => setSuccess(''), 3000);
+      if (onPlantillasChange) onPlantillasChange();
+    } catch (err) {
+      // Revertir si falla
+      setPlantillas(prev => prev.map(p =>
+        p._id === plantilla._id ? { ...p, esPermanente: !nuevoValor } : p
+      ));
+      setError('Error al actualizar permanencia');
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
+  const handleAsignarRapido = (plantillaId) => {
+    if (asignandoPlantillaId === plantillaId) {
+      setAsignandoPlantillaId(null);
+      setUsuarioSeleccionado(null);
+      setBusquedaUsuario('');
+    } else {
+      setAsignandoPlantillaId(plantillaId);
+      setUsuarioSeleccionado(null);
+      setBusquedaUsuario('');
+    }
+  };
+
+  const handleCrearTareaRapida = async (plantillaId) => {
+    if (!usuarioSeleccionado) {
+      setError('Selecciona un usuario para asignar la tarea');
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
+
+    setCreandoTarea(true);
+    setError('');
+    try {
+      // Fecha hoy a las 00:00 para programada
+      const hoy = new Date();
+      const year = hoy.getFullYear();
+      const month = String(hoy.getMonth() + 1).padStart(2, '0');
+      const day = String(hoy.getDate()).padStart(2, '0');
+      const fechaProgramada = `${year}-${month}-${day}T00:00:00`;
+      const fechaVencimiento = `${year}-${month}-${day}T23:59:00`;
+
+      const datos = {
+        plantillaId,
+        asignadoA: usuarioSeleccionado.clerk_id || usuarioSeleccionado.id,
+        fechaProgramada,
+        fechaVencimiento
+      };
+
+      const response = await tareasService.crear(datos);
+      setSuccess(`Tarea asignada a ${usuarioSeleccionado.nombre_negocio || usuarioSeleccionado.email}`);
+      setAsignandoPlantillaId(null);
+      setUsuarioSeleccionado(null);
+      setBusquedaUsuario('');
+      setTimeout(() => setSuccess(''), 3000);
+
+      // Notificar al componente padre para recargar tareas
+      if (onTareaCreada) onTareaCreada(response.data);
+      if (onPlantillasChange) onPlantillasChange();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Error al crear tarea desde plantilla');
+      setTimeout(() => setError(''), 4000);
+    } finally {
+      setCreandoTarea(false);
+    }
+  };
+
+  const usuariosFiltrados = usuarios.filter(u => {
+    const nombre = (u.nombre_negocio || u.email || u.firstName || '').toLowerCase();
+    const email = (u.email || '').toLowerCase();
+    const busqueda = busquedaUsuario.toLowerCase();
+    return nombre.includes(busqueda) || email.includes(busqueda);
+  });
 
   const cargarDatos = async () => {
     setLoading(true);
@@ -668,6 +807,12 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="font-medium text-gray-800">{plantilla.nombre}</span>
+                                {plantilla.esPermanente && (
+                                  <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                    <RefreshCw size={9} />
+                                    Permanente
+                                  </span>
+                                )}
                                 {plantilla.codigo && (
                                   <span className="text-xs font-mono bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
                                     {plantilla.codigo}
@@ -690,6 +835,34 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
                               )}
                             </div>
                             <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                              {/* Botón Permanente */}
+                              {['admin', 'super_admin'].includes(userRole) && (
+                                <button
+                                  onClick={() => handleTogglePermanente(plantilla)}
+                                  className={`p-1.5 rounded transition-colors ${
+                                    plantilla.esPermanente
+                                      ? 'bg-green-100 text-green-700'
+                                      : 'text-gray-400 hover:bg-gray-100'
+                                  }`}
+                                  title={plantilla.esPermanente ? 'Desactivar permanencia' : 'Marcar como permanente'}
+                                >
+                                  <RefreshCw size={15} />
+                                </button>
+                              )}
+                              {/* Botón Asignar Rápido */}
+                              {['admin', 'super_admin'].includes(userRole) && (
+                                <button
+                                  onClick={() => handleAsignarRapido(plantilla._id)}
+                                  className={`p-1.5 rounded transition-colors ${
+                                    asignandoPlantillaId === plantilla._id
+                                      ? 'bg-amber-100 text-amber-700'
+                                      : 'text-amber-500 hover:bg-amber-50'
+                                  }`}
+                                  title="Asignar Rápido"
+                                >
+                                  <Zap size={16} />
+                                </button>
+                              )}
                               <button
                                 onClick={() => handleDuplicarPlantilla(plantilla._id)}
                                 className="p-1.5 text-gray-500 hover:bg-gray-100 rounded transition-colors"
@@ -718,6 +891,112 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
                               )}
                             </div>
                           </div>
+
+                          {/* Panel de Asignación Rápida */}
+                          {asignandoPlantillaId === plantilla._id && (
+                            <div
+                              ref={asignarRef}
+                              className="px-4 pb-3 border-t border-amber-200 bg-amber-50"
+                              onClick={e => e.stopPropagation()}
+                            >
+                              <div className="py-3 space-y-3">
+                                <div className="flex items-center gap-2 text-sm font-medium text-amber-700">
+                                  <Zap size={14} />
+                                  Asignación Rápida — {plantilla.nombre}
+                                </div>
+
+                                {/* Buscador de usuarios */}
+                                <div className="relative">
+                                  <div className="flex items-center border border-amber-300 rounded-lg bg-white overflow-hidden">
+                                    <Search size={14} className="ml-2 text-gray-400" />
+                                    <input
+                                      type="text"
+                                      value={busquedaUsuario}
+                                      onChange={(e) => setBusquedaUsuario(e.target.value)}
+                                      className="flex-1 px-2 py-2 text-sm border-0 focus:ring-0 focus:outline-none"
+                                      placeholder="Buscar usuario..."
+                                      autoFocus
+                                    />
+                                  </div>
+
+                                  {/* Lista de usuarios */}
+                                  {loadingUsuarios ? (
+                                    <div className="flex justify-center py-3">
+                                      <Loader size={18} className="animate-spin text-amber-600" />
+                                    </div>
+                                  ) : (
+                                    <div className="mt-1 max-h-32 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-sm">
+                                      {usuariosFiltrados.length === 0 ? (
+                                        <div className="text-center py-2 text-xs text-gray-500">No se encontraron usuarios</div>
+                                      ) : (
+                                        usuariosFiltrados.map(u => {
+                                          const uid = u.clerk_id || u.id;
+                                          const isSelected = usuarioSeleccionado && (usuarioSeleccionado.clerk_id || usuarioSeleccionado.id) === uid;
+                                          return (
+                                            <button
+                                              key={uid}
+                                              type="button"
+                                              onClick={() => setUsuarioSeleccionado(u)}
+                                              className={`w-full text-left px-3 py-1.5 text-sm flex items-center gap-2 transition-colors ${
+                                                isSelected
+                                                  ? 'bg-amber-100 text-amber-800 font-medium'
+                                                  : 'hover:bg-gray-50 text-gray-700'
+                                              }`}
+                                            >
+                                              <UserPlus size={12} className={isSelected ? 'text-amber-600' : 'text-gray-400'} />
+                                              <span className="truncate">{u.nombre_negocio || u.firstName || u.email}</span>
+                                              <span className="text-xs text-gray-400 ml-auto">{u.role || 'user'}</span>
+                                            </button>
+                                          );
+                                        })
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Usuario seleccionado + botón confirmar */}
+                                <div className="flex items-center justify-between">
+                                  <div className="text-xs text-gray-500">
+                                    {usuarioSeleccionado ? (
+                                      <span className="text-amber-700 font-medium">
+                                        <UserPlus size={12} className="inline mr-1" />
+                                        {usuarioSeleccionado.nombre_negocio || usuarioSeleccionado.email}
+                                      </span>
+                                    ) : (
+                                      'Selecciona un usuario'
+                                    )}
+                                    <span className="ml-2 text-gray-400">• Vence hoy 11:59 PM</span>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setAsignandoPlantillaId(null);
+                                        setUsuarioSeleccionado(null);
+                                        setBusquedaUsuario('');
+                                      }}
+                                      className="px-3 py-1.5 text-xs text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                                    >
+                                      Cancelar
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleCrearTareaRapida(plantilla._id)}
+                                      disabled={!usuarioSeleccionado || creandoTarea}
+                                      className="px-3 py-1.5 text-xs bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 flex items-center gap-1"
+                                    >
+                                      {creandoTarea ? (
+                                        <Loader size={12} className="animate-spin" />
+                                      ) : (
+                                        <Zap size={12} />
+                                      )}
+                                      Asignar Ahora
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
 
                           {/* Detalles expandidos */}
                           {plantillaExpandida === plantilla._id && (

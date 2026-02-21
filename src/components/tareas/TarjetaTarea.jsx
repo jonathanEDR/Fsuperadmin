@@ -14,7 +14,8 @@ import {
   MessageSquare,
   Send,
   Play,
-  Pause
+  Pause,
+  RefreshCw
 } from 'lucide-react';
 
 // Configuración de colores por prioridad
@@ -93,6 +94,13 @@ export default function TarjetaTarea({
             <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-medium rounded-full ${estadoConfig.bg} ${estadoConfig.text}`}>
               {estadoConfig.label}
             </span>
+            {/* Badge de tarea permanente */}
+            {tarea.esPermanente && (
+              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-medium rounded-full bg-green-100 text-green-700 flex items-center gap-1">
+                <RefreshCw size={9} />
+                Diaria
+              </span>
+            )}
             {/* Indicador de vencimiento */}
             {estaVencida && (
               <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-medium rounded-full bg-red-100 text-red-800 flex items-center gap-1">
