@@ -1,22 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { recetaService } from '../../../services/recetaService';
 import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
 /**
  * Componente para mostrar el historial de producciones de una receta
- * Muestra detalles de cada producción: rendimiento, ingredientes consumidos, costos, etc.
+ * Con paginación real del servidor: carga 20 registros por página
+ * y usa "Cargar más" para traer los siguientes desde el backend.
  */
 const HistorialProduccionReceta = ({ recetaId, recetaNombre, unidadMedida = 'unidad' }) => {
   const { canViewPrices, isSuperAdmin } = useQuickPermissions();
   
   const [historial, setHistorial] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [cargandoMas, setCargandoMas] = useState(false);
   const [error, setError] = useState('');
   const [expandido, setExpandido] = useState(true);
   
-  // Límite inicial según rol
-  const limiteInicial = isSuperAdmin ? 10 : 5;
-  const [itemsVisibles, setItemsVisibles] = useState(limiteInicial);
+  // Paginación real del servidor
+  const LIMITE_POR_PAGINA = isSuperAdmin ? 20 : 10;
+  const [paginaActual, setPaginaActual] = useState(1);
+  const [paginacion, setPaginacion] = useState({
+    total: 0,
+    totalPaginas: 0,
+    tieneProxima: false
+  });
   
   // Filtros
   const [filtros, setFiltros] = useState({
@@ -34,42 +41,72 @@ const HistorialProduccionReceta = ({ recetaId, recetaNombre, unidadMedida = 'uni
     promedioProduccionDiaria: 0
   });
 
+  // Cargar primera página al montar o cuando cambian filtros
   useEffect(() => {
     if (recetaId) {
-      cargarHistorial();
+      // Reset al cambiar filtros
+      setHistorial([]);
+      setPaginaActual(1);
+      cargarHistorial(1, true);
     }
-  }, [recetaId]);
+  }, [recetaId, filtros.fechaInicio, filtros.fechaFin, filtros.operador]);
 
   useEffect(() => {
     calcularEstadisticas();
   }, [historial]);
 
-  const cargarHistorial = async () => {
+  const cargarHistorial = useCallback(async (pagina = 1, esNuevaBusqueda = false) => {
     try {
-      setLoading(true);
+      if (esNuevaBusqueda) {
+        setLoading(true);
+      } else {
+        setCargandoMas(true);
+      }
       setError('');
       
-      const response = await recetaService.obtenerHistorialProduccion(recetaId);
+      const opciones = {
+        pagina,
+        limite: LIMITE_POR_PAGINA,
+        ...(filtros.fechaInicio && { fechaInicio: filtros.fechaInicio }),
+        ...(filtros.fechaFin && { fechaFin: filtros.fechaFin }),
+        ...(filtros.operador && { operador: filtros.operador })
+      };
+      
+      const response = await recetaService.obtenerHistorialProduccion(recetaId, opciones);
       
       if (response.success && response.data) {
-        // El historial viene en response.data.historial
-        const historialData = response.data.historial || [];
-        // Ordenar por fecha descendente (más reciente primero)
-        const historialOrdenado = historialData.sort((a, b) => 
-          new Date(b.fecha) - new Date(a.fecha)
-        );
-        setHistorial(historialOrdenado);
+        const nuevosRegistros = response.data.historial || [];
+        const paginacionData = response.data.paginacion || {};
+        
+        if (esNuevaBusqueda) {
+          setHistorial(nuevosRegistros);
+        } else {
+          // Append: agregar al final sin duplicar
+          setHistorial(prev => {
+            const idsExistentes = new Set(prev.map(p => p._id?.toString()));
+            const sinDuplicados = nuevosRegistros.filter(r => !idsExistentes.has(r._id?.toString()));
+            return [...prev, ...sinDuplicados];
+          });
+        }
+        
+        setPaginacion({
+          total: paginacionData.total || 0,
+          totalPaginas: paginacionData.totalPaginas || 0,
+          tieneProxima: paginacionData.tieneProxima || false
+        });
+        setPaginaActual(pagina);
       } else {
-        setHistorial([]);
+        if (esNuevaBusqueda) setHistorial([]);
       }
     } catch (err) {
       console.error('❌ Error al cargar historial de producción:', err);
       setError(err.message || 'Error al cargar el historial');
-      setHistorial([]);
+      if (esNuevaBusqueda) setHistorial([]);
     } finally {
       setLoading(false);
+      setCargandoMas(false);
     }
-  };
+  }, [recetaId, filtros, LIMITE_POR_PAGINA]);
 
   const calcularEstadisticas = () => {
     if (!historial.length) {
@@ -121,28 +158,8 @@ const HistorialProduccionReceta = ({ recetaId, recetaNombre, unidadMedida = 'uni
     });
   };
 
-  // Filtrar historial
-  const historialFiltrado = historial.filter(produccion => {
-    if (filtros.fechaInicio) {
-      const fechaProduccion = new Date(produccion.fecha);
-      const fechaInicio = new Date(filtros.fechaInicio);
-      if (fechaProduccion < fechaInicio) return false;
-    }
-
-    if (filtros.fechaFin) {
-      const fechaProduccion = new Date(produccion.fecha);
-      const fechaFin = new Date(filtros.fechaFin);
-      fechaFin.setHours(23, 59, 59, 999);
-      if (fechaProduccion > fechaFin) return false;
-    }
-
-    if (filtros.operador) {
-      const operadorProduccion = (produccion.operador || '').toLowerCase();
-      if (!operadorProduccion.includes(filtros.operador.toLowerCase())) return false;
-    }
-
-    return true;
-  });
+  // El historial ya viene filtrado y paginado del servidor
+  const historialFiltrado = historial;
 
   const handleFiltroChange = (campo, valor) => {
     setFiltros(prev => ({ ...prev, [campo]: valor }));
@@ -153,7 +170,9 @@ const HistorialProduccionReceta = ({ recetaId, recetaNombre, unidadMedida = 'uni
   };
 
   const cargarMas = () => {
-    setItemsVisibles(prev => prev + (isSuperAdmin ? 10 : 5));
+    if (paginacion.tieneProxima && !cargandoMas) {
+      cargarHistorial(paginaActual + 1, false);
+    }
   };
 
   // Si no hay historial y no está cargando, mostrar mensaje compacto
@@ -183,7 +202,7 @@ const HistorialProduccionReceta = ({ recetaId, recetaNombre, unidadMedida = 'uni
           <span className="text-xl">📊</span>
           <span className="font-semibold text-gray-800">Historial de Producción</span>
           <span className="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full">
-            {historial.length} {historial.length === 1 ? 'producción' : 'producciones'}
+            {paginacion.total || historial.length} {(paginacion.total || historial.length) === 1 ? 'producción' : 'producciones'}
           </span>
         </div>
         <svg 
@@ -316,7 +335,7 @@ const HistorialProduccionReceta = ({ recetaId, recetaNombre, unidadMedida = 'uni
 
               {/* Lista de producciones */}
               <div className="space-y-3">
-                {historialFiltrado.slice(0, itemsVisibles).map((produccion, index) => (
+                {historialFiltrado.map((produccion, index) => (
                   <ProduccionCard 
                     key={produccion._id || index}
                     produccion={produccion}
@@ -327,29 +346,59 @@ const HistorialProduccionReceta = ({ recetaId, recetaNombre, unidadMedida = 'uni
                 ))}
               </div>
 
-              {/* Botón Ver más */}
-              {historialFiltrado.length > itemsVisibles && (
+              {/* Indicador de progreso de carga */}
+              {historial.length > 0 && paginacion.total > 0 && (
+                <div className="text-center mt-3">
+                  <span className="text-xs text-gray-500">
+                    Mostrando {historial.length} de {paginacion.total} producciones
+                  </span>
+                </div>
+              )}
+
+              {/* Botón Cargar más - llama al servidor por la siguiente página */}
+              {paginacion.tieneProxima && (
                 <div className="text-center mt-4">
                   <button
                     onClick={cargarMas}
-                    className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium"
+                    disabled={cargandoMas}
+                    className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mx-auto"
                   >
-                    📄 Ver más ({historialFiltrado.length - itemsVisibles} restantes)
+                    {cargandoMas ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
+                        Cargando...
+                      </>
+                    ) : (
+                      <>
+                        📄 Cargar más ({paginacion.total - historial.length} restantes)
+                      </>
+                    )}
                   </button>
                 </div>
               )}
 
+              {/* Indicador cuando se cargaron todos */}
+              {!paginacion.tieneProxima && historial.length > LIMITE_POR_PAGINA && (
+                <div className="text-center mt-3">
+                  <span className="text-xs text-gray-500">
+                    ✓ Mostrando todas las {historial.length} producciones
+                  </span>
+                </div>
+              )}
+
               {/* Sin resultados con filtros */}
-              {historialFiltrado.length === 0 && historial.length > 0 && (
+              {historialFiltrado.length === 0 && !loading && (
                 <div className="text-center py-6 text-gray-500">
                   <span className="text-3xl block mb-2">🔍</span>
-                  <p>No se encontraron producciones con los filtros aplicados</p>
-                  <button
-                    onClick={limpiarFiltros}
-                    className="mt-2 text-purple-600 hover:text-purple-700 text-sm underline"
-                  >
-                    Limpiar filtros
-                  </button>
+                  <p>No se encontraron producciones{(filtros.fechaInicio || filtros.fechaFin || filtros.operador) ? ' con los filtros aplicados' : ''}</p>
+                  {(filtros.fechaInicio || filtros.fechaFin || filtros.operador) && (
+                    <button
+                      onClick={limpiarFiltros}
+                      className="mt-2 text-purple-600 hover:text-purple-700 text-sm underline"
+                    >
+                      Limpiar filtros
+                    </button>
+                  )}
                 </div>
               )}
             </>

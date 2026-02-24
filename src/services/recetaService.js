@@ -167,12 +167,22 @@ export const recetaService = {
   },
 
   /**
-   * Obtener historial de producciones de una receta
+   * Obtener historial de producciones de una receta (con paginación)
    * @param {string} id - ID de la receta
-   * @returns {Promise} Historial completo de producciones
+   * @param {Object} opciones - { pagina, limite, fechaInicio, fechaFin, operador }
+   * @returns {Promise} Historial paginado con metadatos
    */
-  async obtenerHistorialProduccion(id) {
-    const response = await api.get(`/recetas/${id}/historial-produccion`);
+  async obtenerHistorialProduccion(id, opciones = {}) {
+    const params = new URLSearchParams();
+    if (opciones.pagina) params.append('pagina', opciones.pagina);
+    if (opciones.limite) params.append('limite', opciones.limite);
+    if (opciones.fechaInicio) params.append('fechaInicio', opciones.fechaInicio);
+    if (opciones.fechaFin) params.append('fechaFin', opciones.fechaFin);
+    if (opciones.operador) params.append('operador', opciones.operador);
+    
+    const queryString = params.toString();
+    const url = `/recetas/${id}/historial-produccion${queryString ? `?${queryString}` : ''}`;
+    const response = await api.get(url);
     return response.data;
   },
 

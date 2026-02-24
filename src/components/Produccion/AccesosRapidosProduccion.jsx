@@ -87,6 +87,15 @@ const accesosCompletos = [
     requiereAdmin: false, // Todos pueden ver
     requiereSuperAdmin: false
   },
+  {
+    label: 'Kardex de Inventario',
+    to: 'kardex',
+    icon: '📈',
+    color: 'bg-gradient-to-br from-indigo-50 to-indigo-100 hover:from-indigo-100 hover:to-indigo-200 text-indigo-800 border-indigo-200',
+    description: 'Valuación PEPS y control de lotes',
+    requiereAdmin: true,
+    requiereSuperAdmin: true // Solo super_admin
+  },
 ];
 
 const AccesosRapidosProduccion = () => {

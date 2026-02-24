@@ -21,6 +21,7 @@ import NuevaProduccion from '../components/Produccion/Produccion/NuevaProduccion
 import GestionResiduos from '../components/Produccion/Residuos/GestionResiduos';
 import GestionMovimientos from '../components/Produccion/Movimientos/GestionMovimientos';
 import GraficosProduccionPage from '../components/Produccion/Graficos/GraficosProduccionPage';
+import GestionKardex from '../components/Produccion/Kardex/GestionKardex';
 
 // Componente para rutas protegidas por permisos
 const ProtectedRoute = ({ children, hasPermission, redirectTo = "/produccion" }) => {
@@ -150,6 +151,9 @@ const ProduccionPage = () => {
         
         {/* Rutas de Gráficos - acceso para todos */}
         <Route path="/graficos" element={<GraficosProduccionPage />} />
+        
+        {/* Kardex - solo super_admin */}
+        <Route path="/kardex" element={<GestionKardex />} />
         
         {/* Rutas de Residuos - acceso para todos */}
         <Route path="/residuos" element={<GestionResiduos />} />

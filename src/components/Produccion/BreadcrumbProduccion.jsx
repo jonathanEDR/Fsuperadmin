@@ -54,6 +54,11 @@ const modulosInfo = {
     label: 'Gráficos de Inventario',
     icon: '📈',
     color: 'text-cyan-600 bg-cyan-50'
+  },
+  'kardex': {
+    label: 'Kardex de Inventario',
+    icon: '📈',
+    color: 'text-indigo-600 bg-indigo-50'
   }
 };
 
@@ -97,6 +102,11 @@ const accesosRapidos = {
     { to: 'catalogo', label: 'Catálogo', icon: '📋' },
     { to: 'ingredientes', label: 'Ingredientes', icon: '🥬' },
     { to: 'produccion', label: 'Producción', icon: '🏭' }
+  ],
+  'kardex': [
+    { to: 'recetas', label: 'Recetas', icon: '📝' },
+    { to: 'ingredientes', label: 'Ingredientes', icon: '🥬' },
+    { to: 'movimientos', label: 'Movimientos', icon: '📊' }
   ]
 };
 

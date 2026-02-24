@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { movimientoUnificadoService } from '../../../services/movimientoUnificadoService';
 import { produccionService } from '../../../services/produccionService';
 import AccesosRapidosProduccion from '../AccesosRapidosProduccion';
@@ -118,14 +118,16 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
   // Estados de error
   const [error, setError] = useState('');
 
-  // Estados de paginación para historial móvil basada en roles
-  const limiteInicial = isSuperAdmin ? 20 : 5;
-  const incrementoPagina = isSuperAdmin ? 20 : 5;
-  const [itemsHistorialVisibles, setItemsHistorialVisibles] = useState(limiteInicial);
+  // Paginación real del servidor
+  const LIMITE_POR_PAGINA = isSuperAdmin ? 20 : 10;
+  const [paginaHistorial, setPaginaHistorial] = useState(1);
+  const [totalRegistros, setTotalRegistros] = useState(0);
+  const [totalPaginas, setTotalPaginas] = useState(0);
+  const [cargandoMasHistorial, setCargandoMasHistorial] = useState(false);
 
   // Cargar datos iniciales
   useEffect(() => {
-    cargarHistorial();
+    cargarHistorial(1, true);
     cargarEstadisticas();
   }, []);
 
@@ -137,10 +139,12 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
     }
   }, [tipoSeleccionado]);
 
-  // Cargar historial cuando cambian los filtros
+  // Recargar historial cuando cambian los filtros o tipo seleccionado
   useEffect(() => {
-    cargarHistorial();
-  }, [filtros, tipoSeleccionado]);
+    setHistorial([]);
+    setPaginaHistorial(1);
+    cargarHistorial(1, true);
+  }, [filtros.tipoMovimiento, filtros.fechaInicio, filtros.fechaFin, tipoSeleccionado]);
 
   /**
    * Cargar productos por tipo
@@ -177,14 +181,22 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
   };
 
   /**
-   * Cargar historial de movimientos
+   * Cargar historial de movimientos con paginación real del servidor
+   * @param {number} pagina - Página a cargar
+   * @param {boolean} esNuevaBusqueda - true para reemplazar, false para append
    */
-  const cargarHistorial = async () => {
-    setCargandoHistorial(true);
+  const cargarHistorial = useCallback(async (pagina = 1, esNuevaBusqueda = false) => {
+    if (esNuevaBusqueda) {
+      setCargandoHistorial(true);
+    } else {
+      setCargandoMasHistorial(true);
+    }
     
     try {
       const filtrosHistorial = {
         ...filtros,
+        limite: LIMITE_POR_PAGINA,
+        pagina,
         tipoProducto: tipoSeleccionado || undefined
       };
       
@@ -194,17 +206,41 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
       // VALIDACIÓN: Asegurar que movimientos es un array
       const movimientos = historialData.movimientos;
       if (!Array.isArray(movimientos)) {
-        setHistorial([]);
+        if (esNuevaBusqueda) setHistorial([]);
         return;
       }
       
-      setHistorial(movimientos);
+      if (esNuevaBusqueda) {
+        setHistorial(movimientos);
+      } else {
+        // Append: agregar nuevos registros sin duplicados
+        setHistorial(prev => {
+          const idsExistentes = new Set(prev.map(m => m._id));
+          const sinDuplicados = movimientos.filter(m => !idsExistentes.has(m._id));
+          return [...prev, ...sinDuplicados];
+        });
+      }
+      
+      // Actualizar metadatos de paginación
+      setTotalRegistros(historialData.total || 0);
+      setTotalPaginas(historialData.totalPaginas || 0);
+      setPaginaHistorial(pagina);
       
     } catch (error) {
       console.error('Error al cargar historial:', error);
-      setHistorial([]);
+      if (esNuevaBusqueda) setHistorial([]);
     } finally {
       setCargandoHistorial(false);
+      setCargandoMasHistorial(false);
+    }
+  }, [filtros, tipoSeleccionado, LIMITE_POR_PAGINA]);
+
+  /**
+   * Cargar más registros del servidor (siguiente página)
+   */
+  const cargarMasHistorial = () => {
+    if (paginaHistorial < totalPaginas && !cargandoMasHistorial) {
+      cargarHistorial(paginaHistorial + 1, false);
     }
   };
 
@@ -284,7 +320,7 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
       
       // Recargar historial y estadísticas en paralelo
       await Promise.all([
-        cargarHistorial(),
+        cargarHistorial(1, true),
         cargarEstadisticas()
       ]);
       
@@ -456,7 +492,7 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
       
       // Recargar datos en todos los casos
       cargarProductos();
-      cargarHistorial();
+      cargarHistorial(1, true);
       cargarEstadisticas();
       
     } catch (error) {
@@ -800,7 +836,7 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                   <>
                     {/* 🎯 VISTA MÓVIL: Tarjetas con "Ver más" */}
                     <div className="md:hidden space-y-3">
-                      {historial.slice(0, itemsHistorialVisibles).map((movimiento) => (
+                      {historial.map((movimiento) => (
                         <div 
                           key={movimiento._id}
                           className="bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm"
@@ -889,21 +925,40 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                         </div>
                       ))}
 
-                      {/* Botón "Ver más" para móvil */}
-                      {itemsHistorialVisibles < historial.length && (
+                      {/* Contador de registros */}
+                      {totalRegistros > 0 && (
+                        <div className="text-center py-2">
+                          <span className="text-xs text-gray-500">
+                            Mostrando {historial.length} de {totalRegistros} movimientos
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Botón "Cargar más" para móvil - pide siguiente página al servidor */}
+                      {paginaHistorial < totalPaginas && (
                         <button
-                          onClick={() => setItemsHistorialVisibles(prev => prev + incrementoPagina)}
-                          className="w-full py-3 bg-blue-50 text-blue-600 rounded-lg font-medium hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
+                          onClick={cargarMasHistorial}
+                          disabled={cargandoMasHistorial}
+                          className="w-full py-3 bg-blue-50 text-blue-600 rounded-lg font-medium hover:bg-blue-100 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                          Ver más {incrementoPagina} ({historial.length - itemsHistorialVisibles} restantes)
+                          {cargandoMasHistorial ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                              Cargando...
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                              Cargar más ({totalRegistros - historial.length} restantes)
+                            </>
+                          )}
                         </button>
                       )}
 
-                      {/* Indicador cuando se muestran todos */}
-                      {itemsHistorialVisibles >= historial.length && historial.length > limiteInicial && (
+                      {/* Indicador cuando se cargaron todos */}
+                      {paginaHistorial >= totalPaginas && historial.length > LIMITE_POR_PAGINA && (
                         <p className="text-center text-xs text-gray-500 py-2">
                           ✓ Mostrando todos los {historial.length} movimientos
                         </p>
@@ -945,7 +1000,7 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          {historial.slice(0, itemsHistorialVisibles).map((movimiento) => (
+                          {historial.map((movimiento) => (
                             <tr key={movimiento._id} className="hover:bg-gray-50">
                               <td className="px-4 py-3 text-sm text-gray-900">
                                 {formatearFecha(movimiento.fecha)}
@@ -1015,21 +1070,40 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                         </tbody>
                       </table>
                       
-                      {/* Botón Ver más - Desktop */}
-                      {itemsHistorialVisibles < historial.length && (
+                      {/* Contador registros - Desktop */}
+                      {totalRegistros > 0 && (
+                        <div className="text-center py-2 bg-gray-50 border-t border-gray-200">
+                          <span className="text-xs text-gray-500">
+                            Mostrando {historial.length} de {totalRegistros} movimientos
+                          </span>
+                        </div>
+                      )}
+                      
+                      {/* Botón Cargar más - Desktop */}
+                      {paginaHistorial < totalPaginas && (
                         <div className="flex justify-center py-4 bg-gray-50 border-t border-gray-200">
                           <button
-                            onClick={() => setItemsHistorialVisibles(prev => prev + incrementoPagina)}
-                            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium flex items-center gap-2"
+                            onClick={cargarMasHistorial}
+                            disabled={cargandoMasHistorial}
+                            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                            Ver más {incrementoPagina}
+                            {cargandoMasHistorial ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                Cargando...
+                              </>
+                            ) : (
+                              <>
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                                Cargar más ({totalRegistros - historial.length} restantes)
+                              </>
+                            )}
                           </button>
                         </div>
                       )}
-                      {historial.length > limiteInicial && itemsHistorialVisibles >= historial.length && (
+                      {paginaHistorial >= totalPaginas && historial.length > LIMITE_POR_PAGINA && (
                         <div className="text-center py-3 bg-gray-50 border-t border-gray-200">
                           <span className="text-sm text-gray-600">
                             ✓ Mostrando todos los {historial.length} movimientos

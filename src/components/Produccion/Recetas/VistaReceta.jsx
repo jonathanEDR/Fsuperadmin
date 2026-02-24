@@ -3,6 +3,7 @@ import { recetaService } from '../../../services/recetaService';
 import { formatearFecha as formatearFechaUtil } from '../../../utils/fechaHoraUtils';
 import HistorialFases from './HistorialFases';
 import HistorialProduccionReceta from './HistorialProduccionReceta';
+import TarjetaKardex from '../Kardex/TarjetaKardex';
 import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
 const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
@@ -10,7 +11,6 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
   const { canViewPrices } = useQuickPermissions();
   
   const [recetaActual, setRecetaActual] = useState(receta);
-  const [costoCalculado, setCostoCalculado] = useState(null);
   const [disponibilidad, setDisponibilidad] = useState(null);
   const [cantidadConsulta, setCantidadConsulta] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -49,15 +49,10 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
     
     setLoading(true);
     try {
-      const [costoResponse, disponibilidadResponse] = await Promise.all([
-        recetaService.calcularCosto(recetaParaUsar._id, cantidadConsulta),
-        recetaService.verificarDisponibilidad(recetaParaUsar._id, cantidadConsulta)
-      ]);
-
-      setCostoCalculado(costoResponse.data);
+      const disponibilidadResponse = await recetaService.verificarDisponibilidad(recetaParaUsar._id, cantidadConsulta);
       setDisponibilidad(disponibilidadResponse.data);
     } catch (error) {
-      console.error('Error al consultar información:', error);
+      console.error('Error al consultar disponibilidad:', error);
     } finally {
       setLoading(false);
     }
@@ -341,81 +336,28 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
                 </div>
               </div>
 
-              {/* Calculadora de Costos - Solo visible para super_admin */}
-              {canViewPrices && (
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-blue-800 mb-3">Calculadora de Costos</h4>
-                  
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm font-medium text-blue-700 mb-1">
-                        Cantidad a producir
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        step="1"
-                        value={cantidadConsulta}
-                        onChange={(e) => setCantidadConsulta(parseInt(e.target.value) || 1)}
-                        className="w-full p-2 border border-blue-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
+              {/* Cantidad a producir - controla disponibilidad */}
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <label className="block text-sm font-medium text-blue-700 mb-1">
+                  Cantidad a producir (lotes)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={cantidadConsulta}
+                  onChange={(e) => setCantidadConsulta(parseInt(e.target.value) || 1)}
+                  className="w-full p-2 border border-blue-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
 
-                    {loading ? (
-                      <div className="text-center py-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mx-auto"></div>
-                      </div>
-                    ) : costoCalculado && (
-                      <div className="space-y-3 text-sm">
-                        {/* Información de rendimiento */}
-                        <div className="bg-blue-100 p-2 rounded text-xs">
-                          <div className="flex justify-between">
-                            <span>Rendimiento por producción:</span>
-                            <span className="font-medium">{costoCalculado.rendimiento || 1} unidades</span>
-                          </div>
-                        </div>
-                        
-                        {/* Costos por unidad */}
-                        <div className="space-y-1">
-                          <div className="flex justify-between">
-                            <span className="text-blue-700">Costo por unidad:</span>
-                            <span className="font-bold">S/.{costoCalculado.costoUnitario.toFixed(4)}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-blue-700">Unidades a producir:</span>
-                            <span className="font-medium">{costoCalculado.cantidad}</span>
-                          </div>
-                        </div>
-                        
-                        {/* Costos de producción */}
-                        <div className="border-t border-blue-200 pt-2 space-y-1">
-                          <div className="flex justify-between text-xs text-blue-600">
-                            <span>Costo por lote ({receta.rendimiento?.cantidad || 1} {receta.rendimiento?.unidadMedida || 'unidades'}):</span>
-                            <span>S/.{costoCalculado.costoIngredientes?.toFixed(2) || '0.00'}</span>
-                          </div>
-                          <div className="flex justify-between text-xs text-blue-600">
-                            <span>Costo total ({costoCalculado.cantidad} lotes):</span>
-                            <span>S/.{costoCalculado.costoProduccion?.toFixed(2) || '0.00'}</span>
-                          </div>
-                        </div>
-                        
-                        {/* Total final */}
-                        <div className="border-t border-blue-200 pt-2">
-                          <div className="flex justify-between text-lg">
-                            <span className="text-blue-800 font-medium">Costo total final:</span>
-                            <span className="font-bold text-blue-800">
-                              S/.{costoCalculado.costoTotal.toFixed(2)}
-                            </span>
-                          </div>
-                          <div className="text-xs text-blue-600 mt-1">
-                            {costoCalculado.cantidad} unidades × S/.{costoCalculado.costoUnitario.toFixed(4)}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+              {/* Kardex PEPS - Reemplaza la calculadora simple */}
+              <TarjetaKardex
+                recetaId={datosReceta._id}
+                recetaNombre={datosReceta.nombre}
+                rendimiento={datosReceta.rendimiento}
+                cantidadAProducir={cantidadConsulta}
+              />
 
               {/* Estado de Disponibilidad */}
               <div className={`p-4 rounded-lg ${
