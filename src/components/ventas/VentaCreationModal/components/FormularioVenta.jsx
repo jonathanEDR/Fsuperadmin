@@ -1,5 +1,27 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { User, Search, UserPlus, ChevronDown, X } from 'lucide-react';
+import { User, Search, UserPlus, ChevronDown, X, AlertCircle, Lightbulb, Info } from 'lucide-react';
+
+// Avatar component with real photo support
+const AvatarColab = ({ nombre, avatarUrl, size = 'md' }) => {
+  const [err, setErr] = React.useState(false);
+  const sizes = { sm: 'w-6 h-6 text-[9px]', md: 'w-8 h-8 text-xs', lg: 'w-14 h-14 text-xl' };
+  const sz = sizes[size] || sizes.md;
+  if (avatarUrl && !err) {
+    return (
+      <img
+        src={avatarUrl}
+        alt={nombre}
+        className={`${sz} rounded-full object-cover flex-shrink-0 ring-2 ring-white shadow-sm`}
+        onError={() => setErr(true)}
+      />
+    );
+  }
+  return (
+    <div className={`${sz} rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center font-bold text-white flex-shrink-0 shadow-sm`}>
+      {(nombre || '?').charAt(0).toUpperCase()}
+    </div>
+  );
+};
 
 /**
  * FormularioVenta - Formulario simplificado para selección de cliente
@@ -67,7 +89,7 @@ const FormularioVenta = React.memo(({
   const usuarioSeleccionado = useMemo(() => {
     if (!formData.targetUserId) return null;
     if (formData.targetUserId === 'sin-registro') {
-      return { id: 'sin-registro', name: '🆕 Cliente Sin Registro', email: 'sin-registro@sistema.local' };
+      return { id: 'sin-registro', name: 'Cliente Sin Registro', email: 'sin-registro@sistema.local' };
     }
     return usuarios.find(u => u.id === formData.targetUserId);
   }, [formData.targetUserId, usuarios]);
@@ -174,7 +196,7 @@ const FormularioVenta = React.memo(({
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <UserPlus size={14} className="sm:w-4 sm:h-4 text-yellow-600 flex-shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-sm sm:text-base font-medium text-gray-900 truncate">🆕 Cliente Sin Registro</p>
+                      <p className="text-sm sm:text-base font-medium text-gray-900 truncate">Cliente Sin Registro</p>
                       <p className="text-[10px] sm:text-xs text-gray-500 truncate">Venta directa sin cliente registrado</p>
                     </div>
                   </div>
@@ -192,10 +214,19 @@ const FormularioVenta = React.memo(({
                           : 'hover:bg-gray-50'
                       }`}
                     >
-                      <p className="text-sm sm:text-base font-medium text-gray-900 truncate">{usuario.name}</p>
-                      {usuario.email && (
-                        <p className="text-[10px] sm:text-xs text-gray-500 truncate">{usuario.email}</p>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <AvatarColab
+                          nombre={usuario.name}
+                          avatarUrl={usuario.avatar_url}
+                          size="sm"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm sm:text-base font-medium text-gray-900 truncate">{usuario.name}</p>
+                          {usuario.email && (
+                            <p className="text-[10px] sm:text-xs text-gray-500 truncate">{usuario.email}</p>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   ))
                 ) : (
@@ -213,7 +244,7 @@ const FormularioVenta = React.memo(({
           )}
           
           {errores.targetUserId && (
-            <p className="text-red-500 text-[10px] sm:text-xs mt-1">⚠️ {errores.targetUserId}</p>
+            <p className="text-red-500 text-[10px] sm:text-xs mt-1 flex items-center gap-1"><AlertCircle size={10} /> {errores.targetUserId}</p>
           )}
 
           {/* Campo adicional: Nombre del cliente cuando es "sin-registro" */}
@@ -230,8 +261,8 @@ const FormularioVenta = React.memo(({
                 onChange={(e) => onFormChange({ ...formData, clienteNombre: e.target.value })}
                 className="w-full px-2.5 py-2 sm:px-3 sm:py-2 text-sm sm:text-base border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
               />
-              <p className="text-[10px] sm:text-xs text-yellow-700 mt-1">
-                💡 Este campo te ayudará a identificar esta venta posteriormente
+              <p className="text-[10px] sm:text-xs text-yellow-700 mt-1 flex items-center gap-1">
+                <Lightbulb size={10} className="text-amber-500" /> Este campo te ayudará a identificar esta venta posteriormente
               </p>
             </div>
           )}
@@ -253,19 +284,20 @@ const FormularioVenta = React.memo(({
 
       {/* Información sobre el proceso de pago */}
       <div className="bg-purple-50 border border-purple-200 rounded-lg p-2.5 sm:p-3">
-        <p className="text-purple-800 text-xs sm:text-sm">
-          ℹ️ <strong>Nota:</strong> La venta se creará con estado <strong>"Pendiente"</strong>.
+        <p className="text-purple-800 text-xs sm:text-sm flex items-start gap-1.5">
+          <Info size={14} className="text-purple-500 flex-shrink-0 mt-0.5" />
+          <span><strong>Nota:</strong> La venta se creará con estado <strong>"Pendiente"</strong>.
           {userRole === 'user' 
             ? ' El administrador gestionará el pago posteriormente.' 
-            : ' El pago se gestionará posteriormente desde el módulo de Cobros.'}
+            : ' El pago se gestionará posteriormente desde el módulo de Cobros.'}</span>
         </p>
       </div>
 
       {/* Resumen de validación */}
       {Object.keys(errores).length > 0 && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-2.5 sm:p-3">
-          <p className="text-red-700 text-xs sm:text-sm font-medium">
-            ⚠️ Por favor corrige los errores antes de continuar
+          <p className="text-red-700 text-xs sm:text-sm font-medium flex items-center gap-1">
+            <AlertCircle size={12} /> Por favor corrige los errores antes de continuar
           </p>
         </div>
       )}

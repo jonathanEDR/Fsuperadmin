@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Calendar, User, Hash, Eye, Edit, Trash2, AlertCircle, CheckCircle, Clock, Search, Filter, X } from 'lucide-react';
+import { Package, Calendar, User, Hash, Eye, Edit, Trash2, AlertCircle, CheckCircle, Clock, Search, Filter, X, Loader2, RefreshCw } from 'lucide-react';
 
 const InventarioHistorial = ({ historialEntradas, onRefresh, onEdit, onDelete, loading = false, userRole = 'user' }) => {
   const [filtros, setFiltros] = useState({
@@ -62,13 +62,13 @@ const InventarioHistorial = ({ historialEntradas, onRefresh, onEdit, onDelete, l
   const getEstadoColor = (estado) => {
     switch (estado) {
       case 'activo':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-50 text-green-700 border border-green-200';
       case 'agotado':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-50 text-red-700 border border-red-200';
       case 'inactivo':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-50 text-gray-600 border border-gray-200';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-50 text-gray-600 border border-gray-200';
     }
   };
 
@@ -97,8 +97,8 @@ const InventarioHistorial = ({ historialEntradas, onRefresh, onEdit, onDelete, l
   if (loading) {
     return (
       <div className="mt-8">
-        <div className="flex justify-center items-center py-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="flex justify-center items-center py-10">
+          <Loader2 size={32} className="animate-spin text-blue-500" />
         </div>
       </div>
     );
@@ -107,7 +107,7 @@ const InventarioHistorial = ({ historialEntradas, onRefresh, onEdit, onDelete, l
   if (!historialEntradas || historialEntradas.length === 0) {
     return (
       <div className="mt-8">
-        <div className="bg-gray-50 p-8 rounded-lg text-center">
+        <div className="rounded-2xl shadow-sm border border-gray-100 p-8 text-center bg-white">
           <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No hay entradas de inventario</h3>
           <p className="text-gray-500">Comienza registrando tu primera entrada de inventario.</p>
@@ -127,117 +127,83 @@ const InventarioHistorial = ({ historialEntradas, onRefresh, onEdit, onDelete, l
           {onRefresh && (
             <button
               onClick={onRefresh}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 px-4 py-2 rounded-xl transition-colors text-sm"
             >
-              Actualizar
+              <RefreshCw size={15} /> Actualizar
             </button>
           )}
         </div>
 
-        {/* 🎯 FILTROS OPTIMIZADOS: Compactos para móviles, completos para desktop */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-3 sm:p-4 lg:p-6 rounded-lg sm:rounded-xl shadow-sm sm:shadow-lg mb-4 sm:mb-6">
-          {/* Título - Solo en desktop */}
-          <div className="hidden sm:flex items-center gap-2 mb-4">
-            <Filter className="h-5 w-5 text-blue-600" />
-            <h3 className="text-base sm:text-lg font-semibold text-blue-900">Filtros de Búsqueda</h3>
+        {/* Filtros */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Filter className="h-4 w-4 text-gray-500" />
+            <h3 className="text-sm font-semibold text-gray-700">Filtros de Búsqueda</h3>
           </div>
-          
-          {/* Grid de filtros - Compacto en móviles */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
-            {/* Búsqueda */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
             <div className="col-span-2 sm:col-span-1">
-              <label className="block text-xs sm:text-sm font-medium sm:font-semibold text-gray-700 sm:text-blue-800 mb-1 sm:mb-2">
-                Buscar
-              </label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Buscar</label>
               <div className="relative">
-                <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-gray-400 sm:text-blue-500" />
+                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Producto, lote..."
                   value={filtros.busqueda}
                   onChange={(e) => setFiltros(prev => ({ ...prev, busqueda: e.target.value }))}
-                  className="w-full pl-7 sm:pl-10 pr-2 sm:pr-3 py-2 sm:py-3 border border-gray-300 sm:border-2 sm:border-blue-200 rounded-md sm:rounded-lg focus:ring-1 sm:focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm bg-white shadow-sm hover:border-blue-300 transition-all"
+                  className="w-full pl-8 pr-2 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm bg-white outline-none"
                 />
               </div>
             </div>
-            
-            {/* Estado */}
             <div>
-              <label className="block text-xs sm:text-sm font-medium sm:font-semibold text-gray-700 sm:text-blue-800 mb-1 sm:mb-2">
-                Estado
-              </label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Estado</label>
               <select
                 value={filtros.estado}
                 onChange={(e) => setFiltros(prev => ({ ...prev, estado: e.target.value }))}
-                className="w-full px-2 sm:px-3 py-2 sm:py-3 border border-gray-300 sm:border-2 sm:border-blue-200 rounded-md sm:rounded-lg focus:ring-1 sm:focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm bg-white shadow-sm hover:border-blue-300 transition-all"
+                className="w-full px-2 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm bg-white outline-none"
               >
                 <option value="">Todos</option>
-                <option value="activo">✅ Activo</option>
-                <option value="agotado">🔴 Agotado</option>
-                <option value="inactivo">⏸️ Inactivo</option>
+                <option value="activo">Activo</option>
+                <option value="agotado">Agotado</option>
+                <option value="inactivo">Inactivo</option>
               </select>
             </div>
-            
-            {/* Fecha Desde */}
             <div>
-              <label className="block text-xs sm:text-sm font-medium sm:font-semibold text-gray-700 sm:text-blue-800 mb-1 sm:mb-2">
-                <span className="sm:hidden">Desde</span>
-                <span className="hidden sm:inline">📅 Desde</span>
-              </label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Desde</label>
               <input
                 type="date"
                 value={filtros.fechaDesde}
                 onChange={(e) => setFiltros(prev => ({ ...prev, fechaDesde: e.target.value }))}
-                className="w-full px-2 sm:px-3 py-2 sm:py-3 border border-gray-300 sm:border-2 sm:border-blue-200 rounded-md sm:rounded-lg focus:ring-1 sm:focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm bg-white shadow-sm hover:border-blue-300 transition-all"
+                className="w-full px-2 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm bg-white outline-none"
               />
             </div>
-            
-            {/* Fecha Hasta */}
             <div>
-              <label className="block text-xs sm:text-sm font-medium sm:font-semibold text-gray-700 sm:text-blue-800 mb-1 sm:mb-2">
-                <span className="sm:hidden">Hasta</span>
-                <span className="hidden sm:inline">📅 Hasta</span>
-              </label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Hasta</label>
               <input
                 type="date"
                 value={filtros.fechaHasta}
                 onChange={(e) => setFiltros(prev => ({ ...prev, fechaHasta: e.target.value }))}
-                className="w-full px-2 sm:px-3 py-2 sm:py-3 border border-gray-300 sm:border-2 sm:border-blue-200 rounded-md sm:rounded-lg focus:ring-1 sm:focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm bg-white shadow-sm hover:border-blue-300 transition-all"
+                className="w-full px-2 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm bg-white outline-none"
               />
             </div>
           </div>
-          
-          {/* Línea de información y acciones - Solo en desktop */}
-          <div className="hidden sm:flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 pt-4 border-t border-blue-200 gap-3 sm:gap-0">
-            <div className="flex items-center gap-2">
-              <div className="bg-blue-100 px-3 py-2 rounded-lg">
-                <p className="text-sm font-medium text-blue-800">
-                  📊 Mostrando <span className="font-bold text-blue-900">{entradasFiltradas.length}</span> de <span className="font-bold text-blue-900">{historialEntradas.length}</span> entradas
-                </p>
-              </div>
-            </div>
+          <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
+            <p className="text-xs text-gray-500">
+              Mostrando <span className="font-semibold text-gray-700">{entradasFiltradas.length}</span> de <span className="font-semibold text-gray-700">{historialEntradas.length}</span> entradas
+            </p>
             <button
               onClick={limpiarFiltros}
-              className="bg-white border-2 border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400 font-semibold flex items-center gap-2 px-4 py-2 rounded-lg shadow-sm transition-all hover:shadow-md"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors"
             >
-              <X size={16} />
-              🗑️ Limpiar filtros
+              <X size={12} /> Limpiar filtros
             </button>
-          </div>
-          
-          {/* Contador compacto para móviles */}
-          <div className="sm:hidden mt-2 pt-2 border-t border-blue-200">
-            <p className="text-xs text-blue-700 text-center">
-              📊 {entradasFiltradas.length} de {historialEntradas.length} entradas
-            </p>
           </div>
         </div>
       </div>
 
-      <div className="overflow-x-auto bg-white rounded-lg shadow">
+      <div className="overflow-x-auto rounded-2xl shadow-sm border border-gray-100">
         {/* Desktop Table */}
-        <table className="hidden md:table min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="hidden md:table min-w-full divide-y divide-gray-100">
+          <thead className="bg-gray-50/60">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Entrada
@@ -326,30 +292,30 @@ const InventarioHistorial = ({ historialEntradas, onRefresh, onEdit, onDelete, l
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-1.5">
                     <button
                       onClick={() => setMostrarDetalle(entrada)}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="p-1.5 rounded-lg text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-colors"
                       title="Ver detalles"
                     >
-                      <Eye size={16} />
+                      <Eye size={14} />
                     </button>
                     {onEdit && isSuperAdmin && (
                       <button
                         onClick={() => onEdit(entrada._id, entrada)}
-                        className="text-green-600 hover:text-green-900"
+                        className="p-1.5 rounded-lg text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 transition-colors"
                         title="Editar"
                       >
-                        <Edit size={16} />
+                        <Edit size={14} />
                       </button>
                     )}
                     {onDelete && isSuperAdmin && entrada.cantidadDisponible === entrada.cantidadInicial && (
                       <button
                         onClick={() => onDelete(entrada._id)}
-                        className="text-red-600 hover:text-red-900"
+                        className="p-1.5 rounded-lg text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 transition-colors"
                         title="Eliminar"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={14} />
                       </button>
                     )}
                   </div>
@@ -426,18 +392,23 @@ const InventarioHistorial = ({ historialEntradas, onRefresh, onEdit, onDelete, l
 
       {/* Modal de Detalles */}
       {mostrarDetalle && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="text-xl font-bold text-gray-900">Detalles de la Entrada</h3>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-6 py-4 rounded-t-2xl flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-50 rounded-xl border border-blue-100">
+                  <Package size={18} className="text-blue-600" />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Detalles de la Entrada</h3>
+              </div>
               <button
                 onClick={() => setMostrarDetalle(null)}
-                className="text-gray-500 hover:text-gray-700"
+                className="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
               >
-                <X size={24} />
+                <X size={18} />
               </button>
             </div>
-            
+            <div className="flex-1 overflow-y-auto p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-3">
                 <div>
@@ -532,11 +503,15 @@ const InventarioHistorial = ({ historialEntradas, onRefresh, onEdit, onDelete, l
             <div className="flex justify-end mt-6">
               <button
                 onClick={() => setMostrarDetalle(null)}
-                className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
+                className="px-4 py-2 text-sm font-medium rounded-xl border text-gray-600 bg-gray-50 border-gray-200 hover:bg-gray-100 transition-colors"
               >
                 Cerrar
               </button>
             </div>
+            </div>
+
+            {/* Footer */}
+            <div className="bg-gray-50/50 border-t border-gray-100 px-6 py-3 rounded-b-2xl flex-shrink-0" />
           </div>
         </div>
       )}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, Edit, Trash2 } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, AlertCircle, X, Tag } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import categoryService from '../../services/categoryService';
 import CategoryModal from './CategoryModal';
@@ -77,50 +77,51 @@ const CategoryList = () => {
         </h2>
         <button
           onClick={handleCreateClick}
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl border text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100 transition-colors"
         >
-          <PlusCircle className="w-5 h-5 mr-2" />
+          <PlusCircle className="w-4 h-4" />
           Nueva Categoría
         </button>
       </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-50 text-red-500 rounded-md">
+        <div className="mb-4 flex items-center gap-2 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
+          <AlertCircle size={15} className="flex-shrink-0" />
           {error}
         </div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {categories.map((category) => (
-          <div key={category._id} className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div key={category._id} className="bg-white rounded-2xl shadow-sm border border-gray-100">
             <div className="p-4">
               <div className="flex justify-between items-start">
-                <h3 className="text-lg font-semibold text-gray-800">
+                <h3 className="text-base font-semibold text-gray-800">
                   {category.nombre}
                 </h3>
-                <div className="flex gap-2">
+                <div className="flex gap-1.5">
                   <button
                     onClick={() => handleEditClick(category)}
-                    className="p-1 text-blue-600 hover:text-blue-800 transition-colors"
+                    className="p-1.5 rounded-lg text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-colors"
                   >
-                    <Edit className="w-5 h-5" />
+                    <Edit className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDeleteClick(category)}
-                    className="p-1 text-red-600 hover:text-red-800 transition-colors"
+                    className="p-1.5 rounded-lg text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 transition-colors"
                   >
-                    <Trash2 className="w-5 h-5" />
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
-              <p className="mt-2 text-gray-600">
+              <p className="mt-2 text-sm text-gray-600">
                 {category.descripcion || 'Sin descripción'}
               </p>
               <div className="mt-4">
-                <span className={`px-3 py-1 rounded-full text-sm ${
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
                   category.estado === 'activo' 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-gray-100 text-gray-800'
+                    ? 'bg-green-50 text-green-700 border-green-200' 
+                    : 'bg-gray-50 text-gray-600 border-gray-200'
                 }`}>
                   {category.estado}
                 </span>
@@ -139,26 +140,33 @@ const CategoryList = () => {
 
       {/* Modal de confirmación de eliminación */}
       {deleteDialogOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-xl font-semibold mb-4">Confirmar Eliminación</h3>
-            <p className="text-gray-600 mb-6">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-md w-full overflow-hidden">
+            <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-6 py-4 rounded-t-2xl flex items-center gap-3">
+              <div className="p-2 bg-red-50 rounded-xl border border-red-100">
+                <Trash2 size={18} className="text-red-600" />
+              </div>
+              <h3 className="text-base font-bold text-gray-900">Confirmar Eliminación</h3>
+            </div>
+            <div className="p-6">
+            <p className="text-sm text-gray-600 mb-6">
               ¿Estás seguro que deseas eliminar la categoría "{deleteTarget?.nombre}"?
               Esta acción no se puede deshacer.
             </p>
-            <div className="flex justify-end gap-4">
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteDialogOpen(false)}
-                className="px-4 py-2 text-gray-700 hover:text-gray-900"
+                className="px-4 py-2 text-sm font-medium rounded-xl border text-gray-600 bg-gray-50 border-gray-200 hover:bg-gray-100 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleDeleteConfirm}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-xl border text-red-700 bg-red-50 border-red-200 hover:bg-red-100 transition-colors"
               >
-                Eliminar
+                <Trash2 size={14} /> Eliminar
               </button>
+            </div>
             </div>
           </div>
         </div>

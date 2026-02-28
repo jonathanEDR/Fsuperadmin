@@ -688,7 +688,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                     {dropdownAbierto && (
                       <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-36 overflow-y-auto">
                         {usuarios
-                          .filter(u => u.role !== 'de_baja')
+                          .filter(u => u.role !== 'de_baja' && u.is_active !== false)
                           .filter(u => {
                             const term = busquedaOperador.toLowerCase();
                             return (u.nombre_negocio || u.email || '').toLowerCase().includes(term);
@@ -704,7 +704,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                             </div>
                           ))
                         }
-                        {usuarios.filter(u => u.role !== 'de_baja').filter(u => (u.nombre_negocio || u.email || '').toLowerCase().includes(busquedaOperador.toLowerCase())).length === 0 && (
+                        {usuarios.filter(u => u.role !== 'de_baja' && u.is_active !== false).filter(u => (u.nombre_negocio || u.email || '').toLowerCase().includes(busquedaOperador.toLowerCase())).length === 0 && (
                           <div className="px-3 py-2 text-gray-400 text-xs text-center">No se encontraron</div>
                         )}
                       </div>

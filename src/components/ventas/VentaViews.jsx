@@ -1,11 +1,33 @@
 import React, { useState, useMemo } from 'react';
-import { DollarSign, RotateCcw, Clock, Plus, Check, ChevronDown, ChevronUp, User, Search, Filter, ShoppingCart, Package, X, Trash2 } from 'lucide-react';
+import { DollarSign, RotateCcw, Clock, Plus, Check, ChevronDown, ChevronUp, User, Search, Filter, ShoppingCart, Package, X, Trash2, CreditCard, Ban, AlertCircle } from 'lucide-react';
 import ProductCard from './ProductCard';
 import ClienteCard from './ClienteCard';
 import QuantityModal from './QuantityModal';
 import CobrosDetalleModal from './CobrosDetalleModal';
 import withProductoSafeGuard from '../../hoc/withProductoSafeGuard';
 import './VentaCards.css';
+
+// Avatar component with real photo support
+const AvatarColab = ({ nombre, avatarUrl, size = 'md' }) => {
+  const [err, setErr] = React.useState(false);
+  const sizes = { sm: 'w-7 h-7 text-[10px]', md: 'w-9 h-9 text-xs', lg: 'w-14 h-14 text-xl' };
+  const sz = sizes[size] || sizes.md;
+  if (avatarUrl && !err) {
+    return (
+      <img
+        src={avatarUrl}
+        alt={nombre}
+        className={`${sz} rounded-full object-cover flex-shrink-0 ring-2 ring-white shadow-sm`}
+        onError={() => setErr(true)}
+      />
+    );
+  }
+  return (
+    <div className={`${sz} rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center font-bold text-white flex-shrink-0 shadow-sm`}>
+      {(nombre || '?').charAt(0).toUpperCase()}
+    </div>
+  );
+};
 
 const VentaViews = ({
   ventasToRender,
@@ -47,6 +69,10 @@ const VentaViews = ({
   const [isCobrosModalOpen, setIsCobrosModalOpen] = useState(false);
   const [selectedVentaForCobros, setSelectedVentaForCobros] = useState(null);
 
+  // Estado para confirmación de eliminar producto (reemplaza window.confirm)
+  const [confirmDeleteProduct, setConfirmDeleteProduct] = useState(null); // { ventaId, prodId, nombre }
+  const [errorBanner, setErrorBanner] = useState(''); // Banner de error inline
+
   // Función para abrir el modal de cobros detalle
   const handleOpenCobrosDetalle = (venta) => {
     setSelectedVentaForCobros(venta);
@@ -77,6 +103,7 @@ const VentaViews = ({
       // Usar la misma lógica que en la tabla para obtener el cliente
       let clienteKey = venta.user_info?.nombre_negocio || 'Sin Cliente';
       let clienteEmail = venta.user_info?.email || '';
+      let clienteAvatarUrl = venta.user_info?.avatar_url || null;
       
       // Si no hay cliente pero hay información del usuario, usar esa información
       if (clienteKey === 'Sin Cliente' && venta.userInfo) {
@@ -94,6 +121,7 @@ const VentaViews = ({
         grupos[clienteKey] = {
           cliente: clienteKey,
           email: clienteEmail,
+          avatarUrl: clienteAvatarUrl,
           ventas: [],
           totalVentas: 0,
           totalPagado: 0,
@@ -197,10 +225,10 @@ const VentaViews = ({
   // Vista de Tabla
   const renderTableView = () => {
     return (
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-gray-50/60 border-b border-gray-100">
               <tr>
                 <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Venta
@@ -250,12 +278,19 @@ const VentaViews = ({
 
                     {/* Columna Cliente */}
                     <td className="px-3 md:px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm">
-                        <div className="font-medium text-gray-900">
-                          {venta.user_info?.nombre_negocio || 'N/A'}
-                        </div>
-                        <div className="text-gray-500 text-xs md:text-sm">
-                          {venta.user_info?.email || 'N/A'}
+                      <div className="flex items-center gap-2">
+                        <AvatarColab
+                          nombre={venta.user_info?.nombre_negocio || 'C'}
+                          avatarUrl={venta.user_info?.avatar_url}
+                          size="sm"
+                        />
+                        <div className="text-sm min-w-0">
+                          <div className="font-medium text-gray-900 truncate">
+                            {venta.user_info?.nombre_negocio || 'N/A'}
+                          </div>
+                          <div className="text-gray-500 text-xs md:text-sm truncate">
+                            {venta.user_info?.email || 'N/A'}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -361,7 +396,7 @@ const VentaViews = ({
                         {venta.estadoPago !== 'Pagado' && (
                           <button
                             onClick={() => handleOpenPayment(ventaParaPago)}
-                            className="inline-flex items-center gap-1 px-2 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 transition-colors"
+                            className="inline-flex items-center gap-1 px-2 py-1 text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded text-xs transition-all"
                             disabled={loading}
                           >
                             <DollarSign className="w-3 h-3" />
@@ -373,7 +408,7 @@ const VentaViews = ({
                         {(!venta.estado || venta.estado !== 'devuelta') && (
                           <button
                             onClick={() => handleOpenDevolucion(venta)}
-                            className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-500 text-white rounded text-xs hover:bg-yellow-600 transition-colors"
+                            className="inline-flex items-center gap-1 px-2 py-1 text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 rounded text-xs transition-all"
                             disabled={loading}
                           >
                             <RotateCcw className="w-3 h-3" />
@@ -387,7 +422,7 @@ const VentaViews = ({
                             {(!venta.completionStatus) && (
                               <button
                                 onClick={() => handleFinalizarVenta(venta._id)}
-                                className="inline-flex items-center gap-1 px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors"
+                                className="inline-flex items-center gap-1 px-2 py-1 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded text-xs transition-all"
                                 disabled={loading}
                               >
                                 <Clock className="w-3 h-3" />
@@ -402,17 +437,17 @@ const VentaViews = ({
                           <div className="flex gap-1">
                             <button 
                               onClick={() => handleApproveReject(venta._id, 'approved')}
-                              className="px-2 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 transition-colors"
+                              className="px-2 py-1 text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded text-xs transition-all"
                               disabled={loading}
                             >
-                              ✓
+                              <Check size={12} />
                             </button>
                             <button
                               onClick={() => handleApproveReject(venta._id, 'rejected')}
-                              className="px-2 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition-colors"
+                              className="px-2 py-1 text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 rounded text-xs transition-all"
                               disabled={loading}
                             >
-                              ✗
+                              <X size={12} />
                             </button>
                           </div>
                         )}
@@ -421,19 +456,18 @@ const VentaViews = ({
                         {canEditDelete(venta) ? (
                           <button
                             onClick={() => handleDeleteVenta(venta._id)}
-                            className="inline-flex items-center gap-1 px-2 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition-colors"
+                            className="inline-flex items-center gap-1 px-2 py-1 text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 rounded text-xs transition-all"
                             disabled={loading}
                           >
-                            🗑️
+                            <Trash2 size={14} />
                           </button>
                         ) : (
-                          // Mostrar tooltip o texto indicativo para admin/super_admin
                           ['admin', 'super_admin'].includes(userRole) && (
                             <span 
-                              className="inline-flex items-center gap-1 px-2 py-1 bg-gray-200 text-gray-600 rounded text-xs cursor-help"
+                              className="inline-flex items-center gap-1 px-2 py-1 bg-gray-50 text-gray-400 border border-gray-200 rounded text-xs cursor-help"
                               title={getDeleteRestrictionReason(venta)}
                             >
-                              🚫
+                              <Ban size={12} />
                             </span>
                           )
                         )}
@@ -452,7 +486,17 @@ const VentaViews = ({
   // Vista de Líneas Compactas - Optimizada para móvil
   const renderCardsView = () => {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4">
+      <>
+        {/* Error banner inline */}
+        {errorBanner && (
+          <div className="mb-3 flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+            <AlertCircle size={16} className="flex-shrink-0" />
+            <span>{errorBanner}</span>
+            <button onClick={() => setErrorBanner('')} className="ml-auto"><X size={14} /></button>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4">
         {ventasToRender.map(venta => {
           // Super admin puede finalizar todas las ventas, usuarios/admin solo las suyas
           const puedeFinalizar = userRole === 'super_admin' || 
@@ -465,7 +509,7 @@ const VentaViews = ({
           };
           
           return (
-            <div key={venta._id} className="venta-row bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 p-2 sm:p-3">
+            <div key={venta._id} className="venta-row bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 p-2 sm:p-3">
               {/* Header de la venta - Ultra compacto para móvil */}
               <div className="flex flex-col gap-2 mb-2">
                 {/* Primera línea: ID y estados */}
@@ -481,29 +525,29 @@ const VentaViews = ({
                   
                   {/* Estados - Muy compactos */}
                   <div className="flex items-center gap-1">
-                    <span className={`px-1.5 py-0.5 text-[10px] sm:text-xs font-medium rounded ${
+                    <span className={`px-2 py-0.5 text-[10px] sm:text-xs font-medium rounded-full border ${
                       venta.estadoPago === 'Pagado' 
-                        ? 'bg-emerald-100 text-emerald-700'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                         : venta.estadoPago === 'Parcial'
-                        ? 'bg-amber-100 text-amber-700'
-                        : 'bg-rose-100 text-rose-700'
+                        ? 'bg-amber-50 text-amber-700 border-amber-200'
+                        : 'bg-rose-50 text-rose-700 border-rose-200'
                     }`}>
                       {venta.estadoPago}
                     </span>
                     
                     {venta.isCompleted && (
-                      <span className={`px-1.5 py-0.5 text-[10px] sm:text-xs rounded ${
+                      <span className={`px-2 py-0.5 text-[10px] sm:text-xs rounded-full border flex items-center gap-0.5 ${
                         venta.completionStatus === 'approved'
-                          ? 'bg-green-100 text-green-700'
+                          ? 'bg-green-50 text-green-700 border-green-200'
                           : venta.completionStatus === 'rejected'
-                          ? 'bg-red-100 text-red-700'
-                          : 'bg-yellow-100 text-yellow-700'
+                          ? 'bg-red-50 text-red-700 border-red-200'
+                          : 'bg-yellow-50 text-yellow-700 border-yellow-200'
                       }`}>
                         {venta.completionStatus === 'approved'
-                          ? '✓'
+                          ? <><Check size={9} /><span>Ok</span></>
                           : venta.completionStatus === 'rejected'
-                          ? '✗'
-                          : '⏳'}
+                          ? <><X size={9} /><span>Rechaz</span></>
+                          : <><Clock size={9} /><span>Pend</span></>}
                       </span>
                     )}
                   </div>
@@ -520,10 +564,10 @@ const VentaViews = ({
                       {venta.cantidadPagada > 0 ? (
                         <button
                           onClick={() => handleOpenCobrosDetalle(venta)}
-                          className="text-emerald-600 font-medium hover:underline cursor-pointer transition-colors"
+                          className="text-emerald-600 font-medium hover:underline cursor-pointer transition-colors inline-flex items-center gap-1"
                           title="Ver detalle de pagos"
                         >
-                          💳 S/ {(venta.cantidadPagada || 0).toFixed(2)}
+                          <CreditCard size={11} /> S/ {(venta.cantidadPagada || 0).toFixed(2)}
                         </button>
                       ) : (
                         <>
@@ -541,14 +585,18 @@ const VentaViews = ({
               </div>
 
               {/* Cliente compacto */}
-              <div className="flex items-center justify-between mb-2 py-1.5 sm:py-2 bg-slate-50 rounded-lg px-2 sm:px-3">
+              <div className="flex items-center justify-between mb-2 py-1.5 sm:py-2 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl px-2 sm:px-3 border border-gray-100">
                 <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <User className="w-3 h-3 sm:w-4 sm:h-4 text-slate-600 flex-shrink-0" />
+                  <AvatarColab
+                    nombre={venta.user_info?.nombre_negocio || 'C'}
+                    avatarUrl={venta.user_info?.avatar_url}
+                    size="sm"
+                  />
                   <div className="min-w-0 flex-1">
                     <span className="font-medium text-slate-800 text-[11px] sm:text-sm block truncate">
                       {venta.user_info?.nombre_negocio || 'Cliente sin nombre'}
                     </span>
-                    <p className="text-[9px] sm:text-xs text-slate-600 truncate">
+                    <p className="text-[9px] sm:text-xs text-slate-500 truncate">
                       {venta.user_info?.email || 'Sin email'}
                     </p>
                   </div>
@@ -556,7 +604,7 @@ const VentaViews = ({
                 
                 {/* Progreso ultra compacto */}
                 <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                  <div className="w-12 sm:w-20 bg-slate-200 rounded-full h-1.5 sm:h-2">
+                  <div className="w-12 sm:w-20 bg-slate-200 rounded-full h-2">
                     <div 
                       className={`h-full rounded-full transition-all duration-300 ${
                         venta.estadoPago === 'Pagado' 
@@ -619,9 +667,11 @@ const VentaViews = ({
                               if ((prod.cantidad || 0) > 1) {
                                 openQuantityModal(prod, venta._id);
                               } else {
-                                if (window.confirm('¿Eliminar este producto de la venta?')) {
-                                  handleRemoveProduct(venta._id, prod.productoId?._id || prod._id);
-                                }
+                                setConfirmDeleteProduct({
+                                  ventaId: venta._id,
+                                  prodId: prod.productoId?._id || prod._id,
+                                  nombre: prod.productoId?.nombre || prod.nombre || 'este producto'
+                                });
                               }
                             }}
                             className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition-colors text-xs font-bold"
@@ -648,15 +698,12 @@ const VentaViews = ({
                           
                           {/* Botón eliminar */}
                           <button
-                            onClick={async () => {
-                              try {
-                                if (window.confirm('¿Eliminar este producto de la venta?')) {
-                                  await handleRemoveProduct(venta._id, prod.productoId?._id || prod._id);
-                                }
-                              } catch (error) {
-                                console.error('❌ Error al eliminar producto:', error);
-                                alert('Error al eliminar producto: ' + error.message);
-                              }
+                            onClick={() => {
+                              setConfirmDeleteProduct({
+                                ventaId: venta._id,
+                                prodId: prod.productoId?._id || prod._id,
+                                nombre: prod.productoId?.nombre || prod.nombre || 'este producto'
+                              });
                             }}
                             className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center bg-gray-100 text-red-500 rounded-full hover:bg-red-100 transition-colors"
                             title="Eliminar producto"
@@ -685,7 +732,7 @@ const VentaViews = ({
                 {venta.estadoPago !== 'Pagado' && (
                   <button
                     onClick={() => handleOpenPayment(ventaParaPago)}
-                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-xs sm:text-sm font-medium"
+                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-lg transition-all text-xs sm:text-sm font-medium"
                     disabled={loading}
                     title="Procesar Pago"
                   >
@@ -698,7 +745,7 @@ const VentaViews = ({
                 {(!venta.estado || venta.estado !== 'devuelta') && (
                   <button
                     onClick={() => handleOpenDevolucion(venta)}
-                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-xs sm:text-sm"
+                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 rounded-lg transition-all text-xs sm:text-sm"
                     disabled={loading}
                     title="Devolución"
                   >
@@ -713,7 +760,7 @@ const VentaViews = ({
                     {(!venta.completionStatus) && (
                       <button
                         onClick={() => handleFinalizarVenta(venta._id)}
-                        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
+                        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-lg transition-all text-xs sm:text-sm"
                         disabled={loading}
                         title="Finalizar"
                       >
@@ -724,7 +771,7 @@ const VentaViews = ({
                     {(venta.completionStatus === 'rejected') && (
                       <button
                         onClick={() => handleFinalizarVenta(venta._id)}
-                        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
+                        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-lg transition-all text-xs sm:text-sm"
                         disabled={loading}
                         title="Reenviar"
                       >
@@ -753,7 +800,7 @@ const VentaViews = ({
                     <>
                       <button 
                         onClick={() => handleApproveReject(venta._id, 'approved')}
-                        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-xs sm:text-sm"
+                        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-lg transition-all text-xs sm:text-sm"
                         disabled={loading}
                         title="Aprobar"
                       >
@@ -762,7 +809,7 @@ const VentaViews = ({
                       </button>
                       <button
                         onClick={() => handleApproveReject(venta._id, 'rejected')}
-                        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-xs sm:text-sm"
+                        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 rounded-lg transition-all text-xs sm:text-sm"
                         disabled={loading}
                         title="Rechazar"
                       >
@@ -776,7 +823,7 @@ const VentaViews = ({
                 {canEditDelete(venta) ? (
                   <button
                     onClick={() => handleDeleteVenta(venta._id)}
-                    className="flex items-center justify-center px-2 sm:px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-xs sm:text-sm ml-auto"
+                    className="flex items-center justify-center px-2 sm:px-3 py-2 text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 rounded-lg transition-all text-xs sm:text-sm ml-auto"
                     disabled={loading}
                     title="Eliminar venta"
                   >
@@ -785,10 +832,10 @@ const VentaViews = ({
                 ) : (
                   ['admin', 'super_admin'].includes(userRole) && (
                     <div 
-                      className="flex items-center justify-center px-2 py-2 bg-slate-100 text-slate-500 rounded-lg text-xs cursor-help border border-slate-200 ml-auto"
+                      className="flex items-center justify-center px-2 py-2 bg-slate-50 text-slate-400 rounded-lg text-xs cursor-help border border-slate-200 ml-auto"
                       title={getDeleteRestrictionReason(venta)}
                     >
-                      🚫
+                      <Ban size={14} />
                     </div>
                   )
                 )}
@@ -797,6 +844,46 @@ const VentaViews = ({
           );
         })}
       </div>
+
+      {/* Mini modal de confirmación para eliminar producto */}
+      {confirmDeleteProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mx-4 max-w-sm w-full">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-red-50 rounded-xl border border-red-100">
+                <Trash2 size={18} className="text-red-600" />
+              </div>
+              <h3 className="font-semibold text-gray-800">Eliminar producto</h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-6">
+              ¿Eliminar <span className="font-medium text-gray-800">{confirmDeleteProduct.nombre}</span> de esta venta?
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setConfirmDeleteProduct(null)}
+                className="px-4 py-2 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    await handleRemoveProduct(confirmDeleteProduct.ventaId, confirmDeleteProduct.prodId);
+                  } catch (error) {
+                    setErrorBanner('Error al eliminar: ' + error.message);
+                  } finally {
+                    setConfirmDeleteProduct(null);
+                  }
+                }}
+                className="px-4 py-2 text-sm text-white bg-red-600 border border-red-600 rounded-lg hover:bg-red-700 transition-all"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
     );
   };
 
@@ -865,7 +952,7 @@ const VentaViews = ({
 
         {/* Dashboard de estadísticas - Optimizado para móvil */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-          <div className="bg-blue-50 p-3 sm:p-4 rounded-lg border border-blue-200">
+          <div className="bg-blue-50 p-3 sm:p-4 rounded-xl border border-blue-200">
             <div className="flex items-center gap-2">
               <User className="text-blue-600 flex-shrink-0" size={16} />
               <div className="min-w-0">
@@ -875,7 +962,7 @@ const VentaViews = ({
             </div>
           </div>
           
-          <div className="bg-green-50 p-3 sm:p-4 rounded-lg border border-green-200">
+          <div className="bg-green-50 p-3 sm:p-4 rounded-xl border border-green-200">
             <div className="flex items-center gap-2">
               <ShoppingCart className="text-green-600 flex-shrink-0" size={16} />
               <div className="min-w-0">
@@ -885,7 +972,7 @@ const VentaViews = ({
             </div>
           </div>
           
-          <div className="bg-purple-50 p-3 sm:p-4 rounded-lg border border-purple-200">
+          <div className="bg-purple-50 p-3 sm:p-4 rounded-xl border border-purple-200">
             <div className="flex items-center gap-2">
               <DollarSign className="text-purple-600 flex-shrink-0" size={16} />
               <div className="min-w-0">
@@ -895,7 +982,7 @@ const VentaViews = ({
             </div>
           </div>
           
-          <div className="bg-red-50 p-3 sm:p-4 rounded-lg border border-red-200">
+          <div className="bg-red-50 p-3 sm:p-4 rounded-xl border border-red-200">
             <div className="flex items-center gap-2">
               <Clock className="text-red-600 flex-shrink-0" size={16} />
               <div className="min-w-0">
@@ -907,7 +994,7 @@ const VentaViews = ({
         </div>
 
         {/* Filtros para la vista de cliente */}
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
           <div className="flex flex-col gap-4">
             {/* Primera fila: Selector de usuario (solo para admin y super_admin) */}
             {['super_admin', 'admin'].includes(userRole) && (
@@ -919,7 +1006,7 @@ const VentaViews = ({
                   <select
                     value={selectedUserId}
                     onChange={(e) => setSelectedUserId(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   >
                     <option value="">Todos los usuarios</option>
                     {usuarios.map(usuario => (
@@ -933,7 +1020,7 @@ const VentaViews = ({
                   <div className="flex items-end">
                     <button
                       onClick={() => setSelectedUserId('')}
-                      className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                      className="px-4 py-2 text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-lg transition-all text-sm"
                     >
                       Limpiar
                     </button>
@@ -952,7 +1039,7 @@ const VentaViews = ({
                     placeholder="Buscar cliente por nombre o email..."
                     value={clientSearchTerm}
                     onChange={(e) => setClientSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   />
                 </div>
               </div>

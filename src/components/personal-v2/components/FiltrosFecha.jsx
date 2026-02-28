@@ -1,76 +1,51 @@
-/**
+﻿/**
  * Componente de filtros por fecha
- * Permite filtrar registros por: hoy, semana, mes, histórico o rango personalizado
  */
 
 import React from 'react';
 import { Calendar } from 'lucide-react';
 
-const FiltrosFecha = React.memo(({ 
-  filtroActual, 
-  onFiltroChange, 
-  customRange, 
-  onCustomRangeChange 
-}) => {
-  
-  const opcionesFiltro = [
+const FiltrosFecha = React.memo(({ filtroActual, onFiltroChange, customRange, onCustomRangeChange }) => {
+
+  const opciones = [
     { value: 'hoy', label: 'Hoy' },
-    { value: 'semana', label: 'Esta Semana' },
+    { value: 'semana', label: 'Semana' },
     { value: 'mes', label: 'Este Mes' },
-    { value: 'historico', label: 'Histórico' },
+    { value: 'historico', label: 'Historico' },
     { value: 'custom', label: 'Personalizado' }
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow p-4">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
       <div className="flex items-center gap-2 mb-3">
-        <Calendar size={20} className="text-gray-600" />
-        <h3 className="text-sm font-semibold text-gray-700">Filtrar por Fecha</h3>
+        <Calendar size={15} className="text-gray-400" />
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Filtrar por Fecha</h3>
       </div>
-      
-      {/* Botones de filtro rápido */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {opcionesFiltro.map((opcion) => (
-          <button
-            key={opcion.value}
-            onClick={() => onFiltroChange(opcion.value)}
-            className={`
-              px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-              ${filtroActual === opcion.value
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }
-            `}
-          >
-            {opcion.label}
+
+      <div className="flex flex-wrap gap-1.5 mb-3">
+        {opciones.map((op) => (
+          <button key={op.value} onClick={() => onFiltroChange(op.value)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+              filtroActual === op.value
+                ? 'text-blue-700 bg-blue-50 border-blue-200'
+                : 'text-gray-500 bg-white border-gray-200 hover:bg-gray-50'
+            }`}>
+            {op.label}
           </button>
         ))}
       </div>
-      
-      {/* Rango personalizado */}
+
       {filtroActual === 'custom' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-gray-200">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-3 border-t border-gray-100">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              Fecha Inicio
-            </label>
-            <input
-              type="date"
-              value={customRange.start}
-              onChange={(e) => onCustomRangeChange('start', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
-            />
+            <label className="block text-[11px] font-medium text-gray-400 mb-1">Fecha Inicio</label>
+            <input type="date" value={customRange.start} onChange={(e) => onCustomRangeChange('start', e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              Fecha Fin
-            </label>
-            <input
-              type="date"
-              value={customRange.end}
-              onChange={(e) => onCustomRangeChange('end', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
-            />
+            <label className="block text-[11px] font-medium text-gray-400 mb-1">Fecha Fin</label>
+            <input type="date" value={customRange.end} onChange={(e) => onCustomRangeChange('end', e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all" />
           </div>
         </div>
       )}
@@ -79,5 +54,4 @@ const FiltrosFecha = React.memo(({
 });
 
 FiltrosFecha.displayName = 'FiltrosFecha';
-
 export default FiltrosFecha;

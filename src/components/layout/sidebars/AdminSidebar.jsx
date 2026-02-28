@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, UserCog, LogOut, Shield, Users, Package, ShoppingCart, Menu, X, ChevronLeft, ChevronRight, UserCheck, Factory, Wallet, DollarSign, ScanLine, ArrowRightLeft, Image, ListTodo, MapPin, Building2 } from 'lucide-react';
+import { Home, UserCog, LogOut, Shield, Users, Package, ShoppingCart, Menu, X, ChevronLeft, ChevronRight, UserCheck, Factory, Wallet, DollarSign, ScanLine, ArrowRightLeft, Image, ListTodo, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 import { NotificationBell } from '../../../components/notifications';
@@ -27,7 +27,6 @@ function AdminSidebar({ currentView, onViewChange, userRole, isCollapsed, toggle
     { id: 'escaner-qr', icon: ScanLine, label: 'Marcar Asistencia', route: '/admin/escaner-qr', badge: 'NUEVO', badgeColor: 'bg-green-500' },
     { id: 'imagenes', icon: Image, label: 'Gestión de Imágenes', route: '/admin/imagenes' },
     { id: 'sucursales', icon: Building2, label: 'Sucursales', route: '/admin/sucursales' },
-    { id: 'mapa', icon: MapPin, label: 'Mapa Ubicaciones', route: '/admin/mapa', badge: 'NUEVO', badgeColor: 'bg-blue-500' },
     { id: 'perfil', icon: UserCog, label: 'Mi Perfil', route: '/admin/perfil' }
   ];
 

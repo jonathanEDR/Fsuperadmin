@@ -69,7 +69,8 @@ export const mapUsuarios = (rawUsers) => {
     id: u.clerk_id || u._id,
     name: u.nombre_negocio || u.email || 'Usuario sin nombre',
     email: u.email,
-    role: u.role
+    role: u.role,
+    avatar_url: u.avatar_url || null
   }));
 };
 

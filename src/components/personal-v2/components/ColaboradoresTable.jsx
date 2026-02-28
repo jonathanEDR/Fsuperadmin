@@ -1,334 +1,295 @@
-/**
- * Tabla de colaboradores optimizada
- * Componente memoizado para evitar re-renders innecesarios
- * Max 250 líneas - Enfoque en responsabilidad única
- */
+﻿import React from 'react';
+import { Calendar, ChevronLeft, ChevronRight, Loader2, DollarSign, Gift, TrendingDown, FileText, Check, X, Clock, Shield } from 'lucide-react';
 
-import React, { useMemo } from 'react';
+const MESES = [
+  'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+];
 
-const ColaboradoresTable = React.memo(({ 
-  colaboradores,
-  estadisticasBulk,
-  pagosRealizados,
+const mesAnterior = (mesStr) => {
+  const [y, m] = mesStr.split('-').map(Number);
+  const d = new Date(y, m - 2, 1);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+};
+const mesSiguiente = (mesStr) => {
+  const [y, m] = mesStr.split('-').map(Number);
+  const d = new Date(y, m, 1);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+};
+const esMesActual = (mesStr) => {
+  const hoy = new Date();
+  return mesStr === `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}`;
+};
+
+const AvatarColab = ({ nombre, avatar, avatarUrl }) => {
+  // Prioridad: 1) avatar_url (Clerk), 2) avatar.url (upload manual), 3) inicial
+  const src = avatarUrl || (avatar ? (typeof avatar === 'string' ? avatar : avatar?.url) : null);
+  const [imgError, setImgError] = React.useState(false);
+
+  if (src && !imgError) {
+    return (
+      <img
+        src={src}
+        alt={nombre}
+        className="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-white shadow-sm"
+        onError={() => setImgError(true)}
+      />
+    );
+  }
+  return (
+    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-sm font-bold text-white flex-shrink-0 shadow-sm">
+      {nombre?.charAt(0)?.toUpperCase() || '?'}
+    </div>
+  );
+};
+
+const BadgeAsistencia = ({ data }) => {
+  if (!data) return <span className="text-xs text-gray-300 italic">Sin registro</span>;
+  const asistidos = (data.presente||0)+(data.tardanza||0)+(data.permiso||0);
+  const ausentes  = data.ausente || 0;
+  const total     = asistidos + ausentes;
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center gap-2">
+        <span className={`inline-flex items-center gap-1 text-sm font-bold px-2.5 py-1 rounded-lg ${
+          asistidos > 0 ? 'text-emerald-700 bg-emerald-50 border border-emerald-100' : 'text-gray-400 bg-gray-50 border border-gray-100'
+        }`}>
+          <Check size={12} strokeWidth={3} />
+          {asistidos}
+          {total > 0 && <span className="text-xs font-normal text-gray-400 ml-0.5">/{total}</span>}
+        </span>
+        {ausentes > 0 && (
+          <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg text-red-600 bg-red-50 border border-red-100">
+            <X size={11} strokeWidth={3} />
+            {ausentes}
+          </span>
+        )}
+      </div>
+      <div className="flex gap-1.5 flex-wrap">
+        {(data.presente||0) > 0 && (
+          <span className="inline-flex items-center gap-0.5 text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-100">
+            <Check size={9} strokeWidth={3}/> {data.presente} presente{data.presente!==1?'s':''}
+          </span>
+        )}
+        {(data.tardanza||0) > 0 && (
+          <span className="inline-flex items-center gap-0.5 text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-100">
+            <Clock size={9}/> {data.tardanza} tardanza{data.tardanza!==1?'s':''}
+          </span>
+        )}
+        {(data.permiso||0) > 0 && (
+          <span className="inline-flex items-center gap-0.5 text-[10px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full border border-blue-100">
+            <Shield size={9}/> {data.permiso} permiso{data.permiso!==1?'s':''}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const BtnAccion = ({ onClick, icon: Icon, label, variant }) => {
+  const styles = {
+    success: 'text-emerald-700 bg-emerald-50 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300',
+    warning: 'text-amber-700 bg-amber-50 border-amber-200 hover:bg-amber-100 hover:border-amber-300',
+    danger:  'text-red-600 bg-red-50 border-red-200 hover:bg-red-100 hover:border-red-300',
+    neutral: 'text-slate-600 bg-slate-50 border-slate-200 hover:bg-slate-100 hover:border-slate-300',
+  };
+  return (
+    <button
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150 shadow-none hover:shadow-sm ${styles[variant]}`}
+    >
+      <Icon size={13} strokeWidth={2.5} />
+      {label}
+    </button>
+  );
+};
+
+const ColaboradoresTable = ({
+  colaboradores = [],
+  asistenciasPorColab = {},
+  adelantosPorColab = {},
+  mesSeleccionado,
+  setMesSeleccionado,
   onAbrirModal,
   onAbrirModalBonificacion,
-  onAbrirModalDescuento, // 🆕 Nuevo prop para descuentos/faltantes
+  onAbrirModalDescuento,
   onMostrarDetalle,
   formatearMoneda,
-  loading
+  loading,
+  loadingAsistencias,
 }) => {
-  
-  // Calcular totales por colaborador (memoizado)
-  const datosColaboradores = useMemo(() => {
-    return colaboradores.map(colaborador => {
-      const clerkId = colaborador.clerk_id;
-      const estadisticas = estadisticasBulk[clerkId] || {};
-      
-      // Calcular total de pagos realizados
-      const totalPagos = pagosRealizados
-        .filter(p => p.colaboradorUserId === clerkId)
-        .reduce((sum, p) => sum + (p.montoTotal || p.monto || 0), 0);
-      
-      // Obtener totales de estadísticas
-      const adelantos = estadisticas.totalAdelantos || 0;
-      const pagosDiarios = estadisticas.totalPagosDiarios || 0;
-      const bonificaciones = estadisticas.totalBonificaciones || 0; // 🆕 Bonificaciones
-      const faltantesPendientes = estadisticas.cobrosAutomaticos?.faltantesPendientes || 0;
-      const gastosPendientes = estadisticas.cobrosAutomaticos?.gastosPendientes || 0;
-      const totalAPagar = estadisticas.totalAPagarConCobros !== undefined 
-        ? estadisticas.totalAPagarConCobros 
-        : (pagosDiarios + bonificaciones - (estadisticas.totalFaltantes || 0) - adelantos);
-      
-      // Total final descontando pagos realizados
-      const totalFinal = totalAPagar - totalPagos;
-      
-      return {
-        ...colaborador,
-        adelantos,
-        pagosDiarios,
-        bonificaciones, // 🆕
-        faltantesPendientes,
-        gastosPendientes,
-        pendientesTotal: faltantesPendientes + gastosPendientes,
-        totalAPagar: totalFinal,
-        ventasRelacionadas: estadisticas.cobrosAutomaticos?.totalVentas || 0,
-        cobrosRelacionados: estadisticas.cobrosAutomaticos?.totalCobros || 0
-      };
-    });
-  }, [colaboradores, estadisticasBulk, pagosRealizados]);
-  
+  const [yStr, mStr] = (mesSeleccionado || '').split('-');
+  const nombreMes      = MESES[parseInt(mStr) - 1] || '';
+  const estesMesActual = esMesActual(mesSeleccionado);
+
+  const irHoy = () => {
+    const hoy = new Date();
+    setMesSeleccionado(`${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}`);
+  };
+
+  const SelectorMes = () => (
+    <div className="flex items-center gap-1">
+      <button
+        onClick={() => setMesSeleccionado(mesAnterior(mesSeleccionado))}
+        className="p-1.5 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 text-gray-400 hover:text-gray-600 transition-all"
+        title="Mes anterior"
+      >
+        <ChevronLeft size={16} />
+      </button>
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-blue-100 shadow-sm">
+        <Calendar size={14} className="text-blue-400" />
+        <span className="text-sm font-semibold text-gray-700">{nombreMes} {yStr}</span>
+        {loadingAsistencias && <Loader2 size={12} className="animate-spin text-blue-400" />}
+      </div>
+      <button
+        onClick={() => setMesSeleccionado(mesSiguiente(mesSeleccionado))}
+        disabled={estesMesActual}
+        className="p-1.5 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 text-gray-400 hover:text-gray-600 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+        title="Mes siguiente"
+      >
+        <ChevronRight size={16} />
+      </button>
+      {!estesMesActual && (
+        <button
+          onClick={irHoy}
+          className="text-xs text-blue-600 font-medium px-2.5 py-1.5 rounded-lg border border-blue-100 bg-blue-50 hover:bg-blue-100 transition-colors"
+        >
+          Hoy
+        </button>
+      )}
+    </div>
+  );
+
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-4 sm:px-6 py-4 bg-gray-50 border-b">
-          <h3 className="text-base sm:text-lg font-medium">Colaboradores</h3>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
+          <h3 className="text-base font-semibold text-gray-800">Colaboradores</h3>
+          <SelectorMes />
         </div>
-        <div className="p-8 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Cargando colaboradores...</p>
-        </div>
-      </div>
-    );
-  }
-  
-  if (datosColaboradores.length === 0) {
-    return (
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-4 sm:px-6 py-4 bg-gray-50 border-b">
-          <h3 className="text-base sm:text-lg font-medium">Colaboradores</h3>
-        </div>
-        <div className="p-8 text-center text-gray-500">
-          No hay colaboradores disponibles
+        <div className="p-10 text-center">
+          <Loader2 size={24} className="animate-spin text-blue-400 mx-auto mb-2" />
+          <p className="text-sm text-gray-400">Cargando...</p>
         </div>
       </div>
     );
   }
-  
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="px-5 sm:px-6 py-4 bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-100">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-800">Colaboradores</h3>
+      {/* Cabecera */}
+      <div className="px-5 py-4 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h3 className="text-base font-semibold text-gray-800">Colaboradores</h3>
+          <p className="text-xs text-gray-400 mt-0.5">{colaboradores.length} colaborador{colaboradores.length !== 1 ? 'es' : ''}</p>
+        </div>
+        <SelectorMes />
       </div>
-      
-      {/* Vista Móvil: Tarjetas */}
+
+      {/* Vista movil - tarjetas */}
       <div className="md:hidden p-3 space-y-3">
-        {datosColaboradores.map((colaborador) => (
-          <div 
-            key={colaborador._id} 
-            className="bg-gradient-to-br from-white to-slate-50 rounded-xl p-4 border border-gray-100 shadow-sm"
-          >
-            {/* Header: Avatar + Nombre + Total */}
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center text-sm font-semibold text-blue-600">
-                  {colaborador.nombre_negocio?.charAt(0)?.toUpperCase() || 'C'}
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-800">
-                    {colaborador.nombre_negocio}
-                  </h4>
-                  <span className="text-xs text-gray-400 capitalize">{colaborador.role}</span>
+        {colaboradores.map((col) => {
+          const asist     = asistenciasPorColab[col.clerk_id];
+          const adelanto  = adelantosPorColab[col.clerk_id] || 0;
+          const asistidos = asist ? (asist.presente||0)+(asist.tardanza||0)+(asist.permiso||0) : null;
+          return (
+            <div key={col._id} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3 mb-3">
+                <AvatarColab nombre={col.nombre_negocio} avatar={col.avatar} avatarUrl={col.avatar_url} />
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-sm font-semibold text-gray-800 truncate">{col.nombre_negocio}</h4>
+                  <span className="text-xs text-gray-400 capitalize">{col.role}</span>
                 </div>
               </div>
-              <span className={`text-sm font-bold px-2.5 py-1 rounded-lg ${
-                colaborador.totalAPagar >= 0 
-                  ? 'text-emerald-600 bg-emerald-50' 
-                  : 'text-red-600 bg-red-50'
-              }`}>
-                {formatearMoneda(colaborador.totalAPagar)}
-              </span>
-            </div>
-            
-            {/* Stats Grid 2x2 */}
-            <div className="grid grid-cols-2 gap-2 mb-3">
-              <div className="bg-amber-50 rounded-lg px-3 py-2">
-                <span className="text-xs text-amber-600 block">Bonificación</span>
-                <span className={`text-sm font-semibold ${
-                  colaborador.bonificaciones > 0 ? 'text-amber-600' : 'text-gray-300'
-                }`}>
-                  {formatearMoneda(colaborador.bonificaciones)}
-                </span>
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2.5">
+                  <span className="text-[10px] font-medium text-emerald-600 uppercase tracking-wide block mb-1">Dias asistidos</span>
+                  {asistidos !== null
+                    ? <span className="text-xl font-bold text-emerald-700 leading-none">{asistidos}<span className="text-xs font-normal text-gray-400 ml-1">dias</span></span>
+                    : <span className="text-xs text-gray-300 italic">Sin datos</span>}
+                </div>
+                <div className="bg-orange-50 border border-orange-100 rounded-xl px-3 py-2.5">
+                  <span className="text-[10px] font-medium text-orange-600 uppercase tracking-wide block mb-1">Adelantos</span>
+                  <span className={`text-sm font-bold leading-none ${adelanto > 0 ? 'text-orange-600' : 'text-gray-300'}`}>{formatearMoneda(adelanto)}</span>
+                </div>
               </div>
-              <div className="bg-orange-50 rounded-lg px-3 py-2">
-                <span className="text-xs text-orange-600 block">Adelantos</span>
-                <span className={`text-sm font-semibold ${
-                  colaborador.adelantos > 0 ? 'text-orange-600' : 'text-gray-300'
-                }`}>
-                  {formatearMoneda(colaborador.adelantos)}
-                </span>
-              </div>
-              <div className="bg-emerald-50 rounded-lg px-3 py-2">
-                <span className="text-xs text-emerald-600 block">Pagos Diarios</span>
-                <span className="text-sm font-semibold text-emerald-600">
-                  {formatearMoneda(colaborador.pagosDiarios)}
-                </span>
-              </div>
-              <div className="bg-blue-50 rounded-lg px-3 py-2">
-                <span className="text-xs text-blue-600 block">Total a Pagar</span>
-                <span className={`text-sm font-semibold ${
-                  colaborador.totalAPagar >= 0 ? 'text-blue-600' : 'text-red-600'
-                }`}>
-                  {formatearMoneda(colaborador.totalAPagar)}
-                </span>
+              <div className="grid grid-cols-2 gap-1.5">
+                <BtnAccion onClick={() => onAbrirModal?.(col)} icon={DollarSign} label="Pago Diario" variant="success" />
+                <BtnAccion onClick={() => onAbrirModalBonificacion?.(col)} icon={Gift} label="Bono" variant="warning" />
+                <BtnAccion onClick={() => onAbrirModalDescuento?.(col)} icon={TrendingDown} label="Descuento" variant="danger" />
+                <BtnAccion onClick={() => onMostrarDetalle?.(col)} icon={FileText} label="Detalle" variant="neutral" />
               </div>
             </div>
-            
-            {/* Botones de Acción - Solo iconos en móvil */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => onAbrirModal && onAbrirModal(colaborador)}
-                className="flex-1 px-2 sm:px-3 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors shadow-sm flex items-center justify-center gap-1"
-                title="Registrar pago diario"
-              >
-                <span className="text-base">💵</span>
-                <span className="hidden sm:inline">Pago Diario</span>
-              </button>
-              <button
-                onClick={() => onAbrirModalBonificacion && onAbrirModalBonificacion(colaborador)}
-                className="flex-1 px-2 sm:px-3 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors shadow-sm flex items-center justify-center gap-1"
-                title="Bonificación especial o adelanto (metas son automáticas)"
-              >
-                <span className="text-base">🎁</span>
-                <span className="hidden sm:inline">Bono</span>
-              </button>
-              <button
-                onClick={() => onAbrirModalDescuento && onAbrirModalDescuento(colaborador)}
-                className="flex-1 px-2 sm:px-3 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow-sm flex items-center justify-center gap-1"
-                title="Registrar descuento o faltante"
-              >
-                <span className="text-base">🔻</span>
-                <span className="hidden sm:inline">Descuento</span>
-              </button>
-              <button
-                onClick={() => onMostrarDetalle(colaborador)}
-                className="flex-1 px-2 sm:px-3 py-2 bg-slate-700 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm flex items-center justify-center gap-1"
-                title="Ver detalle"
-              >
-                <span className="text-base">📋</span>
-                <span className="hidden sm:inline">Detalle</span>
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
-      
-      {/* Vista Desktop: Tabla */}
+
+      {/* Vista desktop - tabla */}
       <div className="hidden md:block overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-100">
-          <thead className="bg-gray-50/50">
-            <tr>
-              <th className="px-4 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Colaborador
+        <table className="min-w-full">
+          <thead>
+            <tr className="bg-gray-50/60 border-b border-gray-100">
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Colaborador</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Dias Asistidos
+                <span className="ml-1 normal-case font-normal text-gray-400 text-[11px]"> {nombreMes}</span>
               </th>
-              <th className="px-4 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Bonificación
-              </th>
-              <th className="px-4 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Adelantos
+                <span className="ml-1 normal-case font-normal text-gray-400 text-[11px]"> {nombreMes}</span>
               </th>
-              <th className="px-4 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Pagos Diarios
-              </th>
-              <th className="px-4 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Total a Pagar
-              </th>
-              <th className="px-4 py-3.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Acciones
-              </th>
+              <th className="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
             </tr>
           </thead>
-          
-          <tbody className="bg-white divide-y divide-gray-50">
-            {datosColaboradores.map((colaborador) => (
-              <tr key={colaborador._id} className="hover:bg-slate-50/50 transition-colors">
-                {/* Columna: Colaborador */}
-                <td className="px-4 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center text-sm font-semibold text-blue-600">
-                      {colaborador.nombre_negocio?.charAt(0)?.toUpperCase() || 'C'}
-                    </div>
-                    <div className="flex flex-col">
-                      <div className="text-sm font-medium text-gray-800">
-                        {colaborador.nombre_negocio}
-                      </div>
-                      <div className="hidden sm:block text-xs text-gray-400">
-                        {colaborador.email}
-                      </div>
-                      <div className="text-xs text-gray-400 capitalize">
-                        {colaborador.role}
+          <tbody className="divide-y divide-gray-50">
+            {colaboradores.map((col) => {
+              const asist    = asistenciasPorColab[col.clerk_id];
+              const adelanto = adelantosPorColab[col.clerk_id] || 0;
+              return (
+                <tr key={col._id} className="hover:bg-slate-50/40 transition-colors group">
+                  <td className="px-5 py-4">
+                    <div className="flex items-center gap-3">
+                      <AvatarColab nombre={col.nombre_negocio} avatar={col.avatar} avatarUrl={col.avatar_url} />
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-sm font-semibold text-gray-800">{col.nombre_negocio}</span>
+                        <span className="text-xs text-gray-400">{col.email}</span>
+                        <span className="text-[10px] text-gray-300 capitalize">{col.role}</span>
                       </div>
                     </div>
-                  </div>
-                </td>
-                
-                {/* Columna: Bonificación */}
-                <td className="px-4 py-4 text-right">
-                  <span className={`text-sm font-semibold ${
-                    colaborador.bonificaciones > 0 ? 'text-amber-500' : 'text-gray-300'
-                  }`}>
-                    {formatearMoneda(colaborador.bonificaciones)}
-                  </span>
-                </td>
-                
-                {/* Columna: Adelantos */}
-                <td className="px-4 py-4 text-right">
-                  <span className={`text-sm font-semibold ${
-                    colaborador.adelantos > 0 ? 'text-orange-500' : 'text-gray-300'
-                  }`}>
-                    {formatearMoneda(colaborador.adelantos)}
-                  </span>
-                </td>
-                
-                {/* Columna: Pagos Diarios */}
-                <td className="px-4 py-4 text-right">
-                  <span className="text-sm font-semibold text-emerald-500">
-                    {formatearMoneda(colaborador.pagosDiarios)}
-                  </span>
-                </td>
-                
-                {/* Columna: Total a Pagar */}
-                <td className="px-4 py-4 text-right">
-                  <span className={`text-sm font-bold px-2.5 py-1 rounded-lg ${
-                    colaborador.totalAPagar >= 0 
-                      ? 'text-emerald-600 bg-emerald-50' 
-                      : 'text-red-600 bg-red-50'
-                  }`}>
-                    {formatearMoneda(colaborador.totalAPagar)}
-                  </span>
-                </td>
-                
-                {/* Columna: Acciones */}
-                <td className="px-4 py-4">
-                  <div className="flex flex-col sm:flex-row gap-1.5 justify-center">
-                    {/* Botón Pago Diario Manual */}
-                    <button
-                      onClick={() => onAbrirModal && onAbrirModal(colaborador)}
-                      className="px-2.5 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors shadow-sm"
-                      title="Registrar pago diario manual"
-                    >
-                      💵 Pago Diario
-                    </button>
-                    {/* Botón Bonificación Especial/Adelanto */}
-                    <button
-                      onClick={() => onAbrirModalBonificacion && onAbrirModalBonificacion(colaborador)}
-                      className="px-2.5 py-1.5 bg-amber-600 text-white rounded-lg text-xs font-medium hover:bg-amber-700 transition-colors shadow-sm"
-                      title="Bonificación especial o adelanto"
-                    >
-                      🎁 Bono
-                    </button>
-                    {/* Botón Descuento/Faltante */}
-                    <button
-                      onClick={() => onAbrirModalDescuento && onAbrirModalDescuento(colaborador)}
-                      className="px-2.5 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700 transition-colors shadow-sm"
-                      title="Registrar descuento o faltante"
-                    >
-                      🔻 Descuento
-                    </button>
-                    {/* Botón Ver Detalle */}
-                    <button
-                      onClick={() => onMostrarDetalle(colaborador)}
-                      className="px-2.5 py-1.5 bg-slate-700 text-white rounded-lg text-xs font-medium hover:bg-slate-800 transition-colors shadow-sm"
-                    >
-                      📋 Detalle
-                    </button>
-                  </div>
+                  </td>
+                  <td className="px-5 py-4">
+                    <BadgeAsistencia data={asist} />
+                  </td>
+                  <td className="px-5 py-4 text-right">
+                    <span className={`text-sm font-semibold tabular-nums ${adelanto > 0 ? 'text-orange-500' : 'text-gray-300'}`}>
+                      {formatearMoneda(adelanto)}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="flex items-center gap-1.5 justify-center flex-wrap">
+                      <BtnAccion onClick={() => onAbrirModal?.(col)} icon={DollarSign} label="Pago Diario" variant="success" />
+                      <BtnAccion onClick={() => onAbrirModalBonificacion?.(col)} icon={Gift} label="Bono" variant="warning" />
+                      <BtnAccion onClick={() => onAbrirModalDescuento?.(col)} icon={TrendingDown} label="Descuento" variant="danger" />
+                      <BtnAccion onClick={() => onMostrarDetalle?.(col)} icon={FileText} label="Detalle" variant="neutral" />
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+            {colaboradores.length === 0 && (
+              <tr>
+                <td colSpan={4} className="px-5 py-10 text-center text-sm text-gray-400 italic">
+                  No hay colaboradores disponibles
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
     </div>
   );
-}, (prevProps, nextProps) => {
-  // Comparación personalizada para evitar re-renders innecesarios
-  return (
-    prevProps.colaboradores === nextProps.colaboradores &&
-    prevProps.estadisticasBulk === nextProps.estadisticasBulk &&
-    prevProps.pagosRealizados === nextProps.pagosRealizados &&
-    prevProps.loading === nextProps.loading
-  );
-});
+};
 
 ColaboradoresTable.displayName = 'ColaboradoresTable';
 

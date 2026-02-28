@@ -6,6 +6,7 @@
 
 import React, { useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Settings, Users, Wallet, CalendarCheck, Building2, Target, MapPin } from 'lucide-react';
 import { useUserRole } from '../../hooks/useUserRole';
 import ConfiguracionTardanzaModal from './components/ConfiguracionTardanzaModal';
 
@@ -39,33 +40,39 @@ function GestionPersonalLayout() {
     { 
       id: 'personal', 
       label: 'Personal', 
-      mobileIcon: '👥',
+      icon: Users,
       path: `${basePath}`,
-      exact: true // Solo match exacto para esta ruta
+      exact: true
     },
     { 
       id: 'pagos', 
       label: 'Pagos Realizados', 
-      mobileIcon: '💰',
+      icon: Wallet,
       path: `${basePath}/pagos-realizados`
     },
     { 
       id: 'asistencias', 
       label: 'Control de Asistencias', 
-      mobileIcon: '📅',
+      icon: CalendarCheck,
       path: `${basePath}/asistencias`
     },
     { 
       id: 'colaboradores', 
       label: 'Colaboradores', 
-      mobileIcon: '🏢',
+      icon: Building2,
       path: `${basePath}/perfiles`
     },
     { 
       id: 'metas', 
       label: 'Metas y Bonificaciones', 
-      mobileIcon: '🎯',
+      icon: Target,
       path: `${basePath}/metas`
+    },
+    { 
+      id: 'mapa', 
+      label: 'Mapa Ubicaciones', 
+      icon: MapPin,
+      path: `${basePath}/mapa`
     }
   ];
 
@@ -97,15 +104,16 @@ function GestionPersonalLayout() {
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-              <h2 className="text-xl sm:text-2xl font-bold">
-                Gestión de Personal V2
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-2">
+                <Users size={22} className="text-blue-600" />
+                Gestion de Personal
               </h2>
             </div>
           </div>
           
           {/* Tabs Navigation - Scroll horizontal en móvil */}
-          <div className="relative flex items-end gap-2">
-            <div className="flex-1 flex gap-1 sm:gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-px border-b border-gray-200">
+          <div className="relative flex items-end gap-1.5">
+            <div className="flex-1 min-w-0 flex gap-1 sm:gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-px border-b border-gray-200">
               {tabs.map((tab) => (
                 <NavLink
                   key={tab.id}
@@ -121,22 +129,21 @@ function GestionPersonalLayout() {
                     }`;
                   }}
                 >
-                  <span className="sm:hidden">{tab.mobileIcon}</span>
+                  {tab.icon && <tab.icon size={15} className="sm:hidden" />}
                   <span className="hidden sm:inline">{tab.label}</span>
                 </NavLink>
               ))}
             </div>
             
             {/* Botón de configuración */}
-            <div className="flex gap-2 flex-shrink-0">
-              {/* Botón de configuración de tardanzas */}
+            <div className="flex-shrink-0 pb-px">
               <button
                 onClick={() => setModalConfigTardanza(true)}
-                className="px-3 py-2 font-medium text-sm transition-colors whitespace-nowrap bg-amber-100 text-amber-700 hover:bg-amber-200 rounded-lg flex items-center gap-1 border border-amber-300"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 font-medium text-sm transition-all whitespace-nowrap bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg border border-amber-200 hover:border-amber-300 shadow-sm"
                 title="Configurar descuentos por tardanza"
               >
-                <span>⚙️</span>
-                <span className="hidden sm:inline">Configuración</span>
+                <Settings size={15} strokeWidth={2} />
+                <span className="hidden sm:inline text-xs">Configuración</span>
               </button>
             </div>
           </div>

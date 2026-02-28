@@ -1,136 +1,80 @@
-/**
+﻿/**
  * Card de resumen de asistencias del colaborador
- * Muestra estadísticas rápidas del mes actual
  */
 
 import React from 'react';
 import { Calendar, CheckCircle, XCircle, Clock, FileText } from 'lucide-react';
 
-const AsistenciaResumenCard = React.memo(({ 
-  estadisticasAsistencia,
-  onVerDetalle 
-}) => {
-  
+const AsistenciaResumenCard = React.memo(({ estadisticasAsistencia, onVerDetalle }) => {
+
   if (!estadisticasAsistencia) {
     return (
-      <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Calendar className="text-purple-600" size={24} />
-            <h4 className="text-lg font-semibold text-gray-800">
-              Asistencias del Mes
-            </h4>
-          </div>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div className="flex items-center gap-2 mb-2">
+          <Calendar size={16} className="text-purple-500" />
+          <h4 className="text-sm font-semibold text-gray-700">Asistencias del Mes</h4>
         </div>
-        <p className="text-sm text-gray-600">
-          No hay datos de asistencia disponibles
-        </p>
+        <p className="text-xs text-gray-400">No hay datos de asistencia disponibles</p>
       </div>
     );
   }
-  
-  const {
-    total = 0,
-    presentes = 0,
-    ausentes = 0,
-    tardanzas = 0,
-    permisos = 0
-  } = estadisticasAsistencia;
-  
-  const porcentajeAsistencia = total > 0 
-    ? ((presentes + tardanzas) / total * 100).toFixed(0) 
-    : 0;
-  
+
+  const { total = 0, presentes = 0, ausentes = 0, tardanzas = 0, permisos = 0 } = estadisticasAsistencia;
+  const pct = total > 0 ? Math.round((presentes + tardanzas) / total * 100) : 0;
+
+  const stats = [
+    { label: 'Presentes', value: presentes, icon: CheckCircle, color: 'text-emerald-600' },
+    { label: 'Tardanzas', value: tardanzas, icon: Clock, color: 'text-orange-500' },
+    { label: 'Ausentes', value: ausentes, icon: XCircle, color: 'text-red-500' },
+    { label: 'Permisos', value: permisos, icon: FileText, color: 'text-blue-500' },
+  ];
+
   return (
-    <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Calendar className="text-purple-600" size={24} />
-          <h4 className="text-lg font-semibold text-gray-800">
-            Asistencias del Mes
-          </h4>
+          <Calendar size={16} className="text-purple-500" />
+          <h4 className="text-sm font-semibold text-gray-700">Asistencias del Mes</h4>
         </div>
         {onVerDetalle && (
-          <button
-            onClick={onVerDetalle}
-            className="text-sm text-purple-600 hover:text-purple-800 font-medium underline"
-          >
-            Ver detalle completo
+          <button onClick={onVerDetalle}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border text-purple-700 bg-purple-50 border-purple-200 hover:bg-purple-100 transition-all">
+            Ver detalle
           </button>
         )}
       </div>
-      
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-        {/* Presentes */}
-        <div className="text-center">
-          <div className="flex items-center justify-center mb-2">
-            <CheckCircle className="text-green-600" size={20} />
-          </div>
-          <div className="text-2xl font-bold text-green-700">{presentes}</div>
-          <div className="text-xs text-gray-600">Presentes</div>
-        </div>
-        
-        {/* Tardanzas */}
-        <div className="text-center">
-          <div className="flex items-center justify-center mb-2">
-            <Clock className="text-orange-600" size={20} />
-          </div>
-          <div className="text-2xl font-bold text-orange-700">{tardanzas}</div>
-          <div className="text-xs text-gray-600">Tardanzas</div>
-        </div>
-        
-        {/* Ausentes */}
-        <div className="text-center">
-          <div className="flex items-center justify-center mb-2">
-            <XCircle className="text-red-600" size={20} />
-          </div>
-          <div className="text-2xl font-bold text-red-700">{ausentes}</div>
-          <div className="text-xs text-gray-600">Ausentes</div>
-        </div>
-        
-        {/* Permisos */}
-        <div className="text-center">
-          <div className="flex items-center justify-center mb-2">
-            <FileText className="text-blue-600" size={20} />
-          </div>
-          <div className="text-2xl font-bold text-blue-700">{permisos}</div>
-          <div className="text-xs text-gray-600">Permisos</div>
-        </div>
+
+      <div className="grid grid-cols-4 gap-3 mb-4">
+        {stats.map((s, i) => {
+          const Icon = s.icon;
+          return (
+            <div key={i} className="text-center">
+              <Icon size={16} className={`${s.color} mx-auto mb-1`} />
+              <div className={`text-xl font-bold ${s.color}`}>{s.value}</div>
+              <div className="text-[10px] text-gray-400 uppercase tracking-wide">{s.label}</div>
+            </div>
+          );
+        })}
       </div>
-      
-      {/* Barra de porcentaje de asistencia */}
-      <div className="mt-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700">
-            Porcentaje de Asistencia
-          </span>
-          <span className={`text-sm font-bold ${
-            porcentajeAsistencia >= 90 ? 'text-green-600' :
-            porcentajeAsistencia >= 75 ? 'text-yellow-600' :
-            'text-red-600'
-          }`}>
-            {porcentajeAsistencia}%
+
+      {/* Barra de asistencia */}
+      <div>
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[11px] font-medium text-gray-500">Porcentaje de Asistencia</span>
+          <span className={`text-xs font-bold ${pct >= 90 ? 'text-emerald-600' : pct >= 75 ? 'text-amber-600' : 'text-red-500'}`}>
+            {pct}%
           </span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div 
-            className={`h-2 rounded-full transition-all duration-300 ${
-              porcentajeAsistencia >= 90 ? 'bg-green-500' :
-              porcentajeAsistencia >= 75 ? 'bg-yellow-500' :
-              'bg-red-500'
-            }`}
-            style={{ width: `${porcentajeAsistencia}%` }}
-          ></div>
+        <div className="w-full bg-gray-200/60 rounded-full h-2">
+          <div className={`h-2 rounded-full transition-all duration-300 ${
+            pct >= 90 ? 'bg-emerald-500' : pct >= 75 ? 'bg-amber-500' : 'bg-red-500'
+          }`} style={{ width: `${pct}%` }} />
         </div>
-      </div>
-      
-      <div className="mt-3 text-xs text-gray-500 text-center">
-        Basado en {total} registros del mes actual
+        <p className="text-[10px] text-gray-400 text-center mt-1.5">Basado en {total} registros del mes actual</p>
       </div>
     </div>
   );
 });
 
 AsistenciaResumenCard.displayName = 'AsistenciaResumenCard';
-
 export default AsistenciaResumenCard;

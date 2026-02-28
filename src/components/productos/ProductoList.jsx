@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { Package, Plus, Edit2, Trash2, Users, Search, X, FileSpreadsheet } from 'lucide-react';
+import { Package, Plus, Edit2, Trash2, Users, Search, X, FileSpreadsheet, Loader2, BookOpen, Tag } from 'lucide-react';
 import ProductCreationModal from './ProductCreationModal';
 import InventarioHistorial from './InventarioHistorial';
 import InventarioModal from './InventarioModal';
@@ -578,13 +578,13 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
         {/* Título principal con contador de productos */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-100 rounded-lg">
+            <div className="p-3 bg-blue-50 rounded-xl border border-blue-100">
               <Package className="text-blue-600" size={24} />
             </div>
             <div>
               <div className="flex items-center gap-3">
                 <h3 className="text-xl font-bold text-gray-800">Gestión de Productos</h3>
-                <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+                <span className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded-full border border-blue-200">
                   {productosFiltrados.length} de {productos.length} productos
                 </span>
               </div>
@@ -601,27 +601,27 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
         <div className="flex flex-wrap gap-3">
           <button
             onClick={() => setIsCatalogoModalOpen(true)}
-            className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors flex items-center gap-2 shadow-sm"
+            className="text-orange-700 bg-orange-50 border border-orange-200 hover:bg-orange-100 px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
           >
-            <Plus size={18} />
+            <BookOpen size={17} />
             <span className="hidden sm:inline">Ver / Agregar Catálogo</span>
             <span className="sm:hidden">Catálogo</span>
           </button>
 
           <button
             onClick={() => setIsCategoryModalOpen(true)}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 shadow-sm"
+            className="text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
           >
-            <Plus size={18} />
+            <Tag size={17} />
             <span className="hidden sm:inline">Ver / Agregar Categorías</span>
             <span className="sm:hidden">Categorías</span>
           </button>
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
+            className="text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
           >
-            <Plus size={18} />
+            <Plus size={17} />
             <span className="hidden sm:inline">Agregar Producto</span>
             <span className="sm:hidden">Producto</span>
           </button>
@@ -630,7 +630,7 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
           {isAdminUser && (
             <button
               onClick={() => setIsBulkUploadModalOpen(true)}
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all flex items-center gap-2 shadow-lg transform hover:scale-105"
+              className="text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100 px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
             >
               <FileSpreadsheet size={18} />
               <span className="hidden sm:inline">Importar Masivo</span>
@@ -642,7 +642,7 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
           {isAdminUser && (
             <button
               onClick={() => setIsInventarioModalOpen(true)}
-              className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors flex items-center gap-2 shadow-sm"
+              className="text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
             >
               <Plus size={20} />
               <span className="hidden sm:inline">Registrar Entrada/Lote</span>
@@ -716,37 +716,33 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
       />
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+        <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 text-sm">
+          <X size={15} className="flex-shrink-0" />
           {error}
         </div>
       )}
 
-      {/* 🎯 OPTIMIZADO: Filtros súper compactos - solo esenciales */}
-      <div className="bg-orange-100 p-3 rounded-lg mb-6 border border-orange-200">
-        <h3 className="text-center text-base font-semibold text-orange-800 mb-3">
+      {/* Filtros */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+        <h3 className="text-center text-sm font-semibold text-gray-700 mb-3">
           Selecciona tus productos favoritos para crear una venta
         </h3>
-        
-        {/* Grid responsivo para filtros - máximo 2 filas, solo elementos esenciales */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-3">
-          {/* Campo de búsqueda */}
           <div className="relative">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+            <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400" size={15} />
             <input
               type="text"
               placeholder="Buscar productos"
               value={filtros.busqueda}
               onChange={(e) => handleFiltroChange('busqueda', e.target.value)}
-              className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+              className="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm outline-none"
             />
           </div>
-
-          {/* Filtro por categoría */}
           <div>
             <select
               value={filtros.categoria}
               onChange={(e) => handleFiltroChange('categoria', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white text-sm"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm outline-none"
             >
               <option value="">Todas las categorías</option>
               {categorias.map(categoria => (
@@ -756,13 +752,11 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
               ))}
             </select>
           </div>
-
-          {/* Filtro por stock - sin checkbox ni botón limpiar */}
           <div>
             <select
               value={filtros.stock}
               onChange={(e) => handleFiltroChange('stock', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white text-sm"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm outline-none"
             >
               <option value="todos">Todos los productos</option>
               <option value="conStock">Solo con stock</option>
@@ -773,27 +767,27 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center py-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="flex justify-center items-center py-10">
+          <Loader2 size={32} className="animate-spin text-blue-500" />
         </div>
       ) : (
         <div className="space-y-8">
           {/* Mensaje cuando no hay productos filtrados */}
           {productosFiltrados.length === 0 ? (
-            <div className="bg-white rounded-lg shadow p-8 text-center">
+            <div className="rounded-2xl shadow-sm border border-gray-100 p-8 text-center bg-white">
               <div className="text-gray-500">
                 <Package size={48} className="mx-auto mb-4 text-gray-300" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
                   No se encontraron productos
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-sm">
                   No hay productos que coincidan con los filtros seleccionados.
                 </p>
                 <button
                   onClick={limpiarFiltros}
-                  className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-blue-700 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors text-sm"
                 >
-                  <X size={16} className="mr-2" />
+                  <X size={15} />
                   Limpiar filtros
                 </button>
               </div>
@@ -802,10 +796,10 @@ function ProductoList({ userRole: propUserRole = 'user', hideHeader = false }) {
             <>
               {/* Tabla de Productos Activos */}
               {/* Responsive: tabla en desktop, cards en móvil */}
-              <div className="overflow-x-auto bg-white rounded-lg shadow">
+              <div className="overflow-x-auto rounded-2xl shadow-sm border border-gray-100">
             {/* Desktop Table */}
-            <table className="hidden sm:table min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="hidden sm:table min-w-full divide-y divide-gray-100">
+              <thead className="bg-gray-50/60">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>

@@ -180,6 +180,7 @@ function App() {
                 <Route path="asistencias" element={<AsistenciasPage />} />
                 <Route path="perfiles" element={<PerfilesPage />} />
                 <Route path="metas" element={<MetasPage />} />
+                <Route path="mapa" element={<MapaPage />} />
               </Route>
               <Route path="qr-asistencias" element={<GestionQR />} /> {/* NUEVO: Gestión de Códigos QR */}
               <Route path="escaner-qr" element={<EscanerQR />} /> {/* NUEVO: Escáner QR Asistencias */}
@@ -187,8 +188,6 @@ function App() {
               <Route path="produccion/*" element={<ProduccionPage />} />
               {/* Gestión de Imágenes */}
               <Route path="imagenes" element={<ImagenesPage />} />
-              {/* Mapa de Ubicaciones */}
-              <Route path="mapa" element={<MapaPage />} />
               {/* Gestión de Sucursales y Carritos */}
               <Route path="sucursales" element={<SucursalesPage />} />
             </Route>
@@ -220,6 +219,7 @@ function App() {
                 <Route path="asistencias" element={<AsistenciasPage />} />
                 <Route path="perfiles" element={<PerfilesPage />} />
                 <Route path="metas" element={<MetasPage />} />
+                <Route path="mapa" element={<MapaPage />} />
               </Route>
               <Route path="qr-asistencias" element={<GestionQR />} /> {/* NUEVO: Gestión de Códigos QR */}
               <Route path="escaner-qr" element={<EscanerQR />} /> {/* NUEVO: Escáner QR Asistencias */}

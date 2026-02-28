@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, Plus, Grid3X3 } from 'lucide-react';
+import { ShoppingCart, Plus, Grid3X3, LayoutGrid } from 'lucide-react';
 import VentaList from './VentaList';
 import VentaCreationModal from './VentaCreationModal';
 import { useRole } from '../../context/RoleContext';
@@ -160,17 +160,17 @@ function VentasManager({ userRole: userRoleProp }) {
   }, []);
 
   return (
-    <div className="space-y-8">
-      <div className="bg-white shadow-lg rounded-xl p-4 sm:p-6">
+    <div className="space-y-6">
+      <div className="bg-white shadow-sm rounded-2xl border border-gray-100 p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 sm:p-3 bg-purple-100 rounded-lg">
+            <div className="p-2.5 bg-purple-50 rounded-xl border border-purple-100">
               <ShoppingCart className="text-purple-600" size={20} />
             </div>
             <div>
               <h3 className="text-lg sm:text-xl font-bold text-gray-800">Gestión de Ventas</h3>
-              <p className="text-xs sm:text-sm text-gray-600">
-                Administra las ventas del sistema {userRole && `(${userRole})`}
+              <p className="text-xs sm:text-sm text-gray-400">
+                Administra las ventas del sistema ({userRole})
               </p>
             </div>
           </div>
@@ -178,18 +178,18 @@ function VentasManager({ userRole: userRoleProp }) {
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <button
                 onClick={() => navigate(getCatalogoRoute())}
-                className="flex-1 sm:flex-none bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 sm:px-6 py-2.5 sm:py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg text-sm sm:text-base"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium border rounded-lg text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100 transition-all"
                 title="Ver Catálogo"
               >
-                <Grid3X3 size={18} className="sm:w-5 sm:h-5" />
+                <LayoutGrid size={16} />
                 <span className="hidden xs:inline">Ver Catálogo</span>
               </button>
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="flex-1 sm:flex-none bg-purple-600 text-white px-3 sm:px-6 py-2.5 sm:py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium border rounded-lg text-purple-700 bg-purple-50 border-purple-200 hover:bg-purple-100 transition-all"
                 title="Nueva Venta"
               >
-                <Plus size={18} className="sm:w-5 sm:h-5" />
+                <Plus size={16} />
                 <span className="hidden xs:inline">Nueva Venta</span>
               </button>
             </div>

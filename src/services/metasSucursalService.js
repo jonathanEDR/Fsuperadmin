@@ -201,10 +201,7 @@ export const metasSucursalService = {
    * @returns {string} Monto formateado
    */
   formatearMoneda: (monto) => {
-    return new Intl.NumberFormat('es-PE', {
-      style: 'currency',
-      currency: 'PEN'
-    }).format(monto || 0);
+    return `S/ ${(monto || 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   },
   
   /**

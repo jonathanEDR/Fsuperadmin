@@ -1,5 +1,27 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, User, DollarSign, ShoppingCart } from 'lucide-react';
+import { ChevronDown, ChevronUp, User, DollarSign, ShoppingCart, Check, X, Clock } from 'lucide-react';
+
+// Avatar component with real photo support
+const AvatarColab = ({ nombre, avatarUrl, size = 'md' }) => {
+  const [err, setErr] = React.useState(false);
+  const sizes = { sm: 'w-7 h-7 text-[10px]', md: 'w-9 h-9 text-xs', lg: 'w-14 h-14 text-xl' };
+  const sz = sizes[size] || sizes.md;
+  if (avatarUrl && !err) {
+    return (
+      <img
+        src={avatarUrl}
+        alt={nombre}
+        className={`${sz} rounded-full object-cover flex-shrink-0 ring-2 ring-white shadow-sm`}
+        onError={() => setErr(true)}
+      />
+    );
+  }
+  return (
+    <div className={`${sz} rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center font-bold text-white flex-shrink-0 shadow-sm`}>
+      {(nombre || '?').charAt(0).toUpperCase()}
+    </div>
+  );
+};
 
 const ClienteCard = ({ 
   clienteData, 
@@ -8,17 +30,19 @@ const ClienteCard = ({
   formatearFechaHora
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
       {/* Header del cliente */}
       <div 
-        className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+        className="p-4 cursor-pointer hover:bg-gray-50/50 transition-colors"
         onClick={onToggleExpansion}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-full">
-              <User className="text-blue-600" size={20} />
-            </div>
+            <AvatarColab
+              nombre={clienteData.cliente}
+              avatarUrl={clienteData.avatarUrl}
+              size="md"
+            />
             <div>
               <h3 className="font-semibold text-gray-900">{clienteData.cliente}</h3>
               {clienteData.email && (
@@ -78,7 +102,7 @@ const ClienteCard = ({
       {isExpanded && (
         <div className="border-t border-gray-200">
           {/* Resumen detallado del cliente */}
-          <div className="bg-gray-50 p-4 border-b border-gray-200">
+          <div className="bg-gray-50/50 p-4 border-b border-gray-100">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
               <div>
                 <div className="text-lg font-bold text-blue-600">{clienteData.ventas.length}</div>
@@ -101,7 +125,7 @@ const ClienteCard = ({
           
           <div className="p-4 space-y-3">
             {clienteData.ventas.map((venta) => (
-              <div key={venta._id} className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+              <div key={venta._id} className="bg-gray-50/50 rounded-xl p-3 border border-gray-100">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   {/* Columna Venta - Similar a la tabla */}
                   <div className="space-y-1">
@@ -169,28 +193,28 @@ const ClienteCard = ({
 
                   {/* Columna Estado - Similar a la tabla */}
                   <div className="space-y-2">
-                    <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
+                    <span className={`inline-flex px-2 py-1 text-xs rounded-full border ${
                       venta.estadoPago === 'Pagado' 
-                        ? 'bg-green-100 text-green-800'
+                        ? 'bg-green-50 text-green-700 border-green-200'
                         : venta.estadoPago === 'Parcial'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                        : 'bg-red-50 text-red-700 border-red-200'
                     }`}>
                       {venta.estadoPago}
                     </span>
                     {venta.isCompleted && (
-                      <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
+                      <span className={`inline-flex items-center gap-0.5 px-2 py-1 text-xs rounded-full border ${
                         venta.completionStatus === 'approved'
-                          ? 'bg-green-100 text-green-800'
+                          ? 'bg-green-50 text-green-700 border-green-200'
                           : venta.completionStatus === 'rejected'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-yellow-100 text-yellow-800'
+                          ? 'bg-red-50 text-red-700 border-red-200'
+                          : 'bg-yellow-50 text-yellow-700 border-yellow-200'
                       }`}>
                         {venta.completionStatus === 'approved'
-                          ? 'Aprobada'
+                          ? <><Check size={10} /> Aprobada</>
                           : venta.completionStatus === 'rejected'
-                          ? 'Rechazada'
-                          : 'Pendiente'}
+                          ? <><X size={10} /> Rechazada</>
+                          : <><Clock size={10} /> Pendiente</>}
                       </span>
                     )}
                   </div>

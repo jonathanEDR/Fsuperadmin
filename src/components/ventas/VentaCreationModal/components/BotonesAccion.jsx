@@ -1,5 +1,5 @@
 import React from 'react';
-import { Save, X, Loader2, AlertCircle } from 'lucide-react';
+import { Save, X, Loader2, AlertCircle, Lightbulb } from 'lucide-react';
 
 /**
  * BotonesAccion - Botones de acción del modal (Guardar/Cancelar)
@@ -65,8 +65,8 @@ const BotonesAccion = React.memo(({
           disabled={guardando}
           className={`px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 min-w-[40px] sm:min-w-0 ${
             guardando
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              : 'bg-gray-200 hover:bg-gray-300 text-gray-700 hover:shadow-md'
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+              : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200'
           }`}
           title="Cancelar"
         >
@@ -80,8 +80,8 @@ const BotonesAccion = React.memo(({
           disabled={deshabilitarGuardar || guardando}
           className={`px-4 py-1.5 sm:px-6 sm:py-2 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 flex items-center gap-1.5 sm:gap-2 ${
             deshabilitarGuardar || guardando
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg hover:shadow-xl'
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+              : 'text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100'
           }`}
           title={
             deshabilitarGuardar
@@ -107,8 +107,8 @@ const BotonesAccion = React.memo(({
 
       {/* Ayuda contextual */}
       {deshabilitarGuardar && !guardando && (
-        <p className="text-[10px] sm:text-xs text-gray-500 text-center">
-          💡 Asegúrate de agregar productos y seleccionar un cliente
+        <p className="text-[10px] sm:text-xs text-gray-500 text-center flex items-center justify-center gap-1">
+          <Lightbulb size={10} className="text-amber-500" /> Asegúrate de agregar productos y seleccionar un cliente
         </p>
       )}
     </div>

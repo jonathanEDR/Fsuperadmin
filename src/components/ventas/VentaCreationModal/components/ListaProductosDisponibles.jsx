@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Package, Zap } from 'lucide-react';
+import { Plus, Package, Zap, Loader2, AlertCircle } from 'lucide-react';
 import MiniModalStock from './MiniModalStock';
 
 /**
@@ -103,7 +103,7 @@ const ListaProductosDisponibles = React.memo(({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        <Loader2 className="h-8 w-8 text-purple-500 animate-spin" />
         <span className="ml-3 text-gray-600">Cargando productos...</span>
       </div>
     );
@@ -112,8 +112,8 @@ const ListaProductosDisponibles = React.memo(({
   // Error state
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-        <p className="text-red-600 font-medium">⚠️ Error al cargar productos</p>
+      <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+        <p className="text-red-600 font-medium flex items-center justify-center gap-1"><AlertCircle size={14} /> Error al cargar productos</p>
         <p className="text-red-500 text-sm mt-1">{error}</p>
       </div>
     );
@@ -217,7 +217,7 @@ const ListaProductosDisponibles = React.memo(({
               {(userRole === 'admin' || userRole === 'super_admin') && (
                 <button
                   onClick={() => handleAgregarStock(producto)}
-                  className="flex-shrink-0 px-2 sm:px-2.5 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-all duration-200 flex items-center justify-center gap-1 hover:shadow-lg min-w-[36px] sm:min-w-0"
+                  className="flex-shrink-0 px-2 sm:px-2.5 py-2 text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 rounded-lg transition-all flex items-center justify-center gap-1 min-w-[36px] sm:min-w-0"
                   title="Agregar stock rápido"
                 >
                   <Zap size={14} className="sm:w-4 sm:h-4" />
@@ -229,10 +229,10 @@ const ListaProductosDisponibles = React.memo(({
               <button
                 onClick={() => handleAgregar(producto)}
                 disabled={!(producto.cantidadRestante || producto.stock) || (producto.cantidadRestante || producto.stock) <= 0}
-                className={`flex-shrink-0 px-2.5 sm:px-3 py-2 rounded-lg transition-all duration-200 flex items-center justify-center gap-1 min-w-[36px] sm:min-w-0 ${
+                className={`flex-shrink-0 px-2.5 sm:px-3 py-2 rounded-lg transition-all flex items-center justify-center gap-1 min-w-[36px] sm:min-w-0 ${
                   (producto.cantidadRestante || producto.stock) > 0
-                    ? 'bg-purple-600 hover:bg-purple-700 text-white hover:shadow-lg'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    ? 'text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100'
+                    : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
                 }`}
                 title={(producto.cantidadRestante || producto.stock) > 0 ? 'Agregar al carrito' : 'Sin stock disponible'}
               >

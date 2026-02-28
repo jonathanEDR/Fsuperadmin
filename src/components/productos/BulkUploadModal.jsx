@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Upload, Download, FileSpreadsheet, CheckCircle, XCircle, AlertCircle, Info } from 'lucide-react';
+import { X, Upload, Download, FileSpreadsheet, CheckCircle, XCircle, AlertCircle, Info, Loader2 } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
 
@@ -160,80 +160,79 @@ const BulkUploadModal = ({ isOpen, onClose, onSuccess }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-6 py-4 rounded-t-2xl flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
-            <FileSpreadsheet className="text-green-600" size={24} />
+            <div className="p-2 bg-green-50 rounded-xl border border-green-100">
+              <FileSpreadsheet className="text-green-600" size={20} />
+            </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-800">
+              <h2 className="text-base font-bold text-gray-800">
                 Importar Productos Masivamente
               </h2>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs text-gray-500">
                 Sistema mejorado con IDs pre-configurados
               </p>
             </div>
           </div>
           <button
             onClick={handleClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
           >
-            <X size={24} />
+            <X size={20} />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
-          {/* Instrucciones mejoradas */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-5">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Instrucciones */}
+          <div className="bg-gray-50/60 border border-gray-100 rounded-2xl p-5">
             <div className="flex items-start gap-3 mb-4">
-              <Info className="text-blue-600 flex-shrink-0 mt-1" size={24} />
+              <Info className="text-blue-600 flex-shrink-0 mt-1" size={20} />
               <div>
-                <h3 className="font-bold text-blue-900 mb-2 text-lg">
-                  ✨ Nuevo Proceso Mejorado - Sin Errores
+                <h3 className="font-bold text-gray-900 mb-2 text-base">
+                  Nuevo Proceso Mejorado - Sin Errores
                 </h3>
-                <p className="text-sm text-blue-800 mb-3">
+                <p className="text-sm text-gray-600 mb-3">
                   Este sistema genera un Excel <strong>pre-poblado</strong> con todos los productos
-                  disponibles y sus IDs correctos. ¡Solo llena precio y cantidad!
+                  disponibles y sus IDs correctos. Solo llena precio y cantidad.
                 </p>
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4 text-sm text-blue-800">
-              <div className="space-y-2">
-                <h4 className="font-semibold text-blue-900">📥 Paso 1: Descargar</h4>
-                <ul className="space-y-1 pl-4">
+            <div className="grid md:grid-cols-2 gap-3 text-sm text-gray-700 mb-4">
+              <div className="space-y-1 bg-white rounded-xl p-3 border border-gray-100">
+                <h4 className="font-semibold text-gray-800 flex items-center gap-1.5"><Download size={13} className="text-blue-500" /> Paso 1: Descargar</h4>
+                <ul className="text-xs space-y-0.5 text-gray-600 pl-4">
                   <li>• Click en "Descargar Excel Pre-poblado"</li>
                   <li>• El Excel tiene TODAS las combinaciones disponibles</li>
                   <li>• Categorías y productos con IDs correctos</li>
                 </ul>
               </div>
-
-              <div className="space-y-2">
-                <h4 className="font-semibold text-blue-900">✏️ Paso 2: Completar</h4>
-                <ul className="space-y-1 pl-4">
+              <div className="space-y-1 bg-white rounded-xl p-3 border border-gray-100">
+                <h4 className="font-semibold text-gray-800 flex items-center gap-1.5"><FileSpreadsheet size={13} className="text-green-500" /> Paso 2: Completar</h4>
+                <ul className="text-xs space-y-0.5 text-gray-600 pl-4">
                   <li>• Llena columnas: <strong>PRECIO</strong> y <strong>CANTIDAD</strong></li>
                   <li>• ELIMINA las filas que NO quieras agregar</li>
                   <li>• NO modifiques los IDs ni nombres</li>
                 </ul>
               </div>
-
-              <div className="space-y-2">
-                <h4 className="font-semibold text-blue-900">📤 Paso 3: Importar</h4>
-                <ul className="space-y-1 pl-4">
+              <div className="space-y-1 bg-white rounded-xl p-3 border border-gray-100">
+                <h4 className="font-semibold text-gray-800 flex items-center gap-1.5"><Upload size={13} className="text-purple-500" /> Paso 3: Importar</h4>
+                <ul className="text-xs space-y-0.5 text-gray-600 pl-4">
                   <li>• Guarda el archivo Excel</li>
                   <li>• Súbelo arrastrando o seleccionando</li>
                   <li>• El sistema valida y crea productos</li>
                 </ul>
               </div>
-
-              <div className="space-y-2">
-                <h4 className="font-semibold text-blue-900">✅ Ventajas</h4>
-                <ul className="space-y-1 pl-4">
-                  <li>• ✅ Cero errores de tipeo</li>
-                  <li>• ✅ IDs correctos garantizados</li>
-                  <li>• ✅ Solo llenar precio y cantidad</li>
+              <div className="space-y-1 bg-white rounded-xl p-3 border border-gray-100">
+                <h4 className="font-semibold text-gray-800 flex items-center gap-1.5"><CheckCircle size={13} className="text-emerald-500" /> Ventajas</h4>
+                <ul className="text-xs space-y-0.5 text-gray-600 pl-4">
+                  <li>• Cero errores de tipeo</li>
+                  <li>• IDs correctos garantizados</li>
+                  <li>• Solo llenar precio y cantidad</li>
                 </ul>
               </div>
             </div>
@@ -250,28 +249,12 @@ const BulkUploadModal = ({ isOpen, onClose, onSuccess }) => {
             <button
               onClick={handleDownloadTemplate}
               disabled={downloading}
-              className={`
-                mt-4 w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg
-                font-semibold transition-all transform hover:scale-105
-                ${downloading
-                  ? 'bg-gray-400 text-white cursor-not-allowed'
-                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg'
-                }
-              `}
+              className="mt-4 w-full flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium border text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {downloading ? (
-                <>
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Generando Excel...
-                </>
+                <><Loader2 size={16} className="animate-spin" /> Generando Excel...</>
               ) : (
-                <>
-                  <Download size={20} />
-                  Descargar Excel Pre-poblado (Paso 1)
-                </>
+                <><Download size={16} /> Descargar Excel Pre-poblado (Paso 1)</>
               )}
             </button>
           </div>
@@ -280,13 +263,13 @@ const BulkUploadModal = ({ isOpen, onClose, onSuccess }) => {
           {!results && (
             <div
               className={`
-                border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
+                border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer
                 transition-all
                 ${dragActive
-                  ? 'border-blue-500 bg-blue-50 scale-105'
-                  : 'border-gray-300 hover:border-gray-400'
+                  ? 'border-blue-400 bg-blue-50'
+                  : 'border-gray-200 hover:border-gray-300'
                 }
-                ${file ? 'bg-green-50 border-green-500' : ''}
+                ${file ? 'bg-green-50/60 border-green-300' : ''}
               `}
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
@@ -470,10 +453,10 @@ const BulkUploadModal = ({ isOpen, onClose, onSuccess }) => {
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-between items-center">
+        <div className="bg-gray-50/50 border-t border-gray-100 px-6 py-3 flex justify-between items-center rounded-b-2xl flex-shrink-0">
           <button
             onClick={handleClose}
-            className="px-5 py-2 text-gray-700 hover:text-gray-900 font-medium"
+            className="px-4 py-2 text-sm font-medium rounded-xl border text-gray-600 bg-white border-gray-200 hover:bg-gray-50 transition-colors"
           >
             {results ? 'Cerrar' : 'Cancelar'}
           </button>
@@ -482,27 +465,12 @@ const BulkUploadModal = ({ isOpen, onClose, onSuccess }) => {
             <button
               onClick={handleUpload}
               disabled={!file || uploading}
-              className={`
-                px-6 py-3 rounded-lg font-semibold transition-all transform
-                ${!file || uploading
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700 hover:scale-105 shadow-lg'
-                }
-              `}
+              className="flex items-center gap-1.5 px-5 py-2.5 text-sm font-medium rounded-xl border text-green-700 bg-green-50 border-green-200 hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {uploading ? (
-                <>
-                  <svg className="animate-spin inline-block mr-2 h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Procesando...
-                </>
+                <><Loader2 size={16} className="animate-spin" /> Procesando...</>
               ) : (
-                <>
-                  <Upload className="inline-block mr-2" size={20} />
-                  Importar Productos (Paso 3)
-                </>
+                <><Upload size={16} /> Importar Productos (Paso 3)</>
               )}
             </button>
           )}
@@ -513,9 +481,9 @@ const BulkUploadModal = ({ isOpen, onClose, onSuccess }) => {
                 setFile(null);
                 setResults(null);
               }}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all font-semibold transform hover:scale-105 shadow-lg"
+              className="flex items-center gap-1.5 px-5 py-2.5 text-sm font-medium rounded-xl border text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100 transition-colors"
             >
-              Importar Otro Archivo
+              <Upload size={15} /> Importar Otro Archivo
             </button>
           )}
         </div>

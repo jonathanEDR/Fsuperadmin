@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Plus, Package } from 'lucide-react';
+import { X, Plus, Package, Loader2, AlertCircle } from 'lucide-react';
 import useInventarioProducto from '../../../../hooks/useInventarioProducto';
 
 /**
@@ -106,29 +106,31 @@ const MiniModalStock = ({ isOpen, onClose, producto, onStockAdded }) => {
   if (!isOpen || !producto) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
-      <div className="bg-white rounded-xl w-full max-w-md shadow-2xl">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
+      <div className="bg-white rounded-2xl w-full max-w-md shadow-xl border border-gray-100">
         
         {/* Header */}
-        <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-6 py-4 rounded-t-xl">
+        <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-6 py-4 rounded-t-2xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Package size={20} />
-              <h3 className="text-lg font-bold">Agregar Stock Rápido</h3>
+              <div className="p-2 bg-amber-50 rounded-xl border border-amber-100">
+                <Package size={18} className="text-amber-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-800">Agregar Stock Rápido</h3>
             </div>
             <button
               onClick={handleClose}
               disabled={isSubmitting}
-              className="text-white/80 hover:text-white transition-colors disabled:opacity-50"
+              className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
             >
-              <X size={20} />
+              <X size={18} className="text-gray-500" />
             </button>
           </div>
         </div>
 
         <div className="p-6">
           {/* Información del producto */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
+          <div className="bg-gray-50/80 rounded-xl p-4 mb-6 border border-gray-100">
             <h4 className="font-semibold text-gray-900 mb-1">{producto.nombre}</h4>
             <div className="flex items-center gap-3 text-sm text-gray-600">
               <span>Stock actual: <span className="font-medium">{producto.cantidadRestante || producto.stock || 0}</span></span>
@@ -153,7 +155,7 @@ const MiniModalStock = ({ isOpen, onClose, producto, onStockAdded }) => {
                 step="1"
                 required
                 disabled={isSubmitting}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors disabled:bg-gray-100"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100"
                 placeholder="Ej: 50"
                 autoFocus
               />
@@ -174,7 +176,7 @@ const MiniModalStock = ({ isOpen, onClose, producto, onStockAdded }) => {
                   step="0.01"
                   required
                   disabled={isSubmitting}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors disabled:bg-gray-100"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100"
                   placeholder="15.50"
                 />
               </div>
@@ -190,14 +192,14 @@ const MiniModalStock = ({ isOpen, onClose, producto, onStockAdded }) => {
                 value={formData.lote}
                 onChange={(e) => handleInputChange('lote', e.target.value)}
                 disabled={isSubmitting}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors disabled:bg-gray-100"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100"
                 placeholder="Ej: LOTE-001 (auto si está vacío)"
               />
             </div>
 
             {/* Resumen */}
             {formData.cantidad && formData.precio && (
-              <div className="bg-blue-50 rounded-lg p-4">
+              <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
                 <h5 className="font-semibold text-blue-900 mb-2">Resumen</h5>
                 <div className="text-sm text-blue-800 space-y-1">
                   <p>Cantidad: <span className="font-medium">{formData.cantidad} unidades</span></p>
@@ -211,8 +213,9 @@ const MiniModalStock = ({ isOpen, onClose, producto, onStockAdded }) => {
 
             {/* Error */}
             {inventarioHook.error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                <strong>Error:</strong> {inventarioHook.error}
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-start gap-2">
+                <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+                <span className="text-sm">{inventarioHook.error}</span>
               </div>
             )}
 
@@ -222,18 +225,18 @@ const MiniModalStock = ({ isOpen, onClose, producto, onStockAdded }) => {
                 type="button"
                 onClick={handleClose}
                 disabled={isSubmitting}
-                className="flex-1 px-4 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-3 text-gray-700 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 font-medium transition-all disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || !formData.cantidad || !formData.precio}
-                className="flex-1 px-4 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-3 text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 rounded-xl font-medium transition-all disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <Loader2 size={16} className="animate-spin" />
                     Agregando...
                   </>
                 ) : (

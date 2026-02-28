@@ -1,6 +1,7 @@
 import React from 'react';
 import ProductoList from '../components/productos/ProductoList';
 import { useUserRole } from '../hooks/useUserRole';
+import { Loader2 } from 'lucide-react';
 
 function ProductosPage() {
   const { userRole, isLoading, error } = useUserRole();
@@ -12,7 +13,7 @@ function ProductosPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto" />
           <p className="mt-4 text-gray-600">Cargando productos...</p>
         </div>
       </div>

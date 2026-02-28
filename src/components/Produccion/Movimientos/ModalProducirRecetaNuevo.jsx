@@ -188,7 +188,7 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
     try {
       setLoadingUsuarios(true);
       const token = await getToken();
-      const response = await safeFetch(getFullApiUrl('/admin/users?limit=100'), {
+      const response = await safeFetch(getFullApiUrl('/admin/users?limit=100&excludeInactive=true'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -805,11 +805,13 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
                           required
                         >
                           <option value="">Seleccionar operador...</option>
-                          {usuarios.map((usuario) => (
-                            <option key={usuario._id} value={usuario.nombre_negocio || usuario.email}>
-                              {usuario.nombre_negocio || usuario.email} ({usuario.role})
-                            </option>
-                          ))}
+                          {usuarios
+                            .filter(u => u.role !== 'de_baja' && u.is_active !== false)
+                            .map((usuario) => (
+                              <option key={usuario._id} value={usuario.nombre_negocio || usuario.email}>
+                                {usuario.nombre_negocio || usuario.email} ({usuario.role})
+                              </option>
+                            ))}
                         </select>
                       ) : (
                         <input

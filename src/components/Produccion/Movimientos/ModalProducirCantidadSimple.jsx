@@ -163,7 +163,7 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
     try {
       setLoadingUsuarios(true);
       const token = await getToken();
-      const url = getFullApiUrl('/admin/users?limit=100');
+      const url = getFullApiUrl('/admin/users?limit=100&excludeInactive=true');
       
       const response = await safeFetch(url, {
         headers: {
@@ -717,11 +717,13 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
                   required
                 >
                   <option value="">Seleccionar operador...</option>
-                  {usuarios.map((usuario) => (
-                    <option key={usuario._id} value={usuario.nombre_negocio || usuario.email}>
-                      {usuario.nombre_negocio || usuario.email} ({usuario.role})
-                    </option>
-                  ))}
+                  {usuarios
+                    .filter(u => u.role !== 'de_baja' && u.is_active !== false)
+                    .map((usuario) => (
+                      <option key={usuario._id} value={usuario.nombre_negocio || usuario.email}>
+                        {usuario.nombre_negocio || usuario.email} ({usuario.role})
+                      </option>
+                    ))}
                 </select>
               ) : (
                 // Admin/User: Campo readonly con su nombre autocompletado
