@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, UserCheck, X, ChevronLeft, ChevronRight, CreditCard, Factory, Grid3X3, RotateCcw, DollarSign, QrCode, Wallet, ScanLine, Image, Bell, ListTodo } from 'lucide-react';
+import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, UserCheck, X, ChevronLeft, ChevronRight, CreditCard, Factory, Grid3X3, RotateCcw, DollarSign, QrCode, Wallet, ScanLine, Image, Bell, ListTodo, MapPin, Building2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 import { NotificationBell } from '../../../components/notifications';
@@ -24,6 +24,7 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
       title: "Usuarios",
       items: [
         { id: 'usuarios', icon: Home, label: 'Usuarios', route: '/super-admin/usuarios' },
+        { id: 'sucursales', icon: Building2, label: 'Sucursales', route: '/super-admin/sucursales' },
         { id: 'personal', icon: UserCheck, label: 'Personal', route: '/super-admin/personal-v2' },
         { id: 'qr-asistencias', icon: QrCode, label: 'QR Asistencias', route: '/super-admin/qr-asistencias' },
         { id: 'escaner-qr', icon: ScanLine, label: 'Marcar Asistencia', route: '/super-admin/escaner-qr', badge: 'NEW' },
@@ -45,6 +46,7 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
         { id: 'produccion', icon: Factory, label: 'Producción', route: '/super-admin/produccion' },
         { id: 'caja', icon: Wallet, label: 'Caja', route: '/super-admin/caja' },
         { id: 'finanzas', icon: CreditCard, label: 'Finanzas', route: '/super-admin/finanzas' },
+        { id: 'mapa', icon: MapPin, label: 'Mapa Ubicaciones', route: '/super-admin/mapa', badge: 'NEW' },
       ]
     },
     {

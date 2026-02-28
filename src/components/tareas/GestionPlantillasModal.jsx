@@ -18,10 +18,12 @@ import {
   Zap,
   Search,
   UserPlus,
-  RefreshCw
+  RefreshCw,
+  Building2
 } from 'lucide-react';
 import { plantillasService, categoriasService } from '../../services/tareas';
 import { tareasService } from '../../services/tareas';
+import { getSucursalesActivas } from '../../services/sucursalService';
 import api from '../../services/api';
 
 // Prioridades disponibles
@@ -52,6 +54,11 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
   const [creandoTarea, setCreandoTarea] = useState(false);
   const asignarRef = useRef(null);
 
+  // === Estados para sucursales en asignación rápida ===
+  const [sucursales, setSucursales] = useState([]);
+  const [modoAsignacionRapida, setModoAsignacionRapida] = useState('usuario'); // 'usuario' | 'sucursal'
+  const [sucursalSeleccionada, setSucursalSeleccionada] = useState(null);
+
   // Estado para nueva plantilla
   const [nuevaPlantilla, setNuevaPlantilla] = useState({
     nombre: '',
@@ -81,11 +88,14 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
       cargarDatos();
       if (['admin', 'super_admin'].includes(userRole)) {
         cargarUsuarios();
+        cargarSucursales();
       }
     } else {
       // Reset al cerrar
       setAsignandoPlantillaId(null);
       setUsuarioSeleccionado(null);
+      setSucursalSeleccionada(null);
+      setModoAsignacionRapida('usuario');
       setBusquedaUsuario('');
     }
   }, [isOpen]);
@@ -123,6 +133,15 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
     }
   };
 
+  const cargarSucursales = async () => {
+    try {
+      const response = await getSucursalesActivas();
+      setSucursales(response.sucursales || response || []);
+    } catch (err) {
+      console.error('Error cargando sucursales:', err);
+    }
+  };
+
   const handleTogglePermanente = async (plantilla) => {
     const nuevoValor = !plantilla.esPermanente;
     // Optimistic update
@@ -148,17 +167,26 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
     if (asignandoPlantillaId === plantillaId) {
       setAsignandoPlantillaId(null);
       setUsuarioSeleccionado(null);
+      setSucursalSeleccionada(null);
+      setModoAsignacionRapida('usuario');
       setBusquedaUsuario('');
     } else {
       setAsignandoPlantillaId(plantillaId);
       setUsuarioSeleccionado(null);
+      setSucursalSeleccionada(null);
+      setModoAsignacionRapida('usuario');
       setBusquedaUsuario('');
     }
   };
 
   const handleCrearTareaRapida = async (plantillaId) => {
-    if (!usuarioSeleccionado) {
+    if (modoAsignacionRapida === 'usuario' && !usuarioSeleccionado) {
       setError('Selecciona un usuario para asignar la tarea');
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
+    if (modoAsignacionRapida === 'sucursal' && !sucursalSeleccionada) {
+      setError('Selecciona una sucursal para asignar la tarea');
       setTimeout(() => setError(''), 3000);
       return;
     }
@@ -176,15 +204,34 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
 
       const datos = {
         plantillaId,
-        asignadoA: usuarioSeleccionado.clerk_id || usuarioSeleccionado.id,
         fechaProgramada,
         fechaVencimiento
       };
 
+      if (modoAsignacionRapida === 'usuario') {
+        datos.asignadoA = usuarioSeleccionado.clerk_id || usuarioSeleccionado.id;
+      } else {
+        datos.sucursalId = sucursalSeleccionada._id;
+      }
+
       const response = await tareasService.crear(datos);
-      setSuccess(`Tarea asignada a ${usuarioSeleccionado.nombre_negocio || usuarioSeleccionado.email}`);
+      
+      if (modoAsignacionRapida === 'sucursal') {
+        const total = response.data?._tareasCreadas || 1;
+        const sinTrab = response.data?._sinTrabajadores;
+        if (sinTrab) {
+          setSuccess(`Tarea creada para sucursal "${sucursalSeleccionada.nombre}" (sin trabajadores asignados)`);
+        } else {
+          setSuccess(`${total} tarea(s) creada(s) para sucursal "${sucursalSeleccionada.nombre}"`);
+        }
+      } else {
+        setSuccess(`Tarea asignada a ${usuarioSeleccionado.nombre_negocio || usuarioSeleccionado.email}`);
+      }
+      
       setAsignandoPlantillaId(null);
       setUsuarioSeleccionado(null);
+      setSucursalSeleccionada(null);
+      setModoAsignacionRapida('usuario');
       setBusquedaUsuario('');
       setTimeout(() => setSuccess(''), 3000);
 
@@ -905,65 +952,130 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
                                   Asignación Rápida — {plantilla.nombre}
                                 </div>
 
-                                {/* Buscador de usuarios */}
-                                <div className="relative">
-                                  <div className="flex items-center border border-amber-300 rounded-lg bg-white overflow-hidden">
-                                    <Search size={14} className="ml-2 text-gray-400" />
-                                    <input
-                                      type="text"
-                                      value={busquedaUsuario}
-                                      onChange={(e) => setBusquedaUsuario(e.target.value)}
-                                      className="flex-1 px-2 py-2 text-sm border-0 focus:ring-0 focus:outline-none"
-                                      placeholder="Buscar usuario..."
-                                      autoFocus
-                                    />
+                                {/* Toggle Usuario / Sucursal */}
+                                {['admin', 'super_admin'].includes(userRole) && sucursales.length > 0 && (
+                                  <div className="flex gap-1 p-0.5 bg-gray-200 rounded-lg w-fit">
+                                    <button
+                                      type="button"
+                                      onClick={() => { setModoAsignacionRapida('usuario'); setSucursalSeleccionada(null); }}
+                                      className={`px-3 py-1 text-xs rounded-md font-medium transition-colors flex items-center gap-1 ${
+                                        modoAsignacionRapida === 'usuario'
+                                          ? 'bg-amber-500 text-white shadow-sm'
+                                          : 'text-gray-600 hover:text-gray-800'
+                                      }`}
+                                    >
+                                      <UserPlus size={12} /> Usuario
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => { setModoAsignacionRapida('sucursal'); setUsuarioSeleccionado(null); setBusquedaUsuario(''); }}
+                                      className={`px-3 py-1 text-xs rounded-md font-medium transition-colors flex items-center gap-1 ${
+                                        modoAsignacionRapida === 'sucursal'
+                                          ? 'bg-green-500 text-white shadow-sm'
+                                          : 'text-gray-600 hover:text-gray-800'
+                                      }`}
+                                    >
+                                      <Building2 size={12} /> Sucursal
+                                    </button>
                                   </div>
+                                )}
 
-                                  {/* Lista de usuarios */}
-                                  {loadingUsuarios ? (
-                                    <div className="flex justify-center py-3">
-                                      <Loader size={18} className="animate-spin text-amber-600" />
+                                {/* Selector según modo */}
+                                {modoAsignacionRapida === 'usuario' ? (
+                                  <div className="relative">
+                                    {/* Buscador de usuarios */}
+                                    <div className="flex items-center border border-amber-300 rounded-lg bg-white overflow-hidden">
+                                      <Search size={14} className="ml-2 text-gray-400" />
+                                      <input
+                                        type="text"
+                                        value={busquedaUsuario}
+                                        onChange={(e) => setBusquedaUsuario(e.target.value)}
+                                        className="flex-1 px-2 py-2 text-sm border-0 focus:ring-0 focus:outline-none"
+                                        placeholder="Buscar usuario..."
+                                        autoFocus
+                                      />
                                     </div>
-                                  ) : (
-                                    <div className="mt-1 max-h-32 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-sm">
-                                      {usuariosFiltrados.length === 0 ? (
-                                        <div className="text-center py-2 text-xs text-gray-500">No se encontraron usuarios</div>
-                                      ) : (
-                                        usuariosFiltrados.map(u => {
-                                          const uid = u.clerk_id || u.id;
-                                          const isSelected = usuarioSeleccionado && (usuarioSeleccionado.clerk_id || usuarioSeleccionado.id) === uid;
-                                          return (
-                                            <button
-                                              key={uid}
-                                              type="button"
-                                              onClick={() => setUsuarioSeleccionado(u)}
-                                              className={`w-full text-left px-3 py-1.5 text-sm flex items-center gap-2 transition-colors ${
-                                                isSelected
-                                                  ? 'bg-amber-100 text-amber-800 font-medium'
-                                                  : 'hover:bg-gray-50 text-gray-700'
-                                              }`}
-                                            >
-                                              <UserPlus size={12} className={isSelected ? 'text-amber-600' : 'text-gray-400'} />
-                                              <span className="truncate">{u.nombre_negocio || u.firstName || u.email}</span>
-                                              <span className="text-xs text-gray-400 ml-auto">{u.role || 'user'}</span>
-                                            </button>
-                                          );
-                                        })
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
 
-                                {/* Usuario seleccionado + botón confirmar */}
+                                    {/* Lista de usuarios */}
+                                    {loadingUsuarios ? (
+                                      <div className="flex justify-center py-3">
+                                        <Loader size={18} className="animate-spin text-amber-600" />
+                                      </div>
+                                    ) : (
+                                      <div className="mt-1 max-h-32 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-sm">
+                                        {usuariosFiltrados.length === 0 ? (
+                                          <div className="text-center py-2 text-xs text-gray-500">No se encontraron usuarios</div>
+                                        ) : (
+                                          usuariosFiltrados.map(u => {
+                                            const uid = u.clerk_id || u.id;
+                                            const isSelected = usuarioSeleccionado && (usuarioSeleccionado.clerk_id || usuarioSeleccionado.id) === uid;
+                                            return (
+                                              <button
+                                                key={uid}
+                                                type="button"
+                                                onClick={() => setUsuarioSeleccionado(u)}
+                                                className={`w-full text-left px-3 py-1.5 text-sm flex items-center gap-2 transition-colors ${
+                                                  isSelected
+                                                    ? 'bg-amber-100 text-amber-800 font-medium'
+                                                    : 'hover:bg-gray-50 text-gray-700'
+                                                }`}
+                                              >
+                                                <UserPlus size={12} className={isSelected ? 'text-amber-600' : 'text-gray-400'} />
+                                                <span className="truncate">{u.nombre_negocio || u.firstName || u.email}</span>
+                                                <span className="text-xs text-gray-400 ml-auto">{u.role || 'user'}</span>
+                                              </button>
+                                            );
+                                          })
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div className="space-y-2">
+                                    {/* Selector de sucursal */}
+                                    <select
+                                      value={sucursalSeleccionada?._id || ''}
+                                      onChange={(e) => {
+                                        const suc = sucursales.find(s => s._id === e.target.value);
+                                        setSucursalSeleccionada(suc || null);
+                                      }}
+                                      className="w-full px-3 py-2 text-sm border border-green-300 rounded-lg bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    >
+                                      <option value="">Seleccionar sucursal...</option>
+                                      {sucursales.map(s => (
+                                        <option key={s._id} value={s._id}>{s.nombre}</option>
+                                      ))}
+                                    </select>
+                                    {sucursalSeleccionada && (
+                                      <p className="text-xs text-green-600">
+                                        <Building2 size={11} className="inline mr-1" />
+                                        Se creará una tarea para cada trabajador de esta sucursal
+                                      </p>
+                                    )}
+                                  </div>
+                                )}
+
+                                {/* Selección actual + botón confirmar */}
                                 <div className="flex items-center justify-between">
                                   <div className="text-xs text-gray-500">
-                                    {usuarioSeleccionado ? (
-                                      <span className="text-amber-700 font-medium">
-                                        <UserPlus size={12} className="inline mr-1" />
-                                        {usuarioSeleccionado.nombre_negocio || usuarioSeleccionado.email}
-                                      </span>
+                                    {modoAsignacionRapida === 'usuario' ? (
+                                      usuarioSeleccionado ? (
+                                        <span className="text-amber-700 font-medium">
+                                          <UserPlus size={12} className="inline mr-1" />
+                                          {usuarioSeleccionado.nombre_negocio || usuarioSeleccionado.email}
+                                        </span>
+                                      ) : (
+                                        'Selecciona un usuario'
+                                      )
                                     ) : (
-                                      'Selecciona un usuario'
+                                      sucursalSeleccionada ? (
+                                        <span className="text-green-700 font-medium">
+                                          <Building2 size={12} className="inline mr-1" />
+                                          {sucursalSeleccionada.nombre}
+                                        </span>
+                                      ) : (
+                                        'Selecciona una sucursal'
+                                      )
                                     )}
                                     <span className="ml-2 text-gray-400">• Vence hoy 11:59 PM</span>
                                   </div>
@@ -973,6 +1085,8 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
                                       onClick={() => {
                                         setAsignandoPlantillaId(null);
                                         setUsuarioSeleccionado(null);
+                                        setSucursalSeleccionada(null);
+                                        setModoAsignacionRapida('usuario');
                                         setBusquedaUsuario('');
                                       }}
                                       className="px-3 py-1.5 text-xs text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -982,15 +1096,19 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
                                     <button
                                       type="button"
                                       onClick={() => handleCrearTareaRapida(plantilla._id)}
-                                      disabled={!usuarioSeleccionado || creandoTarea}
-                                      className="px-3 py-1.5 text-xs bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 flex items-center gap-1"
+                                      disabled={(modoAsignacionRapida === 'usuario' ? !usuarioSeleccionado : !sucursalSeleccionada) || creandoTarea}
+                                      className={`px-3 py-1.5 text-xs text-white rounded-lg disabled:opacity-50 flex items-center gap-1 ${
+                                        modoAsignacionRapida === 'sucursal'
+                                          ? 'bg-green-600 hover:bg-green-700'
+                                          : 'bg-amber-600 hover:bg-amber-700'
+                                      }`}
                                     >
                                       {creandoTarea ? (
                                         <Loader size={12} className="animate-spin" />
                                       ) : (
                                         <Zap size={12} />
                                       )}
-                                      Asignar Ahora
+                                      {modoAsignacionRapida === 'sucursal' ? 'Asignar a Sucursal' : 'Asignar Ahora'}
                                     </button>
                                   </div>
                                 </div>

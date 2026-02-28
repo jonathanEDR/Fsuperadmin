@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, DollarSign, Building2 } from 'lucide-react';
+import { X, DollarSign } from 'lucide-react';
 import { getLocalDateTimeString, isValidDateNotFuture, convertLocalDateTimeToISO } from '../../utils/dateUtils';
-import { getSucursalesActivas } from '../../services/sucursalService';
 
-const PaymentModal = ({ isOpen, onClose, onSubmit, venta, onOpenSucursalModal, userRole = 'user' }) => {
+const PaymentModal = ({ isOpen, onClose, onSubmit, venta, userRole = 'user' }) => {
   const [formData, setFormData] = useState({
     yape: 0,
     efectivo: 0,
@@ -11,27 +10,8 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta, onOpenSucursalModal, u
     faltantes: 0,
     gastosImprevistos: 0,
     descripcion: '',
-    sucursalId: '',
     fechaCobro: getLocalDateTimeString() // Fecha y hora actual de Perú por defecto
   });
-  
-  const [sucursales, setSucursales] = useState([]);
-
-  // Cargar sucursales activas
-  useEffect(() => {
-    const loadSucursales = async () => {
-      try {
-        const response = await getSucursalesActivas();
-        setSucursales(response.sucursales || []);
-      } catch (error) {
-        console.error('Error al cargar sucursales:', error);
-      }
-    };
-    
-    if (isOpen) {
-      loadSucursales();
-    }
-  }, [isOpen]);
 
   // Reset form cuando se abre el modal
   useEffect(() => {
@@ -43,7 +23,6 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta, onOpenSucursalModal, u
         faltantes: 0,
         gastosImprevistos: 0,
         descripcion: '',
-        sucursalId: '',
         fechaCobro: getLocalDateTimeString() // Usar fecha y hora actual de Perú
       });
     }
@@ -53,7 +32,7 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta, onOpenSucursalModal, u
     const { name, value } = e.target;
     let processedValue = value;
     
-    if (name !== 'descripcion' && name !== 'fechaCobro' && name !== 'sucursalId') {
+    if (name !== 'descripcion' && name !== 'fechaCobro') {
       processedValue = parseFloat(value) || 0;
       if (processedValue < 0) processedValue = 0; // No permitir negativos
     }
@@ -116,10 +95,6 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta, onOpenSucursalModal, u
       faltantes: parseFloat(formData.faltantes) || 0,
       gastosImprevistos: parseFloat(formData.gastosImprevistos) || 0,
       descripcion: formData.descripcion.trim(),
-      sucursalId: formData.sucursalId || null,
-      sucursalNombre: formData.sucursalId 
-        ? sucursales.find(s => s._id === formData.sucursalId)?.nombre || ''
-        : '',
       fechaCobro: convertLocalDateTimeToISO(formData.fechaCobro)
     };
 
@@ -261,38 +236,6 @@ const PaymentModal = ({ isOpen, onClose, onSubmit, venta, onOpenSucursalModal, u
                     placeholder="Agregar observaciones o notas..."
                     rows={2}
                   />
-                </div>
-
-                {/* Sucursal */}
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Sucursal (opcional)
-                    </label>
-                    {onOpenSucursalModal && userRole !== 'user' && (
-                      <button
-                        type="button"
-                        onClick={onOpenSucursalModal}
-                        className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                      >
-                        <Building2 size={14} />
-                        Gestionar
-                      </button>
-                    )}
-                  </div>
-                  <select
-                    name="sucursalId"
-                    value={formData.sucursalId}
-                    onChange={handleChange}
-                    className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  >
-                    <option value="">Sin sucursal</option>
-                    {sucursales.map((sucursal) => (
-                      <option key={sucursal._id} value={sucursal._id}>
-                        {sucursal.nombre} - {sucursal.ubicacion}
-                      </option>
-                    ))}
-                  </select>
                 </div>
 
                 {/* Resumen visual del total ingresado */}

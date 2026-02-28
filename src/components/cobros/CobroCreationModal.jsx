@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, Building2 } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
-import { VentasSelectionList, SucursalModal } from '.';  // Import from local module
+import { VentasSelectionList } from '.';  // Import from local module
 import { createCobro } from '../../services/cobroService';
-import { getSucursalesActivas } from '../../services/sucursalService';
 import PaymentModal from './PaymentModal';
 import { getLocalDateString, getLocalDateTimeString, isValidDateNotFuture, convertLocalDateTimeToISO } from '../../utils/dateUtils';
 
@@ -12,32 +11,15 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated, userRole = 'user'
   const [selectedVentas, setSelectedVentas] = useState([]);
   const [ventasDetails, setVentasDetails] = useState({});
   const [ventaParaPagar, setVentaParaPagar] = useState(null);
-  const [sucursales, setSucursales] = useState([]);
   
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
       onClose();
     }
   }, [isLoaded, isSignedIn, onClose]);
-  
-  // Cargar sucursales activas
-  useEffect(() => {
-    const loadSucursales = async () => {
-      try {
-        const response = await getSucursalesActivas();
-        setSucursales(response.sucursales || []);
-      } catch (error) {
-        console.error('Error al cargar sucursales:', error);
-      }
-    };
-    
-    if (isOpen) {
-      loadSucursales();
-    }
-  }, [isOpen]);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const [isSucursalModalOpen, setIsSucursalModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     yape: '0',
     efectivo: '0',
@@ -45,7 +27,6 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated, userRole = 'user'
     faltantes: '0',
     gastosImprevistos: '0',
     descripcion: '',
-    sucursalId: '',
     fechaCobro: getLocalDateTimeString() // Fecha y hora actual de Perú por defecto
   });
 
@@ -61,7 +42,6 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated, userRole = 'user'
         faltantes: '0',
         gastosImprevistos: '0',
         descripcion: '',
-        sucursalId: '',
         fechaCobro: getLocalDateTimeString() // Usar fecha y hora actual de Perú
       });
       setError(null);
@@ -237,10 +217,7 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated, userRole = 'user'
         gastosImprevistos,
         montoTotal: ventasTotal,
         descripcion: formData.descripcion || '',
-        sucursalId: formData.sucursalId || null,
-        sucursalNombre: formData.sucursalId 
-          ? sucursales.find(s => s._id === formData.sucursalId)?.nombre || ''
-          : '',
+
         fechaCobro: convertLocalDateTimeToISO(formData.fechaCobro)
       };
 
@@ -295,8 +272,6 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated, userRole = 'user'
         montoPagado: montoTotalPago,
         montoTotalVentas: parseFloat(ventaParaPagar.montoTotal),
         descripcion: pagoData.descripcion || '',
-        sucursalId: pagoData.sucursalId || null,
-        sucursalNombre: pagoData.sucursalNombre || '',
         fechaCobro: convertLocalDateTimeToISO(pagoData.fechaCobro)
       };
 
@@ -443,38 +418,6 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated, userRole = 'user'
                     placeholder="Agregar observaciones o notas..."
                     rows={2}
                   />
-                </div>
-
-                {/* Sucursal */}
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Sucursal (opcional)
-                    </label>
-                    {userRole !== 'user' && (
-                      <button
-                        type="button"
-                        onClick={() => setIsSucursalModalOpen(true)}
-                        className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                      >
-                        <Building2 size={14} />
-                        Gestionar
-                      </button>
-                    )}
-                  </div>
-                  <select
-                    name="sucursalId"
-                    value={formData.sucursalId}
-                    onChange={handleChange}
-                    className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Sin sucursal</option>
-                    {sucursales.map((sucursal) => (
-                      <option key={sucursal._id} value={sucursal._id}>
-                        {sucursal.nombre} - {sucursal.ubicacion}
-                      </option>
-                    ))}
-                  </select>
                 </div>
 
                 {/* Resumen visual del total ingresado */}
@@ -657,20 +600,6 @@ const CobroCreationModal = ({ isOpen, onClose, onCobroCreated, userRole = 'user'
         onClose={handleCerrarPago}
         onSubmit={handleProcesarPago}
         venta={ventaParaPagar || { montoTotal: 0 }}
-        onOpenSucursalModal={() => setIsSucursalModalOpen(true)}
-        userRole={userRole}
-      />
-
-      {/* Modal de Sucursales */}
-      <SucursalModal
-        isOpen={isSucursalModalOpen}
-        onClose={() => {
-          setIsSucursalModalOpen(false);
-          // Recargar sucursales después de cerrar el modal
-          getSucursalesActivas().then(response => {
-            setSucursales(response.sucursales || []);
-          }).catch(console.error);
-        }}
         userRole={userRole}
       />
     </div>

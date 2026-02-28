@@ -54,6 +54,11 @@ import GarantiasPage from './Pages/GarantiasPage';
 // Importar página de gestión de imágenes
 import ImagenesPage from './Pages/ImagenesPage';
 
+// Importar página de mapa de ubicaciones
+import MapaPage from './Pages/MapaPage';
+// Importar página de gestión de sucursales y carritos
+import SucursalesPage from './Pages/SucursalesPage';
+
 // Banner de notificaciones push
 import NotificationPermissionBanner from './components/notifications/NotificationPermissionBanner';
 
@@ -182,6 +187,10 @@ function App() {
               <Route path="produccion/*" element={<ProduccionPage />} />
               {/* Gestión de Imágenes */}
               <Route path="imagenes" element={<ImagenesPage />} />
+              {/* Mapa de Ubicaciones */}
+              <Route path="mapa" element={<MapaPage />} />
+              {/* Gestión de Sucursales y Carritos */}
+              <Route path="sucursales" element={<SucursalesPage />} />
             </Route>
             
             {/* SuperAdminDashboard como layout persistente */}
@@ -227,6 +236,10 @@ function App() {
               <Route path="finanzas/garantias" element={<GarantiasPage />} />
               {/* Gestión de Imágenes */}
               <Route path="imagenes" element={<ImagenesPage />} />
+              {/* Mapa de Ubicaciones */}
+              <Route path="mapa" element={<MapaPage />} />
+              {/* Gestión de Sucursales y Carritos */}
+              <Route path="sucursales" element={<SucursalesPage />} />
             </Route>
             
             {/* UserDashboard como layout persistente */}

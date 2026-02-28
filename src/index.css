@@ -2,6 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Leaflet Map Styles */
+@import 'leaflet/dist/leaflet.css';
+
+/* Fix para marcadores custom de Leaflet con Tailwind */
+.custom-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Asegurar que el popup de Leaflet se vea bien */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+.leaflet-popup-content {
+  margin: 10px 14px !important;
+}
+
 /* Utilidad para ocultar scrollbar manteniendo funcionalidad */
 .scrollbar-hide {
   -ms-overflow-style: none;  /* IE and Edge */
