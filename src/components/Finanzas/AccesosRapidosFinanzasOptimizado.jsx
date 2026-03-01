@@ -1,5 +1,6 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { TrendingUp, AlertTriangle, CheckCircle, ListTodo, BarChart3, ArrowLeftRight, Landmark, Coins, Shield } from 'lucide-react';
 import { useFinanzasDashboard } from './hooks/useFinanzasDashboard';
 import DashboardStatsCards from './components/DashboardStatsCards';
 import DashboardQuickAccess from './components/DashboardQuickAccess';
@@ -28,7 +29,7 @@ const AccesosRapidosFinanzasOptimizado = memo(() => {
         {
             label: 'Dashboard Financiero',
             to: '',
-            icon: '📊',
+            icon: BarChart3,
             color: 'bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 text-blue-800 border-blue-200',
             description: 'Resumen financiero general',
             badge: estadisticas?.alertas?.dashboard || null
@@ -36,7 +37,7 @@ const AccesosRapidosFinanzasOptimizado = memo(() => {
         {
             label: 'Movimientos de Caja',
             to: 'movimientos-caja',
-            icon: '💸',
+            icon: ArrowLeftRight,
             color: 'bg-gradient-to-br from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200 text-emerald-800 border-emerald-200',
             description: 'Control de ingresos y egresos',
             badge: estadisticas?.movimientos?.pendientes || null
@@ -44,7 +45,7 @@ const AccesosRapidosFinanzasOptimizado = memo(() => {
         {
             label: 'Cuentas Bancarias',
             to: 'cuentas-bancarias',
-            icon: '🏦',
+            icon: Landmark,
             color: 'bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 text-green-800 border-green-200',
             description: 'Gestionar cuentas bancarias',
             badge: estadisticas?.cuentas?.alertas || null
@@ -52,7 +53,7 @@ const AccesosRapidosFinanzasOptimizado = memo(() => {
         {
             label: 'Gestión de Préstamos',
             to: 'prestamos',
-            icon: '💰',
+            icon: Coins,
             color: 'bg-gradient-to-br from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 text-yellow-800 border-yellow-200',
             description: 'Administrar préstamos',
             badge: estadisticas?.prestamos?.vencimientos || null
@@ -60,7 +61,7 @@ const AccesosRapidosFinanzasOptimizado = memo(() => {
         {
             label: 'Garantías',
             to: 'garantias',
-            icon: '🛡️',
+            icon: Shield,
             color: 'bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 text-purple-800 border-purple-200',
             description: 'Gestionar garantías',
             badge: estadisticas?.garantias?.revision || null
@@ -80,7 +81,7 @@ const AccesosRapidosFinanzasOptimizado = memo(() => {
             <div className="container-fluid">
                 <div className="d-sm-flex align-items-center justify-content-between mb-4">
                     <h1 className="h3 mb-0 text-gray-800">
-                        <i className="fas fa-chart-line mr-2"></i>
+                        <TrendingUp size={16} className="mr-2 inline" />
                         Dashboard Finanzas
                     </h1>
                     <div className="spinner-border text-primary" role="status">
@@ -117,7 +118,7 @@ const AccesosRapidosFinanzasOptimizado = memo(() => {
             {/* Mostrar errores si existen */}
             {error && (
                 <div className="alert alert-danger alert-dismissible fade show mb-4" role="alert">
-                    <i className="fas fa-exclamation-triangle mr-2"></i>
+                    <AlertTriangle size={16} className="mr-2 inline" />
                     {error}
                     <button type="button" className="close" data-dismiss="alert">
                         <span aria-hidden="true">&times;</span>
@@ -147,7 +148,7 @@ const AccesosRapidosFinanzasOptimizado = memo(() => {
                         <div className="card shadow mb-4">
                             <div className="card-header py-3">
                                 <h6 className="m-0 font-weight-bold text-primary">
-                                    <i className="fas fa-exclamation-triangle mr-2"></i>
+                                    <AlertTriangle size={16} className="mr-2 inline" />
                                     Alertas Importantes
                                 </h6>
                             </div>
@@ -163,7 +164,7 @@ const AccesosRapidosFinanzasOptimizado = memo(() => {
                                     </ul>
                                 ) : (
                                     <p className="text-muted mb-0">
-                                        <i className="fas fa-check-circle text-success mr-2"></i>
+                                        <CheckCircle size={16} className="text-green-500 mr-2 inline" />
                                         No hay alertas pendientes
                                     </p>
                                 )}
@@ -175,7 +176,7 @@ const AccesosRapidosFinanzasOptimizado = memo(() => {
                         <div className="card shadow mb-4">
                             <div className="card-header py-3">
                                 <h6 className="m-0 font-weight-bold text-primary">
-                                    <i className="fas fa-tasks mr-2"></i>
+                                    <ListTodo size={16} className="mr-2 inline" />
                                     Tareas Pendientes
                                 </h6>
                             </div>
@@ -196,7 +197,7 @@ const AccesosRapidosFinanzasOptimizado = memo(() => {
                                     </ul>
                                 ) : (
                                     <p className="text-muted mb-0">
-                                        <i className="fas fa-check-circle text-success mr-2"></i>
+                                        <CheckCircle size={16} className="text-green-500 mr-2 inline" />
                                         Todas las tareas completadas
                                     </p>
                                 )}

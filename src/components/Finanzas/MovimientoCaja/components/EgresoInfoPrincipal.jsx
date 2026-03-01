@@ -30,7 +30,7 @@ const EgresoInfoPrincipal = memo(({
                         min="0.01"
                         value={formData.monto}
                         onChange={(e) => onInputChange('monto', e.target.value)}
-                        className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 font-medium"
+                        className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 font-medium"
                         placeholder="0.00"
                         required
                     />
@@ -44,7 +44,7 @@ const EgresoInfoPrincipal = memo(({
                         type="text"
                         value={formData.concepto}
                         onChange={(e) => onInputChange('concepto', e.target.value)}
-                        className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                        className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500"
                         placeholder="Concepto del egreso"
                         required
                     />
@@ -59,7 +59,7 @@ const EgresoInfoPrincipal = memo(({
                 <textarea
                     value={formData.descripcion}
                     onChange={(e) => onInputChange('descripcion', e.target.value)}
-                    className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500"
                     placeholder="Descripción detallada del egreso"
                     rows="3"
                 />
@@ -73,7 +73,7 @@ const EgresoInfoPrincipal = memo(({
                 <select
                     value={formData.categoria}
                     onChange={(e) => onInputChange('categoria', e.target.value)}
-                    className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500"
                     required
                 >
                     <option value="">Seleccionar categoría</option>

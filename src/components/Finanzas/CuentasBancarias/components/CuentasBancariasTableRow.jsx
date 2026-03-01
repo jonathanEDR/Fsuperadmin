@@ -138,7 +138,7 @@ const CuentasBancariasTableRow = memo(({
                         type="checkbox"
                         checked={estaSeleccionada}
                         onChange={handleSeleccion}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="rounded border-gray-200 text-blue-600 focus:ring-blue-500"
                         aria-label={`Seleccionar cuenta ${cuenta.nombre}`}
                     />
                 </td>

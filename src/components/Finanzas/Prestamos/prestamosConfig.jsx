@@ -1,11 +1,12 @@
 import React from 'react';
+import { CheckCircle, Ban, Pencil, BarChart3, XCircle, Trash2 } from 'lucide-react';
 
 // ==================== CONFIGURACIÓN DE PRÉSTAMOS ====================
 
 // ========== COLORES Y ETIQUETAS DE ESTADOS ==========
 export const estadosColor = {
-    'aprobado': { color: 'bg-green-100 text-green-800', label: 'Aprobado', icono: '✅' },
-    'cancelado': { color: 'bg-gray-100 text-gray-800', label: 'Cancelado', icono: '🚫' }
+    'aprobado': { color: 'bg-green-100 text-green-800', label: 'Aprobado', icono: CheckCircle },
+    'cancelado': { color: 'bg-gray-100 text-gray-800', label: 'Cancelado', icono: Ban }
 };
 
 // ========== VALORES INICIALES DE FORMULARIOS ==========
@@ -167,6 +168,7 @@ export const columnasPrestamos = [
             }
             
             const configEstado = estadosColor[estado];
+            const IconoEstado = configEstado.icono;
             
             return (
                 <div className="text-left">
@@ -177,8 +179,8 @@ export const columnasPrestamos = [
                         })}
                     </div>
                     <div className="mt-1">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${configEstado.color}`}>
-                            {configEstado.icono} {configEstado.label}
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${configEstado.color} inline-flex items-center gap-1`}>
+                            <IconoEstado size={14} /> {configEstado.label}
                         </span>
                     </div>
                 </div>
@@ -222,7 +224,7 @@ export const columnasPrestamos = [
                             onClick={() => {
                                 handlers?.abrirModalDetallesPrestamo?.(fila);
                             }}
-                            className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 text-xs font-medium rounded-md border border-blue-200 hover:border-blue-300 transition-all duration-200"
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 text-xs font-medium rounded-xl border border-blue-200 hover:border-blue-300 transition-all duration-200"
                             title="Ver cronograma de pagos y detalles del préstamo"
                         >
                             <span>👁️</span>
@@ -260,7 +262,7 @@ export const columnasPrestamos = [
                         onClick={() => {
                             handlers?.abrirModalDetallesPrestamo?.(fila);
                         }}
-                        className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 text-xs font-medium rounded-md border border-blue-200 hover:border-blue-300 transition-all duration-200"
+                        className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 text-xs font-medium rounded-xl border border-blue-200 hover:border-blue-300 transition-all duration-200"
                         title="Ver cronograma de pagos y detalles del préstamo"
                     >
                         <span>👁️</span>
@@ -276,34 +278,34 @@ export const columnasPrestamos = [
 export const accionesPrestamos = [
     {
         label: 'Editar',
-        icono: '✏️',
+        icono: Pencil,
         color: 'blue',
         handler: 'abrirModalEditarPrestamo',
-        className: 'bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-md transition-colors',
+        className: 'bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-xl transition-colors',
         tooltip: 'Editar préstamo'
     },
     {
         label: 'Tabla',
-        icono: '📊',
+        icono: BarChart3,
         color: 'purple',
         handler: 'verTablaAmortizacion',
-        className: 'bg-purple-500 hover:bg-purple-600 text-white p-2 rounded-md transition-colors',
+        className: 'bg-purple-500 hover:bg-purple-600 text-white p-2 rounded-xl transition-colors',
         tooltip: 'Ver tabla de amortización'
     },
     {
         label: 'Cancelar',
-        icono: '❌',
+        icono: XCircle,
         color: 'red',
         handler: 'cancelarPrestamo',
-        className: 'bg-red-500 hover:bg-red-600 text-white p-2 rounded-md transition-colors',
+        className: 'bg-red-500 hover:bg-red-600 text-white p-2 rounded-xl transition-colors',
         tooltip: 'Cancelar préstamo'
     },
     {
         label: 'Eliminar',
-        icono: '🗑️',
+        icono: Trash2,
         color: 'gray',
         handler: 'eliminarPrestamo',
-        className: 'bg-gray-500 hover:bg-gray-600 text-white p-2 rounded-md transition-colors',
+        className: 'bg-gray-500 hover:bg-gray-600 text-white p-2 rounded-xl transition-colors',
         tooltip: 'Eliminar préstamo (elimina también el movimiento de caja)'
     }
 ];

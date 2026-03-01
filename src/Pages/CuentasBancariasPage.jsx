@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import TablaCuentasBancarias from '../components/Finanzas/CuentasBancarias/TablaCuentasBancarias';
 import CampoCuentasBancarias from '../components/Finanzas/CuentasBancarias/CampoCuentasBancarias';
 import { finanzasService } from '../services/finanzasService';
+import { Search, Plus, ArrowLeftRight, ChevronDown, X as XIcon } from 'lucide-react';
 import {
     useCuentasBancarias,
     obtenerAcciones,
@@ -76,17 +77,17 @@ const CuentasBancariasPage = () => {
         <div className="flex gap-2">
             <button
                 onClick={() => navigate(`${baseRoute}/movimientos-caja`)}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 sm:px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1"
+                className="text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 px-2 sm:px-3 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-1.5"
                 title="Ir a Movimientos de Caja para gestionar ingresos y egresos bancarios"
             >
-                💰 <span className="hidden sm:inline">Movimientos</span>
+                <ArrowLeftRight size={16} /> <span className="hidden sm:inline">Movimientos</span>
             </button>
             <button 
                 onClick={abrirModalNuevaCuenta}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-1"
+                className="text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 px-2 sm:px-4 py-2 rounded-xl font-medium transition-colors flex items-center gap-1.5 text-sm"
                 title="Crear nueva cuenta bancaria"
             >
-                <span className="text-lg">+</span> <span className="hidden sm:inline">Nueva Cuenta</span>
+                <Plus size={16} /> <span className="hidden sm:inline">Nueva Cuenta</span>
             </button>
         </div>
     );
@@ -100,14 +101,14 @@ const CuentasBancariasPage = () => {
         >
 
             {/* Filtros Colapsables Mejorados */}
-            <div className="bg-white rounded-lg shadow-sm border mb-6 overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-slate-50 to-gray-50">
                     <button 
                         onClick={() => setMostrarFiltros(!mostrarFiltros)}
                         className="flex items-center justify-between w-full text-left hover:bg-gray-100 -mx-2 px-2 py-1 rounded transition-colors"
                     >
                         <h3 className="text-sm font-semibold text-gray-700 flex items-center">
-                            <span className="mr-2">🔍</span>
+                            <Search size={14} className="mr-2 text-gray-400" />
                             Filtros de búsqueda
                             {Object.values(filtros).some(val => val !== '') && (
                                 <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
@@ -116,9 +117,7 @@ const CuentasBancariasPage = () => {
                             )}
                         </h3>
                         <span className={`transform transition-all duration-200 text-gray-500 ${mostrarFiltros ? 'rotate-180' : ''}`}>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
+                            <ChevronDown size={16} />
                         </span>
                     </button>
                 </div>
@@ -170,11 +169,9 @@ const CuentasBancariasPage = () => {
                             <div className="mt-4 pt-4 border-t border-gray-200">
                                 <button
                                     onClick={() => setFiltros({ banco: '', tipoCuenta: '', moneda: '', activa: '' })}
-                                    className="text-sm text-gray-600 hover:text-gray-800 flex items-center gap-1"
+                                    className="text-sm text-gray-600 hover:text-gray-800 flex items-center gap-1.5"
                                 >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
+                                    <XIcon size={14} />
                                     Limpiar filtros
                                 </button>
                             </div>

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Loader2, ArrowLeft, Filter, X } from 'lucide-react';
 import useGastos from './useGastos';
 import GastoForm from './GastoForm';
 import GastoDashboard from './GastoDashboard';
@@ -139,7 +140,7 @@ export default function GastoList() {
     return (
       <div className="flex justify-center items-center py-20">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <Loader2 className="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4" />
           <p className="text-gray-500">Cargando gastos...</p>
         </div>
       </div>
@@ -150,10 +151,10 @@ export default function GastoList() {
     <div className="p-4 max-w-7xl mx-auto">
       {/* Error */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex justify-between items-center">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 flex justify-between items-center">
           <span>{error}</span>
           <button onClick={() => setError(null)} className="text-red-700 hover:text-red-900">
-            <i className="fas fa-times"></i>
+            <X size={14} />
           </button>
         </div>
       )}
@@ -168,8 +169,8 @@ export default function GastoList() {
             className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                <i className="fas fa-filter text-blue-600"></i>
+              <div className="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center">
+                <Filter size={16} className="text-blue-600" />
               </div>
               <div className="text-left">
                 <span className="font-semibold text-gray-800">Filtrar por Fechas</span>
@@ -202,7 +203,7 @@ export default function GastoList() {
                     type="date"
                     value={fechaInicio}
                     onChange={(e) => setFechaInicio(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
                 
@@ -214,7 +215,7 @@ export default function GastoList() {
                     type="date"
                     value={fechaFin}
                     onChange={(e) => setFechaFin(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
                 
@@ -226,7 +227,7 @@ export default function GastoList() {
                       setFechaInicio(`${year}-${month}-01`);
                       setFechaFin(today);
                     }}
-                    className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition-colors"
+                    className="flex-1 px-3 py-2 text-gray-700 bg-white border border-gray-200 rounded-xl text-sm hover:bg-gray-50 transition-colors"
                   >
                     Este Mes
                   </button>
@@ -235,7 +236,7 @@ export default function GastoList() {
                       setFechaInicio('');
                       setFechaFin('');
                     }}
-                    className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                    className="px-3 py-2 text-blue-700 bg-blue-50 border border-blue-200 rounded-xl text-sm hover:bg-blue-100 transition-colors"
                   >
                     Ver Todo
                   </button>
@@ -252,9 +253,9 @@ export default function GastoList() {
           <div className="flex items-center gap-4 mb-6">
             <button
               onClick={handleVolverDashboard}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
             >
-              <i className="fas fa-arrow-left text-gray-600"></i>
+              <ArrowLeft size={18} className="text-gray-600" />
             </button>
             <h1 className="text-2xl font-bold text-gray-800">Catalogo de Gastos</h1>
           </div>
@@ -286,18 +287,18 @@ export default function GastoList() {
 
       {/* Modal del formulario */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl">
               <div className="flex justify-between items-center">
                 <h3 className="text-xl font-semibold text-gray-800">
                   {gastoActual._id ? 'Editar Gasto' : 'Nuevo Gasto'}
                 </h3>
                 <button
                   onClick={handleCancelForm}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
                 >
-                  <i className="fas fa-times text-gray-500"></i>
+                  <X size={18} className="text-gray-500" />
                 </button>
               </div>
             </div>

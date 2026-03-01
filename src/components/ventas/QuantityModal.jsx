@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Minus, X, History } from 'lucide-react';
+import { Plus, Minus, X, History, Loader2 } from 'lucide-react';
 import { useCantidadManagement } from '../../hooks/useCantidadManagement';
 
 const QuantityModal = ({ 
@@ -130,8 +130,8 @@ const QuantityModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
             <History className="w-5 h-5 text-blue-600" />
@@ -147,7 +147,7 @@ const QuantityModal = ({
         </div>
 
         {/* Información del producto */}
-        <div className="mb-4 bg-gray-50 rounded-lg p-4">
+        <div className="mb-4 bg-gray-50 rounded-xl p-4">
           <h4 className="font-medium text-gray-900 mb-2">
             {producto.productoId?.nombre}
           </h4>
@@ -163,7 +163,7 @@ const QuantityModal = ({
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Historial de Cambios
           </label>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
             <div className="text-sm text-blue-800 font-mono">
               {renderHistorialFormula()}
             </div>
@@ -184,7 +184,7 @@ const QuantityModal = ({
               const maxValue = Math.max(stockDisponible, producto.cantidad);
               setCantidad(Math.min(value, maxValue));
             }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             min="1"
             max={Math.max(stockDisponible, producto.cantidad)}
             disabled={loading}
@@ -196,7 +196,7 @@ const QuantityModal = ({
 
         {/* Error */}
         {(error || cantidadError) && (
-          <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
+          <div className="mb-4 bg-red-50 border border-red-200 rounded-xl p-3">
             <p className="text-sm text-red-600">{error || cantidadError}</p>
           </div>
         )}
@@ -206,14 +206,14 @@ const QuantityModal = ({
           <button
             onClick={handleClose}
             disabled={loading}
-            className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50"
+            className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50"
           >
             Cancelar
           </button>
           <button
             onClick={() => handleOperation('subtract')}
             disabled={loading || cantidad >= producto.cantidad || producto.cantidad <= 0}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 rounded-xl disabled:opacity-50"
             title={producto.cantidad <= 0 ? "No se puede reducir más" : `Quitar ${cantidad} unidades`}
           >
             <Minus className="w-4 h-4" />
@@ -222,7 +222,7 @@ const QuantityModal = ({
           <button
             onClick={() => handleOperation('add')}
             disabled={loading || cantidad > stockDisponible || stockDisponible <= 0}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 rounded-xl disabled:opacity-50"
             title={stockDisponible <= 0 ? "Sin stock disponible" : `Agregar ${cantidad} unidades`}
           >
             <Plus className="w-4 h-4" />
@@ -232,7 +232,7 @@ const QuantityModal = ({
 
         {loading && (
           <div className="mt-4 flex items-center justify-center gap-2 text-sm text-blue-600">
-            <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+            <Loader2 size={16} className="animate-spin text-blue-600" />
             Actualizando...
           </div>
         )}

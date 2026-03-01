@@ -47,10 +47,10 @@ const EgresoMetodoPago = memo(({
                             key={metodo.value}
                             type="button"
                             onClick={() => handleTipoChange(metodo.value)}
-                            className={`p-3 rounded-lg border-2 transition-all duration-200 flex items-center justify-center space-x-2 ${
+                            className={`p-3 rounded-xl border-2 transition-all duration-200 flex items-center justify-center space-x-2 ${
                                 formData.metodoPago.tipo === metodo.value
                                     ? 'border-red-500 bg-red-50 text-red-700'
-                                    : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                                    : 'border-gray-200 hover:border-gray-200 text-gray-600'
                             }`}
                         >
                             <span className="text-lg">{metodo.icon}</span>
@@ -62,7 +62,7 @@ const EgresoMetodoPago = memo(({
 
             {/* Campos específicos para métodos bancarios */}
             {esBancario && (
-                <div className="space-y-4 bg-blue-50 p-4 rounded-lg">
+                <div className="space-y-4 bg-blue-50 p-4 rounded-xl">
                     <h4 className="font-medium text-blue-900 flex items-center">
                         🏦 Información Bancaria
                     </h4>
@@ -76,7 +76,7 @@ const EgresoMetodoPago = memo(({
                             <select
                                 value={formData.cuentaBancariaId}
                                 onChange={(e) => onInputChange('cuentaBancariaId', e.target.value)}
-                                className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             >
                                 <option value="">Seleccionar cuenta (opcional)</option>
                                 {cuentasBancarias.map((cuenta) => (
@@ -104,7 +104,7 @@ const EgresoMetodoPago = memo(({
                                     type="text"
                                     value={formData.metodoPago.detalles.numeroOperacion}
                                     onChange={(e) => onNestedChange('metodoPago.detalles.numeroOperacion', e.target.value)}
-                                    className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     placeholder="Número de operación"
                                 />
                             </div>
@@ -117,7 +117,7 @@ const EgresoMetodoPago = memo(({
                                     type="text"
                                     value={formData.metodoPago.detalles.banco}
                                     onChange={(e) => onNestedChange('metodoPago.detalles.banco', e.target.value)}
-                                    className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     placeholder={formData.metodoPago.tipo === 'transferencia' ? 'Nombre del banco' : 'Número de teléfono'}
                                 />
                             </div>
@@ -135,7 +135,7 @@ const EgresoMetodoPago = memo(({
                                 maxLength="4"
                                 value={formData.metodoPago.detalles.numeroOperacion}
                                 onChange={(e) => onNestedChange('metodoPago.detalles.numeroOperacion', e.target.value)}
-                                className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="1234"
                             />
                         </div>

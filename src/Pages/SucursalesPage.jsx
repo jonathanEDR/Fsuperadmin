@@ -2,8 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Building2, Plus, Edit2, Trash2, MapPin, CheckCircle, XCircle,
   Search, RefreshCw, Map, Users, User, AlertCircle, X, Save,
-  UserCheck, UserX, ArrowRightLeft, Mail, ClipboardList, Clock, Check, Play, Zap, ListTodo
+  UserCheck, UserX, ArrowRightLeft, Mail, ClipboardList, Clock, Check, Play, Zap, ListTodo, Loader2
 } from 'lucide-react';
+
+// Helper para obtener la URL del avatar del trabajador
+const getAvatarUrl = (t) => t?.avatar_url || t?.avatar?.url || null;
 import { getAllSucursales, deleteSucursal } from '../services/sucursalService';
 import api from '../services/api';
 import SucursalFormModal from '../components/sucursales/SucursalFormModal';
@@ -66,28 +69,34 @@ const AsignarTrabajadorModal = ({ isOpen, onClose, onSaved, trabajador, sucursal
   const sucursalesActivas = sucursales.filter(s => s.activo !== false);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
-        <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-green-50 to-emerald-50">
-          <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-            <ArrowRightLeft className="text-green-600" size={22} />
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-md">
+        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-gray-50 rounded-t-2xl">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <ArrowRightLeft className="text-green-600" size={20} />
             Asignar Sucursal
           </h2>
-          <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+          <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-white/80 rounded-xl transition-colors">
             <X size={20} />
           </button>
         </div>
 
         <div className="p-5 space-y-4">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm">{error}</div>
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-xl text-sm flex items-center gap-2">
+              <AlertCircle size={16} className="flex-shrink-0" /> {error}
+            </div>
           )}
 
           {/* Info del trabajador */}
-          <div className="bg-gray-50 rounded-lg p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-              <User className="text-blue-600" size={20} />
-            </div>
+          <div className="bg-gray-50/60 rounded-xl border border-gray-100 p-4 flex items-center gap-3">
+            {getAvatarUrl(trabajador) ? (
+              <img src={getAvatarUrl(trabajador)} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">
+                {(trabajador.nombre_negocio || trabajador.email || '?')[0].toUpperCase()}
+              </div>
+            )}
             <div>
               <p className="font-semibold text-gray-800">{trabajador.nombre_negocio || trabajador.email}</p>
               <p className="text-xs text-gray-500">{trabajador.email}</p>
@@ -99,7 +108,7 @@ const AsignarTrabajadorModal = ({ isOpen, onClose, onSaved, trabajador, sucursal
 
           {/* Sucursal actual */}
           {trabajador.sucursalActual && (
-            <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-2">
+            <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-2">
               <p className="text-xs font-medium text-blue-600 mb-0.5">Sucursal actual:</p>
               <p className="text-sm font-semibold text-blue-800">{trabajador.sucursalActual.nombre}</p>
             </div>
@@ -113,7 +122,7 @@ const AsignarTrabajadorModal = ({ isOpen, onClose, onSaved, trabajador, sucursal
             <select
               value={sucursalSeleccionada}
               onChange={(e) => setSucursalSeleccionada(e.target.value)}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
             >
               <option value="">Sin asignar (remover de sucursal)</option>
               {sucursalesActivas.map(s => (
@@ -125,15 +134,15 @@ const AsignarTrabajadorModal = ({ isOpen, onClose, onSaved, trabajador, sucursal
           </div>
 
           <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
-            <button onClick={onClose} className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <button onClick={onClose} className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
               Cancelar
             </button>
             <button
               onClick={handleAsignar}
               disabled={saving}
-              className="px-5 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+              className="px-5 py-2 text-sm text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 rounded-xl disabled:opacity-50 transition-colors flex items-center gap-2"
             >
-              {sucursalSeleccionada ? <UserCheck size={16} /> : <UserX size={16} />}
+              {saving ? <Loader2 size={16} className="animate-spin" /> : sucursalSeleccionada ? <UserCheck size={16} /> : <UserX size={16} />}
               {saving ? 'Guardando...' : sucursalSeleccionada ? 'Asignar' : 'Remover'}
             </button>
           </div>
@@ -262,17 +271,20 @@ const SucursalesPage = () => {
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
       {/* Toast */}
       {toast && (
-        <div className={`fixed top-4 right-4 z-[100] px-5 py-3 rounded-xl shadow-lg text-white text-sm font-medium transition-all ${
-          toast.tipo === 'error' ? 'bg-red-600' : 'bg-green-600'
+        <div className={`fixed top-4 right-4 z-[100] px-5 py-3 rounded-xl shadow-lg text-sm font-medium transition-all border ${
+          toast.tipo === 'error' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200'
         }`}>
-          {toast.msg}
+          <div className="flex items-center gap-2">
+            {toast.tipo === 'error' ? <AlertCircle size={16} /> : <CheckCircle size={16} />}
+            {toast.msg}
+          </div>
         </div>
       )}
 
       {/* Confirm Dialog */}
       {confirmEliminar.open && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 w-full max-w-sm">
             <AlertCircle className="text-red-500 mx-auto mb-3" size={40} />
             <h3 className="text-lg font-bold text-gray-800 text-center mb-2">¿Eliminar sucursal?</h3>
             <p className="text-sm text-gray-600 text-center mb-6">
@@ -281,13 +293,13 @@ const SucursalesPage = () => {
             <div className="flex gap-3">
               <button
                 onClick={() => setConfirmEliminar({ open: false, id: null, nombre: '' })}
-                className="flex-1 px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="flex-1 px-4 py-2 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleEliminarSucursal}
-                className="flex-1 px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+                className="flex-1 px-4 py-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl hover:bg-red-100 transition-colors"
               >
                 Eliminar
               </button>
@@ -316,7 +328,7 @@ const SucursalesPage = () => {
           <button
             key={key}
             onClick={() => { setTab(key); setBusqueda(''); }}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
               tab === key
                 ? 'bg-white text-gray-900 shadow-sm'
                 : 'text-gray-600 hover:text-gray-800'
@@ -365,7 +377,7 @@ const SucursalesPage = () => {
             </button>
             <button
               onClick={() => setModalSucursal({ open: true, editar: null })}
-              className="px-5 py-2.5 text-sm text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
+              className="px-5 py-2.5 text-sm text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-colors flex items-center gap-2"
             >
               <Plus size={16} />
               Nueva Sucursal
@@ -375,7 +387,7 @@ const SucursalesPage = () => {
           {/* Grid de sucursales */}
           {loadingSuc ? (
             <div className="flex items-center justify-center h-48">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+              <Loader2 size={32} className="animate-spin text-blue-500" />
             </div>
           ) : sucursalesFiltradas.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-xl border border-gray-100 shadow-sm">
@@ -390,34 +402,36 @@ const SucursalesPage = () => {
                 return (
                   <div key={suc._id} className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow overflow-hidden">
                     {/* Card header */}
-                    <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-4 flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-white bg-opacity-20 flex items-center justify-center">
-                          <Building2 className="text-white" size={20} />
-                        </div>
-                        <div>
-                          <p className="font-bold text-white text-base leading-tight">{suc.nombre}</p>
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                            suc.activo !== false
-                              ? 'bg-green-400 bg-opacity-30 text-white'
-                              : 'bg-red-400 bg-opacity-30 text-white'
-                          }`}>
-                            {suc.activo !== false ? 'Activa' : 'Inactiva'}
-                          </span>
-                        </div>
-                      </div>
-                      {/* Badges */}
-                      <div className="flex flex-col gap-1 items-end">
-                        <div className="bg-white bg-opacity-20 rounded-lg px-2.5 py-1 text-white text-xs font-medium flex items-center gap-1">
-                          <Users size={13} />
-                          {trab.length}
-                        </div>
-                        {tareasResumen[suc._id]?.total > 0 && (
-                          <div className="bg-white bg-opacity-20 rounded-lg px-2.5 py-1 text-white text-xs font-medium flex items-center gap-1">
-                            <ClipboardList size={12} />
-                            {tareasResumen[suc._id].completadas}/{tareasResumen[suc._id].total}
+                    <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-slate-50 to-gray-50">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
+                            <Building2 className="text-white" size={20} />
                           </div>
-                        )}
+                          <div>
+                            <p className="font-bold text-gray-900 text-base leading-tight">{suc.nombre}</p>
+                            <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full font-medium mt-0.5 ${
+                              suc.activo !== false
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-red-100 text-red-700'
+                            }`}>
+                              {suc.activo !== false ? 'Activa' : 'Inactiva'}
+                            </span>
+                          </div>
+                        </div>
+                        {/* Badges */}
+                        <div className="flex flex-col gap-1 items-end">
+                          <div className="bg-blue-50 border border-blue-100 rounded-xl px-2.5 py-1 text-blue-700 text-xs font-medium flex items-center gap-1">
+                            <Users size={13} />
+                            {trab.length}
+                          </div>
+                          {tareasResumen[suc._id]?.total > 0 && (
+                            <div className="bg-amber-50 border border-amber-100 rounded-xl px-2.5 py-1 text-amber-700 text-xs font-medium flex items-center gap-1">
+                              <ClipboardList size={12} />
+                              {tareasResumen[suc._id].completadas}/{tareasResumen[suc._id].total}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
 
@@ -429,7 +443,7 @@ const SucursalesPage = () => {
                       </div>
 
                       {suc.descripcion && (
-                        <p className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2 line-clamp-2">
+                        <p className="text-xs text-gray-500 bg-gray-50 rounded-xl px-3 py-2 line-clamp-2">
                           {suc.descripcion}
                         </p>
                       )}
@@ -453,9 +467,13 @@ const SucursalesPage = () => {
                           <div className="space-y-1.5">
                             {trab.slice(0, 3).map(t => (
                               <div key={t._id} className="flex items-center gap-2 text-xs">
-                                <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                                  <User size={11} className="text-blue-600" />
-                                </div>
+                                {getAvatarUrl(t) ? (
+                                  <img src={getAvatarUrl(t)} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                                ) : (
+                                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 text-white text-[9px] font-bold">
+                                    {(t.nombre_negocio || t.email || '?')[0].toUpperCase()}
+                                  </div>
+                                )}
                                 <span className="text-gray-700 truncate">{t.nombre_negocio || t.email}</span>
                               </div>
                             ))}
@@ -541,13 +559,13 @@ const SucursalesPage = () => {
                     <div className="px-4 pb-4 flex gap-2">
                       <button
                         onClick={() => setModalSucursal({ open: true, editar: suc })}
-                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors font-medium"
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors font-medium"
                       >
                         <Edit2 size={13} /> Editar
                       </button>
                       <button
                         onClick={() => setConfirmEliminar({ open: true, id: suc._id, nombre: suc.nombre })}
-                        className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors font-medium"
+                        className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl hover:bg-red-100 transition-colors font-medium"
                       >
                         <Trash2 size={13} />
                       </button>
@@ -596,7 +614,7 @@ const SucursalesPage = () => {
           {/* Tabla de trabajadores */}
           {loadingTrab ? (
             <div className="flex items-center justify-center h-48">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+              <Loader2 size={32} className="animate-spin text-blue-500" />
             </div>
           ) : trabajadoresFiltrados.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-xl border border-gray-100 shadow-sm">
@@ -609,7 +627,7 @@ const SucursalesPage = () => {
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-gray-50 border-b border-gray-100">
+                    <tr className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100">
                       <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-5 py-3">Trabajador</th>
                       <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-5 py-3">Departamento</th>
                       <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-5 py-3">Rol</th>
@@ -622,9 +640,13 @@ const SucursalesPage = () => {
                       <tr key={t._id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 text-white text-xs font-bold">
-                              {(t.nombre_negocio || t.email || '?')[0].toUpperCase()}
-                            </div>
+                            {getAvatarUrl(t) ? (
+                              <img src={getAvatarUrl(t)} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+                            ) : (
+                              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 text-white text-xs font-bold">
+                                {(t.nombre_negocio || t.email || '?')[0].toUpperCase()}
+                              </div>
+                            )}
                             <div>
                               <p className="font-semibold text-gray-800 text-sm">{t.nombre_negocio || 'Sin nombre'}</p>
                               <p className="text-xs text-gray-400 flex items-center gap-1">
@@ -662,7 +684,7 @@ const SucursalesPage = () => {
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => setModalAsignar({ open: true, trabajador: t })}
-                              className="px-3 py-1.5 text-xs text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1"
+                              className="px-3 py-1.5 text-xs text-green-700 bg-green-50 border border-green-200 rounded-xl hover:bg-green-100 transition-colors flex items-center gap-1"
                               title={t.sucursalActual ? "Cambiar sucursal" : "Asignar sucursal"}
                             >
                               <ArrowRightLeft size={13} />
@@ -682,7 +704,7 @@ const SucursalesPage = () => {
                                     showToast('Error al remover', 'error');
                                   }
                                 }}
-                                className="px-3 py-1.5 text-xs text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors flex items-center gap-1"
+                                className="px-3 py-1.5 text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl hover:bg-red-100 transition-colors flex items-center gap-1"
                                 title="Remover de sucursal"
                               >
                                 <UserX size={13} /> Remover
@@ -701,9 +723,13 @@ const SucursalesPage = () => {
                 {trabajadoresFiltrados.map(t => (
                   <div key={t._id} className="p-4 space-y-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">
-                        {(t.nombre_negocio || t.email || '?')[0].toUpperCase()}
-                      </div>
+                      {getAvatarUrl(t) ? (
+                        <img src={getAvatarUrl(t)} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">
+                          {(t.nombre_negocio || t.email || '?')[0].toUpperCase()}
+                        </div>
+                      )}
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-gray-800 truncate">{t.nombre_negocio || 'Sin nombre'}</p>
                         <p className="text-xs text-gray-400 truncate">{t.email}</p>
@@ -719,7 +745,7 @@ const SucursalesPage = () => {
                     </div>
 
                     {t.sucursalActual ? (
-                      <div className="bg-green-50 rounded-lg px-3 py-2 flex items-center gap-2">
+                      <div className="bg-green-50 rounded-xl px-3 py-2 flex items-center gap-2">
                         <Building2 size={14} className="text-green-600" />
                         <div>
                           <p className="text-xs font-medium text-green-800">{t.sucursalActual.nombre}</p>
@@ -727,7 +753,7 @@ const SucursalesPage = () => {
                         </div>
                       </div>
                     ) : (
-                      <div className="bg-orange-50 rounded-lg px-3 py-2 flex items-center gap-2">
+                      <div className="bg-orange-50 rounded-xl px-3 py-2 flex items-center gap-2">
                         <AlertCircle size={14} className="text-orange-500" />
                         <p className="text-xs font-medium text-orange-600">Sin sucursal asignada</p>
                       </div>
@@ -736,7 +762,7 @@ const SucursalesPage = () => {
                     <div className="flex gap-2">
                       <button
                         onClick={() => setModalAsignar({ open: true, trabajador: t })}
-                        className="flex-1 py-2 text-xs text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-1"
+                        className="flex-1 py-2 text-xs text-green-700 bg-green-50 border border-green-200 rounded-xl hover:bg-green-100 transition-colors flex items-center justify-center gap-1"
                       >
                         <ArrowRightLeft size={13} />
                         {t.sucursalActual ? 'Mover' : 'Asignar'}
@@ -755,7 +781,7 @@ const SucursalesPage = () => {
                               showToast('Error al remover', 'error');
                             }
                           }}
-                          className="px-4 py-2 text-xs text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                          className="px-4 py-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl hover:bg-red-100 transition-colors"
                         >
                           Remover
                         </button>

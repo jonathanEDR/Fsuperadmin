@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { ArrowLeft, Plus, Search, X, Pencil, Trash2, Receipt, Coins, Factory, TrendingUp, Building2, FolderOpen } from 'lucide-react';
 
 // Funcion para formatear moneda en Soles
 const formatCurrency = (amount) => {
@@ -30,10 +31,10 @@ const formatDateTime = (date) => {
 
 // Configuracion de colores por categoria
 const CATEGORIA_CONFIG = {
-  'Finanzas': { color: 'blue', icon: 'fa-coins' },
-  'Producción': { color: 'green', icon: 'fa-industry' },
-  'Ventas': { color: 'amber', icon: 'fa-chart-line' },
-  'Administración': { color: 'purple', icon: 'fa-building' }
+  'Finanzas': { color: 'blue', icon: Coins },
+  'Producción': { color: 'green', icon: Factory },
+  'Ventas': { color: 'amber', icon: TrendingUp },
+  'Administración': { color: 'purple', icon: Building2 }
 };
 
 // Configuracion de colores por tipo de gasto
@@ -56,7 +57,8 @@ export default function GastoCategoriaView({
   const [searchTerm, setSearchTerm] = useState('');
   const [tipoFilter, setTipoFilter] = useState('');
 
-  const config = CATEGORIA_CONFIG[categoria] || { color: 'gray', icon: 'fa-folder' };
+  const config = CATEGORIA_CONFIG[categoria] || { color: 'gray', icon: FolderOpen };
+  const ConfigIcon = config.icon;
 
   // Filtrar gastos por categoria
   const gastosCategoria = useMemo(() => {
@@ -126,13 +128,13 @@ export default function GastoCategoriaView({
         <div className="flex items-center gap-4">
           <button
             onClick={onVolver}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
           >
-            <i className="fas fa-arrow-left text-gray-600"></i>
+            <ArrowLeft size={18} className="text-gray-600" />
           </button>
           <div className="flex items-center gap-3">
             <div className={`w-12 h-12 rounded-xl bg-${config.color}-100 flex items-center justify-center`}>
-              <i className={`fas ${config.icon} text-xl text-${config.color}-600`}></i>
+              <ConfigIcon size={20} className={`text-${config.color}-600`} />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-800">Gastos de {categoria}</h1>
@@ -142,9 +144,9 @@ export default function GastoCategoriaView({
         </div>
         <button
           onClick={() => onAgregarGasto(categoria)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-md"
+          className="px-4 py-2 text-blue-700 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors flex items-center gap-2"
         >
-          <i className="fas fa-plus"></i>
+          <Plus size={16} />
           Agregar Gasto
         </button>
       </div>
@@ -175,14 +177,14 @@ export default function GastoCategoriaView({
               type="date"
               value={customDateRange.start}
               onChange={e => setCustomDateRange(prev => ({ ...prev, start: e.target.value }))}
-              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="px-3 py-1.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
             <span className="text-gray-400">-</span>
             <input
               type="date"
               value={customDateRange.end}
               onChange={e => setCustomDateRange(prev => ({ ...prev, end: e.target.value }))}
-              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="px-3 py-1.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
@@ -190,7 +192,7 @@ export default function GastoCategoriaView({
           <select
             value={tipoFilter}
             onChange={e => setTipoFilter(e.target.value)}
-            className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm"
+            className="px-3 py-1.5 border border-gray-200 rounded-xl text-sm"
           >
             <option value="">Todos los tipos</option>
             {tiposUnicos.map(tipo => (
@@ -200,13 +202,13 @@ export default function GastoCategoriaView({
 
           {/* Busqueda */}
           <div className="relative flex-1 min-w-[200px]">
-            <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               placeholder="Buscar gasto..."
-              className="w-full pl-10 pr-4 py-1.5 border border-gray-300 rounded-lg text-sm"
+              className="w-full pl-10 pr-4 py-1.5 border border-gray-200 rounded-xl text-sm"
             />
           </div>
 
@@ -216,7 +218,7 @@ export default function GastoCategoriaView({
               onClick={limpiarFiltros}
               className="px-3 py-1.5 text-sm text-gray-500 hover:text-red-600 transition-colors flex items-center gap-1"
             >
-              <i className="fas fa-times"></i>
+              <X size={14} />
               Limpiar
             </button>
           )}
@@ -227,23 +229,23 @@ export default function GastoCategoriaView({
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         {gastosFiltrados.length === 0 ? (
           <div className="p-12 text-center">
-            <i className="fas fa-receipt text-5xl text-gray-300 mb-4"></i>
+            <Receipt size={48} className="text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-lg mb-2">No hay gastos registrados</p>
             <p className="text-gray-400 text-sm mb-4">
               {gastosCategoria.length > 0 ? 'Intenta ajustar los filtros' : 'Comienza agregando tu primer gasto'}
             </p>
             <button
               onClick={() => onAgregarGasto(categoria)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+              className="px-4 py-2 text-blue-700 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors text-sm"
             >
-              <i className="fas fa-plus mr-2"></i>
+              <Plus size={14} className="mr-2 inline" />
               Agregar Gasto
             </button>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Descripcion</th>
@@ -287,14 +289,14 @@ export default function GastoCategoriaView({
                             className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                             title="Editar"
                           >
-                            <i className="fas fa-edit"></i>
+                            <Pencil size={14} />
                           </button>
                           <button
                             onClick={() => onEliminarGasto(gasto._id)}
                             className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
                             title="Eliminar"
                           >
-                            <i className="fas fa-trash"></i>
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </td>

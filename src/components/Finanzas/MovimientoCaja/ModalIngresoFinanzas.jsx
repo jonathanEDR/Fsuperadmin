@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, X } from 'lucide-react';
+import { DollarSign, X, Loader2 } from 'lucide-react';
 import { movimientosCajaService } from '../../../services/movimientosCajaService';
 import FinanzasService from '../../../services/finanzasService';
 
@@ -336,34 +336,34 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-6xl w-full max-h-[90vh] overflow-y-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-green-500 to-green-600">
-                    <h2 className="text-xl font-semibold text-white flex items-center">
-                        <DollarSign className="w-5 h-5 mr-2" />
+                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-slate-50 to-gray-50 rounded-t-2xl">
+                    <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                        <DollarSign className="w-5 h-5 mr-2 text-green-600" />
                         Registrar Ingreso
                     </h2>
                     <button
                         onClick={onClose}
-                        className="text-white hover:text-green-200 bg-green-700 rounded-full p-1"
+                        className="p-1.5 hover:bg-white/80 rounded-xl text-gray-500"
                     >
-                        <X className="w-6 h-6" />
+                        <X size={20} />
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6">
                     {/* Tabs de categorías principales */}
                     <div className="mb-6">
-                        <div className="flex flex-wrap gap-2 p-2 bg-gray-100 rounded-lg">
+                        <div className="flex flex-wrap gap-2 p-2 bg-gray-100 rounded-xl">
                             {categorias.ingresos.map(cat => (
                                 <button
                                     key={cat.value}
                                     type="button"
                                     onClick={() => handleInputChange('categoria', cat.value)}
-                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                                         formData.categoria === cat.value
-                                            ? 'bg-green-600 text-white shadow-md'
+                                            ? 'text-green-700 bg-green-50 border border-green-200 shadow-md'
                                             : 'bg-white text-gray-700 hover:bg-gray-200'
                                     }`}
                                 >
@@ -382,14 +382,14 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
 
                             {/* Sección especial para Cobro de Préstamo */}
                             {formData.categoria === 'cobro_prestamo' && (
-                                <div className="bg-green-50 p-4 rounded-lg border border-green-200 space-y-4">
+                                <div className="bg-green-50 p-4 rounded-xl border border-green-200 space-y-4">
                                     <h4 className="font-semibold text-green-800 flex items-center">
                                         📋 Seleccionar Préstamo y Cuota
                                     </h4>
 
                                     {loadingPrestamos ? (
                                         <div className="flex items-center justify-center py-4">
-                                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500"></div>
+                                            <Loader2 className="animate-spin h-6 w-6 text-green-500" />
                                             <span className="ml-2 text-gray-600">Cargando préstamos...</span>
                                         </div>
                                     ) : prestamosConCuotas.length === 0 ? (
@@ -407,7 +407,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                 <select
                                                     value={formData.prestamoId}
                                                     onChange={(e) => handlePrestamoChange(e.target.value)}
-                                                    className="w-full px-3 py-2 border border-green-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                                    className="w-full px-3 py-2 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                                     required
                                                 >
                                                     <option value="">Seleccione un préstamo...</option>
@@ -421,7 +421,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
 
                                             {/* Info del Préstamo Seleccionado */}
                                             {prestamoSeleccionado && (
-                                                <div className="bg-white p-3 rounded-lg border">
+                                                <div className="bg-white p-3 rounded-xl border">
                                                     <div className="grid grid-cols-2 gap-2 text-sm">
                                                         <div>
                                                             <span className="text-gray-500">Prestatario:</span>
@@ -459,7 +459,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                             <div
                                                                 key={cuota._id}
                                                                 onClick={() => handleCuotaChange(cuota._id)}
-                                                                className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                                                                className={`p-3 rounded-xl border cursor-pointer transition-all ${
                                                                     cuotaSeleccionada?._id === cuota._id
                                                                         ? 'bg-green-100 border-green-500 shadow-md'
                                                                         : 'bg-white border-gray-200 hover:border-green-300 hover:bg-green-50'
@@ -469,7 +469,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                                     <div className="flex items-center">
                                                                         <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mr-3 ${
                                                                             cuotaSeleccionada?._id === cuota._id
-                                                                                ? 'bg-green-600 text-white'
+                                                                                ? 'text-green-700 bg-green-50 border border-green-200'
                                                                                 : 'bg-gray-200 text-gray-700'
                                                                         }`}>
                                                                             {cuota.numeroCuota}
@@ -499,16 +499,16 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                             )}
 
                             {/* Selector de Tipo de Movimiento */}
-                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                            <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
                                 <label className="block text-sm font-semibold text-gray-800 mb-3">
                                     🎯 Tipo de Movimiento *
                                 </label>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div
-                                        className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                                        className={`p-3 border-2 rounded-xl cursor-pointer transition-all ${
                                             formData.tipoMovimiento === 'efectivo'
                                                 ? 'border-green-500 bg-green-50 text-green-800'
-                                                : 'border-gray-300 bg-white hover:border-gray-400'
+                                                : 'border-gray-200 bg-white hover:border-gray-400'
                                         }`}
                                         onClick={() => handleInputChange('tipoMovimiento', 'efectivo')}
                                     >
@@ -519,10 +519,10 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                         </div>
                                     </div>
                                     <div
-                                        className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                                        className={`p-3 border-2 rounded-xl cursor-pointer transition-all ${
                                             formData.tipoMovimiento === 'bancario'
                                                 ? 'border-blue-500 bg-blue-50 text-blue-800'
-                                                : 'border-gray-300 bg-white hover:border-gray-400'
+                                                : 'border-gray-200 bg-white hover:border-gray-400'
                                         }`}
                                         onClick={() => handleInputChange('tipoMovimiento', 'bancario')}
                                     >
@@ -547,7 +547,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                         min="0.1"
                                         value={formData.monto}
                                         onChange={(e) => handleInputChange('monto', e.target.value)}
-                                        className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 font-medium"
+                                        className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 font-medium"
                                         placeholder="0.00"
                                         required
                                         readOnly={formData.categoria === 'cobro_prestamo' && cuotaSeleccionada}
@@ -562,7 +562,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                         type="text"
                                         value={formData.concepto}
                                         onChange={(e) => handleInputChange('concepto', e.target.value)}
-                                        className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                        className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                         placeholder="Concepto del ingreso"
                                         required
                                     />
@@ -577,7 +577,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                 <textarea
                                     value={formData.descripcion}
                                     onChange={(e) => handleInputChange('descripcion', e.target.value)}
-                                    className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                     rows="2"
                                     placeholder="Descripción detallada"
                                 />
@@ -593,7 +593,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                         <select
                                             value={formData.cuentaBancariaId}
                                             onChange={(e) => handleInputChange('cuentaBancariaId', e.target.value)}
-                                            className="w-full px-3 py-2 text-base border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
+                                            className="w-full px-3 py-2 text-base border border-blue-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
                                             required
                                         >
                                             <option value="">Seleccione una cuenta...</option>
@@ -613,7 +613,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                             type="text"
                                             value={formData.detallesAdicionales.numeroOperacion}
                                             onChange={(e) => handleNestedChange('detallesAdicionales.numeroOperacion', e.target.value)}
-                                            className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                             placeholder="Número de operación"
                                         />
                                     </div>
@@ -624,7 +624,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                 <button
                                     type="button"
                                     onClick={() => setMostrarInfoAdicional(!mostrarInfoAdicional)}
-                                    className="flex items-center justify-between w-full px-3 py-2 text-sm font-semibold text-gray-800 bg-gray-50 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
+                                    className="flex items-center justify-between w-full px-3 py-2 text-sm font-semibold text-gray-800 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors"
                                 >
                                     <span className="flex items-center">
                                         📋 Información Adicional (Opcional)
@@ -636,7 +636,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                             </div>
 
                             {mostrarInfoAdicional && (
-                                <div className="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                <div className="space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-800 mb-2">
                                             Cliente
@@ -645,7 +645,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                             type="text"
                                             value={formData.cliente.nombre}
                                             onChange={(e) => handleNestedChange('cliente.nombre', e.target.value)}
-                                            className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                            className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                             placeholder="Nombre del cliente"
                                         />
                                     </div>
@@ -659,7 +659,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                 type="text"
                                                 value={formData.cliente.documento}
                                                 onChange={(e) => handleNestedChange('cliente.documento', e.target.value)}
-                                                className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                                className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                                 placeholder="DNI/RUC"
                                             />
                                         </div>
@@ -672,7 +672,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                 type="text"
                                                 value={formData.cliente.telefono}
                                                 onChange={(e) => handleNestedChange('cliente.telefono', e.target.value)}
-                                                className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                                className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                                 placeholder="Teléfono"
                                             />
                                         </div>
@@ -688,30 +688,30 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                 <textarea
                                     value={formData.observaciones}
                                     onChange={(e) => handleInputChange('observaciones', e.target.value)}
-                                    className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                     rows="2"
                                     placeholder="Observaciones adicionales"
                                 />
                             </div>
 
                             {/* Botones */}
-                            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 mt-4">
+                            <div className="flex justify-end space-x-3 bg-gray-50/50 border-t border-gray-100 px-5 py-3 rounded-b-2xl mt-4">
                                 <button
                                     type="button"
                                     onClick={onClose}
-                                    className="px-4 py-2 text-base font-medium border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                                    className="px-4 py-2 text-base font-medium border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50"
                                     disabled={loading}
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 text-base font-semibold bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center"
+                                    className="px-4 py-2 text-base font-semibold text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 rounded-xl disabled:opacity-50 flex items-center"
                                     disabled={loading}
                                 >
                                     {loading ? (
                                         <>
-                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                            <Loader2 className="animate-spin h-4 w-4 text-green-700 mr-2" />
                                             Registrando...
                                         </>
                                     ) : (
@@ -726,13 +726,13 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
                                     <h3 className="font-semibold text-base text-gray-900">💵 Desglose de Efectivo</h3>
-                                    <div className="bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-bold">
+                                    <div className="text-green-700 bg-green-50 border border-green-200 px-3 py-1 rounded-xl text-sm font-bold">
                                         S/ {totalCalculado.toFixed(2)}
                                     </div>
                                 </div>
 
                                 {/* Billetes */}
-                                <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-3 rounded-lg border">
+                                <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-3 rounded-xl border">
                                     <div className="flex items-center justify-between mb-2">
                                         <h4 className="text-sm font-semibold text-gray-800 flex items-center">
                                             💴 Billetes
@@ -790,7 +790,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                 </div>
 
                                 {/* Monedas */}
-                                <div className="bg-gradient-to-r from-yellow-50 to-amber-50 p-3 rounded-lg border">
+                                <div className="bg-gradient-to-r from-yellow-50 to-amber-50 p-3 rounded-xl border">
                                     <div className="flex items-center justify-between mb-2">
                                         <h4 className="text-sm font-semibold text-gray-800 flex items-center">
                                             🪙 Monedas
@@ -863,7 +863,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                 }
                                             }));
                                         }}
-                                        className="px-3 py-2 bg-gray-500 text-white rounded text-sm font-semibold hover:bg-gray-600 transition-colors flex items-center justify-center"
+                                        className="px-3 py-2 text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center"
                                     >
                                         🗑️ Limpiar
                                     </button>
@@ -903,7 +903,7 @@ const ModalIngresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                 }
                                             }));
                                         }}
-                                        className="px-3 py-2 bg-blue-500 text-white rounded text-sm font-semibold hover:bg-blue-600 transition-colors flex items-center justify-center"
+                                        className="px-3 py-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center"
                                     >
                                         🎯 Auto
                                     </button>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@clerk/clerk-react';
-import { MapPin, Save, Edit3, X, Check, AlertCircle } from 'lucide-react';
+import { MapPin, Save, Edit3, X, Check, AlertCircle, Loader2, Info } from 'lucide-react';
 import MapaPicker from '../mapa/MapaPicker';
 import { ubicacionService } from '../../services/ubicacionService';
 
@@ -110,20 +110,20 @@ const UbicacionPerfil = () => {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <div className="flex items-center gap-2 mb-4">
           <MapPin className="text-blue-600" size={20} />
           <h2 className="text-xl font-semibold text-gray-900">Mi Ubicación</h2>
         </div>
         <div className="flex items-center justify-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <Loader2 size={32} className="animate-spin text-blue-600" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -139,7 +139,7 @@ const UbicacionPerfil = () => {
         {!editing ? (
           <button
             onClick={() => setEditing(true)}
-            className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-1 px-3 py-1.5 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors"
           >
             <Edit3 size={14} />
             {ubicacion?.configurada ? 'Editar' : 'Configurar'}
@@ -148,7 +148,7 @@ const UbicacionPerfil = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={handleCancel}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
             >
               <X size={14} />
               Cancelar
@@ -156,7 +156,7 @@ const UbicacionPerfil = () => {
             <button
               onClick={handleSave}
               disabled={saving || !editData.lat}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl hover:bg-green-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <Save size={14} />
               {saving ? 'Guardando...' : 'Guardar'}
@@ -167,13 +167,13 @@ const UbicacionPerfil = () => {
 
       {/* Mensajes */}
       {error && (
-        <div className="mb-4 px-4 py-2 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm flex items-center gap-2">
+        <div className="mb-4 px-4 py-2 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-center gap-2">
           <AlertCircle size={16} />
           {error}
         </div>
       )}
       {success && (
-        <div className="mb-4 px-4 py-2 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm flex items-center gap-2">
+        <div className="mb-4 px-4 py-2 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm flex items-center gap-2">
           <Check size={16} />
           {success}
         </div>
@@ -182,10 +182,11 @@ const UbicacionPerfil = () => {
       {/* Contenido */}
       {editing ? (
         <div className="space-y-4">
-          <p className="text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
-            💡 Selecciona tu ubicación haciendo click en el mapa, usando el botón "Mi ubicación" o buscando tu dirección. 
-            Tu ubicación será visible para el administrador.
-          </p>
+          <div className="text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-xl px-3 py-2 flex items-start gap-2">
+            <Info size={14} className="text-blue-500 flex-shrink-0 mt-0.5" />
+            <span>Selecciona tu ubicación haciendo click en el mapa, usando el botón "Mi ubicación" o buscando tu dirección. 
+            Tu ubicación será visible para el administrador.</span>
+          </div>
 
           {/* Mapa editable */}
           <MapaPicker
@@ -206,7 +207,7 @@ const UbicacionPerfil = () => {
               <input
                 type="text"
                 placeholder="Ej: Av. Principal 123, Lima"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={editData.direccion}
                 onChange={(e) => setEditData(prev => ({ ...prev, direccion: e.target.value }))}
                 maxLength={300}
@@ -219,7 +220,7 @@ const UbicacionPerfil = () => {
               <input
                 type="text"
                 placeholder="Ej: Frente al parque, 2do piso"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={editData.referencia}
                 onChange={(e) => setEditData(prev => ({ ...prev, referencia: e.target.value }))}
                 maxLength={200}
@@ -267,7 +268,7 @@ const UbicacionPerfil = () => {
         </div>
       ) : (
         /* Estado sin configurar */
-        <div className="text-center py-8 bg-gray-50 rounded-lg">
+        <div className="text-center py-8 bg-gray-50 rounded-xl">
           <MapPin size={48} className="mx-auto text-gray-300 mb-3" />
           <p className="text-gray-600 font-medium">No has configurado tu ubicación</p>
           <p className="text-sm text-gray-500 mt-1">
@@ -275,7 +276,7 @@ const UbicacionPerfil = () => {
           </p>
           <button
             onClick={() => setEditing(true)}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+            className="mt-4 px-4 py-2 text-blue-700 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors text-sm"
           >
             Configurar ubicación
           </button>

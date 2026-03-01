@@ -174,7 +174,7 @@ const PrestamosTable = React.memo(({
     // Loading state
     if (loading) {
         return (
-            <div className="bg-white shadow rounded-lg">
+            <div className="bg-white shadow rounded-xl">
                 <div className="p-6">
                     <div className="animate-pulse">
                         <div className="h-4 bg-gray-200 rounded mb-4"></div>
@@ -192,7 +192,7 @@ const PrestamosTable = React.memo(({
     // Empty state
     if (isEmpty) {
         return (
-            <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+            <div className="bg-white shadow rounded-xl p-4 sm:p-6">
                 <div className="text-center py-8 sm:py-12">
                     <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">📋</div>
                     <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
@@ -211,7 +211,7 @@ const PrestamosTable = React.memo(({
         const esOtorgado = esPrestamoOtorgado(prestamo);
         
         return (
-            <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm">
+            <div className="bg-white border border-gray-200 rounded-xl p-3 sm:p-4 shadow-sm">
                 {/* Header con tipo y estado */}
                 <div className="flex items-start justify-between mb-2 sm:mb-3">
                     <div className="flex-1 min-w-0">
@@ -319,7 +319,7 @@ const PrestamosTable = React.memo(({
             </div>
 
             {/* Vista desktop: Tabla */}
-            <div className="hidden lg:block bg-white shadow rounded-lg overflow-hidden">
+            <div className="hidden lg:block bg-white shadow rounded-xl overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
@@ -362,21 +362,21 @@ const PrestamosTable = React.memo(({
                             <p className="text-sm text-gray-700">
                                 {paginacion.mensaje}
                             </p>
-                            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                            <nav className="relative z-0 inline-flex rounded-xl shadow-sm -space-x-px">
                                 <button
                                     onClick={() => onCambiarPagina(paginacion.paginaActual - 1)}
                                     disabled={!paginacion.hayAnterior}
-                                    className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                                    className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-200 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                                 >
                                     ←
                                 </button>
-                                <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                                <span className="relative inline-flex items-center px-4 py-2 border border-gray-200 bg-white text-sm font-medium text-gray-700">
                                     Página {paginacion.paginaActual} de {paginacion.totalPaginas}
                                 </span>
                                 <button
                                     onClick={() => onCambiarPagina(paginacion.paginaActual + 1)}
                                     disabled={!paginacion.haySiguiente}
-                                    className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                                    className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-200 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                                 >
                                     →
                                 </button>
@@ -388,12 +388,12 @@ const PrestamosTable = React.memo(({
 
             {/* PAGINACIÓN Móvil - fuera de la tabla */}
             {paginacion.totalPaginas > 1 && (
-                <div className="block lg:hidden bg-white rounded-lg shadow px-3 py-3 mt-3">
+                <div className="block lg:hidden bg-white rounded-xl shadow px-3 py-3 mt-3">
                     <div className="flex items-center justify-between">
                         <button
                             onClick={() => onCambiarPagina(paginacion.paginaActual - 1)}
                             disabled={!paginacion.hayAnterior}
-                            className="px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-3 py-1.5 text-xs font-medium rounded-xl border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             ← Anterior
                         </button>
@@ -403,7 +403,7 @@ const PrestamosTable = React.memo(({
                         <button
                             onClick={() => onCambiarPagina(paginacion.paginaActual + 1)}
                             disabled={!paginacion.haySiguiente}
-                            className="px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-3 py-1.5 text-xs font-medium rounded-xl border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Siguiente →
                         </button>

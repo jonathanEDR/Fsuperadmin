@@ -1,4 +1,5 @@
 import React, { memo, useCallback, useMemo } from 'react';
+import { ArrowUp, ArrowDown, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, Landmark } from 'lucide-react';
 import CuentaBancariaRow from './CuentaBancariaRow';
 
 /**
@@ -69,7 +70,7 @@ const CuentasBancariasTable = memo(({
                             >
                                 {column.label}
                                 {sortConfig.field === column.key && (
-                                    <i className={`fas fa-sort-${sortConfig.direction === 'asc' ? 'up' : 'down'} ml-1`}></i>
+                                    sortConfig.direction === 'asc' ? <ArrowUp size={12} className="ml-1" /> : <ArrowDown size={12} className="ml-1" />
                                 )}
                             </button>
                         ) : (
@@ -105,7 +106,7 @@ const CuentasBancariasTable = memo(({
                             onClick={() => onPageChange(1)}
                             disabled={currentPage === 1 || loading}
                         >
-                            <i className="fas fa-angle-double-left"></i>
+                            <ChevronsLeft size={16} />
                         </button>
                     </li>
                     <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
@@ -114,7 +115,7 @@ const CuentasBancariasTable = memo(({
                             onClick={() => onPageChange(currentPage - 1)}
                             disabled={currentPage === 1 || loading}
                         >
-                            <i className="fas fa-angle-left"></i>
+                            <ChevronLeft size={16} />
                         </button>
                     </li>
                     
@@ -136,7 +137,7 @@ const CuentasBancariasTable = memo(({
                             onClick={() => onPageChange(currentPage + 1)}
                             disabled={currentPage === totalPages || loading}
                         >
-                            <i className="fas fa-angle-right"></i>
+                            <ChevronRight size={16} />
                         </button>
                     </li>
                     <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
@@ -145,7 +146,7 @@ const CuentasBancariasTable = memo(({
                             onClick={() => onPageChange(totalPages)}
                             disabled={currentPage === totalPages || loading}
                         >
-                            <i className="fas fa-angle-double-right"></i>
+                            <ChevronsRight size={16} />
                         </button>
                     </li>
                 </ul>
@@ -188,7 +189,7 @@ const CuentasBancariasTable = memo(({
                                 <tr>
                                     <td colSpan={tableColumns.length} className="text-center py-4">
                                         <div className="text-gray-500">
-                                            <i className="fas fa-university fa-2x mb-3"></i>
+                                            <Landmark size={32} className="mb-3" />
                                             <p className="mb-0">No se encontraron cuentas bancarias</p>
                                         </div>
                                     </td>

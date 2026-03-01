@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Loader2, Plus, Search, BarChart3, Eye, Pencil, Trash2, Play, Pause, RotateCcw, ChevronRight, Beaker, CheckCircle, Clock, FlaskConical, Flag, FileText, AlertTriangle, ChefHat } from 'lucide-react';
 import AccesosRapidosProduccion from '../AccesosRapidosProduccion';
 import BreadcrumbProduccion from '../BreadcrumbProduccion';
 import { recetaService } from '../../../services/recetaService';
@@ -368,49 +369,51 @@ const GestionRecetas = () => {
     }
   };
 
-  // Obtener emoji por fase
-  const obtenerEmojiFase = (fase) => {
+  // Obtener icono Lucide por fase
+  const obtenerIconoFase = (fase, size = 14) => {
     switch (fase) {
-      case 'preparado': return '🥄';
-      case 'intermedio': return '⚗️';
-      case 'terminado': return '✅';
-      default: return '📋';
+      case 'preparado': return <Beaker size={size} />;
+      case 'intermedio': return <FlaskConical size={size} />;
+      case 'terminado': return <CheckCircle size={size} />;
+      default: return <FileText size={size} />;
     }
   };
 
-  // Obtener emoji por estado
-  const obtenerEmojiEstado = (estado) => {
+  // Obtener icono por estado
+  const obtenerIconoEstado = (estado, size = 14) => {
     switch (estado) {
-      case 'borrador': return '📝';
-      case 'en_proceso': return '⚙️';
-      case 'completado': return '✅';
-      case 'pausado': return '⏸️';
-      default: return '📋';
+      case 'borrador': return <FileText size={size} />;
+      case 'en_proceso': return <Play size={size} />;
+      case 'completado': return <CheckCircle size={size} />;
+      case 'pausado': return <Pause size={size} />;
+      default: return <FileText size={size} />;
     }
   };
 
-  // Obtener color del botón según la fase
+  // Obtener icono para la siguiente fase
+  const obtenerIconoSiguienteFase = (siguienteFase, size = 14) => {
+    switch (siguienteFase) {
+      case 'producto_intermedio': return <FlaskConical size={size} />;
+      case 'producto_terminado': return <Flag size={size} />;
+      default: return <ChevronRight size={size} />;
+    }
+  };
+
+  // Obtener color del botón outline según la fase
   const obtenerColorBotonFase = (siguienteFase) => {
     switch (siguienteFase) {
       case 'producto_intermedio':
-        return 'bg-yellow-600 hover:bg-yellow-700'; // Amarillo para intermedio
+        return 'text-yellow-700 bg-yellow-50 border border-yellow-200 hover:bg-yellow-100';
       case 'producto_terminado':
-        return 'bg-green-600 hover:bg-green-700';   // Verde para terminado
+        return 'text-green-700 bg-green-50 border border-green-200 hover:bg-green-100';
       default:
-        return 'bg-blue-600 hover:bg-blue-700';     // Azul por defecto
+        return 'text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100';
     }
   };
 
-  // Obtener emoji para la siguiente fase
+  // Obtener icono para la siguiente fase (inline helper kept)
   const obtenerEmojiSiguienteFase = (siguienteFase) => {
-    switch (siguienteFase) {
-      case 'producto_intermedio':
-        return '⚗️';
-      case 'producto_terminado':
-        return '🏁';
-      default:
-        return '⏭️';
-    }
+    return obtenerIconoSiguienteFase(siguienteFase, 14);
   };
 
   // Normalizar categoría para comparaciones internas
@@ -462,7 +465,7 @@ const GestionRecetas = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <Loader2 size={48} className="animate-spin text-blue-600" />
       </div>
     );
   }
@@ -478,42 +481,43 @@ const GestionRecetas = () => {
         {canManageRecetas && (
           <button
             onClick={handleNuevaReceta}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-colors w-full sm:w-auto font-medium text-sm sm:text-base"
+            className="flex items-center justify-center gap-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 px-4 py-2.5 rounded-xl transition-colors w-full sm:w-auto font-medium text-sm sm:text-base"
           >
-            ➕ Nueva Receta
+            <Plus size={16} /> Nueva Receta
           </button>
         )}
       </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded text-sm sm:text-base">
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm sm:text-base flex items-center gap-2">
+          <AlertTriangle size={16} className="flex-shrink-0" />
           {error}
         </div>
       )}
 
-      {/* 🎯 SUPER OPTIMIZADO: Filtros ultra compactos - máximo 2 filas */}
-      <div className="bg-white p-3 sm:p-4 rounded-lg shadow mb-6">
+      {/* Filtros */}
+      <div className="bg-white p-3 sm:p-4 rounded-2xl shadow-xl border border-gray-100 mb-6">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="col-span-2 sm:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              🔍 Buscar Receta
+            <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1">
+              <Search size={14} /> Buscar Receta
             </label>
             <input
               type="text"
               value={filtros.buscar}
               onChange={(e) => handleFiltroChange('buscar', e.target.value)}
               placeholder="Nombre de la receta..."
-              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
           <div className="col-span-2 sm:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              📊 Estado
+            <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1">
+              <BarChart3 size={14} /> Estado
             </label>
             <select
               value={filtros.activo}
               onChange={(e) => handleFiltroChange('activo', e.target.value === 'true')}
-              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
             >
               <option value="true">Activas</option>
               <option value="false">Inactivas</option>
@@ -522,203 +526,127 @@ const GestionRecetas = () => {
         </div>
       </div>
 
-      {/* Lista de Recetas con Flujo de Trabajo */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      {/* ========== VISTA MÓVIL: Tarjetas compactas ========== */}
+      <div className="md:hidden space-y-3">
         {recetas.map((receta) => {
-          // 🎯 CORRECCIÓN: Usar categoria como fuente de verdad principal
           const categoriaOriginal = receta.categoria || 'preparado';
           const faseNormalizada = normalizarCategoria(categoriaOriginal);
           const estadoProceso = receta.estadoProceso || 'borrador';
           const siguienteFase = obtenerSiguienteFase(receta);
           const puedeAvanzar = puedeAvanzarFase(receta);
+          const disponible = (receta.inventario?.cantidadProducida || 0) - (receta.inventario?.cantidadUtilizada || 0);
 
           return (
-            <div key={receta._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
-              
-              {/* Header con nombre y fase */}
-              <div className="bg-gradient-to-r from-blue-50 to-gray-50 px-4 py-3">
-                <div className="flex justify-between items-start">
-                  <h3 className="font-semibold text-gray-900 text-lg leading-tight">
-                    {receta.nombre}
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{obtenerEmojiFase(faseNormalizada)}</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium border ${obtenerColorPorFase(faseNormalizada)}`}>
+            <div key={receta._id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+              {/* Header */}
+              <div className="px-4 py-3 border-b border-gray-100">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-semibold text-gray-900 text-base flex-1 mr-2">{receta.nombre}</h3>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium border ${obtenerColorPorFase(faseNormalizada)}`}>
+                      {obtenerIconoFase(faseNormalizada, 12)}
                       {categoriaOriginal.replace('producto_', '').toUpperCase()}
                     </span>
                   </div>
                 </div>
-                
-                {/* Estado del proceso */}
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-sm">{obtenerEmojiEstado(estadoProceso)}</span>
-                  <span className={`text-xs px-2 py-1 rounded ${
-                    estadoProceso === 'completado' ? 'bg-green-100 text-green-700' :
-                    estadoProceso === 'en_proceso' ? 'bg-blue-100 text-blue-700' :
-                    estadoProceso === 'pausado' ? 'bg-orange-100 text-orange-700' :
-                    'bg-gray-100 text-gray-700'
-                  }`}>
-                    {estadoProceso.replace('_', ' ').toUpperCase()}
-                  </span>
+                <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-lg ${
+                  estadoProceso === 'completado' ? 'bg-green-50 text-green-700 border border-green-200' :
+                  estadoProceso === 'en_proceso' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                  estadoProceso === 'pausado' ? 'bg-orange-50 text-orange-700 border border-orange-200' :
+                  'bg-gray-50 text-gray-700 border border-gray-200'
+                }`}>
+                  {obtenerIconoEstado(estadoProceso, 12)}
+                  {estadoProceso.replace('_', ' ').toUpperCase()}
+                </span>
+              </div>
+
+              <div className="p-4">
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  <div className="bg-gray-50/60 rounded-xl border border-gray-100 p-2 text-center">
+                    <p className="text-xs text-gray-500 flex items-center justify-center gap-1"><Clock size={10} /> Prep.</p>
+                    <p className="text-sm font-bold text-gray-800">{receta.tiempoPreparacion || 0}m</p>
+                  </div>
+                  <div className="bg-gray-50/60 rounded-xl border border-gray-100 p-2 text-center">
+                    <p className="text-xs text-gray-500 flex items-center justify-center gap-1"><Beaker size={10} /> Ingr.</p>
+                    <p className="text-sm font-bold text-gray-800">{receta.ingredientes?.length || 0}</p>
+                  </div>
+                  <div className="bg-gray-50/60 rounded-xl border border-gray-100 p-2 text-center">
+                    <p className="text-xs text-gray-500">Disp.</p>
+                    <p className={`text-sm font-bold ${disponible > 0 ? 'text-green-600' : 'text-gray-500'}`}>{disponible}</p>
+                  </div>
                 </div>
-                
+
                 {/* Progreso visual */}
                 <div className="mb-3">
-                  <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                    <span>Prep.</span>
-                    <span>Inter.</span>
-                    <span>Term.</span>
+                  <div className="flex items-center justify-between text-[10px] text-gray-400 mb-0.5">
+                    <span>Prep.</span><span>Inter.</span><span>Term.</span>
                   </div>
-                  <div className="flex gap-1">
+                  <div className="flex gap-0.5">
                     {['preparado', 'intermedio', 'terminado'].map((fase, index) => (
-                      <div
-                        key={fase}
-                        className={`flex-1 h-2 rounded ${
-                          estadoProceso === 'completado' && faseNormalizada === 'terminado'
-                            ? 'bg-green-400'
-                            : faseNormalizada === fase
-                            ? 'bg-blue-400'
-                            : index < ['preparado', 'intermedio', 'terminado'].indexOf(faseNormalizada)
-                            ? 'bg-green-300'
-                            : 'bg-gray-200'
-                        }`}
-                      />
+                      <div key={fase} className={`flex-1 h-1.5 rounded ${
+                        estadoProceso === 'completado' && faseNormalizada === 'terminado' ? 'bg-green-400' :
+                        faseNormalizada === fase ? 'bg-blue-400' :
+                        index < ['preparado', 'intermedio', 'terminado'].indexOf(faseNormalizada) ? 'bg-green-300' : 'bg-gray-200'
+                      }`} />
                     ))}
                   </div>
                 </div>
-              </div>
 
-              {/* Información de la receta */}
-              <div className="p-4">
-                {receta.descripcion && (
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                    {receta.descripcion}
-                  </p>
+                {/* Acción principal de flujo */}
+                {estadoProceso === 'borrador' && (
+                  <button onClick={() => handleIniciarProceso(receta._id)}
+                    className="w-full flex items-center justify-center gap-2 text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 px-3 py-2 rounded-xl transition-colors text-sm font-medium mb-2">
+                    <Play size={14} /> Iniciar Proceso
+                  </button>
+                )}
+                {puedeAvanzar && (
+                  <button onClick={() => handleAbrirModalAvanzar(receta)}
+                    className={`w-full flex items-center justify-center gap-2 ${obtenerColorBotonFase(siguienteFase)} px-3 py-2 rounded-xl transition-colors text-sm font-medium mb-2`}>
+                    {obtenerEmojiSiguienteFase(siguienteFase)} Avanzar a {siguienteFase?.replace('producto_', '').toUpperCase()}
+                  </button>
+                )}
+                {estadoProceso === 'en_proceso' && !puedeAvanzar && faseNormalizada !== 'terminado' && (
+                  <button onClick={() => handlePausarProceso(receta._id)}
+                    className="w-full flex items-center justify-center gap-2 text-orange-700 bg-orange-50 border border-orange-200 hover:bg-orange-100 px-3 py-2 rounded-xl transition-colors text-sm font-medium mb-2">
+                    <Pause size={14} /> Pausar
+                  </button>
+                )}
+                {estadoProceso === 'pausado' && (
+                  <button onClick={() => handleReanudarProceso(receta._id)}
+                    className="w-full flex items-center justify-center gap-2 text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100 px-3 py-2 rounded-xl transition-colors text-sm font-medium mb-2">
+                    <Play size={14} /> Reanudar
+                  </button>
+                )}
+                {estadoProceso === 'completado' && (
+                  <div className="w-full flex items-center justify-center gap-2 bg-green-50 text-green-700 border border-green-200 px-3 py-2 rounded-xl text-sm font-medium mb-2">
+                    <CheckCircle size={14} /> Completado
+                  </div>
                 )}
 
-                {/* Detalles de la receta */}
-                <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
-                  <div>
-                    <span className="text-gray-500">⏱️ Preparación:</span>
-                    <p className="font-medium">{receta.tiempoPreparacion || 0} min</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">📦 Rendimiento:</span>
-                    <p className="font-medium">
-                      {receta.rendimiento?.cantidad || 1} {receta.rendimiento?.unidadMedida || 'unidad'}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">🧪 Ingredientes:</span>
-                    <p className="font-medium">{receta.ingredientes?.length || 0}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">📈 Disponible:</span>
-                    <div className="flex items-center gap-1">
-                      <span className={`font-medium ${
-                        (receta.inventario?.cantidadProducida || 0) - (receta.inventario?.cantidadUtilizada || 0) > 0 
-                          ? 'text-green-600' 
-                          : 'text-gray-500'
-                      }`}>
-                        {(receta.inventario?.cantidadProducida || 0) - (receta.inventario?.cantidadUtilizada || 0)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Botones de acción del flujo de trabajo */}
-                <div className="space-y-2 mb-4">
-                  {estadoProceso === 'borrador' && (
-                    <button
-                      onClick={() => handleIniciarProceso(receta._id)}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
-                    >
-                      <span>🚀</span>
-                      <span>Iniciar Proceso</span>
-                    </button>
-                  )}
-                  
-                  {puedeAvanzar && (
-                    <button
-                      onClick={() => handleAbrirModalAvanzar(receta)}
-                      className={`w-full ${obtenerColorBotonFase(siguienteFase)} text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2`}
-                    >
-                      <span>{obtenerEmojiSiguienteFase(siguienteFase)}</span>
-                      <span>Avanzar a {siguienteFase?.replace('producto_', '').toUpperCase()}</span>
-                    </button>
-                  )}
-                  
-                  {estadoProceso === 'en_proceso' && !puedeAvanzar && faseNormalizada !== 'terminado' && (
-                    <button
-                      onClick={() => handlePausarProceso(receta._id)}
-                      className="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
-                    >
-                      <span>⏸️</span>
-                      <span>Pausar Proceso</span>
-                    </button>
-                  )}
-                  
-                  {estadoProceso === 'pausado' && (
-                    <button
-                      onClick={() => handleReanudarProceso(receta._id)}
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
-                    >
-                      <span>▶️</span>
-                      <span>Reanudar Proceso</span>
-                    </button>
-                  )}
-                  
-                  {estadoProceso === 'completado' && (
-                    <div className="w-full bg-green-100 text-green-800 px-4 py-2 rounded-lg text-center font-medium">
-                      ✅ Proceso Completado
-                    </div>
-                  )}
-                </div>
-
-                {/* 🎯 OPTIMIZADO: Botones compactos para móvil - 2 filas máximo */}
-                <div className="pt-2 border-t space-y-2">
-                  {/* Fila 1: Botones principales */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => handleVerReceta(receta)}
-                      className="text-blue-600 hover:text-blue-800 text-xs sm:text-sm font-medium py-1 px-2 border border-blue-200 rounded hover:bg-blue-50 transition-colors"
-                    >
-                      👁️ Ver
-                    </button>
-                    {/* Solo admin o superior puede editar recetas */}
-                    {canManageRecetas && (
-                      <button
-                        onClick={() => handleEditarReceta(receta)}
-                        className="text-green-600 hover:text-green-800 text-xs sm:text-sm font-medium py-1 px-2 border border-green-200 rounded hover:bg-green-50 transition-colors"
-                      >
-                        ✏️ Editar
-                      </button>
-                    )}
-                  </div>
-                  
-                  {/* Fila 2: Botones secundarios (solo si tiene permisos) */}
+                {/* Acciones secundarias */}
+                <div className="flex items-center gap-1.5 pt-2 border-t border-gray-100">
+                  <button onClick={() => handleVerReceta(receta)}
+                    className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl text-xs font-medium transition-colors">
+                    <Eye size={12} /> Ver
+                  </button>
                   {canManageRecetas && (
-                    <div className="grid grid-cols-2 gap-2">
-                      {receta.estadoProceso !== 'borrador' && (
-                        <button
-                          onClick={() => handleReiniciarRecetaTarjeta(receta)}
-                          disabled={loading}
-                          className="px-2 py-1 bg-orange-100 text-orange-700 border border-orange-300 rounded text-xs sm:text-sm font-medium hover:bg-orange-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                          title="Reiniciar receta al estado preparado"
-                        >
-                          🔄 Reiniciar
-                        </button>
-                      )}
-                      {/* Solo admin puede eliminar */}
-                      {canDeleteProduccion && (
-                        <button
-                          onClick={() => handleEliminar(receta._id)}
-                          className="text-red-600 hover:text-red-800 text-xs sm:text-sm font-medium py-1 px-2 border border-red-200 rounded hover:bg-red-50 transition-colors"
-                        >
-                          🗑️ Eliminar
-                        </button>
-                      )}
-                    </div>
+                    <button onClick={() => handleEditarReceta(receta)}
+                      className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 rounded-xl text-xs font-medium transition-colors">
+                      <Pencil size={12} /> Editar
+                    </button>
+                  )}
+                  {canManageRecetas && receta.estadoProceso !== 'borrador' && (
+                    <button onClick={() => handleReiniciarRecetaTarjeta(receta)} disabled={loading}
+                      className="px-2 py-1.5 text-orange-700 bg-orange-50 border border-orange-200 hover:bg-orange-100 rounded-xl text-xs font-medium transition-colors disabled:opacity-50">
+                      <RotateCcw size={12} />
+                    </button>
+                  )}
+                  {canDeleteProduccion && (
+                    <button onClick={() => handleEliminar(receta._id)}
+                      className="px-2 py-1.5 text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 rounded-xl text-xs font-medium transition-colors">
+                      <Trash2 size={12} />
+                    </button>
                   )}
                 </div>
               </div>
@@ -727,9 +655,163 @@ const GestionRecetas = () => {
         })}
       </div>
 
+      {/* ========== VISTA DESKTOP: Tabla ========== */}
+      <div className="hidden md:block bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gradient-to-r from-slate-50 to-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Receta</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Progreso</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Prep.</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Ingr.</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Rend.</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Disp.</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Flujo</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-100">
+              {recetas.map((receta) => {
+                const categoriaOriginal = receta.categoria || 'preparado';
+                const faseNormalizada = normalizarCategoria(categoriaOriginal);
+                const estadoProceso = receta.estadoProceso || 'borrador';
+                const siguienteFase = obtenerSiguienteFase(receta);
+                const puedeAvanzar = puedeAvanzarFase(receta);
+                const disponible = (receta.inventario?.cantidadProducida || 0) - (receta.inventario?.cantidadUtilizada || 0);
+
+                return (
+                  <tr key={receta._id} className="hover:bg-gray-50/50 transition-colors">
+                    {/* Receta */}
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-gray-900 text-sm">{receta.nombre}</div>
+                      {receta.descripcion && (
+                        <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">{receta.descripcion}</p>
+                      )}
+                    </td>
+                    {/* Categoría */}
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium border ${obtenerColorPorFase(faseNormalizada)}`}>
+                        {obtenerIconoFase(faseNormalizada, 12)}
+                        {categoriaOriginal.replace('producto_', '')}
+                      </span>
+                    </td>
+                    {/* Estado */}
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-lg font-medium ${
+                        estadoProceso === 'completado' ? 'bg-green-50 text-green-700 border border-green-200' :
+                        estadoProceso === 'en_proceso' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                        estadoProceso === 'pausado' ? 'bg-orange-50 text-orange-700 border border-orange-200' :
+                        'bg-gray-50 text-gray-700 border border-gray-200'
+                      }`}>
+                        {obtenerIconoEstado(estadoProceso, 12)}
+                        {estadoProceso.replace('_', ' ')}
+                      </span>
+                    </td>
+                    {/* Progreso */}
+                    <td className="px-4 py-3">
+                      <div className="flex gap-0.5 w-20 mx-auto">
+                        {['preparado', 'intermedio', 'terminado'].map((fase, index) => (
+                          <div key={fase} className={`flex-1 h-1.5 rounded ${
+                            estadoProceso === 'completado' && faseNormalizada === 'terminado' ? 'bg-green-400' :
+                            faseNormalizada === fase ? 'bg-blue-400' :
+                            index < ['preparado', 'intermedio', 'terminado'].indexOf(faseNormalizada) ? 'bg-green-300' : 'bg-gray-200'
+                          }`} />
+                        ))}
+                      </div>
+                    </td>
+                    {/* Preparación */}
+                    <td className="px-4 py-3 text-center text-sm text-gray-700">{receta.tiempoPreparacion || 0}m</td>
+                    {/* Ingredientes */}
+                    <td className="px-4 py-3 text-center text-sm text-gray-700">{receta.ingredientes?.length || 0}</td>
+                    {/* Rendimiento */}
+                    <td className="px-4 py-3 text-center text-sm text-gray-700">
+                      {receta.rendimiento?.cantidad || 1} {receta.rendimiento?.unidadMedida || 'u'}
+                    </td>
+                    {/* Disponible */}
+                    <td className="px-4 py-3 text-center">
+                      <span className={`text-sm font-medium ${disponible > 0 ? 'text-green-600' : 'text-gray-400'}`}>{disponible}</span>
+                    </td>
+                    {/* Flujo de trabajo */}
+                    <td className="px-4 py-3 text-center">
+                      {estadoProceso === 'borrador' && (
+                        <button onClick={() => handleIniciarProceso(receta._id)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 rounded-xl text-xs font-medium transition-colors"
+                          title="Iniciar proceso">
+                          <Play size={12} /> Iniciar
+                        </button>
+                      )}
+                      {puedeAvanzar && (
+                        <button onClick={() => handleAbrirModalAvanzar(receta)}
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 ${obtenerColorBotonFase(siguienteFase)} rounded-xl text-xs font-medium transition-colors`}
+                          title={`Avanzar a ${siguienteFase?.replace('producto_', '')}`}>
+                          {obtenerEmojiSiguienteFase(siguienteFase)} Avanzar
+                        </button>
+                      )}
+                      {estadoProceso === 'en_proceso' && !puedeAvanzar && faseNormalizada !== 'terminado' && (
+                        <button onClick={() => handlePausarProceso(receta._id)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 text-orange-700 bg-orange-50 border border-orange-200 hover:bg-orange-100 rounded-xl text-xs font-medium transition-colors"
+                          title="Pausar proceso">
+                          <Pause size={12} /> Pausar
+                        </button>
+                      )}
+                      {estadoProceso === 'pausado' && (
+                        <button onClick={() => handleReanudarProceso(receta._id)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100 rounded-xl text-xs font-medium transition-colors"
+                          title="Reanudar proceso">
+                          <Play size={12} /> Reanudar
+                        </button>
+                      )}
+                      {estadoProceso === 'completado' && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-50 text-green-700 border border-green-200 rounded-xl text-xs font-medium">
+                          <CheckCircle size={12} /> Listo
+                        </span>
+                      )}
+                    </td>
+                    {/* Acciones */}
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1">
+                        <button onClick={() => handleVerReceta(receta)} title="Ver"
+                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                          <Eye size={16} />
+                        </button>
+                        {canManageRecetas && (
+                          <button onClick={() => handleEditarReceta(receta)} title="Editar"
+                            className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors">
+                            <Pencil size={16} />
+                          </button>
+                        )}
+                        {canManageRecetas && receta.estadoProceso !== 'borrador' && (
+                          <button onClick={() => handleReiniciarRecetaTarjeta(receta)} disabled={loading} title="Reiniciar"
+                            className="p-1.5 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors disabled:opacity-50">
+                            <RotateCcw size={16} />
+                          </button>
+                        )}
+                        {canDeleteProduccion && (
+                          <button onClick={() => handleEliminar(receta._id)} title="Eliminar"
+                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {recetas.length === 0 && (
-        <div className="text-center py-12">
-          <div className="text-gray-400 text-6xl mb-4">📋</div>
+        <div className="text-center py-12 bg-white rounded-2xl shadow-xl border border-gray-100">
+          <div className="flex justify-center mb-4">
+            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+              <ChefHat size={48} className="text-gray-300" />
+            </div>
+          </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             No hay recetas
           </h3>
@@ -739,9 +821,9 @@ const GestionRecetas = () => {
           {canManageRecetas && (
             <button
               onClick={handleNuevaReceta}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+              className="inline-flex items-center gap-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 px-4 py-2 rounded-xl transition-colors font-medium"
             >
-              Crear Primera Receta
+              <Plus size={16} /> Crear Primera Receta
             </button>
           )}
         </div>

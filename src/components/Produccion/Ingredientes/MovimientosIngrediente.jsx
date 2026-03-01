@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { X, Loader2, ArrowUp, ArrowDown, Scale, Factory, RefreshCw, ClipboardList } from 'lucide-react';
 import { ingredienteService } from '../../../services/ingredienteService';
 
 const MovimientosIngrediente = ({ ingrediente, onCerrar }) => {
@@ -47,33 +48,41 @@ const MovimientosIngrediente = ({ ingrediente, onCerrar }) => {
 
   const getTipoIcono = (tipo) => {
     const iconos = {
-      entrada: '⬆️',
-      salida: '⬇️',
-      ajuste: '⚖️',
-      produccion: '🏭',
-      consumo: '🔄'
+      entrada: ArrowUp,
+      salida: ArrowDown,
+      ajuste: Scale,
+      produccion: Factory,
+      consumo: RefreshCw
     };
-    return iconos[tipo] || '📋';
+    const IconComponent = iconos[tipo] || ClipboardList;
+    return <IconComponent size={18} />;
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-10 mx-auto p-5 border w-11/12 md:w-4/5 lg:w-3/4 shadow-lg rounded-md bg-white">
-        <div className="mt-3">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-medium text-gray-900">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+      <div className="relative top-10 mx-auto w-11/12 md:w-4/5 lg:w-3/4 rounded-2xl shadow-xl border border-gray-100 bg-white flex flex-col overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-5 py-4 rounded-t-2xl">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-purple-100 rounded-lg border border-purple-200">
+              <ClipboardList size={18} className="text-purple-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">
               Historial de Movimientos - {ingrediente.nombre}
             </h3>
-            <button
-              onClick={onCerrar}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              ✕
-            </button>
           </div>
+          <button
+            onClick={onCerrar}
+            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="p-5">
 
           {/* Información del ingrediente */}
-          <div className="bg-gray-50 p-4 rounded-lg mb-4">
+          <div className="bg-gray-50/60 p-4 rounded-xl border border-gray-100 mb-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
                 <span className="text-gray-600">Unidad:</span>
@@ -103,7 +112,7 @@ const MovimientosIngrediente = ({ ingrediente, onCerrar }) => {
               <select
                 value={limite}
                 onChange={(e) => setLimite(parseInt(e.target.value))}
-                className="border border-gray-300 rounded px-2 py-1 text-sm"
+                className="border border-gray-200 rounded-xl px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
               >
                 <option value={25}>25</option>
                 <option value={50}>50</option>
@@ -113,21 +122,21 @@ const MovimientosIngrediente = ({ ingrediente, onCerrar }) => {
             </div>
             <button
               onClick={cargarMovimientos}
-              className="text-blue-600 hover:text-blue-800 text-sm"
+              className="flex items-center gap-1.5 text-blue-600 hover:text-blue-800 text-sm font-medium"
             >
-              🔄 Actualizar
+              <RefreshCw size={14} /> Actualizar
             </button>
           </div>
 
           {error && (
-            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl">
               {error}
             </div>
           )}
 
           {loading ? (
             <div className="flex justify-center items-center h-32">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <Loader2 size={32} className="animate-spin text-blue-600" />
             </div>
           ) : (
             <div className="max-h-96 overflow-y-auto">
@@ -140,7 +149,7 @@ const MovimientosIngrediente = ({ ingrediente, onCerrar }) => {
                   {movimientos.map((movimiento, index) => (
                     <div
                       key={movimiento._id || index}
-                      className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50"
+                      className="border border-gray-200 rounded-xl p-4 hover:bg-gray-50"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -206,7 +215,7 @@ const MovimientosIngrediente = ({ ingrediente, onCerrar }) => {
           <div className="flex justify-end mt-6">
             <button
               onClick={onCerrar}
-              className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+              className="px-4 py-2 text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl transition-colors font-medium"
             >
               Cerrar
             </button>

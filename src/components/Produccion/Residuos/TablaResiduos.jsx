@@ -1,4 +1,5 @@
 import React from 'react';
+import { Loader2, Trash2, Eye, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { residuoService } from '../../../services/residuoService';
 
 // Función para verificar si puede eliminar usando zona horaria de Perú
@@ -24,9 +25,9 @@ const TablaResiduos = ({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow">
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100">
         <div className="p-8 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto" />
           <p className="mt-2 text-gray-500">Cargando residuos...</p>
         </div>
       </div>
@@ -34,12 +35,12 @@ const TablaResiduos = ({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
       {/* ========== VISTA MÓVIL: Tarjetas ========== */}
       <div className="md:hidden space-y-3 p-3">
         {residuos.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">🗑️</div>
+            <Trash2 size={48} className="mx-auto text-gray-300 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               No hay residuos registrados
             </h3>
@@ -91,7 +92,7 @@ const TablaResiduos = ({
               {/* Info adicional */}
               <div className="text-xs text-gray-500 mb-3 px-1">
                 <div className="flex items-center justify-between">
-                  <span>👤 {residuo.operador}</span>
+                  <span className="flex items-center gap-1"><User size={12} /> {residuo.operador}</span>
                 </div>
                 {residuo.observaciones && (
                   <p className="mt-1 text-gray-600 italic truncate">
@@ -138,7 +139,7 @@ const TablaResiduos = ({
       {/* ========== VISTA DESKTOP: Tabla ========== */}
       <div className="hidden md:block overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+            <thead className="bg-gradient-to-r from-slate-50 to-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Fecha
@@ -250,7 +251,7 @@ const TablaResiduos = ({
       {/* Estado vacío - solo para desktop ya que móvil tiene su propio estado vacío */}
       {residuos.length === 0 && !loading && (
         <div className="hidden md:block text-center py-12">
-          <div className="text-6xl mb-4">🗑️</div>
+          <Trash2 size={48} className="mx-auto text-gray-300 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             No hay residuos registrados
           </h3>
@@ -261,7 +262,7 @@ const TablaResiduos = ({
       )}
       {residuos.length === 0 && !loading && (
         <div className="text-center py-12">
-          <div className="text-6xl mb-4">🗑️</div>
+          <Trash2 size={48} className="mx-auto text-gray-300 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             No hay residuos registrados
           </h3>
@@ -278,14 +279,14 @@ const TablaResiduos = ({
             <button
               onClick={() => onCambiarPagina(Math.max(1, filtros.pagina - 1))}
               disabled={filtros.pagina === 1}
-              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
             >
               Anterior
             </button>
             <button
               onClick={() => onCambiarPagina(Math.min(totalPaginas, filtros.pagina + 1))}
               disabled={filtros.pagina === totalPaginas}
-              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
             >
               Siguiente
             </button>
@@ -302,9 +303,9 @@ const TablaResiduos = ({
                 <button
                   onClick={() => onCambiarPagina(Math.max(1, filtros.pagina - 1))}
                   disabled={filtros.pagina === 1}
-                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-xl border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                 >
-                  ←
+                  <ChevronLeft size={16} />
                 </button>
                 
                 {Array.from({ length: Math.min(5, totalPaginas) }, (_, i) => {
@@ -337,9 +338,9 @@ const TablaResiduos = ({
                 <button
                   onClick={() => onCambiarPagina(Math.min(totalPaginas, filtros.pagina + 1))}
                   disabled={filtros.pagina === totalPaginas}
-                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-xl border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                 >
-                  →
+                  <ChevronRight size={16} />
                 </button>
               </nav>
             </div>

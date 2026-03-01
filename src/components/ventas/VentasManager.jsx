@@ -178,7 +178,7 @@ function VentasManager({ userRole: userRoleProp }) {
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <button
                 onClick={() => navigate(getCatalogoRoute())}
-                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium border rounded-lg text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100 transition-all"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium border rounded-xl text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100 transition-all"
                 title="Ver Catálogo"
               >
                 <LayoutGrid size={16} />
@@ -186,7 +186,7 @@ function VentasManager({ userRole: userRoleProp }) {
               </button>
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium border rounded-lg text-purple-700 bg-purple-50 border-purple-200 hover:bg-purple-100 transition-all"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium border rounded-xl text-purple-700 bg-purple-50 border-purple-200 hover:bg-purple-100 transition-all"
                 title="Nueva Venta"
               >
                 <Plus size={16} />

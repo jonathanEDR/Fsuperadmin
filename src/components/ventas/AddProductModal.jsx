@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Plus, ShoppingCart, Search } from 'lucide-react';
+import { X, Plus, ShoppingCart, Search, Loader2 } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 
 const AddProductModal = ({
@@ -203,12 +203,12 @@ const AddProductModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
+            <div className="p-2 bg-blue-100 rounded-xl">
               <ShoppingCart className="w-5 h-5 text-blue-600" />
             </div>
             <h2 className="text-lg font-semibold text-gray-900">
@@ -226,7 +226,7 @@ const AddProductModal = ({
         {/* Body dividido en dos columnas */}
         <form onSubmit={handleSubmit} className="p-6">
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+            <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4">
               <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
@@ -240,7 +240,7 @@ const AddProductModal = ({
                 </label>
                 {loadingProducts ? (
                   <div className="flex items-center justify-center p-4">
-                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-600 border-t-transparent"></div>
+                    <Loader2 size={24} className="animate-spin text-blue-600" />
                     <span className="ml-2 text-sm text-gray-600">Cargando productos...</span>
                   </div>
                 ) : (
@@ -261,7 +261,7 @@ const AddProductModal = ({
                         }}
                         onFocus={() => setShowDropdown(true)}
                         placeholder="Buscar producto por nombre..."
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                       {searchTerm && (
                         <button
@@ -283,7 +283,7 @@ const AddProductModal = ({
                     {showDropdown && (
                       <div
                         ref={dropdownRef}
-                        className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                        className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
                       >
                         {productos.length === 0 ? (
                           <div className="p-4 text-sm text-gray-500 text-center">
@@ -339,7 +339,7 @@ const AddProductModal = ({
               </div>
               {/* Información del producto seleccionado */}
               {selectedProduct && (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
                   <h4 className="font-medium text-gray-900 mb-2">Información del Producto</h4>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
@@ -365,7 +365,7 @@ const AddProductModal = ({
                   </div>
                   {/* Advertencia de stock bajo */}
                   {selectedProduct.cantidadRestante <= 5 && (
-                    <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                    <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-xl">
                       <p className="text-sm text-orange-800">
                         ⚠️ <strong>Stock bajo:</strong> Solo quedan {selectedProduct.cantidadRestante} unidades disponibles
                       </p>
@@ -384,10 +384,10 @@ const AddProductModal = ({
                   max={selectedProduct ? selectedProduct.cantidadRestante : undefined}
                   value={quantity}
                   onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                  className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                     selectedProduct && quantity > selectedProduct.cantidadRestante 
-                      ? 'border-red-300 bg-red-50' 
-                      : 'border-gray-300'
+                      ? 'border-red-200 bg-red-50' 
+                      : 'border-gray-200'
                   }`}
                   required
                 />
@@ -407,22 +407,22 @@ const AddProductModal = ({
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !selectedProductId || quantity <= 0 || productos.length === 0 || !isQuantityValid}
-                  className={`flex-1 px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                  className={`flex-1 px-4 py-2 rounded-xl transition-colors flex items-center justify-center gap-2 ${
                     loading || !selectedProductId || quantity <= 0 || productos.length === 0 || !isQuantityValid
                       ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100'
                   }`}
                 >
                   {loading ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      <Loader2 size={16} className="animate-spin" />
                       Agregando...
                     </>
                   ) : (
@@ -446,7 +446,7 @@ const AddProductModal = ({
             <div className="md:w-1/2 flex flex-col gap-4">
               {/* Resumen de la operación */}
               {selectedProduct && (
-                <div className={`border rounded-lg p-4 ${
+                <div className={`border rounded-xl p-4 ${
                   isQuantityValid ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
                 }`}>
                   <h4 className="font-medium text-gray-900 mb-3">Resumen de la operación</h4>
@@ -500,7 +500,7 @@ const AddProductModal = ({
               )}
               {/* Información del producto seleccionado (resumen adicional) */}
               {selectedProductId && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
                   {(() => {
                     const producto = productos.find(p => p._id === selectedProductId);
                     if (!producto) return null;

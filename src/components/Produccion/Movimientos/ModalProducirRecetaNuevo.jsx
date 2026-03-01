@@ -25,6 +25,7 @@ import { recetaService } from '../../../services/recetaService';
 import { getLocalDateTimeString } from '../../../utils/fechaHoraUtils';
 import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 import { getFullApiUrl, safeFetch } from '../../../config/api';
+import { X, ClipboardList, Loader2, AlertCircle, Package, Carrot, Lightbulb, Calendar, User, Trash2, Check, AlertTriangle, Search, Sparkles, Plus } from 'lucide-react';
 import '../../../styles/modal-protection.css';
 
 const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
@@ -441,10 +442,10 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
 
   if (!receta) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg p-6 max-w-md">
-          <p className="text-red-600">Error: No se ha seleccionado una receta</p>
-          <button onClick={onClose} className="mt-4 px-4 py-2 bg-gray-200 rounded">
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl p-6 max-w-md border border-gray-100 shadow-xl">
+          <p className="text-red-600 flex items-center gap-2"><AlertCircle size={16} /> Error: No se ha seleccionado una receta</p>
+          <button onClick={onClose} className="mt-4 px-4 py-2 text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl text-sm font-medium">
             Cerrar
           </button>
         </div>
@@ -453,38 +454,38 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-      <div className="modal-protection bg-white rounded-lg sm:rounded-xl shadow-2xl w-full max-w-4xl max-h-[98vh] sm:max-h-[95vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="modal-protection bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-4xl max-h-[98vh] sm:max-h-[95vh] flex flex-col overflow-hidden">
         
         {/* ============= HEADER ============= */}
-        <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-3 sm:p-4 md:p-6">
-          <div className="flex justify-between items-start">
-            <div className="flex-1 min-w-0">
-              <h2 className="text-lg sm:text-xl md:text-2xl font-bold m-0 flex items-center gap-2">
-                📋 <span className="hidden xs:inline">Producir Receta</span><span className="xs:hidden">Producir</span>
+        <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-5 py-4 rounded-t-2xl flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="p-2 bg-purple-50 rounded-xl border border-purple-100">
+              <ClipboardList size={20} className="text-purple-600" />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
+                Producir Receta
               </h2>
-              <p className="text-purple-100 text-xs sm:text-sm mt-1 mb-0 truncate">
+              <p className="text-sm text-gray-500 truncate">
                 {receta.nombre}
               </p>
             </div>
-            <button
-              onClick={onClose}
-              disabled={enviando}
-              className="text-white hover:bg-white/20 p-1.5 sm:p-2 rounded-lg transition-colors flex-shrink-0 ml-2"
-            >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
           </div>
+          <button
+            onClick={onClose}
+            disabled={enviando}
+            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-xl transition-colors flex-shrink-0 ml-2"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         {/* ============= ERROR ============= */}
         {error && (
-          <div className="mx-2 sm:mx-4 md:mx-6 mt-3 sm:mt-4 p-2 sm:p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-xs sm:text-sm text-red-600 flex items-center gap-2">
-              <span>❌</span> <span className="break-words">{error}</span>
-            </p>
+          <div className="mx-2 sm:mx-4 md:mx-6 mt-3 sm:mt-4 p-2 sm:p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2">
+            <AlertCircle size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
+            <p className="text-xs sm:text-sm text-red-600 break-words">{error}</p>
           </div>
         )}
 
@@ -494,15 +495,15 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
             
             {loadingRecursos ? (
               <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600"></div>
+                <Loader2 size={28} className="animate-spin text-purple-600" />
                 <span className="ml-3 text-gray-600">Cargando datos...</span>
               </div>
             ) : (
               <>
                 {/* ============= SECCIÓN: RENDIMIENTO ============= */}
-                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg sm:rounded-xl p-3 sm:p-4">
+                <div className="bg-gray-50/60 border border-gray-100 rounded-xl p-3 sm:p-4">
                   <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3 flex items-center gap-2">
-                    <span className="text-lg sm:text-xl">📦</span>
+                    <Package size={18} className="text-indigo-600" />
                     <span className="text-sm sm:text-base">Rendimiento de esta Producción</span>
                   </h3>
                   
@@ -517,7 +518,7 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
                         min="0.01"
                         value={rendimiento.cantidad}
                         onChange={(e) => handleRendimientoChange(e.target.value)}
-                        className="w-full p-3 text-lg font-bold border border-indigo-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full p-3 text-lg font-bold border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
                         disabled={enviando}
                         required
                       />
@@ -529,7 +530,7 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
                       <select
                         value={rendimiento.unidadMedida}
                         onChange={(e) => setRendimiento(prev => ({ ...prev, unidadMedida: e.target.value }))}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                        className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
                         disabled={enviando}
                       >
                         <option value="unidad">Unidades</option>
@@ -542,16 +543,16 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
                     </div>
                   </div>
                   
-                  <p className="text-xs text-gray-500 mt-2">
-                    💡 La receta original rinde: {receta.rendimiento?.cantidad || 1} {receta.rendimiento?.unidadMedida || 'unidad'}
+                  <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                    <Lightbulb size={12} className="text-gray-400" /> La receta original rinde: {receta.rendimiento?.cantidad || 1} {receta.rendimiento?.unidadMedida || 'unidad'}
                   </p>
                 </div>
 
                 {/* ============= SECCIÓN: INGREDIENTES ============= */}
-                <div className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-3 sm:p-4">
+                <div className="bg-gray-50/60 border border-gray-100 rounded-xl p-3 sm:p-4">
                   <div className="flex justify-between items-center mb-3 sm:mb-4 gap-2">
                     <h3 className="text-base sm:text-lg font-semibold text-gray-800 flex items-center gap-2 min-w-0">
-                      <span className="text-lg sm:text-xl flex-shrink-0">🥬</span>
+                      <Carrot size={18} className="text-green-600 flex-shrink-0" />
                       <span className="text-sm sm:text-base truncate">Ingredientes Necesarios</span>
                       <span className="text-xs sm:text-sm font-normal text-gray-500 flex-shrink-0">
                         ({ingredientesProduccion.length})
@@ -562,24 +563,24 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
                       <button
                         type="button"
                         onClick={() => abrirBuscador('ingrediente')}
-                        className="px-2 sm:px-3 py-1.5 bg-green-600 text-white text-xs sm:text-sm rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1"
+                        className="px-2 sm:px-3 py-1.5 text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 text-xs sm:text-sm rounded-xl transition-colors flex items-center gap-1 font-medium"
                         disabled={enviando}
                         title="Agregar Ingrediente"
                       >
-                        <span className="text-base sm:text-sm">+</span>
+                        <Plus size={14} />
                         <span className="hidden md:inline">Ingrediente</span>
-                        <span className="md:hidden text-base">🥬</span>
+                        <Carrot size={14} className="md:hidden" />
                       </button>
                       <button
                         type="button"
                         onClick={() => abrirBuscador('receta')}
-                        className="px-2 sm:px-3 py-1.5 bg-purple-600 text-white text-xs sm:text-sm rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-1"
+                        className="px-2 sm:px-3 py-1.5 text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100 text-xs sm:text-sm rounded-xl transition-colors flex items-center gap-1 font-medium"
                         disabled={enviando}
                         title="Agregar Receta"
                       >
-                        <span className="text-base sm:text-sm">+</span>
+                        <Plus size={14} />
                         <span className="hidden md:inline">Receta</span>
-                        <span className="md:hidden text-base">📋</span>
+                        <ClipboardList size={14} className="md:hidden" />
                       </button>
                     </div>
                   </div>
@@ -587,13 +588,13 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
                   {/* Lista de ingredientes */}
                   {ingredientesProduccion.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
-                      <span className="text-4xl mb-2 block">🔍</span>
+                      <Search size={32} className="mx-auto mb-2 text-gray-300" />
                       <p>No hay ingredientes. Agrega ingredientes o recetas.</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
                       {/* Header de la tabla */}
-                      <div className="hidden sm:grid grid-cols-12 gap-2 px-3 py-2 bg-gray-100 rounded-lg text-xs font-medium text-gray-600">
+                      <div className="hidden sm:grid grid-cols-12 gap-2 px-3 py-2 bg-white rounded-xl border border-gray-100 text-xs font-medium text-gray-600">
                         <div className="col-span-5">Ingrediente/Receta</div>
                         <div className="col-span-2 text-center">Cantidad</div>
                         <div className="col-span-2 text-center">Unidad</div>
@@ -609,21 +610,21 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
                         return (
                           <div 
                             key={`${item.tipo}-${item.id}-${index}`}
-                            className={`grid grid-cols-12 gap-2 px-3 py-3 rounded-lg items-center
+                            className={`grid grid-cols-12 gap-2 px-3 py-3 rounded-xl items-center
                               ${item.esExtra ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'}
                               ${!suficiente ? 'border-2 border-red-300' : ''}`}
                           >
                             {/* Nombre */}
                             <div className="col-span-12 sm:col-span-5 flex items-center gap-2">
-                              <span className="text-lg">
-                                {item.tipo === 'receta' ? '📋' : '🥬'}
+                              <span className="text-gray-500">
+                                {item.tipo === 'receta' ? <ClipboardList size={16} /> : <Carrot size={16} />}
                               </span>
                               <div className="flex-1 min-w-0">
                                 <span className={`font-medium truncate block ${!suficiente ? 'text-red-700' : 'text-gray-900'}`}>
                                   {item.nombre}
                                 </span>
                                 {item.esExtra && (
-                                  <span className="text-xs text-blue-600">✨ Agregado extra</span>
+                                  <span className="text-xs text-blue-600 flex items-center gap-0.5"><Sparkles size={10} /> Agregado extra</span>
                                 )}
                               </div>
                             </div>
@@ -636,10 +637,10 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
                                 min="0"
                                 value={item.cantidad}
                                 onChange={(e) => handleCantidadIngredienteChange(index, e.target.value)}
-                                className={`w-full p-2 text-sm border rounded-lg text-center font-medium
+                                className={`w-full p-2 text-sm border rounded-xl text-center font-medium
                                   ${!suficiente 
                                     ? 'border-red-400 bg-red-50 text-red-700' 
-                                    : 'border-gray-300 focus:ring-purple-500 focus:border-purple-500'}`}
+                                    : 'border-gray-200 focus:ring-purple-500 focus:border-transparent outline-none'}`}
                                 disabled={enviando}
                               />
                             </div>
@@ -655,7 +656,7 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
                                 {item.disponible.toFixed(2)} {item.unidadMedida}
                               </span>
                               {suficiente ? (
-                                <span className="ml-1 text-green-600">✓</span>
+                                <span className="ml-1 text-green-600"><Check size={14} className="inline" /></span>
                               ) : (
                                 <span className="block text-xs text-red-500">
                                   Faltan: {falta.toFixed(2)}
@@ -668,13 +669,11 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
                               <button
                                 type="button"
                                 onClick={() => handleEliminarIngrediente(index)}
-                                className="p-1.5 text-red-500 hover:bg-red-100 rounded transition-colors"
+                                className="p-1.5 text-red-500 hover:bg-red-100 rounded-xl transition-colors"
                                 title="Eliminar"
                                 disabled={enviando}
                               >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
+                                <Trash2 size={16} />
                               </button>
                             </div>
                           </div>
@@ -685,17 +684,17 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
 
                   {/* Modal/Panel de agregar item extra */}
                   {mostrarBuscador && (
-                    <div className="mt-4 p-4 bg-gray-50 border border-gray-300 rounded-lg">
+                    <div className="mt-4 p-4 bg-white border border-gray-100 rounded-xl">
                       <div className="flex justify-between items-center mb-3">
-                        <h4 className="font-medium text-gray-800">
-                          {tipoBuscador === 'ingrediente' ? '🥬 Agregar Ingrediente' : '📋 Agregar Receta'}
+                        <h4 className="font-medium text-gray-800 flex items-center gap-1.5">
+                          {tipoBuscador === 'ingrediente' ? <><Carrot size={14} className="text-green-600" /> Agregar Ingrediente</> : <><ClipboardList size={14} className="text-purple-600" /> Agregar Receta</>}
                         </h4>
                         <button
                           type="button"
                           onClick={cerrarBuscador}
-                          className="text-gray-500 hover:text-gray-700"
+                          className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1 rounded-xl transition-colors"
                         >
-                          ✕
+                          <X size={16} />
                         </button>
                       </div>
 
@@ -710,12 +709,12 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
                               setItemSeleccionado(null);
                             }}
                             placeholder={`Buscar ${tipoBuscador}...`}
-                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
+                            className="w-full p-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                           />
                           
                           {/* Sugerencias */}
                           {terminoBusqueda && !itemSeleccionado && (
-                            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
                               {getItemsFiltrados().length > 0 ? (
                                 getItemsFiltrados().map(item => (
                                   <button
@@ -751,7 +750,7 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
                             value={cantidadNuevo}
                             onChange={(e) => setCantidadNuevo(e.target.value)}
                             placeholder="Cant."
-                            className="w-full p-2 border border-gray-300 rounded-lg"
+                            className="w-full p-2 border border-gray-200 rounded-xl outline-none"
                           />
                         </div>
 
@@ -760,7 +759,7 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
                           <select
                             value={unidadNuevo}
                             onChange={(e) => setUnidadNuevo(e.target.value)}
-                            className="w-full p-2 border border-gray-300 rounded-lg"
+                            className="w-full p-2 border border-gray-200 rounded-xl outline-none"
                           >
                             {unidadesMedida.map(u => (
                               <option key={u.value} value={u.value}>{u.label}</option>
@@ -774,7 +773,7 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
                             type="button"
                             onClick={agregarItemExtra}
                             disabled={!itemSeleccionado || !cantidadNuevo || parseFloat(cantidadNuevo) <= 0}
-                            className="w-full p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                            className="w-full p-2 text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100 rounded-xl disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed font-medium text-sm"
                           >
                             Agregar
                           </button>
@@ -785,9 +784,9 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
                 </div>
 
                 {/* ============= SECCIÓN: INFORMACIÓN DE PRODUCCIÓN ============= */}
-                <div className="bg-white border border-gray-200 rounded-xl p-4">
+                <div className="bg-gray-50/60 border border-gray-100 rounded-xl p-4">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    👤 Información de Producción
+                    <User size={18} className="text-gray-600" /> Información de Producción
                   </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -800,7 +799,7 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
                         <select
                           value={formData.operador}
                           onChange={(e) => handleFormDataChange('operador', e.target.value)}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
+                          className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                           disabled={enviando || loadingUsuarios}
                           required
                         >
@@ -818,28 +817,28 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
                           type="text"
                           value={formData.operador}
                           readOnly
-                          className="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                          className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 cursor-not-allowed"
                         />
                       )}
                     </div>
 
                     {/* Fecha y Hora */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        📅 Fecha y Hora de Producción
+                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5">
+                        <Calendar size={14} className="text-gray-500" /> Fecha y Hora de Producción
                       </label>
                       <input
                         type="datetime-local"
                         value={formData.fechaProduccion}
                         onChange={(e) => handleFormDataChange('fechaProduccion', e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
+                        className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                         disabled={enviando}
                       />
                     </div>
                   </div>
 
                   {/* Checkbox consumir ingredientes */}
-                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="mt-4 p-3 bg-green-50/60 border border-green-200 rounded-xl">
                     <label className="flex items-center gap-3 cursor-pointer">
                       <input
                         type="checkbox"
@@ -849,8 +848,8 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
                         disabled={enviando}
                       />
                       <div>
-                        <span className="font-medium text-gray-900">
-                          ✅ Consumir ingredientes del inventario al producir
+                        <span className="font-medium text-gray-900 flex items-center gap-1">
+                          <Check size={14} className="text-green-600" /> Consumir ingredientes del inventario al producir
                         </span>
                         <p className="text-xs text-gray-600 mt-0.5">
                           Los ingredientes se descontarán automáticamente del stock
@@ -870,7 +869,7 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
                       placeholder="Notas adicionales sobre esta producción..."
                       rows={3}
                       maxLength={500}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 resize-none"
+                      className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none resize-none"
                       disabled={enviando}
                     />
                     <p className="text-xs text-gray-500 mt-1">
@@ -883,32 +882,30 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
           </div>
 
           {/* ============= FOOTER ============= */}
-          <div className="border-t border-gray-200 px-2 sm:px-4 md:px-6 py-3 sm:py-4 bg-gray-50">
+          <div className="bg-gray-50/50 border-t border-gray-100 px-4 sm:px-5 py-3 rounded-b-2xl flex-shrink-0">
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end">
               <button
                 type="button"
                 onClick={onClose}
                 disabled={enviando}
-                className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-medium text-sm sm:text-base"
+                className="w-full sm:w-auto px-4 sm:px-6 py-2.5 text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl transition-colors font-medium text-sm"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={enviando || loadingRecursos || (formData.consumirIngredientes && hayErroresStock())}
-                className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm sm:text-base flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-4 sm:px-6 py-2.5 text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm flex items-center justify-center gap-2"
               >
                 {enviando ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span className="hidden xs:inline">Produciendo...</span>
-                    <span className="xs:hidden">...</span>
+                    <Loader2 size={16} className="animate-spin" />
+                    Produciendo...
                   </>
                 ) : (
                   <>
-                    <span>✅</span>
-                    <span className="hidden xs:inline">Producir Receta</span>
-                    <span className="xs:hidden">Producir</span>
+                    <ClipboardList size={16} />
+                    Producir Receta
                   </>
                 )}
               </button>
@@ -916,9 +913,8 @@ const ModalProducirRecetaNuevo = ({ isOpen, onClose, receta, onSuccess }) => {
             
             {/* Aviso de errores de stock */}
             {formData.consumirIngredientes && hayErroresStock() && (
-              <div className="mt-2 sm:mt-3 text-center text-xs sm:text-sm text-red-600">
-                <span className="hidden sm:inline">⚠️ Hay ingredientes con stock insuficiente. Ajusta las cantidades o desactiva el consumo automático.</span>
-                <span className="sm:hidden">⚠️ Stock insuficiente. Ajusta cantidades.</span>
+              <div className="mt-2 sm:mt-3 text-center text-xs sm:text-sm text-red-600 flex items-center justify-center gap-1">
+                <AlertTriangle size={14} /> Hay ingredientes con stock insuficiente. Ajusta las cantidades o desactiva el consumo automático.
               </div>
             )}
           </div>

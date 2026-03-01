@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import { ArrowUpDown } from 'lucide-react';
 
 /**
  * Componente memoizado para el encabezado de la tabla
@@ -24,7 +25,7 @@ const CuentasBancariasTableHeader = memo(({
             <span className="text-gray-400 ml-1">
                 {isActive ? (
                     direction === 'asc' ? '↑' : '↓'
-                ) : '↕️'}
+                ) : <ArrowUpDown size={14} />}
             </span>
         );
     };
@@ -45,7 +46,7 @@ const CuentasBancariasTableHeader = memo(({
                             type="checkbox"
                             checked={todasSeleccionadas}
                             onChange={onSeleccionTodos}
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            className="rounded border-gray-200 text-blue-600 focus:ring-blue-500"
                             aria-label="Seleccionar todas las cuentas"
                         />
                     </th>

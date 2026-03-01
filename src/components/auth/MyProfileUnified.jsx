@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useUser, useClerk } from '@clerk/clerk-react';
 import { useAuth } from '@clerk/clerk-react';
-import { User, Mail, Shield, CheckCircle, Camera, Loader2 } from 'lucide-react';
+import { User, Mail, Shield, CheckCircle, Camera, Loader2, Building2 } from 'lucide-react';
 import UserGestionPersonal from '../personal/UserGestionPersonal';
 import ProgresoMetasSucursales from '../perfil/ProgresoMetasSucursales';
 import SucursalAsignada from '../perfil/SucursalAsignada';
@@ -41,7 +41,7 @@ function MyProfileUnified() {
   if (!user) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <Loader2 size={48} className="animate-spin text-blue-600" />
       </div>
     );
   }
@@ -151,7 +151,7 @@ function MyProfileUnified() {
 
               {/* Overlay hover */}
               <div className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity rounded-full ${
-                uploading ? 'bg-black bg-opacity-50 opacity-100' : 'bg-black bg-opacity-40 opacity-0 group-hover:opacity-100'
+                uploading ? 'bg-black/50 opacity-100' : 'bg-black/40 opacity-0 group-hover:opacity-100'
               }`}>
                 {uploading ? (
                   <Loader2 className="text-white animate-spin" size={24} />
@@ -225,7 +225,7 @@ function MyProfileUnified() {
 
         <div className="grid md:grid-cols-2 gap-5">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
               <User className="text-gray-500" size={18} />
             </div>
             <div>
@@ -235,7 +235,7 @@ function MyProfileUnified() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
               <Mail className="text-gray-500" size={18} />
             </div>
             <div>
@@ -245,10 +245,8 @@ function MyProfileUnified() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h3M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
+            <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
+              <Building2 className="text-gray-500" size={16} />
             </div>
             <div>
               <p className="text-xs font-medium text-gray-500">Nombre del Negocio</p>
@@ -257,7 +255,7 @@ function MyProfileUnified() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
               <Shield className="text-gray-500" size={18} />
             </div>
             <div>
@@ -288,7 +286,7 @@ function MyProfileUnified() {
       <div className="flex justify-end">
         <button
           onClick={() => signOut()}
-          className="px-6 py-2.5 rounded-lg bg-red-600 text-white font-semibold shadow hover:bg-red-700 transition-colors w-full sm:w-auto"
+          className="px-6 py-2.5 rounded-xl text-red-700 bg-red-50 border border-red-200 font-semibold hover:bg-red-100 transition-colors w-full sm:w-auto"
         >
           Cerrar sesión
         </button>

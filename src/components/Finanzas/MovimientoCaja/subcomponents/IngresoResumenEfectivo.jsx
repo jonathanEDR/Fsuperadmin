@@ -17,7 +17,7 @@ const IngresoResumenEfectivo = React.memo(({
     const hayVuelto = diferencia > 0.01;
     
     return (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-3">
             
             {/* TOTALES POR TIPO */}
             <div className="grid grid-cols-2 gap-4 text-sm">

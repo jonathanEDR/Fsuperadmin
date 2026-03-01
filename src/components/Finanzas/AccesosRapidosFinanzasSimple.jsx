@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { TrendingUp, ArrowRight, Info, BarChart2, BarChart3, ArrowLeftRight, Landmark, Coins, Shield } from 'lucide-react';
 import FinanzasLayout from './common/FinanzasLayout';
 
 const AccesosRapidosFinanzasSimple = () => {
@@ -10,35 +11,35 @@ const AccesosRapidosFinanzasSimple = () => {
         {
             label: 'Dashboard Financiero',
             to: '',
-            icon: '📊',
+            icon: BarChart3,
             color: 'bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 text-blue-800 border-blue-200',
             description: 'Resumen financiero general'
         },
         {
             label: 'Movimientos de Caja',
             to: 'movimientos-caja',
-            icon: '💸',
+            icon: ArrowLeftRight,
             color: 'bg-gradient-to-br from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200 text-emerald-800 border-emerald-200',
             description: 'Control de ingresos y egresos'
         },
         {
             label: 'Cuentas Bancarias',
             to: 'cuentas-bancarias',
-            icon: '🏦',
+            icon: Landmark,
             color: 'bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 text-green-800 border-green-200',
             description: 'Gestionar cuentas bancarias'
         },
         {
             label: 'Gestión de Préstamos',
             to: 'prestamos',
-            icon: '💰',
+            icon: Coins,
             color: 'bg-gradient-to-br from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 text-yellow-800 border-yellow-200',
             description: 'Administrar préstamos'
         },
         {
             label: 'Garantías',
             to: 'garantias',
-            icon: '🛡️',
+            icon: Shield,
             color: 'bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 text-purple-800 border-purple-200',
             description: 'Gestionar garantías'
         }
@@ -66,7 +67,7 @@ const AccesosRapidosFinanzasSimple = () => {
                 <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold text-gray-900">Accesos Rápidos</h2>
                     <div className="text-sm text-gray-500">
-                        <i className="fas fa-chart-line mr-2"></i>
+                        <TrendingUp size={16} className="mr-2 inline" />
                         Dashboard Financiero
                         <br />
                         <span className="text-xs text-blue-600">Ruta base: {baseRoute}</span>
@@ -93,9 +94,7 @@ const AccesosRapidosFinanzasSimple = () => {
                                 }`}
                             >
                                 <div className="flex items-center space-x-4">
-                                    <div className="text-3xl">
-                                        {acceso.icon}
-                                    </div>
+                                    <acceso.icon size={28} />
                                     <div className="flex-1">
                                         <h3 className="text-lg font-semibold group-hover:text-opacity-90">
                                             {acceso.label}
@@ -105,7 +104,7 @@ const AccesosRapidosFinanzasSimple = () => {
                                         </p>
                                     </div>
                                     <div className="text-xl opacity-50 group-hover:opacity-75 transition-opacity">
-                                        <i className="fas fa-arrow-right"></i>
+                                        <ArrowRight size={16} />
                                     </div>
                                 </div>
                             </Link>
@@ -116,9 +115,9 @@ const AccesosRapidosFinanzasSimple = () => {
 
             {/* Información adicional */}
             <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                        <i className="fas fa-info-circle text-blue-500 mr-2"></i>
+                        <Info size={16} className="text-blue-500 mr-2 inline" />
                         Información del Sistema
                     </h3>
                     <div className="space-y-2 text-sm text-gray-600">
@@ -128,9 +127,9 @@ const AccesosRapidosFinanzasSimple = () => {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                        <i className="fas fa-chart-bar text-green-500 mr-2"></i>
+                        <BarChart2 size={16} className="text-green-500 mr-2 inline" />
                         Estado del Sistema
                     </h3>
                     <div className="space-y-2">

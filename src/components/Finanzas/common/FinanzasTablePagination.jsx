@@ -1,4 +1,5 @@
 import React, { memo, useMemo, useCallback } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 /**
  * Componente de paginación genérico y reutilizable
@@ -133,7 +134,7 @@ const FinanzasTablePagination = memo(({
                         className={`rounded border bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${sizeClasses.button}`}
                         aria-label="Página anterior"
                     >
-                        <i className="fas fa-chevron-left"></i>
+                        <ChevronLeft size={14} />
                     </button>
                     
                     {/* Números de página */}
@@ -160,7 +161,7 @@ const FinanzasTablePagination = memo(({
                         className={`rounded border bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${sizeClasses.button}`}
                         aria-label="Página siguiente"
                     >
-                        <i className="fas fa-chevron-right"></i>
+                        <ChevronRight size={14} />
                     </button>
 
                     {/* Botón última página (solo si hay muchas páginas) */}

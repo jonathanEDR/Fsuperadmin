@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Trash2, Plus } from 'lucide-react';
+import { Trash2, Plus, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '@clerk/clerk-react';
 import DevolucionModal from './DevolucionModal';
 import { formatearFecha, getLocalDateTimeString, convertLocalDateTimeToISO } from '../../utils/fechaHoraUtils';
@@ -238,15 +238,15 @@ const DevolucionList = ({ userRole = 'user', onDevolucionDeleted }) => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <Loader2 size={32} className="animate-spin text-blue-500" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
-        {error}
+      <div className="p-4 mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2">
+        <AlertCircle size={16} className="flex-shrink-0" /> {error}
       </div>
     );
   }
@@ -261,7 +261,7 @@ const DevolucionList = ({ userRole = 'user', onDevolucionDeleted }) => {
         </div>
         <button
           onClick={handleOpenModal}
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+          className="inline-flex items-center px-4 py-2 text-blue-700 bg-blue-50 border border-blue-200 text-sm font-medium rounded-xl hover:bg-blue-100 transition-colors"
         >
           <Plus className="h-4 w-4 mr-2" />
           Nueva Devolución
@@ -269,16 +269,17 @@ const DevolucionList = ({ userRole = 'user', onDevolucionDeleted }) => {
       </div>
 
       {deleteStatus.show && (
-        <div className={`p-4 mb-4 text-sm rounded-lg ${
+        <div className={`p-4 mb-4 text-sm rounded-xl border flex items-center gap-2 ${
           deleteStatus.type === 'success' 
-            ? 'text-green-700 bg-green-100' 
-            : 'text-red-700 bg-red-100'
+            ? 'text-green-700 bg-green-50 border-green-200' 
+            : 'text-red-700 bg-red-50 border-red-200'
         }`}>
+          {deleteStatus.type === 'success' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
           {deleteStatus.message}
         </div>
       )}
       <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+        <thead className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100">
           <tr>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Colaborador</th>
@@ -338,14 +339,14 @@ const DevolucionList = ({ userRole = 'user', onDevolucionDeleted }) => {
                   <button
                     onClick={() => handleDeleteDevolucion(devolucion._id, devolucion.producto, devolucion.cantidad)}
                     disabled={loading} // Deshabilitar durante loading
-                    className="inline-flex items-center px-3 py-2 bg-red-600 text-white text-xs font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center px-3 py-2 text-red-700 bg-red-50 border border-red-200 text-xs font-medium rounded-xl hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
                     {loading ? 'Eliminando...' : 'Eliminar'}
                   </button>
                 ) : (
                   <div className="flex flex-col items-center">
-                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md">No disponible</span>
+                    <span className="text-xs text-gray-500 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-xl">No disponible</span>
                     <span className="text-xs text-gray-400 mt-1">Venta finalizada</span>
                   </div>
                 )}
@@ -357,7 +358,7 @@ const DevolucionList = ({ userRole = 'user', onDevolucionDeleted }) => {
 
       {/* Información adicional para usuarios no super admin */}
       {hasMore && userRole !== 'super_admin' && (
-        <div className="text-center mt-6 p-4 bg-blue-50 rounded-lg">
+        <div className="text-center mt-6 p-4 bg-blue-50 border border-blue-100 rounded-xl">
           <p className="text-sm text-blue-800">
             <span className="font-medium">Nota:</span> Solo se muestran las primeras 10 devoluciones. 
             Contacta a un Super Administrador para ver el historial completo.
@@ -373,11 +374,11 @@ const DevolucionList = ({ userRole = 'user', onDevolucionDeleted }) => {
           <button
             onClick={handleLoadMore}
             disabled={loadingMore}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
+            className="px-6 py-3 text-blue-700 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
             {loadingMore ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <Loader2 size={16} className="animate-spin" />
                 Cargando...
               </>
             ) : (

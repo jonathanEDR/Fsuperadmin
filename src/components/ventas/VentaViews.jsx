@@ -637,7 +637,7 @@ const VentaViews = ({
                   {canModifyQuantity(venta) && venta.estadoPago !== 'Pagado' && (
                     <button
                       onClick={() => handleOpenAddProduct(venta)}
-                      className="p-1 sm:p-1.5 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors border border-blue-200"
+                      className="p-1 sm:p-1.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors border border-blue-200"
                       title="Agregar producto"
                     >
                       <Plus className="w-3 h-3" />
@@ -648,7 +648,7 @@ const VentaViews = ({
                 {/* Lista de productos ultra compacta */}
                 <div className="space-y-1.5">
                   {venta.productos?.filter(prod => prod != null).map((prod, idx) => (
-                    <div key={idx} className="flex items-center justify-between bg-white border border-slate-200 rounded-lg px-2 py-1.5">
+                    <div key={idx} className="flex items-center justify-between bg-white border border-slate-200 rounded-xl px-2 py-1.5">
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <span className="font-medium text-slate-700 truncate text-[11px] sm:text-sm">
                           {prod.productoId?.nombre || prod.nombre || 'Sin nombre'}
@@ -719,7 +719,7 @@ const VentaViews = ({
                       )}
                     </div>
                   )) || (
-                    <div className="text-slate-500 text-[10px] sm:text-sm py-2 text-center bg-slate-50 rounded-lg">
+                    <div className="text-slate-500 text-[10px] sm:text-sm py-2 text-center bg-slate-50 rounded-xl">
                       No hay productos
                     </div>
                   )}
@@ -732,7 +732,7 @@ const VentaViews = ({
                 {venta.estadoPago !== 'Pagado' && (
                   <button
                     onClick={() => handleOpenPayment(ventaParaPago)}
-                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-lg transition-all text-xs sm:text-sm font-medium"
+                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-xl transition-all text-xs sm:text-sm font-medium"
                     disabled={loading}
                     title="Procesar Pago"
                   >
@@ -745,7 +745,7 @@ const VentaViews = ({
                 {(!venta.estado || venta.estado !== 'devuelta') && (
                   <button
                     onClick={() => handleOpenDevolucion(venta)}
-                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 rounded-lg transition-all text-xs sm:text-sm"
+                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 rounded-xl transition-all text-xs sm:text-sm"
                     disabled={loading}
                     title="Devolución"
                   >
@@ -760,7 +760,7 @@ const VentaViews = ({
                     {(!venta.completionStatus) && (
                       <button
                         onClick={() => handleFinalizarVenta(venta._id)}
-                        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-lg transition-all text-xs sm:text-sm"
+                        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-all text-xs sm:text-sm"
                         disabled={loading}
                         title="Finalizar"
                       >
@@ -771,7 +771,7 @@ const VentaViews = ({
                     {(venta.completionStatus === 'rejected') && (
                       <button
                         onClick={() => handleFinalizarVenta(venta._id)}
-                        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-lg transition-all text-xs sm:text-sm"
+                        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-all text-xs sm:text-sm"
                         disabled={loading}
                         title="Reenviar"
                       >
@@ -780,13 +780,13 @@ const VentaViews = ({
                       </button>
                     )}
                     {venta.completionStatus === 'pending' && (
-                      <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-amber-50 text-amber-700 rounded-lg text-xs sm:text-sm border border-amber-200">
+                      <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-amber-50 text-amber-700 rounded-xl text-xs sm:text-sm border border-amber-200">
                         <Clock className="w-4 h-4" />
                         <span className="hidden sm:inline">Pendiente</span>
                       </div>
                     )}
                     {venta.completionStatus === 'approved' && (
-                      <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-emerald-50 text-emerald-700 rounded-lg text-xs sm:text-sm border border-emerald-200">
+                      <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-emerald-50 text-emerald-700 rounded-xl text-xs sm:text-sm border border-emerald-200">
                         <Check className="w-4 h-4" />
                         <span className="hidden sm:inline">Finalizada</span>
                       </div>
@@ -800,7 +800,7 @@ const VentaViews = ({
                     <>
                       <button 
                         onClick={() => handleApproveReject(venta._id, 'approved')}
-                        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-lg transition-all text-xs sm:text-sm"
+                        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-xl transition-all text-xs sm:text-sm"
                         disabled={loading}
                         title="Aprobar"
                       >
@@ -809,7 +809,7 @@ const VentaViews = ({
                       </button>
                       <button
                         onClick={() => handleApproveReject(venta._id, 'rejected')}
-                        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 rounded-lg transition-all text-xs sm:text-sm"
+                        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 rounded-xl transition-all text-xs sm:text-sm"
                         disabled={loading}
                         title="Rechazar"
                       >
@@ -823,7 +823,7 @@ const VentaViews = ({
                 {canEditDelete(venta) ? (
                   <button
                     onClick={() => handleDeleteVenta(venta._id)}
-                    className="flex items-center justify-center px-2 sm:px-3 py-2 text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 rounded-lg transition-all text-xs sm:text-sm ml-auto"
+                    className="flex items-center justify-center px-2 sm:px-3 py-2 text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 rounded-xl transition-all text-xs sm:text-sm ml-auto"
                     disabled={loading}
                     title="Eliminar venta"
                   >
@@ -832,7 +832,7 @@ const VentaViews = ({
                 ) : (
                   ['admin', 'super_admin'].includes(userRole) && (
                     <div 
-                      className="flex items-center justify-center px-2 py-2 bg-slate-50 text-slate-400 rounded-lg text-xs cursor-help border border-slate-200 ml-auto"
+                      className="flex items-center justify-center px-2 py-2 bg-slate-50 text-slate-400 rounded-xl text-xs cursor-help border border-slate-200 ml-auto"
                       title={getDeleteRestrictionReason(venta)}
                     >
                       <Ban size={14} />
@@ -861,7 +861,7 @@ const VentaViews = ({
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setConfirmDeleteProduct(null)}
-                className="px-4 py-2 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-all"
+                className="px-4 py-2 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-all"
               >
                 Cancelar
               </button>
@@ -875,7 +875,7 @@ const VentaViews = ({
                     setConfirmDeleteProduct(null);
                   }
                 }}
-                className="px-4 py-2 text-sm text-white bg-red-600 border border-red-600 rounded-lg hover:bg-red-700 transition-all"
+                className="px-4 py-2 text-sm text-white bg-red-600 border border-red-600 rounded-xl hover:bg-red-700 transition-all"
               >
                 Eliminar
               </button>
@@ -913,7 +913,7 @@ const VentaViews = ({
       <div className="space-y-6">
         {/* Información del usuario seleccionado */}
         {['super_admin', 'admin'].includes(userRole) && selectedUserId && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
             {(() => {
               const usuarioSeleccionado = usuarios.find(u => u.id === selectedUserId);
               return usuarioSeleccionado ? (
@@ -935,7 +935,7 @@ const VentaViews = ({
 
         {/* Información cuando no hay filtro aplicado */}
         {['super_admin', 'admin'].includes(userRole) && !selectedUserId && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
             <div className="flex items-center gap-3">
               <Filter className="text-yellow-600" size={20} />
               <div>
@@ -1020,7 +1020,7 @@ const VentaViews = ({
                   <div className="flex items-end">
                     <button
                       onClick={() => setSelectedUserId('')}
-                      className="px-4 py-2 text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-lg transition-all text-sm"
+                      className="px-4 py-2 text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl transition-all text-sm"
                     >
                       Limpiar
                     </button>

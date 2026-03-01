@@ -5,6 +5,7 @@ import { movimientoUnificadoService } from '../../../services/movimientoUnificad
 import { getLocalDateTimeString } from '../../../utils/fechaHoraUtils';
 import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 import { getFullApiUrl, safeFetch } from '../../../config/api';
+import { X, Factory, Loader2, AlertCircle, Zap, Pencil, ClipboardList, Settings, Trash2, Save, RefreshCw, Calendar, Lightbulb, Check, ChevronDown, ChevronRight, DollarSign } from 'lucide-react';
 
 const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
   const { canViewPrices, isSuperAdmin } = useQuickPermissions();
@@ -365,17 +366,19 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
   const esRapido = formulaCargada && formulaEstandar?.activa && !modoManual;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-0 sm:p-4">
-      <div className="bg-white sm:rounded-xl shadow-2xl w-full h-full sm:h-auto sm:max-w-lg sm:max-h-[95vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-0 sm:p-4">
+      <div className="bg-white sm:rounded-2xl shadow-xl border border-gray-100 w-full h-full sm:h-auto sm:max-w-lg sm:max-h-[95vh] flex flex-col overflow-hidden">
 
         {/* ===== HEADER ===== */}
-        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-indigo-600 sm:rounded-t-xl">
-          <div className="flex items-center gap-2 text-white min-w-0">
-            <span className="text-xl flex-shrink-0">🏭</span>
+        <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-4 sm:px-5 py-3 sm:py-4 sm:rounded-t-2xl flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="p-2 bg-blue-50 rounded-xl border border-blue-100">
+              <Factory size={18} className="text-blue-600" />
+            </div>
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-bold truncate">{producto.nombre}</h3>
-              <p className="text-xs opacity-80">
-                {esRapido ? '⚡ Producción rápida' : '✏️ Producción manual'}
+              <h3 className="text-sm sm:text-base font-semibold text-gray-900 truncate">{producto.nombre}</h3>
+              <p className="text-xs text-gray-500 flex items-center gap-1">
+                {esRapido ? <><Zap size={12} /> Producción rápida</> : <><Pencil size={12} /> Producción manual</>}
               </p>
             </div>
           </div>
@@ -384,26 +387,22 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
               type="button"
               onClick={abrirConfigFormula}
               disabled={enviando || loading}
-              className="text-white/70 hover:text-white p-1.5 rounded-lg hover:bg-white/10"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1.5 rounded-xl transition-colors"
               title="Configurar fórmula estándar"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+              <Settings size={18} />
             </button>
-            <button onClick={onClose} disabled={enviando} className="text-white/70 hover:text-white p-1.5 rounded-lg hover:bg-white/10">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+            <button onClick={onClose} disabled={enviando} className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1.5 rounded-xl transition-colors">
+              <X size={18} />
             </button>
           </div>
         </div>
 
         {/* ===== ERROR ===== */}
         {error && (
-          <div className="mx-3 mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-xs text-red-600">❌ {error}</p>
+          <div className="mx-3 mt-2 p-2 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2">
+            <AlertCircle size={14} className="text-red-500 mt-0.5 flex-shrink-0" />
+            <p className="text-xs text-red-600">{error}</p>
           </div>
         )}
 
@@ -411,7 +410,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
         {loading ? (
           <div className="flex-1 flex items-center justify-center py-16">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-3"></div>
+              <Loader2 size={28} className="animate-spin text-blue-600 mx-auto mb-3" />
               <p className="text-sm text-gray-500">Cargando configuración...</p>
             </div>
           </div>
@@ -420,7 +419,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
             <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
 
               {/* ===== PANEL CANTIDAD ===== */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-3">
+              <div className="bg-gray-50/60 border border-gray-100 rounded-xl p-3">
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <div>
                     <div className="text-xs text-gray-500">Actual</div>
@@ -449,7 +448,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                   step="0.01"
                   value={cantidadProducir}
                   onChange={(e) => handleCantidadChange(parseFloat(e.target.value) || 0)}
-                  className="w-full p-2.5 text-lg font-bold border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
+                  className="w-full p-2.5 text-lg font-bold border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-center"
                   disabled={enviando}
                   autoFocus
                 />
@@ -457,10 +456,10 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
 
               {/* ===== RECETAS AUTO-CALCULADAS (Modo Rápido) ===== */}
               {esRapido && (
-                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+                <div className="bg-emerald-50/60 border border-emerald-200 rounded-xl p-3">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-sm">⚡</span>
+                      <Zap size={14} className="text-emerald-600" />
                       <span className="text-xs font-bold text-emerald-800">Recetas Auto-calculadas</span>
                     </div>
                     <button
@@ -481,9 +480,9 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                       const costoReceta = info?.costoUnitario || item.costoUnitario || 0;
 
                       return (
-                        <div key={i} className={`flex items-center justify-between py-1.5 px-2 rounded-lg ${insuficiente ? 'bg-red-50 border border-red-200' : 'bg-white/60'}`}>
+                        <div key={i} className={`flex items-center justify-between py-1.5 px-2 rounded-xl ${insuficiente ? 'bg-red-50 border border-red-200' : 'bg-white/60'}`}>
                           <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-sm flex-shrink-0">📋</span>
+                            <ClipboardList size={14} className="text-gray-400 flex-shrink-0" />
                             <span className="text-xs font-medium text-gray-800 truncate">{nombre}</span>
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
@@ -500,7 +499,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                                 S/.{(item.cantidadUtilizada * costoReceta).toFixed(2)}
                               </span>
                             )}
-                            {insuficiente && <span className="text-xs">❌</span>}
+                            {insuficiente && <AlertCircle size={12} className="text-red-500" />}
                           </div>
                         </div>
                       );
@@ -510,7 +509,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                   {/* Costo total */}
                   {canViewPrices && costoTotal > 0 && (
                     <div className="mt-2 pt-2 border-t border-emerald-200 flex items-center justify-between">
-                      <span className="text-xs text-emerald-700">💰 Costo total</span>
+                      <span className="text-xs text-emerald-700 flex items-center gap-1"><DollarSign size={12} /> Costo total</span>
                       <div className="text-right">
                         <span className="text-sm font-bold text-emerald-800">S/.{costoTotal.toFixed(2)}</span>
                         <span className="text-xs text-emerald-600 ml-2">(S/.{(costoTotal / cantidadProducir).toFixed(2)}/u)</span>
@@ -522,10 +521,10 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
 
               {/* ===== MODO MANUAL: SELECCIONAR RECETAS ===== */}
               {(!esRapido) && (
-                <div className="border border-gray-200 rounded-xl overflow-hidden">
-                  <div className="bg-gray-50 p-2.5 flex items-center justify-between">
+                <div className="bg-gray-50/60 border border-gray-100 rounded-xl overflow-hidden">
+                  <div className="bg-white p-2.5 flex items-center justify-between border-b border-gray-100">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-sm">📋</span>
+                      <ClipboardList size={14} className="text-gray-500" />
                       <span className="text-xs font-bold text-gray-700">Recetas ({recetasUtilizadas.length})</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -533,16 +532,16 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                         <button
                           type="button"
                           onClick={() => { setModoManual(false); aplicarFormula(formulaEstandar, cantidadProducir); }}
-                          className="text-xs text-blue-600 hover:text-blue-800 underline"
+                          className="text-xs text-blue-600 hover:text-blue-800 underline flex items-center gap-0.5"
                         >
-                          ⚡ Usar fórmula
+                          <Zap size={10} /> Usar fórmula
                         </button>
                       )}
                       <button
                         type="button"
                         onClick={agregarReceta}
                         disabled={enviando}
-                        className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors"
+                        className="px-2 py-1 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl text-xs font-medium transition-colors"
                       >
                         + Agregar
                       </button>
@@ -552,7 +551,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                   <div className="p-2.5 space-y-2">
                     {recetasUtilizadas.length === 0 ? (
                       <div className="text-center py-6 text-gray-400">
-                        <div className="text-2xl mb-1">📋</div>
+                        <ClipboardList size={24} className="mx-auto mb-1 text-gray-300" />
                         <p className="text-xs">Agrega recetas para producir</p>
                       </div>
                     ) : (
@@ -563,7 +562,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                         const costoReceta = info?.costoUnitario || item.costoUnitario || 0;
 
                         return (
-                          <div key={index} className={`border rounded-lg p-2 ${insuficiente ? 'bg-red-50 border-red-200' : 'bg-white'}`}>
+                          <div key={index} className={`border rounded-xl p-2 ${insuficiente ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'}`}>
                             <div className="flex items-start gap-2">
                               <div className="flex-1 space-y-1.5">
                                 <select
@@ -573,7 +572,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                                     const rec = obtenerRecetaInfo(e.target.value);
                                     actualizarReceta(index, 'costoUnitario', rec?.costoUnitario || 0);
                                   }}
-                                  className="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-blue-500 focus:border-blue-500"
+                                  className="w-full p-1.5 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 outline-none"
                                   disabled={enviando}
                                 >
                                   <option value="">Seleccionar receta...</option>
@@ -593,7 +592,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                                     min="0"
                                     value={Math.round(item.cantidadUtilizada * 100) / 100}
                                     onChange={(e) => actualizarReceta(index, 'cantidadUtilizada', Math.round((parseFloat(e.target.value) || 0) * 100) / 100)}
-                                    className="flex-1 p-1.5 border border-gray-300 rounded text-xs focus:ring-blue-500"
+                                    className="flex-1 p-1.5 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 outline-none"
                                     placeholder="Cantidad"
                                     disabled={enviando}
                                   />
@@ -613,11 +612,9 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                                 type="button"
                                 onClick={() => eliminarReceta(index)}
                                 disabled={enviando}
-                                className="p-1 text-red-500 hover:bg-red-50 rounded flex-shrink-0 mt-1"
+                                className="p-1 text-red-500 hover:bg-red-50 rounded-xl flex-shrink-0 mt-1"
                               >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
+                                <Trash2 size={14} />
                               </button>
                             </div>
                           </div>
@@ -629,7 +626,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                   {/* Costo total en modo manual */}
                   {canViewPrices && recetasUtilizadas.length > 0 && costoTotal > 0 && (
                     <div className="bg-green-50 px-3 py-2 flex justify-between border-t border-gray-200">
-                      <span className="text-xs text-green-700">💰 Costo total</span>
+                      <span className="text-xs text-green-700 flex items-center gap-1"><DollarSign size={12} /> Costo total</span>
                       <div className="text-right">
                         <span className="text-sm font-bold text-green-800">S/.{costoTotal.toFixed(2)}</span>
                         <span className="text-xs text-green-600 ml-2">(S/.{(costoTotal / cantidadProducir).toFixed(2)}/u)</span>
@@ -640,7 +637,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
               )}
 
               {/* ===== GUARDAR FÓRMULA ===== */}
-              <label className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+              <label className="flex items-center gap-2 p-2 bg-gray-50/60 rounded-xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors">
                 <input
                   type="checkbox"
                   checked={guardarFormula}
@@ -648,8 +645,8 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                   className="w-4 h-4 text-blue-600 rounded"
                   disabled={enviando}
                 />
-                <span className="text-xs text-gray-600">
-                  {formulaCargada ? '🔄 Actualizar fórmula estándar' : '💾 Guardar como fórmula estándar'}
+                <span className="text-xs text-gray-600 flex items-center gap-1">
+                  {formulaCargada ? <><RefreshCw size={12} /> Actualizar fórmula estándar</> : <><Save size={12} /> Guardar como fórmula estándar</>}
                 </span>
               </label>
 
@@ -664,7 +661,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                       onChange={(e) => { setBusquedaOperador(e.target.value); setOperador(''); setDropdownAbierto(true); }}
                       onFocus={() => setDropdownAbierto(true)}
                       placeholder={loadingUsuarios ? 'Cargando...' : 'Buscar operador...'}
-                      className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 pr-8"
+                      className="w-full p-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none pr-8"
                       disabled={enviando || loadingUsuarios}
                     />
                     <button
@@ -676,17 +673,13 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                       className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
                       {operador ? (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <X size={14} />
                       ) : (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
+                        <ChevronDown size={14} />
                       )}
                     </button>
                     {dropdownAbierto && (
-                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-36 overflow-y-auto">
+                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-36 overflow-y-auto">
                         {usuarios
                           .filter(u => u.role !== 'de_baja' && u.is_active !== false)
                           .filter(u => {
@@ -714,7 +707,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                   <input
                     type="text"
                     value={operador}
-                    className="w-full p-2 text-sm border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed"
+                    className="w-full p-2 text-sm border border-gray-200 rounded-xl bg-gray-50 cursor-not-allowed outline-none"
                     readOnly
                     title="Tu nombre se completa automáticamente"
                   />
@@ -724,20 +717,18 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
               {/* ===== FECHA Y OBSERVACIONES (Colapsable) ===== */}
               <details className="group">
                 <summary className="text-xs text-gray-500 cursor-pointer hover:text-gray-700 list-none flex items-center gap-1">
-                  <svg className="w-3 h-3 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                  </svg>
+                  <ChevronRight size={12} className="transition-transform group-open:rotate-90" />
                   Más opciones (fecha, observaciones)
                 </summary>
                 <div className="mt-2 space-y-2">
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">📅 Fecha y Hora</label>
+                    <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1"><Calendar size={12} className="text-gray-400" /> Fecha y Hora</label>
                     <input
                       type="datetime-local"
                       value={fechaProduccion}
                       onChange={(e) => setFechaProduccion(e.target.value)}
                       max={getLocalDateTimeString()}
-                      className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full p-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                       disabled={enviando}
                     />
                   </div>
@@ -747,7 +738,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                       value={observaciones}
                       onChange={(e) => setObservaciones(e.target.value)}
                       rows={2}
-                      className="w-full p-2 text-sm border border-gray-300 rounded-lg resize-none"
+                      className="w-full p-2 text-sm border border-gray-200 rounded-xl resize-none outline-none"
                       placeholder="Notas adicionales..."
                       disabled={enviando}
                     />
@@ -758,22 +749,22 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
             </div>
 
             {/* ===== FOOTER ===== */}
-            <div className="border-t border-gray-200 p-3 bg-white sm:rounded-b-xl">
+            <div className="bg-gray-50/50 border-t border-gray-100 p-3 sm:rounded-b-2xl flex-shrink-0">
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={onClose}
                   disabled={enviando}
-                  className="flex-1 px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-3 py-2.5 text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl text-sm font-medium transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={enviando || !recetasUtilizadas.length}
-                  className="flex-1 px-3 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex-1 px-3 py-2.5 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1.5"
                 >
-                  {enviando ? 'Produciendo...' : `🏭 Producir ${cantidadProducir}`}
+                  {enviando ? <><Loader2 size={14} className="animate-spin" /> Produciendo...</> : <><Factory size={14} /> Producir {cantidadProducir}</>}
                 </button>
               </div>
             </div>
@@ -783,44 +774,46 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
 
       {/* ===== MINI-MODAL CONFIG FÓRMULA ESTÁNDAR ===== */}
       {configFormulaOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[60] p-2 sm:p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[60] p-2 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
             
             {/* Header */}
-            <div className="flex items-center justify-between p-3 border-b border-gray-200 bg-gradient-to-r from-amber-500 to-orange-500 rounded-t-xl">
-              <div className="flex items-center gap-2 text-white min-w-0">
-                <span className="text-lg">⚙️</span>
+            <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-4 py-3 rounded-t-2xl flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="p-1.5 bg-amber-50 rounded-xl border border-amber-100">
+                  <Settings size={16} className="text-amber-600" />
+                </div>
                 <div className="min-w-0">
-                  <h4 className="text-sm font-bold truncate">Configurar Fórmula</h4>
-                  <p className="text-xs opacity-80 truncate">{producto.nombre}</p>
+                  <h4 className="text-sm font-semibold text-gray-900 truncate">Configurar Fórmula</h4>
+                  <p className="text-xs text-gray-500 truncate">{producto.nombre}</p>
                 </div>
               </div>
               <button
                 onClick={() => setConfigFormulaOpen(false)}
                 disabled={guardandoConfig}
-                className="text-white/70 hover:text-white p-1 rounded-lg hover:bg-white/10"
+                className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1 rounded-xl transition-colors"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X size={16} />
               </button>
             </div>
 
             {/* Contenido */}
             <div className="flex-1 overflow-y-auto p-3 space-y-3">
-              <p className="text-xs text-gray-500 bg-amber-50 p-2 rounded-lg">
-                💡 Define cuántas unidades de cada receta se necesitan <strong>por cada unidad</strong> producida de {producto.nombre}.
+              <p className="text-xs text-gray-500 bg-amber-50/60 border border-amber-100 p-2 rounded-xl flex items-start gap-1">
+                <Lightbulb size={12} className="text-amber-500 mt-0.5 flex-shrink-0" /> Define cuántas unidades de cada receta se necesitan <strong>por cada unidad</strong> producida de {producto.nombre}.
               </p>
 
               {/* Mensajes */}
               {configError && (
-                <div className="p-2 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-xs text-red-600">❌ {configError}</p>
+                <div className="p-2 bg-red-50 border border-red-200 rounded-xl flex items-start gap-1.5">
+                  <AlertCircle size={12} className="text-red-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-red-600">{configError}</p>
                 </div>
               )}
               {configExito && (
-                <div className="p-2 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-xs text-green-600">✅ {configExito}</p>
+                <div className="p-2 bg-green-50 border border-green-200 rounded-xl flex items-start gap-1.5">
+                  <Check size={12} className="text-green-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-green-600">{configExito}</p>
                 </div>
               )}
 
@@ -831,13 +824,13 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                   const disp = recetaInfo ? (recetaInfo.inventario?.cantidadProducida || 0) - (recetaInfo.inventario?.cantidadUtilizada || 0) : 0;
 
                   return (
-                    <div key={index} className="border border-gray-200 rounded-lg p-2.5 bg-white">
+                    <div key={index} className="border border-gray-100 rounded-xl p-2.5 bg-white">
                       <div className="flex items-start gap-2">
                         <div className="flex-1 space-y-2">
                           <select
                             value={item.receta}
                             onChange={(e) => actualizarRecetaConfig(index, 'receta', e.target.value)}
-                            className="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-amber-500 focus:border-amber-500"
+                            className="w-full p-1.5 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 outline-none"
                             disabled={guardandoConfig}
                           >
                             <option value="">Seleccionar receta...</option>
@@ -858,7 +851,7 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                               min="0"
                               value={item.cantidadPorUnidad}
                               onChange={(e) => actualizarRecetaConfig(index, 'cantidadPorUnidad', parseFloat(e.target.value) || 0)}
-                              className="flex-1 p-1.5 border border-gray-300 rounded text-xs text-center font-medium focus:ring-amber-500"
+                              className="flex-1 p-1.5 border border-gray-200 rounded-xl text-xs text-center font-medium focus:ring-2 focus:ring-amber-500 outline-none"
                               placeholder="0"
                               disabled={guardandoConfig}
                             />
@@ -874,11 +867,9 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                           type="button"
                           onClick={() => eliminarRecetaConfig(index)}
                           disabled={guardandoConfig || configRecetas.length <= 1}
-                          className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded flex-shrink-0 mt-1 disabled:opacity-30"
+                          className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl flex-shrink-0 mt-1 disabled:opacity-30"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </div>
@@ -891,29 +882,29 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                 type="button"
                 onClick={agregarRecetaConfig}
                 disabled={guardandoConfig}
-                className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-xs text-gray-500 hover:border-amber-400 hover:text-amber-600 transition-colors"
+                className="w-full py-2 border-2 border-dashed border-gray-200 rounded-xl text-xs text-gray-500 hover:border-amber-400 hover:text-amber-600 transition-colors"
               >
                 + Agregar receta
               </button>
             </div>
 
             {/* Footer */}
-            <div className="border-t border-gray-200 p-3 flex gap-2">
+            <div className="bg-gray-50/50 border-t border-gray-100 p-3 flex gap-2 rounded-b-2xl">
               {formulaCargada && (
                 <button
                   type="button"
                   onClick={eliminarConfigFormula}
                   disabled={guardandoConfig || eliminandoFormula}
-                  className="px-3 py-2 border border-red-300 text-red-600 rounded-lg text-xs hover:bg-red-50 transition-colors disabled:opacity-50"
+                  className="px-3 py-2 text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 rounded-xl text-xs transition-colors disabled:opacity-50"
                 >
-                  {eliminandoFormula ? '...' : '🗑️'}
+                  {eliminandoFormula ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
                 </button>
               )}
               <button
                 type="button"
                 onClick={() => setConfigFormulaOpen(false)}
                 disabled={guardandoConfig}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-xs text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex-1 px-3 py-2 text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl text-xs font-medium transition-colors"
               >
                 Cancelar
               </button>
@@ -921,9 +912,9 @@ const ModalProducirProducto = ({ isOpen, onClose, producto, onSuccess }) => {
                 type="button"
                 onClick={guardarConfigFormula}
                 disabled={guardandoConfig || configRecetas.filter(r => r.receta && r.cantidadPorUnidad > 0).length === 0}
-                className="flex-1 px-3 py-2 bg-amber-500 text-white rounded-lg text-xs font-medium hover:bg-amber-600 disabled:opacity-50 transition-colors"
+                className="flex-1 px-3 py-2 text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 rounded-xl text-xs font-medium disabled:opacity-50 transition-colors flex items-center justify-center gap-1"
               >
-                {guardandoConfig ? 'Guardando...' : '💾 Guardar Fórmula'}
+                {guardandoConfig ? <><Loader2 size={12} className="animate-spin" /> Guardando...</> : <><Save size={12} /> Guardar Fórmula</>}
               </button>
             </div>
           </div>

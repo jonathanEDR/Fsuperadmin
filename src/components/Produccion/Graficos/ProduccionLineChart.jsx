@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import { Loader2, Factory, Package, DollarSign, CheckCircle, AlertTriangle, RefreshCw, Calendar } from 'lucide-react';
 import api from '../../../services/api';
 import { formatearFecha } from '../../../utils/fechaHoraUtils';
 import { procesarFechaParaGrafico } from '../../../utils/graficosDateUtils';
@@ -34,7 +35,7 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
   // State para almacenar las etiquetas originales para el tooltip
   const [originalLabels, setOriginalLabels] = useState([]);
   
-  // 📊 State para almacenar detalles de productos por día (para tooltip enriquecido)
+  // State para almacenar detalles de productos por día (para tooltip enriquecido)
   const [detallesPorDia, setDetallesPorDia] = useState({});
 
   // Detectar si es móvil
@@ -73,7 +74,7 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
       
       // Validar estructura de respuesta
       if (!response.data || !response.data.data) {
-        console.error('❌ ProduccionLineChart - Estructura de respuesta inválida:', response.data);
+        console.error('ProduccionLineChart - Estructura de respuesta inválida:', response.data);
         setError('Estructura de datos incorrecta');
         return;
       }
@@ -85,7 +86,7 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
       
       await processProduccionData(producciones, totales);
     } catch (err) {
-      console.error('❌ ProduccionLineChart - Error:', err.message, err.response?.status);
+      console.error('ProduccionLineChart - Error:', err.message, err.response?.status);
       setError('Error al cargar datos: ' + err.message);
     } finally {
       setLoading(false);
@@ -122,7 +123,7 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
       setOriginalLabels(labels);
       
       if (labels.length === 0) {
-        console.error('❌ ProduccionLineChart - No se pudieron generar etiquetas');
+        console.error('ProduccionLineChart - No se pudieron generar etiquetas');
         setError('Error al generar las etiquetas del gráfico');
         return;
       }
@@ -238,14 +239,14 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
       };
       
       if (!newChartData.labels || newChartData.labels.length === 0) {
-        console.error('❌ ProduccionLineChart - Sin datos válidos para mostrar');
+        console.error('ProduccionLineChart - Sin datos válidos para mostrar');
         setError('No hay datos para mostrar en el período seleccionado');
         return;
       }
       
       setChartData(newChartData);
     } catch (err) {
-      console.error('❌ ProduccionLineChart - Error:', err.message);
+      console.error('ProduccionLineChart - Error:', err.message);
       setError('No se pudo cargar el gráfico de producción: ' + err.message);
     }
   }, [fechaInicio, fechaFin, obtenerFechaSoloLocal, canViewPrices]);
@@ -279,15 +280,15 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg shadow p-6 mb-8">
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-8">
         <div className="text-center">
-          <div className="text-red-500 text-lg mb-2">⚠️ Error</div>
+          <AlertTriangle className="mx-auto h-8 w-8 text-red-500 mb-2" />
           <p className="text-gray-600">{error}</p>
           <button 
             onClick={fetchProduccionData}
-            className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            className="mt-4 px-4 py-2 text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100 rounded-xl flex items-center gap-2 mx-auto"
           >
-            🔄 Reintentar
+            <RefreshCw size={16} /> Reintentar
           </button>
         </div>
       </div>
@@ -295,16 +296,14 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-2 sm:p-6 mb-4 sm:mb-8 overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-2 sm:p-6 mb-4 sm:mb-8 overflow-hidden">
       {/* Header simplificado */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div className="flex items-center gap-3">
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-lg blur-sm opacity-60"></div>
-            <div className="relative bg-white rounded-lg p-2 border border-gray-200">
-              <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1.581.814L10 14.229l-4.419 2.585A1 1 0 014 16V4zm2 0v10.586l3.419-2a1 1 0 011.162 0L14 14.586V4H6z" clipRule="evenodd" />
-              </svg>
+            <div className="relative bg-white rounded-xl p-2 border border-gray-200">
+              <Factory className="w-5 h-5 text-purple-600" />
             </div>
           </div>
           <h3 className="text-base sm:text-xl font-bold bg-gradient-to-r from-purple-800 to-indigo-600 bg-clip-text text-transparent">
@@ -314,39 +313,39 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
         
         {/* Información del período actual */}
         <div className="text-center">
-          <span className="text-xs sm:text-sm text-gray-600 font-medium">
-            🏭 {getTimeFilterLabel()}
+          <span className="text-xs sm:text-sm text-gray-600 font-medium flex items-center gap-1">
+            <Factory size={14} /> {getTimeFilterLabel()}
           </span>
         </div>
       </div>
 
       {/* Panel de selección de fechas siempre visible */}
-      <div className="mb-6 bg-purple-50 border border-purple-200 rounded-lg p-4">
+      <div className="mb-6 bg-purple-50 border border-purple-200 rounded-xl p-4">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
           {/* Fecha de inicio */}
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              📅 Fecha de Inicio
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+              <Calendar size={14} /> Fecha de Inicio
             </label>
             <input
               type="date"
               value={fechaInicio}
               onChange={(e) => setFechaInicio(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
               max={fechaFin || new Date().toISOString().split('T')[0]}
             />
           </div>
 
           {/* Fecha de fin */}
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              📅 Fecha de Fin
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+              <Calendar size={14} /> Fecha de Fin
             </label>
             <input
               type="date"
               value={fechaFin}
               onChange={(e) => setFechaFin(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
               min={fechaInicio}
               max={new Date().toISOString().split('T')[0]}
             />
@@ -362,7 +361,7 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
                 setFechaInicio(hace7Dias.toISOString().split('T')[0]);
                 setFechaFin(hoy.toISOString().split('T')[0]);
               }}
-              className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-xs font-medium whitespace-nowrap transition-colors"
+              className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 text-xs font-medium whitespace-nowrap transition-colors"
             >
               Últimos 7 días
             </button>
@@ -375,7 +374,7 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
                 setFechaInicio(hace30Dias.toISOString().split('T')[0]);
                 setFechaFin(hoy.toISOString().split('T')[0]);
               }}
-              className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-xs font-medium whitespace-nowrap transition-colors"
+              className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 text-xs font-medium whitespace-nowrap transition-colors"
             >
               Últimos 30 días
             </button>
@@ -385,8 +384,8 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
         {/* Información del rango */}
         {fechaInicio && fechaFin && (
           <div className="mt-3 pt-3 border-t border-purple-200">
-            <p className="text-sm text-purple-800">
-              🏭 Analizando desde {new Date(fechaInicio).toLocaleDateString('es-ES')} hasta {new Date(fechaFin).toLocaleDateString('es-ES')}
+            <p className="text-sm text-purple-800 flex items-center gap-1">
+              <Factory size={14} /> Analizando desde {new Date(fechaInicio).toLocaleDateString('es-ES')} hasta {new Date(fechaFin).toLocaleDateString('es-ES')}
               {(() => {
                 const inicio = new Date(fechaInicio);
                 const fin = new Date(fechaFin);
@@ -404,7 +403,7 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="flex flex-col items-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                <Loader2 className="h-12 w-12 animate-spin text-purple-600" />
                 <p className="mt-2 text-gray-600">Cargando datos...</p>
               </div>
             </div>
@@ -581,7 +580,7 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
-                <div className="text-gray-400 text-6xl mb-4">🏭</div>
+                <Factory className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                 <p className="text-gray-500">No hay datos de producción</p>
                 <p className="text-gray-400 text-sm">Selecciona un rango de fechas válido</p>
               </div>
@@ -592,7 +591,7 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
 
       {/* Panel de totales mejorado */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3 sm:p-4">
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-3 sm:p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs sm:text-sm font-medium text-green-800">Unidades Producidas</p>
@@ -600,12 +599,12 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
                 {totals.totalUnidadesProducidas.toLocaleString()}
               </p>
             </div>
-            <div className="text-green-600 text-xl sm:text-2xl">📦</div>
+            <div className="text-green-600"><Package size={22} /></div>
           </div>
         </div>
 
         {canViewPrices && (
-        <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg p-3 sm:p-4">
+        <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-3 sm:p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs sm:text-sm font-medium text-amber-800">Costo Total</p>
@@ -613,12 +612,12 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
                 S/ {totals.costoTotalProduccion.toFixed(2)}
               </p>
             </div>
-            <div className="text-amber-600 text-xl sm:text-2xl">💰</div>
+            <div className="text-amber-600"><DollarSign size={22} /></div>
           </div>
         </div>
         )}
 
-        <div className="bg-gradient-to-r from-blue-50 to-sky-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+        <div className="bg-gradient-to-r from-blue-50 to-sky-50 border border-blue-200 rounded-xl p-3 sm:p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs sm:text-sm font-medium text-blue-800">Total Producciones</p>
@@ -626,11 +625,11 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
                 {totals.totalProducciones}
               </p>
             </div>
-            <div className="text-blue-600 text-xl sm:text-2xl">🏭</div>
+            <div className="text-blue-600"><Factory size={22} /></div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-lg p-3 sm:p-4">
+        <div className="bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-xl p-3 sm:p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs sm:text-sm font-medium text-purple-800">Completadas</p>
@@ -638,7 +637,7 @@ const ProduccionLineChart = React.memo(({ userRole }) => {
                 {totals.produccionesCompletadas}
               </p>
             </div>
-            <div className="text-purple-600 text-xl sm:text-2xl">✅</div>
+            <div className="text-purple-600"><CheckCircle size={22} /></div>
           </div>
         </div>
       </div>

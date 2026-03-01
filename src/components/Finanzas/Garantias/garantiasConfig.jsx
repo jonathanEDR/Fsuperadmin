@@ -1,4 +1,5 @@
 import React from 'react';
+import { Clock, CheckCircle, XCircle, Lock, Unlock, Scale, Home, Car, User, Coins, Landmark, Package, ScrollText, ClipboardList, Eye, Pencil, Trash2 } from 'lucide-react';
 
 // ==================== CONFIGURACIÓN DE GARANTÍAS ====================
 
@@ -7,37 +8,37 @@ export const estadosColor = {
     'pendiente_evaluacion': {
         color: 'bg-yellow-100 text-yellow-800',
         label: 'Pendiente de Evaluación',
-        icono: '⏳',
+        icono: Clock,
         borderColor: 'border-yellow-300'
     },
     'aprobada': {
         color: 'bg-blue-100 text-blue-800',
         label: 'Aprobada',
-        icono: '✅',
+        icono: CheckCircle,
         borderColor: 'border-blue-300'
     },
     'rechazada': {
         color: 'bg-red-100 text-red-800',
         label: 'Rechazada',
-        icono: '❌',
+        icono: XCircle,
         borderColor: 'border-red-300'
     },
     'activa': {
         color: 'bg-green-100 text-green-800',
         label: 'Activa',
-        icono: '🔒',
+        icono: Lock,
         borderColor: 'border-green-300'
     },
     'liberada': {
         color: 'bg-gray-100 text-gray-800',
         label: 'Liberada',
-        icono: '🔓',
-        borderColor: 'border-gray-300'
+        icono: Unlock,
+        borderColor: 'border-gray-200'
     },
     'ejecutada': {
         color: 'bg-purple-100 text-purple-800',
         label: 'Ejecutada',
-        icono: '⚖️',
+        icono: Scale,
         borderColor: 'border-purple-300'
     }
 };
@@ -47,42 +48,42 @@ export const tiposColor = {
     'hipotecaria': {
         color: 'bg-indigo-100 text-indigo-800',
         label: 'Hipotecaria',
-        icono: '🏠'
+        icono: Home
     },
     'vehicular': {
         color: 'bg-cyan-100 text-cyan-800',
         label: 'Vehicular',
-        icono: '🚗'
+        icono: Car
     },
     'fianza_personal': {
         color: 'bg-pink-100 text-pink-800',
         label: 'Fianza Personal',
-        icono: '👤'
+        icono: User
     },
     'deposito_garantia': {
         color: 'bg-emerald-100 text-emerald-800',
         label: 'Depósito de Garantía',
-        icono: '💰'
+        icono: Coins
     },
     'aval_bancario': {
         color: 'bg-violet-100 text-violet-800',
         label: 'Aval Bancario',
-        icono: '🏦'
+        icono: Landmark
     },
     'prenda': {
         color: 'bg-amber-100 text-amber-800',
         label: 'Prenda',
-        icono: '📦'
+        icono: Package
     },
     'warrant': {
         color: 'bg-teal-100 text-teal-800',
         label: 'Warrant',
-        icono: '📜'
+        icono: ScrollText
     },
     'otra': {
         color: 'bg-slate-100 text-slate-800',
         label: 'Otra',
-        icono: '📋'
+        icono: ClipboardList
     }
 };
 
@@ -230,9 +231,10 @@ export const columnasGarantias = [
         ordenable: true,
         render: (valor) => {
             const config = tiposColor[valor] || tiposColor.otra;
+            const Icono = config.icono;
             return (
                 <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
-                    <span>{config.icono}</span>
+                    <Icono size={14} />
                     <span>{config.label}</span>
                 </span>
             );
@@ -301,9 +303,10 @@ export const columnasGarantias = [
         ordenable: true,
         render: (valor) => {
             const config = estadosColor[valor] || estadosColor.pendiente_evaluacion;
+            const Icono = config.icono;
             return (
                 <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
-                    <span>{config.icono}</span>
+                    <Icono size={14} />
                     <span>{config.label}</span>
                 </span>
             );
@@ -356,80 +359,80 @@ export const accionesGarantias = [
     {
         key: 'ver',
         label: 'Ver',
-        icono: '👁️',
+        icono: Eye,
         color: 'gray',
         handler: 'verDetalles',
-        className: 'bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-md transition-colors',
+        className: 'bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-xl transition-colors',
         tooltip: 'Ver detalles de la garantía',
         siempreVisible: true
     },
     {
         key: 'editar',
         label: 'Editar',
-        icono: '✏️',
+        icono: Pencil,
         color: 'blue',
         handler: 'editarGarantia',
-        className: 'bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-md transition-colors',
+        className: 'bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-xl transition-colors',
         tooltip: 'Editar garantía',
         estadosPermitidos: ['pendiente_evaluacion', 'aprobada', 'rechazada']
     },
     {
         key: 'aprobar',
         label: 'Aprobar',
-        icono: '✅',
+        icono: CheckCircle,
         color: 'green',
         handler: 'aprobarGarantia',
-        className: 'bg-green-100 hover:bg-green-200 text-green-700 p-2 rounded-md transition-colors',
+        className: 'bg-green-100 hover:bg-green-200 text-green-700 p-2 rounded-xl transition-colors',
         tooltip: 'Aprobar garantía',
         estadosPermitidos: ['pendiente_evaluacion']
     },
     {
         key: 'rechazar',
         label: 'Rechazar',
-        icono: '❌',
+        icono: XCircle,
         color: 'red',
         handler: 'rechazarGarantia',
-        className: 'bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-md transition-colors',
+        className: 'bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-xl transition-colors',
         tooltip: 'Rechazar garantía',
         estadosPermitidos: ['pendiente_evaluacion', 'aprobada']
     },
     {
         key: 'activar',
         label: 'Activar',
-        icono: '🔒',
+        icono: Lock,
         color: 'green',
         handler: 'activarGarantia',
-        className: 'bg-green-100 hover:bg-green-200 text-green-700 p-2 rounded-md transition-colors',
+        className: 'bg-green-100 hover:bg-green-200 text-green-700 p-2 rounded-xl transition-colors',
         tooltip: 'Activar garantía',
         estadosPermitidos: ['aprobada']
     },
     {
         key: 'liberar',
         label: 'Liberar',
-        icono: '🔓',
+        icono: Unlock,
         color: 'yellow',
         handler: 'liberarGarantia',
-        className: 'bg-yellow-100 hover:bg-yellow-200 text-yellow-700 p-2 rounded-md transition-colors',
+        className: 'bg-yellow-100 hover:bg-yellow-200 text-yellow-700 p-2 rounded-xl transition-colors',
         tooltip: 'Liberar garantía',
         estadosPermitidos: ['activa']
     },
     {
         key: 'ejecutar',
         label: 'Ejecutar',
-        icono: '⚖️',
+        icono: Scale,
         color: 'purple',
         handler: 'ejecutarGarantia',
-        className: 'bg-purple-100 hover:bg-purple-200 text-purple-700 p-2 rounded-md transition-colors',
+        className: 'bg-purple-100 hover:bg-purple-200 text-purple-700 p-2 rounded-xl transition-colors',
         tooltip: 'Ejecutar garantía',
         estadosPermitidos: ['activa']
     },
     {
         key: 'eliminar',
         label: 'Eliminar',
-        icono: '🗑️',
+        icono: Trash2,
         color: 'red',
         handler: 'eliminarGarantia',
-        className: 'bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-md transition-colors',
+        className: 'bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-xl transition-colors',
         tooltip: 'Eliminar garantía',
         estadosPermitidos: ['pendiente_evaluacion', 'rechazada']
     }

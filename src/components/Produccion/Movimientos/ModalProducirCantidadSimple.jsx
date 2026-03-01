@@ -5,6 +5,7 @@ import { getLocalDateTimeString } from '../../../utils/fechaHoraUtils';
 import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 import { getFullApiUrl, safeFetch } from '../../../config/api';
 import { useAuth } from '@clerk/clerk-react';
+import { X, Factory, Loader2, AlertCircle, BarChart3, Plus, Target, Zap, Pencil, Lightbulb, RefreshCw, Save, Calendar, Carrot, CakeSlice, AlertTriangle, Trash2, Check } from 'lucide-react';
 
 /**
  * Modal simplificado para admin/user
@@ -361,15 +362,17 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
   if (!isOpen || !producto) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
         
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-white">
-          <div className="flex items-center space-x-3">
-            <span className="text-3xl">🏭</span>
+        <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-5 py-4 rounded-t-2xl flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-50 rounded-xl border border-blue-100">
+              <Factory size={20} className="text-blue-600" />
+            </div>
             <div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900">
                 Producir Stock
               </h3>
               <p className="text-sm text-gray-500">
@@ -380,17 +383,16 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
           <button
             onClick={onClose}
             disabled={enviando}
-            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors"
+            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-xl transition-colors"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X size={20} />
           </button>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="mx-4 sm:mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+          <div className="mx-4 sm:mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2">
+            <AlertCircle size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
             <p className="text-sm text-red-600">{error}</p>
           </div>
         )}
@@ -400,17 +402,17 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
             
             {/* Stock Actual */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
+            <div className="bg-gray-50/60 border border-gray-100 rounded-xl p-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center">
-                  <div className="text-sm text-gray-600 mb-1">📊 Cantidad Actual</div>
+                  <div className="text-sm text-gray-600 mb-1 flex items-center justify-center gap-1"><BarChart3 size={13} className="text-gray-500" /> Cantidad Actual</div>
                   <div className="text-2xl font-bold text-blue-600">
                     {producto.stock || 0}
                   </div>
                   <div className="text-xs text-gray-500">{producto.unidadMedida || 'unidad'}</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-sm text-gray-600 mb-1">➕ A Producir</div>
+                  <div className="text-sm text-gray-600 mb-1 flex items-center justify-center gap-1"><Plus size={13} className="text-gray-500" /> A Producir</div>
                   <div className="text-2xl font-bold text-green-600">
                     +{formData.cantidadProducir}
                   </div>
@@ -419,9 +421,9 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
               </div>
               
               {/* Stock Final Proyectado */}
-              <div className="mt-3 pt-3 border-t border-blue-200">
+              <div className="mt-3 pt-3 border-t border-gray-200">
                 <div className="text-center">
-                  <div className="text-xs text-gray-600 mb-1">🎯 Stock Final</div>
+                  <div className="text-xs text-gray-600 mb-1 flex items-center justify-center gap-1"><Target size={13} className="text-gray-500" /> Stock Final</div>
                   <div className="text-xl font-bold text-indigo-600">
                     {(producto.stock || 0) + formData.cantidadProducir}
                   </div>
@@ -441,7 +443,7 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
                 min="1"
                 value={formData.cantidadProducir}
                 onChange={(e) => handleCantidadProducirChange(parseInt(e.target.value) || 0)}
-                className="w-full p-3 border border-gray-300 rounded-lg text-lg font-semibold focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border border-gray-200 rounded-xl text-lg font-semibold focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                 disabled={enviando}
                 required
               />
@@ -449,10 +451,10 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
 
             {/* 🎯 Indicador de Fórmula Estándar */}
             {formulaCargada && formulaEstandar?.activa && !modoManual ? (
-              <div className="bg-gradient-to-r from-emerald-50 to-green-50 border-2 border-emerald-300 rounded-xl p-3">
+              <div className="bg-emerald-50/60 border border-emerald-200 rounded-xl p-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">⚡</span>
+                    <Zap size={16} className="text-emerald-600" />
                     <div>
                       <p className="text-sm font-bold text-emerald-800">Fórmula Estándar Activa</p>
                       <p className="text-xs text-emerald-700">Recetas auto-calculadas al cambiar cantidad</p>
@@ -464,10 +466,10 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
                 </div>
               </div>
             ) : modoManual && formulaCargada ? (
-              <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-3">
+              <div className="bg-amber-50/60 border border-amber-200 rounded-xl p-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">✏️</span>
+                    <Pencil size={16} className="text-amber-600" />
                     <p className="text-sm font-bold text-amber-800">Modo Manual</p>
                   </div>
                   <button type="button" onClick={() => { setModoManual(false); aplicarFormula(formulaEstandar, formData.cantidadProducir); }} className="text-xs text-amber-600 hover:text-amber-800 underline">
@@ -476,9 +478,9 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
                 </div>
               </div>
             ) : (
-              <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-3">
+              <div className="bg-blue-50/60 border border-blue-200 rounded-xl p-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">💡</span>
+                  <Lightbulb size={16} className="text-blue-600" />
                   <div>
                     <p className="text-sm font-semibold text-blue-800">Sin Fórmula Estándar</p>
                     <p className="text-xs text-blue-700">Agrega recetas y marca "Guardar como fórmula" para auto-calcular.</p>
@@ -488,7 +490,7 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
             )}
 
             {/* Checkbox guardar fórmula */}
-            <label className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+            <label className="flex items-center gap-2 p-2 bg-gray-50/60 rounded-xl border border-gray-100 cursor-pointer hover:bg-gray-100">
               <input
                 type="checkbox"
                 checked={guardarComoFormula}
@@ -496,21 +498,21 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
                 className="w-4 h-4 text-blue-600 rounded"
                 disabled={enviando}
               />
-              <span className="text-xs text-gray-700">
+              <span className="text-xs text-gray-700 flex items-center gap-1">
                 {formulaCargada && formulaEstandar?.activa
-                  ? '🔄 Actualizar fórmula estándar'
-                  : '💾 Guardar como fórmula estándar'
+                  ? <><RefreshCw size={12} /> Actualizar fórmula estándar</>
+                  : <><Save size={12} /> Guardar como fórmula estándar</>
                 }
               </span>
             </label>
 
             {/* Ingredientes Utilizados */}
-            <div className="border border-gray-300 rounded-lg p-4">
+            <div className="bg-gray-50/60 border border-gray-100 rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-semibold text-gray-700">
-                  🥕 Ingredientes (Opcional)
+                <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
+                  <Carrot size={14} className="text-green-600" /> Ingredientes (Opcional)
                   {ingredientesDisponibles.length > 0 && (
-                    <span className="ml-2 text-xs text-green-600">
+                    <span className="ml-1 text-xs text-green-600">
                       ({ingredientesDisponibles.length} disponible{ingredientesDisponibles.length !== 1 ? 's' : ''})
                     </span>
                   )}
@@ -519,7 +521,7 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
                   type="button"
                   onClick={agregarIngrediente}
                   disabled={enviando || loading || ingredientesDisponibles.length === 0}
-                  className="text-xs bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="text-xs text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 px-3 py-1 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   title={ingredientesDisponibles.length === 0 ? 'No hay ingredientes con stock disponible' : 'Agregar ingrediente'}
                 >
                   + Agregar
@@ -527,9 +529,9 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
               </div>
 
               {ingredientesDisponibles.length === 0 && (
-                <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 text-center">
-                  <p className="text-sm text-yellow-700 font-medium">⚠️ No hay ingredientes con stock disponible</p>
-                  <p className="text-xs text-yellow-600 mt-1">Agrega entrada de inventario primero</p>
+                <div className="bg-amber-50/60 border border-amber-200 rounded-xl p-3 text-center">
+                  <p className="text-sm text-amber-700 font-medium flex items-center justify-center gap-1"><AlertTriangle size={14} /> No hay ingredientes con stock disponible</p>
+                  <p className="text-xs text-amber-600 mt-1">Agrega entrada de inventario primero</p>
                 </div>
               )}
 
@@ -546,14 +548,14 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
                     const disponible = (ingredienteInfo?.cantidad || 0) - (ingredienteInfo?.procesado || 0);
                     
                     return (
-                      <div key={index} className="flex gap-2 items-end bg-gray-50 p-3 rounded-lg relative">
+                      <div key={index} className="flex gap-2 items-end bg-white p-3 rounded-xl border border-gray-100 relative">
                         <button
                           type="button"
                           onClick={() => eliminarIngrediente(index)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                          className="absolute -top-2 -right-2 bg-red-50 text-red-500 border border-red-200 rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-100"
                           disabled={enviando}
                         >
-                          ×
+                          <Trash2 size={12} />
                         </button>
 
                         <div className="flex-1">
@@ -561,7 +563,7 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
                           <select
                             value={item.ingrediente}
                             onChange={(e) => actualizarIngrediente(index, 'ingrediente', e.target.value)}
-                            className="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                            className="w-full text-sm p-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                             disabled={enviando || loading}
                             required
                           >
@@ -585,7 +587,7 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
                             min="0"
                             value={item.cantidadUtilizada}
                             onChange={(e) => actualizarIngrediente(index, 'cantidadUtilizada', parseFloat(e.target.value) || 0)}
-                            className="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                            className="w-full text-sm p-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                             disabled={enviando}
                             required
                           />
@@ -603,12 +605,12 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
             </div>
 
             {/* Recetas Utilizadas */}
-            <div className="border border-gray-300 rounded-lg p-4">
+            <div className="bg-gray-50/60 border border-gray-100 rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-semibold text-gray-700">
-                  🍰 Recetas (Opcional)
+                <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
+                  <CakeSlice size={14} className="text-purple-600" /> Recetas (Opcional)
                   {recetasDisponibles.length > 0 && (
-                    <span className="ml-2 text-xs text-purple-600">
+                    <span className="ml-1 text-xs text-purple-600">
                       ({recetasDisponibles.length} disponible{recetasDisponibles.length !== 1 ? 's' : ''})
                     </span>
                   )}
@@ -617,7 +619,7 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
                   type="button"
                   onClick={agregarReceta}
                   disabled={enviando || loading || recetasDisponibles.length === 0}
-                  className="text-xs bg-purple-500 text-white px-3 py-1 rounded-lg hover:bg-purple-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="text-xs text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100 px-3 py-1 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   title={recetasDisponibles.length === 0 ? 'No hay recetas con stock disponible' : 'Agregar receta'}
                 >
                   + Agregar
@@ -625,9 +627,9 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
               </div>
 
               {recetasDisponibles.length === 0 && (
-                <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 text-center">
-                  <p className="text-sm text-yellow-700 font-medium">⚠️ No hay recetas con stock disponible</p>
-                  <p className="text-xs text-yellow-600 mt-1">Produce recetas primero</p>
+                <div className="bg-amber-50/60 border border-amber-200 rounded-xl p-3 text-center">
+                  <p className="text-sm text-amber-700 font-medium flex items-center justify-center gap-1"><AlertTriangle size={14} /> No hay recetas con stock disponible</p>
+                  <p className="text-xs text-amber-600 mt-1">Produce recetas primero</p>
                 </div>
               )}
 
@@ -644,14 +646,14 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
                     const disponible = (recetaInfo?.inventario?.cantidadProducida || 0) - (recetaInfo?.inventario?.cantidadUtilizada || 0);
                     
                     return (
-                      <div key={index} className="flex gap-2 items-end bg-gray-50 p-3 rounded-lg relative">
+                      <div key={index} className="flex gap-2 items-end bg-white p-3 rounded-xl border border-gray-100 relative">
                         <button
                           type="button"
                           onClick={() => eliminarReceta(index)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                          className="absolute -top-2 -right-2 bg-red-50 text-red-500 border border-red-200 rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-100"
                           disabled={enviando}
                         >
-                          ×
+                          <Trash2 size={12} />
                         </button>
 
                         <div className="flex-1">
@@ -659,7 +661,7 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
                           <select
                             value={item.receta}
                             onChange={(e) => actualizarReceta(index, 'receta', e.target.value)}
-                            className="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500"
+                            className="w-full text-sm p-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"
                             disabled={enviando || loading}
                             required
                           >
@@ -685,7 +687,7 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
                             min="0"
                             value={item.cantidadUtilizada}
                             onChange={(e) => actualizarReceta(index, 'cantidadUtilizada', parseFloat(e.target.value) || 0)}
-                            className="w-full text-sm p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500"
+                            className="w-full text-sm p-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"
                             disabled={enviando}
                             required
                           />
@@ -712,7 +714,7 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
                 <select
                   value={formData.operador}
                   onChange={(e) => handleInputChange('operador', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   disabled={enviando || loadingUsuarios}
                   required
                 >
@@ -731,27 +733,27 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
                   type="text"
                   value={formData.operador}
                   readOnly
-                  className="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                  className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 cursor-not-allowed"
                   title="Tu nombre se completa automáticamente"
                 />
               )}
               {!isSuperAdmin && (
-                <p className="text-xs text-gray-500 mt-1">
-                  ✓ Tu nombre se completa automáticamente
+                <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                  <Check size={12} className="text-green-500" /> Tu nombre se completa automáticamente
                 </p>
               )}
             </div>
 
             {/* Fecha y Hora de Producción */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                📅 Fecha y Hora de Producción
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1.5">
+                <Calendar size={14} className="text-gray-500" /> Fecha y Hora de Producción
               </label>
               <input
                 type="datetime-local"
                 value={formData.fechaProduccion}
                 onChange={(e) => handleInputChange('fechaProduccion', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                 disabled={enviando}
               />
               <p className="text-xs text-gray-500 mt-1">
@@ -769,7 +771,7 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
                 onChange={(e) => handleInputChange('observaciones', e.target.value)}
                 placeholder="Observaciones adicionales..."
                 rows={3}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 resize-none"
+                className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
                 disabled={enviando}
               />
             </div>
@@ -777,22 +779,22 @@ const ModalProducirCantidadSimple = ({ producto, isOpen, onClose, onSuccess }) =
           </div>
 
           {/* Footer con botones */}
-          <div className="border-t border-gray-200 px-4 sm:px-6 py-4 bg-white">
+          <div className="bg-gray-50/50 border-t border-gray-100 px-5 py-3 rounded-b-2xl flex-shrink-0">
             <div className="flex gap-3">
               <button
                 type="button"
                 onClick={onClose}
                 disabled={enviando}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium"
+                className="flex-1 px-4 py-2.5 text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl transition-colors font-medium text-sm"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={enviando}
-                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                className="flex-1 px-4 py-2.5 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm flex items-center justify-center gap-2"
               >
-                {enviando ? 'Produciendo...' : '🏭 Producir'}
+                {enviando ? <><Loader2 size={16} className="animate-spin" /> Produciendo...</> : <><Factory size={16} /> Producir</>}
               </button>
             </div>
           </div>

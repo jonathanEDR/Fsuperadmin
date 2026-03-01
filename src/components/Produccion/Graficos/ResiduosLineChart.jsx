@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import { Loader2, Trash2, TrendingDown, DollarSign, BarChart3, AlertTriangle, RefreshCw, Calendar, Package, FileText } from 'lucide-react';
 import api from '../../../services/api';
 import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
@@ -59,19 +60,19 @@ const ResiduosLineChart = React.memo(() => {
 
   // Mapeo de motivos para mostrar
   const motivosLabels = {
-    vencido: '📅 Vencido',
-    dañado: '💥 Dañado',
-    merma: '📉 Merma',
-    error_proceso: '⚠️ Error de proceso',
-    otros: '❓ Otros'
+    vencido: 'Vencido',
+    dañado: 'Dañado',
+    merma: 'Merma',
+    error_proceso: 'Error de proceso',
+    otros: 'Otros'
   };
 
   // Mapeo de tipos de producto
   const tiposLabels = {
-    ingrediente: '🥬 Ingrediente',
-    material: '📦 Material',
-    receta: '📝 Receta',
-    produccion: '🏭 Producción'
+    ingrediente: 'Ingrediente',
+    material: 'Material',
+    receta: 'Receta',
+    produccion: 'Producción'
   };
 
   // Función auxiliar para obtener fecha solo (YYYY-MM-DD) en zona horaria de Perú
@@ -103,7 +104,7 @@ const ResiduosLineChart = React.memo(() => {
       
       await processResiduosData(residuos);
     } catch (err) {
-      console.error('❌ ResiduosLineChart - Error al cargar datos:', err);
+      console.error('ResiduosLineChart - Error al cargar datos:', err);
       setError('Error al cargar datos: ' + err.message);
     } finally {
       setLoading(false);
@@ -244,15 +245,15 @@ const ResiduosLineChart = React.memo(() => {
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg shadow p-6 mb-8">
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-8">
         <div className="text-center">
-          <div className="text-red-500 text-lg mb-2">⚠️ Error</div>
+          <AlertTriangle className="mx-auto h-8 w-8 text-red-500 mb-2" />
           <p className="text-gray-600">{error}</p>
           <button 
             onClick={fetchResiduosData}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            className="mt-4 px-4 py-2 text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 rounded-xl flex items-center gap-2 mx-auto"
           >
-            🔄 Reintentar
+            <RefreshCw size={16} /> Reintentar
           </button>
         </div>
       </div>
@@ -260,14 +261,14 @@ const ResiduosLineChart = React.memo(() => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-2 sm:p-6 mb-4 sm:mb-8 overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-2 sm:p-6 mb-4 sm:mb-8 overflow-hidden">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div className="flex items-center gap-3">
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-red-400 to-orange-500 rounded-lg blur-sm opacity-60"></div>
-            <div className="relative bg-white rounded-lg p-2 border border-gray-200">
-              <span className="text-xl">🗑️</span>
+            <div className="relative bg-white rounded-xl p-2 border border-gray-200">
+              <Trash2 className="w-5 h-5 text-red-600" />
             </div>
           </div>
           <h3 className="text-base sm:text-xl font-bold bg-gradient-to-r from-red-700 to-orange-600 bg-clip-text text-transparent">
@@ -276,39 +277,39 @@ const ResiduosLineChart = React.memo(() => {
         </div>
         
         <div className="text-center">
-          <span className="text-xs sm:text-sm text-gray-600 font-medium">
-            📊 {getTimeFilterLabel()}
+          <span className="text-xs sm:text-sm text-gray-600 font-medium flex items-center gap-1">
+            <BarChart3 size={14} /> {getTimeFilterLabel()}
           </span>
         </div>
       </div>
 
       {/* Panel de filtros */}
-      <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+      <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Fecha de inicio */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              📅 Fecha Inicio
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+              <Calendar size={14} /> Fecha Inicio
             </label>
             <input
               type="date"
               value={fechaInicio}
               onChange={(e) => setFechaInicio(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
               max={fechaFin || new Date().toISOString().split('T')[0]}
             />
           </div>
 
           {/* Fecha de fin */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              📅 Fecha Fin
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+              <Calendar size={14} /> Fecha Fin
             </label>
             <input
               type="date"
               value={fechaFin}
               onChange={(e) => setFechaFin(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
               min={fechaInicio}
               max={new Date().toISOString().split('T')[0]}
             />
@@ -316,38 +317,38 @@ const ResiduosLineChart = React.memo(() => {
 
           {/* Tipo de producto */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              📦 Tipo de Producto
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+              <Package size={14} /> Tipo de Producto
             </label>
             <select
               value={tipoProducto}
               onChange={(e) => setTipoProducto(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
             >
               <option value="">Todos los tipos</option>
-              <option value="ingrediente">🥬 Ingrediente</option>
-              <option value="material">📦 Material</option>
-              <option value="receta">📝 Receta</option>
-              <option value="produccion">🏭 Producción</option>
+              <option value="ingrediente">Ingrediente</option>
+              <option value="material">Material</option>
+              <option value="receta">Receta</option>
+              <option value="produccion">Producción</option>
             </select>
           </div>
 
           {/* Motivo */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              ❓ Motivo
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+              <FileText size={14} /> Motivo
             </label>
             <select
               value={motivo}
               onChange={(e) => setMotivo(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
             >
               <option value="">Todos los motivos</option>
-              <option value="vencido">📅 Vencido</option>
-              <option value="dañado">💥 Dañado</option>
-              <option value="merma">📉 Merma</option>
-              <option value="error_proceso">⚠️ Error de proceso</option>
-              <option value="otros">❓ Otros</option>
+              <option value="vencido">Vencido</option>
+              <option value="dañado">Dañado</option>
+              <option value="merma">Merma</option>
+              <option value="error_proceso">Error de proceso</option>
+              <option value="otros">Otros</option>
             </select>
           </div>
         </div>
@@ -362,7 +363,7 @@ const ResiduosLineChart = React.memo(() => {
               setFechaInicio(hace7Dias.toISOString().split('T')[0]);
               setFechaFin(hoy.toISOString().split('T')[0]);
             }}
-            className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-xs font-medium transition-colors"
+            className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 text-xs font-medium transition-colors"
           >
             Últimos 7 días
           </button>
@@ -375,7 +376,7 @@ const ResiduosLineChart = React.memo(() => {
               setFechaInicio(hace30Dias.toISOString().split('T')[0]);
               setFechaFin(hoy.toISOString().split('T')[0]);
             }}
-            className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-xs font-medium transition-colors"
+            className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 text-xs font-medium transition-colors"
           >
             Últimos 30 días
           </button>
@@ -388,7 +389,7 @@ const ResiduosLineChart = React.memo(() => {
               setFechaInicio(hace90Dias.toISOString().split('T')[0]);
               setFechaFin(hoy.toISOString().split('T')[0]);
             }}
-            className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-xs font-medium transition-colors"
+            className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 text-xs font-medium transition-colors"
           >
             Últimos 90 días
           </button>
@@ -398,9 +399,9 @@ const ResiduosLineChart = React.memo(() => {
               setTipoProducto('');
               setMotivo('');
             }}
-            className="px-3 py-1.5 bg-red-100 text-red-700 rounded-md hover:bg-red-200 text-xs font-medium transition-colors"
+            className="px-3 py-1.5 bg-red-100 text-red-700 rounded-xl hover:bg-red-200 text-xs font-medium transition-colors flex items-center gap-1"
           >
-            🔄 Limpiar filtros
+            <RefreshCw size={12} /> Limpiar filtros
           </button>
         </div>
       </div>
@@ -411,7 +412,7 @@ const ResiduosLineChart = React.memo(() => {
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="flex flex-col items-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+                <Loader2 className="h-12 w-12 animate-spin text-red-600" />
                 <p className="mt-2 text-gray-600">Cargando datos...</p>
               </div>
             </div>
@@ -600,7 +601,7 @@ const ResiduosLineChart = React.memo(() => {
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center text-gray-500">
-                <span className="text-4xl mb-2 block">🗑️</span>
+                <Trash2 className="mx-auto h-10 w-10 text-gray-400 mb-2" />
                 <p>No hay residuos registrados en este período</p>
               </div>
             </div>
@@ -610,9 +611,9 @@ const ResiduosLineChart = React.memo(() => {
 
       {/* Tarjetas de resumen */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mt-4 sm:mt-6">
-        <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-3 sm:p-4 border border-red-200">
+        <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-3 sm:p-4 border border-red-200">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-lg sm:text-xl">🗑️</span>
+            <Trash2 size={20} className="text-red-600" />
             <span className="text-xs sm:text-sm text-red-600 font-medium">Total Registros</span>
           </div>
           <div className="text-lg sm:text-2xl font-bold text-red-800">
@@ -620,9 +621,9 @@ const ResiduosLineChart = React.memo(() => {
           </div>
         </div>
         
-        <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-3 sm:p-4 border border-orange-200">
+        <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-3 sm:p-4 border border-orange-200">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-lg sm:text-xl">📉</span>
+            <TrendingDown size={20} className="text-orange-600" />
             <span className="text-xs sm:text-sm text-orange-600 font-medium">Cantidad Perdida</span>
           </div>
           <div className="text-lg sm:text-2xl font-bold text-orange-800">
@@ -631,9 +632,9 @@ const ResiduosLineChart = React.memo(() => {
         </div>
         
         {canViewPrices && (
-        <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-3 sm:p-4 border border-amber-200">
+        <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-3 sm:p-4 border border-amber-200">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-lg sm:text-xl">💰</span>
+            <DollarSign size={20} className="text-amber-600" />
             <span className="text-xs sm:text-sm text-amber-600 font-medium">Costo Pérdida</span>
           </div>
           <div className="text-lg sm:text-2xl font-bold text-amber-800">
@@ -642,9 +643,9 @@ const ResiduosLineChart = React.memo(() => {
         </div>
         )}
         
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-3 sm:p-4 border border-purple-200">
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-3 sm:p-4 border border-purple-200">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-lg sm:text-xl">📊</span>
+            <BarChart3 size={20} className="text-purple-600" />
             <span className="text-xs sm:text-sm text-purple-600 font-medium">Tipos Afectados</span>
           </div>
           <div className="text-lg sm:text-2xl font-bold text-purple-800">
@@ -658,8 +659,8 @@ const ResiduosLineChart = React.memo(() => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
           {/* Por motivo */}
           {Object.keys(totals.porMotivo || {}).length > 0 && (
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h4 className="text-sm font-semibold text-gray-700 mb-3">📋 Distribución por Motivo</h4>
+            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+              <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-1"><FileText size={14} /> Distribución por Motivo</h4>
               <div className="space-y-2">
                 {Object.entries(totals.porMotivo).map(([mot, cant]) => (
                   <div key={mot} className="flex justify-between items-center">
@@ -673,8 +674,8 @@ const ResiduosLineChart = React.memo(() => {
           
           {/* Por tipo */}
           {Object.keys(totals.porTipo || {}).length > 0 && (
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h4 className="text-sm font-semibold text-gray-700 mb-3">📦 Distribución por Tipo</h4>
+            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+              <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-1"><Package size={14} /> Distribución por Tipo</h4>
               <div className="space-y-2">
                 {Object.entries(totals.porTipo).map(([tipo, cant]) => (
                   <div key={tipo} className="flex justify-between items-center">

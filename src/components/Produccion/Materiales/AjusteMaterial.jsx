@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Loader2, Scale, Plus, Minus, Factory, RefreshCw, Package, AlertTriangle } from 'lucide-react';
 import { materialService } from '../../../services/materialService';
 
 const AjusteMaterial = ({ material, onGuardar, onCancelar }) => {
@@ -74,37 +75,37 @@ const AjusteMaterial = ({ material, onGuardar, onCancelar }) => {
       value: 'ajustar',
       label: 'Ajustar Cantidad Total',
       description: 'Establecer la cantidad total exacta',
-      icon: '⚖️'
+      icon: <Scale size={18} />
     },
     {
       value: 'sumar',
       label: 'Sumar al Inventario',
       description: 'Agregar cantidad al stock actual',
-      icon: '➕'
+      icon: <Plus size={18} />
     },
     {
       value: 'restar',
       label: 'Restar del Inventario',
       description: 'Quitar cantidad del stock actual',
-      icon: '➖'
+      icon: <Minus size={18} />
     },
     {
       value: 'consumir',
       label: 'Consumir Material',
       description: 'Marcar como consumido en producción',
-      icon: '🏭'
+      icon: <Factory size={18} />
     },
     {
       value: 'restaurar',
       label: 'Restaurar Material',
       description: 'Devolver material consumido al inventario',
-      icon: '♻️'
+      icon: <RefreshCw size={18} />
     },
     {
       value: 'agregar',
       label: 'Entrada de Stock',
       description: 'Agregar nueva entrada de material',
-      icon: '📦'
+      icon: <Package size={18} />
     }
   ];
 
@@ -134,15 +135,15 @@ const AjusteMaterial = ({ material, onGuardar, onCancelar }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-20 mx-auto p-6 border w-11/12 md:w-2/3 lg:w-1/2 xl:w-1/3 shadow-lg rounded-md bg-white">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+      <div className="relative top-20 mx-auto p-6 border border-gray-100 w-11/12 md:w-2/3 lg:w-1/2 xl:w-1/3 shadow-xl rounded-2xl bg-white">
         <div className="mt-3">
           <h3 className="text-lg font-medium text-gray-900 mb-4">
             Ajustar Inventario - {material.nombre}
           </h3>
 
           {/* Estado Actual */}
-          <div className="bg-gray-50 p-4 rounded-md mb-6">
+          <div className="bg-gray-50 p-4 rounded-xl mb-6">
             <h4 className="font-medium text-gray-700 mb-2">Estado Actual</h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
@@ -174,7 +175,7 @@ const AjusteMaterial = ({ material, onGuardar, onCancelar }) => {
                 {operaciones.map((operacion) => (
                   <label
                     key={operacion.value}
-                    className={`border rounded-lg p-3 cursor-pointer transition-colors flex items-start space-x-3 ${
+                    className={`border rounded-xl p-3 cursor-pointer transition-colors flex items-start space-x-3 ${
                       formData.tipoOperacion === operacion.value
                         ? 'border-blue-500 bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300'
@@ -189,7 +190,7 @@ const AjusteMaterial = ({ material, onGuardar, onCancelar }) => {
                     />
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
-                        <span className="text-lg">{operacion.icon}</span>
+                        <span className="text-blue-500">{operacion.icon}</span>
                         <span className="font-medium">{operacion.label}</span>
                       </div>
                       <p className="text-sm text-gray-500 mt-1">{operacion.description}</p>
@@ -210,15 +211,14 @@ const AjusteMaterial = ({ material, onGuardar, onCancelar }) => {
                 min="0"
                 value={formData.cantidad}
                 onChange={(e) => setFormData(prev => ({ ...prev, cantidad: e.target.value }))}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Ingrese la cantidad"
+                className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                 required
               />
             </div>
 
             {/* Resultado Esperado */}
             {getResultadoEsperado() && (
-              <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
                 <h4 className="font-medium text-blue-800 mb-1">Resultado Esperado:</h4>
                 <p className="text-sm text-blue-700">{getResultadoEsperado()}</p>
               </div>
@@ -232,7 +232,7 @@ const AjusteMaterial = ({ material, onGuardar, onCancelar }) => {
               <textarea
                 value={formData.motivo}
                 onChange={(e) => setFormData(prev => ({ ...prev, motivo: e.target.value }))}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                 rows="3"
                 placeholder="Descripción del motivo del ajuste..."
                 required
@@ -241,8 +241,8 @@ const AjusteMaterial = ({ material, onGuardar, onCancelar }) => {
 
             {/* Error */}
             {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md">
-                {error}
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-2">
+                <AlertTriangle size={16} className="flex-shrink-0" /> {error}
               </div>
             )}
 
@@ -251,7 +251,7 @@ const AjusteMaterial = ({ material, onGuardar, onCancelar }) => {
               <button
                 type="button"
                 onClick={onCancelar}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+                className="px-4 py-2 text-gray-700 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors"
                 disabled={loading}
               >
                 Cancelar
@@ -259,9 +259,9 @@ const AjusteMaterial = ({ material, onGuardar, onCancelar }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2"
               >
-                {loading ? 'Procesando...' : 'Confirmar Ajuste'}
+                {loading ? <><Loader2 size={16} className="animate-spin" /> Procesando...</> : 'Confirmar Ajuste'}
               </button>
             </div>
           </form>

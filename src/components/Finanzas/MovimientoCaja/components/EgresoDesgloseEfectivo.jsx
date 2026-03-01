@@ -43,7 +43,7 @@ const EgresoDesgloseEfectivo = memo(({
             </h3>
 
             {/* Resumen y estado */}
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-gray-50 p-4 rounded-xl">
                 <div className="flex justify-between items-center mb-2">
                     <span className="font-medium text-gray-700">Total Calculado:</span>
                     <span className="font-bold text-lg text-green-600">
@@ -84,7 +84,7 @@ const EgresoDesgloseEfectivo = memo(({
                         const subtotal = cantidad * denom.valor;
                         
                         return (
-                            <div key={denom.key} className="bg-white border border-gray-200 rounded-lg p-3">
+                            <div key={denom.key} className="bg-white border border-gray-200 rounded-xl p-3">
                                 <div className="text-center mb-2">
                                     <div className="font-semibold text-gray-800">{denom.label}</div>
                                     <div className="text-xs text-gray-500">
@@ -131,7 +131,7 @@ const EgresoDesgloseEfectivo = memo(({
                         const subtotal = cantidad * denom.valor;
                         
                         return (
-                            <div key={denom.key} className="bg-white border border-gray-200 rounded-lg p-3">
+                            <div key={denom.key} className="bg-white border border-gray-200 rounded-xl p-3">
                                 <div className="text-center mb-2">
                                     <div className="font-semibold text-gray-800 text-sm">{denom.label}</div>
                                     <div className="text-xs text-gray-500">

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { getLocalDateTimeString, formatLocalDate, convertLocalDateTimeToISO } from '../../utils/fechaHoraUtils';
 
 function DevolucionModal({
@@ -51,8 +52,8 @@ function DevolucionModal({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-60">
-      <div className="modal-overlay absolute inset-0 bg-black opacity-50"></div>
-      <div className="modal-content bg-white p-4 sm:p-6 rounded-lg shadow-xl z-50 w-[95vw] max-w-[800px] max-h-[95vh] overflow-y-auto">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-xl border border-gray-100 z-50 w-[95vw] max-w-[800px] max-h-[95vh] overflow-y-auto relative">
         <h3 className="text-xl font-semibold mb-6">Registrar Devolución</h3>
         
         {/* Selección de Venta */}
@@ -67,7 +68,7 @@ function DevolucionModal({
               onVentaSelect(venta);
               setProductosADevolver([]); // Limpiar productos al cambiar de venta
             }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           >
             <option value="">Seleccione una venta</option>
             {ventas.map(venta => (
@@ -92,7 +93,7 @@ function DevolucionModal({
                     agregarProducto(producto);
                   }
                 }}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               >
                 <option value="">Agregar producto</option>
                 {selectedVenta.productos
@@ -109,7 +110,7 @@ function DevolucionModal({
             {/* Lista de productos seleccionados */}
             <div className="space-y-4">
               {productosADevolver.map((item, index) => (
-                <div key={index} className="flex items-center gap-4 p-4 bg-gray-50 rounded-md">
+                <div key={index} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
                   <div className="flex-1">
                     <p className="font-medium">{item.producto.productoId.nombre}</p>
                     <p className="text-sm text-gray-600">
@@ -123,7 +124,7 @@ function DevolucionModal({
                       onChange={(e) => actualizarCantidad(index, e.target.value)}
                       min="1"
                       max={item.producto.cantidad}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Cantidad"
                     />
                   </div>
@@ -154,7 +155,7 @@ function DevolucionModal({
             value={fechaDevolucion}
             onChange={(e) => onFechaChange(e.target.value)}
             max={getLocalDateTimeString()}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             required
           />
           <p className="text-xs text-gray-500 mt-1">
@@ -170,10 +171,10 @@ function DevolucionModal({
           <textarea
             value={motivo}
             onChange={(e) => onMotivoChange(e.target.value)}
-            className={`w-full px-3 py-2 border rounded-md ${
+            className={`w-full px-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               motivo.length > 0 && motivo.length < 10 
                 ? 'border-yellow-300' 
-                : 'border-gray-300'
+                : 'border-gray-200'
             }`}
             rows="3"
             placeholder="Explique detalladamente el motivo de la devolución..."
@@ -187,7 +188,7 @@ function DevolucionModal({
 
         {/* Total de la devolución */}
         {productosADevolver.length > 0 && (
-          <div className="mb-6 p-4 bg-gray-50 rounded-md">
+          <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
             <p className="text-lg font-medium">
               Total a devolver: S/ {productosADevolver.reduce((sum, item) => sum + item.montoDevolucion, 0).toFixed(2)}
             </p>
@@ -198,7 +199,7 @@ function DevolucionModal({
         <div className="flex justify-end space-x-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+            className="px-4 py-2 text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-sm"
           >
             Cancelar
           </button>
@@ -261,9 +262,9 @@ function DevolucionModal({
                 parseInt(item.cantidad) > item.producto.cantidad
               )
             }
-            className={`px-4 py-2 ${
-              isSubmitting ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-            } text-white rounded-md transition-colors`}
+            className={`px-4 py-2 text-sm rounded-xl transition-colors ${
+              isSubmitting ? 'text-blue-400 bg-blue-50 border border-blue-200 cursor-not-allowed opacity-60' : 'text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100'
+            }`}
           >
             {isSubmitting ? 'Procesando...' : 'Registrar Devolución'}
           </button>

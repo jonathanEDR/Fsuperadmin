@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { X, Scale, Loader2, AlertTriangle, Eye } from 'lucide-react';
 import { ingredienteService } from '../../../services/ingredienteService';
 
 const AjusteInventario = ({ ingrediente, onGuardar, onCancelar }) => {
@@ -70,15 +71,26 @@ const AjusteInventario = ({ ingrediente, onGuardar, onCancelar }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
-        <div className="mt-3">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
-            Ajustar Inventario - {ingrediente.nombre}
-          </h3>
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+      <div className="relative top-20 mx-auto w-11/12 md:w-1/2 lg:w-1/3 rounded-2xl shadow-xl border border-gray-100 bg-white flex flex-col overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-5 py-4 rounded-t-2xl">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-green-100 rounded-lg border border-green-200">
+              <Scale size={18} className="text-green-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Ajustar Inventario - {ingrediente.nombre}
+            </h3>
+          </div>
+          <button onClick={onCancelar} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+            <X size={20} />
+          </button>
+        </div>
 
+        <div className="p-5">
           {/* Información actual */}
-          <div className="bg-gray-50 p-4 rounded-lg mb-4">
+          <div className="bg-gray-50/60 p-4 rounded-xl border border-gray-100 mb-4">
             <h4 className="font-medium text-gray-700 mb-2">Estado Actual:</h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
@@ -147,8 +159,8 @@ const AjusteInventario = ({ ingrediente, onGuardar, onCancelar }) => {
                   step="0.01"
                   value={valor}
                   onChange={(e) => setValor(parseFloat(e.target.value) || 0)}
-                  className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                    errores.valor ? 'border-red-500' : 'border-gray-300'
+                  className={`w-full p-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none ${
+                    errores.valor ? 'border-red-500' : 'border-gray-200'
                   }`}
                   placeholder={tipoAjuste === 'ajustar' ? '+10 o -5' : '50'}
                 />
@@ -171,8 +183,8 @@ const AjusteInventario = ({ ingrediente, onGuardar, onCancelar }) => {
                   value={motivo}
                   onChange={(e) => setMotivo(e.target.value)}
                   rows={3}
-                  className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                    errores.motivo ? 'border-red-500' : 'border-gray-300'
+                  className={`w-full p-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none ${
+                    errores.motivo ? 'border-red-500' : 'border-gray-200'
                   }`}
                   placeholder="Describe el motivo del ajuste..."
                 />
@@ -183,8 +195,8 @@ const AjusteInventario = ({ ingrediente, onGuardar, onCancelar }) => {
 
               {/* Vista previa */}
               {valor !== 0 && (
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-blue-700 mb-2">Vista Previa:</h4>
+                <div className="bg-blue-50/60 p-4 rounded-xl border border-blue-100">
+                  <h4 className="flex items-center gap-1.5 font-medium text-blue-700 mb-2"><Eye size={15} /> Vista Previa:</h4>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-blue-600">Nueva Cantidad Total:</span>
@@ -204,7 +216,7 @@ const AjusteInventario = ({ ingrediente, onGuardar, onCancelar }) => {
               <button
                 type="button"
                 onClick={onCancelar}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+                className="px-4 py-2 text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl transition-colors font-medium"
                 disabled={enviando}
               >
                 Cancelar
@@ -212,9 +224,9 @@ const AjusteInventario = ({ ingrediente, onGuardar, onCancelar }) => {
               <button
                 type="submit"
                 disabled={enviando || valor === 0}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-colors disabled:opacity-50 font-medium flex items-center gap-2"
               >
-                {enviando ? 'Aplicando...' : 'Aplicar Ajuste'}
+                {enviando ? <><Loader2 size={16} className="animate-spin" /> Aplicando...</> : 'Aplicar Ajuste'}
               </button>
             </div>
           </form>

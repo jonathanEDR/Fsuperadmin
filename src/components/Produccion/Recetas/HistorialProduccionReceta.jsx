@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Loader2, BarChart3, ChevronDown, Filter, Trash2, Factory, Ruler, Leaf, FileText, DollarSign, AlertTriangle, User, Search, CheckCircle } from 'lucide-react';
 import { recetaService } from '../../../services/recetaService';
 import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
@@ -178,9 +179,9 @@ const HistorialProduccionReceta = ({ recetaId, recetaNombre, unidadMedida = 'uni
   // Si no hay historial y no está cargando, mostrar mensaje compacto
   if (!loading && historial.length === 0) {
     return (
-      <div className="mt-6 bg-gray-50 rounded-lg border border-gray-200 p-4">
+      <div className="mt-6 bg-gray-50/60 rounded-xl border border-gray-100 p-4">
         <div className="flex items-center gap-2 text-gray-600">
-          <span className="text-xl">📊</span>
+          <BarChart3 size={20} />
           <span className="font-medium">Historial de Producción</span>
         </div>
         <p className="text-sm text-gray-500 mt-2">
@@ -192,27 +193,22 @@ const HistorialProduccionReceta = ({ recetaId, recetaNombre, unidadMedida = 'uni
   }
 
   return (
-    <div className="mt-6 bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div className="mt-6 bg-white rounded-xl border border-gray-100 overflow-hidden">
       {/* Header colapsable */}
       <button
         onClick={() => setExpandido(!expandido)}
         className="w-full p-4 bg-gradient-to-r from-purple-50 to-blue-50 flex items-center justify-between hover:from-purple-100 hover:to-blue-100 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <span className="text-xl">📊</span>
+          <BarChart3 size={20} className="text-purple-600" />
           <span className="font-semibold text-gray-800">Historial de Producción</span>
           <span className="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full">
             {paginacion.total || historial.length} {(paginacion.total || historial.length) === 1 ? 'producción' : 'producciones'}
           </span>
         </div>
-        <svg 
+        <ChevronDown 
           className={`w-5 h-5 text-gray-500 transition-transform ${expandido ? 'rotate-180' : ''}`}
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        />
       </button>
 
       {expandido && (
@@ -220,14 +216,14 @@ const HistorialProduccionReceta = ({ recetaId, recetaNombre, unidadMedida = 'uni
           {/* Loading */}
           {loading && (
             <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+              <Loader2 size={24} className="animate-spin text-purple-600" />
               <span className="ml-2 text-gray-600">Cargando historial...</span>
             </div>
           )}
 
           {/* Error */}
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md mb-4">
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl mb-4">
               <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
@@ -236,24 +232,24 @@ const HistorialProduccionReceta = ({ recetaId, recetaNombre, unidadMedida = 'uni
             <>
               {/* Estadísticas */}
               <div className={`grid grid-cols-2 ${canViewPrices ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-3 mb-4`}>
-                <div className="bg-blue-50 p-3 rounded-lg text-center">
+                <div className="bg-blue-50/60 p-3 rounded-xl border border-blue-100 text-center">
                   <div className="text-xs font-medium text-gray-500">Total Producciones</div>
                   <div className="text-xl font-bold text-blue-600">{estadisticas.totalProducciones}</div>
                 </div>
-                <div className="bg-green-50 p-3 rounded-lg text-center">
+                <div className="bg-green-50/60 p-3 rounded-xl border border-green-100 text-center">
                   <div className="text-xs font-medium text-gray-500">Cantidad Producida</div>
                   <div className="text-xl font-bold text-green-600">{estadisticas.cantidadTotalProducida}</div>
                   <div className="text-xs text-gray-400">{unidadMedida}</div>
                 </div>
                 {canViewPrices && (
-                  <div className="bg-purple-50 p-3 rounded-lg text-center">
+                  <div className="bg-purple-50/60 p-3 rounded-xl border border-purple-100 text-center">
                     <div className="text-xs font-medium text-gray-500">Costo Total</div>
                     <div className="text-xl font-bold text-purple-600">
                       S/.{estadisticas.costoTotalProduccion.toFixed(2)}
                     </div>
                   </div>
                 )}
-                <div className="bg-orange-50 p-3 rounded-lg text-center">
+                <div className="bg-orange-50/60 p-3 rounded-xl border border-orange-100 text-center">
                   <div className="text-xs font-medium text-gray-500">Promedio Diario</div>
                   <div className="text-xl font-bold text-orange-600">
                     {estadisticas.promedioProduccionDiaria.toFixed(1)}
@@ -263,15 +259,13 @@ const HistorialProduccionReceta = ({ recetaId, recetaNombre, unidadMedida = 'uni
               </div>
 
               {/* Filtros colapsables */}
-              <div className="bg-gray-50 rounded-lg mb-4">
+              <div className="bg-gray-50/60 rounded-xl border border-gray-100 mb-4">
                 <button
                   onClick={() => setFiltrosExpandidos(!filtrosExpandidos)}
-                  className="w-full p-2 flex items-center justify-between text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="w-full p-2 flex items-center justify-between text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
                 >
                   <span className="flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                    </svg>
+                    <Filter size={16} />
                     Filtros
                     {(filtros.fechaInicio || filtros.fechaFin || filtros.operador) && (
                       <span className="bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded-full">
@@ -279,18 +273,13 @@ const HistorialProduccionReceta = ({ recetaId, recetaNombre, unidadMedida = 'uni
                       </span>
                     )}
                   </span>
-                  <svg 
+                  <ChevronDown 
                     className={`w-4 h-4 transition-transform ${filtrosExpandidos ? 'rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                  />
                 </button>
 
                 {filtrosExpandidos && (
-                  <div className="p-3 border-t border-gray-200">
+                  <div className="p-3 border-t border-gray-100">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">Fecha Inicio</label>
@@ -298,7 +287,7 @@ const HistorialProduccionReceta = ({ recetaId, recetaNombre, unidadMedida = 'uni
                           type="date"
                           value={filtros.fechaInicio}
                           onChange={(e) => handleFiltroChange('fechaInicio', e.target.value)}
-                          className="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-purple-500 focus:border-purple-500"
+                          className="w-full p-1.5 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-purple-500 outline-none"
                         />
                       </div>
                       <div>
@@ -307,7 +296,7 @@ const HistorialProduccionReceta = ({ recetaId, recetaNombre, unidadMedida = 'uni
                           type="date"
                           value={filtros.fechaFin}
                           onChange={(e) => handleFiltroChange('fechaFin', e.target.value)}
-                          className="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-purple-500 focus:border-purple-500"
+                          className="w-full p-1.5 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-purple-500 outline-none"
                         />
                       </div>
                       <div>
@@ -317,15 +306,15 @@ const HistorialProduccionReceta = ({ recetaId, recetaNombre, unidadMedida = 'uni
                           value={filtros.operador}
                           onChange={(e) => handleFiltroChange('operador', e.target.value)}
                           placeholder="Filtrar..."
-                          className="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-purple-500 focus:border-purple-500"
+                          className="w-full p-1.5 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-purple-500 outline-none"
                         />
                       </div>
                       <div className="flex items-end">
                         <button
                           onClick={limpiarFiltros}
-                          className="w-full px-2 py-1.5 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors text-xs"
+                          className="w-full px-2 py-1.5 text-gray-700 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors text-xs flex items-center justify-center gap-1"
                         >
-                          🗑️ Limpiar
+                          <Trash2 size={12} /> Limpiar
                         </button>
                       </div>
                     </div>
@@ -361,16 +350,16 @@ const HistorialProduccionReceta = ({ recetaId, recetaNombre, unidadMedida = 'uni
                   <button
                     onClick={cargarMas}
                     disabled={cargandoMas}
-                    className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mx-auto"
+                    className="px-4 py-2 text-purple-700 bg-purple-50 border border-purple-200 rounded-xl hover:bg-purple-100 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mx-auto"
                   >
                     {cargandoMas ? (
                       <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
+                        <Loader2 size={16} className="animate-spin" />
                         Cargando...
                       </>
                     ) : (
                       <>
-                        📄 Cargar más ({paginacion.total - historial.length} restantes)
+                        <FileText size={14} /> Cargar más ({paginacion.total - historial.length} restantes)
                       </>
                     )}
                   </button>
@@ -380,8 +369,8 @@ const HistorialProduccionReceta = ({ recetaId, recetaNombre, unidadMedida = 'uni
               {/* Indicador cuando se cargaron todos */}
               {!paginacion.tieneProxima && historial.length > LIMITE_POR_PAGINA && (
                 <div className="text-center mt-3">
-                  <span className="text-xs text-gray-500">
-                    ✓ Mostrando todas las {historial.length} producciones
+                  <span className="text-xs text-gray-500 flex items-center gap-1 justify-center">
+                    <CheckCircle size={12} /> Mostrando todas las {historial.length} producciones
                   </span>
                 </div>
               )}
@@ -389,7 +378,7 @@ const HistorialProduccionReceta = ({ recetaId, recetaNombre, unidadMedida = 'uni
               {/* Sin resultados con filtros */}
               {historialFiltrado.length === 0 && !loading && (
                 <div className="text-center py-6 text-gray-500">
-                  <span className="text-3xl block mb-2">🔍</span>
+                  <Search size={28} className="mx-auto mb-2 text-gray-300" />
                   <p>No se encontraron producciones{(filtros.fechaInicio || filtros.fechaFin || filtros.operador) ? ' con los filtros aplicados' : ''}</p>
                   {(filtros.fechaInicio || filtros.fechaFin || filtros.operador) && (
                     <button
@@ -431,7 +420,7 @@ const ProduccionCard = ({ produccion, unidadMedida, canViewPrices, formatearFech
   );
 
   return (
-    <div className="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-gray-50/60 border border-gray-100 rounded-xl overflow-hidden">
       {/* Header de la tarjeta */}
       <div 
         className="p-3 cursor-pointer hover:bg-gray-100 transition-colors"
@@ -441,8 +430,8 @@ const ProduccionCard = ({ produccion, unidadMedida, canViewPrices, formatearFech
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xs text-gray-500">{formatearFecha(produccion.fecha)}</span>
-              <span className="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full">
-                🏭 Producción
+              <span className="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
+                <Factory size={12} /> Producción
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -465,14 +454,9 @@ const ProduccionCard = ({ produccion, unidadMedida, canViewPrices, formatearFech
               )}
             </div>
           </div>
-          <svg 
+          <ChevronDown 
             className={`w-5 h-5 text-gray-400 transition-transform ${detallesExpandidos ? 'rotate-180' : ''}`}
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
+          />
         </div>
       </div>
 
@@ -480,8 +464,8 @@ const ProduccionCard = ({ produccion, unidadMedida, canViewPrices, formatearFech
       {detallesExpandidos && (
         <div className="p-3 border-t border-gray-200 bg-white space-y-3">
           {/* Rendimiento detallado */}
-          <div className="bg-blue-50 p-3 rounded-lg">
-            <div className="text-xs font-medium text-blue-700 mb-2">📏 Rendimiento</div>
+          <div className="bg-blue-50/60 p-3 rounded-xl border border-blue-100">
+            <div className="text-xs font-medium text-blue-700 mb-2 flex items-center gap-1"><Ruler size={12} /> Rendimiento</div>
             <div className="grid grid-cols-3 gap-2 text-xs">
               <div className="text-center">
                 <div className="text-gray-500">Original</div>
@@ -500,9 +484,9 @@ const ProduccionCard = ({ produccion, unidadMedida, canViewPrices, formatearFech
 
           {/* Ingredientes consumidos */}
           {ingredientes.length > 0 && (
-            <div className="bg-orange-50 p-3 rounded-lg">
-              <div className="text-xs font-medium text-orange-700 mb-2">
-                🥬 Ingredientes Consumidos ({ingredientes.length})
+            <div className="bg-orange-50/60 p-3 rounded-xl border border-orange-100">
+              <div className="text-xs font-medium text-orange-700 mb-2 flex items-center gap-1">
+                <Leaf size={12} /> Ingredientes Consumidos ({ingredientes.length})
               </div>
               <div className="space-y-1">
                 {ingredientes.map((ing, idx) => (
@@ -526,9 +510,9 @@ const ProduccionCard = ({ produccion, unidadMedida, canViewPrices, formatearFech
 
           {/* Recetas consumidas */}
           {recetas.length > 0 && (
-            <div className="bg-purple-50 p-3 rounded-lg">
-              <div className="text-xs font-medium text-purple-700 mb-2">
-                📋 Recetas Utilizadas ({recetas.length})
+            <div className="bg-purple-50/60 p-3 rounded-xl border border-purple-100">
+              <div className="text-xs font-medium text-purple-700 mb-2 flex items-center gap-1">
+                <FileText size={12} /> Recetas Utilizadas ({recetas.length})
               </div>
               <div className="space-y-1">
                 {recetas.map((rec, idx) => (
@@ -552,8 +536,8 @@ const ProduccionCard = ({ produccion, unidadMedida, canViewPrices, formatearFech
 
           {/* Costos - Solo super_admin */}
           {canViewPrices && (
-            <div className="bg-gray-100 p-3 rounded-lg">
-              <div className="text-xs font-medium text-gray-700 mb-2">💰 Resumen de Costos</div>
+            <div className="bg-gray-100/60 p-3 rounded-xl border border-gray-100">
+              <div className="text-xs font-medium text-gray-700 mb-2 flex items-center gap-1"><DollarSign size={12} /> Resumen de Costos</div>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div>
                   <span className="text-gray-500">Costo Total:</span>
@@ -573,9 +557,9 @@ const ProduccionCard = ({ produccion, unidadMedida, canViewPrices, formatearFech
 
           {/* Diferencias de ingredientes */}
           {(produccion.diferenciasIngredientes || []).length > 0 && (
-            <div className="bg-yellow-50 p-3 rounded-lg">
-              <div className="text-xs font-medium text-yellow-700 mb-2">
-                ⚠️ Diferencias vs Receta Base
+            <div className="bg-yellow-50/60 p-3 rounded-xl border border-yellow-100">
+              <div className="text-xs font-medium text-yellow-700 mb-2 flex items-center gap-1">
+                <AlertTriangle size={12} /> Diferencias vs Receta Base
               </div>
               <div className="space-y-1 text-xs">
                 {produccion.diferenciasIngredientes.map((dif, idx) => (
@@ -592,7 +576,7 @@ const ProduccionCard = ({ produccion, unidadMedida, canViewPrices, formatearFech
 
           {/* Observaciones */}
           {(produccion.motivo || produccion.observaciones) && (
-            <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="bg-gray-50/60 p-3 rounded-xl border border-gray-100">
               {produccion.motivo && (
                 <div className="text-xs">
                   <span className="text-gray-500">Motivo:</span>
@@ -609,8 +593,8 @@ const ProduccionCard = ({ produccion, unidadMedida, canViewPrices, formatearFech
           )}
 
           {/* Operador */}
-          <div className="text-xs text-gray-400 text-right">
-            👤 {produccion.operador || 'Sistema'}
+          <div className="text-xs text-gray-400 text-right flex items-center justify-end gap-1">
+            <User size={12} /> {produccion.operador || 'Sistema'}
           </div>
         </div>
       )}

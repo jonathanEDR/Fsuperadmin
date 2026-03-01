@@ -55,7 +55,7 @@ const PrestamosFilters = React.memo(({
     const tieneFiltrosActivos = filtrosActivos.length > 0;
 
     return (
-        <div className="bg-white rounded-lg shadow border overflow-hidden">
+        <div className="bg-white rounded-xl shadow border overflow-hidden">
             {/* Header colapsable */}
             <button
                 type="button"
@@ -100,7 +100,7 @@ const PrestamosFilters = React.memo(({
             <div className={`transition-all duration-300 ease-in-out ${filtrosAbiertos ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
                 <div className="p-3 sm:p-4 lg:p-6 pt-0 border-t border-gray-200">
                     {/* Filtro principal por Tipo de Préstamo */}
-                    <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-gray-50 rounded-lg border mt-3 sm:mt-4">
+                    <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-gray-50 rounded-xl border mt-3 sm:mt-4">
                         <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                             Tipo de Préstamo
                         </label>
@@ -111,14 +111,14 @@ const PrestamosFilters = React.memo(({
                                     type="button"
                                     onClick={() => handleInputChange('tipoPrestamo', tipo.value)}
                                     disabled={loading}
-                                    className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
+                                    className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-colors ${
                                         (filtros.tipoPrestamo || '') === tipo.value
                                             ? tipo.value === 'recibido'
                                                 ? 'bg-indigo-600 text-white'
                                                 : tipo.value === 'otorgado'
                                                 ? 'bg-green-600 text-white'
                                                 : 'bg-gray-700 text-white'
-                                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                            : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
                                     }`}
                                 >
                                     <span className="sm:hidden">{tiposPrestamoCortosMovil[tipo.label] || tipo.label}</span>
@@ -138,7 +138,7 @@ const PrestamosFilters = React.memo(({
                             <select
                                 value={filtros.estado}
                                 onChange={(e) => handleInputChange('estado', e.target.value)}
-                                className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 disabled={loading}
                             >
                                 {estados.map(estado => (
@@ -158,7 +158,7 @@ const PrestamosFilters = React.memo(({
                             <select
                                 value={filtros.tipoCredito}
                                 onChange={(e) => handleInputChange('tipoCredito', e.target.value)}
-                                className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 disabled={loading}
                             >
                                 {tiposCredito.map(tipo => (
@@ -180,7 +180,7 @@ const PrestamosFilters = React.memo(({
                                 value={filtros.entidadFinanciera}
                                 onChange={(e) => handleInputChange('entidadFinanciera', e.target.value)}
                                 placeholder={filtros.tipoPrestamo === 'otorgado' ? 'Nombre...' : 'Entidad...'}
-                                className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 disabled={loading}
                             />
                         </div>
@@ -195,7 +195,7 @@ const PrestamosFilters = React.memo(({
                         value={filtros.busqueda}
                         onChange={(e) => handleInputChange('busqueda', e.target.value)}
                         placeholder="Buscar..."
-                        className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         disabled={loading}
                     />
                 </div>
@@ -214,7 +214,7 @@ const PrestamosFilters = React.memo(({
                         type="date"
                         value={filtros.fechaDesde}
                         onChange={(e) => handleInputChange('fechaDesde', e.target.value)}
-                        className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         disabled={loading}
                     />
                 </div>
@@ -229,7 +229,7 @@ const PrestamosFilters = React.memo(({
                         type="date"
                         value={filtros.fechaHasta}
                         onChange={(e) => handleInputChange('fechaHasta', e.target.value)}
-                        className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         disabled={loading}
                     />
                 </div>
@@ -247,7 +247,7 @@ const PrestamosFilters = React.memo(({
                         placeholder="0"
                         min="0"
                         step="0.01"
-                        className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         disabled={loading}
                     />
                 </div>
@@ -265,7 +265,7 @@ const PrestamosFilters = React.memo(({
                         placeholder="0"
                         min="0"
                         step="0.01"
-                        className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         disabled={loading}
                     />
                 </div>

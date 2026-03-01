@@ -166,27 +166,27 @@ export default function SucursalAsignada() {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-4">
+      <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white bg-opacity-20 flex items-center justify-center">
-              <Building2 className="text-white" size={20} />
+            <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+              <Building2 className="text-emerald-600" size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">Mi Sucursal</h2>
-              <p className="text-emerald-100 text-sm">{sucursal.nombre}</p>
+              <h2 className="text-lg font-bold text-gray-800">Mi Sucursal</h2>
+              <p className="text-gray-500 text-sm">{sucursal.nombre}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {totalActivas > 0 && (
-              <div className="bg-white bg-opacity-20 rounded-lg px-3 py-1.5 text-white text-sm font-medium flex items-center gap-1.5">
+              <div className="bg-gray-100 rounded-xl px-3 py-1.5 text-gray-700 text-sm font-medium flex items-center gap-1.5">
                 <ClipboardList size={14} />
                 {totalActivas} activa{totalActivas !== 1 ? 's' : ''}
               </div>
             )}
             <button
               onClick={cargarDatos}
-              className="p-2 rounded-lg bg-white bg-opacity-10 hover:bg-opacity-20 transition-colors text-white"
+              className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors text-gray-500"
               title="Actualizar"
             >
               <RefreshCw size={16} className={loading || loadingTareas ? 'animate-spin' : ''} />
@@ -216,7 +216,7 @@ export default function SucursalAsignada() {
                 value={editData.ubicacion}
                 onChange={(e) => setEditData(p => ({ ...p, ubicacion: e.target.value }))}
                 placeholder="Ej: Av. Principal 123, Colonia Centro"
-                className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400"
               />
             </div>
             <div>
@@ -226,7 +226,7 @@ export default function SucursalAsignada() {
                 value={editData.referenciaDireccion}
                 onChange={(e) => setEditData(p => ({ ...p, referenciaDireccion: e.target.value }))}
                 placeholder="Ej: Frente al parque central"
-                className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400"
               />
             </div>
 
@@ -253,7 +253,7 @@ export default function SucursalAsignada() {
               <button
                 onClick={handleGuardarUbicacion}
                 disabled={saving}
-                className="flex-1 flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 text-white text-sm font-medium py-2 rounded-lg transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 disabled:opacity-60 text-sm font-medium py-2 rounded-xl transition-colors"
               >
                 {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                 {saving ? 'Guardando…' : 'Guardar'}
@@ -261,7 +261,7 @@ export default function SucursalAsignada() {
               <button
                 onClick={handleCancelarEdicion}
                 disabled={saving}
-                className="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 disabled:opacity-60 text-gray-700 text-sm font-medium py-2 rounded-lg transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 disabled:opacity-60 text-gray-700 text-sm font-medium py-2 rounded-xl transition-colors"
               >
                 <X size={14} />
                 Cancelar
@@ -358,7 +358,7 @@ export default function SucursalAsignada() {
                 <Loader2 size={20} className="animate-spin text-gray-400" />
               </div>
             ) : totalActivas === 0 ? (
-              <div className="text-center py-6 bg-gray-50 rounded-lg">
+              <div className="text-center py-6 bg-gray-50 rounded-xl">
                 <Check size={24} className="text-green-300 mx-auto mb-2" />
                 <p className="text-sm font-medium text-gray-500">¡Todo al día!</p>
                 <p className="text-xs text-gray-400 mt-1">No hay tareas pendientes</p>
@@ -372,7 +372,7 @@ export default function SucursalAsignada() {
                 return (
                   <div
                     key={tarea._id}
-                    className={`rounded-lg border p-3 transition-colors ${
+                    className={`rounded-xl border p-3 transition-colors ${
                       tarea.estado === 'en_progreso'
                         ? 'border-blue-200 bg-blue-50/30'
                         : 'border-gray-200 bg-white'

@@ -122,7 +122,7 @@ const ListaProductosDisponibles = React.memo(({
   // Empty state
   if (productos.length === 0) {
     return (
-      <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+      <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-8 text-center">
         <Package size={48} className="mx-auto text-gray-400 mb-3" />
         <p className="text-gray-600 font-medium">No se encontraron productos</p>
         <p className="text-gray-500 text-sm mt-1">
@@ -139,7 +139,7 @@ const ListaProductosDisponibles = React.memo(({
         {productos.map((producto) => (
           <div
             key={producto._id}
-            className="bg-white border border-gray-200 rounded-lg p-2.5 sm:p-3 hover:border-purple-400 hover:shadow-md transition-all duration-200"
+            className="bg-white border border-gray-200 rounded-xl p-2.5 sm:p-3 hover:border-purple-400 hover:shadow-md transition-all duration-200"
           >
             {/* Fila 1: Nombre del producto */}
             <h4 className="font-semibold text-gray-900 text-sm sm:text-base mb-2 line-clamp-2">
@@ -186,7 +186,7 @@ const ListaProductosDisponibles = React.memo(({
               {/* Controles de cantidad y agregar */}
               <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
               {/* Input de cantidad */}
-              <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+              <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
                 <button
                   onClick={() => actualizarCantidad(producto._id, getCantidad(producto._id) - 1)}
                   disabled={getCantidad(producto._id) <= 1}

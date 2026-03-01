@@ -48,7 +48,7 @@ const BusquedaProductos = React.memo(({
           value={searchTerm}
           onChange={handleSearchChange}
           disabled={disabled}
-          className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-2.5 sm:py-3 bg-white border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors placeholder:text-gray-400"
+          className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-2.5 sm:py-3 bg-white border border-gray-200 rounded-xl text-sm sm:text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors placeholder:text-gray-400"
           aria-label="Buscar productos"
         />
       </div>
@@ -63,7 +63,7 @@ const BusquedaProductos = React.memo(({
           value={selectedCategory}
           onChange={handleCategoryChange}
           disabled={disabled}
-          className="w-full pl-8 sm:pl-10 pr-6 sm:pr-8 py-2.5 sm:py-3 bg-white border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:bg-gray-100 disabled:cursor-not-allowed appearance-none transition-colors cursor-pointer"
+          className="w-full pl-8 sm:pl-10 pr-6 sm:pr-8 py-2.5 sm:py-3 bg-white border border-gray-200 rounded-xl text-sm sm:text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:bg-gray-100 disabled:cursor-not-allowed appearance-none transition-colors cursor-pointer"
           aria-label="Filtrar por categoría"
         >
           <option value="">Todas</option>

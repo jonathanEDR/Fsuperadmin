@@ -723,7 +723,7 @@ function VentaList({
         Error: {error}
         <button 
           onClick={() => window.location.reload()} 
-          className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600"
         >
           Reintentar
         </button>
@@ -737,7 +737,7 @@ function VentaList({
       {showHeader && (
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-purple-100 rounded-lg">
+            <div className="p-3 bg-purple-100 rounded-xl">
               <ShoppingCart className="text-purple-600" size={24} />
             </div>
             <div>
@@ -754,10 +754,10 @@ function VentaList({
       <div className="flex flex-wrap justify-between items-center gap-2 mb-4 sm:mb-6">
         <div className="flex items-center gap-1 sm:gap-2">
           <span className="hidden sm:inline text-sm font-medium text-gray-700">Vista:</span>
-          <div className="flex bg-gray-100 rounded-lg p-0.5 sm:p-1">
+          <div className="flex bg-gray-100 rounded-xl p-0.5 sm:p-1">
             <button
               onClick={() => setViewMode('cards')}
-              className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm transition-colors ${
+              className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm transition-colors ${
                 viewMode === 'cards'
                   ? 'bg-white text-blue-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-800'
@@ -769,7 +769,7 @@ function VentaList({
             </button>
             <button
               onClick={() => setViewMode('table')}
-              className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm transition-colors ${
+              className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm transition-colors ${
                 viewMode === 'table'
                   ? 'bg-white text-blue-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-800'
@@ -781,7 +781,7 @@ function VentaList({
             </button>
             <button
               onClick={() => setViewMode('lista')}
-              className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm transition-colors ${
+              className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm transition-colors ${
                 viewMode === 'lista'
                   ? 'bg-white text-blue-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-800'
@@ -795,7 +795,7 @@ function VentaList({
         </div>
 
         {viewMode === 'lista' && (
-          <div className="text-xs sm:text-sm text-gray-600 bg-blue-50 px-2 sm:px-3 py-1 sm:py-2 rounded-lg">
+          <div className="text-xs sm:text-sm text-gray-600 bg-blue-50 px-2 sm:px-3 py-1 sm:py-2 rounded-xl">
             <span className="flex items-center gap-1">
               <Package size={14} />
               <span className="hidden xs:inline">Vista agrupada por cliente</span>

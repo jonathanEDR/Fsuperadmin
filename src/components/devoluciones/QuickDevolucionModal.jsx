@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { X, MinusCircle } from 'lucide-react';
+import { X, MinusCircle, Loader2 } from 'lucide-react';
 import { getLocalDateTimeString, formatLocalDate, convertLocalDateTimeToISO } from '../../utils/fechaHoraUtils';
 import { useCantidadManagement } from '../../hooks/useCantidadManagement';
 
@@ -213,7 +213,7 @@ function QuickDevolucionModal({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -239,7 +239,7 @@ function QuickDevolucionModal({
                       limpiarForm();
                       onClose();
                     }}
-                    className="text-gray-400 hover:text-gray-500"
+                    className="text-gray-400 hover:text-gray-600 hover:bg-white/80 p-1.5 rounded-xl transition-colors"
                   >
                     <X className="h-6 w-6" />
                   </button>
@@ -255,10 +255,10 @@ function QuickDevolucionModal({
                           key={producto.productoId._id}
                           onClick={() => agregarProducto(producto)}
                           disabled={productosADevolver.some(p => p.producto.productoId._id === producto.productoId._id)}
-                          className={`w-full text-left p-2 rounded border ${
+                          className={`w-full text-left p-2.5 rounded-xl border ${
                             productosADevolver.some(p => p.producto.productoId._id === producto.productoId._id)
-                              ? 'bg-gray-100 border-gray-200'
-                              : 'border-gray-300 hover:bg-gray-50'
+                              ? 'bg-gray-50 border-gray-200'
+                              : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'
                           }`}
                         >
                           <div className="flex justify-between items-center">
@@ -277,7 +277,7 @@ function QuickDevolucionModal({
                     <div className="mt-4 space-y-4">
                       <h4 className="text-sm font-medium text-gray-900">Productos a devolver:</h4>
                       {productosADevolver.map((item, index) => (
-                        <div key={index} className="flex items-center space-x-4 p-2 border rounded">
+                        <div key={index} className="flex items-center space-x-4 p-3 border border-gray-200 rounded-xl">
                           <div className="flex-1">
                             <div className="font-medium">{item.producto.productoId.nombre}</div>
                             <div className="text-sm text-gray-500">
@@ -290,7 +290,7 @@ function QuickDevolucionModal({
                             max={item.producto.cantidad}
                             value={item.cantidad}
                             onChange={(e) => actualizarCantidad(index, e.target.value)}
-                            className="w-20 border rounded p-1"
+                            className="w-20 border border-gray-200 rounded-xl p-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Cant."
                           />
                           <button
@@ -315,7 +315,7 @@ function QuickDevolucionModal({
                       value={fechaDevolucion}
                       onChange={(e) => setFechaDevolucion(e.target.value)}
                       max={getLocalDateTimeString()}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-xl border border-gray-200 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none text-sm px-3 py-2"
                       required
                     />
                     <p className="text-xs text-gray-500 mt-1">
@@ -333,10 +333,10 @@ function QuickDevolucionModal({
                       rows={3}
                       value={motivo}
                       onChange={(e) => setMotivo(e.target.value)}
-                      className={`mt-1 block w-full rounded-md shadow-sm focus:ring-indigo-500 sm:text-sm ${
+                      className={`mt-1 block w-full rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm px-3 py-2 border ${
                         motivo.length > 0 && motivo.length < 10 
-                          ? 'border-yellow-300 focus:border-yellow-500' 
-                          : 'border-gray-300 focus:border-indigo-500'
+                          ? 'border-yellow-300' 
+                          : 'border-gray-200'
                       }`}
                       placeholder="Ingrese el motivo de la devolución"
                     />
@@ -358,7 +358,7 @@ function QuickDevolucionModal({
                         limpiarForm();
                         onClose();
                       }}
-                      className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      className="inline-flex justify-center rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                     >
                       Cancelar
                     </button>
@@ -366,10 +366,10 @@ function QuickDevolucionModal({
                       type="button"
                       onClick={handleSubmit}
                       disabled={isSubmitting || cantidadLoading}
-                      className={`inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                      className={`inline-flex justify-center rounded-xl border px-4 py-2 text-sm font-medium transition-colors ${
                         (isSubmitting || cantidadLoading)
-                          ? 'bg-indigo-400 cursor-not-allowed'
-                          : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500'
+                          ? 'text-blue-400 bg-blue-50 border-blue-200 cursor-not-allowed opacity-60'
+                          : 'text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100'
                       }`}
                     >
                       {(isSubmitting || cantidadLoading) ? 'Procesando...' : 'Confirmar Devolución'}

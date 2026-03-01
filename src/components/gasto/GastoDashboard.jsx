@@ -1,4 +1,5 @@
 import React from 'react';
+import { Plus, BookOpen, Wallet, CalendarDays, Calculator, Coins, Factory, TrendingUp, Building2, ArrowRight, Receipt } from 'lucide-react';
 
 // Configuracion de categorias
 const CATEGORIAS = [
@@ -6,7 +7,7 @@ const CATEGORIAS = [
     id: 'Finanzas',
     nombre: 'Finanzas',
     descripcion: 'Gastos financieros, intereses, comisiones',
-    icon: 'fa-coins',
+    icon: Coins,
     color: 'blue',
     bgGradient: 'from-blue-500 to-blue-600'
   },
@@ -14,7 +15,7 @@ const CATEGORIAS = [
     id: 'Producción',
     nombre: 'Producción',
     descripcion: 'Materia prima, insumos, maquinaria',
-    icon: 'fa-industry',
+    icon: Factory,
     color: 'green',
     bgGradient: 'from-green-500 to-green-600'
   },
@@ -22,7 +23,7 @@ const CATEGORIAS = [
     id: 'Ventas',
     nombre: 'Ventas',
     descripcion: 'Marketing, publicidad, comisiones',
-    icon: 'fa-chart-line',
+    icon: TrendingUp,
     color: 'amber',
     bgGradient: 'from-amber-500 to-amber-600'
   },
@@ -30,7 +31,7 @@ const CATEGORIAS = [
     id: 'Administración',
     nombre: 'Administración',
     descripcion: 'Servicios, alquiler, sueldos admin',
-    icon: 'fa-building',
+    icon: Building2,
     color: 'purple',
     bgGradient: 'from-purple-500 to-purple-600'
   }
@@ -101,16 +102,16 @@ export default function GastoDashboard({
         <div className="flex gap-3">
           <button
             onClick={onAgregarGasto}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-md"
+            className="px-4 py-2 text-blue-700 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors flex items-center gap-2"
           >
-            <i className="fas fa-plus"></i>
+            <Plus size={16} />
             Agregar Gasto
           </button>
           <button
             onClick={onAdministrarCatalogo}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
+            className="px-4 py-2 text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2"
           >
-            <i className="fas fa-book"></i>
+            <BookOpen size={16} />
             Catalogo
           </button>
         </div>
@@ -126,8 +127,8 @@ export default function GastoDashboard({
               <p className="text-3xl font-bold mt-1">{formatCurrency(totalGeneral)}</p>
               <p className="text-indigo-200 text-xs mt-2">{gastos.length} gastos registrados</p>
             </div>
-            <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center">
-              <i className="fas fa-wallet text-2xl"></i>
+            <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+              <Wallet size={24} />
             </div>
           </div>
         </div>
@@ -140,8 +141,8 @@ export default function GastoDashboard({
               <p className="text-3xl font-bold mt-1">{formatCurrency(totalMesActual)}</p>
               <p className="text-emerald-200 text-xs mt-2">{gastosDelMes.length} gastos este mes</p>
             </div>
-            <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center">
-              <i className="fas fa-calendar-alt text-2xl"></i>
+            <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+              <CalendarDays size={24} />
             </div>
           </div>
         </div>
@@ -156,8 +157,8 @@ export default function GastoDashboard({
               </p>
               <p className="text-orange-200 text-xs mt-2">Por transaccion</p>
             </div>
-            <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center">
-              <i className="fas fa-calculator text-2xl"></i>
+            <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+              <Calculator size={24} />
             </div>
           </div>
         </div>
@@ -178,10 +179,10 @@ export default function GastoDashboard({
                 className="bg-white rounded-xl border border-gray-200 p-5 cursor-pointer hover:shadow-lg hover:border-gray-300 transition-all group"
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className={`w-12 h-12 rounded-lg bg-${categoria.color}-100 flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                    <i className={`fas ${categoria.icon} text-xl text-${categoria.color}-600`}></i>
+                  <div className={`w-12 h-12 rounded-xl bg-${categoria.color}-100 flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                    <categoria.icon size={20} className={`text-${categoria.color}-600`} />
                   </div>
-                  <i className="fas fa-arrow-right text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all"></i>
+                  <ArrowRight size={16} className="text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all" />
                 </div>
                 <h3 className="font-semibold text-gray-800 mb-1">{categoria.nombre}</h3>
                 <p className="text-xs text-gray-500 mb-3">{categoria.descripcion}</p>
@@ -204,11 +205,11 @@ export default function GastoDashboard({
 
         {ultimosGastos.length === 0 ? (
           <div className="p-8 text-center">
-            <i className="fas fa-receipt text-4xl text-gray-300 mb-3"></i>
+            <Receipt size={40} className="text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500">No hay gastos registrados</p>
             <button
               onClick={onAgregarGasto}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+              className="mt-4 px-4 py-2 text-blue-700 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors text-sm"
             >
               Registrar primer gasto
             </button>
@@ -219,8 +220,8 @@ export default function GastoDashboard({
               <div key={gasto._id} className="px-5 py-4 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-lg bg-${getCategoriaColor(gasto.gasto)}-100 flex items-center justify-center`}>
-                      <i className={`fas ${CATEGORIAS.find(c => c.id === gasto.gasto)?.icon || 'fa-receipt'} text-${getCategoriaColor(gasto.gasto)}-600`}></i>
+                    <div className={`w-10 h-10 rounded-xl bg-${getCategoriaColor(gasto.gasto)}-100 flex items-center justify-center`}>
+                      {(() => { const CatIcon = CATEGORIAS.find(c => c.id === gasto.gasto)?.icon || Receipt; return <CatIcon size={18} className={`text-${getCategoriaColor(gasto.gasto)}-600`} />; })()}
                     </div>
                     <div>
                       <p className="font-medium text-gray-800">{gasto.descripcion}</p>

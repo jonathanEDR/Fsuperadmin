@@ -1,4 +1,5 @@
 import React, { memo, useCallback, useMemo } from 'react';
+import { AlertTriangle } from 'lucide-react';
 import { useCuentasBancariasData } from './hooks/useCuentasBancariasData';
 import { useCuentasBancariasModals } from './hooks/useCuentasBancariasModals';
 import { useCuentaBancariaForm } from './hooks/useCuentaBancariaForm';
@@ -96,7 +97,7 @@ const CuentasBancariasOptimizado = memo(() => {
             {/* Mostrar errores globales */}
             {dataHook.error && (
                 <div className="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i className="fas fa-exclamation-triangle mr-2"></i>
+                    <AlertTriangle size={16} className="mr-2" />
                     {dataHook.error}
                     <button type="button" className="close" onClick={() => dataHook.setError(null)}>
                         <span aria-hidden="true">&times;</span>

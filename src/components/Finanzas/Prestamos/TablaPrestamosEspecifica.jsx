@@ -1,4 +1,5 @@
 import React from 'react';
+import { Loader2 } from 'lucide-react';
 
 /**
  * Tabla específica para datos de préstamos
@@ -33,13 +34,13 @@ const TablaPrestamos = ({
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                <Loader2 className="animate-spin h-12 w-12 text-blue-600" />
             </div>
         );
     }
 
     return (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-xl shadow overflow-hidden">
             {titulo && (
                 <div className="px-6 py-4 border-b border-gray-200">
                     <h3 className="text-lg font-semibold text-gray-900">{titulo}</h3>
@@ -86,16 +87,19 @@ const TablaPrestamos = ({
                                     {acciones.length > 0 && (
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex justify-end space-x-2">
-                                                {acciones.map((accion, accionIndex) => (
-                                                    <button
-                                                        key={accionIndex}
-                                                        onClick={() => accion.onClick(fila)}
-                                                        className={accion.className || "text-blue-600 hover:text-blue-900"}
-                                                        title={accion.titulo}
-                                                    >
-                                                        {accion.icono || accion.texto}
-                                                    </button>
-                                                ))}
+                                                {acciones.map((accion, accionIndex) => {
+                                                    const Icono = accion.icono;
+                                                    return (
+                                                        <button
+                                                            key={accionIndex}
+                                                            onClick={() => accion.onClick(fila)}
+                                                            className={accion.className || "text-blue-600 hover:text-blue-900"}
+                                                            title={accion.titulo}
+                                                        >
+                                                            {typeof Icono === 'function' ? <Icono size={16} /> : (Icono || accion.texto)}
+                                                        </button>
+                                                    );
+                                                })}
                                             </div>
                                         </td>
                                     )}

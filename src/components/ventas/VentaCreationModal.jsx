@@ -210,7 +210,7 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
             </div>
             
             {/* Fecha de Venta - Siempre visible, adaptativa */}
-            <div className="bg-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-gray-200 order-2 lg:order-none">
+            <div className="bg-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-gray-200 order-2 lg:order-none">
               <div className="flex items-center gap-1 sm:gap-2">
                 <Calendar size={14} className="sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
                 <input
@@ -226,7 +226,7 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
             <div className="flex items-center gap-2 sm:gap-3 order-1 lg:order-none">
               {/* Total a facturar */}
               {subtotal > 0 && (
-                <div className="bg-emerald-50 px-2 py-1 sm:px-4 sm:py-2 rounded-lg border border-emerald-200">
+                <div className="bg-emerald-50 px-2 py-1 sm:px-4 sm:py-2 rounded-xl border border-emerald-200">
                   <div className="flex items-center gap-1 sm:gap-2">
                     <span className="text-xs sm:text-sm font-medium text-emerald-600">Total:</span>
                     <span className="text-sm sm:text-lg font-bold text-emerald-700 whitespace-nowrap">S/ {subtotal.toFixed(2)}</span>
@@ -238,7 +238,7 @@ const VentaCreationModal = ({ isOpen, onClose, onVentaCreated, userRole }) => {
               <button
                 onClick={handleCerrar}
                 disabled={guardando}
-                className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 flex-shrink-0"
+                className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-xl transition-colors disabled:opacity-50 flex-shrink-0"
               >
                 <X size={20} className="sm:w-5 sm:h-5 text-gray-500" />
               </button>

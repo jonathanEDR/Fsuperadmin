@@ -1,4 +1,5 @@
 import React from 'react';
+import { X } from 'lucide-react';
 import TablaPrestamosEspecifica from './TablaPrestamosEspecifica';
 import { columnasAmortizacion } from './prestamosConfig.jsx';
 
@@ -15,27 +16,27 @@ const ModalTablaAmortizacion = ({
     const totalCuotas = tablaAmortizacion.reduce((sum, fila) => sum + (fila.cuotaMensual || 0), 0);
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-6xl max-h-[90vh] overflow-hidden">
                 {/* Header */}
-                <div className="bg-purple-600 text-white px-6 py-4">
+                <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-5 py-4 rounded-t-2xl">
                     <div className="flex justify-between items-center">
                         <div>
-                            <h2 className="text-xl font-bold flex items-center">
+                            <h2 className="text-xl font-bold flex items-center text-gray-800">
                                 <span className="mr-2">📊</span>
                                 Tabla de Amortización
                             </h2>
                             {prestamo && (
-                                <p className="text-purple-100 text-sm mt-1">
+                                <p className="text-gray-500 text-sm mt-1">
                                     {prestamo.prestatario?.nombre} - {prestamo.entidadFinanciera?.nombre}
                                 </p>
                             )}
                         </div>
                         <button
                             onClick={onClose}
-                            className="text-white hover:text-gray-200 transition-colors"
+                            className="p-1.5 hover:bg-white/80 rounded-xl text-gray-500 hover:text-gray-700 transition-colors"
                         >
-                            <span className="text-2xl">&times;</span>
+                            <X size={20} />
                         </button>
                     </div>
                 </div>
@@ -134,7 +135,7 @@ const ModalTablaAmortizacion = ({
                 </div>
 
                 {/* Footer */}
-                <div className="bg-gray-50 px-6 py-4 border-t">
+                <div className="bg-gray-50/50 border-t border-gray-100 px-5 py-3 rounded-b-2xl">
                     <div className="flex justify-between items-center">
                         <div className="text-sm text-gray-600">
                             <span className="font-medium">{tablaAmortizacion?.length || 0}</span> cuotas programadas
@@ -144,7 +145,7 @@ const ModalTablaAmortizacion = ({
                                 onClick={() => {
                                     // TODO: Implementar exportación a PDF
                                 }}
-                                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-sm"
+                                className="px-4 py-2 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors text-sm"
                             >
                                 📄 Exportar PDF
                             </button>
@@ -152,13 +153,13 @@ const ModalTablaAmortizacion = ({
                                 onClick={() => {
                                     // TODO: Implementar exportación a Excel
                                 }}
-                                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-sm"
+                                className="px-4 py-2 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors text-sm"
                             >
                                 📊 Exportar Excel
                             </button>
                             <button
                                 onClick={onClose}
-                                className="px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors text-sm"
+                                className="px-6 py-2 text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100 rounded-xl transition-colors text-sm"
                             >
                                 Cerrar
                             </button>

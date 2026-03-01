@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { X, Loader2, AlertTriangle, Check, Lightbulb, Ruler, Package, DollarSign, ClipboardList, CheckCircle } from 'lucide-react';
 import { ingredienteService } from '../../../services/ingredienteService';
 import catalogoProduccionService from '../../../services/catalogoProduccion';
 
@@ -185,12 +186,24 @@ const FormularioIngredienteMejorado = ({ ingrediente, onGuardar, onCancelar }) =
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-4 mx-auto p-6 border w-11/12 md:w-5/6 lg:w-4/5 xl:w-3/4 shadow-lg rounded-md bg-white max-h-[95vh] overflow-y-auto">
-        <div className="mt-3">
-          <h3 className="text-lg font-medium text-gray-900 mb-6">
-            {ingrediente ? 'Editar Ingrediente' : 'Nuevo Ingrediente'}
-          </h3>
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+      <div className="relative top-4 mx-auto w-11/12 md:w-5/6 lg:w-4/5 xl:w-3/4 rounded-2xl shadow-xl border border-gray-100 bg-white flex flex-col overflow-hidden max-h-[95vh]">
+        {/* Header */}
+        <div className="flex items-center justify-between bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-5 py-4 rounded-t-2xl">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-blue-100 rounded-lg border border-blue-200">
+              <Package size={18} className="text-blue-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              {ingrediente ? 'Editar Ingrediente' : 'Nuevo Ingrediente'}
+            </h3>
+          </div>
+          <button onClick={onCancelar} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="p-6 overflow-y-auto">
           
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -204,8 +217,8 @@ const FormularioIngredienteMejorado = ({ ingrediente, onGuardar, onCancelar }) =
                   <select
                     value={formData.productoReferencia}
                     onChange={(e) => handleChange('productoReferencia', e.target.value)}
-                    className={`w-full p-3 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                      errores.productoReferencia ? 'border-red-500' : 'border-gray-300'
+                    className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none ${
+                      errores.productoReferencia ? 'border-red-500' : 'border-gray-200'
                     }`}
                     disabled={cargandoProductos}
                   >
@@ -225,7 +238,7 @@ const FormularioIngredienteMejorado = ({ ingrediente, onGuardar, onCancelar }) =
 
                 {/* Vista previa del producto seleccionado */}
                 {productoSeleccionado && (
-                  <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                  <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
                     <h4 className="font-medium text-blue-900 mb-3">Producto Seleccionado</h4>
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
@@ -250,7 +263,7 @@ const FormularioIngredienteMejorado = ({ ingrediente, onGuardar, onCancelar }) =
                 )}
 
                 {/* Estado del ingrediente */}
-                <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="p-4 bg-gray-50/60 rounded-xl border border-gray-100">
                   <label className="flex items-center cursor-pointer">
                     <input
                       type="checkbox"
@@ -269,9 +282,9 @@ const FormularioIngredienteMejorado = ({ ingrediente, onGuardar, onCancelar }) =
 
                 {/* Error general */}
                 {errores.general && (
-                  <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
+                  <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl">
                     <div className="flex items-center">
-                      <span className="text-red-500 mr-2">⚠️</span>
+                      <AlertTriangle size={16} className="text-red-500 mr-2 flex-shrink-0" />
                       {errores.general}
                     </div>
                   </div>
@@ -282,11 +295,11 @@ const FormularioIngredienteMejorado = ({ ingrediente, onGuardar, onCancelar }) =
                   <button
                     type="submit"
                     disabled={enviando}
-                    className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    className="w-full px-6 py-3 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   >
                     {enviando ? (
-                      <span className="flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      <span className="flex items-center justify-center gap-2">
+                        <Loader2 size={16} className="animate-spin" />
                         Guardando...
                       </span>
                     ) : (
@@ -296,7 +309,7 @@ const FormularioIngredienteMejorado = ({ ingrediente, onGuardar, onCancelar }) =
                   <button
                     type="button"
                     onClick={onCancelar}
-                    className="w-full px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-medium"
+                    className="w-full px-6 py-3 text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl transition-colors font-medium"
                     disabled={enviando}
                   >
                     Cancelar
@@ -316,10 +329,10 @@ const FormularioIngredienteMejorado = ({ ingrediente, onGuardar, onCancelar }) =
                       type="text"
                       value={formData.nombre}
                       onChange={(e) => handleChange('nombre', e.target.value)}
-                      className={`w-full p-3 border rounded-md focus:ring-blue-500 focus:border-blue-500 pr-10 ${
+                      className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none pr-10 ${
                         errores.nombre ? 'border-red-500' : 
                         nombreDisponible === true ? 'border-green-500' :
-                        nombreDisponible === false ? 'border-red-500' : 'border-gray-300'
+                        nombreDisponible === false ? 'border-red-500' : 'border-gray-200'
                       }`}
                       placeholder="Se completará automáticamente al seleccionar el producto"
                       disabled={formData.productoReferencia}
@@ -329,32 +342,32 @@ const FormularioIngredienteMejorado = ({ ingrediente, onGuardar, onCancelar }) =
                     {/* Indicadores de validación */}
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                       {validandoNombre && (
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                        <Loader2 size={20} className="animate-spin text-blue-500" />
                       )}
                       {!validandoNombre && nombreDisponible === true && !formData.productoReferencia && (
-                        <span className="text-green-500 text-xl">✓</span>
+                        <Check size={20} className="text-green-500" />
                       )}
                       {!validandoNombre && nombreDisponible === false && (
-                        <span className="text-red-500 text-xl">✗</span>
+                        <X size={20} className="text-red-500" />
                       )}
                     </div>
                   </div>
                   
                   {errores.nombre && (
                     <p className="mt-1 text-sm text-red-600 flex items-center">
-                      <span className="mr-1">⚠️</span>
+                      <AlertTriangle size={14} className="mr-1 flex-shrink-0" />
                       {errores.nombre}
                     </p>
                   )}
                   {!errores.nombre && nombreDisponible === true && !formData.productoReferencia && (
                     <p className="mt-1 text-sm text-green-600 flex items-center">
-                      <span className="mr-1">✅</span>
+                      <CheckCircle size={14} className="mr-1 flex-shrink-0" />
                       Este nombre está disponible
                     </p>
                   )}
                   {!formData.productoReferencia && !errores.nombre && !nombreDisponible && (
-                    <p className="mt-1 text-sm text-gray-500">
-                      💡 Seleccione un producto del catálogo para autocompletar el nombre
+                    <p className="mt-1 text-sm text-gray-500 flex items-center">
+                      <Lightbulb size={14} className="mr-1 flex-shrink-0" /> Seleccione un producto del catálogo para autocompletar el nombre
                     </p>
                   )}
                 </div>
@@ -368,13 +381,13 @@ const FormularioIngredienteMejorado = ({ ingrediente, onGuardar, onCancelar }) =
                     <input
                       type="text"
                       value={unidadesMedida.find(u => u.value === formData.unidadMedida)?.label || formData.unidadMedida}
-                      className="w-full p-3 border border-gray-300 rounded-md bg-gray-50 text-gray-700 pl-10"
+                      className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 pl-10"
                       disabled
                       readOnly
                       placeholder="Se autocompletará desde el producto"
                     />
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-gray-400">📏</span>
+                      <Ruler size={16} className="text-gray-400" />
                     </div>
                   </div>
                   {!formData.productoReferencia && (
@@ -398,18 +411,18 @@ const FormularioIngredienteMejorado = ({ ingrediente, onGuardar, onCancelar }) =
                         min="0"
                         value={formData.cantidad}
                         onChange={(e) => handleChange('cantidad', parseFloat(e.target.value) || 0)}
-                        className={`w-full p-3 border rounded-md focus:ring-blue-500 focus:border-blue-500 pl-10 ${
-                          errores.cantidad ? 'border-red-500' : 'border-gray-300'
+                        className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none pl-10 ${
+                          errores.cantidad ? 'border-red-500' : 'border-gray-200'
                         }`}
                         placeholder="0.00"
                       />
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <span className="text-gray-400">📦</span>
+                        <Package size={16} className="text-gray-400" />
                       </div>
                     </div>
                     {errores.cantidad && (
                       <p className="mt-1 text-sm text-red-600 flex items-center">
-                        <span className="mr-1">⚠️</span>
+                        <AlertTriangle size={14} className="mr-1 flex-shrink-0" />
                         {errores.cantidad}
                       </p>
                     )}
@@ -427,18 +440,18 @@ const FormularioIngredienteMejorado = ({ ingrediente, onGuardar, onCancelar }) =
                         min="0"
                         value={formData.precioUnitario}
                         onChange={(e) => handleChange('precioUnitario', parseFloat(e.target.value) || 0)}
-                        className={`w-full p-3 border rounded-md focus:ring-blue-500 focus:border-blue-500 pl-10 ${
-                          errores.precioUnitario ? 'border-red-500' : 'border-gray-300'
+                        className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none pl-10 ${
+                          errores.precioUnitario ? 'border-red-500' : 'border-gray-200'
                         }`}
                         placeholder="0.00"
                       />
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <span className="text-gray-400">💰</span>
+                        <DollarSign size={16} className="text-gray-400" />
                       </div>
                     </div>
                     {errores.precioUnitario && (
                       <p className="mt-1 text-sm text-red-600 flex items-center">
-                        <span className="mr-1">⚠️</span>
+                        <AlertTriangle size={14} className="mr-1 flex-shrink-0" />
                         {errores.precioUnitario}
                       </p>
                     )}
@@ -446,8 +459,8 @@ const FormularioIngredienteMejorado = ({ ingrediente, onGuardar, onCancelar }) =
                 </div>
 
                 {/* Información adicional */}
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <h4 className="font-medium text-blue-900 mb-2">📋 Información</h4>
+                <div className="p-4 bg-blue-50/60 rounded-xl border border-blue-100">
+                  <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-1.5"><ClipboardList size={15} className="text-blue-600" /> Información</h4>
                   <ul className="text-sm text-blue-700 space-y-1">
                     <li>• Los ingredientes se vinculan directamente con productos del catálogo</li>
                     <li>• El nombre y unidad de medida se toman automáticamente del producto</li>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { ClipboardList, Home, User, Coins, MapPin, Scale, Pencil, Plus, X } from 'lucide-react';
 import { useGarantiaForm } from './hooks';
 import {
     opcionesTipoGarantia,
@@ -74,12 +75,12 @@ const ModalGarantia = ({
 
     // Tabs de navegación
     const tabs = [
-        { id: 'basico', label: 'Información Básica', labelCorto: 'Básica', icono: '📋' },
-        { id: 'bien', label: 'Datos del Bien', labelCorto: 'Bien', icono: '🏠' },
-        { id: 'propietario', label: 'Propietario', labelCorto: 'Dueño', icono: '👤' },
-        { id: 'valores', label: 'Valores', labelCorto: 'Valores', icono: '💰' },
-        { id: 'ubicacion', label: 'Ubicación', labelCorto: 'Ubicación', icono: '📍' },
-        { id: 'legal', label: 'Info. Legal', labelCorto: 'Legal', icono: '⚖️' }
+        { id: 'basico', label: 'Información Básica', labelCorto: 'Básica', icono: <ClipboardList size={16} /> },
+        { id: 'bien', label: 'Datos del Bien', labelCorto: 'Bien', icono: <Home size={16} /> },
+        { id: 'propietario', label: 'Propietario', labelCorto: 'Dueño', icono: <User size={16} /> },
+        { id: 'valores', label: 'Valores', labelCorto: 'Valores', icono: <Coins size={16} /> },
+        { id: 'ubicacion', label: 'Ubicación', labelCorto: 'Ubicación', icono: <MapPin size={16} /> },
+        { id: 'legal', label: 'Info. Legal', labelCorto: 'Legal', icono: <Scale size={16} /> }
     ];
 
     // Obtener índice del tab activo
@@ -109,26 +110,24 @@ const ModalGarantia = ({
         <div className="fixed inset-0 z-50 overflow-y-auto">
             {/* Overlay */}
             <div
-                className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
             />
 
             {/* Modal */}
             <div className="flex min-h-full items-center justify-center p-4">
-                <div className="relative bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+                <div className="relative bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-4xl max-h-[90vh] overflow-hidden">
                     {/* Header */}
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-slate-50 to-gray-50 rounded-t-2xl">
                         <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                            <span>{modoEdicion ? '✏️' : '➕'}</span>
+                            <span>{modoEdicion ? <Pencil size={20} /> : <Plus size={20} />}</span>
                             <span>{modoEdicion ? 'Editar Garantía' : 'Nueva Garantía'}</span>
                         </h2>
                         <button
                             onClick={onClose}
-                            className="text-gray-400 hover:text-gray-600 transition-colors"
+                            className="p-1.5 hover:bg-white/80 rounded-xl text-gray-400 hover:text-gray-600 transition-colors"
                         >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
+                            <X size={20} />
                         </button>
                     </div>
 
@@ -143,7 +142,7 @@ const ModalGarantia = ({
                                         : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                                     }`}
                             >
-                                <span>{tab.icono}</span>
+                                {tab.icono}
                                 <span>{tab.label}</span>
                             </button>
                         ))}
@@ -165,7 +164,7 @@ const ModalGarantia = ({
                                             value={valores.prestamoId}
                                             onChange={manejarCambioInput}
                                             onBlur={() => manejarBlur('prestamoId')}
-                                            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 ${tieneError('prestamoId') ? 'border-red-500' : 'border-gray-300'
+                                            className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 ${tieneError('prestamoId') ? 'border-red-500' : 'border-gray-200'
                                                 }`}
                                             disabled={modoEdicion}
                                         >
@@ -191,7 +190,7 @@ const ModalGarantia = ({
                                             value={valores.tipo}
                                             onChange={manejarCambioInput}
                                             onBlur={() => manejarBlur('tipo')}
-                                            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 ${tieneError('tipo') ? 'border-red-500' : 'border-gray-300'
+                                            className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 ${tieneError('tipo') ? 'border-red-500' : 'border-gray-200'
                                                 }`}
                                         >
                                             <option value="">Seleccionar tipo...</option>
@@ -218,7 +217,7 @@ const ModalGarantia = ({
                                             onBlur={() => manejarBlur('descripcion')}
                                             rows={3}
                                             placeholder="Descripción detallada de la garantía..."
-                                            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 ${tieneError('descripcion') ? 'border-red-500' : 'border-gray-300'
+                                            className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 ${tieneError('descripcion') ? 'border-red-500' : 'border-gray-200'
                                                 }`}
                                         />
                                         {obtenerError('descripcion') && (
@@ -237,7 +236,7 @@ const ModalGarantia = ({
                                             onChange={manejarCambioInput}
                                             rows={2}
                                             placeholder="Observaciones adicionales..."
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                         />
                                     </div>
                                 </div>
@@ -258,7 +257,7 @@ const ModalGarantia = ({
                                                 onChange={(e) => manejarCambio('bien.nombre', e.target.value)}
                                                 onBlur={() => manejarBlur('bien.nombre')}
                                                 placeholder="Ej: Casa de 2 pisos, Toyota Corolla 2020..."
-                                                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 ${tieneError('bien.nombre') ? 'border-red-500' : 'border-gray-300'
+                                                className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 ${tieneError('bien.nombre') ? 'border-red-500' : 'border-gray-200'
                                                     }`}
                                             />
                                             {obtenerError('bien.nombre') && (
@@ -276,7 +275,7 @@ const ModalGarantia = ({
                                                 value={valores.bien.marca}
                                                 onChange={(e) => manejarCambio('bien.marca', e.target.value)}
                                                 placeholder="Ej: Toyota, Samsung..."
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -290,7 +289,7 @@ const ModalGarantia = ({
                                                 value={valores.bien.modelo}
                                                 onChange={(e) => manejarCambio('bien.modelo', e.target.value)}
                                                 placeholder="Ej: Corolla, Galaxy S21..."
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -306,7 +305,7 @@ const ModalGarantia = ({
                                                 placeholder="2024"
                                                 min="1900"
                                                 max="2100"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -318,7 +317,7 @@ const ModalGarantia = ({
                                             <select
                                                 value={valores.bien.estado}
                                                 onChange={(e) => manejarCambio('bien.estado', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             >
                                                 {opcionesEstadoBien.map(estado => (
                                                     <option key={estado.value} value={estado.value}>
@@ -338,7 +337,7 @@ const ModalGarantia = ({
                                                 value={valores.bien.color}
                                                 onChange={(e) => manejarCambio('bien.color', e.target.value)}
                                                 placeholder="Ej: Blanco, Negro..."
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -352,7 +351,7 @@ const ModalGarantia = ({
                                                 value={valores.bien.numeroSerie}
                                                 onChange={(e) => manejarCambio('bien.numeroSerie', e.target.value)}
                                                 placeholder="Número de serie..."
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -366,7 +365,7 @@ const ModalGarantia = ({
                                                 value={valores.bien.numeroMotor}
                                                 onChange={(e) => manejarCambio('bien.numeroMotor', e.target.value)}
                                                 placeholder="Solo para vehículos..."
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -380,7 +379,7 @@ const ModalGarantia = ({
                                                 value={valores.bien.numeroChasis}
                                                 onChange={(e) => manejarCambio('bien.numeroChasis', e.target.value)}
                                                 placeholder="Solo para vehículos..."
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -394,7 +393,7 @@ const ModalGarantia = ({
                                                 onChange={(e) => manejarCambio('bien.descripcionDetallada', e.target.value)}
                                                 rows={3}
                                                 placeholder="Características adicionales del bien..."
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
                                     </div>
@@ -416,7 +415,7 @@ const ModalGarantia = ({
                                                 onChange={(e) => manejarCambio('propietario.nombre', e.target.value)}
                                                 onBlur={() => manejarBlur('propietario.nombre')}
                                                 placeholder="Nombre completo del propietario..."
-                                                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 ${tieneError('propietario.nombre') ? 'border-red-500' : 'border-gray-300'
+                                                className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 ${tieneError('propietario.nombre') ? 'border-red-500' : 'border-gray-200'
                                                     }`}
                                             />
                                             {obtenerError('propietario.nombre') && (
@@ -433,7 +432,7 @@ const ModalGarantia = ({
                                                 value={valores.propietario.documento.tipo}
                                                 onChange={(e) => manejarCambio('propietario.documento.tipo', e.target.value)}
                                                 onBlur={() => manejarBlur('propietario.documento.tipo')}
-                                                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 ${tieneError('propietario.documento.tipo') ? 'border-red-500' : 'border-gray-300'
+                                                className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 ${tieneError('propietario.documento.tipo') ? 'border-red-500' : 'border-gray-200'
                                                     }`}
                                             >
                                                 {opcionesTipoDocumento.map(tipo => (
@@ -455,7 +454,7 @@ const ModalGarantia = ({
                                                 onChange={(e) => manejarCambio('propietario.documento.numero', e.target.value)}
                                                 onBlur={() => manejarBlur('propietario.documento.numero')}
                                                 placeholder="Número de documento..."
-                                                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 ${tieneError('propietario.documento.numero') ? 'border-red-500' : 'border-gray-300'
+                                                className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 ${tieneError('propietario.documento.numero') ? 'border-red-500' : 'border-gray-200'
                                                     }`}
                                             />
                                             {obtenerError('propietario.documento.numero') && (
@@ -471,7 +470,7 @@ const ModalGarantia = ({
                                             <select
                                                 value={valores.propietario.relacion}
                                                 onChange={(e) => manejarCambio('propietario.relacion', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             >
                                                 {opcionesRelacionPropietario.map(relacion => (
                                                     <option key={relacion.value} value={relacion.value}>
@@ -491,7 +490,7 @@ const ModalGarantia = ({
                                                 value={valores.propietario.telefono}
                                                 onChange={(e) => manejarCambio('propietario.telefono', e.target.value)}
                                                 placeholder="999 999 999"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -505,7 +504,7 @@ const ModalGarantia = ({
                                                 value={valores.propietario.email}
                                                 onChange={(e) => manejarCambio('propietario.email', e.target.value)}
                                                 placeholder="correo@ejemplo.com"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -519,7 +518,7 @@ const ModalGarantia = ({
                                                 value={valores.propietario.direccion}
                                                 onChange={(e) => manejarCambio('propietario.direccion', e.target.value)}
                                                 placeholder="Dirección del propietario..."
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
                                     </div>
@@ -538,7 +537,7 @@ const ModalGarantia = ({
                                             <select
                                                 value={valores.valores.moneda}
                                                 onChange={(e) => manejarCambio('valores.moneda', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             >
                                                 {opcionesMoneda.map(moneda => (
                                                     <option key={moneda.value} value={moneda.value}>
@@ -568,7 +567,7 @@ const ModalGarantia = ({
                                                     placeholder="0.00"
                                                     min="0"
                                                     step="0.01"
-                                                    className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 ${tieneError('valores.comercial') ? 'border-red-500' : 'border-gray-300'
+                                                    className={`w-full pl-10 pr-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 ${tieneError('valores.comercial') ? 'border-red-500' : 'border-gray-200'
                                                         }`}
                                                 />
                                             </div>
@@ -594,7 +593,7 @@ const ModalGarantia = ({
                                                     placeholder="0.00"
                                                     min="0"
                                                     step="0.01"
-                                                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                    className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                                 />
                                             </div>
                                             <p className="mt-1 text-xs text-gray-500">Valor determinado por tasador oficial</p>
@@ -616,7 +615,7 @@ const ModalGarantia = ({
                                                     placeholder="0.00"
                                                     min="0"
                                                     step="0.01"
-                                                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                    className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                                 />
                                             </div>
                                             <p className="mt-1 text-xs text-gray-500">Valor estimado de venta rápida (80% del comercial)</p>
@@ -638,7 +637,7 @@ const ModalGarantia = ({
                                                     placeholder="0.00"
                                                     min="0"
                                                     step="0.01"
-                                                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                    className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                                 />
                                             </div>
                                             <p className="mt-1 text-xs text-gray-500">Suma asegurada en póliza</p>
@@ -661,7 +660,7 @@ const ModalGarantia = ({
                                                 value={valores.ubicacion.direccion}
                                                 onChange={(e) => manejarCambio('ubicacion.direccion', e.target.value)}
                                                 placeholder="Av. Principal 123..."
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -675,7 +674,7 @@ const ModalGarantia = ({
                                                 value={valores.ubicacion.distrito}
                                                 onChange={(e) => manejarCambio('ubicacion.distrito', e.target.value)}
                                                 placeholder="Ej: Miraflores, San Isidro..."
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -689,7 +688,7 @@ const ModalGarantia = ({
                                                 value={valores.ubicacion.provincia}
                                                 onChange={(e) => manejarCambio('ubicacion.provincia', e.target.value)}
                                                 placeholder="Ej: Lima, Callao..."
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -703,7 +702,7 @@ const ModalGarantia = ({
                                                 value={valores.ubicacion.departamento}
                                                 onChange={(e) => manejarCambio('ubicacion.departamento', e.target.value)}
                                                 placeholder="Ej: Lima, Arequipa..."
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -717,7 +716,7 @@ const ModalGarantia = ({
                                                 value={valores.ubicacion.codigoPostal}
                                                 onChange={(e) => manejarCambio('ubicacion.codigoPostal', e.target.value)}
                                                 placeholder="15001"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -731,7 +730,7 @@ const ModalGarantia = ({
                                                 value={valores.ubicacion.referencia}
                                                 onChange={(e) => manejarCambio('ubicacion.referencia', e.target.value)}
                                                 placeholder="Cerca al parque central, frente a..."
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
                                     </div>
@@ -752,7 +751,7 @@ const ModalGarantia = ({
                                                 value={valores.informacionLegal.numeroRegistro}
                                                 onChange={(e) => manejarCambio('informacionLegal.numeroRegistro', e.target.value)}
                                                 placeholder="N° de partida registral..."
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -766,7 +765,7 @@ const ModalGarantia = ({
                                                 value={valores.informacionLegal.oficina}
                                                 onChange={(e) => manejarCambio('informacionLegal.oficina', e.target.value)}
                                                 placeholder="SUNARP Lima, Zona Registral IX..."
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -780,7 +779,7 @@ const ModalGarantia = ({
                                                 value={valores.informacionLegal.partida}
                                                 onChange={(e) => manejarCambio('informacionLegal.partida', e.target.value)}
                                                 placeholder="N° de partida..."
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -794,7 +793,7 @@ const ModalGarantia = ({
                                                 value={valores.informacionLegal.asiento}
                                                 onChange={(e) => manejarCambio('informacionLegal.asiento', e.target.value)}
                                                 placeholder="N° de asiento..."
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -808,7 +807,7 @@ const ModalGarantia = ({
                                                 value={valores.informacionLegal.folio}
                                                 onChange={(e) => manejarCambio('informacionLegal.folio', e.target.value)}
                                                 placeholder="N° de folio..."
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -822,7 +821,7 @@ const ModalGarantia = ({
                                                 value={valores.informacionLegal.zona}
                                                 onChange={(e) => manejarCambio('informacionLegal.zona', e.target.value)}
                                                 placeholder="Zona IX - Sede Lima..."
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -835,7 +834,7 @@ const ModalGarantia = ({
                                                 type="date"
                                                 value={valores.informacionLegal.fechaInscripcion}
                                                 onChange={(e) => manejarCambio('informacionLegal.fechaInscripcion', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
 
@@ -848,7 +847,7 @@ const ModalGarantia = ({
                                                 type="date"
                                                 value={valores.informacionLegal.vigenciaInscripcion}
                                                 onChange={(e) => manejarCambio('informacionLegal.vigenciaInscripcion', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                                             />
                                         </div>
                                     </div>
@@ -857,18 +856,18 @@ const ModalGarantia = ({
                         </div>
 
                         {/* Footer */}
-                        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+                        <div className="flex items-center justify-end gap-3 px-5 py-3 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl">
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
                                 disabled={guardando}
                             >
                                 Cancelar
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 disabled={guardando || loading}
                             >
                                 {guardando ? (

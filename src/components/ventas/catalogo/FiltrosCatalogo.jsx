@@ -36,7 +36,7 @@ const FiltrosCatalogo = ({
   // Versión ultra-compacta para móvil
   if (isMobile) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3">
         {/* Búsqueda principal */}
         <div className="relative mb-3">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
@@ -45,7 +45,7 @@ const FiltrosCatalogo = ({
             placeholder="Buscar productos..."
             value={filtros.busqueda}
             onChange={(e) => handleFiltroChange('busqueda', e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-sm border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
@@ -54,7 +54,7 @@ const FiltrosCatalogo = ({
           {/* Botón para mostrar filtros avanzados */}
           <button
             onClick={() => setMostrarFiltrosAvanzados(!mostrarFiltrosAvanzados)}
-            className="flex items-center gap-1 px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-xs font-medium hover:bg-purple-200 transition-colors"
+            className="flex items-center gap-1 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium hover:bg-blue-200 transition-colors"
           >
             <Filter size={12} />
             Filtros
@@ -75,7 +75,7 @@ const FiltrosCatalogo = ({
               type="checkbox"
               checked={filtros.soloConStock}
               onChange={(e) => handleFiltroChange('soloConStock', e.target.checked)}
-              className="w-3 h-3 text-purple-500 rounded focus:ring-purple-500"
+              className="w-3 h-3 text-blue-500 rounded focus:ring-blue-500"
             />
             Stock
           </label>
@@ -101,7 +101,7 @@ const FiltrosCatalogo = ({
               <select
                 value={filtros.categoria}
                 onChange={(e) => handleFiltroChange('categoria', e.target.value)}
-                className="w-full px-3 py-1.5 text-xs border border-purple-300 rounded-md focus:ring-1 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-xl focus:ring-1 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Todas las categorías</option>
                 {categorias.map(categoria => (
@@ -118,7 +118,7 @@ const FiltrosCatalogo = ({
               <select
                 value={filtros.ordenarPor}
                 onChange={(e) => handleFiltroChange('ordenarPor', e.target.value)}
-                className="w-full px-3 py-1.5 text-xs border border-purple-300 rounded-md focus:ring-1 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-xl focus:ring-1 focus:ring-blue-500 focus:border-transparent"
               >
                 {opcionesOrden.map(opcion => (
                   <option key={opcion.valor} value={opcion.valor}>
@@ -279,7 +279,7 @@ const FiltrosCatalogo = ({
         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Búsqueda */}
           <div className="relative">
-            <label className="block text-sm font-medium text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
               Buscar productos
             </label>
             <div className="relative">
@@ -289,7 +289,7 @@ const FiltrosCatalogo = ({
                 placeholder="Buscar por nombre o código..."
                 value={filtros.busqueda}
                 onChange={(e) => handleFiltroChange('busqueda', e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm text-white placeholder-gray-400"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900 placeholder-gray-400"
               />
               {filtros.busqueda && (
                 <button
@@ -304,7 +304,7 @@ const FiltrosCatalogo = ({
 
           {/* Categoría */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
               Filtrar por categoría
             </label>
             <div className="relative">
@@ -312,7 +312,7 @@ const FiltrosCatalogo = ({
               <select
                 value={filtros.categoria}
                 onChange={(e) => handleFiltroChange('categoria', e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm appearance-none text-white"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm appearance-none text-gray-900"
               >
                 <option value="">Todas las categorías</option>
                 {categorias.map(categoria => (
@@ -329,7 +329,7 @@ const FiltrosCatalogo = ({
         <div className="flex flex-col sm:flex-row gap-4 lg:w-auto">
           {/* Ordenamiento */}
           <div className="min-w-[200px]">
-            <label className="block text-sm font-medium text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
               Ordenar por
             </label>
             <div className="relative">
@@ -337,7 +337,7 @@ const FiltrosCatalogo = ({
               <select
                 value={filtros.ordenarPor}
                 onChange={(e) => handleFiltroChange('ordenarPor', e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm appearance-none text-white"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm appearance-none text-gray-900"
               >
                 {opcionesOrden.map(opcion => (
                   <option key={opcion.valor} value={opcion.valor}>
@@ -357,9 +357,9 @@ const FiltrosCatalogo = ({
                 type="checkbox"
                 checked={filtros.soloConStock}
                 onChange={(e) => handleFiltroChange('soloConStock', e.target.checked)}
-                className="h-4 w-4 text-purple-500 focus:ring-purple-500 bg-gray-700 border-gray-600 rounded"
+                className="h-4 w-4 text-blue-500 focus:ring-blue-500 bg-white border-gray-200 rounded"
               />
-              <label htmlFor="soloConStock" className="text-sm text-gray-300 flex items-center gap-1">
+              <label htmlFor="soloConStock" className="text-sm text-gray-600 flex items-center gap-1">
                 <Package size={14} />
                 Solo con stock
               </label>
@@ -368,7 +368,7 @@ const FiltrosCatalogo = ({
             {/* Botón limpiar filtros */}
             <button
               onClick={limpiarFiltros}
-              className="flex items-center justify-center gap-2 px-3 py-2 text-gray-300 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors text-sm border border-gray-600"
+              className="flex items-center justify-center gap-2 px-3 py-2 text-gray-600 bg-white rounded-xl hover:bg-gray-100 transition-colors text-sm border border-gray-200"
             >
               <RotateCcw size={14} />
               Limpiar filtros
@@ -379,22 +379,22 @@ const FiltrosCatalogo = ({
 
       {/* Información de resultados */}
       <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <div className="flex items-center gap-4 text-sm text-gray-300">
+        <div className="flex items-center gap-4 text-sm text-gray-600">
           <span>
-            <strong className="text-purple-400">{totalProductos}</strong> productos encontrados
+            <strong className="text-blue-600">{totalProductos}</strong> productos encontrados
           </span>
           
           {/* Filtros activos */}
           {(filtros.busqueda || filtros.categoria || !filtros.soloConStock) && (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-400">Filtros activos:</span>
+              <span className="text-xs text-gray-500">Filtros activos:</span>
               <div className="flex gap-1">
                 {filtros.busqueda && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-purple-500 bg-opacity-20 text-purple-300 border border-purple-500 border-opacity-30">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-blue-50 text-blue-600 border border-blue-200">
                     Búsqueda: "{filtros.busqueda}"
                     <button
                       onClick={() => handleFiltroChange('busqueda', '')}
-                      className="hover:text-purple-200"
+                      className="hover:text-blue-800"
                     >
                       ×
                     </button>
@@ -402,7 +402,7 @@ const FiltrosCatalogo = ({
                 )}
                 
                 {filtros.categoria && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-yellow-500 bg-opacity-20 text-yellow-300 border border-yellow-500 border-opacity-30">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
                     Categoría: {categorias.find(c => c._id === filtros.categoria)?.nombre}
                     <button
                       onClick={() => handleFiltroChange('categoria', '')}
@@ -414,7 +414,7 @@ const FiltrosCatalogo = ({
                 )}
                 
                 {!filtros.soloConStock && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-gray-500 bg-opacity-20 text-gray-300 border border-gray-500 border-opacity-30">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-gray-500/20 text-gray-300 border border-gray-500/30">
                     Incluye sin stock
                     <button
                       onClick={() => handleFiltroChange('soloConStock', true)}
@@ -430,10 +430,10 @@ const FiltrosCatalogo = ({
         </div>
 
         {/* Estadísticas rápidas */}
-        <div className="flex items-center gap-4 text-xs text-gray-400">
+        <div className="flex items-center gap-4 text-xs text-gray-500">
           {filtros.ordenarPor && (
             <span>
-              Ordenado por: <strong className="text-gray-300">{opcionesOrden.find(o => o.valor === filtros.ordenarPor)?.label}</strong>
+              Ordenado por: <strong className="text-gray-700">{opcionesOrden.find(o => o.valor === filtros.ordenarPor)?.label}</strong>
             </span>
           )}
         </div>

@@ -67,7 +67,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
             }
         };
         return config[estado] || { 
-            color: 'bg-gray-100 text-gray-800 border-gray-300', 
+            color: 'bg-gray-100 text-gray-800 border-gray-200', 
             icon: <AlertCircle className="w-4 h-4" />,
             label: estado || 'Desconocido'
         };
@@ -212,38 +212,38 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
         <div className="fixed inset-0 z-50 overflow-y-auto">
             {/* Overlay */}
             <div 
-                className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
             />
             
             {/* Modal */}
             <div className="flex min-h-full items-center justify-center p-4">
-                <div className="relative bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden transform transition-all">
+                <div className="relative bg-white rounded-2xl shadow-xl border border-gray-100 max-w-2xl w-full max-h-[90vh] overflow-hidden transform transition-all">
                     
                     {/* Header */}
-                    <div className={`${esIngreso ? 'bg-gradient-to-r from-green-500 to-emerald-600' : 'bg-gradient-to-r from-red-500 to-rose-600'} px-6 py-4`}>
+                    <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-5 py-4 rounded-t-2xl">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="bg-white/20 rounded-full p-2">
+                                <div className={`${esIngreso ? 'bg-green-100' : 'bg-red-100'} rounded-full p-2`}>
                                     {esIngreso 
-                                        ? <ArrowUpCircle className="w-6 h-6 text-white" />
-                                        : <ArrowDownCircle className="w-6 h-6 text-white" />
+                                        ? <ArrowUpCircle className="w-6 h-6 text-green-600" />
+                                        : <ArrowDownCircle className="w-6 h-6 text-red-600" />
                                     }
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-bold text-white">
+                                    <h3 className="text-lg font-bold text-gray-900">
                                         Detalle de {esIngreso ? 'Ingreso' : 'Egreso'}
                                     </h3>
-                                    <p className="text-white/80 text-sm">
+                                    <p className="text-gray-500 text-sm">
                                         #{movimiento.codigo}
                                     </p>
                                 </div>
                             </div>
                             <button
                                 onClick={onClose}
-                                className="text-white/80 hover:text-white p-1 hover:bg-white/20 rounded-full transition-colors"
+                                className="p-1.5 hover:bg-white/80 rounded-xl text-gray-400 hover:text-gray-600 transition-colors"
                             >
-                                <X className="w-5 h-5" />
+                                <X size={20} />
                             </button>
                         </div>
                     </div>
@@ -269,7 +269,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             
                             {/* Fecha */}
-                            <div className="bg-gray-50 rounded-lg p-4">
+                            <div className="bg-gray-50 rounded-xl p-4">
                                 <div className="flex items-center gap-2 text-gray-500 mb-1">
                                     <Calendar className="w-4 h-4" />
                                     <span className="text-xs font-medium uppercase">Fecha</span>
@@ -280,7 +280,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
                             </div>
 
                             {/* Método de Pago */}
-                            <div className="bg-gray-50 rounded-lg p-4">
+                            <div className="bg-gray-50 rounded-xl p-4">
                                 <div className="flex items-center gap-2 text-gray-500 mb-1">
                                     <CreditCard className="w-4 h-4" />
                                     <span className="text-xs font-medium uppercase">Método de Pago</span>
@@ -292,7 +292,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
                             </div>
 
                             {/* Categoría */}
-                            <div className="bg-gray-50 rounded-lg p-4">
+                            <div className="bg-gray-50 rounded-xl p-4">
                                 <div className="flex items-center gap-2 text-gray-500 mb-1">
                                     <Tag className="w-4 h-4" />
                                     <span className="text-xs font-medium uppercase">Categoría</span>
@@ -303,7 +303,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
                             </div>
 
                             {/* Usuario */}
-                            <div className="bg-gray-50 rounded-lg p-4">
+                            <div className="bg-gray-50 rounded-xl p-4">
                                 <div className="flex items-center gap-2 text-gray-500 mb-1">
                                     <User className="w-4 h-4" />
                                     <span className="text-xs font-medium uppercase">Registrado por</span>
@@ -315,7 +315,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
                         </div>
 
                         {/* Descripción */}
-                        <div className="mt-4 bg-gray-50 rounded-lg p-4">
+                        <div className="mt-4 bg-gray-50 rounded-xl p-4">
                             <div className="flex items-center gap-2 text-gray-500 mb-2">
                                 <FileText className="w-4 h-4" />
                                 <span className="text-xs font-medium uppercase">Descripción</span>
@@ -327,7 +327,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
 
                         {/* Información de saldos */}
                         {(movimiento.saldoAnterior !== undefined || movimiento.saldoActual !== undefined) && (
-                            <div className="mt-4 bg-blue-50 rounded-lg p-4">
+                            <div className="mt-4 bg-blue-50 rounded-xl p-4">
                                 <div className="flex items-center gap-2 text-blue-600 mb-3">
                                     <DollarSign className="w-4 h-4" />
                                     <span className="text-xs font-medium uppercase">Movimiento de Saldo</span>
@@ -357,7 +357,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
 
                         {/* === DESGLOSE DE EFECTIVO === */}
                         {desgloseEfectivo && movimiento.tipoMovimiento === 'efectivo' && (
-                            <div className="mt-4 bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+                            <div className="mt-4 bg-emerald-50 rounded-xl p-4 border border-emerald-200">
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-2 text-emerald-700">
                                         <Banknote className="w-5 h-5" />
@@ -374,7 +374,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {/* Billetes */}
                                     {desgloseEfectivo.billetes.length > 0 && (
-                                        <div className="bg-white rounded-lg p-3 border border-emerald-100">
+                                        <div className="bg-white rounded-xl p-3 border border-emerald-100">
                                             <div className="flex items-center gap-2 mb-3">
                                                 <span className="text-lg">📄</span>
                                                 <span className="font-medium text-gray-700">Billetes</span>
@@ -403,7 +403,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
 
                                     {/* Monedas */}
                                     {desgloseEfectivo.monedas.length > 0 && (
-                                        <div className="bg-white rounded-lg p-3 border border-emerald-100">
+                                        <div className="bg-white rounded-xl p-3 border border-emerald-100">
                                             <div className="flex items-center gap-2 mb-3">
                                                 <Coins className="w-4 h-4 text-amber-600" />
                                                 <span className="font-medium text-gray-700">Monedas</span>
@@ -448,7 +448,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
 
                         {/* === DATOS BANCARIOS (cuando es transferencia) === */}
                         {movimiento.tipoMovimiento === 'bancario' && movimiento.detallesAdicionales && (
-                            <div className="mt-4 bg-blue-50 rounded-lg p-4 border border-blue-200">
+                            <div className="mt-4 bg-blue-50 rounded-xl p-4 border border-blue-200">
                                 <div className="flex items-center gap-2 text-blue-700 mb-3">
                                     <Building className="w-5 h-5" />
                                     <span className="text-sm font-semibold uppercase">Datos de Transferencia</span>
@@ -456,7 +456,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                     {movimiento.detallesAdicionales.banco && (
-                                        <div className="bg-white rounded-lg p-3 border border-blue-100">
+                                        <div className="bg-white rounded-xl p-3 border border-blue-100">
                                             <p className="text-xs text-gray-500 mb-1">Banco</p>
                                             <p className="text-sm font-medium text-gray-900">
                                                 🏦 {movimiento.detallesAdicionales.banco}
@@ -465,7 +465,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
                                     )}
                                     
                                     {movimiento.detallesAdicionales.numeroOperacion && (
-                                        <div className="bg-white rounded-lg p-3 border border-blue-100">
+                                        <div className="bg-white rounded-xl p-3 border border-blue-100">
                                             <p className="text-xs text-gray-500 mb-1">Nº Operación</p>
                                             <p className="text-sm font-medium text-gray-900 font-mono">
                                                 {movimiento.detallesAdicionales.numeroOperacion}
@@ -474,7 +474,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
                                     )}
                                     
                                     {movimiento.detallesAdicionales.cuentaOrigen && (
-                                        <div className="bg-white rounded-lg p-3 border border-blue-100">
+                                        <div className="bg-white rounded-xl p-3 border border-blue-100">
                                             <p className="text-xs text-gray-500 mb-1">Cuenta Origen</p>
                                             <p className="text-sm font-medium text-gray-900">
                                                 {movimiento.detallesAdicionales.cuentaOrigen}
@@ -483,7 +483,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
                                     )}
                                     
                                     {movimiento.detallesAdicionales.cuentaDestino && (
-                                        <div className="bg-white rounded-lg p-3 border border-blue-100">
+                                        <div className="bg-white rounded-xl p-3 border border-blue-100">
                                             <p className="text-xs text-gray-500 mb-1">Cuenta Destino</p>
                                             <p className="text-sm font-medium text-gray-900">
                                                 {movimiento.detallesAdicionales.cuentaDestino}
@@ -499,7 +499,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
                             
                             {/* Colaborador */}
                             {movimiento.colaboradorNombre && (
-                                <div className="bg-gray-50 rounded-lg p-4">
+                                <div className="bg-gray-50 rounded-xl p-4">
                                     <div className="flex items-center gap-2 text-gray-500 mb-1">
                                         <User className="w-4 h-4" />
                                         <span className="text-xs font-medium uppercase">Colaborador</span>
@@ -512,7 +512,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
 
                             {/* Proveedor */}
                             {movimiento.proveedor && (
-                                <div className="bg-gray-50 rounded-lg p-4">
+                                <div className="bg-gray-50 rounded-xl p-4">
                                     <div className="flex items-center gap-2 text-gray-500 mb-1">
                                         <Building className="w-4 h-4" />
                                         <span className="text-xs font-medium uppercase">Proveedor</span>
@@ -525,7 +525,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
 
                             {/* Número de Comprobante */}
                             {movimiento.numeroComprobante && (
-                                <div className="bg-gray-50 rounded-lg p-4">
+                                <div className="bg-gray-50 rounded-xl p-4">
                                     <div className="flex items-center gap-2 text-gray-500 mb-1">
                                         <Hash className="w-4 h-4" />
                                         <span className="text-xs font-medium uppercase">Nº Comprobante</span>
@@ -538,7 +538,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
 
                             {/* Es Automático */}
                             {movimiento.esAutomatico && (
-                                <div className="bg-amber-50 rounded-lg p-4">
+                                <div className="bg-amber-50 rounded-xl p-4">
                                     <div className="flex items-center gap-2 text-amber-600 mb-1">
                                         <Zap className="w-4 h-4" />
                                         <span className="text-xs font-medium uppercase">Generación</span>
@@ -552,7 +552,7 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
 
                         {/* Observaciones */}
                         {movimiento.observaciones && (
-                            <div className="mt-4 bg-gray-50 rounded-lg p-4">
+                            <div className="mt-4 bg-gray-50 rounded-xl p-4">
                                 <div className="flex items-center gap-2 text-gray-500 mb-2">
                                     <MessageSquare className="w-4 h-4" />
                                     <span className="text-xs font-medium uppercase">Observaciones</span>
@@ -581,10 +581,10 @@ const ModalDetalleMovimiento = ({ isOpen, onClose, movimiento }) => {
                     </div>
 
                     {/* Footer */}
-                    <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+                    <div className="bg-gray-50/50 border-t border-gray-100 px-5 py-3 rounded-b-2xl flex justify-end">
                         <button
                             onClick={onClose}
-                            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                            className="px-4 py-2 text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl transition-colors"
                         >
                             Cerrar
                         </button>

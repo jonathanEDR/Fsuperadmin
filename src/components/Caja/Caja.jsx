@@ -8,6 +8,7 @@ import DateRangePicker from '../common/DateRangePicker';
 import { getLocalDateString } from '../../utils/dateUtils';
 import { formatearFecha as formatearFechaUtil } from '../../utils/fechaHoraUtils';
 import CatalogoGastoList from '../gasto/CatalogoGastoList';
+import { Loader2, Wallet, ClipboardList, Calendar, ChevronRight, BarChart3, ArrowUp, ArrowDown, Bot, Hand, Trash2, FileText, Plus, Minus } from 'lucide-react';
 
 function Caja({ userRole }) {
   const { getToken } = useAuth();
@@ -216,7 +217,7 @@ function Caja({ userRole }) {
     return (
       <div className="max-w-7xl mx-auto p-6">
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+          <Loader2 className="animate-spin h-12 w-12 text-blue-500" />
           <span className="ml-4 text-lg">Cargando caja...</span>
         </div>
       </div>
@@ -229,8 +230,9 @@ function Caja({ userRole }) {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 lg:mb-6 gap-3 lg:gap-4">
         <div className="flex-1">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-1 lg:mb-2">
-            <h2 className="text-base sm:text-lg lg:text-2xl xl:text-3xl font-bold text-gray-800">
-              {vistaActual === 'caja' ? '💰 Control de Caja' : '📋 Catálogo de Gastos'}
+            <h2 className="text-base sm:text-lg lg:text-2xl xl:text-3xl font-bold text-gray-800 flex items-center gap-2">
+              {vistaActual === 'caja' ? <Wallet className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" /> : <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />}
+              {vistaActual === 'caja' ? 'Control de Caja' : 'Catálogo de Gastos'}
             </h2>
           </div>
 
@@ -238,24 +240,24 @@ function Caja({ userRole }) {
           <div className="flex gap-1 sm:gap-2 mb-4">
             <button
               onClick={() => setVistaActual('caja')}
-              className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 flex items-center gap-1 sm:gap-2 ${
+              className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-xl font-medium text-xs sm:text-sm transition-all duration-200 flex items-center gap-1 sm:gap-2 ${
                 vistaActual === 'caja'
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'text-blue-700 bg-blue-50 border border-blue-200'
+                  : 'text-gray-600 bg-white border border-gray-200 hover:bg-gray-50'
               }`}
             >
-              <span>💰</span>
+              <Wallet size={16} />
               <span>Caja</span>
             </button>
             <button
               onClick={() => setVistaActual('catalogo')}
-              className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 flex items-center gap-1 sm:gap-2 ${
+              className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-xl font-medium text-xs sm:text-sm transition-all duration-200 flex items-center gap-1 sm:gap-2 ${
                 vistaActual === 'catalogo'
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'text-blue-700 bg-blue-50 border border-blue-200'
+                  : 'text-gray-600 bg-white border border-gray-200 hover:bg-gray-50'
               }`}
             >
-              <span>📋</span>
+              <ClipboardList size={16} />
               <span className="hidden xs:inline">Catálogo de</span>
               <span>Gastos</span>
             </button>
@@ -269,9 +271,9 @@ function Caja({ userRole }) {
                 className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors mb-2"
               >
                 <span className={`transform transition-transform duration-200 ${isFilterExpanded ? 'rotate-90' : ''}`}>
-                  ▶
+                  <ChevronRight size={14} />
                 </span>
-                <span>📅 Filtrar por fechas</span>
+                <span className="flex items-center gap-1"><Calendar size={14} /> Filtrar por fechas</span>
                 {!isFilterExpanded && (
                   <span className="hidden sm:inline text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full truncate max-w-[180px]">
                     {fechaInicio} → {fechaFin}
@@ -287,7 +289,7 @@ function Caja({ userRole }) {
                     onFechaInicioChange={setFechaInicio}
                     onFechaFinChange={setFechaFin}
                     label="Período"
-                    className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm"
+                    className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm"
                   />
                 </div>
               )}
@@ -311,7 +313,7 @@ function Caja({ userRole }) {
       {vistaActual === 'caja' && (
         <>
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6">
               {error}
             </div>
           )}
@@ -336,18 +338,18 @@ function Caja({ userRole }) {
             <div className="flex justify-center gap-2 sm:gap-4">
               <button
                 onClick={() => setIsModalIngresoOpen(true)}
-                className="bg-green-500 hover:bg-green-600 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg text-sm sm:text-base flex items-center justify-center"
+                className="text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-xl font-medium transition-all duration-200 text-sm sm:text-base flex items-center justify-center"
                 title="Registrar Ingreso"
               >
-                <span className="text-base sm:text-lg">➕</span>
+                <Plus size={16} />
                 <span className="hidden sm:inline ml-2">Registrar Ingreso</span>
               </button>
               <button
                 onClick={() => setIsModalEgresoOpen(true)}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg text-sm sm:text-base flex items-center justify-center"
+                className="text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-xl font-medium transition-all duration-200 text-sm sm:text-base flex items-center justify-center"
                 title="Registrar Egreso"
               >
-                <span className="text-base sm:text-lg">➖</span>
+                <Minus size={16} />
                 <span className="hidden sm:inline ml-2">Registrar Egreso</span>
               </button>
             </div>
@@ -382,7 +384,7 @@ function Caja({ userRole }) {
         
         {movimientos.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
-            <div className="text-4xl mb-4">📊</div>
+            <div className="mb-4"><BarChart3 size={40} className="text-gray-300 mx-auto" /></div>
             <p className="text-lg mb-2">No hay movimientos registrados</p>
             <p className="text-sm">Los movimientos aparecerán aquí una vez que los registres</p>
           </div>
@@ -400,7 +402,7 @@ function Caja({ userRole }) {
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-red-100 text-red-800'
                       }`}>
-                        {mov.tipo === 'ingreso' ? '⬆️ Ingreso' : '⬇️ Egreso'}
+                        {mov.tipo === 'ingreso' ? <><ArrowUp size={12} className="inline" /> Ingreso</> : <><ArrowDown size={12} className="inline" /> Egreso</>}
                       </span>
                       <span className="text-xs text-gray-500">
                         {formatearFecha(mov.fecha)}
@@ -411,16 +413,16 @@ function Caja({ userRole }) {
                       <div className="flex items-center gap-1">
                         {userRole === 'super_admin' && (
                           <span className="text-xs" title={mov.esAutomatico ? 'Automático' : 'Manual'}>
-                            {mov.esAutomatico ? '🤖' : '✋'}
+                            {mov.esAutomatico ? <Bot size={12} /> : <Hand size={12} />}
                           </span>
                         )}
                         <button
                           onClick={() => handleEliminarMovimiento(mov._id)}
-                          className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1.5 rounded-md transition-colors duration-200"
+                          className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1.5 rounded-xl transition-colors duration-200"
                           title="Eliminar movimiento"
                           disabled={loading}
                         >
-                          🗑️
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     )}
@@ -467,7 +469,7 @@ function Caja({ userRole }) {
             {/* Vista de Tabla Desktop */}
             <div className="hidden lg:block overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-gradient-to-r from-slate-50 to-gray-50">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Fecha
@@ -511,7 +513,7 @@ function Caja({ userRole }) {
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                           mov.tipo === 'ingreso' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
-                          {mov.tipo === 'ingreso' ? '⬆️ Ingreso' : '⬇️ Egreso'}
+                          {mov.tipo === 'ingreso' ? <><ArrowUp size={12} className="inline" /> Ingreso</> : <><ArrowDown size={12} className="inline" /> Egreso</>}
                         </span>
                       </td>
                       <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
@@ -538,14 +540,14 @@ function Caja({ userRole }) {
                       {userRole === 'super_admin' && (
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
                           <div className="flex items-center space-x-2">
-                            <span className="text-xs font-medium">{mov.esAutomatico ? '🤖' : '✋'}</span>
+                            <span className="text-xs font-medium">{mov.esAutomatico ? <Bot size={12} /> : <Hand size={12} />}</span>
                             <button
                               onClick={() => handleEliminarMovimiento(mov._id)}
-                              className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded-md transition-colors duration-200"
+                              className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded-xl transition-colors duration-200"
                               title="Eliminar movimiento"
                               disabled={loading}
                             >
-                              <span className="text-xs">🗑️</span>
+                              <Trash2 size={14} />
                             </button>
                           </div>
                         </td>
@@ -556,11 +558,11 @@ function Caja({ userRole }) {
                           <div className="flex items-center justify-center">
                             <button
                               onClick={() => handleEliminarMovimiento(mov._id)}
-                              className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded-md transition-colors duration-200"
+                              className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded-xl transition-colors duration-200"
                               title="Eliminar movimiento"
                               disabled={loading}
                             >
-                              <span className="text-xs">🗑️</span>
+                              <Trash2 size={14} />
                             </button>
                           </div>
                         </td>
@@ -580,20 +582,17 @@ function Caja({ userRole }) {
               <button
                 onClick={handleLoadMore}
                 disabled={loadingMore}
-                className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                className="inline-flex items-center px-6 py-3 text-sm font-medium rounded-xl text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
                 {loadingMore ? (
                   <>
-                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+                    <Loader2 className="animate-spin -ml-1 mr-3 h-4 w-4" />
                     Cargando...
                   </>
                 ) : (
                   <>
-                    📄 Ver más registros 
-                    <span className="ml-2 text-xs bg-blue-500 px-2 py-1 rounded-full">
+                    <FileText size={16} className="mr-1" /> Ver más registros 
+                    <span className="ml-2 text-xs bg-blue-100 px-2 py-1 rounded-full">
                       {currentLimit === 20 ? '→ 50' : currentLimit === 50 ? '→ 100' : `→ ${currentLimit + 50}`}
                     </span>
                   </>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Loader2, Trash2, Plus, Search, AlertTriangle } from 'lucide-react';
 import { residuoService } from '../../../services/residuoService';
 import FormularioResiduo from './FormularioResiduo';
 import TablaResiduos from './TablaResiduos';
@@ -85,7 +86,7 @@ const GestionResiduos = () => {
       <div className="min-h-screen bg-gray-50 p-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto" />
             <p className="mt-4 text-gray-600">Cargando gestión de residuos...</p>
           </div>
         </div>
@@ -124,7 +125,7 @@ const GestionResiduos = () => {
         {/* Título y acciones */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">🗑️ Gestión de Residuos</h1>
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><Trash2 size={24} className="text-red-500" /> Gestión de Residuos</h1>
             <p className="mt-1 text-sm text-gray-500">
               Registro y control de productos dañados, vencidos o malogrados
             </p>
@@ -133,9 +134,9 @@ const GestionResiduos = () => {
           <div className="mt-4 sm:mt-0">
             <button
               onClick={() => setMostrarFormulario(true)}
-              className="w-full sm:w-auto inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+              className="w-full sm:w-auto inline-flex items-center gap-2 px-4 py-2 text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 rounded-xl transition-colors text-sm font-medium"
             >
-              <span className="mr-2">📝</span>
+              <Plus size={16} />
               Registrar Residuo
             </button>
           </div>
@@ -143,8 +144,9 @@ const GestionResiduos = () => {
 
         {/* Error */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
             <div className="flex">
+              <AlertTriangle size={18} className="text-red-500 mt-0.5 flex-shrink-0" />
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-red-800">
                   Error al cargar datos
@@ -155,7 +157,7 @@ const GestionResiduos = () => {
                 <div className="mt-4">
                   <button
                     onClick={() => cargarResiduos()}
-                    className="bg-red-100 px-2 py-1 rounded text-red-800 hover:bg-red-200 text-sm"
+                    className="bg-red-100 px-2 py-1 rounded-xl text-red-800 hover:bg-red-200 text-sm"
                   >
                     Reintentar
                   </button>
@@ -166,8 +168,8 @@ const GestionResiduos = () => {
         )}
 
         {/* Filtros */}
-        <div className="bg-white rounded-lg shadow mb-6 p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">🔍 Filtros</h3>
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 mb-6 p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2"><Search size={18} className="text-gray-400" /> Filtros</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Fecha Inicio */}
@@ -179,7 +181,7 @@ const GestionResiduos = () => {
                 type="date"
                 value={filtros.fechaInicio}
                 onChange={(e) => manejarCambiarFiltro('fechaInicio', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -192,7 +194,7 @@ const GestionResiduos = () => {
                 type="date"
                 value={filtros.fechaFin}
                 onChange={(e) => manejarCambiarFiltro('fechaFin', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -204,7 +206,7 @@ const GestionResiduos = () => {
               <select
                 value={filtros.tipoProducto}
                 onChange={(e) => manejarCambiarFiltro('tipoProducto', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Todos los tipos</option>
                 <option value="ingrediente">Ingrediente</option>
@@ -222,7 +224,7 @@ const GestionResiduos = () => {
               <select
                 value={filtros.motivo}
                 onChange={(e) => manejarCambiarFiltro('motivo', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Todos los motivos</option>
                 <option value="vencido">Vencido/Caducado</option>
@@ -238,7 +240,7 @@ const GestionResiduos = () => {
           <div className="mt-4 flex space-x-2">
             <button
               onClick={limpiarFiltros}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
             >
               Limpiar Filtros
             </button>

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Minus, Plus, AlertCircle } from 'lucide-react';
+import { Minus, Plus, AlertCircle, Loader2 } from 'lucide-react';
 
 /**
  * Componente de desglose de efectivo para préstamos otorgados
@@ -171,8 +171,8 @@ const DesgloseEfectivoPrestamo = ({
 
     if (loading) {
         return (
-            <div className="bg-gray-50 rounded-lg p-4 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+            <div className="bg-gray-50 rounded-xl p-4 text-center">
+                <Loader2 className="animate-spin h-8 w-8 text-green-600 mx-auto" />
                 <p className="text-gray-600 mt-2">Cargando saldo de caja...</p>
             </div>
         );
@@ -185,22 +185,22 @@ const DesgloseEfectivoPrestamo = ({
                 <h3 className="font-bold text-gray-800 flex items-center">
                     <span className="mr-2">💸</span> Desglose de Efectivo
                 </h3>
-                <div className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-bold shadow">
+                <div className="bg-green-600 text-white px-3 py-1.5 rounded-xl text-sm font-bold shadow">
                     A Entregar: S/ {totalDesglose.toFixed(2)}
                 </div>
             </div>
 
             {/* Resumen de caja */}
             <div className="grid grid-cols-3 gap-2 mb-4 text-center">
-                <div className="bg-blue-100 rounded-lg p-2">
+                <div className="bg-blue-100 rounded-xl p-2">
                     <span className="text-xs text-blue-600 font-medium">En Caja</span>
                     <p className="text-sm font-bold text-blue-800">S/ {totalDisponible.toFixed(2)}</p>
                 </div>
-                <div className="bg-orange-100 rounded-lg p-2">
+                <div className="bg-orange-100 rounded-xl p-2">
                     <span className="text-xs text-orange-600 font-medium">A Prestar</span>
                     <p className="text-sm font-bold text-orange-800">S/ {montoAPagar.toFixed(2)}</p>
                 </div>
-                <div className="bg-green-100 rounded-lg p-2">
+                <div className="bg-green-100 rounded-xl p-2">
                     <span className="text-xs text-green-600 font-medium">Quedará</span>
                     <p className="text-sm font-bold text-green-800">S/ {(totalDisponible - totalDesglose).toFixed(2)}</p>
                 </div>
@@ -208,7 +208,7 @@ const DesgloseEfectivoPrestamo = ({
 
             {/* Alerta de diferencia */}
             {hayDiferencia && montoAPagar > 0 && (
-                <div className={`mb-3 p-2 rounded-lg flex items-center gap-2 ${diferencia > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
+                <div className={`mb-3 p-2 rounded-xl flex items-center gap-2 ${diferencia > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
                     <AlertCircle size={16} />
                     <span className="text-xs font-medium">
                         {diferencia > 0 
@@ -224,7 +224,7 @@ const DesgloseEfectivoPrestamo = ({
                 <button
                     type="button"
                     onClick={autoDistribuir}
-                    className="flex-1 px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                    className="flex-1 px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 transition-colors"
                     disabled={!montoAPagar || montoAPagar <= 0}
                 >
                     🔄 Auto-distribuir
@@ -232,7 +232,7 @@ const DesgloseEfectivoPrestamo = ({
                 <button
                     type="button"
                     onClick={limpiarDesglose}
-                    className="px-3 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors"
+                    className="px-3 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-300 transition-colors"
                 >
                     🗑️ Limpiar
                 </button>
@@ -255,7 +255,7 @@ const DesgloseEfectivoPrestamo = ({
                         const sinStock = disponible === 0;
                         
                         return (
-                            <div key={billete.key} className={`flex items-center justify-between bg-white p-2 rounded-lg shadow-sm ${sinStock ? 'opacity-50' : ''}`}>
+                            <div key={billete.key} className={`flex items-center justify-between bg-white p-2 rounded-xl shadow-sm ${sinStock ? 'opacity-50' : ''}`}>
                                 <div className="flex items-center gap-2">
                                     <span className={`${billete.color} text-white px-2 py-0.5 rounded text-xs font-bold min-w-[50px] text-center`}>
                                         {billete.label}
@@ -279,7 +279,7 @@ const DesgloseEfectivoPrestamo = ({
                                         max={disponible}
                                         value={aRetirar}
                                         onChange={(e) => handleInputChange('billetes', billete.key, e)}
-                                        className={`w-14 text-center font-bold text-sm border rounded-lg py-1 focus:ring-2 focus:ring-green-500 focus:border-green-500 ${aRetirar > 0 ? 'text-green-600 bg-green-50 border-green-300' : 'text-gray-400 border-gray-200'}`}
+                                        className={`w-14 text-center font-bold text-sm border rounded-xl py-1 focus:ring-2 focus:ring-green-500 focus:border-green-500 ${aRetirar > 0 ? 'text-green-600 bg-green-50 border-green-300' : 'text-gray-400 border-gray-200'}`}
                                         disabled={sinStock}
                                     />
                                     <button
@@ -322,7 +322,7 @@ const DesgloseEfectivoPrestamo = ({
                         const sinStock = disponible === 0;
                         
                         return (
-                            <div key={moneda.key} className={`flex items-center justify-between bg-white p-1.5 rounded-lg shadow-sm ${sinStock ? 'opacity-50' : ''}`}>
+                            <div key={moneda.key} className={`flex items-center justify-between bg-white p-1.5 rounded-xl shadow-sm ${sinStock ? 'opacity-50' : ''}`}>
                                 <div className="flex items-center gap-1">
                                     <span className={`${moneda.color} text-white px-1.5 py-0.5 rounded text-xs font-bold min-w-[45px] text-center`}>
                                         {moneda.label}
@@ -346,7 +346,7 @@ const DesgloseEfectivoPrestamo = ({
                                         max={disponible}
                                         value={aRetirar}
                                         onChange={(e) => handleInputChange('monedas', moneda.key, e)}
-                                        className={`w-10 text-center font-bold text-xs border rounded-lg py-0.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 ${aRetirar > 0 ? 'text-green-600 bg-green-50 border-green-300' : 'text-gray-400 border-gray-200'}`}
+                                        className={`w-10 text-center font-bold text-xs border rounded-xl py-0.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 ${aRetirar > 0 ? 'text-green-600 bg-green-50 border-green-300' : 'text-gray-400 border-gray-200'}`}
                                         disabled={sinStock}
                                     />
                                     <button
@@ -366,7 +366,7 @@ const DesgloseEfectivoPrestamo = ({
 
             {/* Verificación de saldo */}
             {totalDesglose > totalDisponible && (
-                <div className="mt-3 p-2 bg-red-100 text-red-800 rounded-lg flex items-center gap-2">
+                <div className="mt-3 p-2 bg-red-100 text-red-800 rounded-xl flex items-center gap-2">
                     <AlertCircle size={16} />
                     <span className="text-xs font-medium">
                         ¡No hay suficiente efectivo en caja!

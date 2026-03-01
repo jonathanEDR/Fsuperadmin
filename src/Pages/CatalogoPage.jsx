@@ -1,4 +1,5 @@
 import React from 'react';
+import { Loader2 } from 'lucide-react';
 import CatalogoVentasPageView from '../components/ventas/catalogo/CatalogoVentasPageView';
 import { useUserRole } from '../hooks/useUserRole';
 import ProductoErrorBoundary from '../components/common/ProductoErrorBoundary';
@@ -11,7 +12,7 @@ function CatalogoPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <Loader2 size={48} className="animate-spin text-blue-600 mx-auto" />
           <p className="mt-4 text-gray-600">Cargando catálogo...</p>
         </div>
       </div>

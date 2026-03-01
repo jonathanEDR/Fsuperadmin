@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { X, QrCode, MapPin, Clock, AlertCircle, Edit3 } from 'lucide-react';
+import { X, QrCode, MapPin, Clock, AlertCircle, Edit3, Loader2 } from 'lucide-react';
 
 const ModalGenerarQR = ({ 
   isOpen, 
@@ -194,8 +194,8 @@ const ModalGenerarQR = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         
         {/* Header */}
         <div className={`${modoEdicion ? 'bg-gradient-to-r from-amber-500 to-orange-600' : 'bg-gradient-to-r from-blue-600 to-purple-600'} text-white p-6 flex items-center justify-between sticky top-0`}>
@@ -208,7 +208,7 @@ const ModalGenerarQR = ({
           <button
             onClick={handleCerrar}
             disabled={loading}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors disabled:opacity-50"
+            className="p-2 hover:bg-white/20 rounded-xl transition-colors disabled:opacity-50"
           >
             <X size={24} />
           </button>
@@ -237,8 +237,8 @@ const ModalGenerarQR = ({
                 value={formData.nombre}
                 onChange={handleChange}
                 placeholder="Ej: QR Sede Principal - Marzo 2025"
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errores.nombre ? 'border-red-500' : 'border-gray-300'
+                className={`w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  errores.nombre ? 'border-red-500' : 'border-gray-200'
                 }`}
                 disabled={loading}
               />
@@ -261,8 +261,8 @@ const ModalGenerarQR = ({
                 value={formData.sucursal}
                 onChange={handleChange}
                 placeholder="Ej: Lima Centro, Arequipa, Trujillo"
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errores.sucursal ? 'border-red-500' : 'border-gray-300'
+                className={`w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  errores.sucursal ? 'border-red-500' : 'border-gray-200'
                 }`}
                 disabled={loading}
               />
@@ -285,8 +285,8 @@ const ModalGenerarQR = ({
                 value={formData.validoHasta}
                 onChange={handleChange}
                 min={getFechaMinima()}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errores.validoHasta ? 'border-red-500' : 'border-gray-300'
+                className={`w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  errores.validoHasta ? 'border-red-500' : 'border-gray-200'
                 }`}
                 disabled={loading}
               />
@@ -323,8 +323,8 @@ const ModalGenerarQR = ({
                   name="horaInicio"
                   value={formData.horaInicio}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errores.horaInicio ? 'border-red-500' : 'border-gray-300'
+                  className={`w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errores.horaInicio ? 'border-red-500' : 'border-gray-200'
                   }`}
                   disabled={loading}
                 />
@@ -340,7 +340,7 @@ const ModalGenerarQR = ({
                   name="horaFin"
                   value={formData.horaFin}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   disabled={loading}
                 />
               </div>
@@ -364,7 +364,7 @@ const ModalGenerarQR = ({
             </h3>
 
             {/* Activar detección */}
-            <div className="flex items-start gap-3 bg-orange-50 p-4 rounded-lg border border-orange-200">
+            <div className="flex items-start gap-3 bg-orange-50 p-4 rounded-xl border border-orange-200">
               <input
                 type="checkbox"
                 name="aplicarDeteccionTardanza"
@@ -386,7 +386,7 @@ const ModalGenerarQR = ({
 
             {/* Horario esperado y tolerancia */}
             {formData.aplicarDeteccionTardanza && (
-              <div className="bg-gray-50 p-4 rounded-lg space-y-4 border border-gray-200">
+              <div className="bg-gray-50 p-4 rounded-xl space-y-4 border border-gray-200">
                 <div className="grid grid-cols-2 gap-4">
                   {/* Horario de entrada esperado */}
                   <div>
@@ -398,7 +398,7 @@ const ModalGenerarQR = ({
                       name="horarioEntradaEsperado"
                       value={formData.horarioEntradaEsperado}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       disabled={loading}
                     />
                     <p className="text-xs text-gray-500 mt-1">
@@ -419,7 +419,7 @@ const ModalGenerarQR = ({
                       min="0"
                       max="60"
                       step="5"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       disabled={loading}
                     />
                     <p className="text-xs text-gray-500 mt-1">
@@ -477,7 +477,7 @@ const ModalGenerarQR = ({
             </h3>
 
             {/* Requiere Geolocalización */}
-            <div className="flex items-start gap-3 bg-blue-50 p-4 rounded-lg">
+            <div className="flex items-start gap-3 bg-blue-50 p-4 rounded-xl">
               <input
                 type="checkbox"
                 name="requiereGeolocalizacion"
@@ -509,7 +509,7 @@ const ModalGenerarQR = ({
               onChange={handleChange}
               rows="3"
               placeholder="Ej: Este QR es para el personal de la nueva sede..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               disabled={loading}
             />
           </div>
@@ -520,18 +520,18 @@ const ModalGenerarQR = ({
               type="button"
               onClick={handleCerrar}
               disabled={loading}
-              className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="flex-1 px-6 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className={`flex-1 px-6 py-3 ${modoEdicion ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700' : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'} text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
+              className={`flex-1 px-6 py-3 ${modoEdicion ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700' : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'} text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
             >
               {loading ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <Loader2 className="animate-spin h-5 w-5 text-white" />
                   <span>{modoEdicion ? 'Actualizando...' : 'Generando...'}</span>
                 </>
               ) : (

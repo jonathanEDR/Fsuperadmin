@@ -269,7 +269,7 @@ const PrestamosOptimizado = React.memo(() => {
     if (errorData) {
         return (
             <div className="p-6">
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4">
                     <h3 className="text-red-800 font-medium">Error al cargar préstamos</h3>
                     <p className="text-red-600 mt-1">{errorData}</p>
                 </div>
@@ -285,7 +285,7 @@ const PrestamosOptimizado = React.memo(() => {
                 {/* Botón Calculadora - solo icono en móvil */}
                 <button
                     onClick={abrirModalCalculadora}
-                    className="bg-blue-600 text-white px-2 sm:px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-1 sm:space-x-2 transition-colors text-sm"
+                    className="bg-blue-600 text-white px-2 sm:px-4 py-2 rounded-xl hover:bg-blue-700 flex items-center justify-center space-x-1 sm:space-x-2 transition-colors text-sm"
                     title="Calculadora de cuotas"
                 >
                     <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -297,7 +297,7 @@ const PrestamosOptimizado = React.memo(() => {
                 {/* Botón Préstamo Recibido - solo icono en móvil */}
                 <button
                     onClick={abrirModalNuevo}
-                    className="bg-indigo-600 text-white px-2 sm:px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center justify-center space-x-1 sm:space-x-2 transition-colors text-sm"
+                    className="bg-indigo-600 text-white px-2 sm:px-4 py-2 rounded-xl hover:bg-indigo-700 flex items-center justify-center space-x-1 sm:space-x-2 transition-colors text-sm"
                     title="Registrar un préstamo que TÚ RECIBES de un banco o financiera"
                 >
                     <span className="text-base sm:text-lg">💰</span>
@@ -307,7 +307,7 @@ const PrestamosOptimizado = React.memo(() => {
                 {/* Botón Préstamo Otorgado - solo icono en móvil */}
                 <button
                     onClick={abrirModalPrestamoOtorgado}
-                    className="bg-green-600 text-white px-2 sm:px-4 py-2 rounded-lg hover:bg-green-700 flex items-center justify-center space-x-1 sm:space-x-2 transition-colors text-sm"
+                    className="bg-green-600 text-white px-2 sm:px-4 py-2 rounded-xl hover:bg-green-700 flex items-center justify-center space-x-1 sm:space-x-2 transition-colors text-sm"
                     title="Registrar un préstamo que TÚ OTORGAS a un trabajador, cliente o tercero"
                 >
                     <span className="text-base sm:text-lg">💸</span>
@@ -316,7 +316,7 @@ const PrestamosOptimizado = React.memo(() => {
             </div>
 
             {/* Información sobre los tipos de préstamos - responsive */}
-            <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+            <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-3 sm:p-4 border border-gray-200">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div className="flex items-start gap-2 sm:gap-3">
                         <span className="text-xl sm:text-2xl">💰</span>

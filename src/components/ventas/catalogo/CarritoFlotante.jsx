@@ -29,20 +29,20 @@ const CarritoFlotante = ({
   return (
     <div className="w-full lg:w-96 bg-white border-l border-gray-200 flex flex-col max-h-[90vh] lg:max-h-screen">
       {/* Header del carrito */}
-      <div className="flex items-center justify-between p-4 border-b-2 border-purple-200 bg-gradient-to-r from-purple-50 via-white to-purple-50 flex-shrink-0">
+      <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gradient-to-r from-slate-50 to-gray-50 flex-shrink-0">
         <div className="flex items-center gap-2">
-          <ShoppingCart className="text-purple-600" size={24} />
+          <ShoppingCart className="text-blue-600" size={24} />
           <h3 className="font-bold text-gray-900 text-lg">
             Carrito de Compras
           </h3>
-          <span className="bg-purple-600 text-white text-xs font-bold rounded-full h-7 w-7 flex items-center justify-center shadow-md">
+          <span className="bg-blue-600 text-white text-xs font-bold rounded-full h-7 w-7 flex items-center justify-center shadow-md">
             {carrito.length}
           </span>
         </div>
         
         <button
           onClick={onCerrar}
-          className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors"
+          className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-xl transition-colors"
           title="Cerrar carrito"
         >
           <X size={20} />
@@ -64,9 +64,9 @@ const CarritoFlotante = ({
       ) : (
         <>
           {/* Lista de productos con scroll controlado */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-purple-50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-50">
             {carrito.map(item => (
-              <div key={item.productoId} className="bg-white rounded-lg p-3 border-2 border-purple-200 hover:border-purple-400 transition-colors shadow-sm">
+              <div key={item.productoId} className="bg-white rounded-xl p-3 border border-gray-200 hover:border-blue-300 transition-colors shadow-sm">
                 {/* Información del producto */}
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1 min-w-0">
@@ -79,7 +79,7 @@ const CarritoFlotante = ({
                         Código: {item.codigoProducto}
                       </span>
                       {item.categoryName && (
-                        <span className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full font-medium">
+                        <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full font-medium">
                           {item.categoryName}
                         </span>
                       )}
@@ -87,7 +87,7 @@ const CarritoFlotante = ({
                     
                     <div className="flex items-center gap-4 text-sm">
                       <span className="text-gray-600">
-                        Precio: <strong className="text-purple-600">S/ {item.precioUnitario.toFixed(2)}</strong>
+                        Precio: <strong className="text-blue-600">S/ {item.precioUnitario.toFixed(2)}</strong>
                       </span>
                       <span className="text-xs text-gray-500">
                         Stock: {item.stockDisponible}
@@ -98,7 +98,7 @@ const CarritoFlotante = ({
                   {/* Botón eliminar */}
                   <button
                     onClick={() => onEliminarProducto(item.productoId)}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50 transition-all p-2 rounded-lg"
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50 transition-all p-2 rounded-xl"
                     title="Eliminar producto"
                   >
                     <Trash2 size={16} />
@@ -107,11 +107,11 @@ const CarritoFlotante = ({
 
                 {/* Controles de cantidad */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 bg-purple-50 rounded-lg border-2 border-purple-300 p-1">
+                  <div className="flex items-center gap-2 bg-gray-50 rounded-xl border border-gray-300 p-1">
                     <button
                       onClick={() => handleCantidadChange(item.productoId, item.cantidad - 1)}
                       disabled={item.cantidad <= 1}
-                      className="p-1.5 text-purple-600 hover:text-white hover:bg-purple-600 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                      className="p-1.5 text-blue-600 hover:text-white hover:bg-blue-600 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                     >
                       <Minus size={14} />
                     </button>
@@ -125,24 +125,24 @@ const CarritoFlotante = ({
                       }}
                       min="1"
                       max={item.stockDisponible}
-                      className="w-12 text-center text-sm font-bold border-0 bg-transparent focus:ring-0 focus:outline-none text-purple-600"
+                      className="w-12 text-center text-sm font-bold border-0 bg-transparent focus:ring-0 focus:outline-none text-blue-600"
                     />
                     
                     <button
                       onClick={() => handleCantidadChange(item.productoId, item.cantidad + 1)}
                       disabled={item.cantidad >= item.stockDisponible}
-                      className="p-1.5 text-purple-600 hover:text-white hover:bg-purple-600 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                      className="p-1.5 text-blue-600 hover:text-white hover:bg-blue-600 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                     >
                       <Plus size={14} />
                     </button>
                   </div>
 
                   {/* Subtotal */}
-                  <div className="text-right bg-purple-50 px-3 py-2 rounded-lg border border-purple-200">
-                    <div className="text-sm font-bold text-purple-700">
+                  <div className="text-right bg-blue-50 px-3 py-2 rounded-xl border border-blue-200">
+                    <div className="text-sm font-bold text-blue-700">
                       S/ {item.subtotal.toFixed(2)}
                     </div>
-                    <div className="text-xs text-purple-500">
+                    <div className="text-xs text-blue-500">
                       {item.cantidad} × S/ {item.precioUnitario.toFixed(2)}
                     </div>
                   </div>
@@ -150,7 +150,7 @@ const CarritoFlotante = ({
 
                 {/* Advertencia de stock */}
                 {item.cantidad >= item.stockDisponible && (
-                  <div className="mt-2 p-2 bg-yellow-50 border border-yellow-300 rounded-lg text-xs text-yellow-800 font-medium">
+                  <div className="mt-2 p-2 bg-yellow-50 border border-yellow-300 rounded-xl text-xs text-yellow-800 font-medium">
                     ⚠️ Has agregado todo el stock disponible
                   </div>
                 )}
@@ -159,15 +159,15 @@ const CarritoFlotante = ({
           </div>
 
           {/* Footer del carrito - Siempre visible */}
-          <div className="border-t-2 border-purple-200 p-4 bg-gradient-to-b from-white to-purple-50 space-y-4 flex-shrink-0">
+          <div className="border-t border-gray-200 p-4 bg-white space-y-4 flex-shrink-0">
             {/* Resumen del total */}
             <div className="space-y-2">
-              <div className="flex justify-between text-sm text-purple-600 font-medium">
+              <div className="flex justify-between text-sm text-gray-600 font-medium">
                 <span>Productos ({carrito.length})</span>
                 <span>S/ {totalCarrito.toFixed(2)}</span>
               </div>
               
-              <div className="flex justify-between text-xl font-bold text-purple-700 pt-2 border-t-2 border-purple-200 bg-purple-50 px-3 py-2 rounded-lg">
+              <div className="flex justify-between text-xl font-bold text-blue-700 pt-2 border-t border-gray-200 bg-blue-50 px-3 py-2 rounded-xl">
                 <span>Total</span>
                 <span>S/ {totalCarrito.toFixed(2)}</span>
               </div>
@@ -177,12 +177,12 @@ const CarritoFlotante = ({
             {onModoChange && (
               <div className="space-y-2">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Destino del carrito</p>
-                <div className="grid grid-cols-2 gap-1 bg-gray-100 p-1 rounded-lg">
+                <div className="grid grid-cols-2 gap-1 bg-gray-100 p-1 rounded-xl">
                   <button
                     onClick={() => onModoChange('nueva')}
-                    className={`py-2 px-2 text-xs font-bold rounded-md transition-all ${
+                    className={`py-2 px-2 text-xs font-bold rounded-xl transition-all ${
                       modoVenta === 'nueva'
-                        ? 'bg-purple-600 text-white shadow-sm'
+                        ? 'bg-blue-600 text-white shadow-sm'
                         : 'text-gray-500 hover:text-gray-800'
                     }`}
                   >
@@ -190,7 +190,7 @@ const CarritoFlotante = ({
                   </button>
                   <button
                     onClick={() => onModoChange('existente')}
-                    className={`py-2 px-2 text-xs font-bold rounded-md transition-all ${
+                    className={`py-2 px-2 text-xs font-bold rounded-xl transition-all ${
                       modoVenta === 'existente'
                         ? 'bg-orange-500 text-white shadow-sm'
                         : 'text-gray-500 hover:text-gray-800'
@@ -212,14 +212,14 @@ const CarritoFlotante = ({
                     <span>Cargando ventas...</span>
                   </div>
                 ) : ventasPendientes.length === 0 ? (
-                  <p className="text-xs text-gray-400 text-center py-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="text-xs text-gray-400 text-center py-3 bg-gray-50 rounded-xl border border-gray-200">
                     No hay ventas pendientes disponibles
                   </p>
                 ) : (
                   <select
                     value={ventaSeleccionada || ''}
                     onChange={(e) => onVentaSeleccionada(e.target.value || null)}
-                    className="w-full text-sm border-2 border-orange-300 rounded-lg px-3 py-2.5 focus:outline-none focus:border-orange-500 bg-white text-gray-700 font-medium cursor-pointer"
+                    className="w-full text-sm border-2 border-orange-300 rounded-xl px-3 py-2.5 focus:outline-none focus:border-orange-500 bg-white text-gray-700 font-medium cursor-pointer"
                   >
                     <option value="">-- Elige una venta --</option>
                     {ventasPendientes.map(venta => (
@@ -239,12 +239,12 @@ const CarritoFlotante = ({
               <button
                 onClick={onConfirmarVenta}
                 disabled={modoVenta === 'existente' && !ventaSeleccionada}
-                className={`w-full py-3 px-4 rounded-lg transition-all font-bold flex items-center justify-center gap-2 shadow-lg ${
+                className={`w-full py-3 px-4 rounded-xl transition-all font-bold flex items-center justify-center gap-2 shadow-lg ${
                   modoVenta === 'existente' && !ventaSeleccionada
                     ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     : modoVenta === 'existente'
                       ? 'bg-orange-500 text-white hover:bg-orange-600 active:bg-orange-700 hover:shadow-xl transform hover:-translate-y-0.5'
-                      : 'bg-purple-600 text-white hover:bg-purple-700 active:bg-purple-800 hover:shadow-xl transform hover:-translate-y-0.5'
+                      : 'text-green-700 bg-green-50 border-2 border-green-300 hover:bg-green-100 hover:shadow-xl transform hover:-translate-y-0.5'
                 }`}
               >
                 {modoVenta === 'existente' ? (
@@ -262,14 +262,14 @@ const CarritoFlotante = ({
 
               <button
                 onClick={onLimpiarCarrito}
-                className="w-full bg-white text-purple-600 py-2 px-4 rounded-lg hover:bg-purple-50 transition-all text-sm font-semibold border-2 border-purple-200 hover:border-purple-400"
+                className="w-full bg-white text-gray-600 py-2 px-4 rounded-xl hover:bg-gray-50 transition-all text-sm font-semibold border border-gray-200 hover:border-gray-300"
               >
                 Limpiar carrito
               </button>
             </div>
 
             {/* Información adicional */}
-            <div className="text-xs text-purple-600 text-center space-y-1 font-medium">
+            <div className="text-xs text-gray-500 text-center space-y-1 font-medium">
               <p>💵 Los precios incluyen todos los impuestos</p>
               <p>📦 Stock actualizado en tiempo real</p>
             </div>

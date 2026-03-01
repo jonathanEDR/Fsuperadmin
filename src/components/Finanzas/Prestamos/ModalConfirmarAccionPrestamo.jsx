@@ -1,4 +1,5 @@
 import React from 'react';
+import { Loader2 } from 'lucide-react';
 
 /**
  * Modal para confirmar acción sobre un préstamo
@@ -25,27 +26,27 @@ const ModalConfirmarAccionPrestamo = ({
         <div className="fixed inset-0 z-50 overflow-y-auto">
             {/* Overlay */}
             <div 
-                className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
             />
             
             {/* Modal */}
             <div className="flex min-h-full items-center justify-center p-4">
-                <div className="relative bg-white rounded-xl shadow-2xl max-w-md w-full transform transition-all">
+                <div className="relative bg-white rounded-2xl shadow-xl border border-gray-100 max-w-md w-full transform transition-all">
                     
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-t-xl px-6 py-4">
+                    <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-5 py-4 rounded-t-2xl">
                         <div className="flex items-center gap-3">
-                            <div className="bg-white/20 rounded-full p-2">
-                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="bg-amber-100 rounded-full p-2">
+                                <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-white">
+                                <h3 className="text-lg font-bold text-gray-800">
                                     ¿Qué desea hacer con el préstamo?
                                 </h3>
-                                <p className="text-white/80 text-sm">
+                                <p className="text-gray-500 text-sm">
                                     {nombrePrestamo} - {montoFormateado}
                                 </p>
                             </div>
@@ -62,10 +63,10 @@ const ModalConfirmarAccionPrestamo = ({
                         <button
                             onClick={onCancelar}
                             disabled={loading}
-                            className="w-full p-4 border-2 border-yellow-200 rounded-lg hover:border-yellow-400 hover:bg-yellow-50 transition-all group text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full p-4 border-2 border-yellow-200 rounded-xl hover:border-yellow-400 hover:bg-yellow-50 transition-all group text-left disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <div className="flex items-start gap-3">
-                                <div className="bg-yellow-100 rounded-lg p-2 group-hover:bg-yellow-200 transition-colors">
+                                <div className="bg-yellow-100 rounded-xl p-2 group-hover:bg-yellow-200 transition-colors">
                                     <span className="text-2xl">🚫</span>
                                 </div>
                                 <div className="flex-1">
@@ -84,10 +85,10 @@ const ModalConfirmarAccionPrestamo = ({
                         <button
                             onClick={onEliminar}
                             disabled={loading}
-                            className="w-full p-4 border-2 border-red-200 rounded-lg hover:border-red-400 hover:bg-red-50 transition-all group text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full p-4 border-2 border-red-200 rounded-xl hover:border-red-400 hover:bg-red-50 transition-all group text-left disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <div className="flex items-start gap-3">
-                                <div className="bg-red-100 rounded-lg p-2 group-hover:bg-red-200 transition-colors">
+                                <div className="bg-red-100 rounded-xl p-2 group-hover:bg-red-200 transition-colors">
                                     <span className="text-2xl">🗑️</span>
                                 </div>
                                 <div className="flex-1">
@@ -110,11 +111,11 @@ const ModalConfirmarAccionPrestamo = ({
                     </div>
 
                     {/* Footer */}
-                    <div className="px-6 py-4 bg-gray-50 rounded-b-xl flex justify-end">
+                    <div className="bg-gray-50/50 border-t border-gray-100 px-5 py-3 rounded-b-2xl flex justify-end">
                         <button
                             onClick={onClose}
                             disabled={loading}
-                            className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
+                            className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50"
                         >
                             Cerrar
                         </button>
@@ -122,9 +123,9 @@ const ModalConfirmarAccionPrestamo = ({
 
                     {/* Loading overlay */}
                     {loading && (
-                        <div className="absolute inset-0 bg-white/70 rounded-xl flex items-center justify-center">
+                        <div className="absolute inset-0 bg-white/70 rounded-2xl flex items-center justify-center">
                             <div className="flex flex-col items-center gap-2">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                                <Loader2 className="animate-spin h-8 w-8 text-indigo-600" />
                                 <span className="text-sm text-gray-600">Procesando...</span>
                             </div>
                         </div>

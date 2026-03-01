@@ -203,7 +203,7 @@ const MovimientosCajaFinanzas = () => {
         <div className="flex flex-row gap-2">
             <button
                 onClick={() => setModalIngreso(true)}
-                className="inline-flex items-center justify-center px-2 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                className="inline-flex items-center justify-center px-2 sm:px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors text-sm"
                 title="Registrar Ingreso"
             >
                 <PlusCircle className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -212,7 +212,7 @@ const MovimientosCajaFinanzas = () => {
             
             <button
                 onClick={() => setModalEgreso(true)}
-                className="inline-flex items-center justify-center px-2 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                className="inline-flex items-center justify-center px-2 sm:px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors text-sm"
                 title="Registrar Egreso"
             >
                 <MinusCircle className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -221,7 +221,7 @@ const MovimientosCajaFinanzas = () => {
             
             <button
                 onClick={() => setModalArqueo(true)}
-                className="inline-flex items-center justify-center px-2 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                className="inline-flex items-center justify-center px-2 sm:px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors text-sm"
                 title="Arqueo de Caja"
             >
                 <Calculator className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -322,7 +322,7 @@ const MovimientosCajaFinanzas = () => {
                 )}
             
             {/* Filtros Colapsables */}
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 {/* Header colapsable */}
                 <button
                     type="button"
@@ -373,7 +373,7 @@ const MovimientosCajaFinanzas = () => {
                                     type="date"
                                     value={filtros.fechaInicio}
                                     onChange={(e) => handleFiltroChange('fechaInicio', e.target.value)}
-                                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
                             </div>
                             
@@ -385,7 +385,7 @@ const MovimientosCajaFinanzas = () => {
                                     type="date"
                                     value={filtros.fechaFin}
                                     onChange={(e) => handleFiltroChange('fechaFin', e.target.value)}
-                                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
                             </div>
                             
@@ -396,7 +396,7 @@ const MovimientosCajaFinanzas = () => {
                                 <select
                                     value={filtros.tipo}
                                     onChange={(e) => handleFiltroChange('tipo', e.target.value)}
-                                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 >
                                     <option value="">Todos</option>
                                     <option value="ingreso">Ingresos</option>
@@ -411,7 +411,7 @@ const MovimientosCajaFinanzas = () => {
                                 <select
                                     value={filtros.metodoPago}
                                     onChange={(e) => handleFiltroChange('metodoPago', e.target.value)}
-                                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 >
                                     <option value="">Todos</option>
                                     <option value="efectivo">Efectivo</option>
@@ -426,7 +426,7 @@ const MovimientosCajaFinanzas = () => {
                                 <select
                                     value={filtros.estado}
                                     onChange={(e) => handleFiltroChange('estado', e.target.value)}
-                                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 >
                                     <option value="">Todos</option>
                                     <option value="pendiente">Pendiente</option>
@@ -439,7 +439,7 @@ const MovimientosCajaFinanzas = () => {
                             <div className="flex items-end col-span-2 sm:col-span-1">
                                 <button
                                     onClick={aplicarFiltros}
-                                    className="w-full px-3 py-1.5 sm:py-2 bg-blue-600 text-white rounded-md text-xs sm:text-sm hover:bg-blue-700 flex items-center justify-center"
+                                    className="w-full px-3 py-1.5 sm:py-2 bg-blue-600 text-white rounded-xl text-xs sm:text-sm hover:bg-blue-700 flex items-center justify-center"
                                 >
                                     <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                                     Aplicar

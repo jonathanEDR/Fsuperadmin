@@ -6,7 +6,7 @@ import React, { memo } from 'react';
  */
 const CuentasBancariasTableSkeleton = memo(() => {
     return (
-        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
             {/* Encabezado skeleton */}
             <div className="px-6 py-4 border-b">
                 <div className="h-6 bg-gray-200 rounded w-1/4 animate-pulse"></div>

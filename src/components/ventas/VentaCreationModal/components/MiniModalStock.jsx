@@ -121,7 +121,7 @@ const MiniModalStock = ({ isOpen, onClose, producto, onStockAdded }) => {
             <button
               onClick={handleClose}
               disabled={isSubmitting}
-              className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+              className="p-1.5 hover:bg-gray-100 rounded-xl transition-colors disabled:opacity-50"
             >
               <X size={18} className="text-gray-500" />
             </button>

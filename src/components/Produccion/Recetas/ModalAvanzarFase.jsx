@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { X, Loader2, FlaskConical, CheckCircle, Rocket, Plus, Trash2 } from 'lucide-react';
 import { ingredienteService } from '../../../services/ingredienteService';
 
 const ModalAvanzarFase = ({ 
@@ -150,15 +151,15 @@ const ModalAvanzarFase = ({
     }
   };
 
-  const obtenerEmojiPorFase = (fase) => {
+  const obtenerIconoPorFase = (fase, size = 20) => {
     switch (fase) {
       case 'intermedio':
       case 'producto_intermedio': 
-        return '⚗️';
+        return <FlaskConical size={size} className="text-yellow-600" />;
       case 'terminado':
       case 'producto_terminado': 
-        return '✅';
-      default: return '🚀';
+        return <CheckCircle size={size} className="text-green-600" />;
+      default: return <Rocket size={size} className="text-blue-600" />;
     }
   };
 
@@ -167,37 +168,37 @@ const ModalAvanzarFase = ({
   const siguienteFase = obtenerSiguienteFase();
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-4 mx-auto p-6 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+      <div className="relative top-4 mx-auto p-0 w-11/12 max-w-4xl shadow-xl rounded-2xl bg-white max-h-[90vh] overflow-hidden border border-gray-100">
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex justify-between items-center mb-6 pb-4 border-b">
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                {obtenerEmojiPorFase(siguienteFase)}
-                Avanzar a: {obtenerTituloFase(siguienteFase)}
-              </h3>
-              <p className="text-sm text-gray-600 mt-1">
-                {obtenerDescripcionFase(siguienteFase)}
-              </p>
+          <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-5 py-4 rounded-t-2xl">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                  {obtenerIconoPorFase(siguienteFase)}
+                  Avanzar a: {obtenerTituloFase(siguienteFase)}
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  {obtenerDescripcionFase(siguienteFase)}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={onCancelar}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1.5 hover:bg-white/80 rounded-xl"
+              >
+                <X size={24} />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={onCancelar}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex-1 overflow-hidden">
+          <form onSubmit={handleSubmit} className="flex-1 overflow-hidden p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
               
               {/* Columna izquierda: Resumen y notas */}
               <div className="space-y-6 overflow-y-auto pr-2">
-                <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="bg-blue-50/60 p-4 rounded-xl border border-blue-100">
                   <h4 className="font-medium text-gray-700 mb-3">Resumen de Transición</h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
@@ -227,7 +228,7 @@ const ModalAvanzarFase = ({
                   </div>
                 </div>
 
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50/60 p-4 rounded-xl border border-gray-100">
                   <h4 className="font-medium text-gray-700 mb-3">
                     Notas de la Fase Actual ({receta.faseActual || receta.categoria || 'preparado'})
                   </h4>
@@ -235,12 +236,12 @@ const ModalAvanzarFase = ({
                     value={formData.notas}
                     onChange={(e) => setFormData(prev => ({...prev, notas: e.target.value}))}
                     rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                     placeholder={`¿Cómo resultó la fase ${receta.faseActual || receta.categoria || 'preparado'}? Observaciones, cambios realizados, etc.`}
                   />
                 </div>
 
-                <div className="bg-green-50 p-4 rounded-lg">
+                <div className="bg-green-50/60 p-4 rounded-xl border border-green-100">
                   <h4 className="font-medium text-gray-700 mb-3">
                     Instrucciones para la Nueva Fase ({siguienteFase})
                   </h4>
@@ -248,7 +249,7 @@ const ModalAvanzarFase = ({
                     value={formData.notasNuevaFase}
                     onChange={(e) => setFormData(prev => ({...prev, notasNuevaFase: e.target.value}))}
                     rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none"
                     placeholder={`Instrucciones específicas para la fase ${siguienteFase}...`}
                   />
                 </div>
@@ -256,15 +257,15 @@ const ModalAvanzarFase = ({
 
               {/* Columna derecha: Ingredientes adicionales */}
               <div className="space-y-6 overflow-y-auto pr-2">
-                <div className="bg-yellow-50 p-4 rounded-lg h-full flex flex-col">
+                <div className="bg-amber-50/60 p-4 rounded-xl border border-amber-100 h-full flex flex-col">
                   <div className="flex justify-between items-center mb-4">
                     <h4 className="font-medium text-gray-700">Ingredientes Adicionales</h4>
                     <button
                       type="button"
                       onClick={agregarIngredienteVacio}
-                      className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                      className="text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 px-3 py-1 rounded-xl text-sm transition-colors flex items-center gap-1"
                     >
-                      ➕ Agregar
+                      <Plus size={14} /> Agregar
                     </button>
                   </div>
 
@@ -274,7 +275,7 @@ const ModalAvanzarFase = ({
 
                   <div className="flex-1 overflow-y-auto space-y-3">
                     {formData.ingredientesAdicionales.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500 border-2 border-dashed border-yellow-200 rounded-lg">
+                      <div className="text-center py-8 text-gray-500 border-2 border-dashed border-amber-200 rounded-xl">
                         <p className="text-sm">No hay ingredientes adicionales</p>
                         <p className="text-xs text-gray-400 mt-1">
                           Si necesitas agregar ingredientes para esta fase, presiona "Agregar"
@@ -282,12 +283,12 @@ const ModalAvanzarFase = ({
                       </div>
                     ) : (
                       formData.ingredientesAdicionales.map((ingrediente, index) => (
-                        <div key={index} className="bg-white p-3 rounded border border-yellow-200">
+                        <div key={index} className="bg-white p-3 rounded-xl border border-amber-200">
                           <div className="space-y-2">
                             <select
                               value={ingrediente.ingrediente}
                               onChange={(e) => actualizarIngrediente(index, 'ingrediente', e.target.value)}
-                              className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-yellow-500 focus:border-yellow-500"
+                              className="w-full p-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none"
                               disabled={loading}
                             >
                               <option value="">Seleccionar ingrediente...</option>
@@ -305,14 +306,14 @@ const ModalAvanzarFase = ({
                                 min="0"
                                 value={ingrediente.cantidad}
                                 onChange={(e) => actualizarIngrediente(index, 'cantidad', parseFloat(e.target.value) || 0)}
-                                className="p-2 text-sm border border-gray-300 rounded focus:ring-yellow-500 focus:border-yellow-500"
+                                className="p-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none"
                                 placeholder="Cantidad"
                               />
                               
                               <select
                                 value={ingrediente.unidadMedida}
                                 onChange={(e) => actualizarIngrediente(index, 'unidadMedida', e.target.value)}
-                                className="p-2 text-sm border border-gray-300 rounded focus:ring-yellow-500 focus:border-yellow-500"
+                                className="p-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none"
                               >
                                 <option value="kg">kg</option>
                                 <option value="gr">gr</option>
@@ -328,14 +329,14 @@ const ModalAvanzarFase = ({
                                 className="text-red-500 hover:text-red-700 text-sm transition-colors flex items-center justify-center"
                                 title="Eliminar ingrediente"
                               >
-                                🗑️
+                                <Trash2 size={16} />
                               </button>
                             </div>
                             
                             <select
                               value={ingrediente.motivo}
                               onChange={(e) => actualizarIngrediente(index, 'motivo', e.target.value)}
-                              className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-yellow-500 focus:border-yellow-500"
+                              className="w-full p-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none"
                             >
                               <option value="mejora">Mejora del producto</option>
                               <option value="ajuste">Ajuste de receta</option>
@@ -358,23 +359,23 @@ const ModalAvanzarFase = ({
                 type="button"
                 onClick={onCancelar}
                 disabled={enviando}
-                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl transition-colors disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={loading || enviando}
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="px-6 py-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2"
               >
                 {enviando ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    <Loader2 size={16} className="animate-spin" />
                     Procesando...
                   </>
                 ) : (
                   <>
-                    <span>{obtenerEmojiPorFase(siguienteFase)}</span>
+                    {obtenerIconoPorFase(siguienteFase, 16)}
                     Avanzar a {obtenerTituloFase(siguienteFase)}
                   </>
                 )}

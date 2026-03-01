@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { X } from 'lucide-react';
 
 const ModalCalculadoraCuota = ({ 
     isOpen, 
@@ -103,20 +104,20 @@ const ModalCalculadoraCuota = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-md max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
                 {/* Header - responsive */}
-                <div className="bg-green-600 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-t-lg">
+                <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-5 py-4 rounded-t-2xl">
                     <div className="flex justify-between items-center">
-                        <h2 className="text-base sm:text-xl font-bold flex items-center">
+                        <h2 className="text-base sm:text-xl font-bold flex items-center text-gray-800">
                             <span className="mr-2">🧮</span>
                             Calculadora<span className="hidden xs:inline"> de Cuotas</span>
                         </h2>
                         <button
                             onClick={handleClose}
-                            className="text-white hover:text-gray-200 transition-colors p-1"
+                            className="p-1.5 hover:bg-white/80 rounded-xl text-gray-500 hover:text-gray-700 transition-colors"
                         >
-                            <span className="text-xl sm:text-2xl">&times;</span>
+                            <X size={20} />
                         </button>
                     </div>
                 </div>
@@ -136,8 +137,8 @@ const ModalCalculadoraCuota = ({
                                     name="monto"
                                     value={valores.monto}
                                     onChange={handleChange}
-                                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                                        errores.monto ? 'border-red-500' : 'border-gray-300'
+                                    className={`w-full pl-10 pr-3 py-2 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                                        errores.monto ? 'border-red-500' : 'border-gray-200'
                                     }`}
                                     placeholder="0.00"
                                     step="0.01"
@@ -160,8 +161,8 @@ const ModalCalculadoraCuota = ({
                                     name="tasaInteres"
                                     value={valores.tasaInteres}
                                     onChange={handleChange}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                                        errores.tasaInteres ? 'border-red-500' : 'border-gray-300'
+                                    className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                                        errores.tasaInteres ? 'border-red-500' : 'border-gray-200'
                                     }`}
                                     placeholder="12.00"
                                     step="0.01"
@@ -185,8 +186,8 @@ const ModalCalculadoraCuota = ({
                                 name="plazoMeses"
                                 value={valores.plazoMeses}
                                 onChange={handleChange}
-                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
-                                    errores.plazoMeses ? 'border-red-500' : 'border-gray-300'
+                                className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                                    errores.plazoMeses ? 'border-red-500' : 'border-gray-200'
                                 }`}
                                 placeholder="12"
                                 min="1"
@@ -198,7 +199,7 @@ const ModalCalculadoraCuota = ({
                         
                         <button
                             type="submit"
-                            className="w-full px-4 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                            className="w-full px-4 py-2.5 text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
                         >
                             <span>🧮</span> Calcular Cuota
                         </button>
@@ -206,7 +207,7 @@ const ModalCalculadoraCuota = ({
 
                     {/* Resultados */}
                     {resultado && (
-                        <div className="mt-6 p-3 sm:p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="mt-6 p-3 sm:p-4 bg-green-50 border border-green-200 rounded-xl">
                             <h3 className="text-base sm:text-lg font-semibold text-green-800 mb-3">
                                 📊 Resultados
                             </h3>
@@ -251,16 +252,16 @@ const ModalCalculadoraCuota = ({
                             </div>
                         </div>
                     )}
+                </div>
 
-                    {/* Footer */}
-                    <div className="flex justify-end mt-4 sm:mt-6">
-                        <button
-                            onClick={handleClose}
-                            className="px-4 sm:px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm sm:text-base"
-                        >
-                            Cerrar
-                        </button>
-                    </div>
+                {/* Footer */}
+                <div className="bg-gray-50/50 border-t border-gray-100 px-5 py-3 rounded-b-2xl flex justify-end">
+                    <button
+                        onClick={handleClose}
+                        className="px-4 sm:px-6 py-2 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors text-sm sm:text-base"
+                    >
+                        Cerrar
+                    </button>
                 </div>
             </div>
         </div>

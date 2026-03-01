@@ -1,4 +1,5 @@
 import React from 'react';
+import { Carrot, Package, ClipboardList, Factory, Loader2, Check, Info } from 'lucide-react';
 
 const SelectorTipoProducto = ({ 
   tipoSeleccionado, 
@@ -12,29 +13,29 @@ const SelectorTipoProducto = ({
       id: 'ingredientes',
       nombre: 'Ingredientes',
       descripcion: 'Materias primas para producción',
-      icono: '🥕',
-      color: 'bg-green-500'
+      icono: <Carrot size={24} />,
+      color: 'green'
     },
     {
       id: 'materiales',
       nombre: 'Materiales',
       descripcion: 'Materiales de producción',
-      icono: '📦',
-      color: 'bg-blue-500'
+      icono: <Package size={24} />,
+      color: 'blue'
     },
     {
       id: 'recetas',
       nombre: 'Recetas',
       descripcion: 'Productos con recetas definidas',
-      icono: '📋',
-      color: 'bg-purple-500'
+      icono: <ClipboardList size={24} />,
+      color: 'purple'
     },
     {
       id: 'produccion',
       nombre: 'Producción',
       descripción: 'Productos del catálogo de producción',
-      icono: '🏭',
-      color: 'bg-orange-500'
+      icono: <Factory size={24} />,
+      color: 'orange'
     }
   ];
 
@@ -59,7 +60,7 @@ const SelectorTipoProducto = ({
             key={tipo.id}
             onClick={() => handleTipoClick(tipo)}
             className={`
-              relative p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 transform hover:scale-105
+              relative p-3 sm:p-4 rounded-xl border cursor-pointer transition-all duration-200 transform hover:scale-105
               ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
               ${
                 tipoSeleccionado === tipo.id
@@ -72,17 +73,7 @@ const SelectorTipoProducto = ({
             {tipoSeleccionado === tipo.id && (
               <div className="absolute top-1 right-1 sm:top-2 sm:right-2">
                 <div className="w-3 h-3 sm:w-4 sm:h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                  <svg 
-                    className="w-2 h-2 sm:w-3 sm:h-3 text-white" 
-                    fill="currentColor" 
-                    viewBox="0 0 20 20"
-                  >
-                    <path 
-                      fillRule="evenodd" 
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" 
-                      clipRule="evenodd" 
-                    />
-                  </svg>
+                  <Check size={10} className="text-white" />
                 </div>
               </div>
             )}
@@ -91,10 +82,10 @@ const SelectorTipoProducto = ({
             <div className="flex flex-col items-center text-center">
               {/* Icono */}
               <div className={`
-                w-8 h-8 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mb-2 sm:mb-3
-                ${tipoSeleccionado === tipo.id ? 'bg-blue-100' : 'bg-gray-100'}
+                w-8 h-8 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mb-2 sm:mb-3
+                ${tipoSeleccionado === tipo.id ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}
               `}>
-                <span className="text-lg sm:text-2xl">{tipo.icono}</span>
+                {tipo.icono}
               </div>
               
               {/* Nombre */}
@@ -116,31 +107,17 @@ const SelectorTipoProducto = ({
             
             {/* Efecto de brillo al seleccionar */}
             {tipoSeleccionado === tipo.id && (
-              <div className="absolute inset-0 bg-blue-500 opacity-5 rounded-lg pointer-events-none"></div>
+              <div className="absolute inset-0 bg-blue-500 opacity-5 rounded-xl pointer-events-none"></div>
             )}
           </div>
         ))}
       </div>
       
-      {/* Información adicional */}
-      {tipoSeleccionado && (
-        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-center">
-            <span className="text-blue-600 mr-2">ℹ️</span>
-            <span className="text-sm text-blue-800">
-              Tipo seleccionado: <strong>
-                {tiposAUsar.find(t => t.id === tipoSeleccionado)?.nombre}
-              </strong>
-            </span>
-          </div>
-        </div>
-      )}
-      
       {/* Estado de carga */}
       {disabled && (
-        <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+        <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-xl">
           <div className="flex items-center">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500 mr-2"></div>
+            <Loader2 size={16} className="animate-spin text-gray-500 mr-2" />
             <span className="text-sm text-gray-600">
               Cargando productos...
             </span>

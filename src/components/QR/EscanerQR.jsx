@@ -13,7 +13,8 @@ import {
   LogIn,
   LogOut,
   RefreshCw,
-  XCircle
+  XCircle,
+  Loader2
 } from 'lucide-react';
 import { useQRScanner } from '../../hooks/useQRScanner';
 import { qrAsistenciaService } from '../../services';
@@ -174,7 +175,7 @@ const EscanerQR = () => {
     <div className="max-w-2xl mx-auto p-6 space-y-6">
       
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg p-6 text-white">
         <div className="flex items-center gap-3">
           <Camera size={32} />
           <div>
@@ -188,7 +189,7 @@ const EscanerQR = () => {
 
       {/* Estado: Sin escanear y sin resultado */}
       {!mostrarEscaner && !registroResult && (
-        <div className="bg-white rounded-lg shadow p-8 text-center">
+        <div className="bg-white rounded-xl shadow p-8 text-center">
           <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Camera size={40} className="text-blue-600" />
           </div>
@@ -202,14 +203,14 @@ const EscanerQR = () => {
           <button
             onClick={handleIniciarEscaneo}
             disabled={loading}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Camera size={20} />
             <span>{loading ? 'Iniciando...' : 'Iniciar Escáner'}</span>
           </button>
 
           {(scannerError || error) && (
-            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 text-left">
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2 text-left">
               <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-red-900 font-medium">Error</p>
@@ -222,7 +223,7 @@ const EscanerQR = () => {
 
       {/* Estado: Escaneando */}
       {mostrarEscaner && !registroResult && (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-xl shadow overflow-hidden">
           <div className="p-4 bg-blue-50 border-b border-blue-200">
             <p className="text-blue-900 font-medium text-center flex items-center justify-center gap-2">
               <div className="w-3 h-3 bg-blue-600 rounded-full animate-pulse"></div>
@@ -235,9 +236,9 @@ const EscanerQR = () => {
             <div id="qr-reader" className="w-full min-h-[300px] bg-gray-900"></div>
             
             {loading && (
-              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                <div className="bg-white rounded-lg p-6 flex flex-col items-center gap-3">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center">
+                <div className="bg-white rounded-xl p-6 flex flex-col items-center gap-3">
+                  <Loader2 className="animate-spin h-12 w-12 text-blue-600" />
                   <p className="text-gray-900 font-medium">Procesando...</p>
                 </div>
               </div>
@@ -247,7 +248,7 @@ const EscanerQR = () => {
           <div className="p-4 bg-gray-50 border-t border-gray-200">
             <button
               onClick={handleCancelar}
-              className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+              className="w-full px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
             >
               <XCircle size={20} />
               <span>Cancelar</span>
@@ -262,7 +263,7 @@ const EscanerQR = () => {
           
           {/* Mensaje de Éxito/Error */}
           {registroResult.success ? (
-            <div className="bg-green-50 border-2 border-green-500 rounded-lg p-6">
+            <div className="bg-green-50 border-2 border-green-500 rounded-xl p-6">
               <div className="flex items-center justify-center mb-4">
                 <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center">
                   {registroResult.tipo === 'entrada' ? (
@@ -283,7 +284,7 @@ const EscanerQR = () => {
 
               {/* Badge de estado (si es tardanza) */}
               {registroResult.tipo === 'entrada' && registroResult.estado === 'tardanza' && (
-                <div className="bg-orange-100 border border-orange-300 rounded-lg p-3 mb-4">
+                <div className="bg-orange-100 border border-orange-300 rounded-xl p-3 mb-4">
                   <p className="text-orange-800 text-center text-sm font-medium flex items-center justify-center gap-2">
                     <Clock size={16} />
                     <span>⚠️ Registro marcado como TARDANZA</span>
@@ -292,7 +293,7 @@ const EscanerQR = () => {
               )}
 
               {/* Información del Registro */}
-              <div className="bg-white rounded-lg p-4 space-y-3">
+              <div className="bg-white rounded-xl p-4 space-y-3">
                 <div className="flex items-center gap-3 text-gray-700">
                   <Clock size={20} className="text-green-600" />
                   <div>
@@ -314,7 +315,7 @@ const EscanerQR = () => {
                 )}
 
                 {registroResult.tipo === 'entrada' && (
-                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                  <div className="mt-4 p-3 bg-blue-50 rounded-xl">
                     <p className="text-blue-800 text-sm">
                       💡 <strong>Recuerda:</strong> Escanea nuevamente el código QR al finalizar tu jornada para registrar tu salida.
                     </p>
@@ -322,7 +323,7 @@ const EscanerQR = () => {
                 )}
 
                 {registroResult.tipo === 'salida' && (
-                  <div className="mt-4 p-3 bg-green-50 rounded-lg">
+                  <div className="mt-4 p-3 bg-green-50 rounded-xl">
                     <p className="text-green-800 text-sm">
                       ✅ Tu jornada laboral ha sido registrada completamente.
                     </p>
@@ -331,7 +332,7 @@ const EscanerQR = () => {
 
                 {/* 🆕 Información del Pago Diario */}
                 {registroResult.tipo === 'salida' && registroResult.pagoDiario && (
-                  <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+                  <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-lg">💰</span>
                       <h3 className="font-semibold text-emerald-900">Pago Diario</h3>
@@ -360,7 +361,7 @@ const EscanerQR = () => {
                 {registroResult.esRolPrivilegiado && (
                   <div className="mt-4 space-y-3">
                     {/* Badge de rol privilegiado */}
-                    <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                    <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl">
                       <p className="text-purple-800 text-sm font-medium flex items-center gap-2">
                         <span>👑</span>
                         <span>Modo Administrador: Puedes registrar múltiples entradas/salidas</span>
@@ -369,13 +370,13 @@ const EscanerQR = () => {
                     
                     {/* Estadísticas del día */}
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="p-3 bg-gray-50 rounded-lg text-center">
+                      <div className="p-3 bg-gray-50 rounded-xl text-center">
                         <p className="text-2xl font-bold text-gray-900">{registroResult.totalRegistrosHoy}</p>
                         <p className="text-xs text-gray-600">Registros hoy</p>
                       </div>
                       
                       {registroResult.tiempoTrabajadoMinutos !== null && (
-                        <div className="p-3 bg-gray-50 rounded-lg text-center">
+                        <div className="p-3 bg-gray-50 rounded-xl text-center">
                           <p className="text-2xl font-bold text-gray-900">
                             {Math.floor(registroResult.tiempoTrabajadoMinutos / 60)}h {registroResult.tiempoTrabajadoMinutos % 60}m
                           </p>
@@ -386,7 +387,7 @@ const EscanerQR = () => {
                     
                     {/* Mensaje de siguiente acción */}
                     {registroResult.tipo === 'entrada' && (
-                      <div className="p-3 bg-blue-50 rounded-lg">
+                      <div className="p-3 bg-blue-50 rounded-xl">
                         <p className="text-blue-800 text-sm">
                           📌 Escanea nuevamente cuando te retires para registrar tu salida.
                         </p>
@@ -394,7 +395,7 @@ const EscanerQR = () => {
                     )}
                     
                     {registroResult.tipo === 'salida' && (
-                      <div className="p-3 bg-amber-50 rounded-lg">
+                      <div className="p-3 bg-amber-50 rounded-xl">
                         <p className="text-amber-800 text-sm">
                           🔄 Si regresas más tarde, puedes escanear para registrar una nueva entrada.
                         </p>
@@ -405,7 +406,7 @@ const EscanerQR = () => {
               </div>
             </div>
           ) : (
-            <div className="bg-red-50 border-2 border-red-500 rounded-lg p-6">
+            <div className="bg-red-50 border-2 border-red-500 rounded-xl p-6">
               <div className="flex items-center justify-center mb-4">
                 <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center">
                   <AlertCircle size={32} className="text-white" />
@@ -425,7 +426,7 @@ const EscanerQR = () => {
           {/* Botón para nuevo escaneo */}
           <button
             onClick={handleIniciarEscaneo}
-            className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+            className="w-full px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
           >
             <RefreshCw size={20} />
             <span>Escanear Nuevamente</span>
@@ -434,7 +435,7 @@ const EscanerQR = () => {
       )}
 
       {/* Instrucciones */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+      <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
         <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
           <CheckCircle size={20} className="text-blue-600" />
           Instrucciones

@@ -10,16 +10,17 @@ import {
   Users, 
   Calendar,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Loader2
 } from 'lucide-react';
 
 const EstadisticasQR = ({ estadisticas, loading = false }) => {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow p-8">
+      <div className="bg-white rounded-xl shadow p-8">
         <div className="flex justify-center items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <Loader2 className="animate-spin h-12 w-12 text-blue-600" />
           <span className="ml-3 text-gray-600">Cargando estadísticas...</span>
         </div>
       </div>
@@ -28,7 +29,7 @@ const EstadisticasQR = ({ estadisticas, loading = false }) => {
 
   if (!estadisticas) {
     return (
-      <div className="bg-white rounded-lg shadow p-8 text-center">
+      <div className="bg-white rounded-xl shadow p-8 text-center">
         <p className="text-gray-500">No hay estadísticas disponibles</p>
       </div>
     );
@@ -55,7 +56,7 @@ const EstadisticasQR = ({ estadisticas, loading = false }) => {
     <div className="space-y-6">
       
       {/* Resumen Principal */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg p-6 text-white">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold">Estadísticas Generales</h2>
           <QrCode size={32} />
@@ -69,9 +70,9 @@ const EstadisticasQR = ({ estadisticas, loading = false }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* Total QRs */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-xl shadow p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
               <QrCode size={24} className="text-blue-600" />
             </div>
             <span className="text-xs text-gray-500 uppercase tracking-wide">Total</span>
@@ -81,9 +82,9 @@ const EstadisticasQR = ({ estadisticas, loading = false }) => {
         </div>
 
         {/* QRs Activos */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-xl shadow p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
               <TrendingUp size={24} className="text-green-600" />
             </div>
             <span className="text-xs text-green-600 font-semibold uppercase tracking-wide">
@@ -95,9 +96,9 @@ const EstadisticasQR = ({ estadisticas, loading = false }) => {
         </div>
 
         {/* Total Escaneos */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-xl shadow p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
               <Users size={24} className="text-purple-600" />
             </div>
             <div className="flex items-center gap-1 text-purple-600">
@@ -110,9 +111,9 @@ const EstadisticasQR = ({ estadisticas, loading = false }) => {
         </div>
 
         {/* Promedio */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-xl shadow p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
               <Calendar size={24} className="text-orange-600" />
             </div>
             <span className="text-xs text-gray-500 uppercase tracking-wide">Promedio</span>
@@ -126,7 +127,7 @@ const EstadisticasQR = ({ estadisticas, loading = false }) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Entradas */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-xl shadow p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Entradas Registradas</h3>
             <div className="flex items-center gap-1 text-green-600">
@@ -154,7 +155,7 @@ const EstadisticasQR = ({ estadisticas, loading = false }) => {
         </div>
 
         {/* Salidas */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-xl shadow p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Salidas Registradas</h3>
             <div className="flex items-center gap-1 text-orange-600">
@@ -183,7 +184,7 @@ const EstadisticasQR = ({ estadisticas, loading = false }) => {
       </div>
 
       {/* Comparativa */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white rounded-xl shadow p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-6">
           Comparativa de Actividad
         </h3>
@@ -232,9 +233,9 @@ const EstadisticasQR = ({ estadisticas, loading = false }) => {
       </div>
 
       {/* Información Adicional */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
             <QrCode size={20} className="text-blue-600" />
           </div>
           <div>

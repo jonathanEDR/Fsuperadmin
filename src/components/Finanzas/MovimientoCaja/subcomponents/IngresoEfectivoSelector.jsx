@@ -42,7 +42,7 @@ const IngresoEfectivoSelector = React.memo(({
                                     )}
                                     className={`
                                         w-16 px-2 py-1 border rounded text-center text-sm
-                                        ${error ? 'border-red-500' : 'border-gray-300'}
+                                        ${error ? 'border-red-500' : 'border-gray-200'}
                                         focus:ring-2 focus:ring-green-500 focus:border-green-500
                                     `}
                                     placeholder="0"
@@ -60,7 +60,7 @@ const IngresoEfectivoSelector = React.memo(({
     
     return (
         <div className={`
-            space-y-6 p-4 rounded-lg border-2
+            space-y-6 p-4 rounded-xl border-2
             ${error ? 'border-red-200 bg-red-50' : 'border-gray-200 bg-gray-50'}
         `}>
             {renderDenominacionGroup('billetes', denominaciones.billetes)}

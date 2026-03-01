@@ -1,4 +1,5 @@
 import React from 'react';
+import { ClipboardList, Lock, Clock, Scale, Coins, BarChart3 } from 'lucide-react';
 import { formatearMoneda } from '../garantiasConfig';
 
 /**
@@ -19,7 +20,7 @@ const GarantiasResumen = ({ resumen, loading = false }) => {
         {
             titulo: 'Total Garantías',
             valor: datos.totalGarantias || 0,
-            icono: '📋',
+            icono: <ClipboardList size={20} />,
             color: 'bg-blue-50 border-blue-200',
             textoColor: 'text-blue-700',
             formato: 'numero'
@@ -27,7 +28,7 @@ const GarantiasResumen = ({ resumen, loading = false }) => {
         {
             titulo: 'Activas',
             valor: datos.garantiasActivas || 0,
-            icono: '🔒',
+            icono: <Lock size={20} />,
             color: 'bg-green-50 border-green-200',
             textoColor: 'text-green-700',
             formato: 'numero'
@@ -35,7 +36,7 @@ const GarantiasResumen = ({ resumen, loading = false }) => {
         {
             titulo: 'Pendientes',
             valor: datos.garantiasPendientes || 0,
-            icono: '⏳',
+            icono: <Clock size={20} />,
             color: 'bg-yellow-50 border-yellow-200',
             textoColor: 'text-yellow-700',
             formato: 'numero'
@@ -43,7 +44,7 @@ const GarantiasResumen = ({ resumen, loading = false }) => {
         {
             titulo: 'Ejecutadas',
             valor: datos.garantiasEjecutadas || 0,
-            icono: '⚖️',
+            icono: <Scale size={20} />,
             color: 'bg-purple-50 border-purple-200',
             textoColor: 'text-purple-700',
             formato: 'numero'
@@ -51,7 +52,7 @@ const GarantiasResumen = ({ resumen, loading = false }) => {
         {
             titulo: 'Valor Comercial Total',
             valor: datos.valorComercialTotal || 0,
-            icono: '💰',
+            icono: <Coins size={20} />,
             color: 'bg-emerald-50 border-emerald-200',
             textoColor: 'text-emerald-700',
             formato: 'moneda'
@@ -59,7 +60,7 @@ const GarantiasResumen = ({ resumen, loading = false }) => {
         {
             titulo: 'Valor Tasación Total',
             valor: datos.valorTasacionTotal || 0,
-            icono: '📊',
+            icono: <BarChart3 size={20} />,
             color: 'bg-indigo-50 border-indigo-200',
             textoColor: 'text-indigo-700',
             formato: 'moneda'
@@ -79,7 +80,7 @@ const GarantiasResumen = ({ resumen, loading = false }) => {
                 {[...Array(6)].map((_, index) => (
                     <div
                         key={index}
-                        className="bg-gray-100 rounded-lg p-4 animate-pulse"
+                        className="bg-gray-100 rounded-xl p-4 animate-pulse"
                     >
                         <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
                         <div className="h-8 bg-gray-200 rounded w-1/2"></div>
@@ -94,13 +95,13 @@ const GarantiasResumen = ({ resumen, loading = false }) => {
             {tarjetas.map((tarjeta, index) => (
                 <div
                     key={index}
-                    className={`${tarjeta.color} border rounded-lg p-4 transition-all duration-200 hover:shadow-md`}
+                    className={`${tarjeta.color} border rounded-xl p-4 transition-all duration-200 hover:shadow-md`}
                 >
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-medium text-gray-600 truncate">
                             {tarjeta.titulo}
                         </span>
-                        <span className="text-lg">{tarjeta.icono}</span>
+                        <span className="text-lg text-gray-500">{tarjeta.icono}</span>
                     </div>
                     <div className={`text-xl font-bold ${tarjeta.textoColor} truncate`}>
                         {formatearValor(tarjeta.valor, tarjeta.formato)}

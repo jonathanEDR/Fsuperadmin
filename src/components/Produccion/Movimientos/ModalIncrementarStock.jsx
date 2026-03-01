@@ -4,6 +4,7 @@ import { produccionService } from '../../../services/produccionService';
 import { ingredienteService } from '../../../services/ingredienteService';
 import { recetaService } from '../../../services/recetaService';
 import { getLocalDateTimeString } from '../../../utils/fechaHoraUtils';
+import { X, Factory, Loader2, AlertCircle, BarChart3, Plus, Calendar, Carrot, ClipboardList, Trash2, AlertTriangle, DollarSign, Package } from 'lucide-react';
 
 const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -307,13 +308,15 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
   const costoTotal = calcularCostoTotal();
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-0 sm:p-4">
-      <div className="bg-white sm:rounded-xl shadow-2xl w-full h-full sm:h-auto sm:max-w-xl lg:max-w-3xl sm:max-h-[95vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-0 sm:p-4">
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 w-full h-full sm:h-auto sm:max-w-xl lg:max-w-3xl sm:max-h-[95vh] flex flex-col overflow-hidden">
         
         {/* Header con Cantidad Final y Costo Total */}
-        <div className="flex items-center justify-between p-2 sm:p-3 border-b border-gray-200 bg-gradient-to-r from-white to-blue-50">
-          <div className="flex items-center space-x-2">
-            <span className="text-lg sm:text-xl lg:text-2xl">🏭</span>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-slate-50 to-gray-50 rounded-t-2xl flex-shrink-0">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-purple-50 rounded-xl border border-purple-100">
+              <Factory size={20} className="text-purple-600" />
+            </div>
             <div>
               <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">
                 Producir Stock
@@ -327,8 +330,8 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
           {/* Cantidad Final y Costo Total en Header */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Cantidad Final */}
-            <div className="bg-blue-100 border border-blue-300 rounded-md px-3 py-1.5 min-w-[90px] text-center">
-              <div className="text-xs text-blue-700 font-medium">📦 Final</div>
+            <div className="bg-blue-50 border border-blue-200 rounded-xl px-3 py-1.5 min-w-[90px] text-center">
+              <div className="text-xs text-blue-700 font-medium flex items-center justify-center gap-1"><Package size={12} /> Final</div>
               <div className="text-base sm:text-lg font-bold text-blue-600">
                 {cantidadFinal}
               </div>
@@ -336,8 +339,8 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
             </div>
             
             {/* Costo Total */}
-            <div className="bg-green-100 border border-green-300 rounded-md px-3 py-1.5 min-w-[90px] text-center">
-              <div className="text-xs text-green-700 font-medium">💰 Costo</div>
+            <div className="bg-green-50 border border-green-200 rounded-xl px-3 py-1.5 min-w-[90px] text-center">
+              <div className="text-xs text-green-700 font-medium flex items-center justify-center gap-1"><DollarSign size={12} /> Costo</div>
               <div className="text-base sm:text-lg font-bold text-green-600 truncate">
                 S/.{costoTotal.toFixed(2)}
               </div>
@@ -346,18 +349,17 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
             <button
               onClick={handleClose}
               disabled={enviando}
-              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors ml-1"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-xl transition-colors ml-1"
             >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X size={20} />
             </button>
           </div>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="mx-2 sm:mx-4 lg:mx-6 mt-2 sm:mt-3 p-2 sm:p-3 bg-red-50 border border-red-200 rounded-md">
+          <div className="mx-2 sm:mx-4 lg:mx-6 mt-2 sm:mt-3 p-2 sm:p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2">
+            <AlertCircle size={16} className="text-red-500 flex-shrink-0 mt-0.5" />
             <p className="text-xs sm:text-sm text-red-600">{error}</p>
           </div>
         )}
@@ -367,17 +369,17 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
           {/* Columna Izquierda - Full width en móvil */}
           <div className="w-full lg:w-1/2 lg:border-r border-gray-200 flex flex-col overflow-y-auto">
             {/* Información del Producto */}
-            <div className="p-2 sm:p-2.5 lg:p-3 bg-gradient-to-r from-purple-50 to-green-50">
+            <div className="p-2 sm:p-2.5 lg:p-3 bg-gray-50/60 border-b border-gray-100">
               <div className="grid grid-cols-2 gap-2">
-                <div className="bg-white p-2 rounded-md shadow-sm text-center border border-purple-200">
-                  <div className="text-xs sm:text-sm font-medium text-gray-500">📊 Cantidad Actual</div>
+                <div className="bg-white p-2 rounded-xl shadow-sm text-center border border-gray-100">
+                  <div className="text-xs sm:text-sm font-medium text-gray-500 flex items-center justify-center gap-1"><BarChart3 size={14} className="text-purple-500" /> Cantidad Actual</div>
                   <div className="text-xl sm:text-2xl font-bold text-purple-600">
                     {cantidadActual}
                   </div>
                   <div className="text-xs text-gray-500">{producto.unidadMedida || 'unidades'}</div>
                 </div>
-                <div className="bg-white p-2 rounded-md shadow-sm text-center border border-green-200">
-                  <div className="text-xs sm:text-sm font-medium text-gray-500">➕ A Producir</div>
+                <div className="bg-white p-2 rounded-xl shadow-sm text-center border border-gray-100">
+                  <div className="text-xs sm:text-sm font-medium text-gray-500 flex items-center justify-center gap-1"><Plus size={14} className="text-green-500" /> A Producir</div>
                   <div className="text-xl sm:text-2xl font-bold text-green-600">
                     +{formData.cantidadAgregar}
                   </div>
@@ -402,10 +404,7 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                     ...prev, 
                     cantidadAgregar: parseInt(e.target.value) || 1 
                   }))}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm"
-                  disabled={enviando}
-                  required
-                  autoFocus
+                  className="w-full p-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-base sm:text-sm"
                 />
               </div>
 
@@ -418,7 +417,7 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                   type="text"
                   value={formData.operador}
                   onChange={(e) => setFormData(prev => ({ ...prev, operador: e.target.value }))}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm"
+                  className="w-full p-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-base sm:text-sm"
                   placeholder="Nombre del operador"
                   disabled={enviando}
                   required
@@ -427,8 +426,8 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
 
               {/* Fecha y Hora de Producción */}
               <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                  📅 Fecha y Hora de Producción
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                  <Calendar size={14} className="text-gray-400" /> Fecha y Hora de Producción
                 </label>
                 <input
                   type="datetime-local"
@@ -436,7 +435,7 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                   onChange={(e) => setFormData(prev => ({ ...prev, fechaProduccion: e.target.value }))}
                   max={getLocalDateTimeString()}
                   step="1"
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm"
+                  className="w-full p-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-base sm:text-sm"
                   disabled={enviando}
                 />
                 <p className="text-xs text-gray-500 mt-1">
@@ -453,7 +452,7 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                   value={formData.motivo}
                   onChange={(e) => setFormData(prev => ({ ...prev, motivo: e.target.value }))}
                   rows={2}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-base sm:text-sm"
+                  className="w-full p-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none text-base sm:text-sm"
                   placeholder="Observaciones adicionales..."
                   disabled={enviando}
                 />
@@ -461,29 +460,29 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
             </div>
 
             {/* Botones */}
-            <div className="border-t px-6 py-4 bg-gray-50">
-              <div className="flex justify-end space-x-4">
+            <div className="border-t border-gray-100 px-5 py-3 bg-gray-50/50 flex-shrink-0">
+              <div className="flex justify-end space-x-3">
                 <button
                   type="button"
                   onClick={handleClose}
                   disabled={enviando}
-                  className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl transition-colors disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={enviando || !puedeEnviar()}
-                  className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                  className="px-4 py-2 text-sm font-medium text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                 >
                   {enviando ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <Loader2 size={16} className="animate-spin" />
                       <span>Produciendo...</span>
                     </>
                   ) : (
                     <>
-                      <span>🏭</span>
+                      <Factory size={16} />
                       <span>Producir</span>
                     </>
                   )}
@@ -494,19 +493,19 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
 
           {/* Columna Derecha - Recursos para Producción */}
           <div className="w-full lg:w-1/2 flex flex-col overflow-y-auto lg:overflow-visible">
-            <div className="p-2 sm:p-3 lg:p-4 border-b border-gray-200">
+            <div className="p-2 sm:p-3 lg:p-4 border-b border-gray-100">
               <div className="flex items-center justify-between">
-                <h4 className="text-sm sm:text-base lg:text-lg font-medium text-gray-900">🏭 Recursos para Producción</h4>
+                <h4 className="text-sm sm:text-base lg:text-lg font-medium text-gray-900 flex items-center gap-2"><Factory size={18} className="text-purple-500" /> Recursos para Producción</h4>
                 {loadingRecursos && (
                   <div className="flex items-center space-x-1 sm:space-x-2 text-blue-600">
-                    <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-blue-600"></div>
+                    <Loader2 size={16} className="animate-spin" />
                     <span className="text-xs sm:text-sm">Cargando...</span>
                   </div>
                 )}
               </div>
 
               {/* Checkbox para consumir recursos */}
-              <div className="mt-2 p-2 sm:p-2.5 bg-amber-50 rounded-lg border-2 border-amber-300">
+              <div className="mt-2 p-2 sm:p-2.5 bg-amber-50/60 rounded-xl border border-amber-200">
                 <div className="flex items-start space-x-2 sm:space-x-3">
                   <input
                     type="checkbox"
@@ -521,8 +520,8 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                       Consumir ingredientes y recetas del inventario
                     </label>
                     {!formData.consumirRecursos && (
-                      <p className="text-xs text-amber-700 mt-1">
-                        ⚠️ Los recursos no se descontarán del inventario
+                      <p className="text-xs text-amber-700 mt-1 flex items-center gap-1">
+                        <AlertTriangle size={12} /> Los recursos no se descontarán del inventario
                       </p>
                     )}
                   </div>
@@ -533,26 +532,26 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
             {/* Contenido scrolleable de recursos */}
             <div className="flex-1 overflow-y-auto">
                 {/* Botones para agregar recursos */}
-                <div className="p-2 sm:p-2.5 lg:p-3 bg-gray-50 border-b">
+                <div className="p-2 sm:p-2.5 lg:p-3 bg-gray-50/60 border-b border-gray-100">
                   <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     <button
                       type="button"
-                      className="px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 text-xs sm:text-sm font-medium bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors flex items-center justify-center space-x-1 sm:space-x-2"
+                      className="px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 text-xs sm:text-sm font-medium text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 rounded-xl transition-colors flex items-center justify-center space-x-1 sm:space-x-2"
                       onClick={agregarIngrediente}
                       disabled={enviando}
                     >
-                      <span>🥬</span>
+                      <Carrot size={16} />
                       <span className="hidden sm:inline">+ Ingrediente</span>
                       <span className="sm:hidden">+</span>
                       <span>({formData.ingredientesUtilizados.length})</span>
                     </button>
                     <button
                       type="button"
-                      className="px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 text-xs sm:text-sm font-medium bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-colors flex items-center justify-center space-x-1 sm:space-x-2"
+                      className="px-2 sm:px-3 lg:px-4 py-2 sm:py-2.5 lg:py-3 text-xs sm:text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-colors flex items-center justify-center space-x-1 sm:space-x-2"
                       onClick={agregarReceta}
                       disabled={enviando}
                     >
-                      <span>📋</span>
+                      <ClipboardList size={16} />
                       <span className="hidden sm:inline">+ Receta</span>
                       <span className="sm:hidden">+</span>
                       <span>({formData.recetasUtilizadas.length})</span>
@@ -562,8 +561,8 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
 
                 {/* Lista de Ingredientes */}
                 {formData.ingredientesUtilizados.length > 0 && (
-                  <div className="p-2 sm:p-3 border-b bg-green-50">
-                    <h5 className="text-xs sm:text-sm font-medium text-gray-800 mb-2">🥬 Ingredientes ({formData.ingredientesUtilizados.length})</h5>
+                  <div className="p-2 sm:p-3 border-b bg-green-50/60">
+                    <h5 className="text-xs sm:text-sm font-medium text-gray-800 mb-2 flex items-center gap-1.5"><Carrot size={14} className="text-green-600" /> Ingredientes ({formData.ingredientesUtilizados.length})</h5>
                     <div className="space-y-2">
                       {formData.ingredientesUtilizados.map((item, index) => {
                         const ingredienteInfo = obtenerIngredienteInfo(item.ingrediente);
@@ -571,7 +570,7 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                         const stockInsuficiente = formData.consumirRecursos && item.cantidadUtilizada > disponible;
                         
                         return (
-                          <div key={index} className={`p-2 border rounded-md ${stockInsuficiente ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'}`}>
+                          <div key={index} className={`p-2 border rounded-xl ${stockInsuficiente ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'}`}>
                             <div className="space-y-1.5">
                               <select
                                 value={item.ingrediente}
@@ -582,7 +581,7 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                                     actualizarIngrediente(index, 'costoUnitario', ing.precioUnitario || 0);
                                   }
                                 }}
-                                className="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full p-1.5 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                                 disabled={enviando}
                                 required
                               >
@@ -600,7 +599,7 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                                   step="0.01"
                                   value={Math.round(item.cantidadUtilizada * 100) / 100}
                                   onChange={(e) => actualizarIngrediente(index, 'cantidadUtilizada', Math.round((parseFloat(e.target.value) || 0) * 100) / 100)}
-                                  className="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-blue-500 focus:border-blue-500"
+                                  className="w-full p-1.5 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                                   placeholder="Cant."
                                   disabled={enviando}
                                   required
@@ -611,7 +610,7 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                                   step="0.01"
                                   value={Math.round(item.costoUnitario * 100) / 100}
                                   onChange={(e) => actualizarIngrediente(index, 'costoUnitario', Math.round((parseFloat(e.target.value) || 0) * 100) / 100)}
-                                  className="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-blue-500 focus:border-blue-500"
+                                  className="w-full p-1.5 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                                   placeholder="S/."
                                   disabled={enviando}
                                 />
@@ -622,17 +621,17 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                                   <button
                                     type="button"
                                     onClick={() => eliminarIngrediente(index)}
-                                    className="p-0.5 text-red-600 hover:bg-red-100 rounded transition-colors"
+                                    className="p-1 text-red-500 bg-red-50 border border-red-200 hover:bg-red-100 rounded-full transition-colors"
                                     disabled={enviando}
                                   >
-                                    🗑️
+                                    <Trash2 size={12} />
                                   </button>
                                 </div>
                               </div>
                             </div>
                             {stockInsuficiente && (
-                              <p className="text-xs text-red-600 mt-2">
-                                ⚠️ Stock insuficiente: disponible {disponible}, necesario {item.cantidadUtilizada}
+                              <p className="text-xs text-red-600 mt-2 flex items-center gap-1">
+                                <AlertTriangle size={12} /> Stock insuficiente: disponible {disponible}, necesario {item.cantidadUtilizada}
                               </p>
                             )}
                           </div>
@@ -644,8 +643,8 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
 
                 {/* Lista de Recetas */}
                 {formData.recetasUtilizadas.length > 0 && (
-                  <div className="p-2 sm:p-3 bg-blue-50">
-                    <h5 className="text-xs sm:text-sm font-medium text-gray-800 mb-2">📋 Recetas ({formData.recetasUtilizadas.length})</h5>
+                  <div className="p-2 sm:p-3 bg-blue-50/60">
+                    <h5 className="text-xs sm:text-sm font-medium text-gray-800 mb-2 flex items-center gap-1.5"><ClipboardList size={14} className="text-blue-600" /> Recetas ({formData.recetasUtilizadas.length})</h5>
                     <div className="space-y-2">
                       {formData.recetasUtilizadas.map((item, index) => {
                         const recetaInfo = obtenerRecetaInfo(item.receta);
@@ -655,7 +654,7 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                         const stockInsuficiente = formData.consumirRecursos && item.cantidadUtilizada > disponible;
                         
                         return (
-                          <div key={index} className={`p-2 border rounded-md ${stockInsuficiente ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'}`}>
+                          <div key={index} className={`p-2 border rounded-xl ${stockInsuficiente ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'}`}>
                             <div className="space-y-1.5">
                               <select
                                 value={item.receta}
@@ -678,7 +677,7 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                                   
                                   actualizarReceta(index, 'costoUnitario', precio);
                                 }}
-                                className="w-full p-2 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full p-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                                 disabled={enviando}
                                 required
                               >
@@ -706,7 +705,7 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                                   step="0.01"
                                   value={Math.round(item.cantidadUtilizada * 100) / 100}
                                   onChange={(e) => actualizarReceta(index, 'cantidadUtilizada', Math.round((parseFloat(e.target.value) || 0) * 100) / 100)}
-                                  className="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-blue-500 focus:border-blue-500"
+                                  className="w-full p-1.5 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                                   placeholder="Cant."
                                   disabled={enviando}
                                   required
@@ -717,7 +716,7 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                                   step="0.01"
                                   value={Math.round(item.costoUnitario * 100) / 100}
                                   onChange={(e) => actualizarReceta(index, 'costoUnitario', Math.round((parseFloat(e.target.value) || 0) * 100) / 100)}
-                                  className="w-full p-1.5 border border-gray-300 rounded text-xs focus:ring-blue-500 focus:border-blue-500"
+                                  className="w-full p-1.5 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                                   placeholder="S/."
                                   disabled={enviando}
                                 />
@@ -728,17 +727,17 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
                                   <button
                                     type="button"
                                     onClick={() => eliminarReceta(index)}
-                                    className="p-0.5 text-red-600 hover:bg-red-100 rounded transition-colors"
+                                    className="p-1 text-red-500 bg-red-50 border border-red-200 hover:bg-red-100 rounded-full transition-colors"
                                     disabled={enviando}
                                   >
-                                    🗑️
+                                    <Trash2 size={12} />
                                   </button>
                                 </div>
                               </div>
                             </div>
                             {stockInsuficiente && (
-                              <p className="text-xs text-red-600 mt-2">
-                                ⚠️ Stock insuficiente: disponible {disponible}, necesario {item.cantidadUtilizada}
+                              <p className="text-xs text-red-600 mt-2 flex items-center gap-1">
+                                <AlertTriangle size={12} /> Stock insuficiente: disponible {disponible}, necesario {item.cantidadUtilizada}
                               </p>
                             )}
                           </div>
@@ -750,9 +749,9 @@ const ModalIncrementarStock = ({ isOpen, onClose, producto, onSuccess }) => {
 
                 {/* Resumen de costos para producción real */}
                 {(formData.ingredientesUtilizados.length > 0 || formData.recetasUtilizadas.length > 0) && (
-                  <div className="p-4 bg-purple-50 border-t">
+                  <div className="p-4 bg-gray-50/60 border-t border-gray-100">
                     <div className="flex justify-between items-center">
-                      <span className="font-medium text-purple-800">💰 Costo Total de Producción:</span>
+                      <span className="font-medium text-gray-800 flex items-center gap-1.5"><DollarSign size={16} className="text-purple-600" /> Costo Total de Producción:</span>
                       <span className="text-lg font-bold text-purple-600">S/.{calcularCostoTotal().toFixed(2)}</span>
                     </div>
                     <div className="text-xs text-purple-600 mt-1">

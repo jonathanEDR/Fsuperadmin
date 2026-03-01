@@ -1,5 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { TrendingUp, ArrowUp, ArrowDown, Scale, BarChart3, ArrowLeftRight, Landmark, Coins, Shield, Home } from 'lucide-react';
 
 /**
  * Navegación unificada para el módulo de finanzas
@@ -27,7 +28,7 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
             id: 'dashboard',
             label: 'Dashboard',
             to: baseRoute,
-            icon: '📊',
+            icon: BarChart3,
             color: 'bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 text-blue-800 border-blue-200',
             description: 'Resumen financiero general',
             badge: estadisticas?.alertas?.dashboard || null
@@ -36,7 +37,7 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
             id: 'movimientos-caja',
             label: 'Movimientos',
             to: `${baseRoute}/movimientos-caja`,
-            icon: '💸',
+            icon: ArrowLeftRight,
             color: 'bg-gradient-to-br from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200 text-emerald-800 border-emerald-200',
             description: 'Ingresos y egresos',
             badge: estadisticas?.movimientos?.pendientes || null
@@ -45,7 +46,7 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
             id: 'cuentas-bancarias',
             label: 'Cuentas',
             to: `${baseRoute}/cuentas-bancarias`,
-            icon: '🏦',
+            icon: Landmark,
             color: 'bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 text-green-800 border-green-200',
             description: 'Cuentas bancarias',
             badge: estadisticas?.cuentas?.alertas || null
@@ -54,7 +55,7 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
             id: 'prestamos',
             label: 'Préstamos',
             to: `${baseRoute}/prestamos`,
-            icon: '💰',
+            icon: Coins,
             color: 'bg-gradient-to-br from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 text-yellow-800 border-yellow-200',
             description: 'Gestión de préstamos',
             badge: estadisticas?.prestamos?.vencimientos || null
@@ -63,7 +64,7 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
             id: 'garantias',
             label: 'Garantías',
             to: `${baseRoute}/garantias`,
-            icon: '🛡️',
+            icon: Shield,
             color: 'bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 text-purple-800 border-purple-200',
             description: 'Gestión de garantías',
             badge: estadisticas?.garantias?.revision || null
@@ -104,7 +105,7 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
                 <div className="flex items-center justify-between py-3 sm:py-4">
                     <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
                         <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 flex items-center flex-shrink-0">
-                            <i className="fas fa-chart-line mr-1.5 sm:mr-2 text-blue-600"></i>
+                            <TrendingUp className="h-5 w-5 mr-1.5 sm:mr-2 text-blue-600" />
                             <span className="hidden xs:inline">Finanzas</span>
                         </h1>
                         
@@ -118,7 +119,7 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
                                             className="text-xs sm:text-sm text-gray-500 hover:text-gray-700 transition-colors"
                                         >
                                             <span className="hidden sm:inline">Dashboard</span>
-                                            <span className="sm:hidden">🏠</span>
+                                            <Home size={14} className="sm:hidden" />
                                         </Link>
                                     </li>
                                     <li className="text-gray-400 flex-shrink-0">
@@ -136,13 +137,13 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
                     {showStats && estadisticas && (
                         <div className="hidden md:flex items-center space-x-4 text-sm">
                             <div className="flex items-center text-green-600">
-                                <i className="fas fa-arrow-up mr-1"></i>
+                                <ArrowUp size={14} className="mr-1" />
                                 <span className="font-medium">
                                     {estadisticas.resumen?.ingresosMes || 0}
                                 </span>
                             </div>
                             <div className="flex items-center text-red-600">
-                                <i className="fas fa-arrow-down mr-1"></i>
+                                <ArrowDown size={14} className="mr-1" />
                                 <span className="font-medium">
                                     {estadisticas.resumen?.egresosMes || 0}
                                 </span>
@@ -150,7 +151,7 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
                             <div className={`flex items-center ${
                                 (estadisticas.resumen?.balanceMes || 0) >= 0 ? 'text-green-600' : 'text-red-600'
                             }`}>
-                                <i className="fas fa-balance-scale mr-1"></i>
+                                <Scale size={14} className="mr-1" />
                                 <span className="font-medium">
                                     {estadisticas.resumen?.balanceMes || 0}
                                 </span>
@@ -169,7 +170,7 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
                                 key={modulo.id}
                                 to={modulo.to}
                                 className={`
-                                    relative flex-shrink-0 flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                                    relative flex-shrink-0 flex items-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200
                                     ${activo 
                                         ? 'bg-blue-100 text-blue-700 border-2 border-blue-300 shadow-md' 
                                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 border-2 border-transparent'
@@ -181,9 +182,7 @@ const FinanzasNavigation = memo(({ currentModule = '', showStats = false, estadi
                                 {renderBadge(modulo.badge)}
                                 
                                 {/* Icono */}
-                                <span className="text-lg mr-2" role="img" aria-label={modulo.label}>
-                                    {modulo.icon}
-                                </span>
+                                <modulo.icon size={18} className="mr-2" />
                                 
                                 {/* Label - oculto en móviles pequeños, visible en sm+ */}
                                 <span className="hidden sm:inline ml-1.5 sm:ml-2 whitespace-nowrap">

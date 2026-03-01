@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Loader2, Search, BarChart3, User, Calendar, FileText, Plus, Factory, Eye, Play, Pause, Trash2, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
 import AccesosRapidosProduccion from '../AccesosRapidosProduccion';
 import BreadcrumbProduccion from '../BreadcrumbProduccion';
 import { produccionService } from '../../../services/produccionService';
@@ -107,19 +108,19 @@ const GestionProduccion = () => {
       return;
     }
 
-    if (window.confirm(`¿Está seguro de eliminar esta producción?\n\n⚠️ IMPORTANTE: Esto revertirá automáticamente:\n• Stock del producto final\n• Inventario de ingredientes consumidos\n• Inventario de recetas utilizadas\n\nEsta acción no se puede deshacer.`)) {
+    if (window.confirm(`¿Está seguro de eliminar esta producción?\n\nIMPORTANTE: Esto revertirá automáticamente:\n• Stock del producto final\n• Inventario de ingredientes consumidos\n• Inventario de recetas utilizadas\n\nEsta acción no se puede deshacer.`)) {
       try {
         const resultado = await produccionService.eliminarProduccion(id);
         
         // Mostrar mensaje de éxito con detalles mejorados
-        const mensaje = `✅ Producción eliminada exitosamente\n\n📊 Detalles de la reversión:\n${resultado.inventarioRevertido ? '📉 Stock del producto revertido correctamente\n📦 Ingredientes y recetas repuestos al inventario' : 'ℹ️ Sin cambios de stock necesarios (producción no completada)'}`;
+        const mensaje = `Producción eliminada exitosamente\n\nDetalles de la reversión:\n${resultado.inventarioRevertido ? 'Stock del producto revertido correctamente\nIngredientes y recetas repuestos al inventario' : 'Sin cambios de stock necesarios (producción no completada)'}`;
         
         alert(mensaje);
         
         cargarProducciones();
       } catch (err) {
         setError('Error al eliminar producción: ' + err.message);
-        alert(`❌ Error al eliminar producción:\n\n${err.message}\n\n⚠️ Nota: Si el error persiste, puede que algunos ingredientes/recetas no hayan sido revertidos correctamente. Revise el inventario manualmente.`);
+        alert(`Error al eliminar producción:\n\n${err.message}\n\nNota: Si el error persiste, puede que algunos ingredientes/recetas no hayan sido revertidos correctamente. Revise el inventario manualmente.`);
       }
     }
   };
@@ -159,7 +160,7 @@ const GestionProduccion = () => {
   if (loading && filtros.pagina === 1) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
       </div>
     );
   }
@@ -175,36 +176,37 @@ const GestionProduccion = () => {
       </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center gap-2">
+          <AlertTriangle size={18} className="flex-shrink-0" />
           {error}
         </div>
       )}
 
       {/* 🎯 OPTIMIZADO: Filtros súper compactos - máximo 2 filas en todos los dispositivos */}
-      <div className="bg-white p-3 sm:p-4 rounded-lg shadow mb-6">
+      <div className="bg-white p-3 sm:p-4 rounded-2xl shadow-xl border border-gray-100 mb-6">
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
           {/* Fila 1: Campos principales */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              🔍 Buscar Producto
+            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5">
+              <Search size={14} className="text-gray-400" /> Buscar Producto
             </label>
             <input
               type="text"
               value={filtros.buscar}
               onChange={(e) => handleFiltroChange('buscar', e.target.value)}
               placeholder="Nombre del producto..."
-              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              📊 Estado
+            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5">
+              <BarChart3 size={14} className="text-gray-400" /> Estado
             </label>
             <select
               value={filtros.estado}
               onChange={(e) => handleFiltroChange('estado', e.target.value)}
-              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
             >
               <option value="">Todos</option>
               <option value="planificada">Planificada</option>
@@ -215,53 +217,53 @@ const GestionProduccion = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              👤 Operador
+            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5">
+              <User size={14} className="text-gray-400" /> Operador
             </label>
             <input
               type="text"
               value={filtros.operador}
               onChange={(e) => handleFiltroChange('operador', e.target.value)}
               placeholder="Nombre del operador..."
-              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
 
           {/* Fila 2: Fechas y configuración */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              📅 Fecha Inicio
+            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5">
+              <Calendar size={14} className="text-gray-400" /> Fecha Inicio
             </label>
             <input
               type="date"
               value={filtros.fechaInicio}
               onChange={(e) => handleFiltroChange('fechaInicio', e.target.value)}
               max={obtenerFechaHoy()}
-              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              📅 Fecha Fin
+            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5">
+              <Calendar size={14} className="text-gray-400" /> Fecha Fin
             </label>
             <input
               type="date"
               value={filtros.fechaFin}
               onChange={(e) => handleFiltroChange('fechaFin', e.target.value)}
               max={obtenerFechaHoy()}
-              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              📄 Por página
+            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5">
+              <FileText size={14} className="text-gray-400" /> Por página
             </label>
             <select
               value={filtros.limite}
               onChange={(e) => handleFiltroChange('limite', parseInt(e.target.value))}
-              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
             >
               <option value={10}>10</option>
               <option value={20}>20</option>
@@ -276,9 +278,9 @@ const GestionProduccion = () => {
         {canCreateProduccion && (
           <button
             onClick={handleNuevaProduccion}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-colors w-full sm:w-auto font-medium text-sm sm:text-base"
+            className="flex items-center gap-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 px-4 py-2.5 rounded-xl transition-colors w-full sm:w-auto font-medium text-sm sm:text-base"
           >
-            ➕ Nueva Producción
+            <Plus size={18} /> Nueva Producción
           </button>
         )}
 
@@ -288,7 +290,7 @@ const GestionProduccion = () => {
       <div className="md:hidden space-y-3">
         {producciones.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-xl">
-            <div className="text-gray-400 text-6xl mb-4">🏭</div>
+            <Factory size={48} className="mx-auto text-gray-300 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               No hay producciones
             </h3>
@@ -300,9 +302,9 @@ const GestionProduccion = () => {
             {canCreateProduccion && (
               <button
                 onClick={handleNuevaProduccion}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                className="flex items-center gap-2 mx-auto text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 px-4 py-2 rounded-xl transition-colors"
               >
-                Crear Primera Producción
+                <Plus size={16} /> Crear Primera Producción
               </button>
             )}
           </div>
@@ -354,45 +356,45 @@ const GestionProduccion = () => {
               
               {/* Info adicional */}
               <div className="flex items-center justify-between text-xs text-gray-500 mb-3 px-1">
-                <span>👤 {produccion.operador}</span>
+                <span className="flex items-center gap-1"><User size={12} /> {produccion.operador}</span>
               </div>
               
               {/* Acciones */}
               <div className="flex flex-wrap gap-2 pt-3 border-t border-gray-100">
                 <button
                   onClick={() => handleVerDetalle(produccion)}
-                  className="flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors"
+                  className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-xl text-xs font-medium hover:bg-blue-100 transition-colors border border-blue-200"
                 >
-                  👁️ Ver
+                  <Eye size={14} /> Ver
                 </button>
                 <button
                   onClick={() => handleVerHistorial(produccion)}
-                  className="flex items-center px-3 py-1.5 bg-purple-50 text-purple-600 rounded-lg text-xs font-medium hover:bg-purple-100 transition-colors"
+                  className="flex items-center gap-1 px-3 py-1.5 bg-purple-50 text-purple-600 rounded-xl text-xs font-medium hover:bg-purple-100 transition-colors border border-purple-200"
                   title="Ver historial de cantidades producidas"
                 >
-                  📊 Historial
+                  <BarChart3 size={14} /> Historial
                 </button>
                 {produccion.estado === 'planificada' && (
                   <>
                     <button
                       onClick={() => handleEjecutarProduccion(produccion._id)}
-                      className="flex items-center px-3 py-1.5 bg-green-50 text-green-600 rounded-lg text-xs font-medium hover:bg-green-100 transition-colors"
+                      className="flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-600 rounded-xl text-xs font-medium hover:bg-green-100 transition-colors border border-green-200"
                     >
-                      ▶️ Ejecutar
+                      <Play size={14} /> Ejecutar
                     </button>
                     <button
                       onClick={() => handleCancelarProduccion(produccion._id)}
-                      className="flex items-center px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-xs font-medium hover:bg-orange-100 transition-colors"
+                      className="flex items-center gap-1 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-xl text-xs font-medium hover:bg-orange-100 transition-colors border border-orange-200"
                     >
-                      ⏸️ Cancelar
+                      <Pause size={14} /> Cancelar
                     </button>
                   </>
                 )}
                 <button
                   onClick={() => handleEliminarProduccion(produccion._id)}
-                  className="flex items-center px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors"
+                  className="flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 rounded-xl text-xs font-medium hover:bg-red-100 transition-colors border border-red-200"
                 >
-                  🗑️ Eliminar
+                  <Trash2 size={14} /> Eliminar
                 </button>
               </div>
             </div>
@@ -401,10 +403,10 @@ const GestionProduccion = () => {
       </div>
 
       {/* ========== VISTA DESKTOP: Tabla ========== */}
-      <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden">
+      <div className="hidden md:block bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-gradient-to-r from-slate-50 to-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Producto
@@ -471,35 +473,35 @@ const GestionProduccion = () => {
                     <div className="flex space-x-2">
                       <button
                         onClick={() => handleVerHistorial(produccion)}
-                        className="text-blue-600 hover:text-blue-900"
+                        className="flex items-center gap-1 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 px-2.5 py-1 rounded-xl text-xs transition-colors"
                         title="Ver historial de cantidades producidas"
                       >
-                        👁️ Ver
+                        <Eye size={13} /> Ver
                       </button>
                       {produccion.estado === 'planificada' && (
                         <>
                           <button
                             onClick={() => handleEjecutarProduccion(produccion._id)}
-                            className="text-green-600 hover:text-green-900"
+                            className="flex items-center gap-1 text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 px-2.5 py-1 rounded-xl text-xs transition-colors"
                             title="Ejecutar producción"
                           >
-                            ▶️ Ejecutar
+                            <Play size={13} /> Ejecutar
                           </button>
                           <button
                             onClick={() => handleCancelarProduccion(produccion._id)}
-                            className="text-orange-600 hover:text-orange-900"
+                            className="flex items-center gap-1 text-orange-700 bg-orange-50 border border-orange-200 hover:bg-orange-100 px-2.5 py-1 rounded-xl text-xs transition-colors"
                             title="Cancelar producción"
                           >
-                            ⏸️ Cancelar
+                            <Pause size={13} /> Cancelar
                           </button>
                         </>
                       )}
                       <button
                         onClick={() => handleEliminarProduccion(produccion._id)}
-                        className="text-red-600 hover:text-red-900"
+                        className="flex items-center gap-1 text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 px-2.5 py-1 rounded-xl text-xs transition-colors"
                         title="Eliminar producción"
                       >
-                        🗑️ Eliminar
+                        <Trash2 size={13} /> Eliminar
                       </button>
                     </div>
                   </td>
@@ -511,7 +513,7 @@ const GestionProduccion = () => {
 
         {producciones.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">🏭</div>
+            <Factory size={48} className="mx-auto text-gray-300 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               No hay producciones
             </h3>
@@ -523,9 +525,9 @@ const GestionProduccion = () => {
             {canCreateProduccion && (
               <button
                 onClick={handleNuevaProduccion}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                className="flex items-center gap-2 mx-auto text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 px-4 py-2 rounded-xl transition-colors"
               >
-                Crear Primera Producción
+                <Plus size={16} /> Crear Primera Producción
               </button>
             )}
           </div>
@@ -534,19 +536,19 @@ const GestionProduccion = () => {
 
       {/* Paginación */}
       {totalPaginas > 1 && (
-        <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4 rounded-lg">
+        <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4 rounded-xl">
           <div className="flex-1 flex justify-between sm:hidden">
             <button
               onClick={() => handleFiltroChange('pagina', Math.max(1, filtros.pagina - 1))}
               disabled={filtros.pagina === 1}
-              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
             >
               Anterior
             </button>
             <button
               onClick={() => handleFiltroChange('pagina', Math.min(totalPaginas, filtros.pagina + 1))}
               disabled={filtros.pagina === totalPaginas}
-              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
             >
               Siguiente
             </button>
@@ -563,9 +565,9 @@ const GestionProduccion = () => {
                 <button
                   onClick={() => handleFiltroChange('pagina', Math.max(1, filtros.pagina - 1))}
                   disabled={filtros.pagina === 1}
-                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-xl border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                 >
-                  ←
+                  <ChevronLeft size={16} />
                 </button>
                 
                 {/* Números de página */}
@@ -599,9 +601,9 @@ const GestionProduccion = () => {
                 <button
                   onClick={() => handleFiltroChange('pagina', Math.min(totalPaginas, filtros.pagina + 1))}
                   disabled={filtros.pagina === totalPaginas}
-                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-xl border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                 >
-                  →
+                  <ChevronRight size={16} />
                 </button>
               </nav>
             </div>

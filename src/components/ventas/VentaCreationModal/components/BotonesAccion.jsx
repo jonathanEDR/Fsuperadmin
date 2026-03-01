@@ -35,7 +35,7 @@ const BotonesAccion = React.memo(({
     <div className="space-y-2 sm:space-y-3">
       {/* Mensaje de error global */}
       {mensajeError && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-2 sm:p-3 flex items-start gap-1.5 sm:gap-2">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-2 sm:p-3 flex items-start gap-1.5 sm:gap-2">
           <AlertCircle size={16} className="sm:w-5 sm:h-5 text-red-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
             <p className="text-red-700 font-medium text-xs sm:text-sm">Error al procesar la venta</p>
@@ -46,7 +46,7 @@ const BotonesAccion = React.memo(({
 
       {/* Estado de guardando */}
       {guardando && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2 sm:p-3 flex items-center gap-2 sm:gap-3">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-2 sm:p-3 flex items-center gap-2 sm:gap-3">
           <Loader2 size={16} className="sm:w-5 sm:h-5 text-yellow-600 animate-spin flex-shrink-0" />
           <div className="min-w-0">
             <p className="text-yellow-900 font-medium text-xs sm:text-sm">Procesando venta...</p>
@@ -63,7 +63,7 @@ const BotonesAccion = React.memo(({
         <button
           onClick={onCancelar}
           disabled={guardando}
-          className={`px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 min-w-[40px] sm:min-w-0 ${
+          className={`px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-sm sm:text-base font-medium transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 min-w-[40px] sm:min-w-0 ${
             guardando
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
               : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200'
@@ -78,7 +78,7 @@ const BotonesAccion = React.memo(({
         <button
           onClick={onGuardar}
           disabled={deshabilitarGuardar || guardando}
-          className={`px-4 py-1.5 sm:px-6 sm:py-2 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 flex items-center gap-1.5 sm:gap-2 ${
+          className={`px-4 py-1.5 sm:px-6 sm:py-2 rounded-xl text-sm sm:text-base font-medium transition-all duration-200 flex items-center gap-1.5 sm:gap-2 ${
             deshabilitarGuardar || guardando
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
               : 'text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100'

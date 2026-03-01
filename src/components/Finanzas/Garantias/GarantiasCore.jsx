@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Lock, XCircle, CheckCircle, Info } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { useGarantiasData, useGarantiasModals } from './hooks';
 import GarantiasTable from './components/GarantiasTable';
@@ -252,7 +253,7 @@ const GarantiasCore = () => {
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                         <div>
                             <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3">
-                                <span className="text-xl sm:text-2xl lg:text-3xl">🔒</span>
+                                <Lock size={28} />
                                 <span className="hidden xs:inline">Gestión de Garantías</span>
                                 <span className="xs:hidden">Garantías</span>
                             </h1>
@@ -263,7 +264,7 @@ const GarantiasCore = () => {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={cargarGarantias}
-                                className="px-2 sm:px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors flex items-center gap-1 sm:gap-2"
+                                className="px-2 sm:px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-1 sm:gap-2"
                                 disabled={loading}
                                 title="Actualizar lista"
                             >
@@ -274,7 +275,7 @@ const GarantiasCore = () => {
                             </button>
                             <button
                                 onClick={abrirModalCrear}
-                                className="px-2 sm:px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors flex items-center gap-1 sm:gap-2"
+                                className="px-2 sm:px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-1 sm:gap-2"
                                 title="Crear nueva garantía"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -289,7 +290,7 @@ const GarantiasCore = () => {
 
             {/* Notificación */}
             {notificacion && (
-                <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg transition-all duration-300 ${notificacion.tipo === 'error'
+                <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-lg transition-all duration-300 ${notificacion.tipo === 'error'
                         ? 'bg-red-500 text-white'
                         : notificacion.tipo === 'info'
                             ? 'bg-blue-500 text-white'
@@ -297,7 +298,7 @@ const GarantiasCore = () => {
                     }`}>
                     <div className="flex items-center gap-2">
                         <span>
-                            {notificacion.tipo === 'error' ? '❌' : notificacion.tipo === 'info' ? 'ℹ️' : '✅'}
+                            {notificacion.tipo === 'error' ? <XCircle size={18} /> : notificacion.tipo === 'info' ? <Info size={18} /> : <CheckCircle size={18} />}
                         </span>
                         <span>{notificacion.mensaje}</span>
                         <button
@@ -314,9 +315,9 @@ const GarantiasCore = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 {/* Error */}
                 {error && (
-                    <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
                         <div className="flex items-center gap-2 text-red-700">
-                            <span>❌</span>
+                            <XCircle size={16} />
                             <span>{error}</span>
                             <button
                                 onClick={cargarGarantias}
@@ -357,7 +358,7 @@ const GarantiasCore = () => {
 
                 {/* Paginación */}
                 {garantias.length > 0 && (
-                    <div className="mt-4 flex items-center justify-between bg-white rounded-lg shadow-sm border border-gray-200 px-4 py-3">
+                    <div className="mt-4 flex items-center justify-between bg-white rounded-xl shadow-sm border border-gray-200 px-4 py-3">
                         <div className="text-sm text-gray-500">
                             {paginacionInfo.mensaje}
                         </div>
@@ -365,7 +366,7 @@ const GarantiasCore = () => {
                             <button
                                 onClick={() => cambiarPagina(paginacionInfo.paginaActual - 1)}
                                 disabled={!paginacionInfo.hayAnterior || loading}
-                                className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-3 py-1 text-sm border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Anterior
                             </button>
@@ -375,7 +376,7 @@ const GarantiasCore = () => {
                             <button
                                 onClick={() => cambiarPagina(paginacionInfo.paginaActual + 1)}
                                 disabled={!paginacionInfo.haySiguiente || loading}
-                                className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-3 py-1 text-sm border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Siguiente
                             </button>

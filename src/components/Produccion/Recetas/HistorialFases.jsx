@@ -1,12 +1,13 @@
 import React from 'react';
+import { FileText, Archive, FlaskConical, CheckCircle, HelpCircle, RotateCcw, Clock } from 'lucide-react';
 import { formatearFecha as formatearFechaUtil } from '../../../utils/fechaHoraUtils';
 
 const HistorialFases = ({ receta, onReiniciar }) => {
   if (!receta || !receta.historicoFases || receta.historicoFases.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">
-          📋 Historial de Fases
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <FileText size={20} className="text-gray-500" /> Historial de Fases
         </h3>
         <div className="text-center text-gray-500 py-4">
           <p>No hay historial de fases disponible</p>
@@ -21,25 +22,25 @@ const HistorialFases = ({ receta, onReiniciar }) => {
     switch (fase) {
       case 'preparado':
         return {
-          icon: '🥫',
+          icon: <Archive size={18} />,
           color: 'text-blue-600 bg-blue-100',
           nombre: 'Preparado'
         };
       case 'intermedio':
         return {
-          icon: '⚗️',
+          icon: <FlaskConical size={18} />,
           color: 'text-yellow-600 bg-yellow-100',
           nombre: 'Intermedio'
         };
       case 'terminado':
         return {
-          icon: '✅',
+          icon: <CheckCircle size={18} />,
           color: 'text-green-600 bg-green-100',
           nombre: 'Terminado'
         };
       default:
         return {
-          icon: '❓',
+          icon: <HelpCircle size={18} />,
           color: 'text-gray-600 bg-gray-100',
           nombre: 'Desconocido'
         };
@@ -73,10 +74,10 @@ const HistorialFases = ({ receta, onReiniciar }) => {
   const puedeReiniciar = receta.estadoProceso !== 'borrador';
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-semibold text-gray-800">
-          📋 Historial de Fases
+        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <FileText size={20} className="text-gray-500" /> Historial de Fases
         </h3>
         
         {puedeReiniciar && (
@@ -86,10 +87,10 @@ const HistorialFases = ({ receta, onReiniciar }) => {
                 onReiniciar();
               }
             }}
-            className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors text-sm font-medium"
+            className="px-4 py-2 text-orange-700 bg-orange-50 border border-orange-200 rounded-xl hover:bg-orange-100 transition-colors text-sm font-medium flex items-center gap-1.5"
             title="Reiniciar receta al estado preparado"
           >
-            🔄 Reiniciar
+            <RotateCcw size={14} /> Reiniciar
           </button>
         )}
       </div>
@@ -103,14 +104,14 @@ const HistorialFases = ({ receta, onReiniciar }) => {
           return (
             <div
               key={index}
-              className={`relative flex items-start space-x-4 p-4 rounded-lg border-l-4 ${
+              className={`relative flex items-start space-x-4 p-4 rounded-xl border-l-4 ${
                 esActiva 
                   ? 'border-l-blue-500 bg-blue-50' 
                   : 'border-l-gray-300 bg-gray-50'
               }`}
             >
               {/* Icono de fase */}
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${faseInfo.color}`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${faseInfo.color}`}>
                 {faseInfo.icon}
               </div>
 
@@ -127,8 +128,8 @@ const HistorialFases = ({ receta, onReiniciar }) => {
                   </h4>
                   
                   {duracion && (
-                    <span className="text-xs text-gray-500 font-medium">
-                      ⏱️ {duracion}
+                    <span className="text-xs text-gray-500 font-medium flex items-center gap-1">
+                      <Clock size={12} /> {duracion}
                     </span>
                   )}
                 </div>
@@ -162,13 +163,13 @@ const HistorialFases = ({ receta, onReiniciar }) => {
                       {fase.ingredientesAgregados.slice(0, 3).map((ing, idx) => (
                         <span
                           key={idx}
-                          className="inline-block px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded"
+                          className="inline-block px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded-xl"
                         >
                           {ing.cantidad} {ing.unidadMedida}
                         </span>
                       ))}
                       {fase.ingredientesAgregados.length > 3 && (
-                        <span className="inline-block px-2 py-1 text-xs bg-gray-300 text-gray-600 rounded">
+                        <span className="inline-block px-2 py-1 text-xs bg-gray-300 text-gray-600 rounded-xl">
                           +{fase.ingredientesAgregados.length - 3} más
                         </span>
                       )}
@@ -182,7 +183,7 @@ const HistorialFases = ({ receta, onReiniciar }) => {
       </div>
 
       {/* Información adicional */}
-      <div className="mt-6 p-4 bg-gray-100 rounded-lg">
+      <div className="mt-6 p-4 bg-gray-50/60 rounded-xl border border-gray-100">
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <span className="font-medium text-gray-700">Estado actual:</span>

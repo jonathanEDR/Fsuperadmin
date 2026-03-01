@@ -1,4 +1,5 @@
 import React from 'react';
+import { Loader2, User, Package, ClipboardList, Building2, MailOpen } from 'lucide-react';
 
 /**
  * Componente para seleccionar un gasto del catálogo
@@ -8,9 +9,9 @@ import React from 'react';
 
 // Configuración de colores por tipo de gasto
 const TIPO_GASTO_COLORS = {
-  'Pago Personal': { bg: 'bg-violet-50', border: 'border-violet-200', text: 'text-violet-700', icon: '👤' },
-  'Materia Prima': { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', icon: '📦' },
-  'Otros': { bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-700', icon: '📋' }
+  'Pago Personal': { bg: 'bg-violet-50', border: 'border-violet-200', text: 'text-violet-700', icon: User },
+  'Materia Prima': { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', icon: Package },
+  'Otros': { bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-700', icon: ClipboardList }
 };
 
 // Formatear moneda
@@ -43,7 +44,7 @@ export default function CatalogoGastoSelector({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
+        <Loader2 className="animate-spin h-8 w-8 text-red-500" />
         <span className="ml-3 text-gray-500 text-sm">Cargando catálogo...</span>
       </div>
     );
@@ -51,8 +52,8 @@ export default function CatalogoGastoSelector({
 
   if (!seccionSeleccionada) {
     return (
-      <div className="bg-gray-50 rounded-lg p-6 text-center border border-gray-200">
-        <div className="text-gray-400 text-4xl mb-3">🏢</div>
+      <div className="bg-gray-50 rounded-xl p-6 text-center border border-gray-200">
+        <Building2 size={40} className="text-gray-400 mx-auto mb-3" />
         <p className="text-gray-500 text-sm">Selecciona una sección para ver el catálogo de gastos</p>
       </div>
     );
@@ -60,8 +61,8 @@ export default function CatalogoGastoSelector({
 
   if (items.length === 0) {
     return (
-      <div className="bg-amber-50 rounded-lg p-6 text-center border border-amber-200">
-        <div className="text-amber-400 text-4xl mb-3">📭</div>
+      <div className="bg-amber-50 rounded-xl p-6 text-center border border-amber-200">
+        <MailOpen size={40} className="text-amber-400 mx-auto mb-3" />
         <p className="text-amber-700 text-sm font-medium mb-2">No hay items en el catálogo para esta sección</p>
         <p className="text-amber-600 text-xs">Primero agrega items al catálogo desde el módulo de Gastos</p>
       </div>
@@ -73,7 +74,7 @@ export default function CatalogoGastoSelector({
       {/* Header */}
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-          <span className="bg-red-100 p-1 rounded">📋</span>
+          <ClipboardList size={16} className="text-red-600" />
           Selecciona del Catálogo
         </h4>
         <span className="text-xs text-gray-500">
@@ -92,8 +93,8 @@ export default function CatalogoGastoSelector({
           return (
             <div key={tipo} className="space-y-2">
               {/* Título del tipo */}
-              <div className={`flex items-center gap-2 px-2 py-1 ${config.bg} rounded-lg`}>
-                <span>{config.icon}</span>
+              <div className={`flex items-center gap-2 px-2 py-1 ${config.bg} rounded-xl`}>
+                <config.icon size={14} />
                 <span className={`text-xs font-semibold ${config.text}`}>{tipo}</span>
                 <span className={`text-xs ${config.text} opacity-70`}>({itemsTipo.length})</span>
               </div>
@@ -109,7 +110,7 @@ export default function CatalogoGastoSelector({
                       key={item._id}
                       type="button"
                       onClick={() => onSelect(item)}
-                      className={`relative p-3 rounded-lg border-2 text-left transition-all duration-200 ${
+                      className={`relative p-3 rounded-xl border text-left transition-all duration-200 ${
                         isSelected
                           ? 'border-red-500 bg-red-50 ring-2 ring-red-500/20'
                           : `${config.border} bg-white hover:border-red-300 hover:shadow-sm`
@@ -151,7 +152,7 @@ export default function CatalogoGastoSelector({
 
       {/* Contador de selección */}
       {selectedId && (
-        <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 flex items-center justify-between">
+        <div className="bg-red-50 border border-red-200 rounded-xl px-3 py-2 flex items-center justify-between">
           <span className="text-xs text-red-700">
             ✓ Item seleccionado del catálogo
           </span>

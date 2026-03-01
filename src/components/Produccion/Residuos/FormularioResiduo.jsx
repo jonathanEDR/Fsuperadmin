@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { X, Loader2, Trash2, AlertTriangle } from 'lucide-react';
 import { residuoService } from '../../../services/residuoService';
 
 const FormularioResiduo = ({ onResiduoRegistrado, onCerrar }) => {
@@ -157,29 +158,29 @@ const FormularioResiduo = ({ onResiduoRegistrado, onCerrar }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white">
-        <div className="mt-3">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+      <div className="relative top-20 mx-auto border w-11/12 md:w-2/3 lg:w-1/2 shadow-xl rounded-2xl bg-white border-gray-100">
+        <div>
           {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
-              🗑️ Registrar Residuo o Producto Malogrado
+          <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-5 py-4 rounded-t-2xl flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <Trash2 size={20} className="text-red-500" /> Registrar Residuo o Producto Malogrado
             </h3>
             <button
               onClick={onCerrar}
-              className="text-gray-400 hover:text-gray-600"
+              className="p-1.5 hover:bg-white/80 rounded-xl text-gray-400 hover:text-gray-600 transition-colors"
             >
-              ✕
+              <X size={20} />
             </button>
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-              {error}
+            <div className="mx-5 mt-3 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center gap-2">
+              <AlertTriangle size={16} className="flex-shrink-0" /> {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 p-5">
             {/* Tipo de Producto */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -188,14 +189,14 @@ const FormularioResiduo = ({ onResiduoRegistrado, onCerrar }) => {
               <select
                 value={formData.tipoProducto}
                 onChange={(e) => handleInputChange('tipoProducto', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                 required
               >
                 <option value="">Seleccionar tipo...</option>
-                <option value="ingrediente">🥬 Ingrediente</option>
-                <option value="material">📦 Material</option>
-                <option value="receta">📝 Receta</option>
-                <option value="produccion">🏭 Producción</option>
+                <option value="ingrediente">Ingrediente</option>
+                <option value="material">Material</option>
+                <option value="receta">Receta</option>
+                <option value="produccion">Producción</option>
               </select>
             </div>
 
@@ -205,14 +206,14 @@ const FormularioResiduo = ({ onResiduoRegistrado, onCerrar }) => {
                 Producto Específico *
               </label>
               {loading ? (
-                <div className="w-full p-3 border border-gray-300 rounded-md bg-gray-50">
+                <div className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50">
                   <span className="text-gray-500">Cargando productos...</span>
                 </div>
               ) : (
                 <select
                   value={formData.productoId}
                   onChange={(e) => handleInputChange('productoId', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                   disabled={!formData.tipoProducto}
                   required
                 >
@@ -230,7 +231,7 @@ const FormularioResiduo = ({ onResiduoRegistrado, onCerrar }) => {
 
             {/* Información del Producto Seleccionado */}
             {productoSeleccionado && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <div className="p-3 bg-blue-50/60 border border-blue-100 rounded-xl">
                 <h4 className="font-medium text-blue-900 mb-2">Información del Producto:</h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
@@ -256,11 +257,11 @@ const FormularioResiduo = ({ onResiduoRegistrado, onCerrar }) => {
                   max={productoSeleccionado ? obtenerStockDisponible(productoSeleccionado) : undefined}
                   value={formData.cantidadPerdida}
                   onChange={(e) => handleInputChange('cantidadPerdida', e.target.value)}
-                  className="flex-1 p-3 border border-gray-300 rounded-l-md focus:ring-blue-500 focus:border-blue-500"
+                  className="flex-1 p-3 border border-gray-200 rounded-l-xl focus:ring-2 focus:ring-blue-500 outline-none"
                   placeholder="0.00"
                   required
                 />
-                <div className="px-3 py-3 bg-gray-50 border border-l-0 border-gray-300 rounded-r-md text-sm text-gray-700">
+                <div className="px-3 py-3 bg-gray-50 border border-l-0 border-gray-200 rounded-r-xl text-sm text-gray-700">
                   {obtenerUnidadMedida(productoSeleccionado) || 'unidad'}
                 </div>
               </div>
@@ -274,7 +275,7 @@ const FormularioResiduo = ({ onResiduoRegistrado, onCerrar }) => {
               <select
                 value={formData.motivo}
                 onChange={(e) => handleInputChange('motivo', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                 required
               >
                 <option value="">Seleccionar motivo...</option>
@@ -294,7 +295,7 @@ const FormularioResiduo = ({ onResiduoRegistrado, onCerrar }) => {
               <textarea
                 value={formData.observaciones}
                 onChange={(e) => handleInputChange('observaciones', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                 rows="3"
                 placeholder="Descripción adicional sobre la pérdida (opcional)..."
                 maxLength="500"
@@ -309,16 +310,16 @@ const FormularioResiduo = ({ onResiduoRegistrado, onCerrar }) => {
               <button
                 type="button"
                 onClick={onCerrar}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+                className="px-4 py-2 text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl transition-colors"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 flex items-center gap-2 text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? '⏳ Registrando...' : '🗑️ Registrar Pérdida'}
+                {loading ? <><Loader2 size={16} className="animate-spin" /> Registrando...</> : <><Trash2 size={16} /> Registrar Pérdida</>}
               </button>
             </div>
           </form>

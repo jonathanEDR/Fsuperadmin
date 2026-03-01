@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
+import { X } from 'lucide-react';
 import { useIngresoForm } from './hooks/useIngresoForm';
 import { useIngresoOptions } from './hooks/useIngresoOptions';
 import { useIngresoEfectivoCalculator } from './hooks/useIngresoEfectivoCalculator';
@@ -132,8 +133,8 @@ const ModalIngresoFinanzasOptimizado = React.memo(({
     
     if (optionsLoading) {
         return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-                <div className="bg-white p-6 rounded-lg">
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+                <div className="bg-white p-6 rounded-xl">
                     <div className="text-center">Cargando opciones...</div>
                 </div>
             </div>
@@ -142,8 +143,8 @@ const ModalIngresoFinanzasOptimizado = React.memo(({
     
     if (optionsError) {
         return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-                <div className="bg-white p-6 rounded-lg">
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+                <div className="bg-white p-6 rounded-xl">
                     <div className="text-red-600 mb-4">Error al cargar opciones: {optionsError}</div>
                     <button 
                         onClick={refetchOptions}
@@ -157,20 +158,20 @@ const ModalIngresoFinanzasOptimizado = React.memo(({
     }
     
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                 
                 {/* HEADER */}
-                <div className="flex justify-between items-center p-6 border-b">
+                <div className="flex justify-between items-center bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-5 py-4 rounded-t-2xl">
                     <h2 className="text-xl font-semibold text-gray-800">
                         Registrar Ingreso Financiero
                     </h2>
                     <button
                         onClick={handleClose}
-                        className="text-gray-400 hover:text-gray-600 text-2xl"
+                        className="p-1.5 hover:bg-white/80 rounded-xl text-gray-400 hover:text-gray-600"
                         type="button"
                     >
-                        ×
+                        <X size={20} />
                     </button>
                 </div>
                 
@@ -329,11 +330,11 @@ const ModalIngresoFinanzasOptimizado = React.memo(({
                     />
                     
                     {/* ACCIONES */}
-                    <div className="flex justify-end space-x-3 pt-4 border-t">
+                    <div className="flex justify-end space-x-3 -mx-6 -mb-6 bg-gray-50/50 border-t border-gray-100 px-5 py-3 rounded-b-2xl">
                         <button
                             type="button"
                             onClick={handleClose}
-                            className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
+                            className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium rounded-xl"
                             disabled={isSubmitting}
                         >
                             Cancelar
@@ -342,7 +343,7 @@ const ModalIngresoFinanzasOptimizado = React.memo(({
                         <button
                             type="submit"
                             disabled={isSubmitting || tieneErrorDesglose || !validacionEfectivo.esValido}
-                            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+                            className="px-6 py-2 text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed font-medium rounded-xl"
                         >
                             {isSubmitting ? 'Registrando...' : 'Registrar Ingreso'}
                         </button>

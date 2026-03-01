@@ -1,4 +1,5 @@
 import React, { memo, useCallback } from 'react';
+import { Filter, X, Search } from 'lucide-react';
 import FilterBadges from './FilterBadges';
 
 /**
@@ -34,7 +35,7 @@ const CuentasBancariasFilters = memo(({
         <div className="card shadow mb-4">
             <div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                 <h6 className="m-0 font-weight-bold text-primary">
-                    <i className="fas fa-filter mr-2"></i>
+                    <Filter size={16} className="inline mr-2" />
                     Filtros y Búsqueda
                 </h6>
                 {hasActiveFilters && (
@@ -45,7 +46,7 @@ const CuentasBancariasFilters = memo(({
                         disabled={loading}
                         title="Limpiar todos los filtros"
                     >
-                        <i className="fas fa-times mr-1"></i>
+                        <X size={14} className="inline mr-1" />
                         Limpiar
                     </button>
                 )}
@@ -59,7 +60,7 @@ const CuentasBancariasFilters = memo(({
                         </label>
                         <div className="input-group">
                             <span className="input-group-text">
-                                <i className="fas fa-search"></i>
+                                <Search size={16} />
                             </span>
                             <input
                                 type="text"

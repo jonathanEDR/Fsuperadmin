@@ -28,7 +28,7 @@ const CarritoVenta = React.memo(({
   // Empty cart state
   if (carrito.length === 0) {
     return (
-      <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-8 text-center">
+      <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-4 sm:p-8 text-center">
         <ShoppingCart size={32} className="sm:w-12 sm:h-12 mx-auto text-gray-400 mb-2 sm:mb-3" />
         <p className="text-gray-600 font-medium text-sm sm:text-base">El carrito está vacío</p>
         <p className="text-gray-500 text-xs sm:text-sm mt-1">
@@ -59,7 +59,7 @@ const CarritoVenta = React.memo(({
         {carrito.map((item, index) => (
           <div
             key={`${item.productoId}-${index}`}
-            className="bg-white border border-gray-200 rounded-lg p-2 sm:p-3 hover:border-purple-300 transition-colors"
+            className="bg-white border border-gray-200 rounded-xl p-2 sm:p-3 hover:border-purple-300 transition-colors"
           >
             <div className="flex items-start justify-between gap-2 sm:gap-3">
               {/* Info del producto */}
@@ -84,7 +84,7 @@ const CarritoVenta = React.memo(({
               {/* Botón eliminar */}
               <button
                 onClick={() => onRemoverProducto(index)}
-                className="p-1 sm:p-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 transition-colors flex-shrink-0"
+                className="p-1 sm:p-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 transition-colors flex-shrink-0"
                 title="Eliminar del carrito"
               >
                 <Trash2 size={14} className="sm:w-4 sm:h-4" />

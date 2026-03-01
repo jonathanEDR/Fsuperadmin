@@ -9,7 +9,7 @@ export default function CatalogoGastoForm({ item, onChange, onSubmit, onCancel, 
           type="text"
           value={item.nombre || ''}
           onChange={e => onChange('nombre', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
           placeholder="Ej: Harina, Electricidad, Gasolina..."
           required
         />
@@ -20,7 +20,7 @@ export default function CatalogoGastoForm({ item, onChange, onSubmit, onCancel, 
         <select
           value={item.categoria || ''}
           onChange={e => onChange('categoria', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
           required
         >
           <option value="">Seleccione una categoria</option>
@@ -36,7 +36,7 @@ export default function CatalogoGastoForm({ item, onChange, onSubmit, onCancel, 
         <select
           value={item.tipoDeGasto || ''}
           onChange={e => onChange('tipoDeGasto', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
           required
         >
           <option value="">Seleccione un tipo</option>
@@ -52,7 +52,7 @@ export default function CatalogoGastoForm({ item, onChange, onSubmit, onCancel, 
           type="text"
           value={item.unidadMedida || ''}
           onChange={e => onChange('unidadMedida', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
           placeholder="Ej: kg, litro, unidad, servicio..."
           required
         />
@@ -67,7 +67,7 @@ export default function CatalogoGastoForm({ item, onChange, onSubmit, onCancel, 
           step="0.01"
           value={item.precioReferencia || ''}
           onChange={e => onChange('precioReferencia', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
           placeholder="0.00"
         />
         <p className="text-xs text-gray-500 mt-1">Precio sugerido por unidad (opcional)</p>
@@ -78,7 +78,7 @@ export default function CatalogoGastoForm({ item, onChange, onSubmit, onCancel, 
         <textarea
           value={item.descripcion || ''}
           onChange={e => onChange('descripcion', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
           placeholder="Descripcion adicional del gasto (opcional)"
           rows={3}
         />
@@ -91,7 +91,7 @@ export default function CatalogoGastoForm({ item, onChange, onSubmit, onCancel, 
             id="activo"
             checked={item.activo !== false}
             onChange={e => onChange('activo', e.target.checked)}
-            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            className="w-4 h-4 text-blue-600 border-gray-200 rounded focus:ring-blue-500"
           />
           <label htmlFor="activo" className="ml-2 text-sm text-gray-700">
             Item activo en el catalogo
@@ -103,7 +103,7 @@ export default function CatalogoGastoForm({ item, onChange, onSubmit, onCancel, 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex-1 px-6 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 disabled:opacity-50 transition-colors"
+          className="flex-1 px-6 py-2 text-blue-700 bg-blue-50 border border-blue-200 font-semibold rounded-xl hover:bg-blue-100 disabled:opacity-50 transition-colors"
         >
           {isSubmitting ? 'Procesando...' : (item._id ? 'Actualizar' : 'Agregar al Catalogo')}
         </button>
@@ -111,7 +111,7 @@ export default function CatalogoGastoForm({ item, onChange, onSubmit, onCancel, 
           type="button"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="flex-1 px-6 py-2 bg-gray-500 text-white font-semibold rounded-md hover:bg-gray-600 disabled:opacity-50 transition-colors"
+          className="flex-1 px-6 py-2 text-gray-700 bg-white border border-gray-200 font-semibold rounded-xl hover:bg-gray-50 disabled:opacity-50 transition-colors"
         >
           Cancelar
         </button>

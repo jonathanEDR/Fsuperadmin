@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { X, Loader2, Search, Leaf, FileText, AlertTriangle, ChefHat, Plus } from 'lucide-react';
 import '../../../styles/modal-protection.css';
 import { ingredienteService } from '../../../services/ingredienteService';
 import { recetaService } from '../../../services/recetaService';
@@ -108,9 +109,9 @@ const BuscadorIngredientesYRecetas = ({
   const isLoading = tipoItem === 'ingrediente' ? loadingIngredientes : loadingRecetas;
 
   return (
-    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+    <div className="bg-gray-50/60 border border-gray-100 rounded-xl p-4 mb-4">
       <h5 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-        🔍 Agregar Ingrediente o Receta
+        <Search size={16} /> Agregar Ingrediente o Receta
       </h5>
 
       {/* Selector de tipo */}
@@ -118,22 +119,22 @@ const BuscadorIngredientesYRecetas = ({
         <button
           type="button"
           onClick={() => handleTipoChange('ingrediente')}
-          className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2
+          className={`flex-1 py-2 px-3 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2
             ${tipoItem === 'ingrediente'
-              ? 'bg-green-600 text-white'
-              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+              ? 'text-green-700 bg-green-50 border border-green-200'
+              : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'}`}
         >
-          🥬 Ingrediente
+          <Leaf size={14} /> Ingrediente
         </button>
         <button
           type="button"
           onClick={() => handleTipoChange('receta')}
-          className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2
+          className={`flex-1 py-2 px-3 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2
             ${tipoItem === 'receta'
-              ? 'bg-purple-600 text-white'
-              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+              ? 'text-purple-700 bg-purple-50 border border-purple-200'
+              : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'}`}
         >
-          📋 Receta
+          <FileText size={14} /> Receta
         </button>
       </div>
 
@@ -156,17 +157,17 @@ const BuscadorIngredientesYRecetas = ({
             onFocus={() => setMostrarSugerencias(true)}
             onBlur={() => setTimeout(() => setMostrarSugerencias(false), 200)}
             onKeyDown={handleKeyDown}
-            className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 bg-white
+            className={`w-full px-3 py-2 text-sm border rounded-xl focus:ring-2 bg-white
               ${tipoItem === 'ingrediente'
-                ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
-                : 'border-purple-300 focus:ring-purple-500 focus:border-purple-500'}`}
+                ? 'border-green-200 focus:ring-green-500 outline-none'
+                : 'border-purple-200 focus:ring-purple-500 outline-none'}`}
             placeholder={isLoading ? "Cargando..." : `Buscar ${tipoItem}...`}
             disabled={isLoading}
           />
 
           {/* Sugerencias */}
           {mostrarSugerencias && itemsFiltrados.length > 0 && (
-            <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+            <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-48 overflow-y-auto">
               {itemsFiltrados.map(item => (
                 <button
                   key={item._id}
@@ -195,7 +196,7 @@ const BuscadorIngredientesYRecetas = ({
                         </p>
                       )}
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded
+                    <span className={`text-xs px-2 py-1 rounded-xl
                       ${tipoItem === 'ingrediente' ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'}`}>
                       {tipoItem === 'ingrediente'
                         ? `${item.cantidad || 0} ${item.unidadMedida}`
@@ -209,7 +210,7 @@ const BuscadorIngredientesYRecetas = ({
 
           {/* Mensaje si no hay items */}
           {mostrarSugerencias && termino && itemsFiltrados.length === 0 && !isLoading && (
-            <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl p-3">
+            <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl p-3">
               <p className="text-sm text-gray-500 text-center">
                 No se encontraron {tipoItem === 'ingrediente' ? 'ingredientes' : 'recetas'}
               </p>
@@ -225,7 +226,7 @@ const BuscadorIngredientesYRecetas = ({
             value={cantidad}
             onChange={(e) => setCantidad(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+            className="w-full px-2 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none"
             placeholder="0.00"
             step="0.01"
             min="0"
@@ -238,7 +239,7 @@ const BuscadorIngredientesYRecetas = ({
           <select
             value={unidad}
             onChange={(e) => setUnidad(e.target.value)}
-            className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+            className="w-full px-2 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none"
           >
             {unidadesMedida.map(u => (
               <option key={u.value} value={u.value}>{u.label}</option>
@@ -252,20 +253,20 @@ const BuscadorIngredientesYRecetas = ({
             type="button"
             onClick={agregarItem}
             disabled={!itemSeleccionado || !cantidad || parseFloat(cantidad) <= 0}
-            className={`w-full py-2 text-white rounded-lg text-sm font-medium transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-1
-              ${tipoItem === 'ingrediente' ? 'bg-green-600 hover:bg-green-700' : 'bg-purple-600 hover:bg-purple-700'}`}
+            className={`w-full py-2 rounded-xl text-sm font-medium transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-1
+              ${tipoItem === 'ingrediente' ? 'text-green-700 bg-green-50 border border-green-200 hover:bg-green-100' : 'text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100'}`}
           >
-            + Agregar
+            <Plus size={14} /> Agregar
           </button>
         </div>
       </div>
 
       {/* Item seleccionado preview */}
       {itemSeleccionado && termino && (
-        <div className={`mt-3 p-2 rounded-lg border
+        <div className={`mt-3 p-2 rounded-xl border
           ${tipoItem === 'ingrediente' ? 'bg-green-50 border-green-200' : 'bg-purple-50 border-purple-200'}`}>
-          <p className={`text-xs ${tipoItem === 'ingrediente' ? 'text-green-700' : 'text-purple-700'}`}>
-            {tipoItem === 'ingrediente' ? '🥬' : '📋'} <strong>{termino}</strong> seleccionado
+          <p className={`text-xs flex items-center gap-1 ${tipoItem === 'ingrediente' ? 'text-green-700' : 'text-purple-700'}`}>
+            {tipoItem === 'ingrediente' ? <Leaf size={12} /> : <FileText size={12} />} <strong>{termino}</strong> seleccionado
             {cantidad && ` - ${cantidad} ${unidad}`}
           </p>
         </div>
@@ -342,8 +343,8 @@ const ListaItemsCompacta = ({
 
   if (items.length === 0) {
     return (
-      <div className="text-center py-6 text-gray-500 bg-gray-50 rounded-lg">
-        <div className="text-3xl mb-2">🍳</div>
+      <div className="text-center py-6 text-gray-500 bg-gray-50/60 rounded-xl border border-gray-100">
+        <ChefHat size={28} className="mx-auto mb-2 text-gray-300" />
         <p className="text-sm">No hay ingredientes agregados</p>
       </div>
     );
@@ -377,12 +378,12 @@ const ListaItemsCompacta = ({
         return (
           <div
             key={index}
-            className={`bg-white border rounded-lg p-2 flex items-center gap-2
+            className={`bg-white border rounded-xl p-2 flex items-center gap-2
               ${esReceta ? 'border-purple-200' : 'border-gray-200'}`}
           >
             {/* Icono de tipo */}
-            <span className="text-lg" title={esReceta ? 'Receta' : 'Ingrediente'}>
-              {esReceta ? '📋' : '🥬'}
+            <span className="flex-shrink-0" title={esReceta ? 'Receta' : 'Ingrediente'}>
+              {esReceta ? <FileText size={18} className="text-purple-600" /> : <Leaf size={18} className="text-green-600" />}
             </span>
 
             {/* Nombre del item */}
@@ -404,10 +405,10 @@ const ListaItemsCompacta = ({
                 type="number"
                 value={item.cantidad}
                 onChange={(e) => onActualizar(index, 'cantidad', parseFloat(e.target.value) || 0)}
-                className={`w-16 px-1 py-1 text-xs border rounded focus:ring-2
+                className={`w-16 px-1 py-1 text-xs border rounded-xl focus:ring-2 outline-none
                   ${esReceta
-                    ? 'border-purple-300 focus:ring-purple-500 focus:border-purple-500'
-                    : 'border-gray-300 focus:ring-green-500 focus:border-green-500'}`}
+                    ? 'border-purple-200 focus:ring-purple-500'
+                    : 'border-gray-200 focus:ring-green-500'}`}
                 step="0.01"
                 min="0"
               />
@@ -435,17 +436,17 @@ const ListaItemsCompacta = ({
             <button
               type="button"
               onClick={() => onEliminar(index)}
-              className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded"
+              className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded-xl"
               title="Eliminar"
             >
-              ✕
+              <X size={16} />
             </button>
           </div>
         );
       })}
 
       {/* Total */}
-      <div className="bg-green-50 border border-green-200 rounded-lg p-2 mt-3">
+      <div className="bg-green-50/60 border border-green-200 rounded-xl p-2 mt-3">
         <div className="flex justify-between items-center">
           <span className="text-sm font-medium text-green-700">
             Costo ingredientes:
@@ -809,10 +810,9 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center h-full w-full z-50 p-2 sm:p-4">
-      {/* 🎯 PROTECCIÓN: Container con centrado perfecto y tamaños responsivos */}
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center h-full w-full z-50 p-2 sm:p-4">
       <div 
-        className="modal-protection recipe-modal-protection bg-white shadow-lg rounded-md overflow-hidden border"
+        className="modal-protection recipe-modal-protection bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100"
         style={{
           fontSize: '16px',
           lineHeight: '1.5',
@@ -821,31 +821,29 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
           maxHeight: '95vh'
         }}
       >
-        <div className="flex flex-col h-full p-4">
+        <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex justify-between items-center mb-4 pb-3 border-b">
-            <h3 className="text-lg font-semibold text-gray-900 m-0">
-              {receta ? 'Editar Receta' : 'Nueva Receta'} 
-              <span className="text-xs text-blue-500 ml-2 hidden sm:inline">(v2.0 - Con Selector de Catálogo)</span>
-            </h3>
-            <button
-              type="button"
-              onClick={onCancelar}
-              className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded"
-              style={{ fontSize: '24px', lineHeight: '1' }}
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+          <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-5 py-4 rounded-t-2xl">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-900 m-0">
+                {receta ? 'Editar Receta' : 'Nueva Receta'}
+              </h3>
+              <button
+                type="button"
+                onClick={onCancelar}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1.5 hover:bg-white/80 rounded-xl"
+              >
+                <X size={20} />
+              </button>
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex-1 overflow-hidden">
+          <form onSubmit={handleSubmit} className="flex-1 overflow-hidden p-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
               {/* COLUMNA IZQUIERDA - Información Básica (1/2 del espacio) */}
               <div className="space-y-4 overflow-y-auto pr-2">
                 {/* Información Básica */}
-                <div className="bg-gray-50 p-3 rounded-lg">
+                <div className="bg-gray-50/60 p-3 rounded-xl border border-gray-100">
                   <h4 className="font-medium text-gray-700 mb-3">Información Básica</h4>
                   <div className="space-y-3">
                     
@@ -857,8 +855,8 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
                       <select
                         value={formData.productoReferencia}
                         onChange={(e) => handleChange('productoReferencia', e.target.value)}
-                        className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                          errores.productoReferencia ? 'border-red-500' : 'border-gray-300'
+                        className={`w-full p-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none ${
+                          errores.productoReferencia ? 'border-red-500' : 'border-gray-200'
                         }`}
                         disabled={cargandoProductos}
                       >
@@ -877,9 +875,9 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
 
                       {/* Vista previa del producto seleccionado */}
                       {productoSeleccionado && (
-                        <div className="mt-2 p-2 bg-blue-50 rounded-md">
+                        <div className="mt-2 p-2 bg-blue-50/60 rounded-xl border border-blue-100">
                           <div className="flex items-center space-x-2">
-                            <span className="text-lg">📝</span>
+                            <FileText size={18} className="text-blue-600" />
                             <div>
                               <div className="font-medium text-blue-800 text-sm">{productoSeleccionado.nombre}</div>
                               <div className="text-xs text-blue-600">
@@ -905,7 +903,7 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
                         min="0"
                         value={formData.tiempoPreparacion}
                         onChange={(e) => handleChange('tiempoPreparacion', parseInt(e.target.value) || 0)}
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full p-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                       />
                     </div>
 
@@ -917,7 +915,7 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
                         value={formData.descripcion}
                         onChange={(e) => handleChange('descripcion', e.target.value)}
                         rows={2}
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full p-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                         placeholder="Descripción de la receta (opcional)"
                       />
                     </div>
@@ -925,7 +923,7 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
                 </div>
 
                 {/* Rendimiento */}
-                <div className="bg-orange-50 p-3 rounded-lg">
+                <div className="bg-orange-50/60 p-3 rounded-xl border border-orange-100">
                   <h4 className="font-medium text-gray-700 mb-3">Rendimiento</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
@@ -938,8 +936,8 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
                         min="0"
                         value={formData.rendimiento.cantidad}
                         onChange={(e) => handleChange('rendimiento.cantidad', parseFloat(e.target.value) || 0)}
-                        className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                          errores.rendimiento ? 'border-red-500' : 'border-gray-300'
+                        className={`w-full p-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none ${
+                          errores.rendimiento ? 'border-red-500' : 'border-gray-200'
                         }`}
                       />
                       {errores.rendimiento && (
@@ -954,7 +952,7 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
                       <select
                         value={formData.rendimiento.unidadMedida}
                         onChange={(e) => handleChange('rendimiento.unidadMedida', e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full p-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                       >
                         {unidadesMedida.map(unidad => (
                           <option key={unidad.value} value={unidad.value}>
@@ -985,7 +983,7 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
 
               {/* COLUMNA DERECHA - Ingredientes y Recetas (1/2 del espacio) */}
               <div className="space-y-4 overflow-y-auto pl-2">
-                <div className="bg-green-50 p-3 rounded-lg">
+                <div className="bg-green-50/60 p-3 rounded-xl border border-green-100">
                   <div className="flex items-center gap-2 mb-3">
                     <h4 className="font-medium text-gray-700 flex items-center gap-2">
                       <span className="bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
@@ -999,9 +997,9 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
                   </div>
 
                   {errores.ingredientes && (
-                    <div className="mb-3 p-2 bg-red-100 border border-red-400 rounded-lg">
+                    <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded-xl">
                       <p className="text-xs text-red-800 flex items-center gap-2">
-                        ⚠️ {errores.ingredientes}
+                        <AlertTriangle size={14} /> {errores.ingredientes}
                       </p>
                     </div>
                   )}
@@ -1035,17 +1033,17 @@ const FormularioReceta = ({ receta, onGuardar, onCancelar }) => {
                 <button
                   type="button"
                   onClick={onCancelar}
-                  className="px-6 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors font-medium"
+                  className="px-6 py-2 text-gray-700 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors font-medium"
                   disabled={enviando}
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 font-medium"
+                  className="px-6 py-2 text-blue-700 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors disabled:opacity-50 font-medium flex items-center gap-2"
                   disabled={enviando}
                 >
-                  {enviando ? 'Guardando...' : (receta ? 'Actualizar Receta' : 'Crear Receta')}
+                  {enviando ? <><Loader2 size={16} className="animate-spin" /> Guardando...</> : (receta ? 'Actualizar Receta' : 'Crear Receta')}
                 </button>
               </div>
             </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Utensils, FlaskConical, CheckCircle, HelpCircle, FileText, Clock, FlaskRound, RotateCcw, XCircle } from 'lucide-react';
 import { recetaService } from '../../../services/recetaService';
 import { formatearFecha as formatearFechaUtil } from '../../../utils/fechaHoraUtils';
 
@@ -9,13 +10,13 @@ const TablaHistorialGeneral = ({ recetas, onActualizar }) => {
   const getFaseInfo = (fase) => {
     switch (fase) {
       case 'preparado':
-        return { icon: '🥄', nombre: 'Preparado', color: 'text-blue-600 bg-blue-50' };
+        return { icon: <Utensils size={14} />, nombre: 'Preparado', color: 'text-blue-600 bg-blue-50' };
       case 'intermedio':
-        return { icon: '⚗️', nombre: 'Intermedio', color: 'text-yellow-600 bg-yellow-50' };
+        return { icon: <FlaskConical size={14} />, nombre: 'Intermedio', color: 'text-yellow-600 bg-yellow-50' };
       case 'terminado':
-        return { icon: '✅', nombre: 'Terminado', color: 'text-green-600 bg-green-50' };
+        return { icon: <CheckCircle size={14} />, nombre: 'Terminado', color: 'text-green-600 bg-green-50' };
       default:
-        return { icon: '❓', nombre: 'Desconocido', color: 'text-gray-600 bg-gray-50' };
+        return { icon: <HelpCircle size={14} />, nombre: 'Desconocido', color: 'text-gray-600 bg-gray-50' };
     }
   };
 
@@ -90,10 +91,10 @@ const TablaHistorialGeneral = ({ recetas, onActualizar }) => {
       setLoading(true);
       await recetaService.reiniciarReceta(recetaId, 'Reinicio desde historial general');
       onActualizar(); // Callback para actualizar las recetas
-      alert(`✅ Receta "${recetaNombre}" reiniciada exitosamente`);
+      alert(`Receta "${recetaNombre}" reiniciada exitosamente`);
     } catch (error) {
       console.error('Error al reiniciar receta:', error);
-      alert(`❌ Error al reiniciar receta: ${error.message}`);
+      alert(`Error al reiniciar receta: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -103,8 +104,8 @@ const TablaHistorialGeneral = ({ recetas, onActualizar }) => {
 
   if (todasLasFases.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow p-8 text-center">
-        <div className="text-gray-400 text-6xl mb-4">📋</div>
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 text-center">
+        <div className="text-gray-300 mb-4"><FileText size={48} /></div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">
           Sin Historial de Fases
         </h3>
@@ -116,10 +117,10 @@ const TablaHistorialGeneral = ({ recetas, onActualizar }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">
-          📋 Historial General de Fases
+    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+      <div className="px-6 py-4 border-b border-gray-100">
+        <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <FileText size={20} className="text-gray-500" /> Historial General de Fases
         </h3>
         <p className="text-sm text-gray-600 mt-1">
           Registro completo de todas las transiciones de fase ({todasLasFases.length} entradas)
@@ -128,7 +129,7 @@ const TablaHistorialGeneral = ({ recetas, onActualizar }) => {
 
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gradient-to-r from-slate-50 to-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Receta
@@ -181,8 +182,8 @@ const TablaHistorialGeneral = ({ recetas, onActualizar }) => {
 
                   {/* Fase */}
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${faseInfo.color}`}>
-                      <span className="mr-2">{faseInfo.icon}</span>
+                    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-sm font-medium ${faseInfo.color}`}>
+                      {faseInfo.icon}
                       {faseInfo.nombre}
                       {esActiva && (
                         <span className="ml-2 px-2 py-0.5 bg-blue-500 text-white text-xs rounded-full">
@@ -213,8 +214,8 @@ const TablaHistorialGeneral = ({ recetas, onActualizar }) => {
 
                   {/* Duración */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <div className="flex items-center">
-                      <span className="mr-1">⏱️</span>
+                    <div className="flex items-center gap-1">
+                      <Clock size={14} className="text-gray-400" />
                       {duracion}
                     </div>
                   </td>
@@ -225,8 +226,8 @@ const TablaHistorialGeneral = ({ recetas, onActualizar }) => {
                       {fase.notas || <span className="text-gray-400 italic">Sin notas</span>}
                     </div>
                     {fase.ingredientesAgregados && fase.ingredientesAgregados.length > 0 && (
-                      <div className="text-xs text-gray-500 mt-1">
-                        🧪 {fase.ingredientesAgregados.length} ingredientes extra
+                      <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                        <FlaskRound size={12} /> {fase.ingredientesAgregados.length} ingredientes extra
                       </div>
                     )}
                   </td>
@@ -237,10 +238,10 @@ const TablaHistorialGeneral = ({ recetas, onActualizar }) => {
                       <button
                         onClick={() => handleReiniciarReceta(fase.recetaId, fase.recetaNombre)}
                         disabled={loading}
-                        className="inline-flex items-center px-3 py-1 border border-orange-300 rounded-md text-xs font-medium text-orange-700 bg-orange-50 hover:bg-orange-100 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 border border-orange-200 rounded-xl text-xs font-medium text-orange-700 bg-orange-50 hover:bg-orange-100 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         title="Reiniciar receta al estado preparado"
                       >
-                        🔄 Reiniciar
+                        <RotateCcw size={12} /> Reiniciar
                       </button>
                     )}
                   </td>
@@ -252,7 +253,7 @@ const TablaHistorialGeneral = ({ recetas, onActualizar }) => {
       </div>
 
       {/* Footer con estadísticas */}
-      <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+      <div className="px-6 py-4 bg-gray-50/60 border-t border-gray-100">
         <div className="flex flex-wrap gap-4 text-sm text-gray-600">
           <div>
             <span className="font-medium">Total de fases:</span> {todasLasFases.length}

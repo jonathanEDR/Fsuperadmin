@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { X, Loader2 } from 'lucide-react';
 import '../../../styles/modal-protection.css';
 
 const FormularioBasicoReceta = ({ 
@@ -84,10 +85,9 @@ const FormularioBasicoReceta = ({
   const titulo = receta ? 'Editar Información Básica' : 'Nueva Receta';
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      {/* 🎯 PROTECCIÓN: Container con centrado perfecto y tamaños responsivos */}
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div 
-        className="modal-protection small-modal-protection bg-white rounded-lg shadow-xl overflow-hidden"
+        className="modal-protection small-modal-protection bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100"
         style={{
           fontSize: '16px',
           lineHeight: '1.5',
@@ -97,23 +97,24 @@ const FormularioBasicoReceta = ({
         }}
       >
         <div className="overflow-y-auto max-h-[95vh]">
-          <div className="p-6">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-6">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-5 py-4 rounded-t-2xl">
+            <div className="flex justify-between items-center">
               <h2 className="text-xl font-bold text-gray-800 m-0">{titulo}</h2>
               <button
                 onClick={onCancelar}
-                className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded"
-                style={{ fontSize: '20px', lineHeight: '1' }}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1.5 hover:bg-white/80 rounded-xl"
               >
-                ✕
+                <X size={20} />
               </button>
             </div>
+          </div>
+          <div className="p-6">
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Información Básica */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">
+              <h3 className="text-sm font-semibold text-gray-700 border-b border-gray-100 pb-2">
                 Información Básica
               </h3>
 
@@ -126,8 +127,8 @@ const FormularioBasicoReceta = ({
                   type="text"
                   value={datos.nombre}
                   onChange={(e) => handleInputChange('nombre', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.nombre ? 'border-red-500' : 'border-gray-300'
+                  className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none ${
+                    errors.nombre ? 'border-red-500' : 'border-gray-200'
                   }`}
                   placeholder="Nombre de la receta"
                 />
@@ -146,8 +147,8 @@ const FormularioBasicoReceta = ({
                   min="0"
                   value={datos.tiempoPreparacion}
                   onChange={(e) => handleInputChange('tiempoPreparacion', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.tiempoPreparacion ? 'border-red-500' : 'border-gray-300'
+                  className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none ${
+                    errors.tiempoPreparacion ? 'border-red-500' : 'border-gray-200'
                   }`}
                   placeholder="0"
                 />
@@ -165,7 +166,7 @@ const FormularioBasicoReceta = ({
                   value={datos.descripcion}
                   onChange={(e) => handleInputChange('descripcion', e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-none"
                   placeholder="Descripción de la receta..."
                 />
               </div>
@@ -176,7 +177,7 @@ const FormularioBasicoReceta = ({
               <button
                 type="button"
                 onClick={onCancelar}
-                className="flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+                className="flex-1 px-4 py-2 text-gray-700 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors"
                 disabled={guardando}
               >
                 Cancelar
@@ -184,9 +185,9 @@ const FormularioBasicoReceta = ({
               <button
                 type="submit"
                 disabled={guardando}
-                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-blue-300 transition-colors"
+                className="flex-1 px-4 py-2 text-blue-700 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
               >
-                {guardando ? 'Guardando...' : (receta ? 'Actualizar' : 'Guardar')}
+                {guardando ? <><Loader2 size={16} className="animate-spin" /> Guardando...</> : (receta ? 'Actualizar' : 'Guardar')}
               </button>
             </div>
           </form>

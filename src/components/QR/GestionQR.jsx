@@ -362,7 +362,7 @@ ${qr.notas ? `📝 Notas:\n${qr.notas}` : ''}
           <button
             onClick={() => setModalGenerarAbierto(true)}
             disabled={loading}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus size={20} />
             <span>Generar Nuevo QR</span>
@@ -372,14 +372,14 @@ ${qr.notas ? `📝 Notas:\n${qr.notas}` : ''}
 
       {/* Mensajes */}
       {mensaje && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
+        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
           <CheckCircle className="text-green-600" size={20} />
           <p className="text-green-800">{mensaje}</p>
         </div>
       )}
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
           <XCircle className="text-red-600" size={20} />
           <p className="text-red-800">{error}</p>
           <button 
@@ -394,9 +394,9 @@ ${qr.notas ? `📝 Notas:\n${qr.notas}` : ''}
       {/* Estadísticas Rápidas */}
       {estadisticasGenerales && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
+          <div className="bg-white p-4 rounded-xl shadow border border-gray-200">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-blue-100 rounded-lg">
+              <div className="p-3 bg-blue-100 rounded-xl">
                 <QrCode className="text-blue-600" size={24} />
               </div>
               <div>
@@ -406,9 +406,9 @@ ${qr.notas ? `📝 Notas:\n${qr.notas}` : ''}
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
+          <div className="bg-white p-4 rounded-xl shadow border border-gray-200">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-green-100 rounded-lg">
+              <div className="p-3 bg-green-100 rounded-xl">
                 <Activity className="text-green-600" size={24} />
               </div>
               <div>
@@ -418,9 +418,9 @@ ${qr.notas ? `📝 Notas:\n${qr.notas}` : ''}
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
+          <div className="bg-white p-4 rounded-xl shadow border border-gray-200">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-purple-100 rounded-lg">
+              <div className="p-3 bg-purple-100 rounded-xl">
                 <BarChart3 className="text-purple-600" size={24} />
               </div>
               <div>
@@ -430,9 +430,9 @@ ${qr.notas ? `📝 Notas:\n${qr.notas}` : ''}
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
+          <div className="bg-white p-4 rounded-xl shadow border border-gray-200">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-orange-100 rounded-lg">
+              <div className="p-3 bg-orange-100 rounded-xl">
                 <Users className="text-orange-600" size={24} />
               </div>
               <div>

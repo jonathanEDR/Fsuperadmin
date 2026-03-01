@@ -26,7 +26,7 @@ const GarantiasFilters = ({
     const cantidadFiltrosActivos = Object.values(filtros).filter(v => v !== '' && v !== null && v !== undefined).length;
 
     return (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-4 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-4 overflow-hidden">
             {/* Header colapsable */}
             <button
                 type="button"
@@ -82,7 +82,7 @@ const GarantiasFilters = ({
                                     value={filtros.buscar || ''}
                                     onChange={(e) => handleChange('buscar', e.target.value)}
                                     placeholder="Código, descripción, propietario..."
-                                    className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     disabled={loading}
                                 />
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -101,7 +101,7 @@ const GarantiasFilters = ({
                             <select
                                 value={filtros.tipo || ''}
                                 onChange={(e) => handleChange('tipo', e.target.value)}
-                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 disabled={loading}
                             >
                                 <option value="">Todos los tipos</option>
@@ -121,7 +121,7 @@ const GarantiasFilters = ({
                             <select
                                 value={filtros.estado || ''}
                                 onChange={(e) => handleChange('estado', e.target.value)}
-                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 disabled={loading}
                             >
                                 <option value="">Todos los estados</option>
@@ -149,7 +149,7 @@ const GarantiasFilters = ({
                                     placeholder="0.00"
                                     min="0"
                                     step="0.01"
-                                    className="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     disabled={loading}
                                 />
                             </div>
@@ -171,7 +171,7 @@ const GarantiasFilters = ({
                                     placeholder="0.00"
                                     min="0"
                                     step="0.01"
-                                    className="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     disabled={loading}
                                 />
                             </div>
@@ -187,7 +187,7 @@ const GarantiasFilters = ({
                             <select
                                 value={filtros.prestamoId || ''}
                                 onChange={(e) => handleChange('prestamoId', e.target.value)}
-                                className="w-full sm:w-64 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full sm:w-64 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 disabled={loading}
                             >
                                 <option value="">Todos los préstamos</option>

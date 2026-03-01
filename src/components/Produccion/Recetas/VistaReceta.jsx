@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { X, CheckCircle, XCircle, AlertTriangle, FileText, Leaf } from 'lucide-react';
 import { recetaService } from '../../../services/recetaService';
 import { formatearFecha as formatearFechaUtil } from '../../../utils/fechaHoraUtils';
 import HistorialFases from './HistorialFases';
@@ -70,10 +71,10 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
       // Recargar la receta con los nuevos datos
       await recargarReceta();
       
-      alert('✅ Receta reiniciada exitosamente al estado preparado');
+      alert('Receta reiniciada exitosamente al estado preparado');
     } catch (error) {
       console.error('Error al reiniciar receta:', error);
-      alert(`❌ Error al reiniciar receta: ${error.message}`);
+      alert(`Error al reiniciar receta: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -106,11 +107,11 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
   const datosReceta = recetaActual || receta;
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-      <div className="relative mx-auto border box-border w-full max-w-3xl sm:w-11/12 shadow-2xl rounded-2xl bg-white p-0 max-h-[92vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="relative mx-auto border border-gray-100 box-border w-full max-w-3xl sm:w-11/12 shadow-xl rounded-2xl bg-white p-0 max-h-[92vh] flex flex-col">
         <div className="flex-1 overflow-y-auto p-0 sm:p-6">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4 sm:mb-8 border-b pb-4 sm:pb-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4 sm:mb-6 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-5 py-4 rounded-t-2xl">
             <div>
               <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
                 {datosReceta.nombre}
@@ -129,10 +130,10 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
             <div className="flex justify-end">
               <button
                 onClick={onCerrar}
-                className="text-gray-400 hover:text-gray-600 p-2"
+                className="text-gray-400 hover:text-gray-600 p-1.5 hover:bg-white/80 rounded-xl transition-colors"
                 title="Cerrar"
               >
-                ✕
+                <X size={20} />
               </button>
             </div>
           </div>
@@ -142,15 +143,15 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
             <div className="space-y-4 sm:space-y-6 min-w-0">
               {/* Descripción */}
               {datosReceta.descripcion && (
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50/60 p-4 rounded-xl border border-gray-100">
                   <h4 className="font-medium text-gray-700 mb-2">Descripción</h4>
                   <p className="text-gray-600">{datosReceta.descripcion}</p>
                 </div>
               )}
 
               {/* Ingredientes y Recetas - Vista de Lista */}
-              <div className="bg-white border rounded-lg overflow-hidden">
-                <div className="bg-gray-50 px-3 sm:px-4 py-2 sm:py-3 border-b">
+              <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+                <div className="bg-gray-50/60 px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-100">
                   <h4 className="font-medium text-gray-700">Ingredientes y Sub-recetas</h4>
                   <p className="text-xs text-gray-500 mt-1">
                     {datosReceta.ingredientes?.length || 0} items en esta receta
@@ -188,19 +189,19 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
                     return (
                       <div
                         key={index}
-                        className={`rounded-lg border p-3 ${
-                          !suficiente 
-                            ? 'bg-red-50 border-red-300' 
-                            : esReceta 
-                              ? 'bg-purple-50 border-purple-200' 
-                              : 'bg-orange-50 border-orange-200'
-                        }`}
-                      >
-                        {/* Header: Icono + Nombre */}
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <span className="text-2xl flex-shrink-0" title={esReceta ? 'Receta' : 'Ingrediente'}>
-                              {esReceta ? '📋' : '🥬'}
+                          className={`rounded-xl border p-3 ${
+                            !suficiente 
+                              ? 'bg-red-50 border-red-300' 
+                              : esReceta 
+                                ? 'bg-purple-50 border-purple-200' 
+                                : 'bg-orange-50 border-orange-200'
+                          }`}
+                        >
+                          {/* Header: Icono + Nombre */}
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <span className="flex-shrink-0" title={esReceta ? 'Receta' : 'Ingrediente'}>
+                                {esReceta ? <FileText size={20} className="text-purple-600" /> : <Leaf size={20} className="text-green-600" />}
                             </span>
                             <div className="flex-1 min-w-0">
                               <div className={`font-medium text-sm ${esReceta ? 'text-purple-700' : 'text-gray-900'} truncate`}>
@@ -212,12 +213,12 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
                             </div>
                           </div>
                           {/* Badge de estado */}
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 flex items-center gap-1 ${
                             suficiente 
                               ? 'bg-green-100 text-green-700' 
                               : 'bg-red-100 text-red-700'
                           }`}>
-                            {suficiente ? '✓ OK' : '⚠ Bajo'}
+                            {suficiente ? <><CheckCircle size={12} /> OK</> : <><AlertTriangle size={12} /> Bajo</>}
                           </span>
                         </div>
 
@@ -270,9 +271,9 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
 
               {/* Disponibilidad */}
               {disponibilidad && !disponibilidad.disponible && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <h4 className="font-medium text-red-800 mb-2">
-                    ⚠️ Ingredientes Insuficientes
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                  <h4 className="font-medium text-red-800 mb-2 flex items-center gap-2">
+                    <AlertTriangle size={16} /> Ingredientes Insuficientes
                   </h4>
                   <div className="space-y-2">
                     {disponibilidad.faltantes.map((faltante, index) => (
@@ -289,9 +290,9 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
               )}
 
               {disponibilidad && disponibilidad.disponible && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <h4 className="font-medium text-green-800">
-                    ✅ Todos los ingredientes están disponibles
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                  <h4 className="font-medium text-green-800 flex items-center gap-2">
+                    <CheckCircle size={16} /> Todos los ingredientes están disponibles
                   </h4>
                 </div>
               )}
@@ -300,7 +301,7 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
             {/* Panel Lateral */}
             <div className="space-y-4 sm:space-y-6 min-w-0">
               {/* Información Básica */}
-              <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="bg-gray-50/60 p-4 rounded-xl border border-gray-100">
                 <h4 className="font-medium text-gray-700 mb-3">Información</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
@@ -337,7 +338,7 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
               </div>
 
               {/* Cantidad a producir - controla disponibilidad */}
-              <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="bg-blue-50/60 p-4 rounded-xl border border-blue-100">
                 <label className="block text-sm font-medium text-blue-700 mb-1">
                   Cantidad a producir (lotes)
                 </label>
@@ -347,7 +348,7 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
                   step="1"
                   value={cantidadConsulta}
                   onChange={(e) => setCantidadConsulta(parseInt(e.target.value) || 1)}
-                  className="w-full p-2 border border-blue-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-2 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                 />
               </div>
 
@@ -360,10 +361,10 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
               />
 
               {/* Estado de Disponibilidad */}
-              <div className={`p-4 rounded-lg ${
+              <div className={`p-4 rounded-xl ${
                 disponibilidad?.disponible 
-                  ? 'bg-green-50 border border-green-200' 
-                  : 'bg-red-50 border border-red-200'
+                  ? 'bg-green-50/60 border border-green-200' 
+                  : 'bg-red-50/60 border border-red-200'
               }`}>
                 <h4 className={`font-medium mb-2 ${
                   disponibilidad?.disponible ? 'text-green-800' : 'text-red-800'
@@ -374,8 +375,8 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
                   disponibilidad?.disponible ? 'text-green-700' : 'text-red-700'
                 }`}>
                   {disponibilidad?.disponible 
-                    ? `✅ Se pueden producir ${cantidadConsulta} unidad${cantidadConsulta > 1 ? 'es' : ''}`
-                    : `❌ No se puede producir con ingredientes actuales`
+                    ? <span className="flex items-center gap-1"><CheckCircle size={14} /> Se pueden producir {cantidadConsulta} unidad{cantidadConsulta > 1 ? 'es' : ''}</span>
+                    : <span className="flex items-center gap-1"><XCircle size={14} /> No se puede producir con ingredientes actuales</span>
                   }
                 </p>
               </div>
@@ -399,7 +400,7 @@ const VistaReceta = ({ receta, onCerrar, recargarKey }) => {
           <div className="flex justify-center sm:justify-end mt-6 pt-4 border-t">
             <button
               onClick={onCerrar}
-              className="w-full sm:w-auto px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-semibold shadow"
+              className="w-full sm:w-auto px-6 py-2 text-gray-700 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors font-semibold"
             >
               Cerrar
             </button>

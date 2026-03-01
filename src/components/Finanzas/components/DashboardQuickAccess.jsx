@@ -1,5 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { Gauge, Check, Info } from 'lucide-react';
 
 /**
  * Componente memoizado para accesos rápidos del dashboard
@@ -31,7 +32,7 @@ const DashboardQuickAccess = memo(({ accesos, currentPath, loading }) => {
                 <div className="card shadow mb-4">
                     <div className="card-header py-3">
                         <h6 className="m-0 font-weight-bold text-primary">
-                            <i className="fas fa-tachometer-alt mr-2"></i>
+                            <Gauge size={16} className="mr-2 inline" />
                             Accesos Rápidos
                         </h6>
                     </div>
@@ -86,7 +87,7 @@ const DashboardQuickAccess = memo(({ accesos, currentPath, loading }) => {
                                                     {isActive && (
                                                         <div className="mt-2">
                                                             <span className="badge badge-primary badge-pill">
-                                                                <i className="fas fa-check mr-1"></i>
+                                                                <Check size={14} className="mr-1 inline" />
                                                                 Activo
                                                             </span>
                                                         </div>
@@ -103,7 +104,7 @@ const DashboardQuickAccess = memo(({ accesos, currentPath, loading }) => {
                         <div className="row mt-4">
                             <div className="col-12">
                                 <div className="alert alert-info mb-0" role="alert">
-                                    <i className="fas fa-info-circle mr-2"></i>
+                                    <Info size={16} className="mr-2 inline" />
                                     <strong>Tip:</strong> Utiliza estos accesos rápidos para navegar eficientemente por las diferentes secciones del módulo de finanzas.
                                     {accesos.some(a => a.badge > 0) && (
                                         <span className="ml-2">

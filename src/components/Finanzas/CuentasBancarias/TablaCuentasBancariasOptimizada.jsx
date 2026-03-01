@@ -1,4 +1,5 @@
 import React, { memo, useMemo, useCallback } from 'react';
+import { Landmark } from 'lucide-react';
 import { useCuentasBancariasTable } from '../hooks/useCuentasBancariasTable';
 import CuentasBancariasResumen from './CuentasBancariasResumen';
 import CuentasBancariasTableHeader from './CuentasBancariasTableHeader';
@@ -133,11 +134,11 @@ const TablaCuentasBancariasOptimizada = memo(({
             />
             
             {/* Tabla de cuentas */}
-            <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
                 {/* Encabezado de la tabla */}
                 <div className="px-6 py-4 border-b">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                        🏦 Cuentas Bancarias ({cuentasSeguras.length})
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <Landmark size={18} className="inline" /> Cuentas Bancarias ({cuentasSeguras.length})
                     </h3>
                 </div>
                 

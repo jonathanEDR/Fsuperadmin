@@ -167,7 +167,7 @@ const TablaMovimientosFinanzas = ({
     
     if (!movimientos || movimientos.length === 0) {
         return (
-            <div className="bg-white rounded-lg border border-gray-200 p-6 sm:p-8 text-center">
+            <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-8 text-center">
                 <div className="text-gray-500">
                     <Clock className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-4 text-gray-300" />
                     <p className="text-base sm:text-lg font-medium">No hay movimientos registrados</p>
@@ -178,7 +178,7 @@ const TablaMovimientosFinanzas = ({
     }
     
     return (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
             <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900">
@@ -243,7 +243,7 @@ const TablaMovimientosFinanzas = ({
                                     </button>
                                     
                                     {menuAbierto === movimiento._id && (
-                                        <div className="absolute right-0 top-8 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                                        <div className="absolute right-0 top-8 w-32 bg-white border border-gray-200 rounded-xl shadow-lg z-10">
                                             <button
                                                 onClick={() => abrirModalDetalle(movimiento)}
                                                 className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center"
@@ -357,7 +357,7 @@ const TablaMovimientosFinanzas = ({
                                         </button>
                                         
                                         {menuAbierto === movimiento._id && (
-                                            <div className="absolute right-0 top-8 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                                            <div className="absolute right-0 top-8 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-10">
                                                 <button
                                                     onClick={() => abrirModalDetalle(movimiento)}
                                                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center"
@@ -398,7 +398,7 @@ const TablaMovimientosFinanzas = ({
                             <button
                                 onClick={onCargarMas}
                                 disabled={loadingMas}
-                                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
+                                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
                             >
                                 {loadingMas ? (
                                     <>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, MinusCircle, Minus, Plus, ChevronDown, CreditCard, Calendar, AlertCircle } from 'lucide-react';
+import { X, MinusCircle, Minus, Plus, ChevronDown, CreditCard, Calendar, AlertCircle, Loader2 } from 'lucide-react';
 import { movimientosCajaService } from '../../../services/movimientosCajaService';
 import FinanzasService from '../../../services/finanzasService';
 
@@ -501,16 +501,16 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
     ];
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-            <div className="bg-white rounded-xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-2xl">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-2xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-xl border border-gray-100">
                 {/* Header */}
-                <div className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-red-500 to-red-600 text-white">
-                    <h2 className="text-base sm:text-xl font-bold flex items-center">
-                        <MinusCircle className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+                <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 rounded-t-2xl">
+                    <h2 className="text-base sm:text-xl font-bold flex items-center text-gray-800">
+                        <MinusCircle className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-red-500" />
                         <span className="hidden xs:inline">Registrar </span>Egreso
                     </h2>
-                    <button onClick={onClose} className="p-1 hover:bg-white/20 rounded-full transition-colors">
-                        <X className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <button onClick={onClose} className="p-1.5 hover:bg-white/80 rounded-xl transition-colors">
+                        <X size={20} className="text-gray-500" />
                     </button>
                 </div>
 
@@ -519,7 +519,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                         {/* Columna Principal - 3/5 */}
                         <div className="lg:col-span-3 space-y-4 sm:space-y-5">
                             {/* Información Principal */}
-                            <div className="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-3 sm:space-y-4">
+                            <div className="bg-gray-50 rounded-xl p-3 sm:p-4 space-y-3 sm:space-y-4">
                                 <h3 className="text-sm sm:text-base font-semibold text-gray-800 flex items-center">
                                     <span className="mr-2">📝</span> <span className="hidden sm:inline">Información </span>Principal
                                 </h3>
@@ -538,7 +538,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                 min="0.01"
                                                 value={formData.monto}
                                                 onChange={(e) => handleInputChange('monto', e.target.value)}
-                                                className="w-full pl-10 pr-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-base sm:text-lg font-semibold"
+                                                className="w-full pl-10 pr-3 py-2 sm:py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-base sm:text-lg font-semibold"
                                                 placeholder="0.00"
                                                 required
                                             />
@@ -552,7 +552,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                             type="text"
                                             value={formData.concepto}
                                             onChange={(e) => handleInputChange('concepto', e.target.value)}
-                                            className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm sm:text-base"
+                                            className="w-full px-3 py-2 sm:py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm sm:text-base"
                                             placeholder="Ej: Compra de insumos"
                                             required
                                         />
@@ -565,7 +565,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                     <textarea
                                         value={formData.descripcion}
                                         onChange={(e) => handleInputChange('descripcion', e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none text-sm"
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none text-sm"
                                         rows="2"
                                         placeholder="Descripción detallada (opcional)"
                                     />
@@ -573,7 +573,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                             </div>
 
                             {/* Método de Pago - responsive */}
-                            <div className="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-3 sm:space-y-4">
+                            <div className="bg-gray-50 rounded-xl p-3 sm:p-4 space-y-3 sm:space-y-4">
                                 <h3 className="text-sm sm:text-base font-semibold text-gray-800 flex items-center">
                                     <span className="mr-2">💰</span> Método de Pago
                                 </h3>
@@ -621,7 +621,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                         <select
                                             value={formData.cuentaBancariaId}
                                             onChange={(e) => handleInputChange('cuentaBancariaId', e.target.value)}
-                                            className="w-full px-2 sm:px-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 font-medium text-xs sm:text-sm"
+                                            className="w-full px-2 sm:px-3 py-2 sm:py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 font-medium text-xs sm:text-sm"
                                             required={formData.metodoPago === 'cuenta_bancaria'}
                                         >
                                             <option value="">-- Seleccionar --</option>
@@ -642,7 +642,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                             </div>
 
                             {/* Categoría - responsive */}
-                            <div className="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-3">
+                            <div className="bg-gray-50 rounded-xl p-3 sm:p-4 space-y-3">
                                 <h3 className="text-sm sm:text-base font-semibold text-gray-800 flex items-center">
                                     <span className="mr-2">📂</span> Categoría
                                 </h3>
@@ -653,7 +653,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                             key={cat.value}
                                             type="button"
                                             onClick={() => handleInputChange('categoria', cat.value)}
-                                            className={`p-1.5 sm:p-2.5 rounded-lg border-2 transition-all text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-0.5 sm:gap-1 ${
+                                            className={`p-1.5 sm:p-2.5 rounded-xl border-2 transition-all text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-0.5 sm:gap-1 ${
                                                 formData.categoria === cat.value
                                                     ? 'border-red-500 bg-red-50 text-red-700 font-semibold'
                                                     : 'border-gray-200 hover:border-red-300 text-gray-600'
@@ -677,11 +677,11 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
 
                                     {loadingPrestamos ? (
                                         <div className="flex items-center justify-center py-4 sm:py-6">
-                                            <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-yellow-600"></div>
+                                            <Loader2 className="animate-spin h-6 w-6 sm:h-8 sm:w-8 text-yellow-600" />
                                             <span className="ml-2 sm:ml-3 text-sm text-gray-600">Cargando...</span>
                                         </div>
                                     ) : prestamosConCuotas.length === 0 ? (
-                                        <div className="bg-amber-100 border border-amber-300 rounded-lg p-3 sm:p-4 flex items-start">
+                                        <div className="bg-amber-100 border border-amber-300 rounded-xl p-3 sm:p-4 flex items-start">
                                             <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 mr-2 flex-shrink-0 mt-0.5" />
                                             <div>
                                                 <p className="text-amber-800 font-medium text-sm sm:text-base">No hay préstamos pendientes</p>
@@ -700,7 +700,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                 <select
                                                     value={prestamoSeleccionado?._id || ''}
                                                     onChange={(e) => handlePrestamoChange(e.target.value)}
-                                                    className="w-full px-2 sm:px-3 py-2 sm:py-2.5 border-2 border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 bg-white font-medium text-xs sm:text-sm"
+                                                    className="w-full px-2 sm:px-3 py-2 sm:py-2.5 border-2 border-yellow-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 bg-white font-medium text-xs sm:text-sm"
                                                 >
                                                     <option value="">-- Seleccionar --</option>
                                                     {prestamosConCuotas.map(prestamo => (
@@ -713,7 +713,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
 
                                             {/* Info del Préstamo Seleccionado - responsive */}
                                             {prestamoSeleccionado && (
-                                                <div className="bg-white rounded-lg p-2 sm:p-3 border border-yellow-200">
+                                                <div className="bg-white rounded-xl p-2 sm:p-3 border border-yellow-200">
                                                     <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
                                                         <div className="flex flex-col xs:flex-row xs:items-center">
                                                             <span className="text-gray-500">Entidad:</span>
@@ -752,7 +752,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                                     key={cuota._id}
                                                                     type="button"
                                                                     onClick={() => handleCuotaChange(cuota._id)}
-                                                                    className={`w-full p-2 sm:p-3 rounded-lg border-2 transition-all text-left ${
+                                                                    className={`w-full p-2 sm:p-3 rounded-xl border-2 transition-all text-left ${
                                                                         isSelected
                                                                             ? 'border-yellow-500 bg-yellow-100 shadow-md'
                                                                             : isVencida
@@ -800,7 +800,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
 
                                             {/* Resumen de Cuota Seleccionada - responsive */}
                                             {cuotaSeleccionada && (
-                                                <div className="bg-green-50 border-2 border-green-300 rounded-lg p-2 sm:p-3">
+                                                <div className="bg-green-50 border-2 border-green-300 rounded-xl p-2 sm:p-3">
                                                     <p className="text-xs sm:text-sm text-green-800 font-medium flex items-center">
                                                         <span className="mr-1 sm:mr-2">✅</span>
                                                         Cuota {cuotaSeleccionada.numeroCuota} - S/{cuotaSeleccionada.montoTotal?.toFixed(2)}
@@ -816,7 +816,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                             )}
 
                             {/* Información Adicional (Colapsable) */}
-                            <div className="bg-gray-50 rounded-lg overflow-hidden">
+                            <div className="bg-gray-50 rounded-xl overflow-hidden">
                                 <button
                                     type="button"
                                     onClick={() => setMostrarInfoAdicional(!mostrarInfoAdicional)}
@@ -839,7 +839,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                 type="text"
                                                 value={formData.proveedor.nombre}
                                                 onChange={(e) => handleNestedChange('proveedor.nombre', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-sm"
+                                                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 text-sm"
                                                 placeholder="Nombre del proveedor"
                                             />
                                         </div>
@@ -851,7 +851,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                     type="text"
                                                     value={formData.proveedor.ruc}
                                                     onChange={(e) => handleNestedChange('proveedor.ruc', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-sm"
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 text-sm"
                                                     placeholder="RUC"
                                                 />
                                             </div>
@@ -860,7 +860,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                 <select
                                                     value={formData.documento.tipo}
                                                     onChange={(e) => handleNestedChange('documento.tipo', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-sm"
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 text-sm"
                                                 >
                                                     <option value="recibo">Recibo</option>
                                                     <option value="factura">Factura</option>
@@ -876,7 +876,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                     type="text"
                                                     value={formData.documento.numero}
                                                     onChange={(e) => handleNestedChange('documento.numero', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-sm"
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 text-sm"
                                                     placeholder="Número"
                                                 />
                                             </div>
@@ -886,7 +886,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                     type="text"
                                                     value={formData.documento.serie}
                                                     onChange={(e) => handleNestedChange('documento.serie', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-sm"
+                                                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 text-sm"
                                                     placeholder="Serie"
                                                 />
                                             </div>
@@ -901,7 +901,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                 <textarea
                                     value={formData.observaciones}
                                     onChange={(e) => handleInputChange('observaciones', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 resize-none text-sm"
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 resize-none text-sm"
                                     rows="2"
                                     placeholder="Observaciones adicionales (opcional)"
                                 />
@@ -920,7 +920,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                         {loadingArqueo ? (
                                             <span className="text-xs text-gray-500">...</span>
                                         ) : (
-                                            <div className="bg-red-600 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-bold shadow">
+                                            <div className="bg-red-600 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs sm:text-sm font-bold shadow">
                                                 S/ {totalDesglose.toFixed(2)}
                                             </div>
                                         )}
@@ -928,15 +928,15 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
 
                                     {/* Resumen de caja - responsive */}
                                     <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-3 sm:mb-4 text-center">
-                                        <div className="bg-blue-100 rounded-lg p-1.5 sm:p-2">
+                                        <div className="bg-blue-100 rounded-xl p-1.5 sm:p-2">
                                             <span className="text-[10px] sm:text-xs text-blue-600 font-medium">Disp.</span>
                                             <p className="text-xs sm:text-sm font-bold text-blue-800">S/{totalDisponibleCaja.toFixed(0)}</p>
                                         </div>
-                                        <div className="bg-red-100 rounded-lg p-1.5 sm:p-2">
+                                        <div className="bg-red-100 rounded-xl p-1.5 sm:p-2">
                                             <span className="text-[10px] sm:text-xs text-red-600 font-medium">Ret.</span>
                                             <p className="text-xs sm:text-sm font-bold text-red-800">S/{totalDesglose.toFixed(0)}</p>
                                         </div>
-                                        <div className="bg-green-100 rounded-lg p-1.5 sm:p-2">
+                                        <div className="bg-green-100 rounded-xl p-1.5 sm:p-2">
                                             <span className="text-[10px] sm:text-xs text-green-600 font-medium">Qued.</span>
                                             <p className="text-xs sm:text-sm font-bold text-green-800">S/{(totalDisponibleCaja - totalDesglose).toFixed(0)}</p>
                                         </div>
@@ -959,7 +959,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                 const sinStock = disponible === 0;
                                                 
                                                 return (
-                                                    <div key={billete.key} className={`flex items-center justify-between bg-white p-2 rounded-lg shadow-sm ${sinStock ? 'opacity-50' : ''}`}>
+                                                    <div key={billete.key} className={`flex items-center justify-between bg-white p-2 rounded-xl shadow-sm ${sinStock ? 'opacity-50' : ''}`}>
                                                         <div className="flex items-center gap-2">
                                                             <span className={`${billete.color} text-white px-2 py-0.5 rounded text-xs font-bold min-w-[50px] text-center`}>
                                                                 {billete.label}
@@ -1020,7 +1020,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                                 const sinStock = disponible === 0;
                                                 
                                                 return (
-                                                    <div key={moneda.key} className={`flex items-center justify-between bg-white p-1.5 rounded-lg shadow-sm ${sinStock ? 'opacity-50' : ''}`}>
+                                                    <div key={moneda.key} className={`flex items-center justify-between bg-white p-1.5 rounded-xl shadow-sm ${sinStock ? 'opacity-50' : ''}`}>
                                                         <div className="flex items-center gap-2">
                                                             <span className={`${moneda.color} text-white px-2 py-0.5 rounded text-xs font-bold min-w-[50px] text-center`}>
                                                                 {moneda.label}
@@ -1069,14 +1069,14 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                                         <button
                                             type="button"
                                             onClick={limpiarDesglose}
-                                            className="flex-1 px-3 py-2 bg-gray-500 text-white rounded-lg text-sm font-medium hover:bg-gray-600 transition-colors"
+                                            className="flex-1 px-3 py-2 text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl text-sm font-medium transition-colors"
                                         >
                                             🗑️ Limpiar
                                         </button>
                                         <button
                                             type="button"
                                             onClick={autoCompletarDesglose}
-                                            className="flex-1 px-3 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
+                                            className="flex-1 px-3 py-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl text-sm font-medium transition-colors"
                                         >
                                             🎯 Auto
                                         </button>
@@ -1084,7 +1084,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
 
                                     {/* Alerta de diferencia */}
                                     {formData.monto && parseFloat(formData.monto) > 0 && totalDesglose > 0 && Math.abs(parseFloat(formData.monto) - totalDesglose) > 0.01 && (
-                                        <div className="mt-3 p-2 bg-amber-100 border border-amber-300 rounded-lg">
+                                        <div className="mt-3 p-2 bg-amber-100 border border-amber-300 rounded-xl">
                                             <p className="text-xs text-amber-800 flex items-center">
                                                 <span className="mr-1">⚠️</span>
                                                 Diferencia: S/ {Math.abs(parseFloat(formData.monto) - totalDesglose).toFixed(2)}
@@ -1094,7 +1094,7 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
 
                                     {/* Mensaje cuando coincide */}
                                     {formData.monto && parseFloat(formData.monto) > 0 && totalDesglose > 0 && Math.abs(parseFloat(formData.monto) - totalDesglose) <= 0.01 && (
-                                        <div className="mt-3 p-2 bg-green-100 border border-green-300 rounded-lg">
+                                        <div className="mt-3 p-2 bg-green-100 border border-green-300 rounded-xl">
                                             <p className="text-xs text-green-800 flex items-center">
                                                 <span className="mr-1">✅</span>
                                                 Desglose correcto
@@ -1108,11 +1108,11 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                 </form>
 
                 {/* Footer con botones - responsive */}
-                <div className="px-3 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-2 sm:gap-3">
+                <div className="bg-gray-50/50 border-t border-gray-100 px-5 py-3 rounded-b-2xl flex justify-end gap-2 sm:gap-3">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-3 sm:px-5 py-2 sm:py-2.5 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center text-sm sm:text-base"
+                        className="px-3 sm:px-5 py-2 sm:py-2.5 border border-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-100 transition-colors flex items-center text-sm sm:text-base"
                         disabled={loading}
                     >
                         <X className="w-4 h-4 sm:mr-1" />
@@ -1120,12 +1120,12 @@ const ModalEgresoFinanzas = ({ isOpen, onClose, onSuccess }) => {
                     </button>
                     <button
                         onClick={handleSubmit}
-                        className="px-3 sm:px-5 py-2 sm:py-2.5 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center text-sm sm:text-base"
+                        className="px-3 sm:px-5 py-2 sm:py-2.5 text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 rounded-xl font-semibold transition-colors disabled:opacity-50 flex items-center text-sm sm:text-base"
                         disabled={loading}
                     >
                         {loading ? (
                             <>
-                                <svg className="animate-spin h-4 w-4 sm:mr-2 text-white" fill="none" viewBox="0 0 24 24">
+                                <svg className="animate-spin h-4 w-4 sm:mr-2 text-red-700" fill="none" viewBox="0 0 24 24">
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>

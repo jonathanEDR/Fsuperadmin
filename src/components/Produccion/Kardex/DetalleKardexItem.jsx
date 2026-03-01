@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Loader2, ChevronLeft, RefreshCw, Package, Search, X, BookOpen, Inbox, Leaf, FileText, AlertTriangle, Clock, ChevronDown, ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { kardexService } from '../../../services/kardexService';
 
 /**
@@ -76,24 +77,24 @@ const DetalleKardexItem = ({ itemId, tipoItem, nombreItem, onVolver }) => {
 
   const formatearConcepto = (concepto) => {
     const conceptos = {
-      'compra': { label: 'Compra', color: 'text-green-700 bg-green-50', icon: '🛒' },
-      'produccion': { label: 'Producción', color: 'text-blue-700 bg-blue-50', icon: '🏭' },
-      'devolucion_produccion': { label: 'Devolución', color: 'text-orange-700 bg-orange-50', icon: '↩️' },
-      'ajuste_positivo': { label: 'Ajuste (+)', color: 'text-emerald-700 bg-emerald-50', icon: '➕' },
-      'inventario_inicial': { label: 'Inventario Inicial', color: 'text-indigo-700 bg-indigo-50', icon: '📋' },
-      'consumo_produccion': { label: 'Consumo Producción', color: 'text-red-700 bg-red-50', icon: '🔥' },
-      'consumo_receta': { label: 'Consumo Receta', color: 'text-purple-700 bg-purple-50', icon: '📝' },
-      'ajuste_negativo': { label: 'Ajuste (-)', color: 'text-red-700 bg-red-50', icon: '➖' },
-      'merma': { label: 'Merma', color: 'text-gray-700 bg-gray-100', icon: '📉' },
-      'transferencia_salida': { label: 'Transferencia', color: 'text-amber-700 bg-amber-50', icon: '🚚' }
+      'compra': { label: 'Compra', color: 'text-green-700 bg-green-50', icon: <Package size={14} /> },
+      'produccion': { label: 'Producción', color: 'text-blue-700 bg-blue-50', icon: <Leaf size={14} /> },
+      'devolucion_produccion': { label: 'Devolución', color: 'text-orange-700 bg-orange-50', icon: <RefreshCw size={14} /> },
+      'ajuste_positivo': { label: 'Ajuste (+)', color: 'text-emerald-700 bg-emerald-50', icon: <ChevronRightIcon size={14} /> },
+      'inventario_inicial': { label: 'Inventario Inicial', color: 'text-indigo-700 bg-indigo-50', icon: <FileText size={14} /> },
+      'consumo_produccion': { label: 'Consumo Producción', color: 'text-red-700 bg-red-50', icon: <AlertTriangle size={14} /> },
+      'consumo_receta': { label: 'Consumo Receta', color: 'text-purple-700 bg-purple-50', icon: <BookOpen size={14} /> },
+      'ajuste_negativo': { label: 'Ajuste (-)', color: 'text-red-700 bg-red-50', icon: <ChevronLeft size={14} /> },
+      'merma': { label: 'Merma', color: 'text-gray-700 bg-gray-100', icon: <AlertTriangle size={14} /> },
+      'transferencia_salida': { label: 'Transferencia', color: 'text-amber-700 bg-amber-50', icon: <Package size={14} /> }
     };
-    return conceptos[concepto] || { label: concepto, color: 'text-gray-700 bg-gray-50', icon: '📄' };
+    return conceptos[concepto] || { label: concepto, color: 'text-gray-700 bg-gray-50', icon: <FileText size={14} /> };
   };
 
   const tipoIcono = {
-    'Ingrediente': '🥬',
-    'Material': '📦',
-    'RecetaProducto': '📋'
+    'Ingrediente': <Leaf size={20} className="text-green-600" />,
+    'Material': <Package size={20} className="text-yellow-600" />,
+    'RecetaProducto': <FileText size={20} className="text-purple-600" />
   };
 
   return (
@@ -103,16 +104,14 @@ const DetalleKardexItem = ({ itemId, tipoItem, nombreItem, onVolver }) => {
         <div className="flex items-center gap-3">
           <button
             onClick={onVolver}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
+            className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-500"
             title="Volver al listado"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+            <ChevronLeft size={20} />
           </button>
           <div>
             <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-              {tipoIcono[tipoItem] || '📄'} {tarjeta?.item?.nombre || nombreItem}
+              {tipoIcono[tipoItem] || <FileText size={20} className="text-gray-500" />} {tarjeta?.item?.nombre || nombreItem}
             </h2>
             <p className="text-sm text-gray-500">
               Tarjeta Kardex · {tipoItem} · {tarjeta?.configuracion?.metodoValuacion || 'PEPS'}
@@ -122,9 +121,9 @@ const DetalleKardexItem = ({ itemId, tipoItem, nombreItem, onVolver }) => {
         <button
           onClick={() => cargarTarjeta(pagina)}
           disabled={loading}
-          className="px-3 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+          className="px-3 py-2 text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5"
         >
-          🔄 Actualizar
+          <RefreshCw size={14} /> Actualizar
         </button>
       </div>
 
@@ -168,14 +167,12 @@ const DetalleKardexItem = ({ itemId, tipoItem, nombreItem, onVolver }) => {
             className="w-full px-4 py-3 flex items-center justify-between bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 transition-colors"
           >
             <span className="font-medium text-amber-800 text-sm">
-              📦 Lotes Activos ({tarjeta.resumenActual.lotes.length})
+              <Package size={16} className="text-amber-600" /> Lotes Activos ({tarjeta.resumenActual.lotes.length})
             </span>
-            <svg 
-              className={`w-4 h-4 text-amber-500 transition-transform ${mostrarLotes ? 'rotate-180' : ''}`} 
-              fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
+            <ChevronDown 
+              size={16}
+              className={`text-amber-500 transition-transform ${mostrarLotes ? 'rotate-180' : ''}`}
+            />
           </button>
           {mostrarLotes && (
             <div className="overflow-x-auto">
@@ -221,7 +218,7 @@ const DetalleKardexItem = ({ itemId, tipoItem, nombreItem, onVolver }) => {
               type="date"
               value={filtros.fechaInicio}
               onChange={(e) => setFiltros(prev => ({ ...prev, fechaInicio: e.target.value }))}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
             />
           </div>
           <div>
@@ -230,21 +227,21 @@ const DetalleKardexItem = ({ itemId, tipoItem, nombreItem, onVolver }) => {
               type="date"
               value={filtros.fechaFin}
               onChange={(e) => setFiltros(prev => ({ ...prev, fechaFin: e.target.value }))}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
             />
           </div>
           <button
             onClick={handleFiltrar}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors"
+            className="px-4 py-2 text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 rounded-xl text-sm font-medium transition-colors flex items-center gap-1.5"
           >
-            🔍 Filtrar
+            <Search size={14} /> Filtrar
           </button>
           {(filtros.fechaInicio || filtros.fechaFin) && (
             <button
               onClick={handleLimpiarFiltros}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+              className="px-4 py-2 text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl text-sm font-medium transition-colors flex items-center gap-1.5"
             >
-              ✕ Limpiar
+              <X size={14} /> Limpiar
             </button>
           )}
         </div>
@@ -253,7 +250,7 @@ const DetalleKardexItem = ({ itemId, tipoItem, nombreItem, onVolver }) => {
       {/* Loading */}
       {loading && (
         <div className="flex items-center justify-center py-10">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
           <span className="ml-3 text-gray-600">Cargando tarjeta Kardex...</span>
         </div>
       )}
@@ -273,7 +270,7 @@ const DetalleKardexItem = ({ itemId, tipoItem, nombreItem, onVolver }) => {
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
           <div className="px-4 py-3 bg-gradient-to-r from-indigo-50 to-blue-50 border-b flex items-center justify-between">
             <h3 className="font-semibold text-indigo-800 text-sm flex items-center gap-2">
-              📒 Tarjeta Kardex Contable
+              <BookOpen size={16} /> Tarjeta Kardex Contable
             </h3>
             <span className="text-xs text-gray-500">
               {tarjeta.paginacion?.total || 0} movimientos
@@ -282,7 +279,7 @@ const DetalleKardexItem = ({ itemId, tipoItem, nombreItem, onVolver }) => {
 
           {tarjeta.movimientos.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
-              <span className="text-3xl block mb-2">📭</span>
+              <Inbox size={32} className="mx-auto mb-2 text-gray-300" />
               <p className="text-sm">No hay movimientos registrados en este período.</p>
             </div>
           ) : (
@@ -400,16 +397,16 @@ const DetalleKardexItem = ({ itemId, tipoItem, nombreItem, onVolver }) => {
                 <button
                   onClick={() => cargarTarjeta(pagina - 1)}
                   disabled={pagina <= 1 || loading}
-                  className="px-3 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-3 py-1 text-gray-700 bg-white border border-gray-200 rounded-xl text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
                 >
-                  ← Anterior
+                  <ChevronLeft size={14} /> Anterior
                 </button>
                 <button
                   onClick={() => cargarTarjeta(pagina + 1)}
                   disabled={pagina >= tarjeta.paginacion.totalPaginas || loading}
-                  className="px-3 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-3 py-1 text-gray-700 bg-white border border-gray-200 rounded-xl text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
                 >
-                  Siguiente →
+                  Siguiente <ChevronRightIcon size={14} />
                 </button>
               </div>
             </div>

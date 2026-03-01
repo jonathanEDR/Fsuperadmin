@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Loader2, X } from 'lucide-react';
 import CampoPrestamos from './CampoPrestamos';
 import DesgloseEfectivoIngreso from './components/DesgloseEfectivoIngreso';
 import { movimientosCajaService } from '../../../services/movimientosCajaService';
@@ -177,19 +178,19 @@ const ModalPrestamo = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
                 {/* Header - responsive */}
-                <div className="bg-blue-600 text-white px-3 sm:px-6 py-3 sm:py-4 rounded-t-lg">
+                <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-5 py-4 rounded-t-2xl">
                     <div className="flex justify-between items-center">
-                        <h2 className="text-base sm:text-xl font-bold">
+                        <h2 className="text-base sm:text-xl font-bold text-gray-800">
                             {prestamoEditando ? 'Editar Préstamo' : 'Nuevo Préstamo'}
                         </h2>
                         <button
                             onClick={onClose}
-                            className="text-white hover:text-gray-200 transition-colors p-1"
+                            className="p-1.5 hover:bg-white/80 rounded-xl text-gray-500 hover:text-gray-700 transition-colors"
                         >
-                            <span className="text-xl sm:text-2xl">&times;</span>
+                            <X size={20} />
                         </button>
                     </div>
                 </div>
@@ -217,13 +218,13 @@ const ModalPrestamo = ({
 
                         {/* Buscador de Trabajadores - responsive */}
                         {esTrabajador && (
-                            <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-blue-50 rounded-xl border border-blue-200">
                                 <h4 className="text-sm sm:text-md font-medium text-blue-800 mb-2 sm:mb-3">
                                     Seleccionar Trabajador
                                 </h4>
 
                                 {trabajadorSeleccionado ? (
-                                    <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 bg-white p-2 sm:p-3 rounded-md border border-blue-300">
+                                    <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 bg-white p-2 sm:p-3 rounded-xl border border-blue-300">
                                         <div className="flex items-center gap-2 sm:gap-3">
                                             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
                                                 {(trabajadorSeleccionado.nombre || '?')[0].toUpperCase()}
@@ -252,18 +253,18 @@ const ModalPrestamo = ({
                                             value={busquedaTrabajador}
                                             onChange={handleBuscarTrabajador}
                                             placeholder="Buscar por nombre, documento o cargo..."
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         />
 
                                         {loadingTrabajadores && (
                                             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                                                <Loader2 className="animate-spin h-5 w-5 text-blue-500" />
                                             </div>
                                         )}
 
                                         {/* Lista de trabajadores */}
                                         {trabajadores.length > 0 && busquedaTrabajador.length >= 2 && (
-                                            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
                                                 {trabajadores.map((trabajador) => (
                                                     <button
                                                         key={trabajador._id}
@@ -503,7 +504,7 @@ const ModalPrestamo = ({
                                 💼 Descuento de Nómina
                             </h3>
 
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 sm:p-4 mb-3 sm:mb-4">
                                 <div className="flex items-start gap-2">
                                     <span className="text-yellow-600">⚠️</span>
                                     <p className="text-xs sm:text-sm text-yellow-800">
@@ -524,7 +525,7 @@ const ModalPrestamo = ({
                                             value: e.target.checked
                                         }
                                     })}
-                                    className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                    className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 border-gray-200 rounded focus:ring-blue-500"
                                 />
                                 <label htmlFor="descuentoNomina.aplicable" className="text-gray-700 font-medium text-sm sm:text-base">
                                     Aplicar descuento de nómina
@@ -591,7 +592,7 @@ const ModalPrestamo = ({
                             💰 Método de Recepción
                         </h3>
 
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
+                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4 mb-3 sm:mb-4">
                             <div className="flex items-start gap-2">
                                 <span className="text-blue-600">ℹ️</span>
                                 <p className="text-xs sm:text-sm text-blue-800">
@@ -649,18 +650,18 @@ const ModalPrestamo = ({
 
                         {/* Selección de cuenta bancaria para transferencia - responsive */}
                         {tipoMovimiento === 'bancario' && (
-                            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 sm:p-4">
+                            <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-3 sm:p-4">
                                 <h4 className="font-medium text-indigo-800 mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
                                     🏦 Cuenta Destino
                                 </h4>
                                 
                                 {loadingCuentas ? (
                                     <div className="flex items-center justify-center py-3 sm:py-4">
-                                        <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-b-2 border-indigo-600"></div>
+                                        <Loader2 className="animate-spin h-5 w-5 sm:h-6 sm:w-6 text-indigo-600" />
                                         <span className="ml-2 text-gray-600 text-sm">Cargando...</span>
                                     </div>
                                 ) : cuentasBancarias.length === 0 ? (
-                                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2 sm:p-3">
+                                    <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-2 sm:p-3">
                                         <p className="text-xs sm:text-sm text-yellow-800">
                                             ⚠️ No hay cuentas bancarias registradas.
                                         </p>
@@ -672,7 +673,7 @@ const ModalPrestamo = ({
                                             onChange={(e) => formulario.manejarCambio({
                                                 target: { name: 'datosBancarios.cuentaBancariaId', value: e.target.value }
                                             })}
-                                            className="w-full px-2 sm:px-3 py-2 sm:py-2.5 border border-indigo-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white font-medium text-xs sm:text-sm"
+                                            className="w-full px-2 sm:px-3 py-2 sm:py-2.5 border border-indigo-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white font-medium text-xs sm:text-sm"
                                         >
                                             <option value="">-- Seleccionar cuenta --</option>
                                             {cuentasBancarias.map(cuenta => (
@@ -707,12 +708,12 @@ const ModalPrestamo = ({
                         {tipoMovimiento === 'efectivo' && formulario.valores?.montoSolicitado > 0 && (
                             <div className="mt-3">
                                 {Math.abs(totalDesglose - parseFloat(formulario.valores.montoSolicitado)) > 0.01 ? (
-                                    <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-3 py-2 rounded-lg text-sm flex items-center gap-2">
+                                    <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-3 py-2 rounded-xl text-sm flex items-center gap-2">
                                         <span>⚠️</span>
                                         El desglose (S/ {totalDesglose.toFixed(2)}) no coincide con el monto del préstamo (S/ {parseFloat(formulario.valores.montoSolicitado).toFixed(2)})
                                     </div>
                                 ) : totalDesglose > 0 && (
-                                    <div className="bg-green-100 border border-green-300 text-green-800 px-3 py-2 rounded-lg text-sm flex items-center gap-2">
+                                    <div className="bg-green-100 border border-green-300 text-green-800 px-3 py-2 rounded-xl text-sm flex items-center gap-2">
                                         <span>✅</span>
                                         Desglose correcto: S/ {totalDesglose.toFixed(2)}
                                     </div>
@@ -751,11 +752,11 @@ const ModalPrestamo = ({
                     </div>
 
                     {/* Footer - responsive */}
-                    <div className="flex justify-end gap-2 sm:gap-4 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t">
+                    <div className="flex justify-end gap-2 sm:gap-4 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-100">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-3 sm:px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-sm sm:text-base"
+                            className="px-3 sm:px-6 py-2 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors text-sm sm:text-base"
                             disabled={loading}
                         >
                             Cancelar
@@ -763,7 +764,7 @@ const ModalPrestamo = ({
                         <button
                             type="submit"
                             disabled={loading}
-                            className="px-3 sm:px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
+                            className="px-3 sm:px-6 py-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
                         >
                             {loading ? 'Guardando...' : (prestamoEditando ? 'Actualizar' : 'Crear')}
                         </button>

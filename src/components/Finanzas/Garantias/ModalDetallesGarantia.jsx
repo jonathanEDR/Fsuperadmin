@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ClipboardList, Home, User, Coins, Shield, FileText, ScrollText, Landmark, MapPin, CheckCircle, XCircle, Lock, Unlock, Scale, Pencil, X } from 'lucide-react';
 import {
     estadosColor,
     tiposColor,
@@ -32,13 +33,13 @@ const ModalDetallesGarantia = ({
 
     // Tabs de navegación
     const tabs = [
-        { id: 'general', label: 'General', icono: '📋' },
-        { id: 'bien', label: 'Bien', icono: '🏠' },
-        { id: 'propietario', label: 'Propietario', icono: '👤' },
-        { id: 'valores', label: 'Valores', icono: '💰' },
-        { id: 'seguros', label: 'Seguros', icono: '🛡️' },
-        { id: 'documentos', label: 'Documentos', icono: '📄' },
-        { id: 'historial', label: 'Historial', icono: '📜' }
+        { id: 'general', label: 'General', icono: <ClipboardList size={16} /> },
+        { id: 'bien', label: 'Bien', icono: <Home size={16} /> },
+        { id: 'propietario', label: 'Propietario', icono: <User size={16} /> },
+        { id: 'valores', label: 'Valores', icono: <Coins size={16} /> },
+        { id: 'seguros', label: 'Seguros', icono: <Shield size={16} /> },
+        { id: 'documentos', label: 'Documentos', icono: <FileText size={16} /> },
+        { id: 'historial', label: 'Historial', icono: <ScrollText size={16} /> }
     ];
 
     // Renderizar campo de información
@@ -53,15 +54,15 @@ const ModalDetallesGarantia = ({
         <div className="fixed inset-0 z-50 overflow-y-auto">
             {/* Overlay */}
             <div
-                className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
             />
 
             {/* Modal */}
             <div className="flex min-h-full items-center justify-center p-4">
-                <div className="relative bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden">
+                <div className="relative bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-5xl max-h-[90vh] overflow-hidden">
                     {/* Header */}
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+                    <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-slate-50 to-gray-50 rounded-t-2xl">
                         <div className="flex items-center gap-4">
                             <div className="text-4xl">{tipoConfig.icono}</div>
                             <div>
@@ -83,11 +84,9 @@ const ModalDetallesGarantia = ({
                         </div>
                         <button
                             onClick={onClose}
-                            className="text-gray-400 hover:text-gray-600 transition-colors"
+                            className="p-1.5 hover:bg-white/80 rounded-xl text-gray-400 hover:text-gray-600 transition-colors"
                         >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
+                            <X size={20} />
                         </button>
                     </div>
 
@@ -102,7 +101,7 @@ const ModalDetallesGarantia = ({
                                         : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                                     }`}
                             >
-                                <span>{tab.icono}</span>
+                                {tab.icono}
                                 <span>{tab.label}</span>
                             </button>
                         ))}
@@ -115,9 +114,9 @@ const ModalDetallesGarantia = ({
                             <div className="space-y-6">
                                 {/* Información del préstamo */}
                                 {garantia.prestamoId && (
-                                    <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                    <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
                                         <h3 className="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
-                                            <span>🏦</span>
+                                            <Landmark size={16} />
                                             <span>Préstamo Asociado</span>
                                         </h3>
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -144,7 +143,7 @@ const ModalDetallesGarantia = ({
                                 {/* Descripción */}
                                 <div>
                                     <h3 className="text-sm font-semibold text-gray-700 mb-2">Descripción</h3>
-                                    <p className="text-sm text-gray-600 bg-gray-50 rounded-lg p-4">
+                                    <p className="text-sm text-gray-600 bg-gray-50 rounded-xl p-4">
                                         {garantia.descripcion || 'Sin descripción'}
                                     </p>
                                 </div>
@@ -161,7 +160,7 @@ const ModalDetallesGarantia = ({
                                 {garantia.observaciones && (
                                     <div>
                                         <h3 className="text-sm font-semibold text-gray-700 mb-2">Observaciones</h3>
-                                        <p className="text-sm text-gray-600 bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                                        <p className="text-sm text-gray-600 bg-yellow-50 rounded-xl p-4 border border-yellow-200">
                                             {garantia.observaciones}
                                         </p>
                                     </div>
@@ -187,7 +186,7 @@ const ModalDetallesGarantia = ({
                                 {garantia.bien?.descripcionDetallada && (
                                     <div>
                                         <h3 className="text-sm font-semibold text-gray-700 mb-2">Descripción Detallada</h3>
-                                        <p className="text-sm text-gray-600 bg-gray-50 rounded-lg p-4">
+                                        <p className="text-sm text-gray-600 bg-gray-50 rounded-xl p-4">
                                             {garantia.bien.descripcionDetallada}
                                         </p>
                                     </div>
@@ -197,10 +196,10 @@ const ModalDetallesGarantia = ({
                                 {garantia.ubicacion && (
                                     <div>
                                         <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                            <span>📍</span>
+                                            <MapPin size={16} />
                                             <span>Ubicación del Bien</span>
                                         </h3>
-                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-gray-50 rounded-lg p-4">
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-gray-50 rounded-xl p-4">
                                             <InfoField label="Dirección" value={garantia.ubicacion.direccion} className="md:col-span-2" />
                                             <InfoField label="Distrito" value={garantia.ubicacion.distrito} />
                                             <InfoField label="Provincia" value={garantia.ubicacion.provincia} />
@@ -216,7 +215,7 @@ const ModalDetallesGarantia = ({
                         {/* Tab: Propietario */}
                         {activeTab === 'propietario' && (
                             <div className="space-y-6">
-                                <div className="bg-gray-50 rounded-lg p-4">
+                                <div className="bg-gray-50 rounded-xl p-4">
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                         <InfoField label="Nombre Completo" value={garantia.propietario?.nombre} className="md:col-span-2" />
                                         <InfoField label="Relación" value={garantia.propietario?.relacion} />
@@ -234,25 +233,25 @@ const ModalDetallesGarantia = ({
                         {activeTab === 'valores' && (
                             <div className="space-y-6">
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                                    <div className="bg-green-50 rounded-xl p-4 border border-green-200">
                                         <dt className="text-xs font-medium text-green-600 uppercase">Valor Comercial</dt>
                                         <dd className="mt-1 text-2xl font-bold text-green-700">
                                             {formatearMoneda(garantia.valores?.comercial, garantia.valores?.moneda)}
                                         </dd>
                                     </div>
-                                    <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                    <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
                                         <dt className="text-xs font-medium text-blue-600 uppercase">Valor Tasación</dt>
                                         <dd className="mt-1 text-2xl font-bold text-blue-700">
                                             {formatearMoneda(garantia.valores?.tasacion, garantia.valores?.moneda)}
                                         </dd>
                                     </div>
-                                    <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
+                                    <div className="bg-orange-50 rounded-xl p-4 border border-orange-200">
                                         <dt className="text-xs font-medium text-orange-600 uppercase">Valor Realización</dt>
                                         <dd className="mt-1 text-2xl font-bold text-orange-700">
                                             {formatearMoneda(garantia.valores?.realizacion, garantia.valores?.moneda)}
                                         </dd>
                                     </div>
-                                    <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                                    <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
                                         <dt className="text-xs font-medium text-purple-600 uppercase">Valor Asegurado</dt>
                                         <dd className="mt-1 text-2xl font-bold text-purple-700">
                                             {formatearMoneda(garantia.valores?.seguro, garantia.valores?.moneda)}
@@ -262,7 +261,7 @@ const ModalDetallesGarantia = ({
 
                                 {/* Información de evaluación */}
                                 {garantia.evaluacion && (
-                                    <div className="bg-gray-50 rounded-lg p-4">
+                                    <div className="bg-gray-50 rounded-xl p-4">
                                         <h3 className="text-sm font-semibold text-gray-700 mb-3">Información de Evaluación</h3>
                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                             <InfoField label="Fecha Evaluación" value={formatearFecha(garantia.evaluacion.fechaEvaluacion)} />
@@ -296,7 +295,7 @@ const ModalDetallesGarantia = ({
                                             return (
                                                 <div
                                                     key={index}
-                                                    className={`rounded-lg p-4 border ${estaVencido
+                                                    className={`rounded-xl p-4 border ${estaVencido
                                                             ? 'bg-red-50 border-red-200'
                                                             : estaPorVencer
                                                                 ? 'bg-yellow-50 border-yellow-200'
@@ -305,7 +304,7 @@ const ModalDetallesGarantia = ({
                                                 >
                                                     <div className="flex items-center justify-between mb-3">
                                                         <h4 className="font-medium text-gray-900 flex items-center gap-2">
-                                                            <span>🛡️</span>
+                                                            <Shield size={16} />
                                                             <span>{seguro.compania}</span>
                                                         </h4>
                                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${estaVencido
@@ -331,14 +330,14 @@ const ModalDetallesGarantia = ({
                                         })}
                                     </div>
                                 ) : (
-                                    <div className="text-center py-12 bg-gray-50 rounded-lg">
-                                        <div className="text-5xl mb-4">🛡️</div>
+                                    <div className="text-center py-12 bg-gray-50 rounded-xl">
+                                        <Shield size={48} className="mb-4 text-gray-400 mx-auto" />
                                         <h3 className="text-lg font-medium text-gray-900 mb-2">Sin seguros registrados</h3>
                                         <p className="text-gray-500 mb-4">Esta garantía no tiene seguros asociados.</p>
                                         {accionesDisponibles.some(a => a.key === 'agregarSeguro') && onAgregarSeguro && (
                                             <button
                                                 onClick={() => onAgregarSeguro(garantia)}
-                                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                                                className="px-4 py-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-colors"
                                             >
                                                 Agregar Seguro
                                             </button>
@@ -354,9 +353,9 @@ const ModalDetallesGarantia = ({
                                 {garantia.documentos && garantia.documentos.length > 0 ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {garantia.documentos.map((doc, index) => (
-                                            <div key={index} className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow">
+                                            <div key={index} className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow">
                                                 <div className="flex items-start gap-3">
-                                                    <div className="text-2xl">📄</div>
+                                                    <FileText size={24} />
                                                     <div className="flex-1">
                                                         <h4 className="font-medium text-gray-900">{doc.nombre || doc.tipo}</h4>
                                                         <p className="text-sm text-gray-500 capitalize">{doc.tipo?.replace('_', ' ')}</p>
@@ -380,8 +379,8 @@ const ModalDetallesGarantia = ({
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="text-center py-12 bg-gray-50 rounded-lg">
-                                        <div className="text-5xl mb-4">📄</div>
+                                    <div className="text-center py-12 bg-gray-50 rounded-xl">
+                                        <FileText size={48} className="mb-4 text-gray-400 mx-auto" />
                                         <h3 className="text-lg font-medium text-gray-900 mb-2">Sin documentos</h3>
                                         <p className="text-gray-500">No hay documentos adjuntos a esta garantía.</p>
                                     </div>
@@ -401,7 +400,7 @@ const ModalDetallesGarantia = ({
                                                 return (
                                                     <div key={index} className="relative pl-10">
                                                         <div className={`absolute left-2 w-4 h-4 rounded-full ${estadoNuevoConfig.color?.split(' ')[0] || 'bg-gray-300'} border-2 border-white`}></div>
-                                                        <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                                        <div className="bg-white rounded-xl p-4 border border-gray-200">
                                                             <div className="flex items-center justify-between mb-2">
                                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${estadoNuevoConfig.color || 'bg-gray-100 text-gray-800'}`}>
                                                                     {estadoNuevoConfig.icono} {estadoNuevoConfig.label || cambio.estadoNuevo}
@@ -428,8 +427,8 @@ const ModalDetallesGarantia = ({
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="text-center py-12 bg-gray-50 rounded-lg">
-                                        <div className="text-5xl mb-4">📜</div>
+                                    <div className="text-center py-12 bg-gray-50 rounded-xl">
+                                        <ScrollText size={48} className="mb-4 text-gray-400 mx-auto" />
                                         <h3 className="text-lg font-medium text-gray-900 mb-2">Sin historial</h3>
                                         <p className="text-gray-500">No hay cambios de estado registrados.</p>
                                     </div>
@@ -439,67 +438,67 @@ const ModalDetallesGarantia = ({
                     </div>
 
                     {/* Footer con acciones */}
-                    <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
+                    <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl">
                         <div className="flex items-center gap-2">
                             {/* Acciones según estado */}
                             {accionesDisponibles.some(a => a.key === 'aprobar') && onAprobar && (
                                 <button
                                     onClick={() => onAprobar(garantia)}
-                                    className="px-3 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors flex items-center gap-1"
+                                    className="px-3 py-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 rounded-xl transition-colors flex items-center gap-1"
                                 >
-                                    <span>✅</span>
+                                    <CheckCircle size={16} />
                                     <span>Aprobar</span>
                                 </button>
                             )}
                             {accionesDisponibles.some(a => a.key === 'rechazar') && onRechazar && (
                                 <button
                                     onClick={() => onRechazar(garantia)}
-                                    className="px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors flex items-center gap-1"
+                                    className="px-3 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 rounded-xl transition-colors flex items-center gap-1"
                                 >
-                                    <span>❌</span>
+                                    <XCircle size={16} />
                                     <span>Rechazar</span>
                                 </button>
                             )}
                             {accionesDisponibles.some(a => a.key === 'activar') && onActivar && (
                                 <button
                                     onClick={() => onActivar(garantia)}
-                                    className="px-3 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors flex items-center gap-1"
+                                    className="px-3 py-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 rounded-xl transition-colors flex items-center gap-1"
                                 >
-                                    <span>🔒</span>
+                                    <Lock size={16} />
                                     <span>Activar</span>
                                 </button>
                             )}
                             {accionesDisponibles.some(a => a.key === 'liberar') && onLiberar && (
                                 <button
                                     onClick={() => onLiberar(garantia)}
-                                    className="px-3 py-2 text-sm font-medium text-white bg-yellow-600 rounded-md hover:bg-yellow-700 transition-colors flex items-center gap-1"
+                                    className="px-3 py-2 text-sm font-medium text-yellow-700 bg-yellow-50 border border-yellow-200 hover:bg-yellow-100 rounded-xl transition-colors flex items-center gap-1"
                                 >
-                                    <span>🔓</span>
+                                    <Unlock size={16} />
                                     <span>Liberar</span>
                                 </button>
                             )}
                             {accionesDisponibles.some(a => a.key === 'ejecutar') && onEjecutar && (
                                 <button
                                     onClick={() => onEjecutar(garantia)}
-                                    className="px-3 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 transition-colors flex items-center gap-1"
+                                    className="px-3 py-2 text-sm font-medium text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100 rounded-xl transition-colors flex items-center gap-1"
                                 >
-                                    <span>⚖️</span>
+                                    <Scale size={16} />
                                     <span>Ejecutar</span>
                                 </button>
                             )}
                             {accionesDisponibles.some(a => a.key === 'editar') && onEditar && (
                                 <button
                                     onClick={() => onEditar(garantia)}
-                                    className="px-3 py-2 text-sm font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200 transition-colors flex items-center gap-1"
+                                    className="px-3 py-2 text-sm font-medium text-blue-700 bg-blue-100 rounded-xl hover:bg-blue-200 transition-colors flex items-center gap-1"
                                 >
-                                    <span>✏️</span>
+                                    <Pencil size={16} />
                                     <span>Editar</span>
                                 </button>
                             )}
                         </div>
                         <button
                             onClick={onClose}
-                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
                         >
                             Cerrar
                         </button>

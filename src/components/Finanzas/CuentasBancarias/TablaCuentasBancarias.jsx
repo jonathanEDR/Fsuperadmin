@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Coins, Banknote, Landmark, BarChart3, ArrowUpDown } from 'lucide-react';
 import { finanzasService } from '../../../services/finanzasService';
 
 /**
@@ -84,7 +85,7 @@ const TablaCuentasBancarias = ({
     );
 
     // Componente para las tarjetas de resumen
-    const TarjetaResumen = ({ titulo, tituloCorto, valor, moneda, icono, color }) => {
+    const TarjetaResumen = ({ titulo, tituloCorto, valor, moneda, icono: Icono, color }) => {
         const colorClasses = {
             green: 'bg-green-50 border-green-200',
             blue: 'bg-blue-50 border-blue-200',
@@ -106,7 +107,7 @@ const TablaCuentasBancarias = ({
             : (valor || 0).toString();
 
         return (
-            <div className={`p-3 sm:p-4 lg:p-6 rounded-lg border ${colorClasses[color] || colorClasses.gray}`}>
+            <div className={`p-3 sm:p-4 lg:p-6 rounded-xl border ${colorClasses[color] || colorClasses.gray}`}>
                 <div className="flex items-center justify-between">
                     <div className="min-w-0 flex-1">
                         <p className="text-[10px] sm:text-xs lg:text-sm text-gray-600 mb-0.5 sm:mb-1 truncate">
@@ -117,8 +118,8 @@ const TablaCuentasBancarias = ({
                             {valorFormateado}
                         </p>
                     </div>
-                    <div className={`text-xl sm:text-2xl lg:text-3xl ${iconColorClasses[color] || iconColorClasses.gray} ml-1 sm:ml-2 flex-shrink-0`}>
-                        {icono}
+                    <div className={`${iconColorClasses[color] || iconColorClasses.gray} ml-1 sm:ml-2 flex-shrink-0`}>
+                        {Icono && <Icono size={20} />}
                     </div>
                 </div>
             </div>
@@ -138,7 +139,7 @@ const TablaCuentasBancarias = ({
                     tituloCorto="Soles"
                     valor={stats.saldoTotalPEN}
                     moneda="PEN"
-                    icono="💰"
+                    icono={Coins}
                     color="green"
                 />
                 
@@ -147,7 +148,7 @@ const TablaCuentasBancarias = ({
                     tituloCorto="Dólares"
                     valor={stats.saldoTotalUSD}
                     moneda="USD"
-                    icono="💵"
+                    icono={Banknote}
                     color="blue"
                 />
                 
@@ -155,7 +156,7 @@ const TablaCuentasBancarias = ({
                     titulo="Cuentas Activas"
                     tituloCorto="Activas"
                     valor={stats.cuentasActivas}
-                    icono="🏦"
+                    icono={Landmark}
                     color="purple"
                 />
                 
@@ -163,7 +164,7 @@ const TablaCuentasBancarias = ({
                     titulo="Total Cuentas"
                     tituloCorto="Total"
                     valor={stats.totalCuentas}
-                    icono="📊"
+                    icono={BarChart3}
                     color="gray"
                 />
             </div>
@@ -176,7 +177,7 @@ const TablaCuentasBancarias = ({
                 {/* Skeleton para tarjetas de resumen */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {[...Array(4)].map((_, i) => (
-                        <div key={i} className="p-4 sm:p-6 bg-white rounded-lg border animate-pulse">
+                        <div key={i} className="p-4 sm:p-6 bg-white rounded-xl border animate-pulse">
                             <div className="flex items-center justify-between">
                                 <div className="flex-1">
                                     <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
@@ -189,7 +190,7 @@ const TablaCuentasBancarias = ({
                 </div>
 
                 {/* Skeleton para tabla */}
-                <div className="bg-white rounded-lg shadow-sm border">
+                <div className="bg-white rounded-xl shadow-sm border">
                     <div className="px-6 py-4 border-b">
                         <div className="h-6 bg-gray-200 rounded w-1/4"></div>
                     </div>
@@ -217,7 +218,7 @@ const TablaCuentasBancarias = ({
         const saldoNum = typeof cuenta.saldoActual === 'number' ? cuenta.saldoActual : parseFloat(cuenta.saldoActual) || 0;
         
         return (
-            <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm">
+            <div className="bg-white border border-gray-200 rounded-xl p-3 sm:p-4 shadow-sm">
                 {/* Header con nombre y estado */}
                 <div className="flex items-start justify-between mb-2">
                     <div className="flex-1 min-w-0">
@@ -291,17 +292,17 @@ const TablaCuentasBancarias = ({
             {renderTarjetasResumen()}
             
             {/* Header de la sección */}
-            <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
                 <div className="px-3 sm:px-6 py-3 sm:py-4 border-b">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">
-                        🏦 Cuentas Bancarias ({cuentasSeguras.length})
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <Landmark size={18} className="inline" /> Cuentas Bancarias ({cuentasSeguras.length})
                     </h3>
                 </div>
 
                 {/* Estado vacío */}
                 {cuentasSeguras.length === 0 ? (
                     <div className="px-4 py-8 sm:py-12 text-center text-gray-500">
-                        <div className="text-3xl sm:text-4xl mb-2">🏦</div>
+                        <div className="text-3xl sm:text-4xl mb-2"><Landmark size={32} /></div>
                         <div className="text-base sm:text-lg font-medium">No hay cuentas bancarias</div>
                         <div className="text-xs sm:text-sm">Crea tu primera cuenta para comenzar</div>
                     </div>
@@ -328,7 +329,7 @@ const TablaCuentasBancarias = ({
                                                     type="checkbox"
                                                     checked={cuentasSeguras.length > 0 && filasSeleccionadas.size === cuentasSeguras.length}
                                                     onChange={manejarSeleccionTodos}
-                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                    className="rounded border-gray-200 text-blue-600 focus:ring-blue-500"
                                                 />
                                             </th>
                                         )}
@@ -342,7 +343,7 @@ const TablaCuentasBancarias = ({
                                                 <span className="text-gray-400">
                                                     {ordenamiento.campo === 'codigo' ? (
                                                         ordenamiento.direccion === 'asc' ? '↑' : '↓'
-                                                    ) : '↕️'}
+                                                    ) : <ArrowUpDown size={14} />}
                                                 </span>
                                             </div>
                                         </th>
@@ -356,7 +357,7 @@ const TablaCuentasBancarias = ({
                                                 <span className="text-gray-400">
                                                     {ordenamiento.campo === 'nombre' ? (
                                                         ordenamiento.direccion === 'asc' ? '↑' : '↓'
-                                                    ) : '↕️'}
+                                                    ) : <ArrowUpDown size={14} />}
                                                 </span>
                                             </div>
                                         </th>
@@ -382,7 +383,7 @@ const TablaCuentasBancarias = ({
                                                 <span className="text-gray-400">
                                                     {ordenamiento.campo === 'saldoActual' ? (
                                                         ordenamiento.direccion === 'asc' ? '↑' : '↓'
-                                                    ) : '↕️'}
+                                                    ) : <ArrowUpDown size={14} />}
                                                 </span>
                                             </div>
                                         </th>
@@ -415,7 +416,7 @@ const TablaCuentasBancarias = ({
                                                         type="checkbox"
                                                         checked={filasSeleccionadas.has(cuenta.id || cuenta._id)}
                                                         onChange={() => manejarSeleccionFila(cuenta.id || cuenta._id)}
-                                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                        className="rounded border-gray-200 text-blue-600 focus:ring-blue-500"
                                                     />
                                                 </td>
                                             )}

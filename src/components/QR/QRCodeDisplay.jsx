@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Download, Printer, XCircle, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react';
+import { Download, Printer, XCircle, RefreshCw, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 const QRCodeDisplay = ({
   qrActivo,
@@ -18,9 +18,9 @@ const QRCodeDisplay = ({
   
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow p-8">
+      <div className="bg-white rounded-xl shadow p-8">
         <div className="flex justify-center items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <Loader2 className="animate-spin h-12 w-12 text-blue-600" />
           <span className="ml-3 text-gray-600">Cargando código QR...</span>
         </div>
       </div>
@@ -29,7 +29,7 @@ const QRCodeDisplay = ({
 
   if (!qrActivo || !qrImageUrl) {
     return (
-      <div className="bg-white rounded-lg shadow p-8">
+      <div className="bg-white rounded-xl shadow p-8">
         <div className="text-center">
           <AlertCircle size={64} className="mx-auto text-gray-400 mb-4" />
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -40,7 +40,7 @@ const QRCodeDisplay = ({
           </p>
           <button
             onClick={onRecargar}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
           >
             <RefreshCw size={16} />
             <span>Recargar</span>
@@ -62,7 +62,7 @@ const QRCodeDisplay = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
+    <div className="bg-white rounded-xl shadow overflow-hidden">
       
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
@@ -90,7 +90,7 @@ const QRCodeDisplay = ({
           
           {/* Columna Izquierda: Imagen QR */}
           <div className="flex flex-col items-center">
-            <div className="bg-white border-4 border-gray-200 rounded-lg p-6 shadow-lg">
+            <div className="bg-white border-4 border-gray-200 rounded-xl p-6 shadow-lg">
               <img 
                 src={qrImageUrl} 
                 alt="Código QR" 
@@ -102,7 +102,7 @@ const QRCodeDisplay = ({
             <div className="flex flex-wrap gap-3 mt-6 w-full max-w-sm">
               <button
                 onClick={onDescargar}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
               >
                 <Download size={20} />
                 <span>Descargar</span>
@@ -110,7 +110,7 @@ const QRCodeDisplay = ({
               
               <button
                 onClick={onImprimir}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors"
               >
                 <Printer size={20} />
                 <span>Imprimir</span>
@@ -118,7 +118,7 @@ const QRCodeDisplay = ({
               
               <button
                 onClick={onDesactivar}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors"
               >
                 <XCircle size={20} />
                 <span>Desactivar</span>
@@ -175,21 +175,21 @@ const QRCodeDisplay = ({
               </h3>
               
               <div className="grid grid-cols-3 gap-4">
-                <div className="bg-blue-50 p-4 rounded-lg text-center">
+                <div className="bg-blue-50 p-4 rounded-xl text-center">
                   <p className="text-2xl font-bold text-blue-600">
                     {qrActivo.totalEscaneos || 0}
                   </p>
                   <p className="text-sm text-gray-600 mt-1">Escaneos</p>
                 </div>
                 
-                <div className="bg-green-50 p-4 rounded-lg text-center">
+                <div className="bg-green-50 p-4 rounded-xl text-center">
                   <p className="text-2xl font-bold text-green-600">
                     {qrActivo.totalEntradas || 0}
                   </p>
                   <p className="text-sm text-gray-600 mt-1">Entradas</p>
                 </div>
                 
-                <div className="bg-orange-50 p-4 rounded-lg text-center">
+                <div className="bg-orange-50 p-4 rounded-xl text-center">
                   <p className="text-2xl font-bold text-orange-600">
                     {qrActivo.totalSalidas || 0}
                   </p>
@@ -229,14 +229,14 @@ const QRCodeDisplay = ({
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Notas
                 </h3>
-                <p className="text-gray-700 text-sm bg-gray-50 p-3 rounded-lg">
+                <p className="text-gray-700 text-sm bg-gray-50 p-3 rounded-xl">
                   {qrActivo.notas}
                 </p>
               </div>
             )}
 
             {/* Instrucciones */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
               <h4 className="font-semibold text-blue-900 mb-2">
                 💡 Instrucciones de Uso
               </h4>

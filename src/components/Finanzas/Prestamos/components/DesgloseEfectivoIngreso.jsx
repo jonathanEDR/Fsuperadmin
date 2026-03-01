@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Minus, Plus, AlertCircle } from 'lucide-react';
+import { Minus, Plus, AlertCircle, Loader2 } from 'lucide-react';
 
 /**
  * Componente de desglose de efectivo para préstamos recibidos (INGRESO)
@@ -100,8 +100,8 @@ const DesgloseEfectivoIngreso = ({
 
     if (loading) {
         return (
-            <div className="bg-gray-50 rounded-lg p-4 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <div className="bg-gray-50 rounded-xl p-4 text-center">
+                <Loader2 className="animate-spin h-8 w-8 text-blue-600 mx-auto" />
                 <p className="text-gray-600 mt-2">Cargando...</p>
             </div>
         );
@@ -114,18 +114,18 @@ const DesgloseEfectivoIngreso = ({
                 <h3 className="font-bold text-gray-800 flex items-center">
                     <span className="mr-2">💵</span> Desglose del Efectivo Recibido
                 </h3>
-                <div className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-bold shadow">
+                <div className="bg-blue-600 text-white px-3 py-1.5 rounded-xl text-sm font-bold shadow">
                     Ingresa: S/ {totalDesglose.toFixed(2)}
                 </div>
             </div>
 
             {/* Resumen */}
             <div className="grid grid-cols-2 gap-2 mb-4 text-center">
-                <div className="bg-indigo-100 rounded-lg p-2">
+                <div className="bg-indigo-100 rounded-xl p-2">
                     <span className="text-xs text-indigo-600 font-medium">Monto Préstamo</span>
                     <p className="text-sm font-bold text-indigo-800">S/ {montoARecibir.toFixed(2)}</p>
                 </div>
-                <div className="bg-blue-100 rounded-lg p-2">
+                <div className="bg-blue-100 rounded-xl p-2">
                     <span className="text-xs text-blue-600 font-medium">Efectivo a Ingresar</span>
                     <p className="text-sm font-bold text-blue-800">S/ {totalDesglose.toFixed(2)}</p>
                 </div>
@@ -133,7 +133,7 @@ const DesgloseEfectivoIngreso = ({
 
             {/* Alerta de diferencia */}
             {hayDiferencia && montoARecibir > 0 && (
-                <div className={`mb-3 p-2 rounded-lg flex items-center gap-2 ${diferencia > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
+                <div className={`mb-3 p-2 rounded-xl flex items-center gap-2 ${diferencia > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
                     <AlertCircle size={16} />
                     <span className="text-xs font-medium">
                         {diferencia > 0 
@@ -149,7 +149,7 @@ const DesgloseEfectivoIngreso = ({
                 <button
                     type="button"
                     onClick={limpiarDesglose}
-                    className="px-3 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors"
+                    className="px-3 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-300 transition-colors"
                 >
                     🗑️ Limpiar
                 </button>
@@ -168,7 +168,7 @@ const DesgloseEfectivoIngreso = ({
                         const cantidad = desglose?.billetes?.[billete.key] || 0;
                         
                         return (
-                            <div key={billete.key} className="flex items-center justify-between bg-white p-2 rounded-lg shadow-sm">
+                            <div key={billete.key} className="flex items-center justify-between bg-white p-2 rounded-xl shadow-sm">
                                 <div className="flex items-center gap-2">
                                     <span className={`${billete.color} text-white px-2 py-0.5 rounded text-xs font-bold min-w-[50px] text-center`}>
                                         {billete.label}
@@ -188,7 +188,7 @@ const DesgloseEfectivoIngreso = ({
                                         min="0"
                                         value={cantidad}
                                         onChange={(e) => handleInputChange('billetes', billete.key, e)}
-                                        className={`w-16 text-center font-bold text-sm border rounded-lg py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${cantidad > 0 ? 'text-blue-600 bg-blue-50 border-blue-300' : 'text-gray-400 border-gray-200'}`}
+                                        className={`w-16 text-center font-bold text-sm border rounded-xl py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${cantidad > 0 ? 'text-blue-600 bg-blue-50 border-blue-300' : 'text-gray-400 border-gray-200'}`}
                                     />
                                     <button
                                         type="button"
@@ -222,7 +222,7 @@ const DesgloseEfectivoIngreso = ({
                         const cantidad = desglose?.monedas?.[moneda.key] || 0;
                         
                         return (
-                            <div key={moneda.key} className="flex items-center justify-between bg-white p-1.5 rounded-lg shadow-sm">
+                            <div key={moneda.key} className="flex items-center justify-between bg-white p-1.5 rounded-xl shadow-sm">
                                 <div className="flex items-center gap-1">
                                     <span className={`${moneda.color} text-white px-1.5 py-0.5 rounded text-xs font-bold min-w-[55px] text-center`}>
                                         {moneda.label}
@@ -242,7 +242,7 @@ const DesgloseEfectivoIngreso = ({
                                         min="0"
                                         value={cantidad}
                                         onChange={(e) => handleInputChange('monedas', moneda.key, e)}
-                                        className={`w-12 text-center font-bold text-xs border rounded-lg py-0.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${cantidad > 0 ? 'text-blue-600 bg-blue-50 border-blue-300' : 'text-gray-400 border-gray-200'}`}
+                                        className={`w-12 text-center font-bold text-xs border rounded-xl py-0.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${cantidad > 0 ? 'text-blue-600 bg-blue-50 border-blue-300' : 'text-gray-400 border-gray-200'}`}
                                     />
                                     <button
                                         type="button"
@@ -260,7 +260,7 @@ const DesgloseEfectivoIngreso = ({
 
             {/* Confirmación de coincidencia */}
             {!hayDiferencia && totalDesglose > 0 && (
-                <div className="mt-3 p-2 bg-green-100 text-green-800 rounded-lg flex items-center gap-2">
+                <div className="mt-3 p-2 bg-green-100 text-green-800 rounded-xl flex items-center gap-2">
                     <span>✅</span>
                     <span className="text-xs font-medium">
                         El desglose coincide con el monto del préstamo

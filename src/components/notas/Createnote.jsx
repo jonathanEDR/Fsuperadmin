@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
-import { Plus, Loader, Calendar, Users, User } from 'lucide-react';
+import { Plus, Loader2, Calendar, Users, User, AlertCircle } from 'lucide-react';
 import { api } from '../../services';
 import { useRole } from '../../context/RoleContext';
 
@@ -110,7 +110,8 @@ const CreateNote = ({ onNoteCreated, disabled = false }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl relative flex items-center gap-2 text-sm" role="alert">
+          <AlertCircle size={16} className="flex-shrink-0" />
           <span className="block sm:inline">{error}</span>
         </div>
       )}
@@ -120,8 +121,8 @@ const CreateNote = ({ onNoteCreated, disabled = false }) => {
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Title"
-          className="w-full p-2 border rounded"
+          placeholder="Título"
+          className="w-full p-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={disabled || loading}
           required
         />
@@ -131,8 +132,8 @@ const CreateNote = ({ onNoteCreated, disabled = false }) => {
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="Content"
-          className="w-full p-2 border rounded"
+          placeholder="Contenido"
+          className="w-full p-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           rows="4"
           disabled={disabled || loading}
           required
@@ -141,12 +142,12 @@ const CreateNote = ({ onNoteCreated, disabled = false }) => {
 
       <div>
         <div className="flex items-center space-x-2">
-          <Calendar className="text-gray-500" size={20} />
+          <Calendar className="text-gray-500" size={18} />
           <input
             type="datetime-local"
             value={fechadenota}
             onChange={(e) => setFechadenota(e.target.value)}
-            className="w-full p-2 border rounded"
+            className="w-full p-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={disabled || loading}
           />
         </div>
@@ -159,7 +160,7 @@ const CreateNote = ({ onNoteCreated, disabled = false }) => {
             <select
               value={selectedUser}
               onChange={(e) => setSelectedUser(e.target.value)}
-              className="w-full p-2 border rounded"
+              className="w-full p-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={disabled || loading || loadingUsers}
             >
               <option value="">Select User</option>
@@ -174,11 +175,11 @@ const CreateNote = ({ onNoteCreated, disabled = false }) => {
       <button
         type="submit"
         disabled={disabled || loading}
-        className={`w-full bg-blue-500 text-white p-2 rounded flex items-center justify-center space-x-2
-          ${(disabled || loading) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'}`}
+        className={`w-full text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 p-2.5 rounded-xl flex items-center justify-center space-x-2 transition-colors text-sm font-medium
+          ${(disabled || loading) ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         {loading ? (
-          <Loader className="animate-spin" size={20} />
+          <Loader2 className="animate-spin" size={18} />
         ) : (
           <>
             <Plus size={20} />

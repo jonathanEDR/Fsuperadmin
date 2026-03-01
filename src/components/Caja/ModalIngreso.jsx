@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { X, Loader2, ClipboardList, CreditCard, FileText, Lightbulb, Banknote } from 'lucide-react';
 import { useMovimiento } from '../../hooks/useMovimiento';
 import { getLocalDateTimeString } from '../../utils/fechaHoraUtils';
 
@@ -80,25 +81,21 @@ const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50 animate-fadeIn">
-      <div className="bg-white rounded-xl sm:rounded-2xl w-full max-h-[95vh] sm:max-w-2xl lg:max-w-4xl relative overflow-hidden shadow-2xl border border-gray-100 flex flex-col">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50 animate-fadeIn">
+      <div className="bg-white rounded-2xl w-full max-h-[95vh] sm:max-w-2xl lg:max-w-4xl relative overflow-hidden shadow-2xl border border-gray-100 flex flex-col">
         
         {/* Header compacto */}
         <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-3 sm:px-6 py-3 sm:py-4 flex-shrink-0">
           <button
             onClick={handleClose}
-            className="absolute right-2 sm:right-4 top-2 sm:top-4 text-white/80 hover:text-white transition-all duration-200 hover:rotate-90 p-1"
+            className="absolute right-2 sm:right-4 top-2 sm:top-4 text-white/80 hover:text-white transition-all duration-200 hover:rotate-90 p-1.5 hover:bg-white/80 rounded-xl"
           >
-            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X size={20} />
           </button>
 
           <div className="flex items-center gap-2 sm:gap-3 pr-8">
-            <div className="bg-white/20 p-1.5 sm:p-2 rounded-lg">
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-              </svg>
+            <div className="bg-white/20 p-1.5 sm:p-2 rounded-xl">
+              <Banknote size={24} className="text-white" />
             </div>
             <div>
               <h2 className="text-base sm:text-xl lg:text-2xl font-bold text-white">
@@ -114,7 +111,7 @@ const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
         {/* Contenido con scroll */}
         <div className="flex-1 overflow-y-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg mb-3 text-sm">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-xl mb-3 text-sm">
               <strong>Error:</strong> {error}
             </div>
           )}
@@ -124,7 +121,7 @@ const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
             {/* Sección: Información Principal */}
             <div className="bg-gray-50 rounded-xl p-3 sm:p-4 border border-gray-200">
               <h3 className="text-sm sm:text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <span className="bg-green-100 p-1 rounded">📋</span>
+                <ClipboardList size={16} className="text-green-600" />
                 Información del Ingreso
               </h3>
               
@@ -137,7 +134,7 @@ const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
                   <select
                     value={formData.categoria}
                     onChange={(e) => handleInputChange('categoria', e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
                     required
                   >
                     <option value="">Seleccionar categoría</option>
@@ -160,7 +157,7 @@ const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
                       min="0.01"
                       value={formData.monto}
                       onChange={(e) => handleInputChange('monto', e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 bg-white pl-9 pr-3 py-2 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                      className="w-full rounded-xl border border-gray-200 bg-white pl-9 pr-3 py-2 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
                       placeholder="0.00"
                       required
                     />
@@ -176,7 +173,7 @@ const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
                     type="datetime-local"
                     value={formData.fecha}
                     onChange={(e) => handleInputChange('fecha', e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
                     required
                   />
                 </div>
@@ -189,7 +186,7 @@ const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
                   <textarea
                     value={formData.descripcion}
                     onChange={(e) => handleInputChange('descripcion', e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-500/20 resize-none"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-500/20 resize-none"
                     placeholder="Describe el ingreso..."
                     rows={2}
                     required
@@ -201,7 +198,7 @@ const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
             {/* Sección: Método de Pago */}
             <div className="bg-gray-50 rounded-xl p-3 sm:p-4 border border-gray-200">
               <h3 className="text-sm sm:text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <span className="bg-blue-100 p-1 rounded">💳</span>
+                <CreditCard size={16} className="text-blue-600" />
                 Método de Pago
               </h3>
               
@@ -211,7 +208,7 @@ const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
                     key={metodo.value}
                     type="button"
                     onClick={() => handleInputChange('metodoPago', metodo.value)}
-                    className={`relative p-2 sm:p-2.5 rounded-lg border text-xs sm:text-sm font-medium transition-all ${
+                    className={`relative p-2 sm:p-2.5 rounded-xl border text-xs sm:text-sm font-medium transition-all ${
                       formData.metodoPago === metodo.value
                         ? 'border-green-500 bg-green-50 text-green-700 ring-2 ring-green-500/30'
                         : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
@@ -229,7 +226,7 @@ const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
             {/* Sección: Detalles Adicionales */}
             <div className="bg-gray-50 rounded-xl p-3 sm:p-4 border border-gray-200">
               <h3 className="text-sm sm:text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <span className="bg-purple-100 p-1 rounded">📝</span>
+                <FileText size={16} className="text-purple-600" />
                 Detalles Adicionales
               </h3>
               
@@ -242,7 +239,7 @@ const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
                     type="text"
                     value={formData.numeroComprobante}
                     onChange={(e) => handleInputChange('numeroComprobante', e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
                     placeholder="Factura, recibo..."
                   />
                 </div>
@@ -254,7 +251,7 @@ const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
                     type="text"
                     value={formData.observaciones}
                     onChange={(e) => handleInputChange('observaciones', e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
                     placeholder="Notas adicionales..."
                   />
                 </div>
@@ -265,7 +262,7 @@ const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
             {formData.categoria && (
               <div className="bg-green-50 rounded-xl p-3 border border-green-200">
                 <div className="flex items-start gap-2">
-                  <span className="text-green-600 text-lg">💡</span>
+                  <Lightbulb size={18} className="text-green-600" />
                   <div className="text-xs sm:text-sm text-green-700">
                     <strong>{categoriasIngreso.find(cat => cat.value === formData.categoria)?.label}:</strong>
                     {formData.categoria === 'venta_directa' && ' Ingresos por ventas realizadas en el local.'}
@@ -286,7 +283,7 @@ const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
             <button
               type="button"
               onClick={handleClose}
-              className="w-full xs:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors order-2 xs:order-1"
+              className="w-full xs:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors order-2 xs:order-1"
             >
               Cancelar
             </button>
@@ -294,7 +291,7 @@ const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
               type="submit"
               onClick={handleSubmit}
               disabled={loading}
-              className={`w-full xs:w-auto px-5 py-2 text-sm font-semibold text-white rounded-lg transition-all order-1 xs:order-2 ${
+              className={`w-full xs:w-auto px-5 py-2 text-sm font-semibold text-white rounded-xl transition-all order-1 xs:order-2 ${
                 loading 
                   ? 'bg-green-400 cursor-not-allowed' 
                   : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-md hover:shadow-lg'
@@ -302,15 +299,12 @@ const ModalIngreso = ({ isOpen, onClose, onSuccess }) => {
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
+                  <Loader2 className="animate-spin h-4 w-4" />
                   Procesando...
                 </span>
               ) : (
                 <span className="flex items-center justify-center gap-2">
-                  <span>💰</span>
+                  <Banknote size={16} className="inline" />
                   Registrar Ingreso
                 </span>
               )}

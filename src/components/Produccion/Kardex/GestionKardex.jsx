@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Loader2, BarChart3, BookOpen, Settings, Bell, RefreshCw, Lock, DollarSign, Package, FileText, Leaf, ChevronRight, AlertTriangle, CheckCircle, Clock, Search, Inbox, Wrench } from 'lucide-react';
 import { kardexService } from '../../../services/kardexService';
 import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 import AccesosRapidosProduccion from '../AccesosRapidosProduccion';
@@ -93,9 +94,9 @@ const GestionKardex = () => {
       setGuardandoConfig(true);
       await kardexService.actualizarConfiguracion({ metodoValuacion: nuevoMetodo });
       await cargarDatos();
-      alert('✅ Configuración actualizada correctamente');
+      alert('Configuración actualizada correctamente');
     } catch (err) {
-      alert(`❌ Error: ${err.message}`);
+      alert(`Error: ${err.message}`);
     } finally {
       setGuardandoConfig(false);
     }
@@ -106,9 +107,9 @@ const GestionKardex = () => {
       setGuardandoConfig(true);
       await kardexService.inicializarConfiguracion();
       await cargarDatos();
-      alert('✅ Configuración inicializada correctamente');
+      alert('Configuración inicializada correctamente');
     } catch (err) {
-      alert(`❌ Error: ${err.message}`);
+      alert(`Error: ${err.message}`);
     } finally {
       setGuardandoConfig(false);
     }
@@ -117,7 +118,7 @@ const GestionKardex = () => {
   if (!canViewPrices) {
     return (
       <div className="px-4 py-8 text-center">
-        <div className="text-6xl mb-4">🔒</div>
+        <Lock size={48} className="mx-auto text-gray-300 mb-4" />
         <h2 className="text-xl font-bold text-gray-800 mb-2">Acceso Restringido</h2>
         <p className="text-gray-600">Solo super_admin puede acceder al módulo Kardex.</p>
       </div>
@@ -125,10 +126,10 @@ const GestionKardex = () => {
   }
 
   const TABS = [
-    { id: 'resumen', label: 'Resumen', icon: '📊' },
-    { id: 'inventario', label: 'Inventario', icon: '📒' },
-    { id: 'configuracion', label: 'Configuración', icon: '⚙️' },
-    { id: 'alertas', label: `Alertas ${alertas.length > 0 ? `(${alertas.length})` : ''}`, icon: '🔔' }
+    { id: 'resumen', label: 'Resumen', icon: <BarChart3 size={16} /> },
+    { id: 'inventario', label: 'Inventario', icon: <BookOpen size={16} /> },
+    { id: 'configuracion', label: 'Configuración', icon: <Settings size={16} /> },
+    { id: 'alertas', label: `Alertas ${alertas.length > 0 ? `(${alertas.length})` : ''}`, icon: <Bell size={16} /> }
   ];
 
   return (
@@ -139,7 +140,7 @@ const GestionKardex = () => {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 flex items-center gap-2">
-            📈 Kardex de Inventario
+            <BarChart3 size={28} className="text-indigo-500" /> Kardex de Inventario
           </h1>
           <p className="text-sm text-gray-500 mt-1">
             Sistema de valuación PEPS - Control de lotes e inventario
@@ -155,8 +156,8 @@ const GestionKardex = () => {
       </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-          {error}
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-center gap-2">
+          <AlertTriangle size={16} className="flex-shrink-0" /> {error}
           <button onClick={cargarDatos} className="ml-2 underline font-medium">Reintentar</button>
         </div>
       )}
@@ -180,7 +181,7 @@ const GestionKardex = () => {
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
+          <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
           <span className="ml-3 text-gray-600">Cargando Kardex...</span>
         </div>
       ) : (
@@ -198,7 +199,7 @@ const GestionKardex = () => {
                         S/.{(resumen?.valorTotal || 0).toFixed(2)}
                       </p>
                     </div>
-                    <div className="text-3xl opacity-80">💰</div>
+                    <DollarSign size={32} className="opacity-80" />
                   </div>
                 </div>
 
@@ -208,7 +209,7 @@ const GestionKardex = () => {
                       <p className="text-blue-200 text-xs font-medium uppercase tracking-wide">Items con Stock</p>
                       <p className="text-2xl font-bold mt-1">{resumen?.totalItems || 0}</p>
                     </div>
-                    <div className="text-3xl opacity-80">📦</div>
+                    <Package size={32} className="opacity-80" />
                   </div>
                 </div>
 
@@ -218,7 +219,7 @@ const GestionKardex = () => {
                       <p className="text-emerald-200 text-xs font-medium uppercase tracking-wide">Lotes Activos</p>
                       <p className="text-2xl font-bold mt-1">{resumen?.totalLotes || 0}</p>
                     </div>
-                    <div className="text-3xl opacity-80">📋</div>
+                    <FileText size={32} className="opacity-80" />
                   </div>
                 </div>
 
@@ -228,7 +229,7 @@ const GestionKardex = () => {
                       <p className={`${alertas.length > 0 ? 'text-red-200' : 'text-green-200'} text-xs font-medium uppercase tracking-wide`}>Alertas</p>
                       <p className="text-2xl font-bold mt-1">{alertas.length}</p>
                     </div>
-                    <div className="text-3xl opacity-80">{alertas.length > 0 ? '⚠️' : '✅'}</div>
+                    {alertas.length > 0 ? <AlertTriangle size={32} className="opacity-80" /> : <CheckCircle size={32} className="opacity-80" />}
                   </div>
                 </div>
               </div>
@@ -238,23 +239,23 @@ const GestionKardex = () => {
                 <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
                   <div className="px-5 py-4 bg-gradient-to-r from-gray-50 to-white border-b">
                     <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-                      📊 Inventario por Categoría
+                      <BarChart3 size={18} className="text-indigo-500" /> Inventario por Categoría
                     </h3>
                   </div>
                   <div className="divide-y divide-gray-100">
                     {resumen.porTipo.map((tipo, idx) => {
                       const tipoLabel = {
-                        'Ingrediente': { icon: '🥬', label: 'Ingredientes', color: 'text-green-600 bg-green-50' },
-                        'Material': { icon: '📦', label: 'Materiales', color: 'text-yellow-600 bg-yellow-50' },
-                        'RecetaProducto': { icon: '📋', label: 'Recetas/Productos', color: 'text-purple-600 bg-purple-50' }
-                      }[tipo._id || tipo.tipoItem] || { icon: '📄', label: tipo._id || tipo.tipoItem, color: 'text-gray-600 bg-gray-50' };
+                        'Ingrediente': { icon: <Leaf size={20} />, label: 'Ingredientes', color: 'text-green-600 bg-green-50' },
+                        'Material': { icon: <Package size={20} />, label: 'Materiales', color: 'text-yellow-600 bg-yellow-50' },
+                        'RecetaProducto': { icon: <FileText size={20} />, label: 'Recetas/Productos', color: 'text-purple-600 bg-purple-50' }
+                      }[tipo._id || tipo.tipoItem] || { icon: <FileText size={20} />, label: tipo._id || tipo.tipoItem, color: 'text-gray-600 bg-gray-50' };
 
                       const valorTotal = tipo.valorTotal || 0;
                       const porcentaje = resumen.valorTotal > 0 ? (valorTotal / resumen.valorTotal * 100) : 0;
 
                       return (
                         <div key={idx} className="px-5 py-4 flex items-center gap-4 hover:bg-gray-50 transition-colors">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-xl ${tipoLabel.color}`}>
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tipoLabel.color}`}>
                             {tipoLabel.icon}
                           </div>
                           <div className="flex-1 min-w-0">
@@ -283,7 +284,7 @@ const GestionKardex = () => {
 
               {/* Método activo */}
               <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex items-center gap-3">
-                <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-xl">⚙️</div>
+                <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center"><Settings size={20} className="text-indigo-600" /></div>
                 <div>
                   <p className="font-medium text-indigo-800">Método de Valuación Activo</p>
                   <p className="text-sm text-indigo-600">
@@ -318,27 +319,27 @@ const GestionKardex = () => {
                         value={busqueda}
                         onChange={(e) => setBusqueda(e.target.value)}
                         placeholder="Buscar por nombre..."
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                       />
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+                      <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     </div>
                     <div className="flex gap-2">
                       {[
                         { id: 'todos', label: 'Todos' },
-                        { id: 'Ingrediente', label: '🥬 Ingredientes' },
-                        { id: 'Material', label: '📦 Materiales' },
-                        { id: 'RecetaProducto', label: '📋 Recetas' }
+                        { id: 'Ingrediente', label: 'Ingredientes', icon: <Leaf size={14} /> },
+                        { id: 'Material', label: 'Materiales', icon: <Package size={14} /> },
+                        { id: 'RecetaProducto', label: 'Recetas', icon: <FileText size={14} /> }
                       ].map(f => (
                         <button
                           key={f.id}
                           onClick={() => setFiltroTipo(f.id)}
-                          className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+                          className={`px-3 py-2 rounded-xl text-xs font-medium transition-colors whitespace-nowrap flex items-center gap-1.5 ${
                             filtroTipo === f.id
-                              ? 'bg-indigo-600 text-white'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              ? 'text-indigo-700 bg-indigo-50 border border-indigo-200'
+                              : 'text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100'
                           }`}
                         >
-                          {f.label}
+                          {f.icon} {f.label}
                         </button>
                       ))}
                     </div>
@@ -355,23 +356,23 @@ const GestionKardex = () => {
                     if (itemsFiltrados.length === 0) {
                       return (
                         <div className="text-center py-12">
-                          <span className="text-4xl block mb-2">📭</span>
+                          <Inbox size={40} className="mx-auto mb-2 text-gray-300" />
                           <p className="text-gray-500 text-sm">No se encontraron items en el Kardex.</p>
                         </div>
                       );
                     }
 
                     const tipoIconos = {
-                      'Ingrediente': { icon: '🥬', color: 'bg-green-50 border-green-200', badge: 'bg-green-100 text-green-700' },
-                      'Material': { icon: '📦', color: 'bg-yellow-50 border-yellow-200', badge: 'bg-yellow-100 text-yellow-700' },
-                      'RecetaProducto': { icon: '📋', color: 'bg-purple-50 border-purple-200', badge: 'bg-purple-100 text-purple-700' }
+                      'Ingrediente': { icon: <Leaf size={20} />, color: 'bg-green-50 border-green-200', badge: 'bg-green-100 text-green-700' },
+                      'Material': { icon: <Package size={20} />, color: 'bg-yellow-50 border-yellow-200', badge: 'bg-yellow-100 text-yellow-700' },
+                      'RecetaProducto': { icon: <FileText size={20} />, color: 'bg-purple-50 border-purple-200', badge: 'bg-purple-100 text-purple-700' }
                     };
 
                     return (
                       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                         <div className="px-4 py-3 bg-gradient-to-r from-indigo-50 to-blue-50 border-b flex items-center justify-between">
-                          <h3 className="font-semibold text-indigo-800 text-sm">
-                            📒 Items del Kardex ({itemsFiltrados.length})
+                          <h3 className="font-semibold text-indigo-800 text-sm flex items-center gap-1.5">
+                            <BookOpen size={16} /> Items del Kardex ({itemsFiltrados.length})
                           </h3>
                           <span className="text-xs text-gray-500">
                             Click en un item para ver su tarjeta Kardex
@@ -379,14 +380,14 @@ const GestionKardex = () => {
                         </div>
                         <div className="divide-y divide-gray-100">
                           {itemsFiltrados.map((item, idx) => {
-                            const tipoInfo = tipoIconos[item.tipoItem] || { icon: '📄', color: 'bg-gray-50 border-gray-200', badge: 'bg-gray-100 text-gray-600' };
+                            const tipoInfo = tipoIconos[item.tipoItem] || { icon: <FileText size={20} />, color: 'bg-gray-50 border-gray-200', badge: 'bg-gray-100 text-gray-600' };
                             return (
                               <button
                                 key={idx}
                                 onClick={() => setItemSeleccionado(item)}
                                 className="w-full px-4 py-3 flex items-center gap-4 hover:bg-indigo-50 transition-colors text-left group"
                               >
-                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-xl ${tipoInfo.color} border`}>
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tipoInfo.color} border`}>
                                   {tipoInfo.icon}
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -416,9 +417,7 @@ const GestionKardex = () => {
                                     C/U: S/.{(item.costoPromedio || 0).toFixed(2)}
                                   </div>
                                 </div>
-                                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
+                                <ChevronRight size={20} className="text-gray-400 group-hover:text-indigo-500 transition-colors" />
                               </button>
                             );
                           })}
@@ -437,7 +436,7 @@ const GestionKardex = () => {
               <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
                 <div className="px-5 py-4 bg-gradient-to-r from-gray-50 to-white border-b">
                   <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-                    ⚙️ Configuración del Kardex
+                    <Settings size={18} className="text-gray-500" /> Configuración del Kardex
                   </h3>
                 </div>
                 <div className="p-5 space-y-6">
@@ -497,7 +496,7 @@ const GestionKardex = () => {
 
                   {/* Info */}
                   {configuracion && (
-                    <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-2">
+                    <div className="bg-gray-50 rounded-xl p-4 text-sm space-y-2">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Moneda:</span>
                         <span className="font-medium">{configuracion.moneda || 'PEN'}</span>
@@ -527,9 +526,9 @@ const GestionKardex = () => {
                       <button
                         onClick={handleInicializarConfig}
                         disabled={guardandoConfig}
-                        className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-medium disabled:opacity-50"
+                        className="px-4 py-2 text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 rounded-xl text-sm font-medium disabled:opacity-50 flex items-center gap-2"
                       >
-                        {guardandoConfig ? 'Inicializando...' : '🔧 Inicializar Configuración'}
+                        {guardandoConfig ? <><Loader2 size={16} className="animate-spin" /> Inicializando...</> : <><Wrench size={16} /> Inicializar Configuración</>}
                       </button>
                     </div>
                   )}
@@ -543,7 +542,7 @@ const GestionKardex = () => {
             <div className="space-y-4">
               {alertas.length === 0 ? (
                 <div className="text-center py-12">
-                  <div className="text-5xl mb-4">✅</div>
+                  <CheckCircle size={48} className="mx-auto mb-4 text-green-400" />
                   <h3 className="text-lg font-medium text-gray-800">Sin alertas</h3>
                   <p className="text-sm text-gray-500 mt-1">
                     No hay lotes próximos a vencer en los próximos 15 días.
@@ -553,7 +552,7 @@ const GestionKardex = () => {
                 <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
                   <div className="px-5 py-4 bg-gradient-to-r from-red-50 to-orange-50 border-b">
                     <h3 className="font-semibold text-red-800 flex items-center gap-2">
-                      ⚠️ Lotes próximos a vencer ({alertas.length})
+                      <AlertTriangle size={18} className="text-red-500" /> Lotes próximos a vencer ({alertas.length})
                     </h3>
                   </div>
                   <div className="divide-y divide-gray-100">
@@ -569,7 +568,7 @@ const GestionKardex = () => {
                               ? 'bg-red-100 text-red-700' 
                               : 'bg-orange-100 text-orange-700'
                           }`}>
-                            {diasRestantes !== null ? `${diasRestantes}d` : '⏰'}
+                            {diasRestantes !== null ? `${diasRestantes}d` : <Clock size={16} />}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-gray-800 truncate">

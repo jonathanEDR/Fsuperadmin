@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Loader2, MailOpen } from 'lucide-react';
 import useCatalogoGastos from './useCatalogoGastos';
 
 export default function GastoForm({ gasto, onChange, onSubmit, onCancel, isSubmitting }) {
@@ -55,7 +56,7 @@ export default function GastoForm({ gasto, onChange, onSubmit, onCancel, isSubmi
             onChange('descripcion', '');
             onChange('tipoDeGasto', '');
           }}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
           required
         >
           <option value="">Seleccione una categoria</option>
@@ -74,14 +75,14 @@ export default function GastoForm({ gasto, onChange, onSubmit, onCancel, isSubmi
           </label>
           {loadingCatalogo ? (
             <div className="flex items-center gap-2 text-gray-500 py-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+              <Loader2 className="animate-spin h-4 w-4 text-blue-500" />
               Cargando catalogo...
             </div>
           ) : catalogoFiltrado.length > 0 ? (
             <select
               value={gasto.catalogoGastoId || ''}
               onChange={handleCatalogoSelect}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
               required
             >
               <option value="">Seleccione un gasto del catalogo</option>
@@ -93,8 +94,8 @@ export default function GastoForm({ gasto, onChange, onSubmit, onCancel, isSubmi
               ))}
             </select>
           ) : (
-            <div className="bg-amber-50 border border-amber-200 rounded-md p-4 text-center">
-              <div className="text-amber-400 text-3xl mb-2">📭</div>
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+              <MailOpen size={32} className="text-amber-400 mx-auto mb-2" />
               <p className="text-sm text-amber-700 font-medium">
                 No hay items en el catalogo para esta categoria
               </p>
@@ -108,7 +109,7 @@ export default function GastoForm({ gasto, onChange, onSubmit, onCancel, isSubmi
 
       {/* Info del gasto seleccionado del catalogo */}
       {gasto.catalogoGastoId && (
-        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+        <div className="bg-blue-50 p-3 rounded-xl border border-blue-200">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm font-medium text-blue-800">{gasto.descripcion}</span>
             <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
@@ -128,7 +129,7 @@ export default function GastoForm({ gasto, onChange, onSubmit, onCancel, isSubmi
           type="datetime-local"
           value={gasto.fechaGasto}
           onChange={e => onChange('fechaGasto', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
           required
         />
       </div>
@@ -144,7 +145,7 @@ export default function GastoForm({ gasto, onChange, onSubmit, onCancel, isSubmi
           step="0.01"
           value={gasto.costoUnidad}
           onChange={e => onChange('costoUnidad', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
           placeholder="0.00"
           required
         />
@@ -161,7 +162,7 @@ export default function GastoForm({ gasto, onChange, onSubmit, onCancel, isSubmi
           step="0.01"
           value={gasto.cantidad}
           onChange={e => onChange('cantidad', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
           placeholder="1"
           required
         />
@@ -169,7 +170,7 @@ export default function GastoForm({ gasto, onChange, onSubmit, onCancel, isSubmi
 
       {/* Total calculado */}
       {gasto.costoUnidad && gasto.cantidad && (
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200">
           <div className="flex justify-between items-center">
             <span className="text-sm font-medium text-gray-700">Total a registrar:</span>
             <span className="text-2xl font-bold text-green-600">
@@ -187,7 +188,7 @@ export default function GastoForm({ gasto, onChange, onSubmit, onCancel, isSubmi
         <button
           type="submit"
           disabled={isSubmitting || !gasto.catalogoGastoId}
-          className="flex-1 px-6 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex-1 px-6 py-2 text-blue-700 bg-blue-50 border border-blue-200 font-semibold rounded-xl hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isSubmitting ? 'Procesando...' : (gasto._id ? 'Actualizar' : 'Agregar')}
         </button>
@@ -195,7 +196,7 @@ export default function GastoForm({ gasto, onChange, onSubmit, onCancel, isSubmi
           type="button"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="flex-1 px-6 py-2 bg-gray-500 text-white font-semibold rounded-md hover:bg-gray-600 disabled:opacity-50 transition-colors"
+          className="flex-1 px-6 py-2 text-gray-700 bg-white border border-gray-200 font-semibold rounded-xl hover:bg-gray-50 disabled:opacity-50 transition-colors"
         >
           Cancelar
         </button>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Loader2, BarChart3, ChevronDown, FileText, Leaf, Package, Clock, AlertTriangle } from 'lucide-react';
 import { kardexService } from '../../../services/kardexService';
 
 /**
@@ -66,22 +67,31 @@ const ResumenKardex = ({ tipoItem = null, compacto = false }) => {
 
   const formatearTipo = (tipo) => {
     const map = {
-      'Ingrediente': '🥬 Ingredientes',
-      'Material': '📦 Materiales',
-      'RecetaProducto': '📋 Recetas'
+      'Ingrediente': 'Ingredientes',
+      'Material': 'Materiales',
+      'RecetaProducto': 'Recetas'
     };
     return map[tipo] || tipo;
   };
 
+  const tipoIcono = (tipo) => {
+    const icons = {
+      'Ingrediente': <Leaf size={16} className="text-green-600" />,
+      'Material': <Package size={16} className="text-yellow-600" />,
+      'RecetaProducto': <FileText size={16} className="text-purple-600" />
+    };
+    return icons[tipo] || <FileText size={16} className="text-gray-500" />;
+  };
+
   return (
-    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
       {/* Header */}
       <button
         onClick={() => setExpandido(!expandido)}
         className="w-full p-4 bg-gradient-to-r from-emerald-50 to-teal-50 flex items-center justify-between hover:from-emerald-100 hover:to-teal-100 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <span className="text-xl">📈</span>
+          <BarChart3 size={20} className="text-emerald-600" />
           <span className="font-semibold text-emerald-800">Resumen Inventario Kardex</span>
           {alertas.length > 0 && (
             <span className="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full animate-pulse">
@@ -89,12 +99,10 @@ const ResumenKardex = ({ tipoItem = null, compacto = false }) => {
             </span>
           )}
         </div>
-        <svg 
-          className={`w-5 h-5 text-emerald-500 transition-transform ${expandido ? 'rotate-180' : ''}`}
-          fill="none" stroke="currentColor" viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        <ChevronDown 
+          size={20}
+          className={`text-emerald-500 transition-transform ${expandido ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {expandido && (
@@ -102,15 +110,15 @@ const ResumenKardex = ({ tipoItem = null, compacto = false }) => {
           {/* Loading */}
           {loading && (
             <div className="flex items-center justify-center py-6">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-600"></div>
+              <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
               <span className="ml-2 text-sm text-emerald-600">Cargando resumen...</span>
             </div>
           )}
 
           {/* Kardex vacío */}
           {error === 'kardex_vacio' && !loading && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
-              <span className="text-2xl block mb-2">📋</span>
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+              <FileText size={28} className="mx-auto mb-2 text-amber-400" />
               <p className="text-sm text-amber-800">
                 El Kardex no tiene datos aún. Ejecute la migración para inicializar los lotes.
               </p>
@@ -119,7 +127,7 @@ const ResumenKardex = ({ tipoItem = null, compacto = false }) => {
 
           {/* Error */}
           {error && error !== 'kardex_vacio' && !loading && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <div className="bg-red-50 border border-red-200 rounded-xl p-3">
               <p className="text-sm text-red-700">{error}</p>
               <button onClick={cargarResumen} className="text-xs text-red-600 underline mt-1">
                 Reintentar
@@ -132,19 +140,19 @@ const ResumenKardex = ({ tipoItem = null, compacto = false }) => {
             <>
               {/* Tarjetas de resumen */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <div className="bg-emerald-50 p-3 rounded-lg text-center">
+                <div className="bg-emerald-50 p-3 rounded-xl text-center">
                   <div className="text-xs text-gray-500 mb-1">Valor Total Inventario</div>
                   <div className="text-xl font-bold text-emerald-700">
                     S/.{(resumen.valorTotal || 0).toFixed(2)}
                   </div>
                 </div>
-                <div className="bg-blue-50 p-3 rounded-lg text-center">
+                <div className="bg-blue-50 p-3 rounded-xl text-center">
                   <div className="text-xs text-gray-500 mb-1">Items con Stock</div>
                   <div className="text-xl font-bold text-blue-700">
                     {resumen.totalItems || 0}
                   </div>
                 </div>
-                <div className="bg-purple-50 p-3 rounded-lg text-center">
+                <div className="bg-purple-50 p-3 rounded-xl text-center">
                   <div className="text-xs text-gray-500 mb-1">Lotes Activos</div>
                   <div className="text-xl font-bold text-purple-700">
                     {resumen.totalLotes || 0}
@@ -157,8 +165,9 @@ const ResumenKardex = ({ tipoItem = null, compacto = false }) => {
                 <div className="space-y-2">
                   <h5 className="text-sm font-medium text-gray-700">Desglose por tipo</h5>
                   {resumen.porTipo.map((tipo, idx) => (
-                    <div key={idx} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+                    <div key={idx} className="flex items-center justify-between bg-gray-50 rounded-xl p-3">
                       <div className="flex items-center gap-2">
+                        {tipoIcono(tipo._id || tipo.tipoItem)}
                         <span className="text-sm">{formatearTipo(tipo._id || tipo.tipoItem)}</span>
                       </div>
                       <div className="text-right">
@@ -176,9 +185,9 @@ const ResumenKardex = ({ tipoItem = null, compacto = false }) => {
 
               {/* Alertas de vencimiento */}
               {alertas.length > 0 && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                  <h5 className="text-sm font-medium text-red-800 mb-2">
-                    ⏰ Lotes próximos a vencer (7 días)
+                <div className="bg-red-50 border border-red-200 rounded-xl p-3">
+                  <h5 className="text-sm font-medium text-red-800 mb-2 flex items-center gap-1.5">
+                    <Clock size={14} /> Lotes próximos a vencer (7 días)
                   </h5>
                   <div className="space-y-1 max-h-32 overflow-y-auto">
                     {alertas.map((lote, idx) => (

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { Loader2, FileText, Package, BarChart3, RefreshCw, AlertTriangle } from 'lucide-react';
 import api from '../../../services/api';
 import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
@@ -59,7 +60,7 @@ const RecetasStockBarChart = React.memo(() => {
       
       processChartData(recetas);
     } catch (err) {
-      console.error('❌ RecetasStockChart - Error al cargar datos:', err);
+      console.error('RecetasStockChart - Error al cargar datos:', err);
       setError('Error al cargar datos: ' + err.message);
     } finally {
       setLoading(false);
@@ -291,13 +292,13 @@ const RecetasStockBarChart = React.memo(() => {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="text-center">
-          <div className="text-red-500 text-lg mb-2">⚠️ Error</div>
+          <AlertTriangle className="mx-auto h-8 w-8 text-red-500 mb-2" />
           <p className="text-gray-600">{error}</p>
           <button 
             onClick={fetchRecetasData}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="mt-4 px-4 py-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl flex items-center gap-2 mx-auto"
           >
-            🔄 Reintentar
+            <RefreshCw size={16} /> Reintentar
           </button>
         </div>
       </div>
@@ -311,8 +312,8 @@ const RecetasStockBarChart = React.memo(() => {
         <div className="flex items-center gap-3">
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg blur-sm opacity-60"></div>
-            <div className="relative bg-white rounded-lg p-2 border border-gray-200">
-              <span className="text-xl">📝</span>
+            <div className="relative bg-white rounded-xl p-2 border border-gray-200">
+              <FileText className="w-5 h-5 text-blue-600" />
             </div>
           </div>
           <div>
@@ -327,9 +328,9 @@ const RecetasStockBarChart = React.memo(() => {
         <button
           onClick={fetchRecetasData}
           disabled={loading}
-          className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 text-sm font-medium transition-colors disabled:opacity-50"
+          className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-1"
         >
-          {loading ? '⏳' : '🔄'} Actualizar
+          {loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />} Actualizar
         </button>
       </div>
 
@@ -338,20 +339,20 @@ const RecetasStockBarChart = React.memo(() => {
         {/* Toggle vista por fase */}
         <button
           onClick={() => setMostrarPorFase(!mostrarPorFase)}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+          className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${
             mostrarPorFase 
-              ? 'bg-blue-600 text-white' 
+              ? 'text-blue-700 bg-blue-100 border border-blue-200' 
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
-          {mostrarPorFase ? '📊 Por Fase' : '📦 Stock Total'}
+          {mostrarPorFase ? <><BarChart3 size={14} className="inline mr-1" /> Por Fase</> : <><Package size={14} className="inline mr-1" /> Stock Total</>}
         </button>
         
         {/* Selector de límite */}
         <select
           value={limite}
           onChange={(e) => setLimite(Number(e.target.value))}
-          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium border-0 focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium border-0 focus:ring-2 focus:ring-blue-500"
         >
           <option value={10}>Top 10</option>
           <option value={15}>Top 15</option>
@@ -362,19 +363,19 @@ const RecetasStockBarChart = React.memo(() => {
 
       {/* Tarjetas de resumen */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200">
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3 border border-blue-200">
           <div className="text-xs text-blue-600 font-medium">Total Recetas</div>
           <div className="text-xl font-bold text-blue-800">{totales.totalRecetas}</div>
         </div>
-        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-3 border border-green-200">
+        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-3 border border-green-200">
           <div className="text-xs text-green-600 font-medium">Con Stock</div>
           <div className="text-xl font-bold text-green-800">{totales.recetasConStock}</div>
         </div>
-        <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-3 border border-amber-200">
+        <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-3 border border-amber-200">
           <div className="text-xs text-amber-600 font-medium">Sin Stock</div>
           <div className="text-xl font-bold text-amber-800">{totales.recetasSinStock}</div>
         </div>
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-3 border border-purple-200">
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-3 border border-purple-200">
           <div className="text-xs text-purple-600 font-medium">Stock Total</div>
           <div className="text-xl font-bold text-purple-800">{totales.totalStockDisponible}</div>
         </div>
@@ -385,7 +386,7 @@ const RecetasStockBarChart = React.memo(() => {
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="flex flex-col items-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
               <p className="mt-2 text-gray-600">Cargando stock de recetas...</p>
             </div>
           </div>
@@ -394,7 +395,7 @@ const RecetasStockBarChart = React.memo(() => {
         ) : (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <span className="text-4xl mb-2 block">📝</span>
+              <FileText className="mx-auto h-10 w-10 text-gray-400 mb-2" />
               <p className="text-gray-500">No hay recetas con stock registrado</p>
               <p className="text-sm text-gray-400 mt-1">Produce recetas para ver el inventario</p>
             </div>

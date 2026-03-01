@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@clerk/clerk-react';
-import { Search, Filter, ShoppingCart, X, Plus, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Search, Filter, ShoppingCart, ShoppingBag, X, Plus, AlertCircle, ArrowLeft, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ProductCardCatalogo from './ProductCardCatalogo';
 import FiltrosCatalogo from './FiltrosCatalogo';
@@ -346,13 +346,13 @@ const CatalogoVentasPageView = ({ userRole = 'user' }) => {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate(getVentasRoute())}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
                 title="Volver a ventas"
               >
                 <ArrowLeft size={20} className="text-gray-600" />
               </button>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">🍕 Catálogo de Productos</h1>
+                <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2"><ShoppingBag size={20} className="text-blue-600" /> Catálogo de Productos</h1>
                 <p className="text-sm text-gray-600">
                   {productosDisponibles.length} productos disponibles
                 </p>
@@ -362,7 +362,7 @@ const CatalogoVentasPageView = ({ userRole = 'user' }) => {
             {/* Contador del carrito */}
             <button
               onClick={() => setVistaCarrito(!vistaCarrito)}
-              className="relative p-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors shadow-lg"
+              className="relative p-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors shadow-lg"
             >
               <ShoppingCart size={20} />
               {carrito.length > 0 && (
@@ -391,7 +391,7 @@ const CatalogoVentasPageView = ({ userRole = 'user' }) => {
 
         {/* Error message */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
             <p className="text-red-600 flex items-center gap-2">
               <AlertCircle size={16} />
               {error}
@@ -406,7 +406,7 @@ const CatalogoVentasPageView = ({ userRole = 'user' }) => {
             {loading ? (
               <div className="flex items-center justify-center h-64">
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+                  <Loader2 size={48} className="animate-spin text-orange-500 mx-auto mb-4" />
                   <p className="text-gray-600">Cargando productos...</p>
                 </div>
               </div>
@@ -466,8 +466,8 @@ const CatalogoVentasPageView = ({ userRole = 'user' }) => {
 
         {/* Carrito flotante (móvil y tablet) */}
         {vistaCarrito && !isDesktop && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-            <div className="w-full max-w-md max-h-[90vh] overflow-hidden rounded-lg shadow-2xl">
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-md max-h-[90vh] overflow-hidden rounded-xl shadow-2xl">
               <CarritoFlotante
                 carrito={carrito}
                 totalCarrito={totalCarrito}
@@ -489,7 +489,7 @@ const CatalogoVentasPageView = ({ userRole = 'user' }) => {
 
         {/* Footer con resumen del carrito */}
         {carrito.length > 0 && (
-          <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-500 shadow-2xl z-40 border-t-4 border-purple-400">
+          <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-blue-600 to-blue-700 shadow-2xl z-40 border-t border-blue-500">
             <div className="max-w-7xl mx-auto p-3 sm:p-4">
               {/* Layout móvil y desktop */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
@@ -508,14 +508,14 @@ const CatalogoVentasPageView = ({ userRole = 'user' }) => {
                   {!vistaCarrito && (
                     <button
                       onClick={() => setVistaCarrito(true)}
-                      className="bg-white bg-opacity-30 backdrop-blur-sm text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg hover:bg-opacity-40 transition-all border-2 border-white font-bold shadow-md text-sm sm:text-base"
+                      className="bg-white/30 backdrop-blur-sm text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl hover:bg-white/40 transition-all border-2 border-white font-bold shadow-md text-sm sm:text-base"
                     >
                       Ver Carrito
                     </button>
                   )}
                   <button
                     onClick={handleConfirmarVenta}
-                    className="bg-white text-purple-600 px-4 py-2 sm:px-6 sm:py-2.5 rounded-lg hover:bg-purple-600 hover:text-white transition-all font-bold shadow-lg flex items-center justify-center gap-2 border-2 border-white text-sm sm:text-base"
+                    className="bg-white text-blue-600 px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl hover:bg-blue-50 transition-all font-bold shadow-lg flex items-center justify-center gap-2 border-2 border-white text-sm sm:text-base"
                   >
                     <Plus size={16} className="sm:w-5 sm:h-5" />
                     Confirmar Venta

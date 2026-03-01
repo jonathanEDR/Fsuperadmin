@@ -1,4 +1,5 @@
 import React from 'react';
+import { ClipboardList } from 'lucide-react';
 import {
     columnasGarantias,
     accionesGarantias,
@@ -88,7 +89,7 @@ const GarantiasTable = ({
     // Estado de carga
     if (loading) {
         return (
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="bg-white rounded-xl shadow overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
@@ -129,9 +130,9 @@ const GarantiasTable = ({
     // Estado vacío
     if (garantias.length === 0) {
         return (
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="bg-white rounded-xl shadow overflow-hidden">
                 <div className="p-12 text-center">
-                    <div className="text-6xl mb-4">📋</div>
+                    <ClipboardList size={48} className="mb-4 text-gray-400 mx-auto" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">
                         No hay garantías
                     </h3>
@@ -144,7 +145,7 @@ const GarantiasTable = ({
     }
 
     return (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-xl shadow overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">

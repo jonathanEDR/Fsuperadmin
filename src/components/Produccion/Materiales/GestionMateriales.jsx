@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Loader2, RefreshCw, Plus, Pencil, Scale, FileText, Trash2, Package, AlertTriangle } from 'lucide-react';
 import { materialService } from '../../../services/materialService';
 import FormularioMaterialMejorado from './FormularioMaterialMejorado';
 import AjusteMaterial from './AjusteMaterial';
@@ -129,7 +130,7 @@ const GestionMateriales = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+        <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
       </div>
     );
   }
@@ -148,16 +149,16 @@ const GestionMateriales = () => {
         <button
           onClick={() => cargarMateriales()}
           disabled={loading}
-          className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50"
+          className="px-4 py-2 text-sm text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl transition-colors flex items-center space-x-2 disabled:opacity-50"
           title="Actualizar lista de materiales"
         >
-          <span className={loading ? 'animate-spin' : ''}>{loading ? '⏳' : '🔄'}</span>
+          <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
           <span className="hidden sm:inline">Actualizar</span>
         </button>
       </div>
 
       {/* Filtros optimizados para móvil */}
-      <div className="bg-white p-2 md:p-4 rounded-lg shadow-sm border border-gray-200 mb-4 md:mb-6">
+      <div className="bg-white p-2 md:p-4 rounded-2xl shadow-xl border border-gray-100 mb-4 md:mb-6">
         {/* Filtro de búsqueda principal en móvil */}
         <div className="block md:hidden mb-3">
           <input
@@ -165,7 +166,7 @@ const GestionMateriales = () => {
             placeholder="Buscar material..."
             value={filtros.buscar}
             onChange={(e) => handleFiltroChange('buscar', e.target.value)}
-            className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="w-full p-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
           />
         </div>
         
@@ -174,7 +175,7 @@ const GestionMateriales = () => {
           <select
             value={filtros.unidadMedida}
             onChange={(e) => handleFiltroChange('unidadMedida', e.target.value)}
-            className="flex-1 p-2 text-xs border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="flex-1 p-2 text-xs border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
           >
             <option value="">Todas las unidades</option>
             {unidadesMedida.slice(1).map(unidad => (
@@ -185,7 +186,7 @@ const GestionMateriales = () => {
           <select
             value={filtros.activo}
             onChange={(e) => handleFiltroChange('activo', e.target.value === 'true')}
-            className="flex-1 p-2 text-xs border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="flex-1 p-2 text-xs border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
           >
             <option value={true}>Activos</option>
             <option value={false}>Inactivos</option>
@@ -203,7 +204,7 @@ const GestionMateriales = () => {
               placeholder="Nombre del material..."
               value={filtros.buscar}
               onChange={(e) => handleFiltroChange('buscar', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -214,7 +215,7 @@ const GestionMateriales = () => {
             <select
               value={filtros.unidadMedida}
               onChange={(e) => handleFiltroChange('unidadMedida', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Todas las unidades</option>
               {unidadesMedida.slice(1).map(unidad => (
@@ -230,7 +231,7 @@ const GestionMateriales = () => {
             <select
               value={filtros.activo}
               onChange={(e) => handleFiltroChange('activo', e.target.value === 'true')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value={true}>Materiales activos</option>
               <option value={false}>Materiales inactivos</option>
@@ -240,7 +241,7 @@ const GestionMateriales = () => {
           <div className="flex items-end">
             <button
               onClick={cargarMateriales}
-              className="w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+              className="w-full px-4 py-2 text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl transition-colors"
             >
               Actualizar
             </button>
@@ -250,26 +251,26 @@ const GestionMateriales = () => {
 
       {/* Error */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-          {error}
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-2">
+          <AlertTriangle size={16} className="flex-shrink-0" /> {error}
         </div>
       )}
 
       {/* Estadísticas rápidas optimizadas para móvil */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
-        <div className="bg-white p-3 md:p-4 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-gray-100">
           <div className="text-lg md:text-2xl font-bold text-blue-600">
             {materiales.length}
           </div>
           <div className="text-xs md:text-sm text-gray-600">Total Materiales</div>
         </div>
-        <div className="bg-white p-3 md:p-4 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-gray-100">
           <div className="text-lg md:text-2xl font-bold text-green-600">
             {materiales.filter(m => (m.cantidad - (m.consumido || 0)) > m.stockMinimo).length}
           </div>
           <div className="text-xs md:text-sm text-gray-600">Con Stock Suficiente</div>
         </div>
-        <div className="bg-white p-3 md:p-4 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-gray-100">
           <div className="text-lg md:text-2xl font-bold text-yellow-600">
             {materiales.filter(m => {
               const disponible = m.cantidad - (m.consumido || 0);
@@ -278,7 +279,7 @@ const GestionMateriales = () => {
           </div>
           <div className="text-xs md:text-sm text-gray-600">Stock Bajo</div>
         </div>
-        <div className="bg-white p-3 md:p-4 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-gray-100">
           <div className="text-lg md:text-2xl font-bold text-red-600">
             {materiales.filter(m => (m.cantidad - (m.consumido || 0)) <= 0).length}
           </div>
@@ -289,11 +290,9 @@ const GestionMateriales = () => {
         {canManageMateriales && (
           <button
             onClick={handleNuevoMaterial}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+            className="text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 px-4 py-2 rounded-xl flex items-center space-x-2 transition-colors"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
+            <Plus size={18} />
             <span>Nuevo Material</span>
           </button>
         )}
@@ -339,8 +338,8 @@ const GestionMateriales = () => {
                 
                 {/* Referencia al producto */}
                 {material.productoReferencia && (
-                  <div className="bg-blue-50 rounded-lg p-2 mb-3 flex items-center text-xs">
-                    <span className="mr-1">📦</span>
+                  <div className="bg-blue-50 rounded-xl p-2 mb-3 flex items-center text-xs">
+                    <Package size={14} className="mr-1 text-blue-500" />
                     <span className="text-blue-700 truncate">
                       {material.productoReferencia.nombre}
                     </span>
@@ -349,22 +348,22 @@ const GestionMateriales = () => {
                 
                 {/* Stats en grid */}
                 <div className="grid grid-cols-3 gap-2 mb-3">
-                  <div className="bg-blue-50 rounded-lg p-2 text-center">
+                  <div className="bg-blue-50 rounded-xl p-2 text-center">
                     <p className="text-xs text-blue-600 font-medium">Disponible</p>
                     <p className={`text-sm font-bold ${estadoStock.color}`}>{formatearNumero(disponible)}</p>
                   </div>
-                  <div className="bg-orange-50 rounded-lg p-2 text-center">
+                  <div className="bg-orange-50 rounded-xl p-2 text-center">
                     <p className="text-xs text-orange-600 font-medium">Stock Mín.</p>
                     <p className="text-sm font-bold text-orange-800">{formatearNumero(material.stockMinimo)}</p>
                   </div>
                   {/* Solo super_admin ve el precio */}
                   {canViewPrices ? (
-                    <div className="bg-emerald-50 rounded-lg p-2 text-center">
+                    <div className="bg-emerald-50 rounded-xl p-2 text-center">
                       <p className="text-xs text-emerald-600 font-medium">Precio</p>
                       <p className="text-sm font-bold text-emerald-800">S/ {formatearNumero(material.precioUnitario)}</p>
                     </div>
                   ) : (
-                    <div className="bg-gray-50 rounded-lg p-2 text-center">
+                    <div className="bg-gray-50 rounded-xl p-2 text-center">
                       <p className="text-xs text-gray-600 font-medium">Total</p>
                       <p className="text-sm font-bold text-gray-800">{formatearNumero(material.cantidad)}</p>
                     </div>
@@ -372,7 +371,7 @@ const GestionMateriales = () => {
                 </div>
                 
                 {/* Info adicional */}
-                <div className="bg-gray-50 rounded-lg p-2 mb-3">
+                <div className="bg-gray-50 rounded-xl p-2 mb-3">
                   <div className="flex items-center justify-between text-xs mb-1">
                     <span className="text-gray-600">Total en almacén:</span>
                     <span className="font-semibold text-gray-800">{formatearNumero(material.cantidad)}</span>
@@ -392,9 +391,9 @@ const GestionMateriales = () => {
                     {canManageMateriales && (
                       <button
                         onClick={() => handleEditarMaterial(material)}
-                        className="flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors"
+                        className="flex items-center px-3 py-1.5 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl text-xs font-medium transition-colors"
                       >
-                        <span className="mr-1">✏️</span> Editar
+                        <Pencil size={12} className="mr-1" /> Editar
                       </button>
                     )}
                     {/* Admin o superior puede ajustar */}
@@ -404,9 +403,9 @@ const GestionMateriales = () => {
                           setMaterialSeleccionado(material);
                           setMostrarAjuste(true);
                         }}
-                        className="flex items-center px-3 py-1.5 bg-green-50 text-green-600 rounded-lg text-xs font-medium hover:bg-green-100 transition-colors"
+                        className="flex items-center px-3 py-1.5 text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 rounded-xl text-xs font-medium transition-colors"
                       >
-                        <span className="mr-1">⚖️</span> Ajustar
+                        <Scale size={12} className="mr-1" /> Ajustar
                       </button>
                     )}
                   </div>
@@ -416,19 +415,19 @@ const GestionMateriales = () => {
                         setMaterialSeleccionado(material);
                         setMostrarMovimientos(true);
                       }}
-                      className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                      className="p-2 text-purple-600 hover:bg-purple-50 rounded-xl transition-colors"
                       title="Movimientos"
                     >
-                      📋
+                      <FileText size={16} />
                     </button>
                     {/* Solo super_admin puede desactivar */}
                     {material.activo && canManageMateriales && (
                       <button
                         onClick={() => handleDesactivarMaterial(material)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors"
                         title="Desactivar"
                       >
-                        🗑️
+                        <Trash2 size={16} />
                       </button>
                     )}
                   </div>
@@ -440,10 +439,10 @@ const GestionMateriales = () => {
       </div>
 
       {/* ========== VISTA DESKTOP: Tabla ========== */}
-      <div className="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="hidden md:block bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-gradient-to-r from-slate-50 to-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Material

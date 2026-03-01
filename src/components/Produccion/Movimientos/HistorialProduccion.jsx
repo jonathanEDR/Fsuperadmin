@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { movimientoUnificadoService } from '../../../services/movimientoUnificadoService';
 import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
+import { X, Factory, Loader2, BarChart3, Trash2, ChevronDown, Filter, Check, Lightbulb, FileText, ShoppingCart, User, Carrot, ClipboardList, DollarSign } from 'lucide-react';
 
 const HistorialProduccion = ({ producto, isOpen, onClose }) => {
   const { canViewPrices, isSuperAdmin } = useQuickPermissions();
@@ -224,13 +225,15 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-        <div className="bg-white rounded-xl shadow-2xl w-full max-w-[98vw] sm:max-w-7xl max-h-[98vh] sm:max-h-[95vh] flex flex-col overflow-hidden">
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-[98vw] sm:max-w-7xl max-h-[98vh] sm:max-h-[95vh] flex flex-col overflow-hidden">
           
           {/* Header */}
-          <div className="flex items-center justify-between p-3 sm:p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
+          <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 rounded-t-2xl">
             <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
-              <span className="text-2xl sm:text-3xl flex-shrink-0">📊</span>
+              <div className="p-2 bg-blue-50 rounded-xl border border-blue-100 flex-shrink-0">
+                <BarChart3 size={20} className="text-blue-600" />
+              </div>
               <div className="min-w-0">
                 <h3 className="text-base sm:text-xl font-semibold text-gray-900 truncate">
                   Historial de Cantidades (Producción)
@@ -242,25 +245,23 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1.5 sm:p-2 rounded-lg transition-colors flex-shrink-0"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1.5 sm:p-2 rounded-xl transition-colors flex-shrink-0"
             >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X size={20} />
             </button>
           </div>
 
           {/* Estadísticas */}
           <div className="p-3 sm:p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-b">
             <div className={`grid grid-cols-2 ${canViewPrices ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-2 sm:gap-4`}>
-              <div className="bg-white p-2 sm:p-4 rounded-lg shadow-sm text-center">
+              <div className="bg-white p-2 sm:p-4 rounded-xl border border-gray-100 text-center">
                 <div className="text-xs sm:text-sm font-medium text-gray-500">Total Producciones</div>
                 <div className="text-lg sm:text-2xl font-bold text-blue-600">
                   {estadisticas.totalProducciones}
                 </div>
                 <div className="text-xs text-gray-400">registros</div>
               </div>
-              <div className="bg-white p-2 sm:p-4 rounded-lg shadow-sm text-center">
+              <div className="bg-white p-2 sm:p-4 rounded-xl border border-gray-100 text-center">
                 <div className="text-xs sm:text-sm font-medium text-gray-500">Cantidad Total Producida</div>
                 <div className="text-lg sm:text-2xl font-bold text-green-600">
                   {estadisticas.cantidadTotalProducida}
@@ -268,7 +269,7 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                 <div className="text-xs text-gray-400">{producto.unidadMedida || 'unidad'}</div>
               </div>
               {canViewPrices && (
-                <div className="bg-white p-2 sm:p-4 rounded-lg shadow-sm text-center">
+                <div className="bg-white p-2 sm:p-4 rounded-xl border border-gray-100 text-center">
                   <div className="text-xs sm:text-sm font-medium text-gray-500">Costo Total</div>
                   <div className="text-lg sm:text-2xl font-bold text-purple-600">
                     S/.{estadisticas.costoTotalProduccion.toFixed(2)}
@@ -276,7 +277,7 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                   <div className="text-xs text-gray-400">inversión total</div>
                 </div>
               )}
-              <div className="bg-white p-2 sm:p-4 rounded-lg shadow-sm text-center">
+              <div className="bg-white p-2 sm:p-4 rounded-xl border border-gray-100 text-center">
                 <div className="text-xs sm:text-sm font-medium text-gray-500">Promedio Diario</div>
                 <div className="text-lg sm:text-2xl font-bold text-orange-600">
                   {estadisticas.promedioProduccionDiaria.toFixed(1)}
@@ -294,9 +295,7 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
               className="w-full p-3 sm:hidden flex items-center justify-between text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
             >
               <span className="flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
+                <Filter size={16} className="text-gray-500" />
                 Filtros
                 {(filtros.fechaInicio || filtros.fechaFin || filtros.operador || filtros.estado) && (
                   <span className="bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded-full">
@@ -304,14 +303,7 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                   </span>
                 )}
               </span>
-              <svg 
-                className={`w-4 h-4 transition-transform ${filtrosExpandidos ? 'rotate-180' : ''}`} 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              <ChevronDown size={16} className={`transition-transform ${filtrosExpandidos ? 'rotate-180' : ''}`} />
             </button>
             
             {/* Contenido de filtros */}
@@ -328,7 +320,7 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                     type="date"
                     value={filtros.fechaInicio}
                     onChange={(e) => handleFiltroChange('fechaInicio', e.target.value)}
-                    className="w-full p-1.5 sm:p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm"
+                    className="w-full p-1.5 sm:p-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-xs sm:text-sm"
                   />
                 </div>
                 <div>
@@ -339,7 +331,7 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                     type="date"
                     value={filtros.fechaFin}
                     onChange={(e) => handleFiltroChange('fechaFin', e.target.value)}
-                    className="w-full p-1.5 sm:p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm"
+                    className="w-full p-1.5 sm:p-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-xs sm:text-sm"
                   />
                 </div>
                 <div>
@@ -349,10 +341,10 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                   <select
                     value={filtros.estado}
                     onChange={(e) => handleFiltroChange('estado', e.target.value)}
-                    className="w-full p-1.5 sm:p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm"
+                    className="w-full p-1.5 sm:p-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-xs sm:text-sm"
                   >
                     <option value="">Todos</option>
-                    <option value="completada">✅ Completados</option>
+                    <option value="completada">Completados</option>
                   </select>
                 </div>
                 <div>
@@ -364,15 +356,16 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                     value={filtros.operador}
                     onChange={(e) => handleFiltroChange('operador', e.target.value)}
                     placeholder="Filtrar..."
-                    className="w-full p-1.5 sm:p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm"
+                    className="w-full p-1.5 sm:p-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-xs sm:text-sm"
                   />
                 </div>
                 <div className="flex items-end col-span-2 sm:col-span-1">
                   <button
                     onClick={limpiarFiltros}
-                    className="w-full px-3 py-1.5 sm:py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-xs sm:text-sm"
+                    className="w-full px-3 py-1.5 sm:py-2 text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl transition-colors text-xs sm:text-sm flex items-center justify-center gap-1.5"
                   >
-                    🗑️ Limpiar
+                    <Trash2 size={14} />
+                    <span>Limpiar</span>
                   </button>
                 </div>
               </div>
@@ -381,7 +374,7 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
 
           {/* Error */}
           {error && (
-            <div className="mx-3 sm:mx-6 mt-3 sm:mt-4 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-md">
+            <div className="mx-3 sm:mx-6 mt-3 sm:mt-4 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-xl">
               <p className="text-xs sm:text-sm text-red-600">{error}</p>
             </div>
           )}
@@ -390,20 +383,25 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
           <div className="flex-1 overflow-auto">
             {loading ? (
               <div className="flex items-center justify-center py-8 sm:py-12">
-                <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-blue-600"></div>
+                <Loader2 size={24} className="animate-spin text-blue-600" />
                 <span className="ml-2 sm:ml-3 text-sm sm:text-base text-gray-600">Cargando historial...</span>
               </div>
             ) : movimientosFiltrados.length === 0 ? (
               <div className="text-center py-8 sm:py-12 px-4">
-                <div className="text-gray-400 text-4xl sm:text-6xl mb-3 sm:mb-4">🏭</div>
+                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 inline-block mb-3 sm:mb-4">
+                  <Factory size={40} className="text-gray-300" />
+                </div>
                 <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
                   Sin historial de producciones
                 </h3>
                 <p className="text-sm text-gray-500 mb-4">
                   No se encontraron movimientos de producción para {producto.nombre}
                 </p>
-                <div className="text-xs sm:text-sm text-gray-400 bg-gray-50 p-3 sm:p-4 rounded-lg max-w-md mx-auto">
-                  <p>💡 Los movimientos de producción aparecerán aquí cuando:</p>
+                <div className="text-xs sm:text-sm text-gray-400 bg-gray-50/60 rounded-xl border border-gray-100 p-3 sm:p-4 max-w-md mx-auto">
+                  <p className="flex items-center gap-1.5 justify-center font-medium text-gray-500 mb-2">
+                    <Lightbulb size={14} className="text-amber-500" />
+                    Los movimientos de producción aparecerán aquí cuando:
+                  </p>
                   <ul className="list-disc text-left mt-2 space-y-1 ml-4">
                     <li>Uses la función "Incrementar Stock" del producto</li>
                     <li>Registres producciones con consumo de ingredientes</li>
@@ -418,7 +416,7 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                   {movimientosFiltrados.slice(0, itemsVisibles).map((movimiento, index) => (
                     <div 
                       key={movimiento._id || index}
-                      className="bg-gray-50 border border-gray-200 rounded-lg p-3 shadow-sm"
+                      className="bg-gray-50 border border-gray-200 rounded-xl p-3 shadow-sm"
                     >
                       {/* Header: Fecha y badge */}
                       <div className="flex justify-between items-start mb-2">
@@ -430,14 +428,14 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                             ID: {(movimiento._id || '').slice(-6)}
                           </div>
                         </div>
-                        <span className="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full">
-                          🏭 Producción
+                        <span className="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <Factory size={12} /> Producción
                         </span>
                       </div>
 
                       {/* Cantidad y Costo */}
                       <div className={`grid ${canViewPrices ? 'grid-cols-2' : 'grid-cols-1'} gap-2 mb-3`}>
-                        <div className="bg-green-50 p-2 rounded-lg text-center">
+                        <div className="bg-green-50 p-2 rounded-xl text-center">
                           <div className="text-xs text-gray-500">Cantidad</div>
                           <div className="text-lg font-bold text-green-600">
                             +{movimiento.cantidad || 0}
@@ -445,7 +443,7 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                           <div className="text-xs text-gray-400">{producto.unidadMedida || 'und'}</div>
                         </div>
                         {canViewPrices && (
-                          <div className="bg-purple-50 p-2 rounded-lg text-center">
+                          <div className="bg-purple-50 p-2 rounded-xl text-center">
                             <div className="text-xs text-gray-500">Costo Total</div>
                             <div className="text-lg font-bold text-purple-600">
                               S/.{(movimiento.costoTotal || movimiento.costo || 0).toFixed(2)}
@@ -467,8 +465,8 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
 
                       {/* Footer: Usuario */}
                       <div className="pt-2 border-t border-gray-200 flex justify-between items-center">
-                        <span className="text-xs text-gray-500">
-                          👤 {movimiento.operador || movimiento.usuario || 'N/A'}
+                        <span className="text-xs text-gray-500 flex items-center gap-1">
+                          <User size={12} /> {movimiento.operador || movimiento.usuario || 'N/A'}
                         </span>
                         {movimiento.precioVenta && (
                           <span className="text-xs text-green-600 font-medium">
@@ -483,19 +481,17 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                   {itemsVisibles < movimientosFiltrados.length && (
                     <button
                       onClick={() => setItemsVisibles(prev => prev + incrementoPagina)}
-                      className="w-full py-3 bg-blue-50 text-blue-600 rounded-lg font-medium hover:bg-blue-100 transition-colors flex items-center justify-center gap-2 text-sm"
+                      className="w-full py-3 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                      <ChevronDown size={16} />
                       Ver más {incrementoPagina} ({movimientosFiltrados.length - itemsVisibles} restantes)
                     </button>
                   )}
 
                   {/* Indicador cuando se muestran todos */}
                   {itemsVisibles >= movimientosFiltrados.length && movimientosFiltrados.length > limiteInicial && (
-                    <p className="text-center text-xs text-gray-500 py-2">
-                      ✓ Mostrando todos los {movimientosFiltrados.length} movimientos
+                    <p className="text-center text-xs text-gray-500 py-2 flex items-center justify-center gap-1">
+                      <Check size={14} className="text-green-500" /> Mostrando todos los {movimientosFiltrados.length} movimientos
                     </p>
                   )}
                 </div>
@@ -536,8 +532,8 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                               <div className="text-xs text-gray-500">
                                 ID: {(movimiento._id || '').slice(-6)}
                               </div>
-                              <div className="text-xs text-purple-600 mt-1">
-                                🏭 Producción
+                              <div className="text-xs text-purple-600 mt-1 flex items-center gap-1">
+                                <Factory size={12} /> Producción
                               </div>
                             </td>
 
@@ -578,9 +574,9 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                               <div className="text-xs space-y-2 max-w-80">
                                 <div className="space-y-2">
                                   {/* Producto Producido */}
-                                  <div className="bg-green-50 p-2 rounded-lg border border-green-200">
-                                    <div className="text-green-800 font-semibold mb-1">
-                                      🏭 Producto Producido
+                                  <div className="bg-green-50 p-2 rounded-xl border border-green-200">
+                                    <div className="text-green-800 font-semibold mb-1 flex items-center gap-1">
+                                      <Factory size={13} /> Producto Producido
                                     </div>
                                     <div className="text-green-700">
                                       • {producto.nombre} (+{movimiento.cantidad || 0} {producto.unidadMedida || 'unidades'})
@@ -594,9 +590,9 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
 
                                   {/* Mostrar ingredientes consumidos */}
                                   {((movimiento.detalles?.ingredientesConsumidos?.length || movimiento.ingredientesConsumidos?.length || movimiento.ingredientesUtilizados?.length) || 0) > 0 && (
-                                    <div className="bg-orange-50 p-2 rounded-lg border border-orange-200">
-                                      <div className="text-orange-800 font-semibold mb-1">
-                                        🥬 Ingredientes Consumidos ({(movimiento.detalles?.ingredientesConsumidos || movimiento.ingredientesConsumidos || movimiento.ingredientesUtilizados || []).length})
+                                    <div className="bg-orange-50 p-2 rounded-xl border border-orange-200">
+                                      <div className="text-orange-800 font-semibold mb-1 flex items-center gap-1">
+                                        <Carrot size={13} /> Ingredientes Consumidos ({(movimiento.detalles?.ingredientesConsumidos || movimiento.ingredientesConsumidos || movimiento.ingredientesUtilizados || []).length})
                                       </div>
                                       <div className="space-y-1">
                                         {(movimiento.detalles?.ingredientesConsumidos || movimiento.ingredientesConsumidos || movimiento.ingredientesUtilizados || []).map((ing, idx) => {
@@ -634,9 +630,9 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                                   
                                   {/* Mostrar recetas consumidas */}
                                   {((movimiento.detalles?.recetasConsumidas?.length || movimiento.recetasConsumidas?.length || movimiento.recetasUtilizadas?.length) || 0) > 0 && (
-                                    <div className="bg-blue-50 p-2 rounded-lg border border-blue-200">
-                                      <div className="text-blue-800 font-semibold mb-1">
-                                        📋 Recetas Utilizadas ({(movimiento.detalles?.recetasConsumidas || movimiento.recetasConsumidas || movimiento.recetasUtilizadas || []).length})
+                                    <div className="bg-blue-50 p-2 rounded-xl border border-blue-200">
+                                      <div className="text-blue-800 font-semibold mb-1 flex items-center gap-1">
+                                        <ClipboardList size={13} /> Recetas Utilizadas ({(movimiento.detalles?.recetasConsumidas || movimiento.recetasConsumidas || movimiento.recetasUtilizadas || []).length})
                                       </div>
                                       <div className="space-y-1">
                                         {(movimiento.detalles?.recetasConsumidas || movimiento.recetasConsumidas || movimiento.recetasUtilizadas || []).map((rec, idx) => {
@@ -679,7 +675,7 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                                    (!movimiento.detalles?.recetasConsumidas || movimiento.detalles.recetasConsumidas.length === 0) &&
                                    (!movimiento.recetasConsumidas || movimiento.recetasConsumidas.length === 0) &&
                                    (!movimiento.recetasUtilizadas || movimiento.recetasUtilizadas.length === 0) && (
-                                    <div className={`p-2 rounded-lg border ${
+                                    <div className={`p-2 rounded-xl border ${
                                       (movimiento.motivo || '').includes('inventario de ventas')
                                         ? 'bg-blue-50 border-blue-200'
                                         : 'bg-purple-50 border-purple-200'
@@ -690,8 +686,8 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                                           : 'text-purple-700'
                                       }`}>
                                         {(movimiento.motivo || '').includes('inventario de ventas')
-                                          ? '🛒 Entrada desde inventario de ventas'
-                                          : '🏭 Producción sin consumo específico'
+                                          ? <span className="flex items-center gap-1"><ShoppingCart size={13} /> Entrada desde inventario de ventas</span>
+                                          : <span className="flex items-center gap-1"><Factory size={13} /> Producción sin consumo específico</span>
                                         }
                                       </div>
                                       <div className={`text-xs ${
@@ -709,9 +705,9 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
 
                                   {/* Información adicional de costos - Solo para super_admin */}
                                   {canViewPrices && (
-                                    <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
+                                    <div className="bg-gray-50 p-2 rounded-xl border border-gray-200">
                                       <div className="text-gray-700 text-xs">
-                                        💰 <strong>Resumen Económico:</strong>
+                                        <span className="flex items-center gap-1 font-semibold mb-1"><DollarSign size={13} /> Resumen Económico:</span>
                                         <br />• Costo por unidad: S/.{((movimiento.costoTotal || movimiento.costo || 0) / (movimiento.cantidad || 1)).toFixed(2)}
                                         {movimiento.precioVenta && (
                                           <span>
@@ -738,13 +734,13 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                                   </div>
                                 )}
                                 {movimiento.notas && (
-                                  <div className="text-xs text-gray-500 mt-1 truncate" title={movimiento.notas}>
-                                    📝 {movimiento.notas}
+                                  <div className="text-xs text-gray-500 mt-1 truncate flex items-center gap-1" title={movimiento.notas}>
+                                    <FileText size={12} /> {movimiento.notas}
                                   </div>
                                 )}
                                 {/* Información adicional del operador */}
-                                <div className="text-xs text-blue-600 mt-1">
-                                  👤 {movimiento.operador || movimiento.usuario || 'N/A'}
+                                <div className="text-xs text-blue-600 mt-1 flex items-center gap-1">
+                                  <User size={12} /> {movimiento.operador || movimiento.usuario || 'N/A'}
                                 </div>
                                 {/* ID del movimiento */}
                                 <div className="text-xs text-gray-400 mt-1">
@@ -763,19 +759,17 @@ const HistorialProduccion = ({ producto, isOpen, onClose }) => {
                     <div className="flex justify-center py-4 bg-gray-50 border-t border-gray-200">
                       <button
                         onClick={() => setItemsVisibles(prev => prev + incrementoPagina)}
-                        className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium flex items-center gap-2"
+                        className="px-6 py-2 text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 rounded-xl transition-colors font-medium flex items-center gap-2"
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
+                        <ChevronDown size={18} />
                         Ver más {incrementoPagina}
                       </button>
                     </div>
                   )}
                   {movimientosFiltrados.length > limiteInicial && itemsVisibles >= movimientosFiltrados.length && (
                     <div className="text-center py-3 bg-gray-50 border-t border-gray-200">
-                      <span className="text-sm text-gray-600">
-                        ✓ Mostrando todos los movimientos
+                      <span className="text-sm text-gray-600 flex items-center gap-1">
+                        <Check size={14} className="text-green-500" /> Mostrando todos los movimientos
                       </span>
                     </div>
                   )}

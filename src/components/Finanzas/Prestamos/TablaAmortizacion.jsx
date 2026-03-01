@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
 import FinanzasService from '../../../services/finanzasService';
 
 const TablaAmortizacion = ({ prestamo }) => {
@@ -200,7 +201,7 @@ const TablaAmortizacion = ({ prestamo }) => {
     return (
         <div className="space-y-4">
             {/* Resumen de Totales */}
-            <div className="bg-blue-50 p-4 rounded-lg">
+            <div className="bg-blue-50 p-4 rounded-xl">
                 <h4 className="font-semibold text-blue-900 mb-3">📈 Resumen de Totales</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="text-center">
@@ -219,22 +220,22 @@ const TablaAmortizacion = ({ prestamo }) => {
             </div>
 
             {/* Resumen de Estado de Pagos */}
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg border">
+            <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl border">
                 <h4 className="font-semibold text-gray-800 mb-3">📊 Estado de Pagos</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <div className="bg-green-100 p-3 rounded-lg text-center">
+                    <div className="bg-green-100 p-3 rounded-xl text-center">
                         <p className="text-2xl font-bold text-green-700">{totales.cuotasPagadas}</p>
                         <p className="text-xs text-green-600">Cuotas Pagadas</p>
                     </div>
-                    <div className="bg-gray-100 p-3 rounded-lg text-center">
+                    <div className="bg-gray-100 p-3 rounded-xl text-center">
                         <p className="text-2xl font-bold text-gray-700">{totales.cuotasPendientes}</p>
                         <p className="text-xs text-gray-600">Cuotas Pendientes</p>
                     </div>
-                    <div className="bg-red-100 p-3 rounded-lg text-center">
+                    <div className="bg-red-100 p-3 rounded-xl text-center">
                         <p className="text-2xl font-bold text-red-700">{totales.cuotasVencidas}</p>
                         <p className="text-xs text-red-600">Cuotas Vencidas</p>
                     </div>
-                    <div className="bg-blue-100 p-3 rounded-lg text-center">
+                    <div className="bg-blue-100 p-3 rounded-xl text-center">
                         <p className="text-lg font-bold text-blue-700">{formatearMoneda(totales.totalPagado)}</p>
                         <p className="text-xs text-blue-600">Total Pagado</p>
                     </div>
@@ -244,7 +245,7 @@ const TablaAmortizacion = ({ prestamo }) => {
             {/* Loading indicator */}
             {loadingPagos && (
                 <div className="flex justify-center items-center py-4">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-2"></div>
+                    <Loader2 className="animate-spin h-6 w-6 text-blue-500 mr-2" />
                     <span className="text-gray-600 text-sm">Actualizando estado de pagos...</span>
                 </div>
             )}
@@ -350,7 +351,7 @@ const TablaAmortizacion = ({ prestamo }) => {
             </div>
 
             {/* Información adicional */}
-            <div className="bg-green-50 p-4 rounded-lg">
+            <div className="bg-green-50 p-4 rounded-xl">
                 <h4 className="font-medium text-green-900 mb-2">ℹ️ Información Importante</h4>
                 <div className="text-sm text-green-800 space-y-1">
                     <p>• <strong>Sistema de Amortización:</strong> Francés (cuotas fijas)</p>

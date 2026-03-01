@@ -1,4 +1,5 @@
 import React from 'react';
+import { TrendingUp, TrendingDown, Scale } from 'lucide-react';
 
 const EstadisticasRapidas = ({ resumen, fechaInicio, fechaFin, formatearMonto }) => {
   if (!resumen) return null;
@@ -27,7 +28,7 @@ const EstadisticasRapidas = ({ resumen, fechaInicio, fechaFin, formatearMonto })
       labelCompleto: `Ingresos (${formatearRangoFechas()})`,
       valor: resumen.totalIngresos,
       color: 'green',
-      icono: '📈',
+      icono: TrendingUp,
       tipo: 'ingreso'
     },
     {
@@ -35,7 +36,7 @@ const EstadisticasRapidas = ({ resumen, fechaInicio, fechaFin, formatearMonto })
       labelCompleto: `Egresos (${formatearRangoFechas()})`,
       valor: resumen.totalEgresos,
       color: 'red',
-      icono: '📉',
+      icono: TrendingDown,
       tipo: 'egreso'
     },
     {
@@ -43,7 +44,7 @@ const EstadisticasRapidas = ({ resumen, fechaInicio, fechaFin, formatearMonto })
       labelCompleto: 'Flujo Neto',
       valor: resumen.flujoNeto,
       color: resumen.flujoNeto >= 0 ? 'green' : 'red',
-      icono: '⚖️',
+      icono: Scale,
       tipo: 'flujo'
     }
   ];
@@ -81,14 +82,12 @@ const EstadisticasRapidas = ({ resumen, fechaInicio, fechaFin, formatearMonto })
   return (
     <div className="grid grid-cols-3 gap-1 sm:gap-2 lg:gap-4">
       {estadisticas.map((stat, index) => (
-        <div key={index} className={`bg-white p-1.5 sm:p-2 lg:p-4 rounded-lg sm:rounded-xl shadow-md sm:shadow-lg border-l-2 sm:border-l-4 ${getColorClass(stat.color, 'border')}`}>
+        <div key={index} className={`bg-white p-1.5 sm:p-2 lg:p-4 rounded-xl shadow-sm border-l-2 sm:border-l-4 ${getColorClass(stat.color, 'border')}`}>
           {/* Layout móvil: vertical compacto */}
           <div className="flex flex-col lg:hidden">
             <div className="text-center">
               <div className={`w-6 h-6 sm:w-8 sm:h-8 ${getColorClass(stat.color, 'bg')} rounded-full flex items-center justify-center mx-auto mb-1`}>
-                <span className={`${getColorClass(stat.color, 'text')} text-xs sm:text-sm`}>
-                  {stat.icono}
-                </span>
+                <stat.icono size={14} className={getColorClass(stat.color, 'text')} />
               </div>
               <p className="text-[10px] sm:text-xs font-medium text-gray-600 mb-0.5 truncate" title={stat.labelCompleto}>
                 {stat.label}
@@ -117,9 +116,7 @@ const EstadisticasRapidas = ({ resumen, fechaInicio, fechaFin, formatearMonto })
               </p>
             </div>
             <div className={`w-10 h-10 ${getColorClass(stat.color, 'bg')} rounded-full flex items-center justify-center ml-3`}>
-              <span className={`${getColorClass(stat.color, 'text')} text-lg`}>
-                {stat.icono}
-              </span>
+              <stat.icono size={18} className={getColorClass(stat.color, 'text')} />
             </div>
           </div>
         </div>

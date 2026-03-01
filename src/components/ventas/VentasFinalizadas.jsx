@@ -214,7 +214,7 @@ function VentasFinalizadas({ userRole }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-purple-100 rounded-lg">
+          <div className="p-3 bg-purple-100 rounded-xl">
             <ShoppingBag className="text-purple-600" size={24} />
           </div>
           <div>
@@ -226,7 +226,7 @@ function VentasFinalizadas({ userRole }) {
         </div>
       </div>
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+      <div className="bg-white shadow-md rounded-xl overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -261,7 +261,7 @@ function VentasFinalizadas({ userRole }) {
                       {prod.productoId?.nombre || 'Producto no disponible'} ({prod.cantidad})
                     </div>
                   ))}
-                </td><td className="px-6 py-4 text-sm text-gray-900"><div className="flex flex-col"><span className="font-medium">{venta.user_info?.nombre_negocio || 'No especificado'}</span><span className="text-xs text-gray-500">{venta.user_info?.email || ''}</span></div></td><td className="px-6 py-4 text-sm text-gray-900">S/ {venta.montoTotal.toFixed(2)}</td><td className="px-6 py-4"><span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(venta.completionStatus)}`}>{getStatusIcon(venta.completionStatus)}<span className="ml-1">{venta.completionStatus === 'approved' ? 'Aprobada' :venta.completionStatus === 'rejected' ? 'Rechazada' : 'Pendiente'}</span></span></td><td className="px-6 py-4 text-sm text-gray-900">{venta.completionDate ? new Date(venta.completionDate).toLocaleDateString() : '-'}</td>{['super_admin', 'admin'].includes(userRole) && (<td className="px-6 py-4 text-sm font-medium">{venta.completionStatus === 'pending' && canApproveReject(venta) && (<div className="flex space-x-2"><button onClick={() => handleApproveReject(venta._id, 'approved')} disabled={actionLoading === venta._id} className={`px-3 py-1 text-sm rounded-md ${actionLoading === venta._id? 'bg-gray-100 text-gray-500':'bg-green-100 text-green-700 hover:bg-green-200'}`}>{actionLoading === venta._id ? 'Procesando...' : 'Aprobar'}</button><button onClick={() => handleApproveReject(venta._id, 'rejected')} disabled={actionLoading === venta._id} className={`px-3 py-1 text-sm rounded-md ${actionLoading === venta._id? 'bg-gray-100 text-gray-500':'bg-red-100 text-red-700 hover:bg-red-200'}`}>{actionLoading === venta._id ? 'Procesando...' : 'Rechazar'}</button></div>)}{(venta.completionStatus === 'approved' || venta.completionStatus === 'rejected') && canApproveReject(venta) && (<button onClick={() => handleRevertVenta(venta._id)} disabled={actionLoading === venta._id} className={`px-3 py-1 text-sm rounded-md flex items-center gap-1 ${actionLoading === venta._id? 'bg-gray-100 text-gray-500':'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'}`} title="Quitar de ventas finalizadas y volver a estado activo"><Undo2 size={14} />{actionLoading === venta._id ? 'Procesando...' : 'Revertir'}</button>)}</td>)}
+                </td><td className="px-6 py-4 text-sm text-gray-900"><div className="flex flex-col"><span className="font-medium">{venta.user_info?.nombre_negocio || 'No especificado'}</span><span className="text-xs text-gray-500">{venta.user_info?.email || ''}</span></div></td><td className="px-6 py-4 text-sm text-gray-900">S/ {venta.montoTotal.toFixed(2)}</td><td className="px-6 py-4"><span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(venta.completionStatus)}`}>{getStatusIcon(venta.completionStatus)}<span className="ml-1">{venta.completionStatus === 'approved' ? 'Aprobada' :venta.completionStatus === 'rejected' ? 'Rechazada' : 'Pendiente'}</span></span></td><td className="px-6 py-4 text-sm text-gray-900">{venta.completionDate ? new Date(venta.completionDate).toLocaleDateString() : '-'}</td>{['super_admin', 'admin'].includes(userRole) && (<td className="px-6 py-4 text-sm font-medium">{venta.completionStatus === 'pending' && canApproveReject(venta) && (<div className="flex space-x-2"><button onClick={() => handleApproveReject(venta._id, 'approved')} disabled={actionLoading === venta._id} className={`px-3 py-1 text-sm rounded-xl ${actionLoading === venta._id? 'bg-gray-100 text-gray-500':'bg-green-100 text-green-700 hover:bg-green-200'}`}>{actionLoading === venta._id ? 'Procesando...' : 'Aprobar'}</button><button onClick={() => handleApproveReject(venta._id, 'rejected')} disabled={actionLoading === venta._id} className={`px-3 py-1 text-sm rounded-xl ${actionLoading === venta._id? 'bg-gray-100 text-gray-500':'bg-red-100 text-red-700 hover:bg-red-200'}`}>{actionLoading === venta._id ? 'Procesando...' : 'Rechazar'}</button></div>)}{(venta.completionStatus === 'approved' || venta.completionStatus === 'rejected') && canApproveReject(venta) && (<button onClick={() => handleRevertVenta(venta._id)} disabled={actionLoading === venta._id} className={`px-3 py-1 text-sm rounded-xl flex items-center gap-1 ${actionLoading === venta._id? 'bg-gray-100 text-gray-500':'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'}`} title="Quitar de ventas finalizadas y volver a estado activo"><Undo2 size={14} />{actionLoading === venta._id ? 'Procesando...' : 'Revertir'}</button>)}</td>)}
               </tr>
             ))}
           </tbody>
@@ -274,7 +274,7 @@ function VentasFinalizadas({ userRole }) {
           <button
             onClick={handleLoadMore}
             disabled={loadingMore}
-            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+            className={`px-6 py-3 rounded-xl font-medium transition-colors ${
               loadingMore
                 ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
                 : 'bg-purple-600 text-white hover:bg-purple-700'

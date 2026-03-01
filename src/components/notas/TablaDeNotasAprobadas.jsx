@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { CheckCircle, User, Calendar, Search, Filter, Eye, X } from 'lucide-react';
+import { CheckCircle, User, Calendar, Search, Filter, Eye, X, Loader2, AlertCircle } from 'lucide-react';
 import { useRole } from '../../context/RoleContext';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || '';
@@ -89,7 +89,7 @@ export default function TablaDeNotasAprobadas() {
             placeholder="Buscar por título, contenido o usuario..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent focus:outline-none text-sm"
           />
         </div>
         <div className="relative">
@@ -98,7 +98,7 @@ export default function TablaDeNotasAprobadas() {
             type="date"
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent focus:outline-none text-sm"
           />
         </div>
         {(searchTerm || dateFilter) && (
@@ -107,7 +107,7 @@ export default function TablaDeNotasAprobadas() {
               setSearchTerm('');
               setDateFilter('');
             }}
-            className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 flex items-center gap-2"
+            className="px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 flex items-center gap-2 text-sm transition-colors"
           >
             <X size={16} />
             Limpiar
@@ -116,14 +116,14 @@ export default function TablaDeNotasAprobadas() {
       </div>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 flex items-center gap-2 text-sm">
+          <AlertCircle size={16} className="flex-shrink-0" /> {error}
         </div>
       )}
 
       {loading ? (
         <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+          <Loader2 size={32} className="animate-spin text-green-500" />
         </div>
       ) : filteredNotes.length === 0 ? (
         <div className="text-gray-500 text-center py-8">
@@ -133,14 +133,14 @@ export default function TablaDeNotasAprobadas() {
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-green-50 border-b border-green-200">
-                <th className="text-left p-4 font-semibold text-green-800">Título</th>
-                <th className="text-left p-4 font-semibold text-green-800">Propietario</th>
-                <th className="text-left p-4 font-semibold text-green-800">Creado por</th>
-                <th className="text-left p-4 font-semibold text-green-800">Fecha de Nota</th>
-                <th className="text-left p-4 font-semibold text-green-800">Aprobada el</th>
-                <th className="text-left p-4 font-semibold text-green-800">Aprobada por</th>
-                <th className="text-center p-4 font-semibold text-green-800">Acciones</th>
+              <tr className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100">
+                <th className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">Título</th>
+                <th className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">Propietario</th>
+                <th className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">Creado por</th>
+                <th className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">Fecha de Nota</th>
+                <th className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">Aprobada el</th>
+                <th className="text-left p-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">Aprobada por</th>
+                <th className="text-center p-4 font-semibold text-gray-500 text-xs uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -221,7 +221,7 @@ export default function TablaDeNotasAprobadas() {
                   <td className="p-4 text-center">
                     <button
                       onClick={() => openNoteModal(note)}
-                      className="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded-lg text-sm flex items-center gap-1 mx-auto transition-colors"
+                      className="text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 px-3 py-1.5 rounded-xl text-sm flex items-center gap-1 mx-auto transition-colors"
                     >
                       <Eye size={14} />
                       Ver
@@ -236,8 +236,8 @@ export default function TablaDeNotasAprobadas() {
 
       {/* Modal para ver detalles de la nota */}
       {showModal && selectedNote && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
@@ -246,7 +246,7 @@ export default function TablaDeNotasAprobadas() {
                 </h3>
                 <button
                   onClick={closeModal}
-                  className="text-gray-400 hover:text-gray-600 p-1"
+                  className="text-gray-400 hover:text-gray-600 hover:bg-white/80 p-1.5 rounded-xl transition-colors"
                 >
                   <X size={20} />
                 </button>
@@ -257,19 +257,19 @@ export default function TablaDeNotasAprobadas() {
                   <h4 className="font-semibold text-gray-800 text-lg mb-2">{selectedNote.title}</h4>
                 </div>
                 
-                <div className="bg-gray-50 rounded-lg p-4">
+                <div className="bg-gray-50 rounded-xl p-4">
                   <h5 className="font-medium text-gray-700 mb-2">Contenido:</h5>
                   <p className="text-gray-600 whitespace-pre-wrap">{selectedNote.content}</p>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-blue-50 p-3 rounded-lg">
+                  <div className="bg-blue-50 p-3 rounded-xl border border-blue-100">
                     <h5 className="font-medium text-blue-800 mb-1">Propietario</h5>
                     <p className="text-blue-700">{selectedNote.user_info?.nombre_negocio || 'Usuario desconocido'}</p>
                     <p className="text-xs text-blue-600">{selectedNote.user_info?.email}</p>
                   </div>
                   
-                  <div className="bg-green-50 p-3 rounded-lg">
+                  <div className="bg-green-50 p-3 rounded-xl border border-green-100">
                     <h5 className="font-medium text-green-800 mb-1">Creado por</h5>
                     <p className="text-green-700">{selectedNote.creator_info?.nombre_negocio || 'Usuario desconocido'}</p>
                     <p className="text-xs text-green-600">{selectedNote.creator_info?.email}</p>
@@ -295,7 +295,7 @@ export default function TablaDeNotasAprobadas() {
               <div className="flex justify-end mt-6">
                 <button
                   onClick={closeModal}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors"
+                  className="text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 px-4 py-2 rounded-xl transition-colors text-sm"
                 >
                   Cerrar
                 </button>

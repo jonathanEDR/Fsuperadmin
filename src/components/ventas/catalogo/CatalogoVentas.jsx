@@ -739,7 +739,7 @@ const CatalogoVentas = ({
               >
                 <button
                   onClick={() => setVistaCarrito(true)}
-                  className="text-gray-900 bg-white bg-opacity-20 backdrop-blur-sm rounded-lg hover:bg-opacity-30 transition-all duration-200 border border-gray-900 border-opacity-20 font-medium"
+                  className="text-gray-900 bg-white/20 backdrop-blur-sm rounded-xl hover:bg-white/30 transition-all duration-200 border border-gray-900/20 font-medium"
                   style={{
                     padding: window.innerWidth < 640 ? '8px 12px' : '8px 16px',
                     fontSize: window.innerWidth < 640 ? '12px' : '14px',
@@ -750,7 +750,7 @@ const CatalogoVentas = ({
                 </button>
                 <button
                   onClick={handleConfirmarVenta}
-                  className="bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 font-medium shadow-lg"
+                  className="bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 font-medium shadow-lg"
                   style={{
                     padding: window.innerWidth < 640 ? '8px 16px' : '8px 24px',
                     fontSize: window.innerWidth < 640 ? '12px' : '14px',

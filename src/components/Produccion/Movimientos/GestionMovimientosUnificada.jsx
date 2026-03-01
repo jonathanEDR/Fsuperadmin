@@ -11,6 +11,7 @@ import ModalIncrementarStock from './ModalIncrementarStock';
 import HistorialProduccion from './HistorialProduccion';
 import TransferenciasSucursales from './TransferenciasSucursales';
 import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
+import { Carrot, Package, ClipboardList, Factory, Store, RefreshCw, AlertTriangle, BarChart3, TrendingUp, TrendingDown, Zap, Loader2, ChevronDown, Trash2, User, Search, ArrowLeft, Plus, Check } from 'lucide-react';
 
 const GestionMovimientosUnificada = ({ onVolver }) => {
   // Hook de permisos para control de roles
@@ -29,36 +30,36 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
           id: 'ingredientes',
           nombre: 'Ingredientes',
           descripcion: 'Materias primas para producción',
-          icono: '🥕',
-          color: 'bg-green-500'
+          icono: <Carrot size={24} />,
+          color: 'green'
         },
         {
           id: 'materiales',
           nombre: 'Materiales',
           descripcion: 'Materiales de producción',
-          icono: '📦',
-          color: 'bg-blue-500'
+          icono: <Package size={24} />,
+          color: 'blue'
         },
         {
           id: 'recetas',
           nombre: 'Recetas',
           descripcion: 'Productos con recetas definidas',
-          icono: '📋',
-          color: 'bg-purple-500'
+          icono: <ClipboardList size={24} />,
+          color: 'purple'
         },
         {
           id: 'produccion',
           nombre: 'Producción',
           descripcion: 'Productos del catálogo de producción',
-          icono: '🏭',
-          color: 'bg-orange-500'
+          icono: <Factory size={24} />,
+          color: 'orange'
         },
         {
           id: 'sucursales',
           nombre: 'Sucursales',
           descripcion: 'Transferir materiales a sucursales',
-          icono: '🏪',
-          color: 'bg-teal-500'
+          icono: <Store size={24} />,
+          color: 'teal'
         }
       ]
     : [
@@ -67,22 +68,22 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
           id: 'recetas',
           nombre: 'Recetas',
           descripcion: 'Productos con recetas definidas',
-          icono: '📋',
-          color: 'bg-purple-500'
+          icono: <ClipboardList size={24} />,
+          color: 'purple'
         },
         {
           id: 'produccion',
           nombre: 'Producción',
           descripcion: 'Productos del catálogo de producción',
-          icono: '🏭',
-          color: 'bg-orange-500'
+          icono: <Factory size={24} />,
+          color: 'orange'
         },
         {
           id: 'sucursales',
           nombre: 'Sucursales',
           descripcion: 'Transferir materiales a sucursales',
-          icono: '🏪',
-          color: 'bg-teal-500'
+          icono: <Store size={24} />,
+          color: 'teal'
         }
       ];
 
@@ -564,6 +565,18 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
     });
   };
 
+  // Helper para obtener icono Lucide por tipo de producto
+  const obtenerIconoLucide = (tipo) => {
+    const iconos = {
+      'ingredientes': <Carrot size={20} className="text-green-600" />,
+      'materiales': <Package size={20} className="text-blue-600" />,
+      'recetas': <ClipboardList size={20} className="text-purple-600" />,
+      'produccion': <Factory size={20} className="text-orange-600" />,
+      'sucursales': <Store size={20} className="text-teal-600" />
+    };
+    return iconos[tipo] || <Package size={20} className="text-gray-600" />;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <BreadcrumbProduccion />
@@ -573,8 +586,8 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                🔄 Gestión de Movimientos Unificada
+              <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                <RefreshCw size={28} className="text-blue-600" /> Gestión de Movimientos Unificada
               </h1>
               <p className="text-gray-600">
                 {canViewPrices 
@@ -588,9 +601,9 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
             {onVolver && (
               <button
                 onClick={onVolver}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center space-x-2 shadow-sm"
+                className="px-4 py-2 text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl transition-colors flex items-center space-x-2 shadow-sm"
               >
-                <span>←</span>
+                <span><ArrowLeft size={16} /></span>
                 <span>Volver</span>
               </button>
             )}
@@ -599,9 +612,9 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
 
         {/* Error global */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
             <div className="flex items-center">
-              <span className="text-red-500 mr-2">⚠️</span>
+              <AlertTriangle size={16} className="text-red-500 mr-2 flex-shrink-0" />
               <span className="text-red-700">{error}</span>
             </div>
           </div>
@@ -610,10 +623,10 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
         {/* 🎯 OPTIMIZADO: Estadísticas compactas para móvil */}
         {estadisticas.totalMovimientos > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-            <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+            <div className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-100">
               <div className="flex items-center">
-                <div className="p-1.5 sm:p-2 bg-blue-100 rounded">
-                  <span className="text-blue-600 text-sm sm:text-base">📊</span>
+                <div className="p-1.5 sm:p-2 bg-blue-50 rounded-xl border border-blue-100">
+                  <BarChart3 size={18} className="text-blue-600" />
                 </div>
                 <div className="ml-2 sm:ml-3">
                   <p className="text-xs sm:text-sm text-gray-500">Total Movimientos</p>
@@ -623,16 +636,15 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
             </div>
             
             {estadisticas.porTipoMovimiento?.map((item, index) => (
-              <div key={item._id} className="bg-white p-3 sm:p-4 rounded-lg shadow">
+              <div key={item._id} className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-100">
                 <div className="flex items-center">
-                  <div className={`p-1.5 sm:p-2 rounded ${
-                    item._id === 'entrada' ? 'bg-green-100' :
-                    item._id === 'salida' ? 'bg-red-100' : 'bg-blue-100'
+                  <div className={`p-1.5 sm:p-2 rounded-xl border ${
+                    item._id === 'entrada' ? 'bg-green-50 border-green-100' :
+                    item._id === 'salida' ? 'bg-red-50 border-red-100' : 'bg-blue-50 border-blue-100'
                   }`}>
-                    <span className="text-sm sm:text-base">{
-                      item._id === 'entrada' ? '📈' :
-                      item._id === 'salida' ? '📉' : '⚡'
-                    }</span>
+                    {item._id === 'entrada' ? <TrendingUp size={18} className="text-green-600" /> :
+                     item._id === 'salida' ? <TrendingDown size={18} className="text-red-600" /> : 
+                     <Zap size={18} className="text-blue-600" />}
                   </div>
                   <div className="ml-2 sm:ml-3">
                     <p className="text-xs sm:text-sm text-gray-500 capitalize">{item._id}</p>
@@ -658,155 +670,203 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
             
             {/* Mostrar componente especial para Sucursales */}
             {tipoSeleccionado === 'sucursales' ? (
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
                 <TransferenciasSucursales />
               </div>
             ) : (
               <>
                 {/* Panel de productos - Ancho completo */}
-                <div className="bg-white rounded-lg shadow">
-                  <div className="p-6 border-b border-gray-200">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+                  <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-xl font-semibold text-gray-800">
-                        {movimientoUnificadoService.obtenerIconoTipo(tipoSeleccionado)} 
-                        {' '}Catálogo de {tipoSeleccionado.charAt(0).toUpperCase() + tipoSeleccionado.slice(1)}
+                      <h2 className="text-lg sm:text-xl font-semibold text-gray-800 flex items-center gap-2">
+                        {obtenerIconoLucide(tipoSeleccionado)}
+                        Catálogo de {tipoSeleccionado.charAt(0).toUpperCase() + tipoSeleccionado.slice(1)}
                       </h2>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-gray-500 bg-gray-50 px-2.5 py-1 rounded-xl border border-gray-100">
                         {productos.length} productos
                       </span>
                     </div>
                     
-                    {/* Buscador */}
-                    <div className="mt-4">
+                    {/* Buscador con icono */}
+                    <div className="mt-3 relative">
+                      <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                       <input
                         type="text"
                         placeholder="Buscar producto..."
                         value={filtros.buscar}
                         onChange={(e) => handleBusqueda(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                       />
                     </div>
                   </div>
               
-              {/* Lista de productos en grid responsive */}
-              <div className="p-6">
+              {/* Contenido del catálogo */}
+              <div className="p-4 sm:p-6">
                 {cargandoProductos ? (
                   <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                    <span className="ml-2">Cargando productos...</span>
+                    <Loader2 size={32} className="animate-spin text-blue-500" />
+                    <span className="ml-2 text-gray-500">Cargando productos...</span>
                   </div>
                 ) : productos.length > 0 ? (
-                  /* 🎯 OPTIMIZADO: Grid responsivo para catálogo */
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-                    {productos.map((producto) => (
-                      <div key={`${producto._id}-${producto.cantidad}-${producto._lastUpdated || Date.now()}`} className={`border rounded-lg p-2 sm:p-4 hover:shadow-md transition-shadow ${
-                        tipoSeleccionado === 'recetas'
-                          ? 'border-green-200 bg-green-50'
-                          : 'border-gray-200 bg-white'
-                      }`}>
-                        {/* Nombre del producto */}
-                        <div className="mb-2 sm:mb-3">
-                          <h3 className="font-medium text-gray-800 text-xs sm:text-sm leading-tight truncate">
-                            {producto.nombre}
-                          </h3>
-                          {tipoSeleccionado === 'recetas' && (
-                            <span className="inline-block px-1.5 sm:px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full mt-1">
-                              Receta
-                            </span>
-                          )}
-                        </div>
-
-                        <div className="space-y-0.5 sm:space-y-1 text-xs text-gray-600">
-                          <div className="hidden sm:block">
-                            <span className="font-medium">Ref:</span> {' '}
-                            {producto.productoReferencia?.nombre || producto.codigo || 'N/A'}
-                          </div>
-                          {/* Stock con botón + al lado */}
+                  <>
+                    {/* VISTA MÓVIL: Cards compactas */}
+                    <div className="md:hidden space-y-2">
+                      {productos.map((producto) => (
+                        <div key={`m-${producto._id}-${producto._lastUpdated || ''}`} className={`border rounded-xl p-3 ${
+                          tipoSeleccionado === 'recetas'
+                            ? 'border-green-200 bg-green-50/50'
+                            : 'border-gray-200 bg-white'
+                        }`}>
                           <div className="flex items-center justify-between">
-                            <div>
-                              <span className="font-medium">Stock:</span> {' '}
-                              <span className={`font-semibold ${
-                                obtenerCantidadProducto(producto) > 0
-                                  ? 'text-green-600'
-                                  : 'text-red-600'
-                              }`}>
-                                {obtenerCantidadProducto(producto)} {producto.unidadMedida || 'u'}
-                              </span>
+                            <div className="flex-1 min-w-0 mr-2">
+                              <h3 className="font-medium text-gray-800 text-sm truncate">
+                                {producto.nombre}
+                              </h3>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className={`text-sm font-semibold ${
+                                  obtenerCantidadProducto(producto) > 0 ? 'text-green-600' : 'text-red-600'
+                                }`}>
+                                  {obtenerCantidadProducto(producto)} {producto.unidadMedida || 'u'}
+                                </span>
+                                {tipoSeleccionado === 'recetas' && (
+                                  <span className="text-xs text-gray-400">
+                                    R: {producto.rendimiento?.cantidad || 0}
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                            <div className="flex gap-1">
+                            <div className="flex gap-1.5">
                               <button
                                 onClick={() => abrirModalAgregar(producto)}
-                                className={`px-1.5 sm:px-2 py-1 text-white text-xs rounded transition-colors flex-shrink-0 ${
+                                className={`p-2 rounded-xl transition-colors ${
                                   tipoSeleccionado === 'recetas'
-                                    ? 'bg-green-600 hover:bg-green-700'
-                                    : 'bg-blue-600 hover:bg-blue-700'
+                                    ? 'text-green-700 bg-green-50 border border-green-200 hover:bg-green-100'
+                                    : 'text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100'
                                 }`}
                               >
-                                {tipoSeleccionado === 'recetas' ? (
-                                  <span className="hidden sm:inline">🧑‍🍳 Producir</span>
-                                ) : (
-                                  <span className="hidden sm:inline">+ Agregar</span>
-                                )}
-                                <span className="sm:hidden">+</span>
+                                <Plus size={16} />
                               </button>
-
-                              {/* Botón de historial solo para productos de producción */}
                               {tipoSeleccionado === 'produccion' && (
                                 <button
                                   onClick={() => abrirHistorialProduccion(producto)}
-                                  className="px-1.5 sm:px-2 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded transition-colors flex-shrink-0"
-                                  title="Ver historial de producciones"
+                                  className="p-2 text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100 rounded-xl transition-colors"
+                                  title="Ver historial"
                                 >
-                                  <span className="hidden sm:inline">📊 Historial</span>
-                                  <span className="sm:hidden">📊</span>
+                                  <BarChart3 size={16} />
                                 </button>
                               )}
                             </div>
                           </div>
-                          {tipoSeleccionado === 'recetas' && (
-                            <>
-                              <div className="hidden sm:block">
-                                <span className="font-medium">Rendimiento:</span> {' '}
-                                <span className="text-blue-600">
-                                  {producto.rendimiento?.cantidad || 0} {producto.rendimiento?.unidadMedida || 'u'}
-                                </span>
-                              </div>
-                              <div className="sm:hidden">
-                                <span className="font-medium">R:</span> {producto.rendimiento?.cantidad || 0}
-                                {' | '}
-                                <span className="font-medium">P:</span> <span className="text-blue-600">{producto.inventario?.cantidadProducida || 0}</span>
-                              </div>
-                              <div className="hidden sm:block">
-                                <span className="font-medium">Producido:</span> {' '}
-                                <span className="text-blue-600">{producto.inventario?.cantidadProducida || 0}</span>
-                                {' | '}
-                                <span className="font-medium">Utilizado:</span> {' '}
-                                <span className="text-orange-600">{producto.inventario?.cantidadUtilizada || 0}</span>
-                              </div>
-                              {/* Solo super_admin ve costos */}
-                              {canViewPrices && producto.costoEstimado && (
-                                <div className="hidden sm:block">
-                                  <span className="font-medium">Costo Unit.:</span> {' '}
-                                  <span className="text-purple-600">
-                                    ${((producto.costoEstimado || 0) / (producto.rendimiento?.cantidad || 1)).toFixed(2)}
-                                  </span>
-                                </div>
-                              )}
-                            </>
-                          )}
-                          {/* Solo super_admin ve precio de referencia */}
-                          {canViewPrices && producto.precio && (
-                            <div className="hidden sm:block">
-                              <span className="font-medium">Precio Ref.:</span> {' '}
-                              <span className="text-green-600">${producto.precio}</span>
-                            </div>
-                          )}
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+
+                    {/* VISTA DESKTOP: Tabla profesional */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-gray-100">
+                            <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Producto</th>
+                            <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Referencia</th>
+                            <th className="text-right py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Stock</th>
+                            {tipoSeleccionado === 'recetas' && (
+                              <>
+                                <th className="text-right py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Rendimiento</th>
+                                <th className="text-right py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Producido</th>
+                                <th className="text-right py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Utilizado</th>
+                              </>
+                            )}
+                            {canViewPrices && (tipoSeleccionado === 'ingredientes' || tipoSeleccionado === 'materiales') && (
+                              <th className="text-right py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Precio</th>
+                            )}
+                            {canViewPrices && tipoSeleccionado === 'recetas' && (
+                              <th className="text-right py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Costo Unit.</th>
+                            )}
+                            <th className="text-right py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50">
+                          {productos.map((producto) => (
+                            <tr key={`d-${producto._id}-${producto._lastUpdated || ''}`} className={`hover:bg-gray-50/50 transition-colors ${
+                              tipoSeleccionado === 'recetas' ? 'bg-green-50/30' : ''
+                            }`}>
+                              <td className="py-3 px-4">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-gray-900 text-sm">{producto.nombre}</span>
+                                  {tipoSeleccionado === 'recetas' && (
+                                    <span className="px-1.5 py-0.5 bg-green-100 text-green-700 text-xs rounded-full border border-green-200">Receta</span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="py-3 px-4 text-sm text-gray-500">
+                                {producto.productoReferencia?.nombre || producto.codigo || '—'}
+                              </td>
+                              <td className="py-3 px-4 text-right">
+                                <span className={`text-sm font-semibold ${
+                                  obtenerCantidadProducto(producto) > 0 ? 'text-green-600' : 'text-red-600'
+                                }`}>
+                                  {obtenerCantidadProducto(producto)}
+                                </span>
+                                <span className="text-xs text-gray-400 ml-1">{producto.unidadMedida || 'u'}</span>
+                              </td>
+                              {tipoSeleccionado === 'recetas' && (
+                                <>
+                                  <td className="py-3 px-4 text-right text-sm text-blue-600">
+                                    {producto.rendimiento?.cantidad || 0} {producto.rendimiento?.unidadMedida || 'u'}
+                                  </td>
+                                  <td className="py-3 px-4 text-right text-sm text-blue-600">
+                                    {producto.inventario?.cantidadProducida || 0}
+                                  </td>
+                                  <td className="py-3 px-4 text-right text-sm text-orange-600">
+                                    {producto.inventario?.cantidadUtilizada || 0}
+                                  </td>
+                                </>
+                              )}
+                              {canViewPrices && (tipoSeleccionado === 'ingredientes' || tipoSeleccionado === 'materiales') && (
+                                <td className="py-3 px-4 text-right text-sm text-green-600">
+                                  {producto.precio ? `$${producto.precio}` : '—'}
+                                </td>
+                              )}
+                              {canViewPrices && tipoSeleccionado === 'recetas' && (
+                                <td className="py-3 px-4 text-right text-sm text-purple-600">
+                                  {producto.costoEstimado
+                                    ? `$${((producto.costoEstimado || 0) / (producto.rendimiento?.cantidad || 1)).toFixed(2)}`
+                                    : '—'}
+                                </td>
+                              )}
+                              <td className="py-3 px-4 text-right">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    onClick={() => abrirModalAgregar(producto)}
+                                    className={`px-3 py-1.5 text-xs font-medium rounded-xl transition-colors ${
+                                      tipoSeleccionado === 'recetas'
+                                        ? 'text-green-700 bg-green-50 border border-green-200 hover:bg-green-100'
+                                        : 'text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100'
+                                    }`}
+                                  >
+                                    {tipoSeleccionado === 'recetas' ? 'Producir' : '+ Agregar'}
+                                  </button>
+                                  {tipoSeleccionado === 'produccion' && (
+                                    <button
+                                      onClick={() => abrirHistorialProduccion(producto)}
+                                      className="px-3 py-1.5 text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100 rounded-xl transition-colors"
+                                      title="Ver historial de producciones"
+                                    >
+                                      Historial
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
                 ) : (
                   <div className="text-center py-8">
+                    <Search size={32} className="mx-auto text-gray-300 mb-2" />
                     <span className="text-gray-500">No se encontraron productos</span>
                   </div>
                 )}
@@ -814,10 +874,10 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
             </div>
 
             {/* Panel de historial */}
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-800">
-                  📋 Historial de Movimientos
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="p-6 border-b border-gray-100">
+                <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                  <ClipboardList size={20} className="text-blue-600" /> Historial de Movimientos
                 </h2>
                 {tipoSeleccionado && (
                   <p className="text-sm text-gray-500 mt-1">
@@ -829,7 +889,7 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
               <div className="p-4">
                 {cargandoHistorial ? (
                   <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                    <Loader2 size={32} className="animate-spin text-blue-500" />
                     <span className="ml-2">Cargando historial...</span>
                   </div>
                 ) : historial.length > 0 ? (
@@ -839,7 +899,7 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                       {historial.map((movimiento) => (
                         <div 
                           key={movimiento._id}
-                          className="bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm"
+                          className="bg-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm"
                         >
                           {/* Header: Tipo y Fecha */}
                           <div className="flex justify-between items-start mb-3">
@@ -847,7 +907,7 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                               px-2 py-1 text-xs rounded-full font-medium
                               ${movimientoUnificadoService.obtenerColorTipo(movimiento.tipo)}
                             `}>
-                              {movimiento.tipo === 'entrada' ? '📈 Entrada' : '📉 Salida'}
+                              {movimiento.tipo === 'entrada' ? 'Entrada' : 'Salida'}
                             </span>
                             <span className="text-xs text-gray-500">
                               {new Date(movimiento.fecha).toLocaleDateString('es-ES', {
@@ -903,19 +963,17 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
 
                           {/* Footer: Usuario y Acción */}
                           <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-                            <span className="text-xs text-gray-500">
-                              👤 {movimiento.operador}
+                            <span className="text-xs text-gray-500 flex items-center gap-1">
+                              <User size={12} /> {movimiento.operador}
                             </span>
                             {/* Solo admin puede eliminar movimientos */}
                             {movimiento.tipo === 'entrada' && canDeleteProduccion ? (
                               <button
                                 onClick={() => handleEliminarMovimiento(movimiento._id)}
-                                className="text-red-600 hover:text-red-900 hover:bg-red-50 p-1.5 rounded transition-colors flex items-center gap-1"
+                                className="text-red-500 bg-red-50 border border-red-200 hover:bg-red-100 p-1.5 rounded-xl transition-colors flex items-center gap-1"
                                 title="Eliminar movimiento"
                               >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
+                                <Trash2 size={14} />
                                 <span className="text-xs">Eliminar</span>
                               </button>
                             ) : (
@@ -939,18 +997,16 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                         <button
                           onClick={cargarMasHistorial}
                           disabled={cargandoMasHistorial}
-                          className="w-full py-3 bg-blue-50 text-blue-600 rounded-lg font-medium hover:bg-blue-100 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full py-3 text-blue-700 bg-blue-50 border border-blue-200 rounded-xl font-medium hover:bg-blue-100 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {cargandoMasHistorial ? (
                             <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                              <Loader2 size={16} className="animate-spin" />
                               Cargando...
                             </>
                           ) : (
                             <>
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
+                              <ChevronDown size={20} />
                               Cargar más ({totalRegistros - historial.length} restantes)
                             </>
                           )}
@@ -959,8 +1015,8 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
 
                       {/* Indicador cuando se cargaron todos */}
                       {paginaHistorial >= totalPaginas && historial.length > LIMITE_POR_PAGINA && (
-                        <p className="text-center text-xs text-gray-500 py-2">
-                          ✓ Mostrando todos los {historial.length} movimientos
+                        <p className="text-center text-xs text-gray-500 py-2 flex items-center justify-center gap-1">
+                          <Check size={14} className="text-green-500" /> Mostrando todos los {historial.length} movimientos
                         </p>
                       )}
                     </div>
@@ -1053,12 +1109,10 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                                 {movimiento.tipo === 'entrada' && canDeleteProduccion && (
                                   <button
                                     onClick={() => handleEliminarMovimiento(movimiento._id)}
-                                    className="text-red-600 hover:text-red-900 hover:bg-red-50 p-1 rounded transition-colors"
+                                    className="text-red-500 bg-red-50 border border-red-200 hover:bg-red-100 p-1 rounded-xl transition-colors"
                                     title="Eliminar movimiento"
                                   >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
+                                    <Trash2 size={16} />
                                   </button>
                                 )}
                                 {(movimiento.tipo !== 'entrada' || !canDeleteProduccion) && (
@@ -1085,18 +1139,16 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                           <button
                             onClick={cargarMasHistorial}
                             disabled={cargandoMasHistorial}
-                            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-6 py-2 text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 rounded-xl transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {cargandoMasHistorial ? (
                               <>
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                <Loader2 size={16} className="animate-spin" />
                                 Cargando...
                               </>
                             ) : (
                               <>
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                </svg>
+                                <ChevronDown size={20} />
                                 Cargar más ({totalRegistros - historial.length} restantes)
                               </>
                             )}
@@ -1105,8 +1157,8 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
                       )}
                       {paginaHistorial >= totalPaginas && historial.length > LIMITE_POR_PAGINA && (
                         <div className="text-center py-3 bg-gray-50 border-t border-gray-200">
-                          <span className="text-sm text-gray-600">
-                            ✓ Mostrando todos los {historial.length} movimientos
+                          <span className="text-sm text-gray-600 flex items-center justify-center gap-1">
+                            <Check size={14} className="text-green-500" /> Mostrando todos los {historial.length} movimientos
                           </span>
                         </div>
                       )}
@@ -1127,7 +1179,11 @@ const GestionMovimientosUnificada = ({ onVolver }) => {
         {/* Mensaje cuando no hay tipo seleccionado */}
         {!tipoSeleccionado && (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">🔄</div>
+            <div className="flex justify-center mb-4">
+              <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                <RefreshCw size={40} className="text-blue-400" />
+              </div>
+            </div>
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
               Selecciona un tipo de producto
             </h3>

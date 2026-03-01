@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { X, Loader2, AlertTriangle, CheckCircle } from 'lucide-react';
 import catalogoProduccionService from '../../../services/catalogoProduccion';
 
 const ModalTipoProduccion = ({ isOpen, onClose, onTipoCreado }) => {
@@ -56,9 +57,9 @@ const ModalTipoProduccion = ({ isOpen, onClose, onTipoCreado }) => {
       setLoading(true);
       setError(''); // Limpiar errores previos
       
-      console.log('🚀 Enviando datos al backend:', nuevoTipo);
+      console.log('Enviando datos al backend:', nuevoTipo);
       const response = await catalogoProduccionService.crearTipoProduccion(nuevoTipo);
-      console.log('✅ Respuesta del backend:', response);
+      console.log('Respuesta del backend:', response);
       
       // Verificar que la respuesta tenga datos
       if (!response.data) {
@@ -81,9 +82,9 @@ const ModalTipoProduccion = ({ isOpen, onClose, onTipoCreado }) => {
       
       // Verificar si se guardó en base de datos o es simulado
       if (response.data._id && response.data._id.toString().length > 10) {
-        mensaje += ' ✅ Guardado en base de datos.';
+        mensaje += ' Guardado en base de datos.';
       } else {
-        mensaje += ' ⚠️ Modo simulado (backend no disponible).';
+        mensaje += ' Modo simulado (backend no disponible).';
       }
       
       setSuccess(mensaje);
@@ -94,15 +95,15 @@ const ModalTipoProduccion = ({ isOpen, onClose, onTipoCreado }) => {
       }, 3000);
       
     } catch (err) {
-      console.error('❌ Error al crear tipo:', err);
+      console.error('Error al crear tipo:', err);
       let errorMessage = 'Error al crear tipo de producción';
       
       if (err.message.includes('Network Error')) {
-        errorMessage = '❌ No se puede conectar al servidor. Verifica que el backend esté ejecutándose.';
+        errorMessage = 'No se puede conectar al servidor. Verifica que el backend esté ejecutándose.';
       } else if (err.message.includes('401')) {
-        errorMessage = '🔐 No tienes permisos. Inicia sesión nuevamente.';
+        errorMessage = 'No tienes permisos. Inicia sesión nuevamente.';
       } else if (err.message.includes('400')) {
-        errorMessage = '⚠️ Datos inválidos. Verifica la información ingresada.';
+        errorMessage = 'Datos inválidos. Verifica la información ingresada.';
       } else {
         errorMessage = err.message || errorMessage;
       }
@@ -130,11 +131,11 @@ const ModalTipoProduccion = ({ isOpen, onClose, onTipoCreado }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
-          <h2 className="text-xl font-bold">Gestión de Tipos de Producción</h2>
+        <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 p-4 flex justify-between items-center rounded-t-2xl">
+          <h2 className="text-xl font-bold text-gray-900">Gestión de Tipos de Producción</h2>
           <div className="flex items-center gap-4">
             {/* Indicador de estado de conexión */}
             {conexionBackend !== null && (
@@ -151,9 +152,9 @@ const ModalTipoProduccion = ({ isOpen, onClose, onTipoCreado }) => {
             )}
             <button
               onClick={onClose}
-              className="text-white hover:text-gray-300 text-2xl font-bold"
+              className="p-1.5 hover:bg-white/80 rounded-xl text-gray-400 hover:text-gray-600 transition-colors"
             >
-              ×
+              <X size={20} />
             </button>
           </div>
         </div>
@@ -172,7 +173,7 @@ const ModalTipoProduccion = ({ isOpen, onClose, onTipoCreado }) => {
                   type="text"
                   value={nuevoTipo.nombre}
                   onChange={(e) => handleInputChange('nombre', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Ej: Bebidas, Comidas, Postres..."
                   required
                 />
@@ -185,7 +186,7 @@ const ModalTipoProduccion = ({ isOpen, onClose, onTipoCreado }) => {
                 <textarea
                   value={nuevoTipo.descripcion}
                   onChange={(e) => handleInputChange('descripcion', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Descripción del tipo de producción"
                   rows="2"
                 />
@@ -193,13 +194,15 @@ const ModalTipoProduccion = ({ isOpen, onClose, onTipoCreado }) => {
             </div>
 
             {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 flex items-center gap-2">
+                <AlertTriangle size={16} className="flex-shrink-0" />
                 {error}
               </div>
             )}
 
             {success && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl mb-4 flex items-center gap-2">
+                <CheckCircle size={16} className="flex-shrink-0" />
                 {success}
               </div>
             )}
@@ -208,14 +211,11 @@ const ModalTipoProduccion = ({ isOpen, onClose, onTipoCreado }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                className="text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 px-6 py-2 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
               >
                 {loading ? (
                   <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+                    <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
                     Creando...
                   </>
                 ) : (
@@ -231,7 +231,7 @@ const ModalTipoProduccion = ({ isOpen, onClose, onTipoCreado }) => {
             
             {loading && (tipos || []).length === 0 ? (
               <div className="text-center py-4">
-                <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <Loader2 className="inline-block h-6 w-6 animate-spin text-blue-600" />
                 <p className="mt-2 text-gray-600">Cargando tipos...</p>
               </div>
             ) : (tipos || []).length === 0 ? (
@@ -242,7 +242,7 @@ const ModalTipoProduccion = ({ isOpen, onClose, onTipoCreado }) => {
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-gradient-to-r from-slate-50 to-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Nombre
@@ -283,7 +283,7 @@ const ModalTipoProduccion = ({ isOpen, onClose, onTipoCreado }) => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           <button
                             onClick={() => handleToggleActivo(tipo._id, tipo.activo)}
-                            className={`inline-flex items-center px-3 py-1 rounded text-xs font-medium ${
+                            className={`inline-flex items-center px-3 py-1 rounded-xl text-xs font-medium ${
                               tipo.activo
                                 ? 'bg-red-100 text-red-800 hover:bg-red-200'
                                 : 'bg-green-100 text-green-800 hover:bg-green-200'
@@ -302,10 +302,10 @@ const ModalTipoProduccion = ({ isOpen, onClose, onTipoCreado }) => {
         </div>
 
         {/* Footer */}
-        <div className="bg-gray-50 px-6 py-3 flex justify-end">
+        <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-t border-gray-100 px-6 py-3 flex justify-end rounded-b-2xl">
           <button
             onClick={onClose}
-            className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
+            className="text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 px-4 py-2 rounded-xl transition-colors"
           >
             CERRAR
           </button>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { X, Loader2, Factory, FileText, Plus, Trash2, AlertTriangle, Zap, RefreshCw, Package } from 'lucide-react';
 import { produccionService } from '../../../services/produccionService';
 import { ingredienteService } from '../../../services/ingredienteService';
 import { recetaService } from '../../../services/recetaService';
@@ -10,7 +11,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
     cantidadProducida: 1,
     unidadMedida: 'unidades',
     observaciones: '',
-    recetasUtilizadas: [], // 🎯 Solo recetas - ingredientes removidos
+    recetasUtilizadas: [], // Solo recetas - ingredientes removidos
     operador: '',
     productoDelCatalogo: null
   });
@@ -32,7 +33,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
   const cargarDatos = async () => {
     try {
       setLoading(true);
-      // 🎯 Solo cargar recetas y productos - ingredientes removidos
+      // Solo cargar recetas y productos - ingredientes removidos
       const [recetasResponse, productosResponse] = await Promise.all([
         recetaService.obtenerRecetas({ activo: true }),
         catalogoProduccionService.obtenerProductosPorModulo({ 
@@ -59,7 +60,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
     }
   };
 
-  // 🎯 REMOVIDO: agregarIngrediente - ya no se usa
+  // REMOVIDO: agregarIngrediente - ya no se usa
   
   const agregarRecetaPreparada = () => {
     setFormData(prev => ({
@@ -75,7 +76,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
     }));
   };
 
-  // 🎯 REMOVIDO: eliminarIngrediente - ya no se usa
+  // REMOVIDO: eliminarIngrediente - ya no se usa
   
   const eliminarReceta = (index) => {
     setFormData(prev => ({
@@ -84,7 +85,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
     }));
   };
 
-  // 🎯 REMOVIDO: actualizarIngrediente - ya no se usa
+  // REMOVIDO: actualizarIngrediente - ya no se usa
 
   const actualizarReceta = (index, campo, valor) => {
     setFormData(prev => ({
@@ -103,7 +104,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
     return recetasDisponibles.find(rec => rec._id === recetaId);
   };
 
-  // 🎯 Calcular costo solo con recetas - ingredientes removidos
+  // Calcular costo solo con recetas - ingredientes removidos
   const calcularCostoTotal = () => {
     return formData.recetasUtilizadas.reduce((total, item) => {
       return total + (item.cantidadUtilizada * item.costoUnitario);
@@ -183,7 +184,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
       return false;
     }
 
-    // 🎯 Solo validar recetas - ingredientes removidos
+    // Solo validar recetas - ingredientes removidos
     if (formData.recetasUtilizadas.length === 0) {
       setError('Debe agregar al menos una receta preparada');
       return false;
@@ -232,10 +233,10 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 shadow-lg rounded-md bg-white">
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+        <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 shadow-xl rounded-2xl bg-white border-gray-100">
           <div className="flex justify-center items-center h-32">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
           </div>
         </div>
       </div>
@@ -243,58 +244,53 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-0 sm:p-4">
-      <div className="relative sm:top-2 mx-auto p-2 sm:p-4 border-0 sm:border w-full sm:w-[95%] max-w-6xl shadow-lg sm:rounded-md bg-white h-full sm:h-auto sm:max-h-[95vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm overflow-y-auto h-full w-full z-50 p-0 sm:p-4">
+      <div className="relative sm:top-2 mx-auto p-0 w-full sm:w-[95%] max-w-6xl shadow-xl sm:rounded-2xl bg-white h-full sm:h-auto sm:max-h-[95vh] flex flex-col border border-gray-100">
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex justify-between items-center mb-2 sm:mb-4 pb-2 sm:pb-3 border-b">
+          <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-4 sm:px-5 py-4 rounded-t-2xl flex justify-between items-center">
             <h3 className="text-base sm:text-lg font-semibold text-gray-900">
               Nueva Producción
-              <span className="text-xs text-blue-500 ml-2 hidden sm:inline">(Manual - Con Catálogo)</span>
             </h3>
             <button
               type="button"
               onClick={onCancelar}
-              className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+              className="p-1.5 hover:bg-white/80 rounded-xl text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X size={20} />
             </button>
           </div>
 
           {error && (
-            <div className="mb-2 sm:mb-3 p-2 sm:p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-xs sm:text-sm">
-              ⚠️ {error}
+            <div className="mx-4 sm:mx-5 mt-3 p-2 sm:p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs sm:text-sm flex items-center gap-2">
+              <AlertTriangle size={16} className="flex-shrink-0" /> {error}
             </div>
           )}
           
           {/* Información sobre Producción Manual - Oculta en móvil */}
-          <div className="hidden sm:block bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-            <div className="flex items-center">
-              <span className="text-xl mr-2">⚡</span>
-              <div>
-                <h4 className="text-sm font-medium text-blue-900">Producción Manual</h4>
-                <p className="text-xs text-blue-700">Especifica ingredientes y recetas para crear el producto final.</p>
-              </div>
+          <div className="hidden sm:flex mx-4 sm:mx-5 mt-3 bg-blue-50/60 border border-blue-100 rounded-xl p-3 items-center gap-3">
+            <Zap size={20} className="text-blue-500 flex-shrink-0" />
+            <div>
+              <h4 className="text-sm font-medium text-blue-900">Producción Manual</h4>
+              <p className="text-xs text-blue-700">Especifica ingredientes y recetas para crear el producto final.</p>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-4 sm:px-5 py-3">
             <div className="flex flex-col lg:grid lg:grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
               {/* COLUMNA IZQUIERDA - Información del Producto */}
               <div className="space-y-2 sm:space-y-3 lg:overflow-y-auto lg:pr-2">
-                <div className="bg-gray-50 p-2 sm:p-3 rounded-lg">
+                <div className="bg-gray-50/60 p-2 sm:p-3 rounded-xl border border-gray-100">
                   <h4 className="text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">Información del Producto</h4>
 
                   <div className="space-y-2 sm:space-y-3">
                     {/* Selector del Catálogo */}
                     <div>
-                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                        🏭 Producto del Catálogo *
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5">
+                        <Factory size={14} className="text-gray-400" /> Producto del Catálogo *
                       </label>
                       {formData.productoDelCatalogo ? (
-                        <div className={`p-2 sm:p-3 border rounded-md ${
+                        <div className={`p-2 sm:p-3 border rounded-xl ${
                           nombreDisponible === true ? 'bg-green-50 border-green-200' :
                           nombreDisponible === false ? 'bg-red-50 border-red-200' : 
                           'bg-green-50 border-green-200'
@@ -308,7 +304,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                                   {formData.productoDelCatalogo.nombre}
                                 </p>
                                 {validandoNombre && (
-                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                                  <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
                                 )}
                                 {!validandoNombre && nombreDisponible === true && (
                                   <span className="text-green-500 text-lg">✓</span>
@@ -326,10 +322,10 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                             <button
                               type="button"
                               onClick={limpiarSeleccionCatalogo}
-                              className="text-red-600 hover:text-red-800 p-1 hover:bg-red-100 rounded"
+                              className="text-red-600 hover:text-red-800 p-1 hover:bg-red-100 rounded-xl"
                               title="Cambiar producto"
                             >
-                              🔄
+                              <RefreshCw size={16} />
                             </button>
                           </div>
                         </div>
@@ -337,10 +333,10 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                         <button
                           type="button"
                           onClick={() => setMostrarSelectorCatalogo(true)}
-                          className="w-full p-3 border-2 border-dashed border-blue-300 rounded-md text-blue-600 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                          className="w-full p-3 border-2 border-dashed border-blue-300 rounded-xl text-blue-600 hover:border-blue-400 hover:bg-blue-50 transition-colors"
                         >
                           <div className="flex items-center justify-center space-x-2">
-                            <span className="text-xl">📋</span>
+                            <FileText size={20} className="text-blue-400" />
                             <span className="font-medium">Seleccionar Producto</span>
                           </div>
                         </button>
@@ -354,7 +350,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                         step="1" 
                         value={formData.cantidadProducida} 
                         onChange={(e) => setFormData(prev => ({ ...prev, cantidadProducida: parseInt(e.target.value) || 1 }))} 
-                        className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                        className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" 
                       />
                     </div>
                     <div>
@@ -362,7 +358,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                       <select 
                         value={formData.unidadMedida} 
                         onChange={(e) => setFormData(prev => ({ ...prev, unidadMedida: e.target.value }))} 
-                        className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                       >
                         <option value="unidades">Unidades</option>
                         <option value="kg">Kilogramos</option>
@@ -376,7 +372,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                         type="text" 
                         value={formData.operador} 
                         onChange={(e) => setFormData(prev => ({ ...prev, operador: e.target.value }))} 
-                        className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                        className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" 
                         placeholder="Nombre del operador" 
                       />
                     </div>
@@ -386,7 +382,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                         value={formData.observaciones} 
                         onChange={(e) => setFormData(prev => ({ ...prev, observaciones: e.target.value }))} 
                         rows={2} 
-                        className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                        className="w-full p-2 sm:p-3 text-base sm:text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" 
                         placeholder="Observaciones adicionales (opcional)" 
                       />
                     </div>
@@ -396,17 +392,17 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
               
               {/* COLUMNA DERECHA - Ingredientes y Recetas */}
               <div className="space-y-2 sm:space-y-3 lg:overflow-y-auto lg:pl-2">
-                {/* 🎯 Sección de Ingredientes Básicos REMOVIDA - Solo se usan recetas */}
+                {/* Sección de Ingredientes Básicos REMOVIDA - Solo se usan recetas */}
                   
 
                 {/* Recetas Preparadas */}
-                <div className="bg-blue-50 p-3 rounded-lg">
+                <div className="bg-blue-50/60 p-3 rounded-xl border border-blue-100">
                   <div className="flex items-center gap-2 mb-3">
                     <h4 className="font-medium text-gray-700 flex items-center gap-2">
-                      <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold">
+                      <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded-xl text-xs font-semibold">
                         {formData.recetasUtilizadas.filter(rec => rec.receta && rec.cantidadUtilizada > 0).length}
                       </span>
-                      📋 Recetas Preparadas
+                      <FileText size={16} className="text-blue-500" /> Recetas Preparadas
                     </h4>
                   </div>
                   
@@ -414,14 +410,14 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                     <button 
                       type="button" 
                       onClick={agregarRecetaPreparada} 
-                      className="w-full py-2 px-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+                      className="w-full py-2 px-3 flex items-center justify-center gap-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-colors text-sm font-medium"
                     >
-                      ➕ Agregar Receta
+                      <Plus size={16} /> Agregar Receta
                     </button>
                   </div>
 
                   {formData.recetasUtilizadas.length === 0 ? (
-                    <div className="text-center py-3 text-gray-500 text-sm bg-white rounded-md border border-dashed border-gray-300">
+                    <div className="text-center py-3 text-gray-500 text-sm bg-white rounded-xl border border-dashed border-gray-300">
                       No hay recetas agregadas
                     </div>
                   ) : (
@@ -433,7 +429,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                         // incluyendo sub-recetas anidadas
                         const precioUnitario = item.costoUnitario || recetaInfo?.costoUnitario || 0;
                         return (
-                          <div key={index} className="bg-blue-50 p-2 rounded-md border text-xs">
+                          <div key={index} className="bg-blue-50/60 p-2 rounded-xl border border-blue-100 text-xs">
                             <div className="grid grid-cols-12 gap-2 items-center">
                               <div className="col-span-5">
                                 <select 
@@ -449,7 +445,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                                     }
                                     actualizarReceta(index, 'costoUnitario', precio);
                                   }} 
-                                  className="w-full p-1 text-xs border border-gray-300 rounded"
+                                  className="w-full p-1 text-xs border border-gray-200 rounded-xl"
                                 >
                                   <option value="">Seleccionar...</option>
                                   {recetasDisponibles.filter(receta => {
@@ -476,7 +472,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                                   min="0" 
                                   value={item.cantidadUtilizada} 
                                   onChange={(e) => actualizarReceta(index, 'cantidadUtilizada', parseFloat(e.target.value) || 0)} 
-                                  className="w-full p-1 text-xs border border-gray-300 rounded" 
+                                  className="w-full p-1 text-xs border border-gray-200 rounded-xl" 
                                 />
                               </div>
                               <div className="col-span-2 text-center text-gray-600">
@@ -489,9 +485,9 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                                 <button 
                                   type="button" 
                                   onClick={() => eliminarReceta(index)} 
-                                  className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                  className="p-1 text-red-600 hover:bg-red-50 rounded-xl"
                                 >
-                                  🗑️
+                                  <Trash2 size={14} />
                                 </button>
                               </div>
                             </div>
@@ -502,7 +498,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                   )}
 
                   {/* Resumen de costos compacto */}
-                  <div className="mt-2 sm:mt-3 lg:mt-4 p-2 bg-white rounded-md border">
+                  <div className="mt-2 sm:mt-3 lg:mt-4 p-2 bg-white rounded-xl border border-gray-100">
                     <div className="grid grid-cols-3 gap-1 sm:gap-2 text-xs text-center">
                       <div>
                         <div className="font-bold text-gray-400">
@@ -527,12 +523,12 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                   </div>
 
                   {/* Botones de acción */}
-                  <div className="mt-2 sm:mt-3 lg:mt-4 pt-2 sm:pt-3 border-t border-gray-200 bg-gray-50 -mx-2 sm:-mx-3 -mb-2 sm:-mb-3 px-2 sm:px-3 pb-2 sm:pb-3 rounded-b-lg">
+                  <div className="mt-2 sm:mt-3 lg:mt-4 pt-2 sm:pt-3 border-t border-gray-200 bg-gray-50/60 -mx-3 -mb-3 px-3 pb-3 rounded-b-xl">
                     <div className="flex gap-2 sm:gap-3">
                       <button 
                         type="button" 
                         onClick={onCancelar} 
-                        className="flex-1 px-3 sm:px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors text-sm sm:text-base font-medium" 
+                        className="flex-1 px-3 sm:px-4 py-2 text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl transition-colors text-sm sm:text-base font-medium" 
                         disabled={enviando}
                       >
                         Cancelar
@@ -540,9 +536,9 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                       <button 
                         type="submit" 
                         disabled={enviando} 
-                        className="flex-1 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm sm:text-base font-medium"
+                        className="flex-1 px-3 sm:px-4 py-2 flex items-center justify-center gap-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-colors disabled:opacity-50 text-sm sm:text-base font-medium"
                       >
-                        {enviando ? 'Creando...' : 'Crear Producción'}
+                        {enviando ? <><Loader2 size={16} className="animate-spin" /> Creando...</> : 'Crear Producción'}
                       </button>
                     </div>
                   </div>
@@ -554,25 +550,25 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
 
         {/* Modal Selector del Catálogo */}
         {mostrarSelectorCatalogo && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-0 sm:p-4">
-            <div className="bg-white sm:rounded-xl shadow-2xl w-full h-full sm:h-auto sm:max-w-5xl sm:max-h-[85vh] flex flex-col">
-              <div className="flex items-center justify-between p-3 sm:p-4 lg:p-6 border-b">
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-0 sm:p-4">
+            <div className="bg-white sm:rounded-2xl shadow-xl border border-gray-100 w-full h-full sm:h-auto sm:max-w-5xl sm:max-h-[85vh] flex flex-col">
+              <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-4 sm:px-5 py-4 rounded-t-2xl flex items-center justify-between">
                 <div>
-                  <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900">🏭 Catálogo de Producción</h3>
+                  <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 flex items-center gap-2"><Factory size={20} className="text-blue-500" /> Catálogo de Producción</h3>
                   <p className="text-xs sm:text-sm text-gray-500 mt-1">Selecciona un producto para continuar</p>
                 </div>
                 <button
                   onClick={() => setMostrarSelectorCatalogo(false)}
-                  className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg"
+                  className="p-1.5 hover:bg-white/80 rounded-xl text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  ✕
+                  <X size={20} />
                 </button>
               </div>
 
               <div className="flex-1 overflow-y-auto p-6">
                 {productosProduccion.length === 0 ? (
                   <div className="text-center py-12">
-                    <div className="text-gray-300 text-6xl mb-4">📦</div>
+                    <Package size={48} className="mx-auto text-gray-300 mb-4" />
                     <h4 className="text-lg font-medium text-gray-700 mb-2">No hay productos disponibles</h4>
                     <p className="text-gray-500 mb-4">No se encontraron productos de producción en el catálogo.</p>
                   </div>
@@ -589,7 +585,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                             <h4 className="font-semibold text-gray-900">{producto.nombre}</h4>
                             <p className="text-sm text-gray-500">{producto.codigo}</p>
                           </div>
-                          <div className="text-blue-500 text-2xl">🏭</div>
+                          <div className="text-blue-500 text-2xl"><Factory size={24} /></div>
                         </div>
                         
                         {producto.descripcion && (
@@ -597,7 +593,7 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                         )}
                         
                         <div className="flex items-center justify-between pt-2 border-t">
-                          <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-md text-xs">
+                          <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-xl text-xs">
                             {producto.unidadMedida || 'Unidad'}
                           </span>
                           {producto.costoEstimado > 0 && (
@@ -612,14 +608,14 @@ const NuevaProduccion = ({ onGuardar, onCancelar }) => {
                 )}
               </div>
 
-              <div className="border-t px-6 py-4 bg-gray-50 rounded-b-xl">
+              <div className="border-t px-6 py-4 bg-gray-50/60 rounded-b-2xl">
                 <div className="flex justify-between items-center">
                   <div className="text-xs text-gray-500">
-                    💡 Al seleccionar un producto, se auto-completará la información básica
+                    Al seleccionar un producto, se auto-completará la información básica
                   </div>
                   <button
                     onClick={() => setMostrarSelectorCatalogo(false)}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                    className="px-4 py-2 text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl transition-colors"
                   >
                     Cancelar
                   </button>

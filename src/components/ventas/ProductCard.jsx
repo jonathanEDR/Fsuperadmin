@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Minus, Edit3, Trash2, Calculator } from 'lucide-react';
+import { Plus, Minus, Edit3, Trash2, Calculator, Loader2 } from 'lucide-react';
 import QuantityModal from './QuantityModal';
 import { useCantidadManagement } from '../../hooks/useCantidadManagement';
 import { useProductoSafe } from '../../hooks/useProductoSafe';
@@ -154,10 +154,10 @@ const ProductCard = ({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-4 shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-white border border-gray-200 rounded-xl p-2 sm:p-4 shadow-sm hover:shadow-md transition-shadow">
       {/* Mostrar error si el producto no es válido */}
       {!productoSafe.isValid && (
-        <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+        <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded-xl">
           <div className="text-red-600 text-xs font-medium">
             ⚠️ Error: {productoSafe.error}
           </div>
@@ -213,7 +213,7 @@ const ProductCard = ({
             {!tieneDevolucion ? (
               <>
                 {/* Controles de cantidad más compactos */}
-                <div className="flex items-center gap-1 bg-gray-50 rounded-lg p-1">
+                <div className="flex items-center gap-1 bg-gray-50 rounded-xl p-1">
                   <button
                     onClick={() => handleQuantityChange('decrease')}
                     disabled={isUpdating || producto.cantidad <= 1}
@@ -272,7 +272,7 @@ const ProductCard = ({
               </>
             ) : (
               /* 🔒 MENSAJE CUANDO HAY DEVOLUCIONES - más compacto */
-              <div className="bg-orange-50 border border-orange-200 rounded-lg p-2 text-center">
+              <div className="bg-orange-50 border border-orange-200 rounded-xl p-2 text-center">
                 <div className="text-orange-700 text-xs">
                   🔒 <span className="font-medium">Cantidad bloqueada</span>
                 </div>
@@ -290,7 +290,7 @@ const ProductCard = ({
 
       {isUpdating && (
         <div className="mt-2 flex items-center gap-2 text-sm text-blue-600">
-          <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+          <Loader2 size={16} className="animate-spin text-blue-600" />
           Actualizando...
         </div>
       )}

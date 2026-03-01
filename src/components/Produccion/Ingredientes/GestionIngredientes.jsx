@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Loader2, Package, Pencil, Scale, ClipboardList, Trash2, AlertTriangle, Plus, Search } from 'lucide-react';
 import { ingredienteService } from '../../../services/ingredienteService';
 import FormularioIngredienteMejorado from './FormularioIngredienteMejorado';
 import AjusteInventario from './AjusteInventario';
@@ -110,7 +111,7 @@ const GestionIngredientes = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <Loader2 size={48} className="animate-spin text-blue-600" />
       </div>
     );
   }
@@ -125,21 +126,22 @@ const GestionIngredientes = () => {
       </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center gap-2">
+          <AlertTriangle size={16} className="flex-shrink-0" />
           {error}
         </div>
       )}
 
       {/* Filtros super compactos para móvil */}
-      <div className="bg-white p-2 md:p-4 rounded-lg shadow mb-4 md:mb-6">
+      <div className="bg-white p-2 md:p-4 rounded-2xl shadow-xl border border-gray-100 mb-4 md:mb-6">
 
          {/* Solo super_admin puede crear nuevos ingredientes */}
          {canManageIngredientes && (
            <button
             onClick={handleNuevoIngrediente}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto"
+            className="flex items-center gap-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 px-4 py-2 rounded-xl transition-colors w-full sm:w-auto font-medium"
           >
-            Nuevo Ingrediente
+            <Plus size={16} /> Nuevo Ingrediente
           </button>
          )}
         {/* Filtro de búsqueda principal en móvil */}
@@ -149,7 +151,7 @@ const GestionIngredientes = () => {
             value={filtros.buscar}
             onChange={(e) => handleFiltroChange('buscar', e.target.value)}
             placeholder="Buscar ingrediente..."
-            className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="w-full p-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
           />
         </div>
         
@@ -158,7 +160,7 @@ const GestionIngredientes = () => {
           <select
             value={filtros.unidadMedida}
             onChange={(e) => handleFiltroChange('unidadMedida', e.target.value)}
-            className="flex-1 p-2 text-xs border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="flex-1 p-2 text-xs border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
           >
             <option value="">Todas las unidades</option>
             <option value="kg">kg</option>
@@ -172,7 +174,7 @@ const GestionIngredientes = () => {
           <select
             value={filtros.activo}
             onChange={(e) => handleFiltroChange('activo', e.target.value === 'true')}
-            className="flex-1 p-2 text-xs border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="flex-1 p-2 text-xs border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
           >
             <option value="true">Activos</option>
             <option value="false">Inactivos</option>
@@ -190,7 +192,7 @@ const GestionIngredientes = () => {
               value={filtros.buscar}
               onChange={(e) => handleFiltroChange('buscar', e.target.value)}
               placeholder="Nombre del ingrediente..."
-              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
           <div>
@@ -200,7 +202,7 @@ const GestionIngredientes = () => {
             <select
               value={filtros.unidadMedida}
               onChange={(e) => handleFiltroChange('unidadMedida', e.target.value)}
-              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
             >
               <option value="">Todas</option>
               <option value="kg">Kilogramos</option>
@@ -218,7 +220,7 @@ const GestionIngredientes = () => {
             <select
               value={filtros.activo}
               onChange={(e) => handleFiltroChange('activo', e.target.value === 'true')}
-              className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
             >
               <option value="true">Activos</option>
               <option value="false">Inactivos</option>
@@ -263,15 +265,15 @@ const GestionIngredientes = () => {
               
               {/* Stats en grid */}
               <div className="grid grid-cols-3 gap-2 mb-3">
-                <div className="bg-blue-50 rounded-lg p-2 text-center">
+                <div className="bg-blue-50 rounded-xl p-2 text-center">
                   <p className="text-xs text-blue-600 font-medium">Total</p>
                   <p className="text-sm font-bold text-blue-800">{ingrediente.cantidad}</p>
                 </div>
-                <div className="bg-orange-50 rounded-lg p-2 text-center">
+                <div className="bg-orange-50 rounded-xl p-2 text-center">
                   <p className="text-xs text-orange-600 font-medium">Procesado</p>
                   <p className="text-sm font-bold text-orange-800">{ingrediente.procesado}</p>
                 </div>
-                <div className="bg-emerald-50 rounded-lg p-2 text-center">
+                <div className="bg-emerald-50 rounded-xl p-2 text-center">
                   <p className="text-xs text-emerald-600 font-medium">Disponible</p>
                   <p className={`text-sm font-bold ${getStockColor(ingrediente)}`}>{disponible}</p>
                 </div>
@@ -287,8 +289,9 @@ const GestionIngredientes = () => {
               
               {/* Referencia al catálogo */}
               {ingrediente.productoReferencia && (
-                <div className="bg-blue-50 rounded-lg p-2 mb-3 flex items-center text-xs">
-                  <span className="mr-1">{ingrediente.productoReferencia.tipoProduccion?.icono || '📦'}</span>
+                <div className="bg-blue-50 rounded-xl p-2 mb-3 flex items-center text-xs">
+                  <span className="mr-1">{ingrediente.productoReferencia.tipoProduccion?.icono || ''}</span>
+                  <Package size={12} className="mr-1 text-blue-600" />
                   <span className="text-blue-700">
                     {ingrediente.productoReferencia.codigo} - {ingrediente.productoReferencia.nombre}
                   </span>
@@ -302,37 +305,37 @@ const GestionIngredientes = () => {
                   {canManageIngredientes && (
                     <button
                       onClick={() => handleEditarIngrediente(ingrediente)}
-                      className="flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors"
+                      className="flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-xs font-medium hover:bg-blue-100 transition-colors"
                     >
-                      <span className="mr-1">✏️</span> Editar
+                      <Pencil size={12} className="mr-1" /> Editar
                     </button>
                   )}
                   {/* Admin o superior puede ajustar inventario */}
                   {canAdjustInventory && (
                     <button
                       onClick={() => handleAjustarInventario(ingrediente)}
-                      className="flex items-center px-3 py-1.5 bg-green-50 text-green-600 rounded-lg text-xs font-medium hover:bg-green-100 transition-colors"
+                      className="flex items-center px-3 py-1.5 bg-green-50 text-green-600 border border-green-200 rounded-xl text-xs font-medium hover:bg-green-100 transition-colors"
                     >
-                      <span className="mr-1">⚖️</span> Ajustar
+                      <Scale size={12} className="mr-1" /> Ajustar
                     </button>
                   )}
                 </div>
                 <div className="flex space-x-1">
                   <button
                     onClick={() => handleVerMovimientos(ingrediente)}
-                    className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                    className="p-2 text-purple-600 hover:bg-purple-50 rounded-xl transition-colors"
                     title="Historial"
                   >
-                    📋
+                    <ClipboardList size={16} />
                   </button>
                   {/* Solo super_admin puede desactivar */}
                   {canManageIngredientes && (
                     <button
                       onClick={() => handleDesactivar(ingrediente._id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors"
                       title="Desactivar"
                     >
-                      🗑️
+                      <Trash2 size={16} />
                     </button>
                   )}
                 </div>
@@ -349,7 +352,7 @@ const GestionIngredientes = () => {
       </div>
 
       {/* ========== VISTA DESKTOP: Tabla ========== */}
-      <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden">
+      <div className="hidden md:block bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -398,9 +401,8 @@ const GestionIngredientes = () => {
                       {ingrediente.productoReferencia ? (
                         <>
                           <div className="flex items-center text-sm text-blue-600">
-                            <span className="mr-1">
-                              {ingrediente.productoReferencia.tipoProduccion?.icono || '📦'}
-                            </span>
+                            <Package size={14} className="mr-1 text-blue-500" />
+                            {ingrediente.productoReferencia.tipoProduccion?.icono || ''}
                             Del Catálogo
                           </div>
                           <div className="text-xs text-gray-500">
@@ -409,7 +411,7 @@ const GestionIngredientes = () => {
                         </>
                       ) : (
                         <div className="flex items-center text-sm text-red-600">
-                          <span className="mr-1">⚠️</span>
+                          <AlertTriangle size={14} className="mr-1" />
                           Sin referencia
                         </div>
                       )}
@@ -437,9 +439,9 @@ const GestionIngredientes = () => {
                         <button
                           onClick={() => handleEditarIngrediente(ingrediente)}
                           title="Editar"
-                          className="p-1 text-blue-600 hover:text-blue-900 rounded hover:bg-blue-50 transition-colors"
+                          className="p-1.5 text-blue-600 hover:text-blue-900 rounded-lg hover:bg-blue-50 transition-colors"
                         >
-                          <span role="img" aria-label="Editar">✏️</span>
+                          <Pencil size={16} />
                         </button>
                       )}
                       {/* Admin o superior puede ajustar */}
@@ -447,26 +449,26 @@ const GestionIngredientes = () => {
                         <button
                           onClick={() => handleAjustarInventario(ingrediente)}
                           title="Ajustar Inventario"
-                          className="p-1 text-green-600 hover:text-green-900 rounded hover:bg-green-50 transition-colors"
+                          className="p-1.5 text-green-600 hover:text-green-900 rounded-lg hover:bg-green-50 transition-colors"
                         >
-                          <span role="img" aria-label="Ajustar">⚖️</span>
+                          <Scale size={16} />
                         </button>
                       )}
                       <button
                         onClick={() => handleVerMovimientos(ingrediente)}
                         title="Historial"
-                        className="p-1 text-purple-600 hover:text-purple-900 rounded hover:bg-purple-50 transition-colors"
+                        className="p-1.5 text-purple-600 hover:text-purple-900 rounded-lg hover:bg-purple-50 transition-colors"
                       >
-                        <span role="img" aria-label="Historial">📋</span>
+                        <ClipboardList size={16} />
                       </button>
                       {/* Solo super_admin puede desactivar */}
                       {canManageIngredientes && (
                         <button
                           onClick={() => handleDesactivar(ingrediente._id)}
                           title="Desactivar"
-                          className="p-1 text-red-600 hover:text-red-900 rounded hover:bg-red-50 transition-colors"
+                          className="p-1.5 text-red-600 hover:text-red-900 rounded-lg hover:bg-red-50 transition-colors"
                         >
-                          <span role="img" aria-label="Desactivar">🗑️</span>
+                          <Trash2 size={16} />
                         </button>
                       )}
                     </div>

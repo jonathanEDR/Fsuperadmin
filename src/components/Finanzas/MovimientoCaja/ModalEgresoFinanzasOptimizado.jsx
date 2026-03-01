@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect } from 'react';
-import { X, MinusCircle } from 'lucide-react';
+import { X, MinusCircle, Loader2 } from 'lucide-react';
 
 // Hooks optimizados
 import { useEgresoForm } from './hooks/useEgresoForm';
@@ -132,27 +132,27 @@ const ModalEgresoFinanzasOptimizado = memo(({ isOpen, onClose, onSuccess }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-6xl w-full max-h-[90vh] overflow-y-auto">
                 {/* Header optimizado */}
-                <header className="flex items-center justify-between p-6 border-b border-gray-200">
+                <header className="flex items-center justify-between bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-5 py-4 rounded-t-2xl">
                     <h2 className="text-xl font-semibold text-gray-900 flex items-center">
                         <MinusCircle className="w-5 h-5 mr-2 text-red-600" />
                         Registrar Egreso
                     </h2>
                     <button
                         onClick={handleClose}
-                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                        className="p-1.5 hover:bg-white/80 rounded-xl text-gray-400 hover:text-gray-600 transition-colors"
                         disabled={loading}
                     >
-                        <X className="w-6 h-6" />
+                        <X size={20} />
                     </button>
                 </header>
 
                 {/* Loading state */}
                 {optionsLoading && (
                     <div className="p-6 text-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+                        <Loader2 className="animate-spin h-8 w-8 text-red-600 mx-auto" />
                         <p className="mt-2 text-gray-600">Cargando opciones...</p>
                     </div>
                 )}
@@ -207,7 +207,7 @@ const ModalEgresoFinanzasOptimizado = memo(({ isOpen, onClose, onSuccess }) => {
                                     type="text"
                                     value={formData.proveedor.nombre}
                                     onChange={(e) => handleNestedChange('proveedor.nombre', e.target.value)}
-                                    className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                    className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500"
                                     placeholder="Nombre o razón social"
                                 />
                             </div>
@@ -221,7 +221,7 @@ const ModalEgresoFinanzasOptimizado = memo(({ isOpen, onClose, onSuccess }) => {
                                         type="text"
                                         value={formData.proveedor.ruc}
                                         onChange={(e) => handleNestedChange('proveedor.ruc', e.target.value)}
-                                        className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                        className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500"
                                         placeholder="RUC o DNI"
                                     />
                                 </div>
@@ -234,7 +234,7 @@ const ModalEgresoFinanzasOptimizado = memo(({ isOpen, onClose, onSuccess }) => {
                                         type="text"
                                         value={formData.proveedor.contacto}
                                         onChange={(e) => handleNestedChange('proveedor.contacto', e.target.value)}
-                                        className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                        className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500"
                                         placeholder="Teléfono o email"
                                     />
                                 </div>
@@ -254,7 +254,7 @@ const ModalEgresoFinanzasOptimizado = memo(({ isOpen, onClose, onSuccess }) => {
                                 <select
                                     value={formData.documento.tipo}
                                     onChange={(e) => handleNestedChange('documento.tipo', e.target.value)}
-                                    className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                    className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500"
                                 >
                                     <option value="recibo">Recibo</option>
                                     <option value="factura">Factura</option>
@@ -272,7 +272,7 @@ const ModalEgresoFinanzasOptimizado = memo(({ isOpen, onClose, onSuccess }) => {
                                         type="text"
                                         value={formData.documento.serie}
                                         onChange={(e) => handleNestedChange('documento.serie', e.target.value)}
-                                        className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                        className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500"
                                         placeholder="Ej: F001"
                                     />
                                 </div>
@@ -285,7 +285,7 @@ const ModalEgresoFinanzasOptimizado = memo(({ isOpen, onClose, onSuccess }) => {
                                         type="text"
                                         value={formData.documento.numero}
                                         onChange={(e) => handleNestedChange('documento.numero', e.target.value)}
-                                        className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                        className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500"
                                         placeholder="Ej: 00001234"
                                     />
                                 </div>
@@ -301,18 +301,18 @@ const ModalEgresoFinanzasOptimizado = memo(({ isOpen, onClose, onSuccess }) => {
                         <textarea
                             value={formData.observaciones}
                             onChange={(e) => handleInputChange('observaciones', e.target.value)}
-                            className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            className="w-full px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500"
                             placeholder="Observaciones adicionales..."
                             rows="3"
                         />
                     </div>
 
                     {/* Footer con botones */}
-                    <div className="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
+                    <div className="flex justify-end space-x-4 -mx-6 -mb-6 mt-8 bg-gray-50/50 border-t border-gray-100 px-5 py-3 rounded-b-2xl">
                         <button
                             type="button"
                             onClick={handleClose}
-                            className="px-6 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                            className="px-6 py-2 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
                             disabled={loading}
                         >
                             Cancelar
@@ -320,12 +320,12 @@ const ModalEgresoFinanzasOptimizado = memo(({ isOpen, onClose, onSuccess }) => {
                         
                         <button
                             type="submit"
-                            className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-400 transition-colors flex items-center"
+                            className="px-6 py-2 text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 rounded-xl transition-colors flex items-center"
                             disabled={loading || !isFormValid}
                         >
                             {loading ? (
                                 <>
-                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                    <Loader2 className="animate-spin h-4 w-4 text-white mr-2" />
                                     Registrando...
                                 </>
                             ) : (

@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import { ArrowUp, ArrowDown, Scale, Landmark } from 'lucide-react';
 
 /**
  * Componente memoizado para las tarjetas de estadísticas
@@ -12,7 +13,7 @@ const DashboardStatsCards = memo(({ estadisticas, loading }) => {
             title: 'Ingresos del Mes',
             value: estadisticas?.resumen?.ingresosMes || 0,
             format: 'currency',
-            icon: 'fa-arrow-up',
+            icon: ArrowUp,
             color: 'success',
             borderColor: 'border-left-success',
             trend: estadisticas?.resumen?.tendenciaIngresos
@@ -21,7 +22,7 @@ const DashboardStatsCards = memo(({ estadisticas, loading }) => {
             title: 'Egresos del Mes',
             value: estadisticas?.resumen?.egresosMes || 0,
             format: 'currency',
-            icon: 'fa-arrow-down',
+            icon: ArrowDown,
             color: 'danger',
             borderColor: 'border-left-danger',
             trend: estadisticas?.resumen?.tendenciaEgresos
@@ -30,7 +31,7 @@ const DashboardStatsCards = memo(({ estadisticas, loading }) => {
             title: 'Balance del Mes',
             value: estadisticas?.resumen?.balanceMes || 0,
             format: 'currency',
-            icon: 'fa-balance-scale',
+            icon: Scale,
             color: (estadisticas?.resumen?.balanceMes || 0) >= 0 ? 'success' : 'danger',
             borderColor: (estadisticas?.resumen?.balanceMes || 0) >= 0 ? 'border-left-success' : 'border-left-danger',
             trend: estadisticas?.resumen?.tendenciaBalance
@@ -39,7 +40,7 @@ const DashboardStatsCards = memo(({ estadisticas, loading }) => {
             title: 'Cuentas Bancarias',
             value: estadisticas?.resumen?.totalCuentas || 0,
             format: 'number',
-            icon: 'fa-university',
+            icon: Landmark,
             color: 'info',
             borderColor: 'border-left-info'
         }
@@ -66,7 +67,7 @@ const DashboardStatsCards = memo(({ estadisticas, loading }) => {
         
         return (
             <div className={`text-xs font-weight-bold ${isPositive ? 'text-success' : 'text-danger'} text-uppercase mb-1`}>
-                <i className={`fas fa-${isPositive ? 'arrow-up' : 'arrow-down'} mr-1`}></i>
+                {isPositive ? <ArrowUp size={12} className="mr-1 inline" /> : <ArrowDown size={12} className="mr-1 inline" />}
                 {Math.abs(percentage)}% {isPositive ? 'incremento' : 'decremento'}
             </div>
         );
@@ -95,7 +96,7 @@ const DashboardStatsCards = memo(({ estadisticas, loading }) => {
                                     {renderTrend(stat.trend)}
                                 </div>
                                 <div className="col-auto">
-                                    <i className={`fas ${stat.icon} fa-2x text-gray-300`}></i>
+                                    <stat.icon size={32} className="text-gray-300" />
                                 </div>
                             </div>
                         </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Info } from 'lucide-react';
 import IngredientesBarChart from './IngredientesBarChart';
 import RecetasStockBarChart from './RecetasStockBarChart';
 import MaterialesBarChart from './MaterialesBarChart';
@@ -44,7 +45,7 @@ const GraficosProduccionPage = () => {
         {/* Información adicional */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
           <div className="flex items-start gap-3">
-            <span className="text-2xl">ℹ️</span>
+            <Info size={22} className="text-blue-600 flex-shrink-0 mt-0.5" />
             <div>
               <h3 className="text-sm font-semibold text-gray-900 mb-1">Acerca de los gráficos</h3>
               <ul className="text-sm text-gray-600 space-y-1">

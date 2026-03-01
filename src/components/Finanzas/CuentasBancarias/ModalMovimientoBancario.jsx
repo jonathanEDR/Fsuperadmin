@@ -24,7 +24,7 @@ export const ModalMovimientoBancario = ({
         >
             <div className="space-y-3">
                 {/* Info cuenta - Más compacta */}
-                <div className="bg-blue-50 p-2 rounded-md text-sm border border-blue-200">
+                <div className="bg-blue-50 p-2 rounded-xl text-sm border border-blue-200">
                     <div className="flex justify-between items-center">
                         <span className="font-medium text-gray-700">{cuentaMovimiento?.nombre}</span>
                         <span className="font-bold text-blue-600">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { sucursalInventarioService } from '../../../services/sucursalInventarioService';
 import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
+import { Truck, ScrollText, BarChart3, Plus, RefreshCw, Package, MapPin, Calendar, FileText, Undo2, Store, AlertTriangle, Search, X, Loader2, CheckCircle, XCircle, Info, Check, Clock, Trash2 } from 'lucide-react';
 
 const TransferenciasSucursales = () => {
   // Hook de permisos para control de roles
@@ -211,7 +212,7 @@ const TransferenciasSucursales = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500"></div>
+        <Loader2 size={32} className="animate-spin text-teal-500" />
         <span className="ml-3 text-gray-600">Cargando datos...</span>
       </div>
     );
@@ -221,17 +222,17 @@ const TransferenciasSucursales = () => {
     <div className="space-y-6">
       {/* Mensaje de notificación */}
       {mensaje.texto && (
-        <div className={`p-4 rounded-lg ${
+        <div className={`p-4 rounded-xl ${
           mensaje.tipo === 'success' ? 'bg-green-50 border border-green-200' :
           mensaje.tipo === 'error' ? 'bg-red-50 border border-red-200' :
           'bg-blue-50 border border-blue-200'
         }`}>
-          <p className={`${
+          <p className={`flex items-center gap-2 ${
             mensaje.tipo === 'success' ? 'text-green-800' :
             mensaje.tipo === 'error' ? 'text-red-800' :
             'text-blue-800'
           }`}>
-            {mensaje.tipo === 'success' ? '✅ ' : mensaje.tipo === 'error' ? '❌ ' : 'ℹ️ '}
+            {mensaje.tipo === 'success' ? <CheckCircle size={16} /> : mensaje.tipo === 'error' ? <XCircle size={16} /> : <Info size={16} />}
             {mensaje.texto}
           </p>
         </div>
@@ -248,7 +249,7 @@ const TransferenciasSucursales = () => {
           }`}
           title="Transferencias"
         >
-          <span className="text-lg sm:text-base">🚚</span>
+          <span className="text-lg sm:text-base"><Truck size={18} /></span>
           <span className="hidden sm:inline ml-1">Transferencias</span>
         </button>
         <button
@@ -260,7 +261,7 @@ const TransferenciasSucursales = () => {
           }`}
           title="Historial"
         >
-          <span className="text-lg sm:text-base">📜</span>
+          <span className="text-lg sm:text-base"><ScrollText size={18} /></span>
           <span className="hidden sm:inline ml-1">Historial</span>
         </button>
         <button
@@ -272,7 +273,7 @@ const TransferenciasSucursales = () => {
           }`}
           title="Estadísticas por Sucursal"
         >
-          <span className="text-lg sm:text-base">📊</span>
+          <span className="text-lg sm:text-base"><BarChart3 size={18} /></span>
           <span className="hidden sm:inline ml-1">Estadísticas</span>
         </button>
       </div>
@@ -284,27 +285,27 @@ const TransferenciasSucursales = () => {
           <div className="flex items-center justify-between gap-2">
             <button
               onClick={() => setMostrarFormulario(true)}
-              className="px-3 sm:px-6 py-2 sm:py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors shadow-md flex items-center gap-2"
+              className="px-3 sm:px-6 py-2 sm:py-3 text-teal-700 bg-teal-50 border border-teal-200 hover:bg-teal-100 rounded-xl transition-colors shadow-sm flex items-center gap-2"
               title="Nueva Transferencia a Sucursal"
             >
-              <span className="text-lg">➕</span>
+              <span className="text-lg"><Plus size={18} /></span>
               <span className="hidden sm:inline">Nueva Transferencia a Sucursal</span>
             </button>
             <button
               onClick={() => cargarDatos()}
               disabled={loading}
-              className="px-3 sm:px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center gap-2"
+              className="px-3 sm:px-4 py-2 text-sm text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl transition-colors flex items-center gap-2"
               title="Actualizar lista de materiales"
             >
-              <span>{loading ? '⏳' : '🔄'}</span>
+              <span>{loading ? <Clock size={16} className="animate-pulse" /> : <RefreshCw size={16} />}</span>
               <span className="hidden sm:inline">Actualizar</span>
             </button>
           </div>
 
           {/* Resumen de materiales disponibles */}
-          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">
-              📦 <span className="hidden sm:inline">Materiales Disponibles para Transferir</span>
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <Package size={18} className="text-gray-600" /> <span className="hidden sm:inline">Materiales Disponibles para Transferir</span>
               <span className="sm:hidden">Materiales Disponibles</span>
             </h3>
             {materiales.length === 0 ? (
@@ -318,7 +319,7 @@ const TransferenciasSucursales = () => {
                   {materiales.map(material => (
                     <div
                       key={material._id}
-                      className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                      className="bg-gray-50 rounded-xl p-4 border border-gray-200"
                     >
                       <div className="font-medium text-gray-900 mb-2">
                         {material.nombre}
@@ -336,7 +337,7 @@ const TransferenciasSucursales = () => {
                 {/* Vista de tabla para desktop */}
                 <div className="hidden sm:block overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-gradient-to-r from-slate-50 to-gray-50">
                       <tr>
                         <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Material</th>
                         <th className="px-4 py-2 text-center text-sm font-medium text-gray-700">Disponible</th>
@@ -368,27 +369,27 @@ const TransferenciasSucursales = () => {
       {vistaActiva === 'historial' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-2">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-800">
-              📜 <span className="hidden sm:inline">Historial de Transferencias</span>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800 flex items-center gap-2">
+              <ScrollText size={18} className="text-gray-600" /> <span className="hidden sm:inline">Historial de Transferencias</span>
               <span className="sm:hidden">Historial</span>
             </h3>
             <button
               onClick={cargarHistorial}
-              className="px-3 sm:px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-1"
+              className="px-3 sm:px-4 py-2 text-sm text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl transition-colors flex items-center gap-1"
               title="Actualizar historial"
             >
-              <span>🔄</span>
+              <span><RefreshCw size={16} /></span>
               <span className="hidden sm:inline">Actualizar</span>
             </button>
           </div>
 
           {loadingHistorial ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500"></div>
+              <Loader2 size={24} className="animate-spin text-teal-500" />
               <span className="ml-3 text-gray-600">Cargando historial...</span>
             </div>
           ) : historial.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-md p-8 text-center">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 text-center">
               <p className="text-gray-500">No hay transferencias registradas</p>
             </div>
           ) : (
@@ -402,7 +403,7 @@ const TransferenciasSucursales = () => {
                   return (
                     <div
                       key={mov._id}
-                      className={`bg-white rounded-lg shadow-md p-4 border-l-4 ${
+                      className={`bg-white rounded-xl shadow-sm p-4 border-l-4 ${
                         esRevertido ? 'border-red-400 bg-red-50' :
                         esReversion ? 'border-orange-400' : 'border-green-400'
                       }`}
@@ -427,13 +428,13 @@ const TransferenciasSucursales = () => {
                       {/* Info: Sucursal y Fecha */}
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
-                          <span className="text-gray-500">📍 Sucursal:</span>
+                          <span className="text-gray-500 flex items-center gap-1"><MapPin size={14} /> Sucursal:</span>
                           <span className="text-gray-900 font-medium">
                             {mov.sucursalDestino?.nombre || 'Sin sucursal'}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-500">📅 Fecha:</span>
+                          <span className="text-gray-500 flex items-center gap-1"><Calendar size={14} /> Fecha:</span>
                           <span className="text-gray-700">
                             {new Date(mov.fecha).toLocaleString('es-PE', {
                               day: 'numeric',
@@ -445,7 +446,7 @@ const TransferenciasSucursales = () => {
                         </div>
                         {mov.motivo && (
                           <div className="flex justify-between">
-                            <span className="text-gray-500">📝 Motivo:</span>
+                            <span className="text-gray-500 flex items-center gap-1"><FileText size={14} /> Motivo:</span>
                             <span className="text-gray-700 text-right max-w-[60%] truncate">
                               {mov.motivo}
                             </span>
@@ -458,14 +459,14 @@ const TransferenciasSucursales = () => {
                         {!esRevertido && !esReversion ? (
                           <button
                             onClick={() => abrirModalRevertir(mov)}
-                            className="w-full px-3 py-2 text-sm bg-red-100 text-red-700 hover:bg-red-200 rounded-lg transition-colors flex items-center justify-center gap-1"
+                            className="w-full px-3 py-2 text-sm text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 rounded-xl transition-colors flex items-center justify-center gap-1"
                           >
-                            <span>↩️</span>
+                            <span><Undo2 size={14} /></span>
                             <span>Revertir</span>
                           </button>
                         ) : (
-                          <div className="text-center text-sm text-gray-400">
-                            {esRevertido ? '✓ Revertido' : '↩️ Reversión'}
+                          <div className="text-center text-sm text-gray-400 flex items-center justify-center gap-1">
+                            {esRevertido ? <><Check size={14} /> Revertido</> : <><Undo2 size={14} /> Reversión</>}
                           </div>
                         )}
                       </div>
@@ -475,10 +476,10 @@ const TransferenciasSucursales = () => {
               </div>
 
               {/* Vista de tabla para desktop - visible solo en pantallas >= 640px */}
-              <div className="hidden sm:block bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="hidden sm:block bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-gradient-to-r from-slate-50 to-gray-50">
                       <tr>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Fecha</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-700">Material</th>
@@ -541,7 +542,7 @@ const TransferenciasSucursales = () => {
                                   className="px-3 py-1 text-xs bg-red-100 text-red-700 hover:bg-red-200 rounded transition-colors"
                                   title="Revertir transferencia"
                                 >
-                                  ↩️ Revertir
+                                  <Undo2 size={12} /> Revertir
                                 </button>
                               ) : (
                                 <span className="text-xs text-gray-400">
@@ -565,63 +566,63 @@ const TransferenciasSucursales = () => {
       {vistaActiva === 'estadisticas' && (
         <div className="space-y-4">
           <div className="flex flex-row items-center justify-between gap-2">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-800">
-              📊 <span className="hidden sm:inline">Inventario por Sucursal</span>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800 flex items-center gap-2">
+              <BarChart3 size={18} className="text-gray-600" /> <span className="hidden sm:inline">Inventario por Sucursal</span>
               <span className="sm:hidden">Inventario</span>
             </h3>
             <button
               onClick={cargarEstadisticas}
               disabled={loadingEstadisticas}
-              className="px-3 sm:px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-1"
+              className="px-3 sm:px-4 py-2 text-sm text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl transition-colors flex items-center gap-1"
               title="Actualizar estadísticas"
             >
-              <span>{loadingEstadisticas ? '⏳' : '🔄'}</span>
+              <span>{loadingEstadisticas ? <Clock size={16} className="animate-pulse" /> : <RefreshCw size={16} />}</span>
               <span className="hidden sm:inline">{loadingEstadisticas ? 'Cargando...' : 'Actualizar'}</span>
             </button>
           </div>
 
           {/* Filtros de fecha */}
-          <div className="bg-white rounded-lg shadow-md p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  📅 Fecha Inicio
+                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                  <Calendar size={14} /> Fecha Inicio
                 </label>
                 <input
                   type="date"
                   value={fechaInicio}
                   onChange={(e) => setFechaInicio(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  📅 Fecha Fin
+                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                  <Calendar size={14} /> Fecha Fin
                 </label>
                 <input
                   type="date"
                   value={fechaFin}
                   onChange={(e) => setFechaFin(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none"
                 />
               </div>
               <div className="flex items-end">
                 <button
                   onClick={aplicarFiltrosFecha}
-                  className="w-full px-3 sm:px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors flex items-center justify-center gap-1"
+                  className="w-full px-3 sm:px-4 py-2 text-teal-700 bg-teal-50 border border-teal-200 hover:bg-teal-100 rounded-xl transition-colors flex items-center justify-center gap-1"
                   title="Filtrar por fechas"
                 >
-                  <span>🔍</span>
+                  <span><Search size={16} /></span>
                   <span className="hidden sm:inline">Filtrar</span>
                 </button>
               </div>
               <div className="flex items-end">
                 <button
                   onClick={limpiarFiltros}
-                  className="w-full px-3 sm:px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center gap-1"
+                  className="w-full px-3 sm:px-4 py-2 text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl transition-colors flex items-center justify-center gap-1"
                   title="Limpiar filtros"
                 >
-                  <span>✕</span>
+                  <span><X size={16} /></span>
                   <span className="hidden sm:inline">Limpiar</span>
                 </button>
               </div>
@@ -637,11 +638,11 @@ const TransferenciasSucursales = () => {
 
           {loadingEstadisticas ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500"></div>
+              <Loader2 size={24} className="animate-spin text-teal-500" />
               <span className="ml-3 text-gray-600">Cargando estadísticas...</span>
             </div>
           ) : estadisticas.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-md p-8 text-center">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 text-center">
               <p className="text-gray-500">
                 No hay datos de inventario en sucursales
               </p>
@@ -649,13 +650,13 @@ const TransferenciasSucursales = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {estadisticas.map(stat => (
-                <div key={stat._id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div key={stat._id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h4 className="font-semibold text-gray-900">{stat.nombreSucursal}</h4>
                       <p className="text-sm text-gray-500">{stat.ubicacion}</p>
                     </div>
-                    <span className="text-2xl">🏪</span>
+                    <span className="p-2 bg-teal-50 rounded-xl border border-teal-100"><Store size={20} className="text-teal-600" /></span>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
@@ -685,24 +686,24 @@ const TransferenciasSucursales = () => {
       {/* Modal de Nueva Transferencia */}
       {mostrarFormulario && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={() => setMostrarFormulario(false)}
         >
           <div 
-            className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header del Modal */}
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                <span className="text-2xl mr-2">🏪</span>
+            <div className="sticky top-0 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <Store size={20} className="text-teal-600" />
                 Registrar Salida a Sucursal
               </h3>
               <button
                 onClick={() => setMostrarFormulario(false)}
-                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+                className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1.5 rounded-xl transition-colors"
               >
-                ✕
+                <X size={20} />
               </button>
             </div>
 
@@ -717,7 +718,7 @@ const TransferenciasSucursales = () => {
                   <select
                     value={materialSeleccionado}
                     onChange={(e) => setMaterialSeleccionado(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none"
                     required
                   >
                     <option value="">Seleccione un material</option>
@@ -731,7 +732,7 @@ const TransferenciasSucursales = () => {
 
                 {/* Información del material seleccionado */}
                 {materialActual && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <p className="text-gray-600">Stock Total</p>
@@ -753,7 +754,7 @@ const TransferenciasSucursales = () => {
                   <select
                     value={sucursalSeleccionada}
                     onChange={(e) => setSucursalSeleccionada(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none"
                     required
                   >
                     <option value="">Seleccione una sucursal</option>
@@ -777,7 +778,7 @@ const TransferenciasSucursales = () => {
                     value={cantidad}
                     onChange={(e) => setCantidad(e.target.value)}
                     placeholder="Ingrese la cantidad"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none"
                     required
                   />
                 </div>
@@ -792,7 +793,7 @@ const TransferenciasSucursales = () => {
                     value={motivo}
                     onChange={(e) => setMotivo(e.target.value)}
                     placeholder="Ej: Abastecimiento mensual, pedido urgente, etc."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none"
                   />
                 </div>
 
@@ -806,7 +807,7 @@ const TransferenciasSucursales = () => {
                     onChange={(e) => setObservaciones(e.target.value)}
                     rows="3"
                     placeholder="Notas adicionales (opcional)"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none resize-none"
                   />
                 </div>
 
@@ -815,14 +816,14 @@ const TransferenciasSucursales = () => {
                   <button
                     type="submit"
                     disabled={procesando}
-                    className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                    className="flex-1 px-4 py-2 text-teal-700 bg-teal-50 border border-teal-200 hover:bg-teal-100 rounded-xl disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1.5"
                   >
-                    {procesando ? 'Procesando...' : '✓ Confirmar Transferencia'}
+                    {procesando ? 'Procesando...' : <><Check size={16} /> Confirmar Transferencia</>}
                   </button>
                   <button
                     type="button"
                     onClick={() => setMostrarFormulario(false)}
-                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors"
                   >
                     Cancelar
                   </button>
@@ -835,13 +836,13 @@ const TransferenciasSucursales = () => {
 
       {/* Modal de confirmación para revertir */}
       {mostrarModalRevertir && movimientoARevertir && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
-              ⚠️ Confirmar Reversión
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <AlertTriangle size={22} className="text-amber-500" /> Confirmar Reversión
             </h3>
             
-            <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded">
+            <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
               <p className="text-sm text-yellow-800 mb-2">
                 <strong>Material:</strong> {movimientoARevertir.item?.nombre}
               </p>
@@ -866,7 +867,7 @@ const TransferenciasSucursales = () => {
                 onChange={(e) => setMotivoReversion(e.target.value)}
                 rows="3"
                 placeholder="Ej: Transferencia realizada por error, cantidad incorrecta, etc."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none resize-none"
                 required
               />
             </div>
@@ -875,9 +876,9 @@ const TransferenciasSucursales = () => {
               <button
                 onClick={confirmarReversion}
                 disabled={procesando || !motivoReversion.trim()}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 px-4 py-2 text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 rounded-xl disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1.5"
               >
-                {procesando ? 'Procesando...' : '✓ Confirmar Reversión'}
+                {procesando ? 'Procesando...' : <><Check size={16} /> Confirmar Reversión</>}
               </button>
               <button
                 onClick={() => {
@@ -886,7 +887,7 @@ const TransferenciasSucursales = () => {
                   setMotivoReversion('');
                 }}
                 disabled={procesando}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors"
               >
                 Cancelar
               </button>

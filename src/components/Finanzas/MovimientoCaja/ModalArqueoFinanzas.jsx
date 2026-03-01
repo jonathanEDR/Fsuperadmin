@@ -32,19 +32,19 @@ const ModalArqueoFinanzas = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
     
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 px-5 py-4 rounded-t-2xl">
                     <h2 className="text-xl font-semibold text-gray-900 flex items-center">
                         <Calculator className="w-5 h-5 mr-2 text-blue-600" />
                         Arqueo de Caja
                     </h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600"
+                        className="p-1.5 hover:bg-white/80 rounded-xl text-gray-400 hover:text-gray-600"
                     >
-                        <X className="w-6 h-6" />
+                        <X size={20} />
                     </button>
                 </div>
                 
@@ -59,11 +59,11 @@ const ModalArqueoFinanzas = ({ isOpen, onClose }) => {
                                 type="date"
                                 value={fechaSeleccionada}
                                 onChange={(e) => setFechaSeleccionada(e.target.value)}
-                                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             />
                             <button
                                 onClick={cargarArqueo}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                                className="px-4 py-2 text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl"
                                 disabled={loading}
                             >
                                 {loading ? 'Cargando...' : 'Actualizar'}
@@ -79,21 +79,21 @@ const ModalArqueoFinanzas = ({ isOpen, onClose }) => {
                         <div className="space-y-6">
                             {/* Resumen */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                                <div className="bg-green-50 p-4 rounded-xl border border-green-200">
                                     <h3 className="font-medium text-green-800 mb-2">Efectivo Esperado</h3>
                                     <p className="text-2xl font-bold text-green-600">
                                         S/ {arqueo.efectivoEsperado?.toLocaleString('es-PE', { minimumFractionDigits: 2 }) || '0.00'}
                                     </p>
                                 </div>
                                 
-                                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
                                     <h3 className="font-medium text-blue-800 mb-2">Efectivo Calculado</h3>
                                     <p className="text-2xl font-bold text-blue-600">
                                         S/ {arqueo.valorCalculado?.toLocaleString('es-PE', { minimumFractionDigits: 2 }) || '0.00'}
                                     </p>
                                 </div>
                                 
-                                <div className={`p-4 rounded-lg border ${
+                                <div className={`p-4 rounded-xl border ${
                                     Math.abs(arqueo.diferencia || 0) < 0.01
                                         ? 'bg-green-50 border-green-200'
                                         : 'bg-red-50 border-red-200'
@@ -118,7 +118,7 @@ const ModalArqueoFinanzas = ({ isOpen, onClose }) => {
                             {/* Desglose detallado */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Billetes */}
-                                <div className="bg-gray-50 p-4 rounded-lg">
+                                <div className="bg-gray-50 p-4 rounded-xl">
                                     <h3 className="font-medium text-gray-900 mb-4 flex items-center">
                                         <Banknote className="w-5 h-5 mr-2 text-green-600" />
                                         Billetes
@@ -149,7 +149,7 @@ const ModalArqueoFinanzas = ({ isOpen, onClose }) => {
                                         })}
                                     </div>
                                     
-                                    <div className="mt-3 pt-3 border-t border-gray-300">
+                                    <div className="mt-3 pt-3 border-t border-gray-200">
                                         <div className="flex justify-between items-center font-semibold">
                                             <span>Total Billetes:</span>
                                             <span className="text-green-600">
@@ -166,7 +166,7 @@ const ModalArqueoFinanzas = ({ isOpen, onClose }) => {
                                 </div>
                                 
                                 {/* Monedas */}
-                                <div className="bg-gray-50 p-4 rounded-lg">
+                                <div className="bg-gray-50 p-4 rounded-xl">
                                     <h3 className="font-medium text-gray-900 mb-4 flex items-center">
                                         <Coins className="w-5 h-5 mr-2 text-yellow-600" />
                                         Monedas
@@ -198,7 +198,7 @@ const ModalArqueoFinanzas = ({ isOpen, onClose }) => {
                                         })}
                                     </div>
                                     
-                                    <div className="mt-3 pt-3 border-t border-gray-300">
+                                    <div className="mt-3 pt-3 border-t border-gray-200">
                                         <div className="flex justify-between items-center font-semibold">
                                             <span>Total Monedas:</span>
                                             <span className="text-yellow-600">
@@ -217,7 +217,7 @@ const ModalArqueoFinanzas = ({ isOpen, onClose }) => {
                             </div>
                             
                             {/* Resumen de movimientos */}
-                            <div className="bg-blue-50 p-4 rounded-lg">
+                            <div className="bg-blue-50 p-4 rounded-xl">
                                 <h3 className="font-medium text-blue-900 mb-3">📊 Resumen de Movimientos del Día</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                                     <div>
@@ -243,7 +243,7 @@ const ModalArqueoFinanzas = ({ isOpen, onClose }) => {
                             
                             {/* Alertas */}
                             {Math.abs(arqueo.diferencia || 0) > 0.01 && (
-                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
                                     <div className="flex items-center">
                                         <div className="text-yellow-800">
                                             <span className="font-medium">⚠️ Atención:</span> Existe una diferencia de{' '}
@@ -263,15 +263,15 @@ const ModalArqueoFinanzas = ({ isOpen, onClose }) => {
                         </div>
                     )}
                     
-                    {/* Botón de cerrar */}
-                    <div className="flex justify-end mt-6 pt-6 border-t border-gray-200">
-                        <button
-                            onClick={onClose}
-                            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
-                        >
-                            Cerrar
-                        </button>
-                    </div>
+                </div>
+                {/* Footer */}
+                <div className="flex justify-end bg-gray-50/50 border-t border-gray-100 px-5 py-3 rounded-b-2xl">
+                    <button
+                        onClick={onClose}
+                        className="px-4 py-2 text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 rounded-xl"
+                    >
+                        Cerrar
+                    </button>
                 </div>
             </div>
         </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Loader2, BarChart3, ChevronDown, FileText, Leaf, AlertTriangle } from 'lucide-react';
 import { kardexService } from '../../../services/kardexService';
 import { useQuickPermissions } from '../../../hooks/useProduccionPermissions';
 
@@ -57,25 +58,23 @@ const TarjetaKardex = ({ recetaId, recetaNombre, rendimiento, cantidadAProducir 
   if (!canViewPrices) return null;
 
   return (
-    <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200 rounded-lg overflow-hidden">
+    <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200 rounded-xl overflow-hidden">
       {/* Header */}
       <button
         onClick={() => setExpandido(!expandido)}
         className="w-full p-4 flex items-center justify-between hover:from-indigo-100 hover:to-blue-100 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <span className="text-xl">📊</span>
+          <BarChart3 size={20} className="text-indigo-600" />
           <span className="font-semibold text-indigo-800">Costos Kardex PEPS</span>
           <span className="bg-indigo-100 text-indigo-700 text-xs px-2 py-0.5 rounded-full font-medium">
             Valuación Real
           </span>
         </div>
-        <svg 
-          className={`w-5 h-5 text-indigo-500 transition-transform ${expandido ? 'rotate-180' : ''}`}
-          fill="none" stroke="currentColor" viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        <ChevronDown 
+          size={20}
+          className={`text-indigo-500 transition-transform ${expandido ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {expandido && (
@@ -91,7 +90,7 @@ const TarjetaKardex = ({ recetaId, recetaNombre, rendimiento, cantidadAProducir 
               max="100"
               value={cantidad}
               onChange={(e) => setCantidad(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-20 px-2 py-1 border border-indigo-300 rounded-md text-center text-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-20 px-2 py-1 border border-indigo-200 rounded-xl text-center text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
             />
             <span className="text-xs text-gray-500">
               = {(typeof rendimiento === 'number' ? rendimiento : rendimiento?.cantidad || 1) * cantidad} unidades
@@ -101,16 +100,16 @@ const TarjetaKardex = ({ recetaId, recetaNombre, rendimiento, cantidadAProducir 
           {/* Loading */}
           {loading && (
             <div className="flex items-center justify-center py-6">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+              <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
               <span className="ml-2 text-sm text-indigo-600">Calculando costos PEPS...</span>
             </div>
           )}
 
           {/* Error: Kardex vacío */}
           {error === 'kardex_vacio' && !loading && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
               <div className="flex items-start gap-2">
-                <span className="text-lg">⚠️</span>
+                <AlertTriangle size={18} className="text-amber-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-amber-800">Kardex sin datos iniciales</p>
                   <p className="text-xs text-amber-700 mt-1">
@@ -124,7 +123,7 @@ const TarjetaKardex = ({ recetaId, recetaNombre, rendimiento, cantidadAProducir 
 
           {/* Error genérico */}
           {error && error !== 'kardex_vacio' && !loading && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <div className="bg-red-50 border border-red-200 rounded-xl p-3">
               <p className="text-sm text-red-700">{error}</p>
               <button 
                 onClick={simularCosto}
@@ -140,25 +139,25 @@ const TarjetaKardex = ({ recetaId, recetaNombre, rendimiento, cantidadAProducir 
             <>
               {/* Resumen de costos */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="bg-white p-3 rounded-lg border border-indigo-100 text-center">
+                <div className="bg-white p-3 rounded-xl border border-indigo-100 text-center">
                   <div className="text-xs text-gray-500 mb-1">Costo Total</div>
                   <div className="text-lg font-bold text-indigo-700">
                     S/.{simulacion.costoTotalProduccion.toFixed(2)}
                   </div>
                 </div>
-                <div className="bg-white p-3 rounded-lg border border-indigo-100 text-center">
+                <div className="bg-white p-3 rounded-xl border border-indigo-100 text-center">
                   <div className="text-xs text-gray-500 mb-1">Costo/Unidad</div>
                   <div className="text-lg font-bold text-blue-700">
                     S/.{simulacion.costoUnitarioProducto.toFixed(4)}
                   </div>
                 </div>
-                <div className="bg-white p-3 rounded-lg border border-indigo-100 text-center">
+                <div className="bg-white p-3 rounded-xl border border-indigo-100 text-center">
                   <div className="text-xs text-gray-500 mb-1">Unidades</div>
                   <div className="text-lg font-bold text-green-700">
                     {simulacion.unidadesProducidas}
                   </div>
                 </div>
-                <div className={`bg-white p-3 rounded-lg border text-center ${
+                <div className={`bg-white p-3 rounded-xl border text-center ${
                   simulacion.todosDisponibles 
                     ? 'border-green-200' 
                     : 'border-red-200'
@@ -173,10 +172,10 @@ const TarjetaKardex = ({ recetaId, recetaNombre, rendimiento, cantidadAProducir 
               </div>
 
               {/* Desglose por ingrediente */}
-              <div className="bg-white rounded-lg border border-indigo-100 overflow-hidden">
+              <div className="bg-white rounded-xl border border-indigo-100 overflow-hidden">
                 <div className="px-3 py-2 bg-indigo-50 border-b border-indigo-100">
-                  <h5 className="text-sm font-medium text-indigo-800">
-                    📋 Desglose PEPS por Ingrediente
+                  <h5 className="text-sm font-medium text-indigo-800 flex items-center gap-1.5">
+                    <FileText size={14} /> Desglose PEPS por Ingrediente
                   </h5>
                 </div>
                 <div className="divide-y divide-gray-100">
@@ -191,7 +190,7 @@ const TarjetaKardex = ({ recetaId, recetaNombre, rendimiento, cantidadAProducir 
                       >
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <span className="text-sm">
-                            {item.tipo === 'receta' ? '📋' : '🥬'}
+                            {item.tipo === 'receta' ? <FileText size={14} className="text-purple-500" /> : <Leaf size={14} className="text-green-500" />}
                           </span>
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium text-gray-900 truncate">
@@ -216,14 +215,12 @@ const TarjetaKardex = ({ recetaId, recetaNombre, rendimiento, cantidadAProducir 
                             </div>
                           </div>
                           {item.lotesAConsumir?.length > 0 && (
-                            <svg 
-                              className={`w-4 h-4 text-gray-400 transition-transform ${
+                            <ChevronDown 
+                              size={16}
+                              className={`text-gray-400 transition-transform ${
                                 detalleExpandido === index ? 'rotate-180' : ''
                               }`}
-                              fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
+                            />
                           )}
                         </div>
                       </div>
@@ -231,8 +228,8 @@ const TarjetaKardex = ({ recetaId, recetaNombre, rendimiento, cantidadAProducir 
                       {/* Estado insuficiente */}
                       {!item.suficiente && (
                         <div className="mt-2 bg-red-50 border border-red-200 rounded px-2 py-1">
-                          <span className="text-xs text-red-700">
-                            ⚠️ Faltan {(item.cantidadRequerida - item.disponible).toFixed(2)} {item.unidadMedida}
+                          <span className="text-xs text-red-700 flex items-center gap-1">
+                            <AlertTriangle size={12} /> Faltan {(item.cantidadRequerida - item.disponible).toFixed(2)} {item.unidadMedida}
                           </span>
                         </div>
                       )}

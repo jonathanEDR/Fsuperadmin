@@ -1,4 +1,5 @@
 import React, { memo, useCallback } from 'react';
+import { Landmark, CreditCard, PiggyBank, Clock, TrendingUp, Wallet, AlertTriangle, CheckCircle, PauseCircle, Eye, Pencil, Trash2 } from 'lucide-react';
 
 /**
  * Componente optimizado para la fila de una cuenta bancaria en la tabla
@@ -55,27 +56,27 @@ const CuentaBancariaRow = memo(({
     // Obtener icono del banco
     const getBankIcon = useCallback((banco) => {
         const iconMap = {
-            'BCP': 'fas fa-university text-primary',
-            'BBVA': 'fas fa-university text-info',
-            'Interbank': 'fas fa-university text-warning',
-            'Scotiabank': 'fas fa-university text-danger',
-            'BanBif': 'fas fa-university text-success',
-            'Banco_Pichincha': 'fas fa-university text-secondary'
+            'BCP': { icon: Landmark, color: 'text-blue-600' },
+            'BBVA': { icon: Landmark, color: 'text-cyan-500' },
+            'Interbank': { icon: Landmark, color: 'text-yellow-500' },
+            'Scotiabank': { icon: Landmark, color: 'text-red-500' },
+            'BanBif': { icon: Landmark, color: 'text-green-500' },
+            'Banco_Pichincha': { icon: Landmark, color: 'text-gray-500' }
         };
         
-        return iconMap[banco] || 'fas fa-university text-muted';
+        return iconMap[banco] || { icon: Landmark, color: 'text-gray-400' };
     }, []);
     
     // Obtener icono del tipo de cuenta
     const getTipoCuentaIcon = useCallback((tipoCuenta) => {
         const iconMap = {
-            'corriente': 'fas fa-credit-card',
-            'ahorros': 'fas fa-piggy-bank',
-            'plazo_fijo': 'fas fa-clock',
-            'inversiones': 'fas fa-chart-line'
+            'corriente': { icon: CreditCard },
+            'ahorros': { icon: PiggyBank },
+            'plazo_fijo': { icon: Clock },
+            'inversiones': { icon: TrendingUp }
         };
         
-        return iconMap[tipoCuenta] || 'fas fa-wallet';
+        return iconMap[tipoCuenta] || { icon: Wallet };
     }, []);
     
     // Manejar clics en los botones de acción
@@ -113,7 +114,7 @@ const CuentaBancariaRow = memo(({
             {/* Información de la cuenta */}
             <td className="align-middle">
                 <div className="d-flex align-items-center">
-                    <i className={getBankIcon(cuenta.banco)} style={{ fontSize: '1.2em', marginRight: '8px' }}></i>
+                    {(() => { const { icon: Icon, color } = getBankIcon(cuenta.banco); return <Icon size={20} className={color} style={{ marginRight: '8px' }} />; })()}
                     <div>
                         <div className="font-weight-bold text-gray-800">
                             {cuenta.nombre}
@@ -135,7 +136,7 @@ const CuentaBancariaRow = memo(({
             {/* Tipo de cuenta */}
             <td className="align-middle">
                 <div className="d-flex align-items-center">
-                    <i className={getTipoCuentaIcon(cuenta.tipoCuenta)} style={{ marginRight: '6px' }}></i>
+                    {(() => { const { icon: Icon } = getTipoCuentaIcon(cuenta.tipoCuenta); return <Icon size={16} style={{ marginRight: '6px' }} />; })()}
                     <span className="text-capitalize">
                         {cuenta.tipoCuenta?.replace('_', ' ') || 'No especificado'}
                     </span>
@@ -154,8 +155,8 @@ const CuentaBancariaRow = memo(({
                         {formatCurrency(cuenta.saldoActual, cuenta.moneda)}
                     </span>
                     {parseFloat(cuenta.saldoActual) < parseFloat(cuenta.alertas?.saldoMinimo || 0) && (
-                        <i className="fas fa-exclamation-triangle text-warning ml-2" 
-                           title="Saldo por debajo del mínimo establecido"></i>
+                        <AlertTriangle size={14} className="text-warning ml-2" 
+                           title="Saldo por debajo del mínimo establecido" />
                     )}
                 </div>
             </td>
@@ -163,7 +164,7 @@ const CuentaBancariaRow = memo(({
             {/* Estado */}
             <td className="align-middle text-center">
                 <span className={`badge ${cuenta.activa ? 'badge-success' : 'badge-secondary'}`}>
-                    <i className={`fas ${cuenta.activa ? 'fa-check-circle' : 'fa-pause-circle'} mr-1`}></i>
+                    {cuenta.activa ? <CheckCircle size={14} className="mr-1" /> : <PauseCircle size={14} className="mr-1" />}
                     {cuenta.activa ? 'Activa' : 'Inactiva'}
                 </span>
             </td>
@@ -184,7 +185,7 @@ const CuentaBancariaRow = memo(({
                         onClick={handleViewDetails}
                         title="Ver detalles"
                     >
-                        <i className="fas fa-eye"></i>
+                        <Eye size={14} />
                     </button>
                     <button
                         type="button"
@@ -192,7 +193,7 @@ const CuentaBancariaRow = memo(({
                         onClick={handleEdit}
                         title="Editar cuenta"
                     >
-                        <i className="fas fa-edit"></i>
+                        <Pencil size={14} />
                     </button>
                     <button
                         type="button"
@@ -200,7 +201,7 @@ const CuentaBancariaRow = memo(({
                         onClick={handleDelete}
                         title="Eliminar cuenta"
                     >
-                        <i className="fas fa-trash"></i>
+                        <Trash2 size={14} />
                     </button>
                 </div>
             </td>

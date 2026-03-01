@@ -116,10 +116,10 @@ const ProductCardCatalogo = ({
       onClick={handleToggleExpandir}
       style={{
         position: 'relative',
-        background: 'linear-gradient(135deg, #ffffff, #faf5ff)',
+        background: '#ffffff',
         borderRadius: '8px',
-        border: '2px solid #8b5cf6',
-        boxShadow: '0 2px 6px rgba(139, 92, 246, 0.15)',
+        border: '1px solid #e5e7eb',
+        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.06)',
         overflow: 'hidden',
         transition: 'all 0.3s ease',
         opacity: stockDisponible <= 0 ? 0.6 : 1,
@@ -161,7 +161,7 @@ const ProductCardCatalogo = ({
         
         <div 
           style={{
-            backgroundColor: '#8b5cf6',
+            backgroundColor: '#f97316',
             color: 'white',
             padding: '4px 10px',
             borderRadius: '8px',
@@ -215,7 +215,7 @@ const ProductCardCatalogo = ({
             disabled={cargando}
             style={{
               padding: '8px 16px',
-              backgroundColor: cargando ? '#e5e7eb' : '#8b5cf6',
+              backgroundColor: cargando ? '#e5e7eb' : '#3b82f6',
               color: cargando ? '#9ca3af' : '#ffffff',
               border: 'none',
               borderRadius: '8px',
@@ -250,7 +250,7 @@ const ProductCardCatalogo = ({
           bottom: '2px',
           left: '50%',
           transform: 'translateX(-50%)',
-          color: '#8b5cf6',
+          color: '#9ca3af',
           fontSize: '10px',
           opacity: 0.6
         }}
@@ -267,7 +267,7 @@ const ProductCardCatalogo = ({
             right: '8px',
             width: '22px',
             height: '22px',
-            backgroundColor: '#8b5cf6',
+            backgroundColor: '#3b82f6',
             color: 'white',
             fontSize: '11px',
             fontWeight: 'bold',
@@ -276,7 +276,7 @@ const ProductCardCatalogo = ({
             alignItems: 'center',
             justifyContent: 'center',
             border: '2px solid white',
-            boxShadow: '0 2px 4px rgba(139, 92, 246, 0.3)'
+            boxShadow: '0 2px 4px rgba(59, 130, 246, 0.3)'
           }}
         >
           {cantidadEnCarrito}
@@ -290,10 +290,10 @@ const ProductCardCatalogo = ({
       style={{
         position: 'relative',
         cursor: isMobile ? 'pointer' : 'default',
-        background: 'linear-gradient(135deg, #ffffff, #faf5ff, #ffffff)',
+        background: '#ffffff',
         borderRadius: '8px',
-        border: '2px solid #8b5cf6',
-        boxShadow: '0 2px 8px rgba(139, 92, 246, 0.15)',
+        border: '1px solid #e5e7eb',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
         overflow: 'hidden',
         transition: 'all 0.3s ease',
         opacity: stockDisponible <= 0 ? 0.6 : 1,
@@ -309,8 +309,8 @@ const ProductCardCatalogo = ({
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.border = '2px solid #8b5cf6';
-        e.currentTarget.style.boxShadow = '0 2px 8px rgba(139, 92, 246, 0.15)';
+        e.currentTarget.style.border = '1px solid #e5e7eb';
+        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.06)';
       }}
     >
       {/* Header compacto */}
@@ -380,7 +380,7 @@ const ProductCardCatalogo = ({
               {isMobile && (
                 <div 
                   style={{
-                    backgroundColor: '#8b5cf6',
+                    backgroundColor: '#f97316',
                     color: 'white',
                     padding: '5px 10px',
                     borderRadius: '8px',
@@ -398,8 +398,8 @@ const ProductCardCatalogo = ({
               {producto.categoryName && (
                 <span
                   style={{
-                    backgroundColor: '#ede9fe',
-                    color: '#6b21a8',
+                    backgroundColor: '#dbeafe',
+                    color: '#1e40af',
                     padding: isMobile ? '4px 10px' : '2px 6px',
                     borderRadius: '8px',
                     fontSize: isMobile ? '11px' : '8px',
@@ -425,7 +425,7 @@ const ProductCardCatalogo = ({
           {!isMobile && (
             <div 
               style={{
-                backgroundColor: '#8b5cf6',
+                backgroundColor: '#f97316',
                 color: 'white',
                 padding: '4px 8px',
                 borderRadius: '12px',
@@ -596,8 +596,8 @@ const ProductCardCatalogo = ({
                 style={{
                   flex: 1,
                   padding: isMobile ? '6px 8px' : '4px 6px',
-                  backgroundColor: '#ede9fe',
-                  border: '1px solid #8b5cf6',
+                  backgroundColor: '#eff6ff',
+                  border: '1px solid #3b82f6',
                   borderRadius: '6px',
                   textAlign: 'center'
                 }}
@@ -615,7 +615,7 @@ const ProductCardCatalogo = ({
                   style={{
                     fontSize: isMobile ? '15px' : '13px',
                     fontWeight: 'bold',
-                    color: '#6b21a8',
+                    color: '#1e40af',
                     margin: 0
                   }}
                 >
@@ -632,8 +632,8 @@ const ProductCardCatalogo = ({
                 style={{
                   padding: isMobile ? '8px 12px' : '6px 8px',
                   backgroundColor: cargando ? '#e5e7eb' : '#ffffff',
-                  color: cargando ? '#9ca3af' : '#8b5cf6',
-                  border: cargando ? '2px solid #d1d5db' : '2px solid #8b5cf6',
+                  color: cargando ? '#9ca3af' : '#3b82f6',
+                  border: cargando ? '2px solid #d1d5db' : '2px solid #3b82f6',
                   borderRadius: '6px',
                   fontSize: isMobile ? '12px' : '10px',
                   fontWeight: '700',
@@ -648,14 +648,14 @@ const ProductCardCatalogo = ({
                 }}
                 onMouseEnter={(e) => {
                   if (!cargando) {
-                    e.currentTarget.style.backgroundColor = '#8b5cf6';
+                    e.currentTarget.style.backgroundColor = '#3b82f6';
                     e.currentTarget.style.color = '#ffffff';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!cargando) {
                     e.currentTarget.style.backgroundColor = '#ffffff';
-                    e.currentTarget.style.color = '#8b5cf6';
+                    e.currentTarget.style.color = '#3b82f6';
                   }
                 }}
               >
@@ -747,7 +747,7 @@ const ProductCardCatalogo = ({
             right: '4px',
             width: isMobile ? '22px' : '18px',
             height: isMobile ? '22px' : '18px',
-            backgroundColor: '#8b5cf6',
+            backgroundColor: '#3b82f6',
             color: 'white',
             fontSize: isMobile ? '11px' : '9px',
             fontWeight: 'bold',
@@ -756,7 +756,7 @@ const ProductCardCatalogo = ({
             alignItems: 'center',
             justifyContent: 'center',
             border: '2px solid white',
-            boxShadow: '0 2px 4px rgba(139, 92, 246, 0.3)'
+            boxShadow: '0 2px 4px rgba(59, 130, 246, 0.3)'
           }}
         >
           {cantidadEnCarrito}
@@ -797,7 +797,7 @@ const ProductCardCatalogo = ({
             bottom: '2px',
             left: '50%',
             transform: 'translateX(-50%)',
-            color: '#8b5cf6',
+            color: '#9ca3af',
             fontSize: '10px',
             opacity: 0.6,
             cursor: 'pointer',

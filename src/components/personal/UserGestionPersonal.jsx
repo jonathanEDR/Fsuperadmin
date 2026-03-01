@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useUser } from '@clerk/clerk-react';
+import { Loader2, BarChart3, ClipboardList, ChevronLeft, ChevronRight, ChevronDown, CreditCard } from 'lucide-react';
 import { gestionPersonalService } from '../../services';
 import { getPagosRealizados } from '../../services/api';
 
@@ -280,7 +281,7 @@ function UserGestionPersonal() {
       </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl">
           {error}
         </div>
       )}
@@ -291,15 +292,13 @@ function UserGestionPersonal() {
           <button
             onClick={() => cambiarMes(1)}
             disabled={!puedeRetroceder}
-            className={`p-2 rounded-lg transition-colors ${
+            className={`p-2 rounded-xl transition-colors ${
               puedeRetroceder 
                 ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
             }`}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+            <ChevronLeft size={20} />
           </button>
           
           <div className="text-center">
@@ -310,15 +309,13 @@ function UserGestionPersonal() {
           <button
             onClick={() => cambiarMes(-1)}
             disabled={!puedeAvanzar}
-            className={`p-2 rounded-lg transition-colors ${
+            className={`p-2 rounded-xl transition-colors ${
               puedeAvanzar 
                 ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
             }`}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+            <ChevronRight size={20} />
           </button>
         </div>
         
@@ -345,29 +342,29 @@ function UserGestionPersonal() {
 
       {/* Resumen de totales - Diseño mejorado */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 overflow-hidden">
-        <div className="px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-white">📊 Resumen de {nombreMesActual}</h3>
-          <span className="text-sm text-blue-100">{registrosFiltrados.length} registros</span>
+        <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100 flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-800"><BarChart3 size={18} className="text-blue-600 inline mr-1" /> Resumen de {nombreMesActual}</h3>
+          <span className="text-sm text-gray-500">{registrosFiltrados.length} registros</span>
         </div>
         <div className="p-4">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div className="bg-green-50 rounded-lg p-3 text-center border border-green-200">
+            <div className="bg-green-50 rounded-xl p-3 text-center border border-green-200">
               <p className="text-xs text-green-600 font-medium uppercase tracking-wide">Pagos Diarios</p>
               <p className="text-xl font-bold text-green-700 mt-1">{formatearMoneda(totales.pagosDiarios)}</p>
             </div>
-            <div className="bg-purple-50 rounded-lg p-3 text-center border border-purple-200">
+            <div className="bg-purple-50 rounded-xl p-3 text-center border border-purple-200">
               <p className="text-xs text-purple-600 font-medium uppercase tracking-wide">Bonificaciones</p>
               <p className="text-xl font-bold text-purple-700 mt-1">{formatearMoneda(totales.bonificaciones)}</p>
             </div>
-            <div className="bg-orange-50 rounded-lg p-3 text-center border border-orange-200">
+            <div className="bg-orange-50 rounded-xl p-3 text-center border border-orange-200">
               <p className="text-xs text-orange-600 font-medium uppercase tracking-wide">Descuentos</p>
               <p className="text-xl font-bold text-orange-700 mt-1">-{formatearMoneda(totales.faltantes)}</p>
             </div>
-            <div className="bg-blue-50 rounded-lg p-3 text-center border border-blue-200">
+            <div className="bg-blue-50 rounded-xl p-3 text-center border border-blue-200">
               <p className="text-xs text-blue-600 font-medium uppercase tracking-wide">Adelantos</p>
               <p className="text-xl font-bold text-blue-700 mt-1">-{formatearMoneda(totales.adelantos)}</p>
             </div>
-            <div className={`rounded-lg p-3 text-center border ${totalAPagar >= 0 ? 'bg-emerald-50 border-emerald-300' : 'bg-red-50 border-red-300'}`}>
+            <div className={`rounded-xl p-3 text-center border ${totalAPagar >= 0 ? 'bg-emerald-50 border-emerald-300' : 'bg-red-50 border-red-300'}`}>
               <p className={`text-xs font-medium uppercase tracking-wide ${totalAPagar >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                 Total a Pagar
               </p>
@@ -381,7 +378,7 @@ function UserGestionPersonal() {
           {pagosRealizadosTotal > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-200">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-600">💳 Pagos ya realizados:</span>
+                <span className="text-gray-600"><CreditCard size={14} className="inline mr-1 text-gray-500" /> Pagos ya realizados:</span>
                 <span className="font-semibold text-gray-800">{formatearMoneda(pagosRealizadosTotal)}</span>
               </div>
             </div>
@@ -393,7 +390,7 @@ function UserGestionPersonal() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
           <h3 className="text-lg font-semibold text-gray-800">
-            📋 Registros de {nombreMesActual} ({registrosFiltrados.length})
+            <ClipboardList size={18} className="text-gray-600 inline mr-1" /> Registros de {nombreMesActual} ({registrosFiltrados.length})
           </h3>
           {registrosMostrados < registrosFiltrados.length && (
             <span className="text-sm text-gray-500">
@@ -404,12 +401,12 @@ function UserGestionPersonal() {
 
         {loading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
+            <Loader2 size={40} className="animate-spin text-blue-600 mx-auto" />
             <p className="mt-3 text-gray-600">Cargando registros...</p>
           </div>
         ) : registrosPaginados.length === 0 ? (
           <div className="p-12 text-center">
-            <div className="text-4xl mb-3">📭</div>
+            <ClipboardList size={40} className="text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500">No tienes registros en {nombreMesActual}</p>
             <p className="text-sm text-gray-400 mt-2">Prueba navegando a otro mes</p>
           </div>
@@ -494,12 +491,10 @@ function UserGestionPersonal() {
               <div className="px-4 py-4 bg-gray-50 border-t text-center">
                 <button
                   onClick={cargarMasRegistros}
-                  className="inline-flex items-center px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm"
+                  className="inline-flex items-center px-6 py-2.5 text-blue-700 bg-blue-50 border border-blue-200 font-medium rounded-xl hover:bg-blue-100 transition-colors"
                 >
                   Ver más registros
-                  <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                  <ChevronDown size={16} className="ml-2" />
                 </button>
                 <p className="mt-2 text-xs text-gray-500">
                   Mostrando {registrosMostrados} de {registrosFiltrados.length} registros

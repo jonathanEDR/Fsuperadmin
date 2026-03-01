@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { X, Loader2, Package, Factory, RefreshCw, ArrowUp, ArrowDown, Send, BarChart3, Calendar, User, AlertTriangle } from 'lucide-react';
 import { materialService } from '../../../services/materialService';
 
 const MovimientosMaterial = ({ material, onCerrar }) => {
@@ -27,14 +28,14 @@ const MovimientosMaterial = ({ material, onCerrar }) => {
 
   const getTipoIcon = (tipo) => {
     const icons = {
-      'entrada': '📦',
-      'consumo': '🏭',
-      'restauracion': '♻️',
-      'ajuste_positivo': '⬆️',
-      'ajuste_negativo': '⬇️',
-      'salida': '📤'
+      'entrada': <Package size={14} />,
+      'consumo': <Factory size={14} />,
+      'restauracion': <RefreshCw size={14} />,
+      'ajuste_positivo': <ArrowUp size={14} />,
+      'ajuste_negativo': <ArrowDown size={14} />,
+      'salida': <Send size={14} />
     };
-    return icons[tipo] || '📊';
+    return icons[tipo] || <BarChart3 size={14} />;
   };
 
   const getTipoColor = (tipo) => {
@@ -72,8 +73,8 @@ const MovimientosMaterial = ({ material, onCerrar }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-10 mx-auto p-6 border w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3 shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+      <div className="relative top-10 mx-auto p-6 border border-gray-100 w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3 shadow-xl rounded-2xl bg-white max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h3 className="text-lg font-medium text-gray-900">
@@ -85,14 +86,14 @@ const MovimientosMaterial = ({ material, onCerrar }) => {
           </div>
           <button
             onClick={onCerrar}
-            className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
+            className="p-1.5 hover:bg-gray-100 rounded-xl transition-colors text-gray-500"
           >
-            ×
+            <X size={20} />
           </button>
         </div>
 
         {/* Estado Actual del Material */}
-        <div className="bg-gray-50 p-4 rounded-md mb-6">
+        <div className="bg-gray-50 p-4 rounded-xl mb-6">
           <h4 className="font-medium text-gray-700 mb-3">Estado Actual</h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div className="text-center">
@@ -130,15 +131,15 @@ const MovimientosMaterial = ({ material, onCerrar }) => {
 
           {loading ? (
             <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
             </div>
           ) : error ? (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md">
-              {error}
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-2">
+              <AlertTriangle size={16} /> {error}
             </div>
           ) : movimientos.length === 0 ? (
             <div className="text-center py-8">
-              <span className="text-6xl mb-4 block">📊</span>
+              <BarChart3 size={48} className="mx-auto mb-4 text-gray-300" />
               <p className="text-xl font-medium text-gray-600 mb-2">
                 Sin movimientos registrados
               </p>
@@ -151,7 +152,7 @@ const MovimientosMaterial = ({ material, onCerrar }) => {
               {movimientos.map((movimiento, index) => (
                 <div
                   key={movimiento._id || index}
-                  className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                  className="border border-gray-200 rounded-xl p-4 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-3">
@@ -171,15 +172,15 @@ const MovimientosMaterial = ({ material, onCerrar }) => {
                           {movimiento.motivo}
                         </p>
                         <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">
-                          <span>
-                            📅 {formatearFecha(movimiento.fecha)}
+                          <span className="flex items-center gap-1">
+                            <Calendar size={12} /> {formatearFecha(movimiento.fecha)}
                           </span>
-                          <span>
-                            👤 {movimiento.operador}
+                          <span className="flex items-center gap-1">
+                            <User size={12} /> {movimiento.operador}
                           </span>
                           {movimiento.cantidadAnterior !== undefined && (
-                            <span>
-                              📊 {movimiento.cantidadAnterior} → {movimiento.cantidadNueva}
+                            <span className="flex items-center gap-1">
+                              <BarChart3 size={12} /> {movimiento.cantidadAnterior} → {movimiento.cantidadNueva}
                             </span>
                           )}
                         </div>
@@ -196,7 +197,7 @@ const MovimientosMaterial = ({ material, onCerrar }) => {
         <div className="flex justify-end mt-6 pt-4 border-t">
           <button
             onClick={onCerrar}
-            className="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+            className="px-6 py-2 text-gray-700 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors"
           >
             Cerrar
           </button>

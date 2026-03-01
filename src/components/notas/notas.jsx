@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { Plus, Loader, User, Calendar, Trash2, Check, X, AlertTriangle, CheckCircle, Archive } from 'lucide-react';
+import { Plus, Loader2, User, Calendar, Trash2, Check, X, AlertTriangle, CheckCircle, Archive, AlertCircle } from 'lucide-react';
 import { useRole } from '../../context/RoleContext';
 import NoteCreationModal from './NoteCreationModal';
 import TablaDeNotasAprobadas from './TablaDeNotasAprobadas';
@@ -241,9 +241,9 @@ export default function Notas() {
           </h2>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow"
+            className="text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 px-4 py-2 rounded-xl flex items-center gap-2 transition-colors"
           >
-            <Plus size={20} /> Nueva Nota
+            <Plus size={18} /> Nueva Nota
           </button>
         </div>
       </div>
@@ -288,17 +288,17 @@ export default function Notas() {
                 Notas Activas
               </h2>
               {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                  {error}
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 flex items-center gap-2 text-sm">
+                  <AlertCircle size={16} className="flex-shrink-0" /> {error}
                 </div>
               )}
               {success && (
-                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                  {success}
+                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl mb-4 flex items-center gap-2 text-sm">
+                  <CheckCircle size={16} className="flex-shrink-0" /> {success}
                 </div>
               )}
               {loading ? (
-                <div className="flex justify-center py-8"><Loader className="animate-spin" size={32} /></div>
+                <div className="flex justify-center py-8"><Loader2 className="animate-spin text-blue-500" size={32} /></div>
               ) : notes.filter(note => note.completionStatus !== 'approved').length === 0 ? (
                 <div className="text-gray-500 text-center py-8">No hay notas activas disponibles</div>
               ) : (
@@ -315,7 +315,7 @@ export default function Notas() {
                     </h3>
                     <div className="space-y-2">
                       {/* Información del propietario */}
-                      <div className="flex items-center justify-between bg-gray-50 p-2 rounded-lg">
+                      <div className="flex items-center justify-between bg-gray-50 p-2 rounded-xl">
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <User size={14} />
                           <span className="font-medium">Propietario:</span>
@@ -338,7 +338,7 @@ export default function Notas() {
                           : note.creator_info?.role === 'admin'
                           ? 'bg-blue-50'
                           : 'bg-green-50'
-                      } p-2 rounded-lg`}>
+                      } p-2 rounded-xl`}>
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <User size={14} className={
                             note.creator_info?.role === 'super_admin'
@@ -374,7 +374,7 @@ export default function Notas() {
                         </div>
                       </div>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-4 mt-4">
+                    <div className="bg-gray-50 rounded-xl p-4 mt-4">
                       <p className="text-gray-600">{note.content}</p>
                     </div>
                     <div className="flex flex-wrap gap-4 text-sm text-gray-500 mt-4">
@@ -401,7 +401,7 @@ export default function Notas() {
                     </div>
                   </div>
                   {(['admin', 'super_admin'].includes(userRole)) && (
-                    <button onClick={() => handleDelete(note._id)} className="text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors" title="Eliminar nota"><Trash2 size={20} /></button>
+                    <button onClick={() => handleDelete(note._id)} className="text-red-600 hover:bg-red-50 p-2 rounded-xl transition-colors" title="Eliminar nota"><Trash2 size={20} /></button>
                   )}
                 </div>
                 <div className="space-y-2 mt-4">
@@ -410,7 +410,7 @@ export default function Notas() {
                     <div className="flex gap-2 mt-2">
                       <button 
                         onClick={() => handleComplete(note._id)} 
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm shadow transition-colors"
+                        className="text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 px-4 py-2 rounded-xl flex items-center gap-2 text-sm transition-colors"
                         disabled={loading}
                       >
                         <CheckCircle size={16} />
@@ -421,8 +421,8 @@ export default function Notas() {
                   {/* Botones de revisión para admins */}
                   {(['admin', 'super_admin'].includes(userRole) && note.isCompleted && note.completionStatus === 'pending') && (
                     <div className="flex gap-2 mt-2">
-                      <button onClick={() => handleReview(note._id, 'approved')} className="flex-1 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 flex items-center gap-1 justify-center"><Check size={16}/>Aprobar</button>
-                      <button onClick={() => handleReview(note._id, 'rejected')} className="flex-1 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 flex items-center gap-1 justify-center"><X size={16}/>Rechazar</button>
+                      <button onClick={() => handleReview(note._id, 'approved')} className="flex-1 py-1.5 text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 text-sm rounded-xl flex items-center gap-1 justify-center transition-colors"><Check size={16}/>Aprobar</button>
+                      <button onClick={() => handleReview(note._id, 'rejected')} className="flex-1 py-1.5 text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 text-sm rounded-xl flex items-center gap-1 justify-center transition-colors"><X size={16}/>Rechazar</button>
                     </div>
                   )}
                   {note.isCompleted && (

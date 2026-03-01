@@ -1,4 +1,5 @@
 import React from 'react';
+import { Info, AlertCircle } from 'lucide-react';
 
 /**
  * Componente memoizado para mostrar errores de validación específicos de ingresos
@@ -14,7 +15,7 @@ const IngresoValidationError = React.memo(({
         if (validacion?.mensaje) {
             return (
                 <div className={`
-                    flex items-center space-x-2 p-3 rounded-lg
+                    flex items-center space-x-2 p-3 rounded-xl
                     bg-blue-50 border border-blue-200 text-blue-800
                     ${className}
                 `}>
@@ -36,7 +37,7 @@ const IngresoValidationError = React.memo(({
     
     return (
         <div className={`
-            flex items-center space-x-2 p-3 rounded-lg
+            flex items-center space-x-2 p-3 rounded-xl
             bg-red-50 border border-red-200 text-red-800
             ${className}
         `}>

@@ -15,7 +15,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Search,
-  Edit3
+  Edit3,
+  Loader2
 } from 'lucide-react';
 
 const TablaQRs = ({ 
@@ -62,9 +63,9 @@ const TablaQRs = ({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow p-8">
+      <div className="bg-white rounded-xl shadow p-8">
         <div className="flex justify-center items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <Loader2 className="animate-spin h-12 w-12 text-blue-600" />
           <span className="ml-3 text-gray-600">Cargando historial...</span>
         </div>
       </div>
@@ -72,7 +73,7 @@ const TablaQRs = ({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
+    <div className="bg-white rounded-xl shadow overflow-hidden">
       
       {/* Header con búsqueda y filtros */}
       <div className="p-6 border-b border-gray-200">
@@ -86,7 +87,7 @@ const TablaQRs = ({
               placeholder="Buscar por nombre, sucursal o creador..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
@@ -94,7 +95,7 @@ const TablaQRs = ({
           <div className="flex gap-2">
             <button
               onClick={() => setFiltroEstado('todos')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                 filtroEstado === 'todos'
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -104,7 +105,7 @@ const TablaQRs = ({
             </button>
             <button
               onClick={() => setFiltroEstado('activo')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                 filtroEstado === 'activo'
                   ? 'bg-green-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -114,7 +115,7 @@ const TablaQRs = ({
             </button>
             <button
               onClick={() => setFiltroEstado('inactivo')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                 filtroEstado === 'inactivo'
                   ? 'bg-red-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -234,7 +235,7 @@ const TablaQRs = ({
                       {qr.activo ? (
                         <button
                           onClick={() => onDesactivar(qr._id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors"
                           title="Desactivar"
                         >
                           <XCircle size={18} />
@@ -242,7 +243,7 @@ const TablaQRs = ({
                       ) : (
                         <button
                           onClick={() => onActivar(qr._id)}
-                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                          className="p-2 text-green-600 hover:bg-green-50 rounded-xl transition-colors"
                           title="Activar"
                         >
                           <CheckCircle size={18} />
@@ -250,21 +251,21 @@ const TablaQRs = ({
                       )}
                       <button
                         onClick={() => onEditar(qr)}
-                        className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                        className="p-2 text-amber-600 hover:bg-amber-50 rounded-xl transition-colors"
                         title="Editar"
                       >
                         <Edit3 size={18} />
                       </button>
                       <button
                         onClick={() => onVerDetalles(qr)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
                         title="Ver detalles"
                       >
                         <Eye size={18} />
                       </button>
                       <button
                         onClick={() => onEliminar(qr._id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors"
                         title="Eliminar"
                       >
                         <Trash2 size={18} />
@@ -339,7 +340,7 @@ const TablaQRs = ({
                 {qr.activo ? (
                   <button
                     onClick={() => onDesactivar(qr._id)}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors text-sm"
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-red-600 bg-red-50 rounded-xl hover:bg-red-100 transition-colors text-sm"
                   >
                     <XCircle size={16} />
                     <span>Desactivar</span>
@@ -347,7 +348,7 @@ const TablaQRs = ({
                 ) : (
                   <button
                     onClick={() => onActivar(qr._id)}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-green-600 bg-green-50 rounded-lg hover:bg-green-100 transition-colors text-sm"
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-green-600 bg-green-50 rounded-xl hover:bg-green-100 transition-colors text-sm"
                   >
                     <CheckCircle size={16} />
                     <span>Activar</span>
@@ -355,20 +356,20 @@ const TablaQRs = ({
                 )}
                 <button
                   onClick={() => onEditar(qr)}
-                  className="flex items-center justify-center gap-2 px-3 py-2 text-amber-600 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors text-sm"
+                  className="flex items-center justify-center gap-2 px-3 py-2 text-amber-600 bg-amber-50 rounded-xl hover:bg-amber-100 transition-colors text-sm"
                   title="Editar"
                 >
                   <Edit3 size={16} />
                 </button>
                 <button
                   onClick={() => onVerDetalles(qr)}
-                  className="flex items-center justify-center gap-2 px-3 py-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-sm"
+                  className="flex items-center justify-center gap-2 px-3 py-2 text-blue-600 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors text-sm"
                 >
                   <Eye size={16} />
                 </button>
                 <button
                   onClick={() => onEliminar(qr._id)}
-                  className="flex items-center justify-center gap-2 px-3 py-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors text-sm"
+                  className="flex items-center justify-center gap-2 px-3 py-2 text-red-600 bg-red-50 rounded-xl hover:bg-red-100 transition-colors text-sm"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -390,14 +391,14 @@ const TablaQRs = ({
               <button
                 onClick={() => onCambiarPagina(paginaActual - 1)}
                 disabled={paginaActual === 1}
-                className="p-2 border border-gray-300 rounded-lg hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-2 border border-gray-200 rounded-xl hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronLeft size={20} />
               </button>
               <button
                 onClick={() => onCambiarPagina(paginaActual + 1)}
                 disabled={paginaActual === totalPaginas}
-                className="p-2 border border-gray-300 rounded-lg hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-2 border border-gray-200 rounded-xl hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronRight size={20} />
               </button>

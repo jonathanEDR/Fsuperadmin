@@ -1,4 +1,5 @@
 import React, { memo, useMemo } from 'react';
+import { Landmark, CheckCircle, Coins, CheckSquare, Banknote } from 'lucide-react';
 
 /**
  * Componente optimizado para mostrar tarjetas de resumen de cuentas bancarias
@@ -26,28 +27,28 @@ const CuentasBancariasResumen = memo(({ computedData, loading }) => {
         {
             title: 'Total Cuentas',
             value: computedData.totalCuentas,
-            icon: 'fas fa-university',
+            icon: Landmark,
             color: 'primary',
             subtitle: `${computedData.cuentasActivas} activas, ${computedData.cuentasInactivas} inactivas`
         },
         {
             title: 'Cuentas Activas',
             value: computedData.cuentasActivas,
-            icon: 'fas fa-check-circle',
+            icon: CheckCircle,
             color: 'success',
             subtitle: `${((computedData.cuentasActivas / computedData.totalCuentas) * 100 || 0).toFixed(1)}% del total`
         },
         {
             title: 'Saldo Total',
             value: formatCurrency(computedData.totalSaldo),
-            icon: 'fas fa-coins',
+            icon: Coins,
             color: 'info',
             subtitle: 'Todas las monedas'
         },
         {
             title: 'Seleccionadas',
             value: computedData.selectedCount,
-            icon: 'fas fa-check-square',
+            icon: CheckSquare,
             color: computedData.hasSelection ? 'warning' : 'secondary',
             subtitle: computedData.hasSelection ? 'cuentas seleccionadas' : 'ninguna selección'
         }
@@ -105,7 +106,7 @@ const CuentasBancariasResumen = memo(({ computedData, loading }) => {
                                     )}
                                 </div>
                                 <div className="col-auto">
-                                    <i className={`${card.icon} fa-2x text-gray-300`}></i>
+                                    <card.icon size={24} className="text-gray-300" />
                                 </div>
                             </div>
                         </div>
@@ -119,7 +120,7 @@ const CuentasBancariasResumen = memo(({ computedData, loading }) => {
                     <div className="card shadow mb-4">
                         <div className="card-header py-3">
                             <h6 className="m-0 font-weight-bold text-primary">
-                                <i className="fas fa-coins mr-2"></i>
+                                <Coins size={16} className="mr-2" />
                                 Saldos por Moneda
                             </h6>
                         </div>
@@ -137,7 +138,7 @@ const CuentasBancariasResumen = memo(({ computedData, loading }) => {
                                                 </div>
                                             </div>
                                             <div className="text-gray-400">
-                                                <i className="fas fa-money-bill-wave fa-lg"></i>
+                                                <Banknote size={24} />
                                             </div>
                                         </div>
                                     </div>
