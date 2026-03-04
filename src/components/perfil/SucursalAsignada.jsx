@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import {
   Building2, MapPin, ClipboardList, Clock, Check, Play, RefreshCw,
-  CheckSquare, ChevronDown, ChevronUp, Loader2, Edit3, Save, X
+  CheckSquare, ChevronDown, ChevronUp, Loader2, Edit3, Save, X, Calendar
 } from 'lucide-react';
 import api from '../../services/api';
 
@@ -13,11 +13,13 @@ const MapaPicker = lazy(() => import('../mapa/MapaPicker'));
  * - Tarjeta con nombre y dirección editable
  * - Mapa interactivo (con edición de ubicación)
  * - Tareas pendientes / en progreso (nunca completadas)
+ * - Soporta asignación permanente (sucursalActual) y por calendario (AsignacionSucursal)
  */
 export default function SucursalAsignada() {
   const { getToken } = useAuth();
 
   const [sucursal, setSucursal] = useState(null);
+  const [esAsignacionCalendario, setEsAsignacionCalendario] = useState(false);
   const [tareas, setTareas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingTareas, setLoadingTareas] = useState(false);
@@ -35,19 +37,56 @@ export default function SucursalAsignada() {
       setLoading(true);
       const token = await getToken();
 
+      console.log('🔍 [SucursalAsignada] === Cargando datos del perfil ===');
+
       const profileRes = await api.get('/api/auth/my-profile', {
         headers: { Authorization: `Bearer ${token}` }
       });
 
       const userData = profileRes.data?.user;
-      if (!userData?.sucursalActual) {
+      console.log('👤 [SucursalAsignada] userData.sucursalActual:', userData?.sucursalActual);
+      console.log('👤 [SucursalAsignada] sucursalActual._id:', userData?.sucursalActual?._id);
+      console.log('👤 [SucursalAsignada] sucursalActual.nombre:', userData?.sucursalActual?.nombre);
+      
+      let suc = userData?.sucursalActual || null;
+      let desdeCalendario = false;
+
+      console.log('📋 [SucursalAsignada] ¿Tiene sucursalActual?', !!suc);
+
+      // Si no tiene sucursal permanente, verificar asignación del calendario de hoy
+      if (!suc) {
+        console.log('📅 [SucursalAsignada] No tiene sucursalActual → Consultando /mi-asignacion-hoy...');
+        try {
+          const calRes = await api.get('/api/asignaciones-sucursal/mi-asignacion-hoy', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          console.log('📅 [SucursalAsignada] Respuesta calendario:', JSON.stringify(calRes.data, null, 2));
+          if (calRes.data?.data?.sucursal) {
+            suc = calRes.data.data.sucursal;
+            desdeCalendario = true;
+            console.log('✅ [SucursalAsignada] Asignación calendario encontrada:', suc.nombre);
+          } else {
+            console.log('❌ [SucursalAsignada] No hay asignación de calendario para hoy');
+          }
+        } catch (calErr) {
+          console.error('❌ [SucursalAsignada] Error consultando calendario:', calErr.message);
+          // Si falla, simplemente no hay asignación de calendario
+        }
+      } else {
+        console.log('✅ [SucursalAsignada] Usando sucursalActual permanente:', suc.nombre, suc._id);
+      }
+
+      if (!suc) {
+        console.log('❌ [SucursalAsignada] Sin sucursal de ningún tipo → Mostrando null');
         setSucursal(null);
+        setEsAsignacionCalendario(false);
         setLoading(false);
         return;
       }
 
-      const suc = userData.sucursalActual;
       setSucursal(suc);
+      setEsAsignacionCalendario(desdeCalendario);
+      console.log('✅ [SucursalAsignada] Sucursal final:', suc.nombre, '| Desde calendario:', desdeCalendario);
 
       // Inicializar datos de edición con coordenadas
       const coords = suc.coordenadas?.coordinates;
@@ -59,14 +98,39 @@ export default function SucursalAsignada() {
       });
 
       // Solo tareas pendientes o en progreso (nunca completadas)
+      // Buscar por sucursalId Y también por asignadoA (el usuario puede tener tareas
+      // asignadas directamente sin sucursalId)
       setLoadingTareas(true);
+      console.log('📋 [SucursalAsignada] Cargando tareas para sucursalId:', suc._id);
       try {
-        const tareasRes = await api.get('/api/tareas', {
-          params: { sucursalId: suc._id, estado: 'pendiente,en_progreso', limite: 30 },
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setTareas(tareasRes.data?.data || []);
-      } catch {
+        // Primero buscar tareas de la sucursal
+        const tareasPromises = [
+          api.get('/api/tareas', {
+            params: { sucursalId: suc._id, estado: 'pendiente,en_progreso', limite: 30 },
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          // También buscar tareas asignadas directamente al usuario (sin filtro de sucursal)
+          api.get('/api/tareas', {
+            params: { estado: 'pendiente,en_progreso', limite: 30 },
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        ];
+        
+        const [tareasSucursal, tareasUsuario] = await Promise.all(tareasPromises);
+        
+        // Combinar y deduplicar por _id
+        const todasTareas = [...(tareasSucursal.data?.data || []), ...(tareasUsuario.data?.data || [])];
+        const tareasUnicas = Array.from(
+          new Map(todasTareas.map(t => [t._id, t])).values()
+        );
+        
+        console.log('📋 [SucursalAsignada] Tareas sucursal:', tareasSucursal.data?.data?.length || 0);
+        console.log('📋 [SucursalAsignada] Tareas usuario:', tareasUsuario.data?.data?.length || 0);
+        console.log('📋 [SucursalAsignada] Tareas únicas (combinadas):', tareasUnicas.length);
+        
+        setTareas(tareasUnicas);
+      } catch (tarErr) {
+        console.error('❌ [SucursalAsignada] Error cargando tareas:', tarErr.message);
         setTareas([]);
       } finally {
         setLoadingTareas(false);
@@ -173,8 +237,18 @@ export default function SucursalAsignada() {
               <Building2 className="text-emerald-600" size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-800">Mi Sucursal</h2>
-              <p className="text-gray-500 text-sm">{sucursal.nombre}</p>
+              <h2 className="text-lg font-bold text-gray-800">
+                {esAsignacionCalendario ? 'Mi Sucursal Hoy' : 'Mi Sucursal'}
+              </h2>
+              <div className="flex items-center gap-2">
+                <p className="text-gray-500 text-sm">{sucursal.nombre}</p>
+                {esAsignacionCalendario && (
+                  <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium">
+                    <Calendar size={10} />
+                    Calendario
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2">

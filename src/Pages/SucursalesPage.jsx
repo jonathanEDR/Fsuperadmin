@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Building2, Plus, Edit2, Trash2, MapPin, CheckCircle, XCircle,
   Search, RefreshCw, Map, Users, User, AlertCircle, X, Save,
-  UserCheck, UserX, ArrowRightLeft, Mail, ClipboardList, Clock, Check, Play, Zap, ListTodo, Loader2
+  UserCheck, UserX, ArrowRightLeft, ClipboardList, Clock, Check, Play, Zap, ListTodo, Loader2, Calendar, Eye
 } from 'lucide-react';
 
 // Helper para obtener la URL del avatar del trabajador
@@ -10,6 +10,8 @@ const getAvatarUrl = (t) => t?.avatar_url || t?.avatar?.url || null;
 import { getAllSucursales, deleteSucursal } from '../services/sucursalService';
 import api from '../services/api';
 import SucursalFormModal from '../components/sucursales/SucursalFormModal';
+import CalendarioSucursal from '../components/sucursales/CalendarioSucursal';
+import { asignacionSucursalService } from '../services/asignacionSucursalService';
 
 // ─── Stat Card ───────────────────────────────────────────────────────────────
 const StatCard = ({ color, icon: Icon, label, value }) => {
@@ -22,13 +24,13 @@ const StatCard = ({ color, icon: Icon, label, value }) => {
     yellow: 'from-yellow-500 to-yellow-600',
   };
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${colors[color] || colors.blue} flex items-center justify-center flex-shrink-0`}>
-        <Icon className="text-white" size={22} />
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 flex items-center gap-3">
+      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${colors[color] || colors.blue} flex items-center justify-center flex-shrink-0`}>
+        <Icon className="text-white" size={18} />
       </div>
-      <div>
-        <p className="text-2xl font-bold text-gray-800">{value}</p>
-        <p className="text-sm font-medium text-gray-600">{label}</p>
+      <div className="min-w-0">
+        <p className="text-xl sm:text-2xl font-bold text-gray-800 leading-tight">{value}</p>
+        <p className="text-xs sm:text-sm font-medium text-gray-600 leading-snug">{label}</p>
       </div>
     </div>
   );
@@ -42,7 +44,11 @@ const AsignarTrabajadorModal = ({ isOpen, onClose, onSaved, trabajador, sucursal
 
   useEffect(() => {
     if (isOpen && trabajador) {
-      setSucursalSeleccionada(trabajador.sucursalActual?._id || '');
+      setSucursalSeleccionada(
+        trabajador.sucursalEfectiva?._id?.toString() || 
+        trabajador.sucursalActual?._id?.toString() || 
+        ''
+      );
       setError('');
     }
   }, [isOpen, trabajador]);
@@ -107,10 +113,20 @@ const AsignarTrabajadorModal = ({ isOpen, onClose, onSaved, trabajador, sucursal
           </div>
 
           {/* Sucursal actual */}
-          {trabajador.sucursalActual && (
-            <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-2">
-              <p className="text-xs font-medium text-blue-600 mb-0.5">Sucursal actual:</p>
-              <p className="text-sm font-semibold text-blue-800">{trabajador.sucursalActual.nombre}</p>
+          {(trabajador.sucursalEfectiva || trabajador.sucursalActual) && (
+            <div className={`border rounded-xl px-4 py-2 ${
+              trabajador.fuenteAsignacion === 'calendario' ? 'bg-indigo-50 border-indigo-100' : 'bg-blue-50 border-blue-100'
+            }`}>
+              <p className={`text-xs font-medium mb-0.5 ${
+                trabajador.fuenteAsignacion === 'calendario' ? 'text-indigo-600' : 'text-blue-600'
+              }`}>
+                Sucursal actual {trabajador.fuenteAsignacion === 'calendario' ? '(desde calendario)' : '(permanente)'}:
+              </p>
+              <p className={`text-sm font-semibold ${
+                trabajador.fuenteAsignacion === 'calendario' ? 'text-indigo-800' : 'text-blue-800'
+              }`}>
+                {trabajador.sucursalEfectiva?.nombre || trabajador.sucursalActual?.nombre}
+              </p>
             </div>
           )}
 
@@ -152,6 +168,207 @@ const AsignarTrabajadorModal = ({ isOpen, onClose, onSaved, trabajador, sucursal
   );
 };
 
+// ─── Modal: Gestión de Tareas del Día ────────────────────────────────────────
+const TareasHoyModal = ({ isOpen, onClose, sucursalId, sucursalNombre, onActualizado }) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [pending, setPending] = useState({});
+  const [savingId, setSavingId] = useState(null);
+  const [savedIds, setSavedIds] = useState(new Set());
+
+  useEffect(() => {
+    if (!isOpen || !sucursalId) { setData(null); setSavedIds(new Set()); return; }
+    (async () => {
+      setLoading(true);
+      try {
+        const res = await api.get(`/api/sucursales/${sucursalId}/tareas-hoy`);
+        setData(res.data);
+        const init = {};
+        for (const t of res.data.tareas) {
+          init[t._id] = { usuarioId: t.asignadoA || '', usuarioNombre: t.asignadoNombre || '' };
+        }
+        setPending(init);
+        setSavedIds(new Set());
+      } catch { /* silencioso */ }
+      finally { setLoading(false); }
+    })();
+  }, [isOpen, sucursalId]);
+
+  const seleccionar = (tareaId, usuarioId) => {
+    const u = (data?.usuariosHoy || []).find(u => u.usuarioId === usuarioId);
+    setPending(p => ({ ...p, [tareaId]: { usuarioId, usuarioNombre: u?.usuarioNombre || '' } }));
+    setSavedIds(prev => { const s = new Set(prev); s.delete(tareaId); return s; });
+  };
+
+  const guardar = async (tareaId) => {
+    const { usuarioId, usuarioNombre } = pending[tareaId] || {};
+    setSavingId(tareaId);
+    try {
+      await api.put(`/api/sucursales/tareas/${tareaId}/asignar`, {
+        usuarioId: usuarioId || null,
+        usuarioNombre: usuarioNombre || null
+      });
+      setSavedIds(prev => new Set([...prev, tareaId]));
+      setData(prev => ({
+        ...prev,
+        tareas: prev.tareas.map(t => t._id === tareaId
+          ? { ...t, asignadoA: usuarioId || null, asignadoNombre: usuarioNombre || null }
+          : t)
+      }));
+      if (onActualizado) onActualizado();
+    } catch { /* silencioso */ }
+    finally { setSavingId(null); }
+  };
+
+  if (!isOpen) return null;
+
+  const tareas = data?.tareas || [];
+  const sinAsignar = tareas.filter(t => !t.asignadoA).length;
+  const PRIORIDAD = { urgente: 'bg-red-100 text-red-700', alta: 'bg-orange-100 text-orange-700', media: 'bg-yellow-100 text-yellow-700', baja: 'bg-gray-100 text-gray-600' };
+  const ESTADO = { pendiente: 'text-amber-600', en_progreso: 'text-blue-600', completada: 'text-green-600', en_revision: 'text-purple-600' };
+
+  return (
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-3 z-50">
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-2xl max-h-[90vh] flex flex-col">
+        {/* Header */}
+        <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-slate-50 to-gray-50 rounded-t-2xl flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <ClipboardList className="text-blue-600" size={20} />
+              Tareas del Día
+            </h2>
+            <p className="text-sm text-gray-500 mt-0.5">{sucursalNombre}</p>
+          </div>
+          <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-white/80 rounded-xl transition-colors">
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Stats bar */}
+        {data && (
+          <div className="px-5 py-2.5 border-b border-gray-100 flex gap-4 flex-wrap text-sm">
+            <span className="text-gray-600 flex items-center gap-1">
+              <ListTodo size={14} className="text-gray-400" />Total: <strong>{tareas.length}</strong>
+            </span>
+            <span className={`flex items-center gap-1 ${sinAsignar > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+              <AlertCircle size={14} />Sin asignar: <strong>{sinAsignar}</strong>
+            </span>
+            <span className="flex items-center gap-1 text-blue-600">
+              <Users size={14} />Trabajadores hoy: <strong>{data.usuariosHoy?.length || 0}</strong>
+            </span>
+            <span className="flex items-center gap-1 text-green-600">
+              <Check size={14} />Completadas: <strong>{tareas.filter(t => t.estado === 'completada').length}</strong>
+            </span>
+          </div>
+        )}
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-3">
+          {loading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 size={32} className="animate-spin text-blue-500" />
+            </div>
+          ) : tareas.length === 0 ? (
+            <div className="text-center py-16">
+              <ClipboardList size={40} className="text-gray-200 mx-auto mb-3" />
+              <p className="text-gray-500 font-medium">No hay tareas para hoy en esta sucursal</p>
+              <p className="text-gray-400 text-sm mt-1">Las tareas se generan al inicio del día si hay trabajadores asignados al calendario</p>
+            </div>
+          ) : (
+            <>
+              {/* Usuarios hoy */}
+              {(data?.usuariosHoy || []).length > 0 && (
+                <div className="bg-blue-50 rounded-xl px-4 py-3">
+                  <p className="text-xs font-semibold text-blue-700 mb-2 flex items-center gap-1.5">
+                    <Users size={13} /> Trabajadores disponibles hoy ({data.usuariosHoy.length})
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {data.usuariosHoy.map(u => (
+                      <span key={u.usuarioId} className="text-xs px-2.5 py-1 bg-white rounded-full border border-blue-200 text-blue-700 font-medium">
+                        {u.usuarioNombre}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Lista de tareas */}
+              {tareas.map(t => {
+                const asign = pending[t._id] || {};
+                const changed = asign.usuarioId !== (t.asignadoA || '');
+                const isSaved = savedIds.has(t._id) && !changed;
+                const isSaving = savingId === t._id;
+                const estaCompletada = t.estado === 'completada';
+                return (
+                  <div key={t._id} className={`rounded-xl border p-4 ${
+                    !asign.usuarioId && !estaCompletada ? 'border-orange-200 bg-orange-50/30' : 'border-gray-100 bg-white'
+                  }`}>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${PRIORIDAD[t.prioridad] || PRIORIDAD.media}`}>{t.prioridad}</span>
+                          <span className={`text-[10px] font-medium capitalize ${ESTADO[t.estado] || 'text-gray-500'}`}>{t.estado?.replace('_', ' ')}</span>
+                          {t.esPermanente && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 font-medium flex items-center gap-0.5">
+                              <RefreshCw size={9} /> Diaria
+                            </span>
+                          )}
+                        </div>
+                        <p className={`text-sm font-semibold ${estaCompletada ? 'text-gray-400 line-through' : 'text-gray-800'}`}>{t.titulo}</p>
+                        {t.asignadoA && !changed && (
+                          <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
+                            <UserCheck size={11} className="text-green-500" />{t.asignadoNombre}
+                          </p>
+                        )}
+                        {!asign.usuarioId && !estaCompletada && (
+                          <p className="text-xs text-orange-500 mt-0.5 flex items-center gap-1">
+                            <AlertCircle size={11} /> Sin asignar
+                          </p>
+                        )}
+                      </div>
+                      {!estaCompletada && (
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <select
+                            value={asign.usuarioId || ''}
+                            onChange={e => seleccionar(t._id, e.target.value)}
+                            disabled={isSaving}
+                            className={`text-sm border rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 min-w-[140px] ${
+                              !asign.usuarioId ? 'border-orange-200 bg-orange-50 text-orange-600' : 'border-gray-200 bg-white text-gray-800'
+                            }`}
+                          >
+                            <option value="">— Sin asignar —</option>
+                            {(data?.usuariosHoy || []).map(u => (
+                              <option key={u.usuarioId} value={u.usuarioId}>{u.usuarioNombre}</option>
+                            ))}
+                          </select>
+                          <button
+                            onClick={() => guardar(t._id)}
+                            disabled={!changed || isSaving}
+                            className={`px-3 py-1.5 text-xs rounded-xl border font-medium transition-all flex items-center gap-1 disabled:opacity-40 ${
+                              isSaved ? 'bg-green-50 border-green-200 text-green-700' : 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 disabled:hover:bg-blue-50'
+                            }`}
+                          >
+                            {isSaving ? <Loader2 size={13} className="animate-spin" /> : isSaved ? <Check size={13} /> : <UserCheck size={13} />}
+                            {isSaving ? 'Guardando' : isSaved ? 'Guardado' : 'Asignar'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </>
+          )}
+        </div>
+
+        <div className="px-5 py-4 border-t border-gray-100">
+          <button onClick={onClose} className="w-full py-2.5 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── Main Page ───────────────────────────────────────────────────────────────
 const SucursalesPage = () => {
   const [tab, setTab] = useState('sucursales');
@@ -164,10 +381,14 @@ const SucursalesPage = () => {
   // Modales
   const [modalSucursal, setModalSucursal] = useState({ open: false, editar: null });
   const [modalAsignar, setModalAsignar] = useState({ open: false, trabajador: null });
+  const [modalTareasHoy, setModalTareasHoy] = useState({ open: false, sucursalId: null, sucursalNombre: '' });
   const [confirmEliminar, setConfirmEliminar] = useState({ open: false, id: null, nombre: '' });
 
   // Tareas por sucursal
   const [tareasResumen, setTareasResumen] = useState({});
+
+  // Asignaciones de hoy (calendario)
+  const [asignacionesHoy, setAsignacionesHoy] = useState({});
 
   // Toast simple
   const [toast, setToast] = useState(null);
@@ -193,7 +414,7 @@ const SucursalesPage = () => {
   const cargarTrabajadores = useCallback(async () => {
     try {
       setLoadingTrab(true);
-      const res = await api.get('/api/sucursales/trabajadores/todos');
+      const res = await api.get('/api/sucursales/trabajadores/completo');
       const lista = res.data?.trabajadores || [];
       setTrabajadores(Array.isArray(lista) ? lista : []);
     } catch {
@@ -212,10 +433,20 @@ const SucursalesPage = () => {
     }
   }, []);
 
+  const cargarAsignacionesHoy = useCallback(async () => {
+    try {
+      const data = await asignacionSucursalService.obtenerAsignacionesHoy();
+      setAsignacionesHoy(data || {});
+    } catch {
+      // Silencioso
+    }
+  }, []);
+
   useEffect(() => {
     cargarSucursales();
     cargarTrabajadores();
     cargarTareasResumen();
+    cargarAsignacionesHoy();
   }, []);
 
   // ── Acciones ──
@@ -245,6 +476,7 @@ const SucursalesPage = () => {
       t.nombre_negocio?.toLowerCase().includes(q) ||
       t.email?.toLowerCase().includes(q) ||
       t.sucursalActual?.nombre?.toLowerCase().includes(q) ||
+      t.sucursalEfectiva?.nombre?.toLowerCase().includes(q) ||
       t.departamento?.toLowerCase().includes(q)
     );
   });
@@ -259,13 +491,17 @@ const SucursalesPage = () => {
 
   const statsTrab = {
     total: trabajadores.length,
-    asignados: trabajadores.filter(t => t.sucursalActual).length,
-    sinAsignar: trabajadores.filter(t => !t.sucursalActual).length,
+    asignados: trabajadores.filter(t => t.sucursalEfectiva).length,
+    sinAsignar: trabajadores.filter(t => !t.sucursalEfectiva).length,
+    desdeCalendario: trabajadores.filter(t => t.fuenteAsignacion === 'calendario').length,
   };
 
-  // Agrupar trabajadores por sucursal
+  // Agrupar trabajadores por sucursal (usando asignación efectiva)
   const trabajadoresPorSucursal = (sucursalId) =>
-    trabajadores.filter(t => t.sucursalActual?._id === sucursalId);
+    trabajadores.filter(t => {
+      const efectivaId = t.sucursalEfectiva?._id?.toString();
+      return efectivaId === sucursalId?.toString();
+    });
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
@@ -310,35 +546,38 @@ const SucursalesPage = () => {
 
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
             <Building2 className="text-white" size={20} />
           </div>
           Gestión de Sucursales
         </h1>
-        <p className="text-sm text-gray-500 mt-1 ml-13">Administra sucursales y asigna trabajadores a sus lugares de trabajo</p>
+        <p className="text-sm text-gray-500 mt-1 ml-[52px]">Administra sucursales y asigna trabajadores a sus lugares de trabajo</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-200 rounded-xl p-1 w-fit mb-6">
+      <div className="flex gap-1 bg-gray-200 rounded-xl p-1 mb-6">
         {[
-          { key: 'sucursales', label: 'Sucursales', icon: Building2, count: statsSuc.total },
-          { key: 'trabajadores', label: 'Trabajadores', icon: Users, count: statsTrab.total },
-        ].map(({ key, label, icon: Icon, count }) => (
+          { key: 'sucursales', label: 'Sucursales', mobileLabel: 'Sucursales', icon: Building2, count: statsSuc.total },
+          { key: 'personal', label: 'Personal y Calendario', mobileLabel: 'Personal', icon: Users, count: statsTrab.total },
+        ].map(({ key, label, mobileLabel, icon: Icon, count }) => (
           <button
             key={key}
             onClick={() => { setTab(key); setBusqueda(''); }}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+            className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
               tab === key
                 ? 'bg-white text-gray-900 shadow-sm'
                 : 'text-gray-600 hover:text-gray-800'
             }`}
           >
-            <Icon size={16} />
-            {label}
-            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-              tab === key ? 'bg-blue-100 text-blue-700' : 'bg-gray-300 text-gray-600'
-            }`}>{count}</span>
+            <Icon size={16} className="flex-shrink-0" />
+            <span className="sm:hidden">{mobileLabel}</span>
+            <span className="hidden sm:inline">{label}</span>
+            {count !== undefined && (
+              <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-xs font-bold flex-shrink-0 ${
+                tab === key ? 'bg-blue-100 text-blue-700' : 'bg-gray-300 text-gray-600'
+              }`}>{count}</span>
+            )}
           </button>
         ))}
       </div>
@@ -369,7 +608,7 @@ const SucursalesPage = () => {
               />
             </div>
             <button
-              onClick={() => { cargarSucursales(); cargarTrabajadores(); cargarTareasResumen(); }}
+              onClick={() => { cargarSucursales(); cargarTrabajadores(); cargarTareasResumen(); cargarAsignacionesHoy(); }}
               className="px-4 py-2.5 text-sm text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2"
             >
               <RefreshCw size={16} className={loadingSuc ? 'animate-spin' : ''} />
@@ -377,7 +616,7 @@ const SucursalesPage = () => {
             </button>
             <button
               onClick={() => setModalSucursal({ open: true, editar: null })}
-              className="px-5 py-2.5 text-sm text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-colors flex items-center gap-2"
+              className="w-full sm:w-auto px-5 py-2.5 text-sm text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-colors flex items-center justify-center gap-2"
             >
               <Plus size={16} />
               Nueva Sucursal
@@ -429,6 +668,12 @@ const SucursalesPage = () => {
                             <div className="bg-amber-50 border border-amber-100 rounded-xl px-2.5 py-1 text-amber-700 text-xs font-medium flex items-center gap-1">
                               <ClipboardList size={12} />
                               {tareasResumen[suc._id].completadas}/{tareasResumen[suc._id].total}
+                            </div>
+                          )}
+                          {tareasResumen[suc._id]?.sinAsignar > 0 && (
+                            <div className="bg-orange-50 border border-orange-200 rounded-xl px-2.5 py-1 text-orange-600 text-xs font-medium flex items-center gap-1">
+                              <AlertCircle size={12} />
+                              {tareasResumen[suc._id].sinAsignar} pendiente
                             </div>
                           )}
                         </div>
@@ -483,6 +728,35 @@ const SucursalesPage = () => {
                           </div>
                         </div>
                       )}
+
+                      {/* Asignado hoy (desde el Calendario) */}
+                      {(() => {
+                        const asigHoy = asignacionesHoy[suc._id];
+                        if (!asigHoy || asigHoy.trabajadores.length === 0) return null;
+                        return (
+                          <div className="border-t border-gray-100 pt-3">
+                            <p className="text-xs font-medium text-gray-500 mb-2 flex items-center gap-1">
+                              <Calendar size={12} className="text-indigo-500" />
+                              Asignado hoy ({asigHoy.trabajadores.length}):
+                            </p>
+                            <div className="space-y-1.5">
+                              {asigHoy.trabajadores.map((t, idx) => (
+                                <div key={idx} className="flex items-center gap-2 text-xs">
+                                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center flex-shrink-0 text-white text-[9px] font-bold">
+                                    {(t.usuarioNombre || '?')[0].toUpperCase()}
+                                  </div>
+                                  <span className="text-gray-700 truncate">{t.usuarioNombre}</span>
+                                  {t.tareasCreadas && (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 font-medium">
+                                      Tareas creadas
+                                    </span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })()}
 
                       {/* Tareas de hoy para esta sucursal */}
                       {(() => {
@@ -558,8 +832,18 @@ const SucursalesPage = () => {
                     {/* Card footer */}
                     <div className="px-4 pb-4 flex gap-2">
                       <button
+                        onClick={() => setModalTareasHoy({ open: true, sucursalId: suc._id.toString(), sucursalNombre: suc.nombre })}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-xl hover:bg-indigo-100 transition-colors font-medium"
+                      >
+                        <ClipboardList size={13} />
+                        Tareas hoy
+                        {tareasResumen[suc._id]?.sinAsignar > 0 && (
+                          <span className="ml-1 px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 text-[10px] font-bold">{tareasResumen[suc._id].sinAsignar}</span>
+                        )}
+                      </button>
+                      <button
                         onClick={() => setModalSucursal({ open: true, editar: suc })}
-                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors font-medium"
+                        className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors font-medium"
                       >
                         <Edit2 size={13} /> Editar
                       </button>
@@ -579,19 +863,34 @@ const SucursalesPage = () => {
       )}
 
       {/* ╔═══════════════════════════════════════╗ */}
-      {/* ║         TAB: TRABAJADORES             ║ */}
+      {/* ║    TAB: PERSONAL Y CALENDARIO         ║ */}
       {/* ╚═══════════════════════════════════════╝ */}
-      {tab === 'trabajadores' && (
+      {tab === 'personal' && (
         <>
           {/* Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <StatCard color="blue" icon={Users} label="Total trabajadores" value={statsTrab.total} />
             <StatCard color="green" icon={UserCheck} label="Con sucursal" value={statsTrab.asignados} />
             <StatCard color="orange" icon={UserX} label="Sin asignar" value={statsTrab.sinAsignar} />
+            <StatCard color="purple" icon={Calendar} label="Desde calendario" value={statsTrab.desdeCalendario} />
           </div>
 
-          {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          {/* ═══ CALENDARIO MENSUAL ═══ */}
+          <CalendarioSucursal onAsignacionChange={() => { cargarTrabajadores(); cargarAsignacionesHoy(); }} />
+
+          {/* ═══ SEPARADOR ═══ */}
+          <div className="mt-8 mb-4 flex items-center gap-3">
+            <div className="flex-1 h-px bg-gray-200" />
+            <h3 className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap">
+              <Users size={14} />
+              <span className="sm:hidden">Personal Hoy</span>
+              <span className="hidden sm:inline">Personal — Asignaciones de Hoy</span>
+            </h3>
+            <div className="flex-1 h-px bg-gray-200" />
+          </div>
+
+          {/* ═══ BARRA DE BÚSQUEDA Y ACCIONES ═══ */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-4">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
               <input
@@ -603,7 +902,7 @@ const SucursalesPage = () => {
               />
             </div>
             <button
-              onClick={cargarTrabajadores}
+              onClick={() => { cargarTrabajadores(); cargarAsignacionesHoy(); }}
               className="px-4 py-2.5 text-sm text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2"
             >
               <RefreshCw size={16} className={loadingTrab ? 'animate-spin' : ''} />
@@ -611,13 +910,13 @@ const SucursalesPage = () => {
             </button>
           </div>
 
-          {/* Tabla de trabajadores */}
+          {/* ═══ TABLA DE PERSONAL ═══ */}
           {loadingTrab ? (
             <div className="flex items-center justify-center h-48">
               <Loader2 size={32} className="animate-spin text-blue-500" />
             </div>
           ) : trabajadoresFiltrados.length === 0 ? (
-            <div className="text-center py-16 bg-white rounded-xl border border-gray-100 shadow-sm">
+            <div className="text-center py-12 bg-white rounded-xl border border-gray-100 shadow-sm">
               <Users className="text-gray-300 mx-auto mb-3" size={48} />
               <p className="text-gray-500 font-medium">No hay trabajadores</p>
             </div>
@@ -631,47 +930,60 @@ const SucursalesPage = () => {
                       <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-5 py-3">Trabajador</th>
                       <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-5 py-3">Departamento</th>
                       <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-5 py-3">Rol</th>
-                      <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-5 py-3">Sucursal asignada</th>
+                      <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-5 py-3">Sucursal Hoy</th>
                       <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wider px-5 py-3">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {trabajadoresFiltrados.map(t => (
                       <tr key={t._id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-5 py-4">
+                        <td className="px-5 py-3">
                           <div className="flex items-center gap-3">
                             {getAvatarUrl(t) ? (
-                              <img src={getAvatarUrl(t)} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+                              <img src={getAvatarUrl(t)} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
                             ) : (
-                              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 text-white text-xs font-bold">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 text-white text-xs font-bold">
                                 {(t.nombre_negocio || t.email || '?')[0].toUpperCase()}
                               </div>
                             )}
                             <div>
                               <p className="font-semibold text-gray-800 text-sm">{t.nombre_negocio || 'Sin nombre'}</p>
-                              <p className="text-xs text-gray-400 flex items-center gap-1">
-                                <Mail size={11} /> {t.email}
-                              </p>
+                              <p className="text-xs text-gray-400">{t.email}</p>
                             </div>
                           </div>
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="px-5 py-3">
                           <span className="text-sm text-gray-600 capitalize">{t.departamento || '—'}</span>
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="px-5 py-3">
                           <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             t.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'
                           }`}>
                             {t.role === 'admin' ? 'Admin' : 'Usuario'}
                           </span>
                         </td>
-                        <td className="px-5 py-4">
-                          {t.sucursalActual ? (
+                        <td className="px-5 py-3">
+                          {t.sucursalEfectiva ? (
                             <div className="flex items-center gap-2">
-                              <Building2 size={14} className="text-green-600" />
+                              <Building2 size={14} className={t.fuenteAsignacion === 'calendario' ? 'text-indigo-600' : 'text-green-600'} />
                               <div>
-                                <p className="text-sm font-medium text-gray-800">{t.sucursalActual.nombre}</p>
-                                <p className="text-xs text-gray-400">{t.sucursalActual.ubicacion}</p>
+                                <p className="text-sm font-medium text-gray-800">{t.sucursalEfectiva.nombre}</p>
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                  {t.fuenteAsignacion === 'calendario' ? (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium flex items-center gap-0.5">
+                                      <Calendar size={9} /> Calendario
+                                    </span>
+                                  ) : (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 font-medium flex items-center gap-0.5">
+                                      <Building2 size={9} /> Permanente
+                                    </span>
+                                  )}
+                                  {t.asignacionHoy?.tareasCreadas && (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-medium flex items-center gap-0.5">
+                                      <Check size={9} /> Tareas
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           ) : (
@@ -680,17 +992,17 @@ const SucursalesPage = () => {
                             </span>
                           )}
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="px-5 py-3">
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => setModalAsignar({ open: true, trabajador: t })}
                               className="px-3 py-1.5 text-xs text-green-700 bg-green-50 border border-green-200 rounded-xl hover:bg-green-100 transition-colors flex items-center gap-1"
-                              title={t.sucursalActual ? "Cambiar sucursal" : "Asignar sucursal"}
+                              title={t.sucursalEfectiva ? "Cambiar sucursal" : "Asignar sucursal"}
                             >
                               <ArrowRightLeft size={13} />
-                              {t.sucursalActual ? 'Mover' : 'Asignar'}
+                              {t.sucursalEfectiva ? 'Mover' : 'Asignar'}
                             </button>
-                            {t.sucursalActual && (
+                            {t.sucursalEfectiva && (
                               <button
                                 onClick={async () => {
                                   try {
@@ -744,12 +1056,26 @@ const SucursalesPage = () => {
                       </div>
                     </div>
 
-                    {t.sucursalActual ? (
-                      <div className="bg-green-50 rounded-xl px-3 py-2 flex items-center gap-2">
-                        <Building2 size={14} className="text-green-600" />
-                        <div>
-                          <p className="text-xs font-medium text-green-800">{t.sucursalActual.nombre}</p>
-                          <p className="text-xs text-green-600">{t.sucursalActual.ubicacion}</p>
+                    {t.sucursalEfectiva ? (
+                      <div className={`rounded-xl px-3 py-2 flex items-center gap-2 ${
+                        t.fuenteAsignacion === 'calendario' ? 'bg-indigo-50' : 'bg-green-50'
+                      }`}>
+                        <Building2 size={14} className={t.fuenteAsignacion === 'calendario' ? 'text-indigo-600' : 'text-green-600'} />
+                        <div className="flex-1">
+                          <p className={`text-xs font-medium ${t.fuenteAsignacion === 'calendario' ? 'text-indigo-800' : 'text-green-800'}`}>
+                            {t.sucursalEfectiva.nombre}
+                          </p>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            {t.fuenteAsignacion === 'calendario' ? (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium flex items-center gap-0.5">
+                                <Calendar size={9} /> Calendario
+                              </span>
+                            ) : (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 font-medium flex items-center gap-0.5">
+                                <Building2 size={9} /> Permanente
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ) : (
@@ -765,9 +1091,9 @@ const SucursalesPage = () => {
                         className="flex-1 py-2 text-xs text-green-700 bg-green-50 border border-green-200 rounded-xl hover:bg-green-100 transition-colors flex items-center justify-center gap-1"
                       >
                         <ArrowRightLeft size={13} />
-                        {t.sucursalActual ? 'Mover' : 'Asignar'}
+                        {t.sucursalEfectiva ? 'Mover' : 'Asignar'}
                       </button>
-                      {t.sucursalActual && (
+                      {t.sucursalEfectiva && (
                         <button
                           onClick={async () => {
                             try {
@@ -796,6 +1122,14 @@ const SucursalesPage = () => {
       )}
 
       {/* Modales */}
+      <TareasHoyModal
+        isOpen={modalTareasHoy.open}
+        onClose={() => setModalTareasHoy({ open: false, sucursalId: null, sucursalNombre: '' })}
+        sucursalId={modalTareasHoy.sucursalId}
+        sucursalNombre={modalTareasHoy.sucursalNombre}
+        onActualizado={() => { cargarTareasResumen(); cargarAsignacionesHoy(); }}
+      />
+
       <SucursalFormModal
         isOpen={modalSucursal.open}
         onClose={() => setModalSucursal({ open: false, editar: null })}
@@ -806,7 +1140,7 @@ const SucursalesPage = () => {
       <AsignarTrabajadorModal
         isOpen={modalAsignar.open}
         onClose={() => setModalAsignar({ open: false, trabajador: null })}
-        onSaved={() => { cargarTrabajadores(); cargarSucursales(); showToast('Asignación actualizada'); }}
+        onSaved={() => { cargarTrabajadores(); cargarSucursales(); cargarAsignacionesHoy(); showToast('Asignación actualizada'); }}
         trabajador={modalAsignar.trabajador}
         sucursales={sucursales}
       />

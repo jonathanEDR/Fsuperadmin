@@ -860,6 +860,24 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
                                     Permanente
                                   </span>
                                 )}
+                                {/* Badges de sucursales asignadas */}
+                                {plantilla.esPermanente && plantilla.sucursalIds?.length > 0 && (
+                                  plantilla.sucursalIds.map(sid => {
+                                    const suc = sucursales.find(s => s._id === (sid._id || sid));
+                                    return suc ? (
+                                      <span key={suc._id} className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                        <Building2 size={9} />
+                                        {suc.nombre}
+                                      </span>
+                                    ) : null;
+                                  })
+                                )}
+                                {plantilla.esPermanente && (!plantilla.sucursalIds || plantilla.sucursalIds.length === 0) && (
+                                  <span className="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                    <Building2 size={9} />
+                                    Todas
+                                  </span>
+                                )}
                                 {plantilla.codigo && (
                                   <span className="text-xs font-mono bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
                                     {plantilla.codigo}
@@ -1154,6 +1172,86 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
                                       </div>
                                     ))}
                                   </div>
+                                </div>
+                              )}
+                              {/* Selector de sucursales para plantillas permanentes */}
+                              {plantilla.esPermanente && ['admin', 'super_admin'].includes(userRole) && sucursales.length > 0 && (
+                                <div className="border border-blue-200 bg-blue-50/50 rounded-lg p-3">
+                                  <span className="text-gray-600 font-medium flex items-center gap-1.5 mb-2">
+                                    <Building2 size={14} className="text-blue-600" />
+                                    Aplica en sucursales:
+                                  </span>
+                                  <div className="flex flex-wrap gap-1.5 mt-1">
+                                    <button
+                                      type="button"
+                                      onClick={async () => {
+                                        try {
+                                          await plantillasService.actualizar(plantilla._id, { sucursalIds: [] });
+                                          setPlantillas(prev => prev.map(p =>
+                                            p._id === plantilla._id ? { ...p, sucursalIds: [] } : p
+                                          ));
+                                          setSuccess('Plantilla aplica a todas las sucursales');
+                                          setTimeout(() => setSuccess(''), 2500);
+                                        } catch (err) {
+                                          setError('Error al actualizar');
+                                          setTimeout(() => setError(''), 3000);
+                                        }
+                                      }}
+                                      className={`px-2.5 py-1 text-xs rounded-lg border transition-colors ${
+                                        !plantilla.sucursalIds || plantilla.sucursalIds.length === 0
+                                          ? 'bg-blue-600 text-white border-blue-600'
+                                          : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400'
+                                      }`}
+                                    >
+                                      Todas
+                                    </button>
+                                    {sucursales.map(suc => {
+                                      const isSelected = (plantilla.sucursalIds || []).some(
+                                        sid => (sid._id || sid).toString() === suc._id.toString()
+                                      );
+                                      return (
+                                        <button
+                                          key={suc._id}
+                                          type="button"
+                                          onClick={async () => {
+                                            try {
+                                              const currentIds = (plantilla.sucursalIds || []).map(sid => sid._id || sid);
+                                              let newIds;
+                                              if (isSelected) {
+                                                newIds = currentIds.filter(id => id.toString() !== suc._id.toString());
+                                              } else {
+                                                newIds = [...currentIds, suc._id];
+                                              }
+                                              await plantillasService.actualizar(plantilla._id, { sucursalIds: newIds });
+                                              setPlantillas(prev => prev.map(p =>
+                                                p._id === plantilla._id ? { ...p, sucursalIds: newIds } : p
+                                              ));
+                                              setSuccess(isSelected ? `Removida de ${suc.nombre}` : `Asignada a ${suc.nombre}`);
+                                              setTimeout(() => setSuccess(''), 2500);
+                                            } catch (err) {
+                                              setError('Error al actualizar sucursales');
+                                              setTimeout(() => setError(''), 3000);
+                                            }
+                                          }}
+                                          className={`px-2.5 py-1 text-xs rounded-lg border transition-colors flex items-center gap-1 ${
+                                            isSelected
+                                              ? 'bg-blue-100 text-blue-700 border-blue-300'
+                                              : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400'
+                                          }`}
+                                        >
+                                          <Building2 size={11} />
+                                          {suc.nombre}
+                                          {isSelected && <Check size={11} />}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                  <p className="text-xs text-gray-400 mt-2">
+                                    {!plantilla.sucursalIds || plantilla.sucursalIds.length === 0
+                                      ? 'Se creará automáticamente en cualquier sucursal al asignar un usuario'
+                                      : `Solo se creará en ${plantilla.sucursalIds.length} sucursal(es) seleccionada(s)`
+                                    }
+                                  </p>
                                 </div>
                               )}
                               <div className="text-xs text-gray-400 pt-1">

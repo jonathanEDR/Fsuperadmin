@@ -1,9 +1,9 @@
+/* Leaflet Map Styles */
+@import 'leaflet/dist/leaflet.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Leaflet Map Styles */
-@import 'leaflet/dist/leaflet.css';
 
 /* Fix para marcadores custom de Leaflet con Tailwind */
 .custom-marker {
