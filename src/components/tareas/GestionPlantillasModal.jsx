@@ -79,8 +79,11 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
   // Estado para expandir/colapsar plantillas
   const [plantillaExpandida, setPlantillaExpandida] = useState(null);
 
-  // Estado para nueva subtarea
+  // Estado para nueva subtarea (creación)
   const [nuevaSubtarea, setNuevaSubtarea] = useState('');
+
+  // Estado para nueva subtarea (edición)
+  const [nuevaSubtareaEdicion, setNuevaSubtareaEdicion] = useState('');
 
   // Cargar datos al abrir
   useEffect(() => {
@@ -127,7 +130,7 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
         });
       setUsuarios(usuariosFiltrados);
     } catch (err) {
-      console.error('Error cargando usuarios:', err);
+      // Error silencioso - usuarios no pudieron cargarse
     } finally {
       setLoadingUsuarios(false);
     }
@@ -138,7 +141,7 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
       const response = await getSucursalesActivas();
       setSucursales(response.sucursales || response || []);
     } catch (err) {
-      console.error('Error cargando sucursales:', err);
+      // Error silencioso - sucursales no pudieron cargarse
     }
   };
 
@@ -265,7 +268,7 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
       setCategorias(categoriasRes.data || []);
     } catch (err) {
       setError('Error al cargar datos');
-      console.error(err);
+      // Error silencioso al cargar datos
     } finally {
       setLoading(false);
     }
@@ -287,6 +290,35 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
     setNuevaPlantilla(prev => ({
       ...prev,
       subtareasPredefinidas: prev.subtareasPredefinidas.filter((_, i) => i !== index)
+    }));
+  };
+
+  // --- Handlers para subtareas en modo edición ---
+  const handleAgregarSubtareaEdicion = () => {
+    if (!nuevaSubtareaEdicion.trim()) return;
+    setPlantillaEditando(prev => ({
+      ...prev,
+      subtareasPredefinidas: [
+        ...(prev.subtareasPredefinidas || []),
+        { titulo: nuevaSubtareaEdicion.trim(), orden: (prev.subtareasPredefinidas?.length || 0) + 1 }
+      ]
+    }));
+    setNuevaSubtareaEdicion('');
+  };
+
+  const handleRemoverSubtareaEdicion = (index) => {
+    setPlantillaEditando(prev => ({
+      ...prev,
+      subtareasPredefinidas: prev.subtareasPredefinidas.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleEditarSubtareaEdicion = (index, nuevoTitulo) => {
+    setPlantillaEditando(prev => ({
+      ...prev,
+      subtareasPredefinidas: prev.subtareasPredefinidas.map((st, i) =>
+        i === index ? { ...st, titulo: nuevoTitulo } : st
+      )
     }));
   };
 
@@ -391,6 +423,7 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
       setPlantillas(prev => prev.map(p => p._id === editandoId ? response.data : p));
       setEditandoId(null);
       setPlantillaEditando(null);
+      setNuevaSubtareaEdicion('');
       setSuccess('Plantilla actualizada');
       setTimeout(() => setSuccess(''), 3000);
       if (onPlantillasChange) onPlantillasChange();
@@ -404,6 +437,7 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
   const handleCancelarEdicion = () => {
     setEditandoId(null);
     setPlantillaEditando(null);
+    setNuevaSubtareaEdicion('');
   };
 
   const handleEliminarPlantilla = async (id) => {
@@ -805,22 +839,51 @@ export default function GestionPlantillasModal({ isOpen, onClose, onPlantillasCh
                             />
                           </div>
 
-                          {/* Subtareas existentes (solo visualización) */}
-                          {plantillaEditando.subtareasPredefinidas?.length > 0 && (
-                            <div>
-                              <label className="block text-xs font-medium text-gray-600 mb-1">
-                                <ListChecks size={12} className="inline mr-1" />
-                                Subtareas Predefinidas ({plantillaEditando.subtareasPredefinidas.length})
-                              </label>
+                          {/* Subtareas predefinidas - edición completa */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">
+                              <ListChecks size={12} className="inline mr-1" />
+                              Subtareas Predefinidas ({plantillaEditando.subtareasPredefinidas?.length || 0})
+                            </label>
+                            <div className="flex gap-2 mb-2">
+                              <input
+                                type="text"
+                                value={nuevaSubtareaEdicion}
+                                onChange={(e) => setNuevaSubtareaEdicion(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAgregarSubtareaEdicion())}
+                                className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="Agregar subtarea..."
+                              />
+                              <button
+                                type="button"
+                                onClick={handleAgregarSubtareaEdicion}
+                                className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                              >
+                                <Plus size={16} />
+                              </button>
+                            </div>
+                            {plantillaEditando.subtareasPredefinidas?.length > 0 && (
                               <div className="space-y-1 bg-white rounded-lg p-2 border border-gray-200">
                                 {plantillaEditando.subtareasPredefinidas.map((st, index) => (
-                                  <div key={index} className="flex items-center justify-between text-sm bg-gray-50 px-2 py-1 rounded">
-                                    <span>{st.titulo}</span>
+                                  <div key={st._id || index} className="flex items-center gap-2 text-sm bg-gray-50 px-2 py-1 rounded">
+                                    <input
+                                      type="text"
+                                      value={st.titulo}
+                                      onChange={(e) => handleEditarSubtareaEdicion(index, e.target.value)}
+                                      className="flex-1 px-2 py-0.5 text-sm border border-gray-200 rounded focus:ring-1 focus:ring-purple-500 focus:border-transparent bg-white"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoverSubtareaEdicion(index)}
+                                      className="text-red-500 hover:text-red-700 flex-shrink-0"
+                                    >
+                                      <X size={14} />
+                                    </button>
                                   </div>
                                 ))}
                               </div>
-                            </div>
-                          )}
+                            )}
+                          </div>
 
                           {/* Botones de acción */}
                           <div className="flex justify-end gap-2 pt-2 border-t border-gray-200">
