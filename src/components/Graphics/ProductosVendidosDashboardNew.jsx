@@ -13,12 +13,12 @@ import {
 } from 'chart.js';
 import { useProductosPorPeriodo } from '../../hooks/useProductosPorPeriodo';
 
-// Registrar componentes de Chart.js
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 const ProductosVendidosDashboard = ({ userRole }) => {
   const [timeFilter, setTimeFilter] = useState('mes');
-  
+  const [selectedDay, setSelectedDay] = useState(null); // { label, index, productos, total }
+
   const { 
     chartData, 
     totals, 
@@ -79,32 +79,34 @@ const ProductosVendidosDashboard = ({ userRole }) => {
     );
   }
 
+  const handleChartClick = (event, elements) => {
+    if (elements.length > 0) {
+      const idx = elements[0].index;
+      const label = chartData.labels[idx];
+      const productos = totals.detallesPorIntervalo?.[idx] || [];
+      const total = productos.reduce((sum, p) => sum + p.cantidad, 0);
+      setSelectedDay({ label, index: idx, productos, total });
+    }
+  };
+
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    onClick: handleChartClick,
     plugins: {
       legend: {
         position: 'top',
         labels: {
           usePointStyle: true,
           padding: 20,
-          font: {
-            size: 12,
-            weight: 'bold'
-          }
+          font: { size: 12, weight: 'bold' }
         }
       },
       title: {
         display: true,
         text: `Análisis de Productos Vendidos - ${getTimeFilterLabel()}`,
-        font: {
-          size: 16,
-          weight: 'bold'
-        },
-        padding: {
-          top: 10,
-          bottom: 30
-        }
+        font: { size: 16, weight: 'bold' },
+        padding: { top: 10, bottom: 30 }
       },
       tooltip: {
         mode: 'index',
@@ -118,24 +120,26 @@ const ProductosVendidosDashboard = ({ userRole }) => {
         displayColors: true,
         callbacks: {
           title: function(tooltipItems) {
-            const title = tooltipItems[0].label;
-            return `${getXAxisLabel()}: ${title}`;
+            return `${getXAxisLabel()}: ${tooltipItems[0].label}`;
           },
           label: function(context) {
             const value = context.parsed.y || 0;
-            return `Productos vendidos: ${value} unidades`;
+            if (context.datasetIndex === 1) return `Meta diaria: ${value} unidades`;
+            return `Total vendido: ${value} unidades`;
           },
           afterBody: function(tooltipItems) {
-            if (totals.topProductos && totals.topProductos.length > 0) {
-              return [
-                '',
-                'Top productos más vendidos:',
-                ...totals.topProductos.slice(0, 3).map((p, index) => 
-                  `${index + 1}. ${p.nombre}: ${p.cantidad} unidades`
-                )
-              ];
+            const dataIndex = tooltipItems[0]?.dataIndex;
+            const productosDelDia = totals.detallesPorIntervalo?.[dataIndex] || [];
+            if (productosDelDia.length === 0) return ['', 'Sin productos registrados'];
+            const lines = ['', '📦 Productos este día:'];
+            productosDelDia.slice(0, 5).forEach((p, i) => {
+              lines.push(`  ${i + 1}. ${p.nombre}: ${p.cantidad} und`);
+            });
+            if (productosDelDia.length > 5) {
+              lines.push(`  ... y ${productosDelDia.length - 5} más`);
             }
-            return null;
+            lines.push('', '👆 Click en el punto para ver todos');
+            return lines;
           }
         }
       }
@@ -145,53 +149,38 @@ const ProductosVendidosDashboard = ({ userRole }) => {
         title: {
           display: true,
           text: getXAxisLabel(),
-          font: {
-            size: 12,
-            weight: 'bold'
-          }
+          font: { size: 12, weight: 'bold' }
         },
-        grid: {
-          display: true,
-          color: 'rgba(0, 0, 0, 0.1)'
-        }
+        grid: { display: true, color: 'rgba(0, 0, 0, 0.1)' }
       },
       y: {
         beginAtZero: true,
         title: {
           display: true,
           text: 'Cantidad de Productos',
-          font: {
-            size: 12,
-            weight: 'bold'
-          }
+          font: { size: 12, weight: 'bold' }
         },
-        grid: {
-          display: true,
-          color: 'rgba(0, 0, 0, 0.1)'
-        },
+        grid: { display: true, color: 'rgba(0, 0, 0, 0.1)' },
         ticks: {
           stepSize: 1,
           callback: function(value) {
-            return Number.isInteger(value) ? `${value} unidades` : '';
+            return Number.isInteger(value) ? `${value} und` : '';
           }
         }
       }
     },
-    interaction: {
-      mode: 'nearest',
-      intersect: false
-    }
+    interaction: { mode: 'nearest', intersect: false }
   };
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
-      {/* Header con filtros */}
+      {/* Filtros de período */}
       <div className="mb-6">
         <div className="flex flex-wrap justify-center gap-2 mb-6">
           {['hoy', 'semana', 'mes', 'anual'].map((filter) => (
             <button
               key={filter}
-              onClick={() => setTimeFilter(filter)}
+              onClick={() => { setTimeFilter(filter); setSelectedDay(null); }}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 timeFilter === filter
                   ? 'bg-green-500 text-white shadow-lg'
@@ -206,7 +195,7 @@ const ProductosVendidosDashboard = ({ userRole }) => {
           ))}
         </div>
 
-        {/* Estadísticas resumen */}
+        {/* Tarjetas resumen */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <div className="flex items-center justify-between">
@@ -248,15 +237,77 @@ const ProductosVendidosDashboard = ({ userRole }) => {
       </div>
 
       {/* Gráfico */}
-      <div className="h-96 mb-6">
+      <div className="h-96 mb-2" style={{ cursor: 'pointer' }}>
         <Line data={chartData} options={chartOptions} />
       </div>
+      <p className="text-center text-xs text-gray-400 mb-6">
+        👆 Haz click en un punto del gráfico para ver el detalle de ese día
+      </p>
 
-      {/* Lista de productos más vendidos */}
+      {/* Panel de detalle del día seleccionado */}
+      {selectedDay && (
+        <div className="border border-green-200 rounded-xl bg-green-50 p-5 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h4 className="text-lg font-bold text-green-800">
+                📋 Detalle: {getXAxisLabel()} {selectedDay.label}
+              </h4>
+              <p className="text-green-600 text-sm">
+                {selectedDay.productos.length} producto{selectedDay.productos.length !== 1 ? 's' : ''} diferentes —{' '}
+                <span className="font-semibold">{selectedDay.total} unidades en total</span>
+              </p>
+            </div>
+            <button
+              onClick={() => setSelectedDay(null)}
+              className="text-gray-400 hover:text-gray-600 text-xl font-bold leading-none p-1"
+              title="Cerrar"
+            >
+              ✕
+            </button>
+          </div>
+
+          {selectedDay.productos.length === 0 ? (
+            <p className="text-gray-500 text-sm text-center py-4">Sin ventas registradas en este período</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-72 overflow-y-auto pr-1">
+              {selectedDay.productos.map((producto, index) => {
+                const pct = selectedDay.total > 0 ? Math.round((producto.cantidad / selectedDay.total) * 100) : 0;
+                return (
+                  <div key={index} className="bg-white rounded-lg p-3 flex items-center gap-3 shadow-sm border border-green-100">
+                    <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold text-white flex-shrink-0 ${
+                      index === 0 ? 'bg-yellow-500' :
+                      index === 1 ? 'bg-gray-400' :
+                      index === 2 ? 'bg-amber-600' : 'bg-green-400'
+                    }`}>
+                      {index + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-800 text-sm truncate" title={producto.nombre}>
+                        {producto.nombre}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="flex-1 bg-gray-100 rounded-full h-1.5">
+                          <div
+                            className="bg-green-500 h-1.5 rounded-full"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <span className="text-gray-600 text-xs whitespace-nowrap">{producto.cantidad} und ({pct}%)</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Top global del período */}
       {totals.topProductos && totals.topProductos.length > 0 && (
         <div className="border-t pt-6">
           <h4 className="text-lg font-semibold text-gray-800 mb-4">
-            Top Productos Más Vendidos - {getTimeFilterLabel()}
+            Top Productos Más Vendidos — {getTimeFilterLabel()}
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {totals.topProductos.map((producto, index) => (
@@ -271,7 +322,7 @@ const ProductosVendidosDashboard = ({ userRole }) => {
                   </span>
                   <div>
                     <p className="font-medium text-gray-800 text-sm" title={producto.nombre}>
-                      {producto.nombre.length > 20 ? `${producto.nombre.substring(0, 20)}...` : producto.nombre}
+                      {producto.nombre.length > 20 ? `${producto.nombre.substring(0, 20)}…` : producto.nombre}
                     </p>
                     <p className="text-gray-600 text-xs">{producto.cantidad} unidades</p>
                   </div>

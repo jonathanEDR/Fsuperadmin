@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import DashboardCard from '../components/common/DashboardCard';
 import ProductosVendidosDashboard from '../components/Graphics/ProductosVendidosDashboardNew';
 import VentasLineChart from '../components/Graphics/VentasLineChart';
+import VentasPorTrabajadorChart from '../components/Graphics/VentasPorTrabajadorChart';
 import CajaLineChart from '../components/Graphics/CajaLineChart';
 import CobrosLineChart from '../components/Graphics/CobrosLineChart';
 import RegistrosDiariosLineChart from '../components/Graphics/RegistrosDiariosLineChart';
@@ -10,7 +11,7 @@ import ProduccionLineChart from '../components/Produccion/Graficos/ProduccionLin
 import { useProductosVendidosHoy } from '../hooks/useProductosVendidosHoy';
 import { useDashboardResumenHoy } from '../hooks/useDashboardResumenHoy';
 import { useRole } from '../context/RoleContext';
-import { Package, TrendingUp, BarChart3, DollarSign, Factory, ClipboardList, Wallet, AlertTriangle } from 'lucide-react';
+import { Package, TrendingUp, BarChart3, DollarSign, Factory, ClipboardList, Wallet, AlertTriangle, Users } from 'lucide-react';
 
 /**
  * Dashboard Principal - SOLO PARA SUPER_ADMIN
@@ -195,6 +196,24 @@ function BienvenidaPage() {
           {/* Contenido expandible con el gráfico de ventas */}
           <div className="min-h-[600px]">
             <VentasLineChart userRole={userRole} />
+          </div>
+        </DashboardCard>
+
+        {/* Card: Ventas por Trabajador */}
+        <DashboardCard
+          title="Ventas por Trabajador"
+          value={null}
+          subtitle="quién vendió más en el período"
+          icon={<Users size={32} />}
+          color="teal"
+          loading={false}
+          error={null}
+          expandable={true}
+          isExpanded={expandedCard === 'ventas-por-trabajador'}
+          onExpandToggle={() => handleCardExpand('ventas-por-trabajador')}
+        >
+          <div className="min-h-[600px]">
+            <VentasPorTrabajadorChart userRole={userRole} />
           </div>
         </DashboardCard>
 
