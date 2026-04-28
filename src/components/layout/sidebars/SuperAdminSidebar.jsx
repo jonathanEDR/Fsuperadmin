@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, UserCheck, X, ChevronLeft, ChevronRight, CreditCard, Factory, Grid3X3, QrCode, Wallet, ScanLine, Image, Bell, ListTodo, Building2 } from 'lucide-react';
+import { Home, FileText, UserCog, LogOut, Shield, Package, ShoppingCart, UserCheck, X, ChevronLeft, ChevronRight, CreditCard, Factory, Grid3X3, QrCode, Wallet, ScanLine, Image, Bell, ListTodo, Building2, Plug } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 import { NotificationBell } from '../../../components/notifications';
@@ -52,6 +52,7 @@ function SuperAdminSidebar({ isCollapsed, toggleSidebar, isMobileView, isSidebar
         { id: 'tareas', icon: ListTodo, label: 'Tareas', route: '/super-admin/tareas' },
         { id: 'notificaciones', icon: Bell, label: 'Notificaciones', route: '/super-admin/notificaciones' },
         { id: 'imagenes', icon: Image, label: 'Imágenes', route: '/super-admin/imagenes' },
+        { id: 'mcp-config', icon: Plug, label: 'Acceso MCP', route: '/super-admin/mcp-config' },
         { id: 'profile', icon: UserCog, label: 'Perfil', route: '/super-admin/perfil' },
       ]
     }

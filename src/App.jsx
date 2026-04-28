@@ -58,6 +58,8 @@ import ImagenesPage from './Pages/ImagenesPage';
 import MapaPage from './Pages/MapaPage';
 // Importar página de gestión de sucursales y carritos
 import SucursalesPage from './Pages/SucursalesPage';
+// Importar página de configuración MCP (solo super admin)
+import McpConfigPage from './Pages/McpConfigPage';
 
 // Banner de notificaciones push
 import NotificationPermissionBanner from './components/notifications/NotificationPermissionBanner';
@@ -240,6 +242,8 @@ function App() {
               <Route path="mapa" element={<MapaPage />} />
               {/* Gestión de Sucursales y Carritos */}
               <Route path="sucursales" element={<SucursalesPage />} />
+              {/* Configuración MCP - solo super admin */}
+              <Route path="mcp-config" element={<McpConfigPage />} />
             </Route>
             
             {/* UserDashboard como layout persistente */}
